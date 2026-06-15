@@ -28,10 +28,6 @@ Use the `.sale-order-query-grid` CSS grid pattern:
         @click="activeTransport = tab.value"
       >{{ tab.label }}</button>
     </div>
-    <div class="query-merge-toggle">
-      <span>合并单元格</span>
-      <a-switch v-model="mergeCells" size="small" />
-    </div>
   </div>
 
   <!-- Query grid -->
@@ -80,7 +76,7 @@ Use the `.sale-order-query-grid` CSS grid pattern:
 
 Labels use class `.query-field > span`:
 - Font size: 12px
-- Color: `var(--color-text-2)` (#4b5870)
+- Color: `var(--color-text-2)`
 - Text-align: right
 - White-space: nowrap
 

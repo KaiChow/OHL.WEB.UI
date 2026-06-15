@@ -9,7 +9,7 @@ All references are local to `.codex/skills/ohl-freight-saas-ui/references/`.
 
 For any page or component task, load these two first:
 
-- `visual-tokens.md` — colors, shadows, spacing, typography values
+- `visual-tokens.md` — Arco theme color tokens, **weak border rules**, **small radius standard**, shadows, spacing, typography
 - `component-patterns.md` — Arco Design component sizes and usage rules
 
 ---
@@ -26,10 +26,10 @@ Load when building any business list page (业务单, 财务列表, 客户列表
 
 ## Table and vxe-table
 
-Load when working on table styling, column design, merged cells, or row interaction:
+Load when working on table styling, column design, or row interaction:
 
 - `table-patterns.md`
-- `visual-tokens.md` (for exact color values)
+- `visual-tokens.md` (for Arco theme tokens)
 
 ---
 
@@ -54,9 +54,18 @@ Load when rendering status tags, status filter chips, or status color mapping:
 
 Load when building a detail drawer, edit form, or modal:
 
-- `page-patterns.md` (detail drawer pattern section)
-- `component-patterns.md` (drawer, modal, form, tabs sections)
-- `visual-tokens.md` (spacing and shadow values)
+- `page-patterns.md` — drawer width rules, `ds-*` class system, anchor nav pattern
+- `form-patterns.md` — column grids, field layout, repeatable rows, required field strategy
+- `component-patterns.md` — drawer, modal, form, tabs sections
+- `visual-tokens.md` — spacing and theme surface rules
+
+---
+
+## Long-Session / Fatigue-Sensitive Design
+
+Load when reviewing overall page quality or designing for sustained daily use:
+
+- `density-fatigue.md` — background neutrality, color frequency limits, spacing rhythm, animation rules
 
 ---
 
@@ -70,6 +79,8 @@ Load all references when starting a new module from scratch:
 - `table-patterns.md`
 - `query-patterns.md`
 - `status-system.md`
+- `form-patterns.md`
+- `density-fatigue.md`
 - `project-architecture.md`
 - `acceptance-checklist.md`
 

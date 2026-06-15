@@ -7,7 +7,8 @@ Rules for vxe-table usage, column design, and visual quality.
 ## Always Use `.freight-table` Class
 
 Every vxe-table in this project must carry the `freight-table` class.
-This class applies the full set of CSS variable overrides and style rules from `global.css`.
+This class is a thin bridge that aligns vxe-table with Arco `a-table` density, borders, hover, and typography.
+It must not become a separate visual skin.
 Never create a bare `<vxe-table>` without it.
 
 ```vue
@@ -28,13 +29,13 @@ Never create a bare `<vxe-table>` without it.
 Key CSS variables already set by `.freight-table`:
 - Row height: 31px
 - Cell padding: 4px 8px
-- Header bg: `linear-gradient(180deg, #f7fbff 0%, #eaf2fb 100%)`
-- Header text: `#2f4058`, font-weight 700
-- Body text: `#1e293b`
-- Column border: `#e3ebf4`
-- Row hover: `#f2f7ff`
-- Selected row: `#edf5ff` + `inset 3px 0 0 rgb(var(--primary-6))` on first column
-- Zebra stripe: `#fbfdff`
+- Header bg: `var(--color-fill-1)`
+- Header text: `var(--color-text-1)`, font-weight 700
+- Body text: `var(--color-text-1)`
+- Column border: `var(--color-border-2)`
+- Row hover: `var(--color-fill-1)`
+- Selected row: `rgb(var(--primary-1))` + `inset 3px 0 0 rgb(var(--primary-6))` on first column
+- Zebra stripe: `var(--color-fill-1)` with subtle opacity if needed
 
 ---
 
@@ -42,12 +43,12 @@ Key CSS variables already set by `.freight-table`:
 
 | Field type                    | CSS class                    | Appearance                          |
 |-------------------------------|------------------------------|-------------------------------------|
-| Order number (primary link)   | `.order-no-button`           | Bold blue #126dff, underline on hover |
-| Business no / secondary link  | `.table-link-button`         | Semi-bold blue #126dff              |
-| HBL / MBL number              | `.table-secondary-link`      | Semi-bold #256bd6                   |
-| Route (POL / POD)             | `.table-route-text`          | Medium weight #334155               |
-| Container number              | `.table-container-text`      | Mono font, badge style #f1f5f9 bg   |
-| Service scope / mode          | `.table-service-text`        | Badge style #eef6ff bg              |
+| Order number (primary link)   | `.order-no-button`           | Bold `rgb(var(--primary-6))`, underline on hover |
+| Business no / secondary link  | `.table-link-button`         | Semi-bold `rgb(var(--primary-6))`   |
+| HBL / MBL number              | `.table-secondary-link`      | Semi-bold `rgb(var(--primary-6))`   |
+| Route (POL / POD)             | `.table-route-text`          | Medium weight `var(--color-text-1)` |
+| Container number              | `.table-container-text`      | Mono font, subtle Arco fill bg when needed |
+| Service scope / mode          | `.table-service-text`        | Subtle Arco fill bg when needed     |
 | Empty / null value            | `.table-muted-text`          | Muted `var(--color-text-4)` → show "-" |
 | Amount / numeric              | `.amount-text`               | Bold, tabular-nums                  |
 | Code / ID (mono)              | `.muted-code`                | Mono font, muted color              |
@@ -77,7 +78,7 @@ Row operation cells should use `.table-row-actions` wrapper with specific button
 ```
 
 Button classes:
-- `.table-action-btn` — 22px height, blue tinted bg, hover fills blue
+- `.table-action-btn` — 22px height, Arco text/link style, hover uses primary color
 - `.table-more-btn` — 24px square, same style, icon only
 - `.table-file-btn` — 22px height, min-width 50px, for file/attachment buttons
 
@@ -109,9 +110,9 @@ Always use `a-tag` with `status-dot`, never plain text:
 
 ---
 
-## Order Group Rows (Merged Cells for Container List)
+## Order Group Rows
 
-When one order expands to multiple container rows, use `span-method` (merge-cells config) and apply row class names:
+When multiple rows belong to the same business order, apply group row class names only for hover/current-row linkage. Do not use merged cells by default.
 
 | Row position  | Class                        | Effect                                  |
 |---------------|------------------------------|-----------------------------------------|
@@ -119,10 +120,10 @@ When one order expands to multiple container rows, use `span-method` (merge-cell
 | Middle rows   | `order-group-row--middle`    | Light dashed bottom border              |
 | Last row      | `order-group-row--end`       | Bottom border highlighted               |
 | Single row    | `order-group-row--single`    | Top + bottom border                     |
-| Hovered group | `order-group-row--hovered`   | All rows in group turn `#f2f7ff`        |
-| Selected group| `order-group-row--current`   | All rows `#edf5ff` + left blue marker   |
+| Hovered group | `order-group-row--hovered`   | All rows in group use theme hover bg     |
+| Selected group| `order-group-row--current`   | All rows use primary tint + left marker  |
 
-The merged master cell (rowspan cell) must use class `.merged-master-cell`.
+Do not add `span-method`, `merge-cells`, `rowspan`, or `.merged-master-cell` unless the user explicitly asks to prototype merged cells again.
 
 ---
 
@@ -184,9 +185,10 @@ Use hidden columns or column settings for lower-frequency fields (vessel, voyage
 
 - Never use `size="small"` or `size="medium"` on vxe-table — always `size="mini"`.
 - Never apply inline `style` to table cells — use CSS classes.
-- Never use thick cell borders — the column border is 1px `#e3ebf4`.
+- Never use thick cell borders — the column border is 1px `var(--color-border-2)`.
 - Never make every cell the same font-weight — primary fields are bold, rest are normal.
 - Never put more than 2 visible buttons in an operation column.
 - Never use a colored left bar decoration on rows by default.
+- Never restyle vxe-table into a custom product skin; keep it close to Arco `a-table`.
 - Never render amounts without `tabular-nums`.
 - Never show raw null/undefined — always display `-` for empty values.

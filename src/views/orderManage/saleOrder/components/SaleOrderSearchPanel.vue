@@ -19,7 +19,6 @@ const loadingType = defineModel<string>('loadingType', { required: true });
 const shipperKeyword = defineModel<string>('shipperKeyword', { required: true });
 const consigneeKeyword = defineModel<string>('consigneeKeyword', { required: true });
 const quickTag = defineModel<string>('quickTag', { required: true });
-const mergeCells = defineModel<boolean>('mergeCells', { required: true });
 const activeTransport = defineModel<TransportType>('activeTransport', { required: true });
 
 defineEmits<{
@@ -45,10 +44,6 @@ defineEmits<{
         </button>
       </div>
 
-      <div class="query-merge-toggle">
-        <span>合并单元格</span>
-        <a-switch v-model="mergeCells" size="small" />
-      </div>
     </div>
 
     <div class="sale-order-query-grid">

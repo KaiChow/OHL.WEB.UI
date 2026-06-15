@@ -17,12 +17,24 @@ defineEmits<{
 <template>
   <div class="operation-bar">
     <a-space :size="6" class="operation-bar__actions">
-      <a-button size="small" @click="$emit('refresh')">
+      <a-button size="small" type="primary">
         <template #icon>
-          <icon-refresh />
+          <icon-plus />
         </template>
+        创建业务单
       </a-button>
-      <a-button size="small" type="outline">
+      <a-dropdown trigger="click">
+        <a-button size="small">
+          批量操作
+          <icon-down class="toolbar-button__suffix" />
+        </a-button>
+        <template #content>
+          <a-doption>批量下载文件</a-doption>
+          <a-doption>批量分配操作</a-doption>
+          <a-doption>批量关闭特殊跟踪</a-doption>
+        </template>
+      </a-dropdown>
+      <a-button size="small">
         <template #icon>
           <icon-download />
         </template>
@@ -34,24 +46,10 @@ defineEmits<{
         </template>
         打印
       </a-button>
-      <a-dropdown trigger="click">
-        <a-button size="small">
-          批量操作
-          <template #icon>
-            <icon-down />
-          </template>
-        </a-button>
-        <template #content>
-          <a-doption>批量下载文件</a-doption>
-          <a-doption>批量分配操作</a-doption>
-          <a-doption>批量关闭特殊跟踪</a-doption>
-        </template>
-      </a-dropdown>
-      <a-button size="small" type="primary">
+      <a-button size="small" title="刷新" @click="$emit('refresh')">
         <template #icon>
-          <icon-plus />
+          <icon-refresh />
         </template>
-        创建业务单
       </a-button>
     </a-space>
 

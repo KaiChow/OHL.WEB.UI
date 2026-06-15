@@ -1,8 +1,6 @@
 export interface SaleOrderRecord {
   id: number;
   groupId: string;
-  detailIndex: number;
-  detailCount: number;
   SubmitTime: string;
   DcgNo: string;
   FollowState: '待审核' | '操作待接单' | '未提交' | '已接单' | '已放舱' | '已拒绝';
@@ -56,7 +54,6 @@ export interface SaleOrderRecord {
   DownFile: string;
   Operation: string;
 }
-
 export interface SaleOrderColumn {
   title: string;
   field: keyof SaleOrderRecord;
@@ -65,7 +62,6 @@ export interface SaleOrderColumn {
   fixed?: 'left' | 'right';
   align?: 'left' | 'center' | 'right';
 }
-
 export const seaSaleOrderColumns: SaleOrderColumn[] = [
   { title: '提交时间', field: 'SubmitTime', width: 150, sortable: true },
   { title: '订单编号', field: 'DcgNo', width: 180, sortable: true },
@@ -120,7 +116,6 @@ export const seaSaleOrderColumns: SaleOrderColumn[] = [
   { title: '文件下载', field: 'DownFile', width: 70, fixed: 'right', align: 'center' },
   { title: '操作', field: 'Operation', width: 70, fixed: 'right', align: 'center' }
 ];
-
 const customers = [
   'PTP supply chain',
   'ALIK',
@@ -131,13 +126,11 @@ const customers = [
   'VEIL',
   'TEST'
 ];
-
 const shipCompanies = ['OOCL', 'EVERGREEN', 'COSCOTTT', 'MSC', 'CMA', 'ONE'];
 const vesselVoyages = ['OOCL GDYNIA/010W', 'EVER GENIUS/0815-031W', 'OOCL TURKIYE/011W', '123/321', '/', 'OOCL ABU DHABI/008W'];
 const states: SaleOrderRecord['FollowState'][] = ['待审核', '操作待接单', '未提交', '已接单', '已放舱', '已拒绝'];
 const serviceItems = ['仓储、报关', '自拖自报', '报关', '仓储、报关、拖车'];
 const businessTypes = ['海运', '空运', '铁路'];
-
 const baseSaleOrders: SaleOrderRecord[] = Array.from({ length: 18 }, (_, index) => {
   const no = 60079 + index;
   const customer = customers[index % customers.length];
@@ -145,12 +138,9 @@ const baseSaleOrders: SaleOrderRecord[] = Array.from({ length: 18 }, (_, index) 
   const state = states[index % states.length];
   const etdDay = 10 + (index % 18);
   const etaDay = 12 + (index % 14);
-
   return {
     id: index + 1,
-    groupId: index % 4 === 0 ? `PTP260${no}-MERGED` : `PTP260${no}`,
-    detailIndex: 0,
-    detailCount: 1,
+    groupId: `PTP260${no}`,
     SubmitTime: `2026-06-${String(15 - (index % 9)).padStart(2, '0')} ${String(9 + (index % 8)).padStart(2, '0')}:30`,
     DcgNo: index % 5 === 0 ? `DCG260${no}` : `PTP260${no}`,
     FollowState: state,
@@ -207,52 +197,4 @@ const baseSaleOrders: SaleOrderRecord[] = Array.from({ length: 18 }, (_, index) 
     Operation: '...'
   };
 });
-
-const mergeDetailFields: Array<keyof SaleOrderRecord> = [
-  'ContainerDataJson',
-  'ContainerNoStr',
-  'HblNo',
-  'MblNo',
-  'ProductMass',
-  'ProductGrossWeight',
-  'ProductVolume',
-  'WarehouseState',
-  'FbaNo',
-  'Po'
-];
-
-export const saleOrders: SaleOrderRecord[] = baseSaleOrders.flatMap((item, index) => {
-  const detailCount = index % 4 === 0 ? 3 : index % 3 === 0 ? 2 : 1;
-
-  return Array.from({ length: detailCount }, (_, detailIndex) => {
-    const detail = { ...item, id: item.id * 10 + detailIndex, detailIndex, detailCount };
-
-    detail.ContainerDataJson =
-      detailCount === 1
-        ? item.ContainerDataJson
-        : detailIndex === 0
-          ? "1X20'GP"
-          : detailIndex === 1
-            ? "1X40'HQ"
-            : 'LCL';
-    detail.ContainerNoStr = detailCount === 1 ? item.ContainerNoStr : `CONT${item.id}${detailIndex}260${detailIndex}`;
-    detail.HblNo = detailCount === 1 ? item.HblNo : `${item.HblNo || item.OrderNo}-H${detailIndex + 1}`;
-    detail.MblNo = detailCount === 1 ? item.MblNo : `${item.MblNo}-M${detailIndex + 1}`;
-    detail.ProductMass = `${Number.parseInt(item.ProductMass, 10) + detailIndex * 6} CTN`;
-    detail.ProductGrossWeight = `${(Number.parseFloat(item.ProductGrossWeight) + detailIndex * 0.58).toFixed(2)} T`;
-    detail.ProductVolume = `${(Number.parseFloat(item.ProductVolume) + detailIndex * 2.35).toFixed(2)} CBM`;
-    detail.WarehouseState = detailIndex === 0 ? item.WarehouseState : detailIndex === 1 ? '部分入仓' : '待入仓';
-    detail.FbaNo = detailCount === 1 ? item.FbaNo : `FBA${item.id}${detailIndex}260`;
-    detail.Po = detailCount === 1 ? item.Po : `PO-${item.id}-${detailIndex + 1}`;
-
-    if (detailIndex > 0) {
-      mergeDetailFields.forEach((field) => {
-        if (!detail[field]) {
-          detail[field] = '-' as never;
-        }
-      });
-    }
-
-    return detail;
-  });
-});
+export const saleOrders: SaleOrderRecord[] = baseSaleOrders;

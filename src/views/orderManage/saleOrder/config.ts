@@ -8,17 +8,14 @@ import type {
 } from './types';
 
 export const saleOrderColumns: SaleOrderListColumn[] = [
-  { title: '订单编号', field: 'DcgNo', width: 148 },
-  { title: '状态', field: 'FollowState', width: 108 },
+  { title: '状态', field: 'FollowState', width: 100,  },
+  { title: '订单编号', field: 'DcgNo', width: 148, },
   { title: '业务单号', field: 'OrderNo', width: 128 },
   { title: '提交时间', field: 'SubmitTime', width: 142 },
-  { title: '货物类型', field: 'CargoTypes', width: 92 },
-  { title: '业务类型', field: 'BusinessTypeStr', width: 82 },
-  { title: '入仓单号', field: 'WarehouseNo', width: 122 },
   { title: '客户', field: 'CustomerName', width: 156 },
   { title: '业务员', field: 'Salesman', width: 86 },
-  { title: '发货人', field: 'Shipper', width: 150 },
-  { title: '收货人', field: 'Consignees', width: 150 },
+  { title: '货物类型', field: 'CargoTypes', width: 92 },
+  { title: '业务类型', field: 'BusinessTypeStr', width: 82 },
   { title: '起运港', field: 'LoaddingPortEn', width: 106 },
   { title: '目的港', field: 'DeliveryPortEn', width: 116 },
   { title: 'ETD', field: 'Etd', width: 96 },
@@ -27,17 +24,20 @@ export const saleOrderColumns: SaleOrderListColumn[] = [
   { title: '船公司', field: 'ShipCompany', width: 94 },
   { title: '船名航次', field: 'ShipCompanyAndVoyno', width: 162 },
   { title: '航线', field: 'RouteName', width: 96 },
-  { title: '装箱方式', field: 'LoaddingTypeStr', width: 96 },
-  { title: '柜量', field: 'ContainerDataJson', width: 116 },
-  { title: '柜号', field: 'ContainerNoStr', width: 124 },
   { title: 'HBL', field: 'HblNo', width: 150 },
   { title: 'MBL', field: 'MblNo', width: 170 },
+  { title: '柜量', field: 'ContainerDataJson', width: 116 },
+  { title: '柜号', field: 'ContainerNoStr', width: 124 },
+  { title: '发货人', field: 'Shipper', width: 150 },
+  { title: '收货人', field: 'Consignees', width: 150 },
+  { title: '入仓单号', field: 'WarehouseNo', width: 122 },
+  { title: '装箱方式', field: 'LoaddingTypeStr', width: 96 },
   { title: '订单类型', field: 'OrderTypeStr', width: 96 },
   { title: '服务项', field: 'ServiceItemStr', width: 132 },
   { title: '服务范围', field: 'ServiceScopeStr', width: 88 },
   { title: '来源', field: 'SourceStr', width: 118 },
   { title: '文件', field: 'DownFile', width: 76, align: 'center' },
-  { title: '操作', field: 'Operation', width: 88, align: 'center' }
+  { title: '操作', field: 'Operation', width: 88, align: 'center', fixed: 'right' }
 ];
 
 export const transportTabs: Array<{ label: string; value: TransportType }> = [
@@ -156,15 +156,15 @@ export const filterGroups: AdvancedFieldGroup[] = [
     fields: [
       { label: '订单编号', key: 'DcgNo', placeholder: '请输入订单编号' },
       { label: '业务单号', key: 'OrderNo', placeholder: '请输入业务单号' },
-      { label: '进仓时间', key: 'WarehousingTimeRange', type: 'dateRange' },
-      { label: '下单时间', key: 'CreatedTimeRange', type: 'dateRange' },
+      { label: '进仓时间', key: 'WarehousingTimeRange', type: 'dateRange', span: 2 },
+      { label: '下单时间', key: 'CreatedTimeRange', type: 'dateRange', span: 2 },
       { label: 'HBL NO', key: 'HblNo', placeholder: '请输入Hbl单号' },
       { label: 'FBA NO', key: 'FbaNo', placeholder: '请输入Fba号' },
-      { label: 'ETD', key: 'EtdRange', type: 'dateRange' },
-      { label: '财务POD', key: 'FinancePodTimeRange', type: 'dateRange' },
+      { label: 'ETD', key: 'EtdRange', type: 'dateRange', span: 2 },
+      { label: '财务POD', key: 'FinancePodTimeRange', type: 'dateRange', span: 2 },
       { label: 'SO NO', key: 'SoNo', placeholder: '请输入So号' },
       { label: 'MBL NO', key: 'MblNo', placeholder: '请输入Mbl单号' },
-      { label: '船前时间', key: 'BoatPreSendTimeRange', type: 'dateRange' },
+      { label: '船前时间', key: 'BoatPreSendTimeRange', type: 'dateRange', span: 2 },
       { label: 'PO', key: 'Po', placeholder: '请输入PO', span: 2 }
     ]
   },

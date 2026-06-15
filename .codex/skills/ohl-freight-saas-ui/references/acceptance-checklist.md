@@ -6,14 +6,14 @@ Run through this before final delivery. Every item must pass.
 
 ## Visual Quality (质感)
 
-- [ ] Content area uses gradient background, not flat white or flat gray.
-- [ ] Search panel has layered box-shadow (not flat border only).
-- [ ] Table wrap (`.table-wrap`) has elevated shadow, not just a border.
-- [ ] Operation bar uses gradient background (`linear-gradient(180deg, #fff 0%, #f5f9fe 100%)`).
+- [ ] Content area uses Arco theme fill (`var(--color-fill-2)`), not custom hard-coded color.
+- [ ] Search panel uses Arco bg/border and compact spacing; no decorative custom skin.
+- [ ] Table wrap (`.table-wrap`) uses Arco bg/border with at most subtle shadow.
+- [ ] Operation bar uses Arco background/fill, not custom gradient skin.
 - [ ] Status tags use `.status-dot` + `a-tag` with correct Arco color name.
-- [ ] Table header is styled (gradient bg, bold text `#2f4058`) — not browser-default.
-- [ ] Links and primary identifiers are visually distinct (bold, `#126dff`).
-- [ ] Row hover is visible (`#f2f7ff`), not invisible.
+- [ ] Table header is styled (theme fill bg, bold `var(--color-text-1)`) — not browser-default.
+- [ ] Links and primary identifiers are visually distinct (bold, `rgb(var(--primary-6))`).
+- [ ] Row hover is visible using Arco fill background, not invisible.
 - [ ] Selected row has left blue marker (`inset 3px 0 0 rgb(var(--primary-6))`).
 - [ ] No raw null/undefined shown in cells — always display `-`.
 
@@ -28,17 +28,17 @@ Run through this before final delivery. Every item must pass.
 - [ ] Pagination is top-right inside operation bar, not below table.
 - [ ] No large KPI dashboard cards on list pages unless explicitly requested.
 - [ ] No oversized margins or paddings between zones.
+- [ ] Custom CSS is limited to layout, density, vxe-table alignment, and missing interaction states.
 
 ## Professional Interaction (交互专业)
 
 - [ ] Transport mode shows as segmented tab group (`.transport-tabs`), not a select.
 - [ ] Status filter shows as chip group (`.segmented-filter` + `.filter-chip`), not tabs component.
-- [ ] Advanced query is inline panel below search, not a modal.
+- [ ] Advanced query pattern matches field count: ≤15 fields → inline panel; 50+ fields → right-side drawer (`adv-filter-drawer`) with scroll+anchor nav, NOT tab-switching. Never a modal.
 - [ ] Advanced filter groups are categorized (单号/客户角色/运输节点/时间/业务标记).
 - [ ] Active filter count badge shows on "更多" button.
 - [ ] Row actions: max 2 visible buttons, rest in dropdown.
 - [ ] Success/error feedback uses `Message.success()` / `Message.error()`, not alert.
-- [ ] Merge toggle (switch) is available when table has rowspan groups.
 - [ ] Drawer uses `unmount-on-close` to reset state.
 
 ## Display Logic (显示合理)
@@ -50,8 +50,10 @@ Run through this before final delivery. Every item must pass.
 - [ ] Service items use `.table-service-text` (badge style), not plain text.
 - [ ] Amounts use `.amount-text` with `font-variant-numeric: tabular-nums`.
 - [ ] HBL / MBL use `.table-secondary-link`, visually distinct from plain text.
-- [ ] Detail drawer has `.detail-header` (order no + status) before the field grid.
-- [ ] Detail fields use `.detail-grid` 2-column layout, not a flat list.
+- [ ] Simple detail (≤20 fields, read-only): uses `.detail-header` + `.detail-grid` 2-column layout.
+- [ ] Full-screen editable detail (50+ fields): uses `ds-*` class system (`ds-topbar` / `ds-body` / `ds-scroll` / `ds-anchor` / `ds-footer`). Width is `calc(100vw - 248px)`, not `100%`.
+- [ ] Anchor nav (`ds-anchor-track`) present for full-screen forms with 5+ sections; active item updates on scroll.
+- [ ] Full-screen detail footer (`ds-footer`) is fixed at bottom, not inline.
 - [ ] Freight status terms are industry-standard (待订舱/已放行/运输中), not generic.
 
 ## Architecture

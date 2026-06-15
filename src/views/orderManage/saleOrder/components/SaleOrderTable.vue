@@ -7,7 +7,6 @@ defineProps<{
   rows: SaleOrderRow[];
   orderCount: number;
   total: number;
-  mergeCellConfig: Array<{ row: number; col: number; rowspan: number; colspan: number }>;
   getCellClassName: (params: { column: { field?: SaleOrderListColumnKey } }) => string;
   getRowClassName: (params: { row: SaleOrderRow }) => string;
   setHoveredOrderGroup: (row: SaleOrderRow | null) => void;
@@ -39,9 +38,8 @@ defineEmits<{
       size="mini"
       max-height="640"
       :column-config="{ resizable: true, minWidth: 80 }"
-      :scroll-x="{ enabled: false }"
+      :scroll-x="{ enabled: true, gt: 0 }"
       :cell-class-name="getCellClassName"
-      :merge-cells="mergeCellConfig"
       :row-class-name="getRowClassName"
       :row-config="{ isHover: true }"
       :data="rows"

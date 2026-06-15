@@ -11,7 +11,7 @@ These rules directly drive visual quality, compactness, and professional feel.
 |-----------------------|-------------------------------|
 | List page query form  | `size="small"` on everything  |
 | Table operation bar   | `size="small"` on everything  |
-| Status filter chips   | Custom CSS `.filter-chip`     |
+| Status filter chips   | Lightweight `.filter-chip` using Arco tokens |
 | Detail drawer form    | `size="small"` preferred      |
 | Modal form            | `size="small"` preferred      |
 | Page-level primary CTA| `size="medium"` is acceptable |
@@ -49,7 +49,9 @@ These rules directly drive visual quality, compactness, and professional feel.
 ```
 
 Button placement rule:
-- Primary button goes **last** in a group (right side).
+- Primary create action goes first in a list toolbar, followed by batch actions, export/print, then utility icon actions such as refresh.
+- Search form actions keep the query button first, then reset, then advanced options.
+- Row actions keep the direct view action first, then the more dropdown.
 - Danger/destructive action never placed at the far right of a group.
 
 ---
@@ -285,18 +287,6 @@ Show active advanced filter count on the "更多" button:
   更多<a-badge v-if="activeCount" :count="activeCount" />
 </a-button>
 ```
-
----
-
-## a-switch
-
-```vue
-<a-switch v-model="mergeCells" size="small" />
-```
-
-Always `size="small"` when used inline with text in a toolbar or search panel.
-
----
 
 ## a-message / a-notification
 
