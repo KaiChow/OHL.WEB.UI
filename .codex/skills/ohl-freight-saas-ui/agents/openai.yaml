@@ -1,0 +1,7 @@
+interface:
+  display_name: "OHL Freight SaaS UI"
+  short_description: "货代 SaaS 项目 UI 与架构规范助手"
+  default_prompt: "Use $ohl-freight-saas-ui to design or implement a FE.OHL.WEB.UI freight SaaS list page."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,26 @@
+{
+  "name": "fe-ohl-web-ui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "@arco-design/web-vue": "^2.57.0",
+    "@arco-themes/vue-gi-demo": "^0.0.60",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "vue": "^3.5.16",
+    "vue-router": "^4.4.5",
+    "vxe-table": "^4.15.10",
+    "xe-utils": "^3.7.8"
+  },
+  "devDependencies": {
+    "less": "^4.6.6",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vue-tsc": "^2.2.10"
+  }
+}
