@@ -820,30 +820,16 @@ html, body, #app {
 .toolbar--dense {
   border-bottom: none;
 }
-.toolbar-zone {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.toolbar-zone--grow {
-  flex: 1;
-  min-width: 0;
-}
-.toolbar-zone__label {
-  font-size: 10px;
-  font-weight: 700;
-  color: #9aa5b8;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  flex-shrink: 0;
-  min-width: 28px;
-}
-.toolbar-zone__btns {
+.toolbar-group {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
+  flex-shrink: 0;
+}
+.toolbar-group--grow {
+  flex: 1;
+  min-width: 0;
 }
 .toolbar-divider {
   width: 1px;

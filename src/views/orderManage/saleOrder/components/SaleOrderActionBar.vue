@@ -96,24 +96,20 @@ const handleBatch = (action: string) => {
     </div>
 
     <div class="toolbar toolbar--dense">
-      <div class="toolbar-zone">
-        <span class="toolbar-zone__label">操作</span>
-        <div class="toolbar-zone__btns">
-          <a-button size="small" type="outline" @click="emit('refresh')">
-            <template #icon><icon-refresh /></template>
-            刷新
-          </a-button>
-          <a-button v-if="perm.canCreate" size="small" type="primary" @click="emit('create')">
-            <template #icon><icon-plus /></template>
-            创建业务单
-          </a-button>
-        </div>
+      <div class="toolbar-group">
+        <a-button size="small" type="outline" @click="emit('refresh')">
+          <template #icon><icon-refresh /></template>
+          刷新
+        </a-button>
+        <a-button v-if="perm.canCreate" size="small" type="primary" @click="emit('create')">
+          <template #icon><icon-plus /></template>
+          创建业务单
+        </a-button>
       </div>
 
-      <div v-if="perm.canSpecialTrack" class="toolbar-divider" />
+      <div v-if="perm.canSpecialTrack" class="toolbar-divider" aria-hidden="true" />
 
-      <div v-if="perm.canSpecialTrack" class="toolbar-zone">
-        <span class="toolbar-zone__label">跟踪</span>
+      <div v-if="perm.canSpecialTrack" class="toolbar-group">
         <div class="toolbar-segment">
           <a-button size="small" type="outline" class="toolbar-segment__btn">
             <template #icon><icon-star /></template>
@@ -125,43 +121,40 @@ const handleBatch = (action: string) => {
         </div>
       </div>
 
-      <div class="toolbar-divider" />
+      <div class="toolbar-divider" aria-hidden="true" />
 
-      <div class="toolbar-zone toolbar-zone--grow">
-        <span class="toolbar-zone__label">单据</span>
-        <div class="toolbar-zone__btns">
+      <div class="toolbar-group toolbar-group--grow">
+        <a-button size="small" type="outline">
+          <template #icon><icon-copy /></template>
+          复制
+        </a-button>
+        <a-button v-if="perm.canPrint" size="small" type="outline">
+          <template #icon><icon-printer /></template>
+          打印
+        </a-button>
+        <a-dropdown v-if="perm.canExport" trigger="click" @select="handleExport($event as 'page' | 'all' | 'selected')">
           <a-button size="small" type="outline">
-            <template #icon><icon-copy /></template>
-            复制
+            <template #icon><icon-download /></template>
+            导出
+            <icon-down class="toolbar-caret" />
           </a-button>
-          <a-button v-if="perm.canPrint" size="small" type="outline">
-            <template #icon><icon-printer /></template>
-            打印
+          <template #content>
+            <a-doption value="page">导出当前页</a-doption>
+            <a-doption value="all">导出全部筛选结果</a-doption>
+            <a-doption value="selected">导出已选</a-doption>
+          </template>
+        </a-dropdown>
+        <a-dropdown v-if="perm.canBatch" trigger="click" @select="handleBatch($event as string)">
+          <a-button size="small" type="outline">
+            批量操作
+            <icon-down class="toolbar-caret" />
           </a-button>
-          <a-dropdown v-if="perm.canExport" trigger="click" @select="handleExport($event as 'page' | 'all' | 'selected')">
-            <a-button size="small" type="outline">
-              <template #icon><icon-download /></template>
-              导出
-              <icon-down class="toolbar-caret" />
-            </a-button>
-            <template #content>
-              <a-doption value="page">导出当前页</a-doption>
-              <a-doption value="all">导出全部筛选结果</a-doption>
-              <a-doption value="selected">导出已选</a-doption>
-            </template>
-          </a-dropdown>
-          <a-dropdown v-if="perm.canBatch" trigger="click" @select="handleBatch($event as string)">
-            <a-button size="small" type="outline">
-              批量操作
-              <icon-down class="toolbar-caret" />
-            </a-button>
-            <template #content>
-              <a-doption value="submit">批量提交</a-doption>
-              <a-doption value="export">批量导出</a-doption>
-              <a-doption class="danger-opt" value="abandon">批量废弃</a-doption>
-            </template>
-          </a-dropdown>
-        </div>
+          <template #content>
+            <a-doption value="submit">批量提交</a-doption>
+            <a-doption value="export">批量导出</a-doption>
+            <a-doption class="danger-opt" value="abandon">批量废弃</a-doption>
+          </template>
+        </a-dropdown>
       </div>
 
       <div class="toolbar-aside">
