@@ -37,17 +37,13 @@ const onCheckboxChange = () => {
   const records = tableRef.value?.getCheckboxRecords() as SaleOrderRecord[] | undefined;
   emit('update:selectedIds', records?.map((r) => r.Id) ?? []);
 };
-
-const rowClassName = ({ row }: { row: SaleOrderRecord }) => {
-  return isDangerCargo(row.CargoType) ? 'row--danger-cargo' : '';
-};
 </script>
 
 <template>
   <div class="table-wrap">
     <vxe-table
       ref="tableRef"
-      class="freight-table compact stripe"
+      class="freight-table compact"
       border="none"
       size="small"
       height="100%"
@@ -56,7 +52,6 @@ const rowClassName = ({ row }: { row: SaleOrderRecord }) => {
       :row-config="{ isHover: true, keyField: 'Id' }"
       :checkbox-config="{ highlight: true, range: true }"
       :sort-config="{ trigger: 'cell', remote: false }"
-      :row-class-name="rowClassName"
       @checkbox-change="onCheckboxChange"
       @checkbox-all="onCheckboxChange"
     >

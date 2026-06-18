@@ -967,29 +967,39 @@ Step 8: 自查（第十节检查清单，全部通过后提交）
 
 **适用场景**：订单列表、**业务单**等 9–16 个筛选字段的页面。
 
-**布局（栅格表单，统一实现）**：
+**布局（filter-card v2，业务单参考实现）**：
 
 ```
-┌─ 运输 Tab（可选）────────────────────────────────────────┐
-├─ 表单区（a-form + a-row，每行 4 列 span=6）──┬─ 操作列 ─┤
-│ 主字段行 ×1~2                               │ [查询]   │
-│ [展开筛选(+N) ▼]                              │ [重置]   │
-├─ 展开区（虚线分隔，同样 4 列栅格）────────────┤          │
-│ 次字段行 ×1~2                               │          │
-└─────────────────────────────────────────────┴──────────┘
-│ FilterActiveStrip（§11.8，有激活条件时）                 │
-└──────────────────────────────────────────────────────────┘
+┌─ L1 运输 Tab（可选）────────────────────────────────────────┐
+├─ L2 filter-card（无「筛选条件」标题栏）──────────────────────┤
+│ 字段区（Grid 4 列）                    │ 固定操作列 84px   │
+│ 行1: 单号 | 类型 | 进出口 | 业务员      │ [查询]  ← 位置固定 │
+│ 行2: 操作员 | 提交时间 chip (span3)    │ [重置]            │
+│ ── 高级区（展开，虚线顶分隔）────────── │ ─────────         │
+│ 行3+: 折叠字段 4 列栅格                │ 展开(+N)/收起     │
+└────────────────────────────────────────┴───────────────────┘
+│ FilterActiveStrip（§11.8，仅有 tag 时渲染，禁止空态占位）   │
+└──────────────────────────────────────────────────────────────┘
 ```
+
+**交互（固定优于动态）**：
+
+| 规则 | 说明 |
+|------|------|
+| 主操作位置 | **查询 / 重置** 始终在右侧操作列顶部，展开/收起**不改变**其位置 |
+| 展开入口 | 操作列底部文字链 `展开(+N)` / `收起`，虚线分隔；禁止占栅格整列宽按钮 |
+| 无标题栏 | **禁止** `filter-card__head`「筛选条件」区块标题（字段即语义） |
+| 空态 Strip | **禁止**「当前无筛选条件」占位行 |
 
 **栅格与标签（Tier 2 强制）**：
 
 | 项 | 规范 |
 |----|------|
-| 布局 | `a-form layout="horizontal"` + `a-row :gutter="[16,10]"` + `a-col :span="6"` |
-| 标签 | 固定 `76px` 右对齐，`color: var(--color-text-3)` |
-| 控件 | `size="small"`，列内 `width: 100%` |
-| 操作列 | 右侧独立列 + 竖线分隔；**查询**（primary）+ **重置**（text）始终可见 |
-| CSS 类 | `.search-bar` / `.search-form` / `.search-form-actions` |
+| 布局 | CSS Grid `repeat(4, 1fr)` + 右侧固定操作列；或 legacy `a-row :span="6"` |
+| 标签 | 顶标 `filter-field__label` 12px；禁止左右 label 挤压列宽 |
+| 控件 | `size="small"`，高度 **32px**（global.css 覆盖），列内 `width: 100%` |
+| 操作列 | 右侧 **84px** 竖线分隔；**查询** primary + **重置** text，**全程固定** |
+| CSS 类 | `.filter-card` / `.filter-card__main` / `.filter-card__actions-col` |
 
 **主字段选取原则**（收起态常驻）：
 
@@ -1002,8 +1012,8 @@ Step 8: 自查（第十节检查清单，全部通过后提交）
 
 | 状态 | 要求 |
 |------|------|
-| 收起 | `icon-down` + `展开筛选(+N)`，N = 折叠区字段总数 |
-| 展开 | `icon-up` + `收起筛选`；展开区 `border-top: 1px dashed` |
+| 收起 | 操作列底部 `icon-down` + `展开(+N)`，N = 折叠区字段总数 |
+| 展开 | 操作列底部 `icon-up` + `收起`；高级区 `border-top: 1px dashed` |
 | 折叠区有值 | 收起时橙色 `a-badge` 显示激活数量 |
 | 记忆 | `localStorage` 记忆展开态，不记忆筛选值 |
 
@@ -1087,9 +1097,9 @@ Step 8: 自查（第十节检查清单，全部通过后提交）
 
 > 解决「筛了半天不知道当前条件是什么」的问题。与状态 Tab、表单筛选**统一回显**。
 
-**何时显示**：任意筛选维度有非默认值时（表单字段、状态 Tab、范围 Tab、时间范围、运输方式切换不算——运输方式是页面上下文）。
+**何时显示**：`v-if="activeFilterTags.length > 0"` — 有非默认筛选时才渲染；**禁止**空态占位文案。
 
-**位置**：`zone-filter` 底部或 `zone-data` 顶部（状态 Tab 上方），有值才渲染。
+**位置**：筛选卡片（L2）底部，紧挨 `filter-card__main` 下方。
 
 ```html
 <div v-if="activeFilterTags.length" class="filter-active-strip">
@@ -2378,7 +2388,7 @@ onBeforeUnmount(() => { resizeObs.disconnect(); chart.dispose() })
 - 默认每页 **20 条**（密集列表）或 **50 条**（数据量大时）
 - 必须显示 total（"共 N 条"）
 - 必须显示 page-size 切换（20/50/100/200）
-- **位置**：表格卡片顶部 `table-card-cap`，分页组件靠**右上**，与列设置齿轮相邻；禁止独立底栏分页
+- **位置**：表格卡片顶部 `table-card-cap`，分页靠**右上**；左侧已有「共 N 条」时，分页**不再** `show-total`（避免重复）
 
 ```vue
 <div class="table-card-cap">
@@ -2387,7 +2397,7 @@ onBeforeUnmount(() => { resizeObs.disconnect(); chart.dispose() })
   </div>
   <div class="table-card-cap__right">
   <!-- 列设置 -->
-    <a-pagination class="table-card-cap__pager" size="small" show-total show-page-size show-jumper />
+    <a-pagination class="table-card-cap__pager" size="small" show-page-size show-jumper />
   </div>
 </div>
 ```
@@ -2404,7 +2414,7 @@ onBeforeUnmount(() => { resizeObs.disconnect(); chart.dispose() })
 
 | 场景 | 尺寸（font-size）|
 |------|---------------|
-| 行操作按钮（mini btn）| 14px（默认）|
+| 行操作按钮 | **28×28** `.row-action-btn` 方钮 + tooltip；禁止 `size="mini"` 纯文字图标 |
 | 工具栏按钮（small btn）| 15px |
 | 页面头部按钮 | 15px |
 | KPI 卡片装饰 | 20–24px |
@@ -2634,7 +2644,7 @@ Code
 | 当前业务状态总览 | KPI 统计条（zone-kpi）在最顶部，高度 ≤ 60px |
 | 异常 / 需处理项数量 | KPI 数字用语义色（红/橙）醒目标示 |
 | 筛选后的数据行 | 表格直接渲染首页 20 条，无需额外点击 |
-| 当前激活的筛选条件 | FilterActiveStrip 始终可见，不折叠 |
+| 当前激活的筛选条件 | FilterActiveStrip 有 tag 时显示在筛选卡片底 |
 
 **反模式**：不允许首屏是 loading spinner + 空白，数据必须 SSR 或 mock 快速呈现。
 
@@ -3430,24 +3440,27 @@ page-root
 |--------|---------|---------|
 | 五层分区 | §41.2 | ✅ 已实现 |
 | 栅格筛选首行操作 | §41.3 | ✅ 已实现 |
-| FilterActiveStrip | §11.8 / §41.3 | ✅ 已实现 |
+| FilterActiveStrip | §11.8 / §41.3 | ✅ 按需显示（无空态） |
 | 人员下拉模糊搜索 | §11.9 / §41.3 | ✅ 已实现 |
 | 清除状态 | §12.3 | ✅ 已实现 |
 | 运输 Tab 清空筛选 | §41.3 | ✅ 已实现 |
 | 表头排序 | §5.4 | ✅ 已实现 |
 | 长文本 tooltip | §5.5 | ✅ 已实现 |
 | 列设置 | §5.6 | ✅ 已实现 |
-| 危险品警示 | §5.7 / §41.4 | ✅ 已实现 |
+| 危险品警示 | §5.7 / §41.4 | ✅ 单元格 pill（无整行底色） |
 | 导出范围 | §14.5 | ✅ 已实现 |
 | 批量校验 | §14.5 | ✅ 已实现 |
 | 分页独立 L5 | §41.2 | ❌ 已废弃 → 表格右上 `table-card-cap` |
 | 权限按钮隐藏 | §41.5 | ✅ 已实现 |
 | 时间 chip | §11.10 / §41.3 | ✅ 已实现（今日/近7天） |
-| 右侧操作组 | §41.3 | ✅ 已实现 |
-| FilterActiveStrip 常驻 | §41.3 | ✅ 已实现 |
+| 筛选固定操作列 | §41.3 | ✅ 查询/重置位置固定 |
+| FilterActiveStrip 常驻 | §41.3 | ❌ 已废弃 → 有 tag 才显示 |
 | 人员字段全 Select | §41.3 | ✅ 已实现 |
-| 范围 Tab 分层 | §41.5 | ✅ 已实现 |
+| 范围 Tab 分层 | §41.5 | ✅ 统一 `.stab` pill |
 | 无文件不可点 | §14.5 | ✅ 已实现（disabled 置灰） |
+| 表格隔行 stripe | §41.4 | ❌ 已废弃 → 统一白底 + hover |
+| 工具栏分区文字 | §41.5 | ❌ 已废弃 → 竖线分组无「操作/跟踪/单据」 |
+| 色彩独立 hex | §41.1 | ❌ 已废弃 → 映射 Arco `--primary-*` |
 
 ---
 
@@ -3455,24 +3468,27 @@ page-root
 
 > 本章为货代 SaaS 列表页**项目级统一规范**，与 §11 / §12 / §5 / §14 互补；业务单 `saleOrder` 为参考实现。
 
-### 41.1 设计 Token（禁止页面内自由改写）
+### 41.1 设计 Token（色彩映射 Arco，禁止页面内另起 hex）
 
 | Token | 值 | 用途 |
 |-------|-----|------|
-| 栅格 | Arco 24 栅格，筛选 `span=6` 四列均分 | 所有列表筛选 |
-| 圆角 | `--dense-radius: 6px` | 卡片、按钮、输入框、Tag 统一 |
-| 三层背景 | body 渐变灰 `#dde2eb→#e2e6ef` / card `#fff` / advanced `#f5f6f9` | 厚重分层 |
-| 主色 | `--dense-primary: #3d6fd9`（低饱和深蓝） | 主按钮、链接 |
-| 行高 | `--dense-row-h: 36px` / `--dense-bar-h: 34px` | 表格行、工具条 |
-| 控件高度 | small `24px` / mini `20px` | 高密度锁定 |
-| 阴影 | 三层 `box-shadow` + `inset` 顶高光 | 卡片质感 |
+| 色彩源 | `ui-skill/arco-ui.css` → `@arco-themes/vue-gi-demo` | **唯一**色彩定义层 |
+| 主色别名 | `--dense-primary: var(--primary-6)` | 链接、Tab 激活、自定义控件 |
+| 深/浅主色 | `--dense-primary-deep: var(--primary-7)` / `--dense-primary-soft: var(--primary-1)` | hover、选中底 |
+| 背景/边框 | `--dense-bg-*` / `--dense-border-*` → `var(--color-bg-body)` / `var(--color-border-*)` | 卡片、分隔 |
+| 圆角 | `--dense-radius: 6px` | 卡片、按钮、输入框、Tag |
+| 行高 | `--dense-row-h: 40px` / `--dense-header-h: 36px` / `--dense-bar-h: 36px` | 表格行、工具条 |
+| 筛选控件 | 高度 **32px**，正文 **13px**，表头 **11px** | filter-grid / vxe-table |
+| 阴影 | `--dense-shadow-card` 中性灰 + inset 顶高光 | 卡片质感 |
+
+> **禁止**在列表页写独立主色 hex（如 `#3d6fd9`），避免与 Arco 按钮/分页 `#165DFF` 割裂。
 
 ### 41.2 五层固定分区（DOM 顺序不可打乱）
 
 ```
 page-root--dense（padding + gap 分隔各卡片）
 ├── L1 zone-l1-transport.zone-card     业务 Tab（海运/空运/铁路）
-├── L2 zone-l2-filter-card.zone-card   筛选卡片 + FilterActiveStrip（常驻）
+├── L2 zone-l2-filter-card.zone-card   筛选卡片（无标题栏）+ FilterActiveStrip（按需）
 ├── L3 zone-l3-action.zone-card        范围下划线 Tab + 状态 Pill + 批量操作栏
 └── L4 zone-l4-table-card              table-card-cap（右上分页）+ vxe-table
 ```
@@ -3485,35 +3501,38 @@ page-root--dense（padding + gap 分隔各卡片）
 
 | 规则 | 说明 |
 |------|------|
-| 结构 | `filter-card`：顶栏（标题+横排操作）→ 基础区白底四列网格 → 高级区内嵌灰底面板 |
-| 栅格 | CSS Grid `repeat(4, 1fr)`，顶标 `filter-field__label` + 控件，禁止左右 label 挤压列宽 |
-| 顶栏操作 | 查询、重置、高级折叠 **横排**于卡片右上，竖线分隔主操作与折叠 |
-| 次行 | 操作员占 1 列；提交时间 chip 占 3 列 `filter-field--span3` |
-| 高级区 | `filter-card__advanced-inner` 内嵌圆角灰底 + 虚线分区标题 |
-| 折叠提示 | 高级条件激活且折叠时 `a-tooltip` + badge |
-| 标签条 | `FilterActiveStrip` **常驻**；无条件显示「当前无筛选条件」 |
-| 人员字段 | 业务员/操作员/客服/发货人/收货人统一 `a-select` + `allow-search` |
+| 结构 | `filter-card__main` = 左侧字段区 + **右侧固定 84px 操作列**（无 `filter-card__head` 标题） |
+| 栅格 | CSS Grid `repeat(4, 1fr)`，顶标 `filter-field__label` + 控件 |
+| 操作列 | 顶部 **查询** primary + **重置** text（**位置固定**，展开/收起不迁移）；底部 **展开(+N)/收起** |
+| 次行 | 操作员 1 列 + 提交时间 chip `filter-field--span3` |
+| 高级区 | `filter-card__advanced-inner` 虚线顶分隔 + 4 列栅格；**无**区内「高级筛选」标题 |
+| 折叠提示 | 高级条件激活且折叠时操作列 badge + `a-tooltip` |
+| 标签条 | `FilterActiveStrip` **`v-if="tags.length"`**；**禁止**空态「当前无筛选条件」 |
+| 人员字段 | 业务员/操作员/客服/发货人/收货人 `a-select` + `allow-search` |
 | Tab 切换 | 运输 Tab → 清空筛选 + 收起高级区 + Toast |
-| 交互 | 回车查询、`allow-clear`、操作 Toast |
+| 交互 | 回车查询、下拉 auto-search、`allow-clear`、操作 Toast |
 
 ### 41.4 表格区（L4）
 
 | 能力 | 实现 |
 |------|------|
-| 顶栏 | `table-card-cap`：左「共 N 条」，右列设置 + **分页** |
+| 顶栏 | `table-card-cap`：左「共 N 条」，右列设置 + **分页**（分页不设 `show-total`） |
+| 行高/字号 | 数据行 **40px**，表头 **36px**，正文 **13px**，表头 **11px** |
 | 横向滚动 | `min-width` 列 + fixed 左右列 |
 | 排序 | 单号/时间/业务单号 `sortable` |
 | 长文本 | `show-overflow` + `a-tooltip` |
 | 列设置 | Popover 勾选 + `localStorage` |
-| 危险品 | 单元格 pill + `row--danger-cargo` **浅橙行底** `#fff8f0` |
-| 隔行 | `.stripe` 偶数行 `#f6f8fc` |
-| 无附件 | 下载按钮 `disabled` 置灰，禁止可点击样式 |
-| 加载/空态 | `#loading` 骨架 shimmer + `#empty` 居中文案 |
+| 危险品 | **仅**单元格 `.danger-cargo-pill`；**禁止**整行 `row--danger-cargo` 底色 |
+| 隔行 | **禁止** `.stripe` 斑马纹；统一白底 + hover `#primary-1` |
+| 操作列 | `.row-action-btn` **28×28** 方钮；hover 仅变色，**禁止** translateY |
+| 无附件 | 下载按钮 `disabled` 置灰 |
+| 加载/空态 | `#loading` 骨架 + `#empty` 居中文案 |
 
 ### 41.5 工具栏与权限（L3）
 
-- **范围 Tab + 状态 Pill** 同一行 `scope-status-bar`，**统一 `.stab` pill 样式**（激活蓝底白字）；竖线仅作分组，不作样式区分
-- **工具栏分区**：`操作`（刷新/创建）| `跟踪`（分段按钮组）| `单据`（复制/打印/导出/批量）| 右侧已选计数 + 列设置
+- **范围 Tab + 状态 Pill** 同一行 `scope-status-bar`，**统一 `.stab` pill**
+- **工具栏**：刷新/创建 | 竖线 | 跟踪分段 | 竖线 | 复制/打印/导出/批量；**禁止**「操作/跟踪/单据」文字分区标签
+- 列设置已移至 L4 `table-card-cap`，L3 工具栏不含列设置
 - 警示类次要按钮用 `.btn-muted-warn` 低饱和描边，禁止 Arco `status="warning"` 高饱和橙
 - 导出下拉：当前页 / 全部筛选 / 已选（已选需勾选校验）
 - 批量操作：未勾选 `Message.warning`
@@ -3529,29 +3548,30 @@ page-root--dense（padding + gap 分隔各卡片）
 
 ### 41.8 高密度 × 高质感专项（优先于功能扩展）
 
-**高密度**：在可读前提下压缩垂直空间——表格行 36px、表头 32px、工具条 34px；筛选 `gutter [12,6]`；状态 pill 24px；字号 body 12px / label 12px / 表头 10px uppercase。
+**高密度**：表格行 **40px**、表头 **36px**、工具条 **36px**；筛选 grid gap **8×12**；去掉无信息标题栏/空态 Strip。
 
 **高质感**：
 
-- 页面底：`linear-gradient` 灰底，卡片 `zone-card` 独立阴影 + 顶内高光
-- 表头：`linear-gradient` 浅灰 + 底部分割加深
-- 高级筛选：灰底 + `inset` 微阴影，与白色基础区强对比
-- 色彩：全局降低明度（主色 `#3d6fd9`、状态 pill 粉彩描边），禁止高饱和 Arco 原色
-- 微交互：保留行 hover、聚焦光晕；**按钮不做 translateY 上浮**
+- 页面底：`var(--color-bg-body)`，卡片 `zone-card` 独立阴影
+- 表头：浅灰渐变 + 列分隔线
+- 高级筛选：虚线顶分隔 + `var(--color-fill-1)` 底，与基础白底区分
+- 色彩：**全部映射 Arco**（`--primary-6` 等），禁止独立 hex 主色
+- 微交互：行 hover `var(--primary-1)`；按钮 **禁止 hover translateY/浮起阴影**
 
 > 列表页迭代时**先过密度与质感自检**，再考虑新增业务能力。
 
 ### 41.7 自检清单（生成后必过）
 
-- [ ] 24 栅格四列对齐，**右侧竖排操作组**含展开
-- [ ] 五层卡片独立圆角阴影，body 灰底可见
-- [ ] 高级区 `#f7f8fa` + 0.2s 动画
-- [ ] FilterActiveStrip 常驻 + 单条删除
+- [ ] 筛选 Grid 四列 + **右侧固定操作列**（查询/重置位置不随展开变化）
+- [ ] **无**「筛选条件」标题栏；**无** FilterActiveStrip 空态占位
+- [ ] 五层卡片独立圆角阴影，body 使用 `var(--color-bg-body)`
+- [ ] 高级区虚线顶分隔 + 0.24s 动画
+- [ ] FilterActiveStrip 有 tag 才显示 + 单条删除 + 清空全部
 - [ ] 时间 chip + 人员模糊 Select 全覆盖
 - [ ] 运输 Tab 切换清空+收起
-- [ ] 危险品行浅橙底、无附件下载置灰
-- [ ] 表格行 36px、表头 32px，同屏可见行数明显多于标准后台
-- [ ] 卡片独立阴影 + body 灰底渐变，非整片白板
-- [ ] 主色/状态色低饱和，无刺眼高亮色块
-- [ ] 高级区与基础区底色对比一眼可辨
-- [ ] 分页在 `table-card-cap` 表格右上，无底部独立分页条
+- [ ] 危险品**仅**单元格 pill；**无** stripe / 整行橙底
+- [ ] 表格行 40px、表头 36px；操作列 28px 方钮
+- [ ] `--dense-*` 色彩映射 Arco，无独立 hex 主色
+- [ ] 工具栏竖线分组，**无**「操作/跟踪/单据」文字标签
+- [ ] 分页在 `table-card-cap` 右上；左侧 summary，分页无重复 `show-total`
+- [ ] 按钮 hover **无** translateY / 浮起阴影

@@ -39,7 +39,8 @@
   --color-border-2: #E5E6EB;
   --color-border-3: #C9CDD4;
 
-  /* 背景 */
+  /* 列表页布局密度 alias → src/styles/global.css :root --dense-*
+     色彩 alias 必须引用本文件 --primary-* / --color-*，禁止另起 hex */
   --color-bg-body: #F2F3F5;
   --color-bg-card: #FFFFFF;
 
