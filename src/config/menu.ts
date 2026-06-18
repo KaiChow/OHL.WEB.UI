@@ -2,14 +2,26 @@ import type { AppMenuItem } from '../types/navigation';
 
 export const appMenus: AppMenuItem[] = [
   {
-    key: 'orderManage',
-    title: '订单管理',
+    key: 'order-manage',
+    title: '下单模块',
     children: [
-      {
-        key: 'saleOrder',
-        title: '业务单',
-        routeName: 'SaleOrder'
-      }
+      { key: 'sale-order', title: '业务单', routeName: 'SaleOrder' }
+    ]
+  },
+  {
+    key: 'logistics-warehouse',
+    title: '物流仓储',
+    children: [
+      { key: 'warehouse-inbound', title: '入仓管理', routeName: 'WarehouseInbound' },
+      { key: 'shipment-tracking', title: '运输跟踪', routeName: 'ShipmentTracking' }
+    ]
+  },
+  {
+    key: 'finance',
+    title: '财务模块',
+    children: [
+      { key: 'receivable-bill', title: '应收账单', routeName: 'ReceivableBill' },
+      { key: 'payable-bill', title: '应付账单', routeName: 'PayableBill' }
     ]
   }
 ];

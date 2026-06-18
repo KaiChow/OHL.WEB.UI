@@ -1,125 +1,211 @@
 <script setup lang="ts">
-import { IconFile, IconMore } from '@arco-design/web-vue/es/icon';
-import { saleOrderColumns, statusColorMap, statusTextMap } from '../config';
-import type { SaleOrderListColumnKey, SaleOrderRow } from '../types';
+import { ref, watch } from 'vue';
+import type { VxeTableInstance } from 'vxe-table';
+import {
+  IconDownload,
+  IconEdit,
+  IconExclamationCircle,
+  IconEye,
+  IconMore
+} from '@arco-design/web-vue/es/icon';
+import { getStatusLabel, getStatusPill, isDangerCargo } from '../config';
+import type { SaleOrderRecord } from '../types';
 
-defineProps<{
-  rows: SaleOrderRow[];
-  orderCount: number;
-  total: number;
-  getCellClassName: (params: { column: { field?: SaleOrderListColumnKey } }) => string;
-  getRowClassName: (params: { row: SaleOrderRow }) => string;
-  setHoveredOrderGroup: (row: SaleOrderRow | null) => void;
-  setCurrentOrderGroup: (row: SaleOrderRow) => void;
+const props = defineProps<{
+  rows: SaleOrderRecord[];
+  loading: boolean;
+  selectedIds: number[];
+  isColumnVisible: (key: string) => boolean;
 }>();
 
-defineEmits<{
-  openDetail: [row: SaleOrderRow];
+const emit = defineEmits<{
+  'update:selectedIds': [ids: number[]];
+  view: [row: SaleOrderRecord];
+  edit: [row: SaleOrderRecord];
 }>();
+
+const tableRef = ref<VxeTableInstance>();
+
+watch(
+  () => props.rows,
+  () => {
+    tableRef.value?.recalculate();
+  }
+);
+
+const onCheckboxChange = () => {
+  const records = tableRef.value?.getCheckboxRecords() as SaleOrderRecord[] | undefined;
+  emit('update:selectedIds', records?.map((r) => r.Id) ?? []);
+};
+
+const rowClassName = ({ row }: { row: SaleOrderRecord }) => {
+  return isDangerCargo(row.CargoType) ? 'row--danger-cargo' : '';
+};
 </script>
 
 <template>
-  <div class="section-bar">
-    <div class="section-bar__title">
-      <strong>业务单列表</strong>
-      <span>共 {{ orderCount }} 单 / {{ total }} 行 / 本页 {{ rows.length }} 行</span>
-    </div>
-    <div class="section-bar__meta">
-      <span>默认按提交时间倒序</span>
-    </div>
-  </div>
-
-  <div class="freight-table-viewport">
+  <div class="table-wrap">
     <vxe-table
-      class="freight-table"
-      stripe
-      show-overflow="title"
-      show-header-overflow="title"
-      size="mini"
-      max-height="640"
-      :column-config="{ resizable: true, minWidth: 80 }"
-      :scroll-x="{ enabled: true, gt: 0 }"
-      :cell-class-name="getCellClassName"
-      :row-class-name="getRowClassName"
-      :row-config="{ isHover: true }"
+      ref="tableRef"
+      class="freight-table compact stripe"
+      border="none"
+      size="small"
+      height="100%"
+      :loading="loading"
       :data="rows"
-      highlight-current-row
-      @cell-mouseenter="setHoveredOrderGroup($event.row)"
-      @cell-mouseleave="setHoveredOrderGroup(null)"
-      @cell-click="setCurrentOrderGroup($event.row)"
+      :row-config="{ isHover: true, keyField: 'Id' }"
+      :checkbox-config="{ highlight: true, range: true }"
+      :sort-config="{ trigger: 'cell', remote: false }"
+      :row-class-name="rowClassName"
+      @checkbox-change="onCheckboxChange"
+      @checkbox-all="onCheckboxChange"
     >
-      <vxe-column type="seq" title="#" width="44" />
-      <vxe-column
-        v-for="column in saleOrderColumns"
-        :key="column.field"
-        :field="column.field"
-        :title="column.title"
-        :width="column.width"
-        :align="column.align"
-        :fixed="column.fixed"
-      >
+      <vxe-column type="checkbox" width="44" fixed="left" />
+      <vxe-column type="seq" title="序号" width="56" fixed="left" />
+
+      <vxe-column field="OrderNo" title="订单编号" width="148" fixed="left" sortable>
         <template #default="{ row }">
-          <a-tag v-if="column.field === 'FollowState'" size="small" :color="statusColorMap[row.FollowState]">
-            <span class="status-dot" />
-            {{ statusTextMap[row.FollowState] }}
-          </a-tag>
+          <span class="link-text link-text--strong mono" @click="emit('view', row)">
+            {{ row.OrderNo }}
+          </span>
+          <icon-exclamation-circle
+            v-if="row.HasRemark"
+            style="margin-left: 4px; color: #ff7d00; font-size: 13px"
+          />
+        </template>
+      </vxe-column>
 
-          <button
-            v-else-if="column.field === 'DcgNo'"
-            class="order-no-button"
-            type="button"
-            @click="$emit('openDetail', row)"
-          >
-            {{ row.DcgNo || '-' }}
-          </button>
+      <vxe-column field="SubmitTime" title="提交时间" width="148" sortable>
+        <template #default="{ row }">
+          <span class="date-val">{{ row.SubmitTime }}</span>
+        </template>
+      </vxe-column>
 
-          <button
-            v-else-if="column.field === 'OrderNo'"
-            class="table-link-button"
-            type="button"
-            @click="$emit('openDetail', row)"
-          >
-            {{ row.OrderNo || '-' }}
-          </button>
+      <vxe-column field="Status" title="订单状态" width="120">
+        <template #default="{ row }">
+          <span class="s-pill" :data-s="getStatusPill(row.Status)">{{ getStatusLabel(row.Status) }}</span>
+        </template>
+      </vxe-column>
 
-          <a-button v-else-if="column.field === 'DownFile'" class="table-file-btn" size="mini" type="text">
-            <template #icon>
-              <icon-file />
-            </template>
-            文件
-          </a-button>
+      <vxe-column v-if="isColumnVisible('CargoType')" field="CargoType" title="货物类型" width="96">
+        <template #default="{ row }">
+          <span v-if="isDangerCargo(row.CargoType)" class="danger-cargo-pill">
+            <icon-exclamation-circle />
+            {{ row.CargoType }}
+          </span>
+          <span v-else>{{ row.CargoType }}</span>
+        </template>
+      </vxe-column>
 
-          <div v-else-if="column.field === 'Operation'" class="table-row-actions">
-            <a-button class="table-action-btn" size="mini" type="text" @click="$emit('openDetail', row)">查看</a-button>
+      <vxe-column v-if="isColumnVisible('BizType')" field="BizType" title="业务类型" width="80" />
+
+      <vxe-column v-if="isColumnVisible('DcgNo')" field="DcgNo" title="业务单号" width="140" sortable>
+        <template #default="{ row }">
+          <span class="link-text mono" @click="emit('view', row)">{{ row.DcgNo }}</span>
+        </template>
+      </vxe-column>
+
+      <vxe-column v-if="isColumnVisible('WarehouseNo')" field="WarehouseNo" title="入仓单号" width="130">
+        <template #default="{ row }">
+          <span v-if="row.WarehouseNo" class="link-text mono">{{ row.WarehouseNo }}</span>
+          <span v-else class="date-none">—</span>
+        </template>
+      </vxe-column>
+
+      <vxe-column v-if="isColumnVisible('Salesman')" field="Salesman" title="业务员" width="72" />
+
+      <vxe-column field="Shipper" title="发货人" min-width="180" show-overflow="title">
+        <template #default="{ row }">
+          <a-tooltip :content="row.Shipper" position="top">
+            <span class="ellipsis">{{ row.Shipper }}</span>
+          </a-tooltip>
+        </template>
+      </vxe-column>
+
+      <vxe-column field="Consignee" title="收货人" min-width="160" show-overflow="title">
+        <template #default="{ row }">
+          <a-tooltip :content="row.Consignee" position="top">
+            <span class="ellipsis">{{ row.Consignee }}</span>
+          </a-tooltip>
+        </template>
+      </vxe-column>
+
+      <vxe-column v-if="isColumnVisible('ContainerInfo')" field="ContainerInfo" title="柜型柜量" width="96">
+        <template #default="{ row }">
+          <span class="mono">{{ row.ContainerInfo }}</span>
+        </template>
+      </vxe-column>
+
+      <vxe-column title="文件下载" width="80" align="center">
+        <template #default="{ row }">
+          <a-tooltip v-if="row.HasFiles" content="下载附件">
+            <a-button type="text" class="row-action-btn row-action-btn--primary" @click.stop>
+              <icon-download />
+            </a-button>
+          </a-tooltip>
+          <a-tooltip v-else content="暂无附件">
+            <a-button type="text" disabled class="row-action-btn btn-download-disabled">
+              <icon-download />
+            </a-button>
+          </a-tooltip>
+        </template>
+      </vxe-column>
+
+      <vxe-column title="操作" width="114" fixed="right" align="center">
+        <template #default="{ row }">
+          <div class="row-actions">
+            <a-tooltip content="查看">
+              <a-button type="text" class="row-action-btn" @click="emit('view', row)">
+                <icon-eye />
+              </a-button>
+            </a-tooltip>
+            <a-tooltip content="编辑">
+              <a-button type="text" class="row-action-btn" @click="emit('edit', row)">
+                <icon-edit />
+              </a-button>
+            </a-tooltip>
             <a-dropdown trigger="click">
-              <a-button class="table-more-btn" size="mini" type="text">
-                <template #icon>
-                  <icon-more />
-                </template>
+              <a-button type="text" class="row-action-btn">
+                <icon-more />
               </a-button>
               <template #content>
-                <a-doption @click="$emit('openDetail', row)">查看详情</a-doption>
-                <a-doption>下载文件</a-doption>
-                <a-doption>编辑订单</a-doption>
-                <a-doption>操作日志</a-doption>
+                <a-doption>复制</a-doption>
+                <a-doption>打印</a-doption>
+                <a-doption class="danger-opt">废弃</a-doption>
               </template>
             </a-dropdown>
           </div>
-
-          <span
-            v-else
-            :class="{
-              'table-secondary-link': ['HblNo', 'MblNo'].includes(column.field),
-              'table-route-text': ['LoaddingPortEn', 'DeliveryPortEn'].includes(column.field),
-              'table-container-text': column.field === 'ContainerDataJson',
-              'table-service-text': ['ServiceItemStr', 'ServiceScopeStr', 'LoaddingTypeStr'].includes(column.field),
-              'table-muted-text': !row[column.field]
-            }"
-          >
-            {{ row[column.field] || '-' }}
-          </span>
         </template>
       </vxe-column>
+
+      <template #loading>
+        <div class="table-skeleton">
+          <div v-for="i in 8" :key="i" class="table-skeleton__row" />
+        </div>
+      </template>
+
+      <template #empty>
+        <div class="state-center state-center--in-table">
+          <div class="state-empty-icon">📋</div>
+          <span>暂无数据，换个条件试试</span>
+        </div>
+      </template>
     </vxe-table>
   </div>
 </template>
+
+<style scoped>
+.danger-cargo-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 7px;
+  height: 22px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a85a20;
+  background: #faf0e6;
+  border: 1px solid #e8d4b8;
+  border-radius: var(--dense-radius);
+}
+</style>

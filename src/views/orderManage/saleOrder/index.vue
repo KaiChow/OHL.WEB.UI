@@ -1,92 +1,107 @@
 <script setup lang="ts">
-import { Message } from '@arco-design/web-vue';
-import AdvancedFilterPanel from './components/AdvancedFilterPanel.vue';
-import SaleOrderDetailDrawer from './components/SaleOrderDetailDrawer.vue';
-import SaleOrderSearchPanel from './components/SaleOrderSearchPanel.vue';
-import SaleOrderStatusFilters from './components/SaleOrderStatusFilters.vue';
+import SaleOrderSearch from './components/SaleOrderSearch.vue';
+import SaleOrderActionBar from './components/SaleOrderActionBar.vue';
 import SaleOrderTable from './components/SaleOrderTable.vue';
-import SaleOrderToolbar from './components/SaleOrderToolbar.vue';
+import SaleOrderTableCap from './components/SaleOrderTableCap.vue';
+import SaleOrderDetailDrawer from './components/SaleOrderDetailDrawer.vue';
 import { useSaleOrderList } from './composables/useSaleOrderList';
+import { useSaleOrderTableColumns } from './composables/useSaleOrderTableColumns';
 
-const saleOrder = useSaleOrderList();
+const {
+  query,
+  loading,
+  selectedIds,
+  filterExpanded,
+  page,
+  drawerVisible,
+  drawerMode,
+  currentRecord,
+  formModel,
+  statusCounts,
+  pagedRows,
+  activeFilterTags,
+  hiddenAdvancedActive,
+  fetchList,
+  handleSearch,
+  handleReset,
+  handleTransportChange,
+  handleScopeChange,
+  handleStatusChange,
+  handleClearStatus,
+  handleTimeQuickChange,
+  handlePageChange,
+  removeFilterTag,
+  clearAllFilterTags,
+  handleExport,
+  handleBatch,
+  openDetail,
+  openCreate,
+  saveRecord
+} = useSaleOrderList();
 
-const resetAllFilters = () => {
-  saleOrder.resetFilters();
-  Message.success('已重置查询条件');
-};
-
-const resetAdvancedFilters = () => {
-  saleOrder.resetAdvancedFilters();
-  Message.success('已清空高级查询条件');
-};
-
-const applyAdvancedFilters = () => {
-  saleOrder.currentPage.value = 1;
-  saleOrder.advancedOpen.value = false;
-  Message.success('已应用高级查询');
-};
+const { columnOptions, visibleColumns, isVisible, toggleColumn } = useSaleOrderTableColumns();
 </script>
 
 <template>
-  <sale-order-search-panel
-    v-model:keyword="saleOrder.keyword.value"
-    v-model:quick-search-field="saleOrder.quickSearchField.value"
-    v-model:business-type="saleOrder.businessType.value"
-    v-model:import-export-type="saleOrder.importExportType.value"
-    v-model:salesman-keyword="saleOrder.salesmanKeyword.value"
-    v-model:operator-keyword="saleOrder.operatorKeyword.value"
-    v-model:customer-service-keyword="saleOrder.customerServiceKeyword.value"
-    v-model:service-order-no="saleOrder.serviceOrderNo.value"
-    v-model:loading-type="saleOrder.loadingType.value"
-    v-model:shipper-keyword="saleOrder.shipperKeyword.value"
-    v-model:consignee-keyword="saleOrder.consigneeKeyword.value"
-    v-model:quick-tag="saleOrder.quickTag.value"
-    v-model:active-transport="saleOrder.activeTransport.value"
-    :active-advanced-count="saleOrder.activeAdvancedCount.value"
-    @search="saleOrder.currentPage.value = 1"
-    @reset="resetAllFilters"
-    @open-advanced="saleOrder.advancedOpen.value = !saleOrder.advancedOpen.value"
-  />
-
-  <advanced-filter-panel
-    :visible="saleOrder.advancedOpen.value"
-    v-model:advanced-filters="saleOrder.advancedFilters.value"
-    :active-advanced-count="saleOrder.activeAdvancedCount.value"
-    @reset="resetAdvancedFilters"
-    @close="saleOrder.advancedOpen.value = false"
-    @apply="applyAdvancedFilters"
-  />
-
-  <section class="table-wrap data-section">
-    <sale-order-toolbar
-      :current-page="saleOrder.currentPage.value"
-      :page-size="saleOrder.pageSize.value"
-      :total="saleOrder.filteredOrders.value.length"
-      @refresh="resetAllFilters"
-      @update:current-page="saleOrder.currentPage.value = $event"
-      @update:page-size="saleOrder.pageSize.value = $event"
+  <div class="page-root page-root--dense">
+    <sale-order-search
+      :query="query"
+      :filter-expanded="filterExpanded"
+      :filter-tags="activeFilterTags"
+      :hidden-advanced-active="hiddenAdvancedActive"
+      @search="handleSearch"
+      @reset="handleReset"
+      @transport-change="handleTransportChange"
+      @update:filter-expanded="filterExpanded = $event"
+      @remove-tag="removeFilterTag"
+      @clear-tags="clearAllFilterTags"
+      @time-quick-change="handleTimeQuickChange"
     />
 
-    <sale-order-status-filters
-      v-model:scope-filter="saleOrder.scopeFilter.value"
-      v-model:phase-filter="saleOrder.phaseFilter.value"
-      :phase-tabs="saleOrder.phaseTabs.value"
+    <sale-order-action-bar
+      :query="query"
+      :status-counts="statusCounts"
+      :selected-count="selectedIds.length"
+      @refresh="fetchList"
+      @create="openCreate"
+      @scope-change="handleScopeChange"
+      @status-change="handleStatusChange"
+      @clear-status="handleClearStatus"
+      @export="handleExport"
+      @batch="handleBatch"
     />
 
-    <sale-order-table
-      :rows="saleOrder.pagedOrders.value"
-      :order-count="saleOrder.orderCount.value"
-      :total="saleOrder.filteredOrders.value.length"
-      :get-cell-class-name="saleOrder.getCellClassName"
-      :get-row-class-name="saleOrder.getRowClassName"
-      :set-hovered-order-group="saleOrder.setHoveredOrderGroup"
-      :set-current-order-group="saleOrder.setCurrentOrderGroup"
-      @open-detail="saleOrder.openOrderDetail"
-    />
-  </section>
+    <div class="zone-l4-table-card zone-card">
+      <sale-order-table-cap
+        :total="page.total"
+        :current="page.current"
+        :page-size="page.size"
+        :column-options="columnOptions"
+        :visible-columns="visibleColumns"
+        @update:current="page.current = $event"
+        @update:page-size="page.size = $event"
+        @page-change="handlePageChange"
+        @page-size-change="handlePageChange"
+        @toggle-column="toggleColumn"
+      />
+      <sale-order-table
+        :rows="pagedRows"
+        :loading="loading"
+        :selected-ids="selectedIds"
+        :is-column-visible="isVisible"
+        @update:selected-ids="selectedIds = $event"
+        @view="openDetail($event, 'view')"
+        @edit="openDetail($event, 'edit')"
+      />
+    </div>
 
-  <sale-order-detail-drawer
-    v-model:visible="saleOrder.detailOpen.value"
-    :selected-order="saleOrder.selectedOrder.value"
-  />
+    <sale-order-detail-drawer
+      v-model:visible="drawerVisible"
+      :mode="drawerMode"
+      :record="currentRecord"
+      :form-model="formModel"
+      @save="saveRecord"
+      @edit="currentRecord && openDetail(currentRecord, 'edit')"
+    />
+  </div>
 </template>

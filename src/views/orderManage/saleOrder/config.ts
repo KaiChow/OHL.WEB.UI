@@ -1,236 +1,101 @@
-import type {
-  AdvancedFieldGroup,
-  PhaseFilter,
-  QuickSearchField,
-  SaleOrderListColumn,
-  ScopeFilter,
-  TransportType
-} from './types';
+import type { SaleOrderStatus, TransportMode } from './types';
 
-export const saleOrderColumns: SaleOrderListColumn[] = [
-  { title: '状态', field: 'FollowState', width: 100,  },
-  { title: '订单编号', field: 'DcgNo', width: 148, },
-  { title: '业务单号', field: 'OrderNo', width: 128 },
-  { title: '提交时间', field: 'SubmitTime', width: 142 },
-  { title: '客户', field: 'CustomerName', width: 156 },
-  { title: '业务员', field: 'Salesman', width: 86 },
-  { title: '货物类型', field: 'CargoTypes', width: 92 },
-  { title: '业务类型', field: 'BusinessTypeStr', width: 82 },
-  { title: '起运港', field: 'LoaddingPortEn', width: 106 },
-  { title: '目的港', field: 'DeliveryPortEn', width: 116 },
-  { title: 'ETD', field: 'Etd', width: 96 },
-  { title: 'ETA', field: 'Eta', width: 96 },
-  { title: '驳船ETD', field: 'BargeEtd', width: 100 },
-  { title: '船公司', field: 'ShipCompany', width: 94 },
-  { title: '船名航次', field: 'ShipCompanyAndVoyno', width: 162 },
-  { title: '航线', field: 'RouteName', width: 96 },
-  { title: 'HBL', field: 'HblNo', width: 150 },
-  { title: 'MBL', field: 'MblNo', width: 170 },
-  { title: '柜量', field: 'ContainerDataJson', width: 116 },
-  { title: '柜号', field: 'ContainerNoStr', width: 124 },
-  { title: '发货人', field: 'Shipper', width: 150 },
-  { title: '收货人', field: 'Consignees', width: 150 },
-  { title: '入仓单号', field: 'WarehouseNo', width: 122 },
-  { title: '装箱方式', field: 'LoaddingTypeStr', width: 96 },
-  { title: '订单类型', field: 'OrderTypeStr', width: 96 },
-  { title: '服务项', field: 'ServiceItemStr', width: 132 },
-  { title: '服务范围', field: 'ServiceScopeStr', width: 88 },
-  { title: '来源', field: 'SourceStr', width: 118 },
-  { title: '文件', field: 'DownFile', width: 76, align: 'center' },
-  { title: '操作', field: 'Operation', width: 88, align: 'center', fixed: 'right' }
+export const transportTabs: { value: TransportMode; label: string }[] = [
+  { value: 'sea', label: '海运' },
+  { value: 'air', label: '空运' },
+  { value: 'rail', label: '铁路' }
 ];
 
-export const transportTabs: Array<{ label: string; value: TransportType }> = [
-  { label: '海运', value: 'sea' },
-  { label: '空运', value: 'air' },
-  { label: '铁路', value: 'rail' }
+export const scopeTabs = [
+  { value: 'all', label: '全部单' },
+  { value: 'personal', label: '个人单' },
+  { value: 'permission', label: '权限单' }
+] as const;
+
+export const statusTabs: { value: string; label: string; danger?: boolean }[] = [
+  { value: '', label: '全部' },
+  { value: 'pending_audit', label: '待审单' },
+  { value: 'op_pending', label: '操作待接单' },
+  { value: 'unsubmitted', label: '未提交' },
+  { value: 'submitted', label: '已提交' },
+  { value: 'accepted', label: '已接单' },
+  { value: 'released', label: '已放舱' },
+  { value: 'rejected', label: '已拒绝', danger: true },
+  { value: 'abandoned', label: '已废弃', danger: true }
 ];
 
-export const transportTypeMap: Record<TransportType, string> = {
-  sea: '海运',
-  air: '空运',
-  rail: '铁路'
+export const statusMeta: Record<SaleOrderStatus, { label: string; pill: string }> = {
+  pending_audit: { label: '待审单', pill: 'wait' },
+  op_pending: { label: '操作待接单', pill: 'op' },
+  unsubmitted: { label: '未提交', pill: 'draft' },
+  submitted: { label: '已提交', pill: 'partial' },
+  accepted: { label: '已接单', pill: 'acc' },
+  released: { label: '已放舱', pill: 'rel' },
+  rejected: { label: '已拒绝', pill: 'rej' },
+  abandoned: { label: '已废弃', pill: 'draft' },
+  sailed: { label: '实际开船', pill: 'rel' },
+  draft: { label: '草稿', pill: 'draft' }
 };
 
-export const quickSearchFields: Array<{ label: string; value: QuickSearchField }> = [
-  { label: '业务单号', value: 'OrderNo' },
-  { label: '订单编号', value: 'DcgNo' },
-  { label: '入仓单号', value: 'WarehouseNo' },
-  { label: 'SO号', value: 'SoNo' },
-  { label: '柜号', value: 'ContainerNoStr' },
-  { label: 'MBL单号', value: 'MblNo' },
-  { label: 'HBL单号', value: 'HblNo' },
-  { label: 'FBA号', value: 'FbaNo' },
-  { label: 'PO', value: 'Po' },
-  { label: '境外单号', value: 'ExtraNo' },
-  { label: '境外业务单号', value: 'ExtraOrderNo' }
+export const bizTypeOptions = ['全部', 'FBA', 'FOB', 'CIF', 'DDP', 'EXW'];
+export const importExportOptions = ['全部', '进口', '出口'];
+export const packingOptions = ['全部', 'LCL', 'FCL', '散货'];
+export const quickTagOptions = ['全部', '加急', 'VIP', '特殊跟踪', '待补资料'];
+
+export const timeQuickOptions: { value: '' | 'today' | 'last7'; label: string }[] = [
+  { value: '', label: '全部时间' },
+  { value: 'today', label: '今日' },
+  { value: 'last7', label: '近7天' }
 ];
 
-export const statusOptions = [
-  { label: '全部状态', value: '' },
-  { label: '待订舱', value: '待审核' },
-  { label: '待接单', value: '操作待接单' },
-  { label: '待放行', value: '未提交' },
-  { label: '运输中', value: '已接单' },
-  { label: '已放行', value: '已放舱' },
-  { label: '异常', value: '已拒绝' }
+export const shipperOptions = [
+  'SHENZHEN OHL LOGISTICS CO.,LTD',
+  'NINGBO FREIGHT INT\'L CO., LTD',
+  'GUANGZHOU STAR TRADING LTD',
+  'SHANGHAI OCEAN SUPPLY CHAIN'
+].map((v) => ({ label: v, value: v }));
+
+export const consigneeOptions = [
+  'AMAZON FBA WAREHOUSE',
+  'HAMBURG TRADING GMBH',
+  'LOS ANGELES IMPORT INC.',
+  'ROTTERDAM LOGISTICS BV'
+].map((v) => ({ label: v, value: v }));
+
+export const staffOptions = [
+  { label: '张三', value: '张三' },
+  { label: '李四', value: '李四' },
+  { label: '王五', value: '王五' },
+  { label: '赵六', value: '赵六' },
+  { label: '陈七', value: '陈七' },
+  { label: '操作A', value: '操作A' },
+  { label: '操作B', value: '操作B' },
+  { label: '操作C', value: '操作C' },
+  { label: '操作D', value: '操作D' }
 ];
 
-export const statusTextMap: Record<string, string> = {
-  待审核: '待订舱',
-  操作待接单: '待接单',
-  未提交: '待放行',
-  已接单: '运输中',
-  已放舱: '已放行',
-  已拒绝: '异常'
+export const ADVANCED_FILTER_COUNT = 7;
+
+/** 页面级权限 Mock（操作员视角） */
+export const saleOrderPermissions = {
+  canCreate: true,
+  canExport: true,
+  canPrint: true,
+  canBatch: true,
+  canSpecialTrack: true,
+  canViewFinance: false
 };
 
-export const statusColorMap: Record<string, string> = {
-  待审核: 'orange',
-  操作待接单: 'arcoblue',
-  未提交: 'gray',
-  已接单: 'blue',
-  已放舱: 'green',
-  已拒绝: 'red'
-};
+export const defaultPageSizeOptions = [20, 50, 100, 200];
 
-export const scopeTabs: Array<{ label: string; value: ScopeFilter }> = [
-  { label: '全部单', value: 'all' },
-  { label: '个人单', value: 'mine' },
-  { label: '权限单', value: 'permission' }
-];
+export function getStatusLabel(status: SaleOrderStatus) {
+  return statusMeta[status]?.label ?? status;
+}
 
-export const phaseStatusMap: Record<PhaseFilter, string[]> = {
-  all: [],
-  pending: ['待审核', '操作待接单'],
-  processing: ['未提交', '已接单'],
-  done: ['已放舱'],
-  exception: ['已拒绝']
-};
+export function getStatusPill(status: SaleOrderStatus) {
+  return statusMeta[status]?.pill ?? 'draft';
+}
 
-export const simpleSelectOptions = {
-  businessType: [
-    { label: '海运', value: '海运' },
-    { label: '空运', value: '空运' },
-    { label: '铁路', value: '铁路' }
-  ],
-  orderType: [
-    { label: '出口单', value: 'export' },
-    { label: '进口单', value: 'import' }
-  ],
-  loadingType: [
-    { label: '整柜', value: '整柜' },
-    { label: '拼箱', value: '拼箱' }
-  ],
-  serviceScope: [
-    { label: '全程', value: '全程' },
-    { label: '港到港', value: '港到港' },
-    { label: '门到门', value: '门到门' }
-  ],
-  customerType: [
-    { label: '直客', value: 'direct' },
-    { label: '同行', value: 'peer' },
-    { label: '代理', value: 'agent' }
-  ],
-  tradeTerms: [
-    { label: 'FOB', value: 'FOB' },
-    { label: 'CIF', value: 'CIF' },
-    { label: 'EXW', value: 'EXW' }
-  ],
-  status: statusOptions.filter((item) => item.value),
-  cargoType: [
-    { label: '普货', value: '普货' },
-    { label: '跨境电商', value: '跨境电商' },
-    { label: '危险货', value: '危险货' }
-  ],
-  declarationType: [
-    { label: '报关', value: '报关' },
-    { label: '自拖自报', value: '自拖自报' }
-  ]
-};
-
-export const filterGroups: AdvancedFieldGroup[] = [
-  {
-    title: '单号信息',
-    columns: 4,
-    fields: [
-      { label: '订单编号', key: 'DcgNo', placeholder: '请输入订单编号' },
-      { label: '业务单号', key: 'OrderNo', placeholder: '请输入业务单号' },
-      { label: '进仓时间', key: 'WarehousingTimeRange', type: 'dateRange', span: 2 },
-      { label: '下单时间', key: 'CreatedTimeRange', type: 'dateRange', span: 2 },
-      { label: 'HBL NO', key: 'HblNo', placeholder: '请输入Hbl单号' },
-      { label: 'FBA NO', key: 'FbaNo', placeholder: '请输入Fba号' },
-      { label: 'ETD', key: 'EtdRange', type: 'dateRange', span: 2 },
-      { label: '财务POD', key: 'FinancePodTimeRange', type: 'dateRange', span: 2 },
-      { label: 'SO NO', key: 'SoNo', placeholder: '请输入So号' },
-      { label: 'MBL NO', key: 'MblNo', placeholder: '请输入Mbl单号' },
-      { label: '船前时间', key: 'BoatPreSendTimeRange', type: 'dateRange', span: 2 },
-      { label: 'PO', key: 'Po', placeholder: '请输入PO', span: 2 }
-    ]
-  },
-  {
-    title: '客户与角色',
-    columns: 4,
-    fields: [
-      { label: '发货人', key: 'Shipper', placeholder: '请选择发货人' },
-      { label: '收货人', key: 'Consignees', placeholder: '请选择收货人' },
-      { label: '业务员', key: 'Salesman', placeholder: '请输入业务员' },
-      { label: '业务类型', key: 'BusinessTypeStr', type: 'select', placeholder: '请选择业务类型', options: simpleSelectOptions.businessType },
-      { label: '提单发货人', key: 'BillShipper', placeholder: '请选择提单发货人' },
-      { label: '客户', key: 'CustomerName', placeholder: '请选择客户' },
-      { label: '客服', key: 'CustomersServesName', placeholder: '请输入客服' },
-      { label: '装箱方式', key: 'LoaddingTypeStr', type: 'select', placeholder: '请选择装箱方式', options: simpleSelectOptions.loadingType },
-      { label: '收货地', key: 'ReceiptPlace', placeholder: '请选择' },
-      { label: '起运港', key: 'LoaddingPortEn', placeholder: '请选择' },
-      { label: '运营', key: 'Operator', placeholder: '请选择运营' },
-      { label: '服务范围', key: 'ServiceScopeStr', type: 'select', placeholder: '请选择服务范围', options: simpleSelectOptions.serviceScope },
-      { label: '目的港', key: 'DeliveryPortEn', placeholder: '请选择' },
-      { label: '目的地', key: 'Destination', placeholder: '请选择' },
-      { label: '操作员', key: 'OperatorName', placeholder: '请输入操作员' },
-      { label: '归属公司', key: 'ContractCompany', type: 'select', placeholder: '请选择归属公司', options: [] },
-      { label: '起运港国家', key: 'LoadCountry', placeholder: '请选择' },
-      { label: '目的港国家', key: 'DeliveryCountry', placeholder: '请选择' },
-      { label: '文件', key: 'FilerName', placeholder: '请输入文件' },
-      { label: '客户类型', key: 'CustomerType', type: 'select', placeholder: '请选择客户类型', options: simpleSelectOptions.customerType }
-    ]
-  },
-  {
-    title: '运输与合同',
-    columns: 4,
-    fields: [
-      { label: '船公司', key: 'ShipCompany', placeholder: '请选择船司' },
-      { label: '柜号', key: 'ContainerNoStr', placeholder: '请输入柜号' },
-      { label: '市场', key: 'Market', type: 'select', placeholder: '请选择市场', options: [] },
-      { label: '贸易条款', key: 'CommissionTermsStr', type: 'select', placeholder: '请选择条款', options: simpleSelectOptions.tradeTerms },
-      { label: '船名', key: 'ShipName', placeholder: '请输入船名' },
-      { label: '航次', key: 'ShipCompanyAndVoyno', placeholder: '请输入航次' },
-      { label: '合约号', key: 'ContractName', placeholder: '请选择合约号' },
-      { label: '航线', key: 'RouteName', placeholder: '请输入航线' },
-      { label: '境外代理', key: 'DAgent', placeholder: '请选择境外代理' },
-      { label: '境外单号', key: 'ExtraNo', placeholder: '请输入境外单号' },
-      { label: '入仓单号', key: 'WarehouseNo', placeholder: '请输入入仓单号' },
-      { label: '柜型柜量', key: 'ContainerDataJson', placeholder: '请选择' },
-      { label: '品名', key: 'OrderProductName', placeholder: '请输入品名' },
-      { label: '账号归属部门', key: 'Department', type: 'select', placeholder: '请选择部门', options: [] },
-      { label: '订单状态', key: 'FollowState', type: 'select', placeholder: '请选择订单状态', options: simpleSelectOptions.status },
-      { label: '货物类型', key: 'CargoTypes', type: 'select', placeholder: '请选择货物类型', options: simpleSelectOptions.cargoType },
-      { label: '报关方式', key: 'ServiceItemStr', type: 'select', placeholder: '请选择报关方式', options: simpleSelectOptions.declarationType },
-      { label: '操作备注', key: 'OperationRemark', placeholder: '请输入操作备注', span: 2 },
-      { label: '提单内容', key: 'BillContent', type: 'textarea', placeholder: '请输入提单内容', span: 2 }
-    ]
-  },
-  {
-    title: '业务标记',
-    columns: 4,
-    fields: [
-      { label: '无客服订单', key: 'NoServiceOrder', type: 'checkbox' },
-      { label: '不含继承单', key: 'ExcludeInheritOrder', type: 'checkbox' },
-      { label: '入仓未核实', key: 'WarehouseUnchecked', type: 'checkbox' },
-      { label: '最后一单(未回款)', key: 'LastUnpaidOrder', type: 'checkbox' },
-      { label: '是否敏感货物', key: 'SensitiveCargo', type: 'checkbox' },
-      { label: '是否甩柜', key: 'ContainerRolled', type: 'checkbox' },
-      { label: '是否闪送柜', key: 'FlashDelivery', type: 'checkbox' },
-      { label: '是否同行', key: 'PeerOrder', type: 'checkbox' }
-    ]
-  }
-];
+export function isDangerCargo(cargoType: string) {
+  return cargoType.includes('危险');
+}

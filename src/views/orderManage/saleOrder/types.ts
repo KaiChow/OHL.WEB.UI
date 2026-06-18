@@ -1,74 +1,77 @@
-import type { SaleOrderRecord } from '../../../mock/saleOrders';
+export type TransportMode = 'sea' | 'air' | 'rail';
 
-export type TransportType = 'sea' | 'air' | 'rail';
-export type ScopeFilter = 'all' | 'mine' | 'permission';
-export type PhaseFilter = 'all' | 'pending' | 'processing' | 'done' | 'exception';
-export type QuickSearchField =
-  | 'DcgNo'
-  | 'OrderNo'
-  | 'WarehouseNo'
-  | 'SoNo'
-  | 'ContainerNoStr'
-  | 'MblNo'
-  | 'HblNo'
-  | 'FbaNo'
-  | 'Po'
-  | 'ExtraNo'
-  | 'ExtraOrderNo';
+export type ScopeFilter = 'all' | 'personal' | 'permission';
 
-export type SaleOrderListColumnKey =
-  | 'SubmitTime'
-  | 'DcgNo'
-  | 'FollowState'
-  | 'CargoTypes'
-  | 'BusinessTypeStr'
-  | 'OrderNo'
-  | 'WarehouseNo'
-  | 'CustomerName'
-  | 'Salesman'
-  | 'Shipper'
-  | 'Consignees'
-  | 'LoaddingPortEn'
-  | 'DeliveryPortEn'
-  | 'Etd'
-  | 'Eta'
-  | 'BargeEtd'
-  | 'ShipCompany'
-  | 'ShipCompanyAndVoyno'
-  | 'RouteName'
-  | 'OrderTypeStr'
-  | 'ServiceItemStr'
-  | 'ServiceScopeStr'
-  | 'SourceStr'
-  | 'LoaddingTypeStr'
-  | 'ContainerDataJson'
-  | 'ContainerNoStr'
-  | 'HblNo'
-  | 'MblNo'
-  | 'DownFile'
-  | 'Operation';
+export type SaleOrderStatus =
+  | 'pending_audit'
+  | 'op_pending'
+  | 'unsubmitted'
+  | 'submitted'
+  | 'accepted'
+  | 'released'
+  | 'rejected'
+  | 'abandoned'
+  | 'sailed'
+  | 'draft';
 
-export interface SaleOrderListColumn {
-  title: string;
-  field: SaleOrderListColumnKey;
-  width: number;
-  align?: 'left' | 'center' | 'right';
-  fixed?: 'left' | 'right';
+export interface SaleOrderRecord {
+  Id: number;
+  OrderNo: string;
+  SubmitTime: string;
+  Status: SaleOrderStatus;
+  CargoType: string;
+  BizType: string;
+  DcgNo: string;
+  WarehouseNo: string;
+  Salesman: string;
+  Shipper: string;
+  Consignee: string;
+  ContainerInfo: string;
+  TransportMode: TransportMode;
+  ImportExport: string;
+  Operator: string;
+  CustomerService: string;
+  CsDocument: string;
+  PackingMethod: string;
+  QuickTag: string;
+  HasRemark: boolean;
+  HasFiles: boolean;
+  Scope: ScopeFilter;
 }
 
-export type SaleOrderRow = SaleOrderRecord;
-
-export interface AdvancedFieldConfig {
-  label: string;
-  key: string;
-  type?: 'input' | 'select' | 'dateRange' | 'checkbox' | 'textarea';
-  placeholder?: string;
-  options?: Array<{ label: string; value: string }>;
-  span?: 1 | 2;
+export interface SaleOrderQuery {
+  transportMode: TransportMode;
+  bizType: string;
+  dcgNo: string;
+  importExport: string;
+  salesman: string;
+  operator: string;
+  customerService: string;
+  csDocument: string;
+  packingMethod: string;
+  shipper: string;
+  consignee: string;
+  quickTag: string;
+  scope: ScopeFilter;
+  status: string;
+  keyword: string;
+  /** 快捷时间：空 | today | last7 */
+  timeQuick: '' | 'today' | 'last7';
 }
 
-export interface AdvancedFieldGroup {
-  title: string;
-  columns?: 1 | 2 | 3 | 4;
-  fields: AdvancedFieldConfig[];
+export interface SaleOrderFormModel {
+  DcgNo: string;
+  OrderNo: string;
+  BizType: string;
+  CargoType: string;
+  ImportExport: string;
+  Salesman: string;
+  Operator: string;
+  CustomerService: string;
+  Shipper: string;
+  Consignee: string;
+  ContainerInfo: string;
+  PackingMethod: string;
+  Status: SaleOrderStatus;
+  TransportMode: TransportMode;
 }
