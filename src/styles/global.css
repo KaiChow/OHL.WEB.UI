@@ -1787,10 +1787,10 @@ html, body, #app {
   background: var(--primary-6);
 }
 .detail-module-summary__stat--weight::before {
-  background: rgb(var(--orange-6));
+  background: var(--warning-6);
 }
 .detail-module-summary__stat--volume::before {
-  background: rgb(var(--green-6));
+  background: var(--success-6);
 }
 .detail-module-summary__stat-label {
   font-size: var(--dense-font-aux);
@@ -1808,10 +1808,10 @@ html, body, #app {
   color: var(--primary-6);
 }
 .detail-module-summary__stat--weight .detail-module-summary__stat-value {
-  color: rgb(var(--orange-6));
+  color: var(--warning-6);
 }
 .detail-module-summary__stat--volume .detail-module-summary__stat-value {
-  color: rgb(var(--green-6));
+  color: var(--success-6);
 }
 .detail-module-summary__stat-unit {
   font-size: var(--dense-font-micro);
@@ -2159,8 +2159,34 @@ html, body, #app {
 .kpi-label { font-size: var(--dense-font-aux); color: var(--color-text-3); font-weight: var(--dense-weight-field); letter-spacing: .03em; text-transform: uppercase; }
 .kpi-body { display: flex; align-items: baseline; gap: 4px; }
 .kpi-value { font-size: 28px; font-weight: 800; color: #1a2035; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -.02em; }
-.kpi-value--warn    { color: #d4620a; }
+.kpi-value--warn    { color: var(--warning-7); }
 .kpi-value--primary { color: var(--primary-6); }
-.kpi-value--ok      { color: #007d1c; }
-.kpi-value--danger  { color: #cc1f1f; }
+.kpi-value--ok      { color: var(--success-7); }
+.kpi-value--danger  { color: var(--danger-7); }
 .kpi-unit { font-size: var(--dense-font-micro); color: var(--color-text-3); font-weight: var(--dense-weight-aux); }
+
+/* ===== VXE 双行单元格（§4.2 cell-two-line pattern）===== */
+/* 用法：<template #default="{ row }"><div class="cell-two-line"><span class="c2-main">{{ row.x }}</span><span class="c2-sub">{{ row.y }}</span></div></template> */
+.cell-two-line {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.35;
+  min-width: 0;
+}
+.c2-main {
+  font-size: var(--dense-font-data);   /* 13px */
+  font-weight: 500;
+  color: var(--color-text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.c2-sub {
+  font-size: var(--dense-font-aux);    /* 11px */
+  font-weight: 400;
+  color: var(--color-text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

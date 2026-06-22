@@ -23,6 +23,14 @@
   --cyan-1:    #E8FFFB; --cyan-6:    #0FB6B6; --cyan-7:    #0AA8A7;
   --gold-1:    #FFFBE8; --gold-6:    #D9A400;
 
+  /* 别名：global.css 详情统计汇总条使用 rgb(var(--orange-6/--green-6)) 已废弃，
+     现统一使用下方直接变量；此处仅作兼容占位，实际 CSS 中应使用 var(--warning-6) / var(--success-6) */
+  --orange-6:  #FF7D00; /* alias → --warning-6 */
+  --green-6:   #00B42A; /* alias → --success-6 */
+
+  /* 补全主色阶缺失的 4 档 */
+  --primary-4: #6AA1FF;
+
   /* 文本四级灰阶 */
   --color-text-1: #1D2129;
   --color-text-2: #4E5969;
@@ -56,7 +64,11 @@
 
 * { box-sizing: border-box; }
 
-/* ===== 状态 Pill（带圆点，货代签名要素）===== */
+/* ===== 状态 Pill（带圆点）· @DEPRECATED =====================================
+   此 .pill / .p-* 体系已废弃，禁止在新页面使用。
+   请统一使用 global.css 中的 .s-pill[data-s="wait|op|partial|draft|acc|rel|rej"] 体系。
+   保留此处仅为旧页面兼容，不得新增 .p-* 类。
+   ============================================================================ */
 .pill {
   display: inline-flex;
   align-items: center;
@@ -133,7 +145,10 @@
   border-radius: var(--radius-md);
 }
 
-/* ===== 筛选区通用布局（列表页搜索面板共用）===== */
+/* ===== 筛选区通用布局 · @DEPRECATED =========================================
+   .filters / .fgrid / .field / .factions 旧体系已废弃。
+   新页面请使用 global.css 中的 .filter-card / .filter-card__main / .filter-grid / .filter-field 体系。
+   ============================================================================ */
 .filters {
   padding: 12px 16px 4px;
 }
