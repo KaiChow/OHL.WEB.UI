@@ -380,7 +380,7 @@ const drawerWidth = 'calc(100vw - 32px)';
 
         <!-- 附件 -->
         <detail-section title="附件">
-          <a-form layout="vertical" :model="detail" size="small">
+          <a-form layout="vertical" :model="detail" size="small" class="detail-form">
             <a-form-item label="其他必传文件">
               <a-upload v-if="!readonly" action="/" :auto-upload="false">
                 <template #upload-button>
@@ -536,28 +536,30 @@ const drawerWidth = 'calc(100vw - 32px)';
               添加
             </a-button>
           </template>
-          <div class="detail-form-grid detail-form-grid--4 detail-form-grid--compact">
-            <a-form-item label="清关条款">
-              <a-select v-model="detail.ClearanceTerms" :disabled="readonly" size="small">
-                <a-option v-for="t in clearanceTermsOptions" :key="t" :value="t">{{ t }}</a-option>
-              </a-select>
-            </a-form-item>
-            <a-form-item label="预付税金">
-              <a-select v-model="detail.PrepaidTax" :disabled="readonly" size="small">
-                <a-option v-for="y in yesNoOptions" :key="'pt-' + y" :value="y">{{ y }}</a-option>
-              </a-select>
-            </a-form-item>
-            <a-form-item label="PVA 递延">
-              <a-select v-model="detail.PvaDefer" :disabled="readonly" size="small">
-                <a-option v-for="y in yesNoOptions" :key="'pv-' + y" :value="y">{{ y }}</a-option>
-              </a-select>
-            </a-form-item>
-            <a-form-item label="海外代理费">
-              <a-select v-model="detail.OverseasAgentFee" :disabled="readonly" size="small">
-                <a-option v-for="y in yesNoOptions" :key="'oa-' + y" :value="y">{{ y }}</a-option>
-              </a-select>
-            </a-form-item>
-          </div>
+          <a-form layout="vertical" :model="detail" size="small" class="detail-form">
+            <div class="detail-form-grid detail-form-grid--4 detail-form-grid--compact">
+              <a-form-item label="清关条款">
+                <a-select v-model="detail.ClearanceTerms" :disabled="readonly" size="small" placeholder="请选择">
+                  <a-option v-for="t in clearanceTermsOptions" :key="t" :value="t">{{ t }}</a-option>
+                </a-select>
+              </a-form-item>
+              <a-form-item label="预付税金">
+                <a-select v-model="detail.PrepaidTax" :disabled="readonly" size="small" placeholder="请选择">
+                  <a-option v-for="y in yesNoOptions" :key="'pt-' + y" :value="y">{{ y }}</a-option>
+                </a-select>
+              </a-form-item>
+              <a-form-item label="PVA 递延">
+                <a-select v-model="detail.PvaDefer" :disabled="readonly" size="small" placeholder="请选择">
+                  <a-option v-for="y in yesNoOptions" :key="'pv-' + y" :value="y">{{ y }}</a-option>
+                </a-select>
+              </a-form-item>
+              <a-form-item label="海外代理费">
+                <a-select v-model="detail.OverseasAgentFee" :disabled="readonly" size="small" placeholder="请选择">
+                  <a-option v-for="y in yesNoOptions" :key="'oa-' + y" :value="y">{{ y }}</a-option>
+                </a-select>
+              </a-form-item>
+            </div>
+          </a-form>
           <div class="detail-mini-table-wrap">
             <table class="detail-mini-table detail-mini-table--wide">
               <thead>

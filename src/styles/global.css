@@ -147,13 +147,15 @@ html, body, #app {
   --dense-weight-nav-active: 600;
   --dense-font-title: 12px;       /* F3 结构标题：VXE 表头、分区标题、抽屉标题 */
   --dense-weight-title: 600;
-  --dense-font-field: 11px;       /* F4 字段标签：filter 顶标、form label */
+  --dense-font-field: 12px;       /* F4 字段标签：filter 顶标 + detail form label（统一） */
   --dense-weight-field: 500;
-  --dense-font-aux: 11px;         /* F5 辅助：副信息、统计标签、badge */
+  --dense-font-aux: 11px;         /* F5 辅助：placeholder、统计 label、副信息 */
   --dense-weight-aux: 400;
-  --dense-font-micro: 10px;       /* F6 微字：单位、分页、极弱提示 */
+  --dense-font-micro: 10px;       /* F6 微字：单位、序号列、badge */
   --dense-weight-micro: 400;
-  --dense-font-label: var(--dense-font-title); /* 别名 */
+  --dense-font-label: var(--dense-font-title); /* 别名：结构标题 F3 */
+  --dense-font-filter-label: var(--dense-font-field); /* 别名：与 F4 相同，禁止再分档 */
+  --dense-icon-action: 14px;      /* 仅 icon-only 按钮图形，非正文字号 */
   --dense-control-h-filter: 32px;
   --dense-control-h-detail: 28px;
   --dense-control-h-nav: 28px;
@@ -304,7 +306,7 @@ html, body, #app {
 .table-card-cap__pager .arco-pagination-item {
   height: 28px !important;
   min-width: 28px !important;
-  font-size: 12px !important;
+  font-size: var(--dense-font-nav) !important;
   line-height: 28px !important;
   border-radius: var(--dense-radius) !important;
   border: 1px solid var(--dense-border-subtle) !important;
@@ -313,24 +315,25 @@ html, body, #app {
   background: var(--dense-primary) !important;
   border-color: var(--dense-primary) !important;
   color: #fff !important;
-  font-weight: 600;
+  font-weight: var(--dense-weight-nav-active);
 }
 .table-card-cap__pager .arco-pagination-total {
-  font-size: 12px;
-  color: #6b7a90;
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
+  color: var(--color-text-3);
   margin-right: 4px;
 }
 .table-card-cap__pager .arco-select-view-single {
   height: 28px !important;
-  font-size: 12px !important;
+  font-size: var(--dense-font-nav) !important;
   border-radius: var(--dense-radius) !important;
 }
 .table-card-cap__pager .arco-select-view-value {
   line-height: 26px !important;
 }
 .table-card-cap__pager .arco-pagination-jumper {
-  font-size: 12px;
-  color: #6b7a90;
+  font-size: var(--dense-font-aux);
+  color: var(--color-text-3);
 }
 .table-card-cap__pager .arco-pagination-jumper-input .arco-input-wrapper {
   height: 28px !important;
@@ -355,25 +358,27 @@ html, body, #app {
   flex-shrink: 0;
 }
 .pager-summary {
-  font-size: 12px;
-  color: #8a94a6;
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
+  color: var(--color-text-3);
 }
 .pager-summary b {
-  color: #1a2035;
-  font-weight: 600;
+  color: var(--color-text-1);
+  font-weight: var(--dense-weight-data);
+  font-size: var(--dense-font-data);
   margin: 0 2px;
 }
 .zone-l5-pager .arco-pagination-item {
   height: 26px !important;
   min-width: 26px !important;
-  font-size: 12px !important;
+  font-size: var(--dense-font-nav) !important;
   border-radius: var(--dense-radius) !important;
 }
 .zone-l5-pager .arco-pagination-item-active {
   background: var(--dense-primary) !important;
   color: #fff !important;
 }
-.zone-l5-pager .arco-select-view-single { height: 26px !important; font-size: 12px !important; }
+.zone-l5-pager .arco-select-view-single { height: 26px !important; font-size: var(--dense-font-nav) !important; }
 
 /* 兼容旧 zone 类名 */
 .zone-filter {
@@ -485,30 +490,30 @@ html, body, #app {
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1e2a3a;
+  font-size: var(--dense-font-title);
+  font-weight: var(--dense-weight-title);
+  color: var(--color-text-1);
   min-width: 0;
 }
 .filter-card__title-icon {
   color: var(--dense-primary);
-  font-size: 16px;
+  font-size: var(--dense-icon-action);
   flex-shrink: 0;
 }
 .filter-card__title-sub {
-  font-size: 12px;
-  font-weight: 400;
-  color: #8a94a6;
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
+  color: var(--color-text-3);
 }
 .filter-card__body--basic {
-  padding: 10px 12px 8px;
+  padding: 12px 12px 10px;
   background: #fff;
   border-bottom: none;
 }
 .filter-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px 12px;
+  gap: 10px 12px;
 }
 .filter-grid--advanced {
   gap: 12px 16px;
@@ -526,7 +531,8 @@ html, body, #app {
   padding: 4px 0;
   border: none;
   background: none;
-  font-size: 12px;
+  font-size: var(--dense-font-nav);
+  font-weight: var(--dense-weight-nav);
   color: var(--color-text-2);
   cursor: pointer;
   line-height: 1.4;
@@ -536,17 +542,17 @@ html, body, #app {
   color: var(--primary-6);
 }
 .filter-expand-link .arco-icon {
-  font-size: 12px;
+  font-size: var(--dense-font-title);
   flex-shrink: 0;
 }
 .filter-field__label {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: var(--dense-gap-label);
   font-size: var(--dense-font-field);
   font-weight: var(--dense-weight-field);
   color: var(--color-text-2);
   letter-spacing: 0;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 .filter-field .arco-input-wrapper,
 .filter-field .arco-select {
@@ -567,6 +573,12 @@ html, body, #app {
 .filter-field .arco-select-view-input {
   font-size: var(--dense-font-data) !important;
   line-height: 30px !important;
+}
+.filter-field .arco-input::placeholder,
+.filter-field .arco-select-view-input::placeholder {
+  font-size: var(--dense-font-aux) !important;
+  font-weight: var(--dense-weight-aux);
+  color: var(--color-text-3) !important;
 }
 .filter-field .arco-input-wrapper:hover,
 .filter-field .arco-select-view-single:hover {
@@ -638,15 +650,16 @@ html, body, #app {
   margin-bottom: 0;
 }
 .search-form .arco-form-item-label > label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #5c6b82;
+  font-size: var(--dense-font-field);
+  font-weight: var(--dense-weight-field);
+  color: var(--color-text-2);
   white-space: nowrap;
 }
 .search-form .arco-input::placeholder,
 .search-form .arco-select-view-input::placeholder {
-  color: #b8c0d0;
-  font-size: 12px;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
 }
 .search-form .arco-select,
 .search-form .arco-input-wrapper {
@@ -1005,7 +1018,7 @@ html, body, #app {
 .toolbar-pager { display: flex; align-items: center; }
 .toolbar-pager .arco-pagination-item {
   height: 24px !important; min-width: 24px !important;
-  font-size: 11px !important; line-height: 24px !important;
+  font-size: var(--dense-font-nav) !important; line-height: 24px !important;
   border-radius: 3px !important;
   padding: 0 4px;
 }
@@ -1013,14 +1026,14 @@ html, body, #app {
   background: var(--primary-6) !important;
   color: #fff !important;
 }
-.toolbar-pager .arco-pagination-total { font-size: 12px; color: #8a94a6; }
-.toolbar-pager .arco-select-view-single { height: 24px !important; font-size: 11px !important; }
+.toolbar-pager .arco-pagination-total { font-size: var(--dense-font-aux); color: var(--color-text-3); }
+.toolbar-pager .arco-select-view-single { height: 24px !important; font-size: var(--dense-font-nav) !important; }
 .toolbar-pager .arco-select-view-value { line-height: 22px !important; }
-.toolbar-pager .arco-pagination-jumper { font-size: 12px; }
+.toolbar-pager .arco-pagination-jumper { font-size: var(--dense-font-aux); color: var(--color-text-3); }
 .toolbar-pager .arco-pagination-jumper-input .arco-input-wrapper { height: 24px !important; }
 
 .bulk-group { display: flex; align-items: center; gap: 6px; }
-.bulk-hint { font-size: 12px; color: var(--primary-6); }
+.bulk-hint { font-size: var(--dense-font-nav); color: var(--primary-6); }
 
 /* =================================================================
    VXE Table 全局样式覆盖
@@ -1079,7 +1092,12 @@ html, body, #app {
 }
 
 /* ── 序号列 ─────────────────────────────────────────────────── */
-.vxe-table .vxe-cell--seq { font-size: 12px; color: #9aa5b8; text-align: center; }
+.vxe-table .vxe-cell--seq {
+  font-size: var(--dense-font-micro);
+  font-weight: var(--dense-weight-micro);
+  color: var(--color-text-4);
+  text-align: center;
+}
 
 /* ── 操作列 / 固定列质感 ───────────────────────────────────── */
 .vxe-table .col--fixed-right .vxe-body--column {
@@ -1101,7 +1119,7 @@ html, body, #app {
   height: 28px !important;
   min-width: 28px !important;
   padding: 0 !important;
-  font-size: 15px !important;
+  font-size: var(--dense-icon-action) !important;
   color: #5f6f85 !important;
   border: 1px solid #e2e8f0 !important;
   border-radius: 6px !important;
@@ -1598,20 +1616,16 @@ html, body, #app {
 .detail-module__subitem--expanded {
   background: var(--color-bg-card);
 }
-.detail-module__subitem--expanded .detail-subitem__head,
-.detail-module__subitem--expanded .detail-cargo-block__head {
-  border-left: 3px solid var(--primary-6);
-  padding-left: 7px;
+.detail-module__subitem--expanded .detail-subitem__index,
+.detail-module__subitem--expanded .detail-cargo-block__index {
+  background: var(--primary-6);
+  color: #fff;
 }
-.detail-module__subitem--collapsed .detail-subitem__head,
-.detail-module__subitem--collapsed .detail-cargo-block__head {
-  border-left: 3px solid var(--color-border-2);
-  padding-left: 7px;
-  border-bottom: none;
-}
-.detail-module__subitem--collapsed:hover .detail-subitem__head,
-.detail-module__subitem--collapsed:hover .detail-cargo-block__head {
-  border-left-color: var(--primary-4);
+.detail-module__subitem--collapsed .detail-subitem__index,
+.detail-module__subitem--collapsed .detail-cargo-block__index {
+  background: var(--color-fill-2);
+  color: var(--color-text-3);
+  font-weight: 500;
 }
 
 /* ── 可重复子项 head/body（§17.3.7 收起态）────────────────────── */
@@ -1621,11 +1635,11 @@ html, body, #app {
   align-items: center;
   gap: var(--dense-gap-inline);
   min-height: 32px;
-  padding: var(--dense-pad-head-y) var(--dense-pad-head-x) var(--dense-pad-head-y) 7px;
+  padding: var(--dense-pad-head-y) var(--dense-pad-head-x);
   cursor: pointer;
   user-select: none;
   border-bottom: 1px solid transparent;
-  transition: background 0.12s, border-color 0.12s;
+  transition: background-color 0.12s ease;
 }
 .detail-module__subitem--expanded .detail-subitem__head,
 .detail-module__subitem--expanded .detail-cargo-block__head {
@@ -1633,12 +1647,7 @@ html, body, #app {
 }
 .detail-subitem__head:hover,
 .detail-cargo-block__head:hover {
-  background: var(--primary-1);
-}
-.detail-subitem__head:hover .detail-collapse-toggle,
-.detail-cargo-block__head:hover .detail-collapse-toggle {
-  color: var(--primary-6);
-  border-color: var(--primary-3);
+  background: var(--color-fill-1);
 }
 .detail-subitem__index,
 .detail-cargo-block__index {
@@ -1704,6 +1713,13 @@ html, body, #app {
   border-radius: 4px;
   background: var(--color-fill-2);
   border: 1px solid var(--color-border-1);
+}
+.detail-subitem__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 .detail-subitem__body,
 .detail-cargo-block__body {
@@ -1834,7 +1850,7 @@ html, body, #app {
 }
 .detail-data-stats__sep {
   color: var(--color-text-4);
-  font-size: 11px;
+  font-size: var(--dense-font-aux);
   user-select: none;
 }
 
@@ -1845,30 +1861,30 @@ html, body, #app {
   justify-content: center;
   gap: 4px;
   flex-shrink: 0;
-  height: 22px;
-  min-width: 52px;
+  height: var(--dense-control-h-nav);
+  min-width: 56px;
   padding: 0 8px;
+  border: none;
   border-radius: var(--dense-radius);
-  border: 1px solid var(--color-border-2);
-  background: var(--color-bg-card);
-  font-size: var(--dense-font-aux);
-  font-weight: 500;
+  background: transparent;
+  font-size: var(--dense-font-nav);
+  font-weight: var(--dense-weight-nav);
   color: var(--color-text-2);
   cursor: pointer;
   line-height: 1;
-  transition: color 0.12s, border-color 0.12s, background 0.12s;
+  transition: color 0.12s ease, background-color 0.12s ease;
   -webkit-font-smoothing: auto;
 }
 .detail-collapse-toggle:hover,
 .detail-collapse-toggle:focus-visible {
   color: var(--primary-6);
-  border-color: var(--primary-3);
   background: var(--primary-1);
   outline: none;
 }
 .detail-collapse-toggle__icon {
   font-size: 12px;
-  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.12s ease;
 }
 .detail-collapse-toggle--expanded .detail-collapse-toggle__icon {
   transform: rotate(180deg);
@@ -1944,23 +1960,33 @@ html, body, #app {
   color: var(--color-text-3);
   padding: 16px !important;
 }
+.detail-option-group,
 .detail-order-flags {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 6px 10px;
-  padding: 8px 10px;
-  margin-top: 2px;
+  gap: var(--dense-gap-field-row) var(--dense-gap-field-col);
+  padding: var(--dense-pad-section-y) var(--dense-pad-section-x);
+  margin-top: 0;
   border-radius: var(--dense-radius);
   border: 1px dashed var(--color-border-2);
   background: var(--color-bg-card);
 }
+.detail-option-group__label,
 .detail-order-flags__label {
   font-size: var(--dense-font-field);
   font-weight: var(--dense-weight-field);
   color: var(--color-text-2);
   flex-shrink: 0;
-  line-height: var(--dense-control-h-nav);
+  line-height: 1.35;
+  padding-right: 4px;
+}
+.detail-option-group .arco-checkbox-group,
+.detail-order-flags .arco-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
 }
 
 /* =================================================================
@@ -1976,8 +2002,8 @@ html, body, #app {
 .arco-btn-size-mini  { height: 20px !important; font-size: 10px !important; padding: 0 6px !important; border-radius: var(--dense-radius) !important; }
 .arco-input-wrapper.arco-input-size-small       { height: 24px !important; border-radius: var(--dense-radius) !important; }
 .arco-select-view-single.arco-select-size-small { height: 24px !important; border-radius: var(--dense-radius) !important; }
-.arco-input-size-small .arco-input              { font-size: 12px !important; }
-.arco-select-size-small .arco-select-view-value { font-size: 12px !important; }
+.arco-input-size-small .arco-input              { font-size: var(--dense-font-data) !important; }
+.arco-select-size-small .arco-select-view-value { font-size: var(--dense-font-data) !important; }
 .danger-opt .arco-dropdown-option-content       { color: #f53f3f !important; }
 
 /* 微交互：输入聚焦发光（按钮不做位移） */
@@ -2130,11 +2156,11 @@ html, body, #app {
 .kpi-card:first-child { padding-left: 8px; }
 .kpi-card:last-child  { border-right: none; }
 .kpi-card--danger { border-left: 3px solid #f53f3f; padding-left: 14px; }
-.kpi-label { font-size: 11px; color: #8a94a6; font-weight: 500; letter-spacing: .03em; text-transform: uppercase; }
+.kpi-label { font-size: var(--dense-font-aux); color: var(--color-text-3); font-weight: var(--dense-weight-field); letter-spacing: .03em; text-transform: uppercase; }
 .kpi-body { display: flex; align-items: baseline; gap: 4px; }
 .kpi-value { font-size: 28px; font-weight: 800; color: #1a2035; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -.02em; }
 .kpi-value--warn    { color: #d4620a; }
 .kpi-value--primary { color: var(--primary-6); }
 .kpi-value--ok      { color: #007d1c; }
 .kpi-value--danger  { color: #cc1f1f; }
-.kpi-unit { font-size: 12px; color: #8a94a6; font-weight: 500; }
+.kpi-unit { font-size: var(--dense-font-micro); color: var(--color-text-3); font-weight: var(--dense-weight-aux); }

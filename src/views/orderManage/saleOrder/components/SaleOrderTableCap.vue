@@ -71,8 +71,8 @@ const emit = defineEmits<{
   padding: 4px 0;
 }
 .column-settings__title {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--dense-font-title);
+  font-weight: var(--dense-weight-title);
   color: var(--color-text-2);
   padding-bottom: 4px;
   border-bottom: 1px solid var(--color-border-1);

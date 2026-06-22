@@ -74,13 +74,13 @@ const onTimeChip = (value: SaleOrderQuery['timeQuick']) => {
             </div>
             <div class="filter-field">
               <label class="filter-field__label">业务类型</label>
-              <a-select v-model="query.bizType" allow-clear size="small" @change="emit('search')">
+              <a-select v-model="query.bizType" allow-clear size="small" placeholder="请选择" @change="emit('search')">
                 <a-option v-for="opt in bizTypeOptions" :key="opt" :value="opt">{{ opt }}</a-option>
               </a-select>
             </div>
             <div class="filter-field">
               <label class="filter-field__label">进/出口</label>
-              <a-select v-model="query.importExport" allow-clear size="small" @change="emit('search')">
+              <a-select v-model="query.importExport" allow-clear size="small" placeholder="请选择" @change="emit('search')">
                 <a-option v-for="opt in importExportOptions" :key="opt" :value="opt">{{ opt }}</a-option>
               </a-select>
             </div>
@@ -91,7 +91,7 @@ const onTimeChip = (value: SaleOrderQuery['timeQuick']) => {
                 allow-clear
                 allow-search
                 size="small"
-                placeholder="模糊搜索"
+                placeholder="请输入业务员"
                 @change="emit('search')"
               >
                 <a-option v-for="opt in staffOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</a-option>
@@ -105,7 +105,7 @@ const onTimeChip = (value: SaleOrderQuery['timeQuick']) => {
                 allow-clear
                 allow-search
                 size="small"
-                placeholder="模糊搜索"
+                placeholder="请输入操作员"
                 @change="emit('search')"
               >
                 <a-option v-for="opt in staffOptions" :key="'op-' + opt.value" :value="opt.value">{{ opt.label }}</a-option>
@@ -142,7 +142,7 @@ const onTimeChip = (value: SaleOrderQuery['timeQuick']) => {
                   allow-clear
                   allow-search
                   size="small"
-                  placeholder="模糊搜索"
+                  placeholder="请输入客服"
                   @change="emit('search')"
                 >
                   <a-option v-for="opt in staffOptions" :key="'cs-' + opt.value" :value="opt.value">{{ opt.label }}</a-option>
@@ -154,7 +154,7 @@ const onTimeChip = (value: SaleOrderQuery['timeQuick']) => {
               </div>
               <div class="filter-field">
                 <label class="filter-field__label">装箱方式</label>
-                <a-select v-model="query.packingMethod" allow-clear size="small" @change="emit('search')">
+                <a-select v-model="query.packingMethod" allow-clear size="small" placeholder="请选择" @change="emit('search')">
                   <a-option v-for="opt in packingOptions" :key="opt" :value="opt">{{ opt }}</a-option>
                 </a-select>
               </div>
@@ -165,7 +165,7 @@ const onTimeChip = (value: SaleOrderQuery['timeQuick']) => {
                   allow-clear
                   allow-search
                   size="small"
-                  placeholder="公司模糊搜索"
+                  placeholder="请输入发货人"
                   @change="emit('search')"
                 >
                   <a-option v-for="opt in shipperOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</a-option>
@@ -178,7 +178,7 @@ const onTimeChip = (value: SaleOrderQuery['timeQuick']) => {
                   allow-clear
                   allow-search
                   size="small"
-                  placeholder="公司模糊搜索"
+                  placeholder="请输入收货人"
                   @change="emit('search')"
                 >
                   <a-option v-for="opt in consigneeOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</a-option>

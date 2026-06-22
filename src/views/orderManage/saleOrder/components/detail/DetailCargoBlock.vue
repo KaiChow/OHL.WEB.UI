@@ -83,8 +83,10 @@ const onHeadKeydown = (e: KeyboardEvent) => {
           <span class="detail-data-stats__val">{{ block.items.length }}</span>
         </span>
       </div>
-      <span v-if="!expanded" class="detail-subitem__state">已收起</span>
-      <detail-collapse-toggle :expanded="expanded" @click.stop="toggle" />
+      <div class="detail-subitem__actions">
+        <span v-if="!expanded" class="detail-subitem__state">已收起</span>
+        <detail-collapse-toggle :expanded="expanded" @click.stop="toggle" />
+      </div>
     </header>
 
     <div v-show="expanded" class="detail-subitem__body detail-cargo-block__body">
