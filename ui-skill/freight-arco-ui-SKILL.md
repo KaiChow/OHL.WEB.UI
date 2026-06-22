@@ -4520,3 +4520,1539 @@ page-root--dense（padding + gap 分隔各卡片）
 - [ ] **详情只读 disabled**：`.detail-drawer` 内 disabled 文字 text-1/500（§17.3.8）
 - [ ] **详情按钮**：全部 `small`；删除用 `outline danger`；表格 toolbar 在表上方右对齐
 - [ ] **详情 mini 文字按钮**：禁止（10px 发糊）
+
+---
+
+## 四十二、VXE Table 批量勾选完整规范
+
+> 批量操作的前提是正确配置 VXE Table 的 checkbox 列。本章给出完整技术配置。
+
+### 42.1 VXE 勾选列配置
+
+```vue
+<vxe-table
+  ref="tableRef"
+  border="none"
+  show-overflow="title"
+  size="small"
+  max-height="100%"
+  :checkbox-config="{ checkStrictly: false, highlight: true }"
+  :row-config="{ isHover: true, keyField: 'id' }"
+  :data="rows"
+  @checkbox-change="onCheckChange"
+  @checkbox-all="onCheckAll"
+>
+  <!-- ① checkbox 列：固定左侧，宽度 40px -->
+  <vxe-column type="checkbox" width="40" fixed="left" />
+  <!-- ② 其余业务列 -->
+  <vxe-column field="orderNo" title="订单号" width="160" fixed="left" />
+  ...
+</vxe-table>
+```
+
+### 42.2 勾选状态管理（Composition API）
+
+```ts
+const tableRef = ref<VxeTableInstance>()
+
+// 获取已勾选行
+const getSelected = () => tableRef.value!.getCheckboxRecords()
+
+// 清空勾选
+const clearSelected = () => tableRef.value!.clearCheckboxRow()
+
+// 勾选变化回调
+const onCheckChange = ({ records }: { records: RowData[] }) => {
+  selectedRows.value = records
+}
+const onCheckAll = ({ records }: { records: RowData[] }) => {
+  selectedRows.value = records
+}
+```
+
+### 42.3 工具栏批量操作展示规则
+
+```vue
+<div class="toolbar">
+  <div class="toolbar-left">
+    <!-- 批量操作按钮：仅勾选后显示 -->
+    <template v-if="selectedRows.length > 0">
+      <span class="bulk-tip">已选 {{ selectedRows.length }} 条</span>
+      <a-button size="small" type="primary" @click="bulkConfirm">批量确认</a-button>
+      <a-button size="small" status="danger" type="outline" @click="bulkReject">批量拒绝</a-button>
+      <a-button size="small" type="text" @click="clearSelected">取消选择</a-button>
+    </template>
+    <!-- 默认操作按钮 -->
+    <template v-else>
+      <a-button size="small" type="primary" @click="handleCreate">
+        <template #icon><icon-plus /></template>新建
+      </a-button>
+    </template>
+  </div>
+</div>
+```
+
+```css
+.bulk-tip {
+  font-size: var(--dense-font-nav);
+  color: var(--primary-6);
+  font-weight: 600;
+  margin-right: 8px;
+}
+```
+
+### 42.4 批量操作规范
+
+| 规则 | 内容 |
+|------|------|
+| 前置校验 | 未勾选时点击批量按钮：`Message.warning('请先选择单据')` |
+| 数量上限 | 单次批量操作上限 **500 条**，超出提示分批 |
+| 结果反馈 | 操作完成后：`Message.success('已成功处理 N 条')` + 自动刷新列表 + `clearSelected()` |
+| 部分失败 | 显示 `Message.warning('N 条成功，M 条失败')` + 提供「查看失败明细」按钮 |
+| 导出范围 | 批量导出必须下拉三选一：「当前页 / 全部筛选结果 / 已选 N 条」 |
+| 危险操作 | 批量删除/废弃必须二次确认弹窗，展示条数 |
+
+---
+
+## 四十三、Uppy 文件上传规范
+
+> 项目使用 **Uppy**（@uppy/core + @uppy/dashboard + @uppy/xhr-upload）替代 a-upload，支持拖拽、进度、多文件、断点续传。
+
+### 43.1 安装与初始化
+
+```bash
+npm install @uppy/core @uppy/dashboard @uppy/xhr-upload @uppy/file-input
+```
+
+```ts
+// composables/useUppy.ts
+import Uppy from '@uppy/core'
+import XHRUpload from '@uppy/xhr-upload'
+import Chinese from '@uppy/locales/lib/zh_CN'
+
+export function useUppy(options: {
+  endpoint: string
+  maxFileSize?: number      // 默认 50MB
+  maxFiles?: number         // 默认 10
+  allowedTypes?: string[]   // 默认 ['application/pdf', 'image/*', ...]
+}) {
+  const uppy = new Uppy({
+    locale: Chinese,
+    restrictions: {
+      maxFileSize: options.maxFileSize ?? 50 * 1024 * 1024,
+      maxNumberOfFiles: options.maxFiles ?? 10,
+      allowedFileTypes: options.allowedTypes ?? [
+        'application/pdf', 'image/jpeg', 'image/png',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ],
+    },
+  }).use(XHRUpload, {
+    endpoint: options.endpoint,
+    headers: { Authorization: `Bearer ${getToken()}` },
+    fieldName: 'file',
+    formData: true,
+  })
+  return uppy
+}
+```
+
+### 43.2 三种使用场景
+
+#### 场景 A：单文件上传（表单内附件）
+
+```vue
+<template>
+  <div class="uppy-inline">
+    <div v-if="fileUrl" class="uppy-file-preview">
+      <icon-file class="uppy-file-icon" />
+      <span class="uppy-file-name">{{ fileName }}</span>
+      <a-button type="text" size="mini" @click="removeFile">
+        <template #icon><icon-close /></template>
+      </a-button>
+    </div>
+    <a-button v-else size="small" type="dashed" @click="openUppy">
+      <template #icon><icon-upload /></template>上传附件
+    </a-button>
+  </div>
+</template>
+```
+
+```css
+.uppy-inline { display: inline-flex; align-items: center; gap: 8px; }
+.uppy-file-preview {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 8px; background: var(--color-fill-1);
+  border: 1px solid var(--color-border-2); border-radius: var(--dense-radius);
+  font-size: var(--dense-font-data); color: var(--color-text-1);
+}
+.uppy-file-icon { font-size: 14px; color: var(--primary-6); flex-shrink: 0; }
+.uppy-file-name { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+```
+
+#### 场景 B：多文件上传（文件管理 / 附件列表）
+
+```vue
+<template>
+  <div class="uppy-list-zone" :class="{ dragging: isDragging }" @dragover.prevent="isDragging=true" @dragleave="isDragging=false" @drop.prevent="handleDrop">
+    <div class="uppy-list-prompt">
+      <icon-upload style="font-size:24px; color:var(--color-text-3)" />
+      <p class="uppy-list-text">拖拽文件到此处，或 <a class="link-text" @click="openFileDialog">点击选择文件</a></p>
+      <p class="uppy-list-hint">支持 PDF / Excel / Word / 图片，单文件不超过 50MB</p>
+    </div>
+  </div>
+  <!-- 已上传文件列表 -->
+  <div class="uppy-file-list">
+    <div v-for="f in uploadedFiles" :key="f.id" class="uppy-file-row">
+      <icon-file class="uppy-file-row__icon" />
+      <span class="uppy-file-row__name">{{ f.name }}</span>
+      <span class="uppy-file-row__size">{{ formatSize(f.size) }}</span>
+      <a-progress v-if="f.progress < 100" :percent="f.progress" size="mini" style="width:80px" />
+      <span v-else class="s-pill" data-s="acc">已上传</span>
+      <a-button type="text" size="mini" @click="removeFile(f.id)">
+        <template #icon><icon-delete /></template>
+      </a-button>
+    </div>
+  </div>
+</template>
+```
+
+```css
+.uppy-list-zone {
+  border: 2px dashed var(--color-border-2);
+  border-radius: var(--dense-radius);
+  padding: 24px; text-align: center;
+  background: var(--color-fill-1); cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.uppy-list-zone.dragging {
+  border-color: var(--primary-6);
+  background: var(--primary-1);
+}
+.uppy-list-text { font-size: var(--dense-font-data); color: var(--color-text-2); margin: 8px 0 4px; }
+.uppy-list-hint { font-size: var(--dense-font-aux); color: var(--color-text-3); margin: 0; }
+.uppy-file-list { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+.uppy-file-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; background: var(--color-fill-1);
+  border: 1px solid var(--color-border-1); border-radius: var(--radius-md);
+  font-size: var(--dense-font-data);
+}
+.uppy-file-row__icon { font-size: 14px; color: var(--primary-6); flex-shrink: 0; }
+.uppy-file-row__name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text-1); }
+.uppy-file-row__size { font-size: var(--dense-font-aux); color: var(--color-text-3); flex-shrink: 0; }
+```
+
+#### 场景 C：头像 / 印章图片上传（裁剪）
+
+```ts
+// 配合 @uppy/image-editor 使用，限制单文件 image/*，2MB
+import ImageEditor from '@uppy/image-editor'
+uppy.use(ImageEditor, { cropperOptions: { aspectRatio: 1 } })
+```
+
+### 43.3 上传规范
+
+| 项目 | 规范 |
+|------|------|
+| 上传按钮样式 | `type="dashed"` + `<icon-upload />` + "上传附件"，尺寸 `size="small"` |
+| 进度展示 | 用 `a-progress` 内联展示每个文件进度（见 §54） |
+| 错误提示 | 超限 → `Message.error('文件超过 50MB 限制')`；格式不符 → `Message.error('仅支持 PDF/Excel/…')` |
+| 成功回调 | `uppy.on('upload-success', (file, res) => { /* 存 fileId */ })` |
+| Token 刷新 | XHRUpload 拦截 401，自动触发 refresh token |
+| 删除 | 已上传文件调后端 DELETE 接口后再从列表移除，**禁止仅前端删除** |
+
+---
+
+## 四十四、Timeline 时间线规范
+
+> 用于货物追踪里程碑、操作历史、审批记录、状态变更日志。
+
+### 44.1 何时用 Timeline
+
+| 场景 | 组件 |
+|------|------|
+| 货物节点（离港 → 到港 → 提货）| Timeline |
+| 操作日志（谁/何时/做了什么）| Timeline（简洁型） |
+| 审批历史 | Timeline（审批型） |
+| 步骤进度（待确认→已接单→在途→到港）| `a-steps`（见 §47）|
+
+### 44.2 使用 Arco Design Timeline
+
+```vue
+<template>
+  <a-timeline>
+    <a-timeline-item
+      v-for="node in timeline"
+      :key="node.id"
+      :label="node.time"
+      :dot-color="node.color"
+    >
+      <div class="tl-content">
+        <span class="tl-event">{{ node.event }}</span>
+        <span v-if="node.location" class="tl-loc">{{ node.location }}</span>
+        <span v-if="node.operator" class="tl-op">{{ node.operator }}</span>
+      </div>
+    </a-timeline-item>
+  </a-timeline>
+</template>
+```
+
+```ts
+// 数据结构
+interface TimelineNode {
+  id: string
+  time: string          // 格式：'2024-01-15 14:30'
+  event: string         // 事件名称
+  location?: string     // 发生地点（港口代码/仓库名）
+  operator?: string     // 操作人
+  color?: string        // 节点色：默认 primary-6，异常 danger-6，完成 success-6
+}
+
+// 颜色语义
+const dotColor = (status: string) => ({
+  done:    'var(--success-6)',
+  active:  'var(--primary-6)',
+  pending: 'var(--color-border-3)',
+  error:   'var(--danger-6)',
+}[status] ?? 'var(--color-border-3)')
+```
+
+### 44.3 Timeline 样式覆盖（dense 风格）
+
+```css
+/* Timeline 整体 */
+.detail-drawer .arco-timeline { padding: 0 0 0 8px; }
+.detail-drawer .arco-timeline-item-label {
+  font-size: var(--dense-font-aux);    /* 11px */
+  color: var(--color-text-3);
+  width: 110px !important;
+  flex-shrink: 0;
+}
+.detail-drawer .arco-timeline-item-content { padding-bottom: 16px; }
+
+/* 事件文本 */
+.tl-content { display: flex; flex-direction: column; gap: 2px; }
+.tl-event { font-size: var(--dense-font-data); font-weight: 500; color: var(--color-text-1); }
+.tl-loc   { font-size: var(--dense-font-aux); color: var(--color-text-3); }
+.tl-op    { font-size: var(--dense-font-aux); color: var(--color-text-3); }
+```
+
+### 44.4 Timeline 位置规范
+
+- 在**复杂详情抽屉**（§17.3）中，Timeline 作为独立 `DetailSection`，标题「操作记录」或「货物节点」
+- 默认**倒序**（最新在上）；货物节点允许正序（运输流程）
+- 单次历史 > 20 条时，增加「展开全部 N 条记录」折叠
+
+---
+
+## 四十五、复制到剪贴板规范
+
+> 货代系统最高频交互：单号、提单号、柜号的一键复制。
+
+### 45.1 实现方式
+
+```ts
+// composables/useCopy.ts
+export function useCopy() {
+  const copy = async (text: string, label = '内容') => {
+    try {
+      await navigator.clipboard.writeText(text)
+      Message.success(`${label}已复制`)
+    } catch {
+      // 降级：execCommand
+      const el = document.createElement('textarea')
+      el.value = text
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+      Message.success(`${label}已复制`)
+    }
+  }
+  return { copy }
+}
+```
+
+### 45.2 触发方式与 UI 规范
+
+#### 方式 A：单号列内联复制图标（最常用）
+
+```vue
+<template #default="{ row }">
+  <div class="copy-cell">
+    <span class="mono link-text" @click="toDetail(row)">{{ row.orderNo }}</span>
+    <icon-copy
+      class="copy-icon"
+      title="复制单号"
+      @click.stop="copy(row.orderNo, '单号')"
+    />
+  </div>
+</template>
+```
+
+```css
+.copy-cell { display: flex; align-items: center; gap: 4px; }
+.copy-icon {
+  font-size: 12px;
+  color: var(--color-text-4);
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+.vxe-body--row:hover .copy-icon { opacity: 1; }
+.copy-icon:hover { color: var(--primary-6); }
+```
+
+#### 方式 B：详情头部单号 + 复制按钮
+
+```vue
+<span class="detail-drawer-status__id mono">{{ order.orderNo }}</span>
+<a-tooltip content="复制单号">
+  <icon-copy class="copy-btn-head" @click="copy(order.orderNo, '单号')" />
+</a-tooltip>
+```
+
+```css
+.copy-btn-head { font-size: 14px; color: var(--color-text-3); cursor: pointer; }
+.copy-btn-head:hover { color: var(--primary-6); }
+```
+
+### 45.3 复制规范
+
+| 规则 | 说明 |
+|------|------|
+| 反馈 | 始终用 `Message.success('XX已复制')`，不用 alert |
+| 图标 | 统一用 `<icon-copy />`，悬停列时显示（opacity 0→1）|
+| 多值复制 | 如同时复制多个单号：`copy(arr.join('\n'), '已选单号')` |
+| 禁止 | 不得直接用浏览器默认 tooltip 说明复制功能，必须有 `a-tooltip` |
+
+---
+
+## 四十六、VXE Table 大数据量虚拟滚动
+
+> 当列表数据量 > 500 行时必须启用 `scroll-y` 虚拟滚动，避免 DOM 卡顿。
+
+### 46.1 配置方式
+
+```vue
+<vxe-table
+  border="none"
+  show-overflow="title"
+  size="small"
+  height="100%"           <!-- ⚠️ 必须用 height，不能用 max-height（虚拟滚动需固定高度）-->
+  :scroll-x="{ enabled: true, gt: 0 }"
+  :scroll-y="{ enabled: true, gt: 200 }"   <!-- 超过 200 行启用虚拟滚动 -->
+  :row-config="{ isHover: true, keyField: 'id', height: 40 }"  <!-- 必须指定 height！ -->
+  :data="rows"
+>
+```
+
+### 46.2 关键约束
+
+| 约束 | 说明 |
+|------|------|
+| `row-config.height` | **必须**与 CSS `--dense-row-h` 一致（40px），否则滚动位置错乱 |
+| `height` vs `max-height` | 虚拟滚动必须用固定 `height`；非虚拟滚动用 `max-height` |
+| 展开行 | 启用虚拟滚动后，展开行（expand）需额外配置 `expand-config.height` |
+| 合并单元格 | 虚拟滚动与 `merge-cells` 不兼容，禁止同时使用 |
+| 列宽变化 | 虚拟滚动 + 列宽拖动后需调用 `tableRef.value.refreshColumn()` |
+
+### 46.3 何时用 max-height vs height
+
+```
+数据量 < 200 行  → max-height="calc(100vh - XXX)"，不启用虚拟滚动
+数据量 ≥ 200 行  → height="100%"（配合 flex:1 父容器） + scroll-y enabled
+分页列表（≤100条/页）→ max-height，不需虚拟滚动
+```
+
+
+---
+
+## 四十七、多步骤流程规范（Steps / Wizard）
+
+> 适用于：下单流程、报价填写、批量导入向导、账号注册等需要分步引导的场景。
+
+### 47.1 何时用 Steps vs 普通表单
+
+```
+字段总数 < 12 个   → 单页表单（Modal 或 Drawer）
+字段总数 ≥ 12 个，且逻辑上可分组 → Steps 多步骤
+步骤间有强依赖（后步骤需前步骤数据计算）→ Steps
+步骤可独立完成、无强依赖 → Tab 切换（非 Steps）
+```
+
+### 47.2 Steps 布局规范
+
+```vue
+<template>
+  <!-- Step 头部：固定在顶部，不随内容滚动 -->
+  <div class="wizard-header">
+    <a-steps :current="currentStep" size="small" style="padding: 0 24px">
+      <a-step title="基础信息" />
+      <a-step title="货物信息" />
+      <a-step title="费用报价" />
+      <a-step title="确认提交" />
+    </a-steps>
+  </div>
+
+  <!-- Step 内容区：可滚动 -->
+  <div class="wizard-body">
+    <keep-alive>
+      <component :is="stepComponents[currentStep - 1]" v-model="formData" />
+    </keep-alive>
+  </div>
+
+  <!-- 底部导航（固定） -->
+  <div class="wizard-footer">
+    <a-button v-if="currentStep > 1" @click="prevStep">上一步</a-button>
+    <a-button v-if="currentStep < totalSteps" type="primary" @click="nextStep">下一步</a-button>
+    <a-button v-if="currentStep === totalSteps" type="primary" :loading="submitting" @click="submit">提交</a-button>
+    <a-button type="text" @click="handleCancel">取消</a-button>
+  </div>
+</template>
+```
+
+```css
+/* Steps 向导：通常在全屏页面或超宽抽屉内使用 */
+.wizard-header {
+  padding: 16px 0 12px;
+  border-bottom: 1px solid var(--color-border-1);
+  background: var(--color-bg-card);
+  flex-shrink: 0;
+}
+.wizard-body {
+  flex: 1; overflow-y: auto; padding: 16px 24px;
+}
+.wizard-footer {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 24px;
+  border-top: 1px solid var(--color-border-1);
+  background: var(--color-bg-card);
+  flex-shrink: 0;
+}
+```
+
+### 47.3 步骤校验规则
+
+```ts
+const nextStep = async () => {
+  // 每步提交前校验当前步骤表单
+  const valid = await currentFormRef.value?.validate()
+  if (!valid) return
+  // 若当前步骤需要后端校验（如校验单号唯一性），在此处调用
+  currentStep.value++
+}
+```
+
+| 规则 | 说明 |
+|------|------|
+| 每步独立校验 | 点「下一步」时校验当前步骤，通过后才跳转 |
+| 返回上步 | 保留已填数据，**不清空** |
+| 进度保存 | 超过 3 步的流程需支持「草稿保存」（接口 + 本地 sessionStorage 双保险）|
+| 错误步骤 | 提交失败后，`a-steps` 对应 step 显示 `status="error"` |
+| 步骤标题 | 最多 6 字，与业务节点语义对应 |
+
+---
+
+## 四十八、TreeSelect 树形选择规范
+
+> 适用于：权限菜单树、货物品类树、仓库区域树、组织架构选择。
+
+### 48.1 何时用 TreeSelect vs Select
+
+```
+数据为扁平列表（无父子关系）→ a-select
+数据有 2 级以上父子层级 → a-tree-select
+层级 > 4 级 → 考虑改用 Cascader（见 §49）
+```
+
+### 48.2 基本用法
+
+```vue
+<a-tree-select
+  v-model="selectedCategory"
+  :data="categoryTree"
+  :field-names="{ key: 'id', title: 'name', children: 'children' }"
+  placeholder="请选择品类"
+  allow-search
+  allow-clear
+  size="small"
+  style="width: 200px"
+/>
+```
+
+```ts
+// 树数据结构
+interface TreeNode {
+  id: string
+  name: string
+  children?: TreeNode[]
+  disabled?: boolean    // 不可选择的父节点
+  selectable?: boolean  // false = 仅作分组，不可选
+}
+```
+
+### 48.3 多选 TreeSelect（权限/批量分配）
+
+```vue
+<a-tree-select
+  v-model="selectedMenus"
+  :data="menuTree"
+  multiple
+  checkable                    <!-- 显示 checkbox -->
+  check-strictly               <!-- true=父子独立勾选；false=联动（权限场景用 false）-->
+  :default-expand-level="2"
+  placeholder="请选择菜单权限"
+  size="small"
+/>
+```
+
+### 48.4 树节点图标规范
+
+```vue
+<!-- 在 a-tree-select 的 title slot 中自定义 -->
+<template #title="node">
+  <span class="tree-node-title">
+    <icon-folder v-if="node.children?.length" class="tree-icon tree-icon--folder" />
+    <icon-file   v-else                        class="tree-icon tree-icon--file" />
+    {{ node.name }}
+  </span>
+</template>
+```
+
+```css
+.tree-icon { font-size: 13px; flex-shrink: 0; }
+.tree-icon--folder { color: var(--warning-6); }
+.tree-icon--file   { color: var(--color-text-3); }
+.tree-node-title   { display: inline-flex; align-items: center; gap: 5px;
+                     font-size: var(--dense-font-data); }
+```
+
+---
+
+## 四十九、Cascader 级联选择规范
+
+> 适用于：国家/省/市地址选择、港口级联（大区→国家→港口）、货物分类级联。
+
+### 49.1 基本用法
+
+```vue
+<a-cascader
+  v-model="selectedPort"
+  :options="portOptions"
+  :field-names="{ value: 'code', label: 'name', children: 'ports' }"
+  placeholder="请选择目的港"
+  allow-search
+  allow-clear
+  size="small"
+  style="width: 200px"
+  check-strictly              <!-- 允许选中父级（中间级别也可确认）-->
+/>
+```
+
+```ts
+// 港口级联数据
+interface PortCascader {
+  code: string
+  name: string
+  ports?: PortCascader[]
+}
+// 示例：[{ code:'AS', name:'亚洲', ports:[{ code:'CN', name:'中国', ports:[{ code:'SHA', name:'上海' }] }] }]
+```
+
+### 49.2 规范
+
+| 项目 | 规范 |
+|------|------|
+| 搜索 | 必须开启 `allow-search`（货代港口数量庞大） |
+| 回显 | 仅显示末级（`display-render` 只显示最后一级名称）|
+| 层级上限 | 建议不超过 4 级，超过时拆成两个独立 select |
+| 远程加载 | 超大数据集（如全国城市）用 `load-data` 懒加载 |
+| 禁用父级选中 | 地区选择中，省级不可选时设 `selectable: false` |
+
+---
+
+## 五十、财务模块规范
+
+> 覆盖应收/应付账款、对账单、收费项、汇率换算等财务场景的专项设计规范。
+
+### 50.1 金额格式化
+
+```ts
+// utils/money.ts
+
+// 千分位 + 保留 2 位小数
+export const fmtMoney = (v: number | string, currency = 'CNY') => {
+  const n = Number(v)
+  if (isNaN(n)) return '—'
+  return new Intl.NumberFormat('zh-CN', {
+    style: 'decimal',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(n)
+}
+
+// 带币种符号
+export const fmtCurrency = (v: number, currency = 'CNY') => {
+  const symbols: Record<string, string> = {
+    CNY: '¥', USD: '$', EUR: '€', JPY: '¥', GBP: '£', HKD: 'HK$', SGD: 'S$',
+  }
+  return `${symbols[currency] ?? currency} ${fmtMoney(v)}`
+}
+
+// 负值红色展示
+export const moneyColor = (v: number) =>
+  v < 0 ? 'var(--danger-6)' : v > 0 ? 'var(--color-text-1)' : 'var(--color-text-3)'
+```
+
+### 50.2 金额列展示规范
+
+```vue
+<!-- VXE 金额列 -->
+<vxe-column field="amount" title="金额（元）" width="120" align="right">
+  <template #default="{ row }">
+    <span class="num-val" :style="{ color: moneyColor(row.amount) }">
+      {{ fmtMoney(row.amount) }}
+    </span>
+  </template>
+</vxe-column>
+
+<!-- 多币种列（显示币种符号）-->
+<vxe-column field="foreignAmount" title="外币金额" width="140" align="right">
+  <template #default="{ row }">
+    <div class="cell-two-line" style="align-items:flex-end">
+      <span class="c2-main">{{ fmtMoney(row.foreignAmount) }}</span>
+      <span class="c2-sub">{{ row.currency }}</span>
+    </div>
+  </template>
+</vxe-column>
+```
+
+| 规范 | 内容 |
+|------|------|
+| 对齐 | 金额列必须**右对齐**（`align="right"`）|
+| 字体 | 使用 `.num-val`（等宽数字 tabular-nums）|
+| 负数 | `var(--danger-6)` 红色显示，正数默认 text-1 |
+| 小数位 | 统一 2 位小数（货币）；费率 4 位；数量按业务定 |
+| 汇总行 | 使用 VXE `footer-method` 配置合计行，字重 600 |
+
+### 50.3 收费项目列表规范（费用明细）
+
+```vue
+<div class="fee-table">
+  <div class="fee-table__head">
+    <span class="fee-col-name">费用项</span>
+    <span class="fee-col-qty">数量</span>
+    <span class="fee-col-unit">单价</span>
+    <span class="fee-col-currency">币种</span>
+    <span class="fee-col-amount">金额</span>
+  </div>
+  <div v-for="fee in fees" :key="fee.id" class="fee-table__row">
+    <span class="fee-col-name">{{ fee.name }}</span>
+    <span class="fee-col-qty num-val">{{ fee.qty }}</span>
+    <span class="fee-col-unit num-val">{{ fmtMoney(fee.unitPrice) }}</span>
+    <span class="fee-col-currency">{{ fee.currency }}</span>
+    <span class="fee-col-amount num-val" :style="{ color: moneyColor(fee.amount) }">
+      {{ fmtMoney(fee.amount) }}
+    </span>
+  </div>
+  <div class="fee-table__total">
+    <span>合计（CNY）</span>
+    <span class="num-val fee-total-val">{{ fmtMoney(totalCNY) }}</span>
+  </div>
+</div>
+```
+
+```css
+.fee-table { font-size: var(--dense-font-data); }
+.fee-table__head {
+  display: grid;
+  grid-template-columns: 1fr 60px 80px 60px 100px;
+  padding: 6px 12px;
+  background: var(--color-fill-1);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  font-weight: 500;
+}
+.fee-table__row {
+  display: grid;
+  grid-template-columns: 1fr 60px 80px 60px 100px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border-1);
+}
+.fee-col-qty, .fee-col-unit, .fee-col-amount { text-align: right; font-variant-numeric: tabular-nums; }
+.fee-table__total {
+  display: flex; justify-content: space-between;
+  padding: 10px 12px;
+  font-weight: 600;
+  background: var(--color-fill-1);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+.fee-total-val { font-size: 15px; color: var(--primary-6); }
+```
+
+### 50.4 财务状态色
+
+| 状态 | `data-s` | 语义 |
+|------|----------|------|
+| 待付款 | `wait` | 橙黄 |
+| 部分付款 | `partial` | 紫色 |
+| 已付款 | `acc` | 青色 |
+| 已结清 | `rel` | 绿色 |
+| 已逾期 | `rej` | 红色（危险）|
+| 草稿/未确认 | `draft` | 灰色 |
+
+---
+
+## 五十一、审批流 UI 规范
+
+> 覆盖单据审批、多级审批历史、审批操作按钮。
+
+### 51.1 审批状态展示
+
+审批状态统一使用 `.s-pill[data-s]`，映射关系：
+
+| 审批状态 | `data-s` | 说明 |
+|---------|----------|------|
+| 待审批 | `wait` | 提交后等待审批 |
+| 审批中 | `op` | 多级审批进行中 |
+| 已通过 | `acc` | 审批完成 |
+| 已拒绝 | `rej` | 审批被驳回 |
+| 已撤回 | `draft` | 申请人撤回 |
+
+### 51.2 审批历史 Timeline
+
+```vue
+<a-timeline>
+  <a-timeline-item
+    v-for="record in approvalHistory"
+    :key="record.id"
+    :label="record.time"
+    :dot-color="approvalDotColor(record.action)"
+  >
+    <div class="approval-node">
+      <span class="approval-node__actor">{{ record.actorName }}</span>
+      <span class="s-pill" :data-s="approvalActionToS(record.action)">
+        {{ record.actionLabel }}
+      </span>
+      <p v-if="record.comment" class="approval-node__comment">
+        "{{ record.comment }}"
+      </p>
+    </div>
+  </a-timeline-item>
+</a-timeline>
+```
+
+```ts
+const approvalDotColor = (action: string) => ({
+  pass:    'var(--success-6)',
+  reject:  'var(--danger-6)',
+  revoke:  'var(--color-text-3)',
+  pending: 'var(--warning-6)',
+}[action] ?? 'var(--color-border-3)')
+
+const approvalActionToS = (action: string) => ({
+  pass: 'acc', reject: 'rej', revoke: 'draft', pending: 'wait',
+}[action] ?? 'draft')
+```
+
+```css
+.approval-node { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.approval-node__actor { font-size: var(--dense-font-data); font-weight: 500; color: var(--color-text-1); }
+.approval-node__comment {
+  width: 100%; margin: 4px 0 0;
+  font-size: var(--dense-font-aux); color: var(--color-text-2);
+  font-style: italic; line-height: 1.5;
+  padding: 4px 8px; background: var(--color-fill-1);
+  border-left: 2px solid var(--color-border-2); border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+```
+
+### 51.3 审批操作按钮（详情抽屉 Footer）
+
+```vue
+<!-- 当前用户是审批人且状态为「待审批/审批中」时显示 -->
+<template v-if="canApprove">
+  <a-button type="primary" :loading="approving" @click="handlePass">
+    <template #icon><icon-check /></template>通过
+  </a-button>
+  <a-button status="danger" type="outline" @click="openRejectModal">
+    <template #icon><icon-close /></template>拒绝
+  </a-button>
+</template>
+<!-- 申请人可撤回（待审批状态） -->
+<a-button v-if="canRevoke" type="text" @click="handleRevoke">撤回申请</a-button>
+```
+
+### 51.4 拒绝理由弹窗规范
+
+```vue
+<a-modal title="拒绝原因" :visible="rejectVisible" @ok="confirmReject" @cancel="rejectVisible=false">
+  <a-form :model="rejectForm">
+    <a-form-item field="reason" label="拒绝原因" :rules="[{ required: true, message: '请填写拒绝原因' }]">
+      <a-textarea v-model="rejectForm.reason" placeholder="请说明拒绝原因（必填）" :max-length="200" show-word-limit :rows="3" />
+    </a-form-item>
+  </a-form>
+</a-modal>
+```
+
+---
+
+## 五十二、文件管理规范
+
+> 覆盖附件列表、文件预览、文件夹树、批量下载等文件管理场景。
+
+### 52.1 文件管理页面布局
+
+```
+┌─────────────────────────────────────────────────┐
+│ [L1] 页面 Tab（全部文件 / 提单文件 / 报关文件…）  │
+├───────────────┬─────────────────────────────────┤
+│               │ [L2] 工具栏（上传 / 下载 / 删除）│
+│  [左侧]       ├─────────────────────────────────┤
+│  文件夹树     │ [L3] 文件列表（VXE Table）       │
+│  TreeSelect   │                                 │
+│  或 a-tree    │                                 │
+│               │                                 │
+└───────────────┴─────────────────────────────────┘
+```
+
+### 52.2 文件列表 VXE Table 列规范
+
+| 列 | 宽度 | 内容 |
+|----|------|------|
+| checkbox | 40px | 批量勾选 |
+| 文件名 | min-width | icon + 文件名（可点击预览）|
+| 文件类型 | 80px | PDF / Excel / Image 等 |
+| 文件大小 | 80px | 格式化：`1.2 MB` |
+| 上传人 | 100px | 姓名 |
+| 上传时间 | 150px | `YYYY-MM-DD HH:mm` |
+| 操作 | 120px | 预览 / 下载 / 删除 |
+
+```vue
+<!-- 文件名列 -->
+<vxe-column field="fileName" title="文件名" min-width="200">
+  <template #default="{ row }">
+    <div class="file-name-cell">
+      <component :is="fileTypeIcon(row.fileType)" class="file-type-icon" />
+      <span class="link-text" @click="previewFile(row)">{{ row.fileName }}</span>
+    </div>
+  </template>
+</vxe-column>
+```
+
+```ts
+const fileTypeIcon = (type: string) => ({
+  pdf:   IconFilePdf,
+  excel: IconFileExcel,
+  word:  IconFile,
+  image: IconImage,
+}[type] ?? IconFile)
+
+const formatSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes/1024).toFixed(1)} KB`
+  return `${(bytes/1024/1024).toFixed(1)} MB`
+}
+```
+
+```css
+.file-name-cell { display: flex; align-items: center; gap: 6px; }
+.file-type-icon { font-size: 16px; flex-shrink: 0; }
+```
+
+### 52.3 文件预览规范
+
+| 文件类型 | 预览方式 |
+|---------|---------|
+| PDF | 新标签页打开（`window.open(url, '_blank')`）或内嵌 `<iframe>` |
+| 图片 | `a-image` 组件 preview 功能 |
+| Excel / Word | 提供「下载后查看」按钮，不强制在线预览 |
+| 视频 | `<video>` 标签 + 控件 |
+
+### 52.4 文件大小与格式限制（统一规范）
+
+```ts
+export const FILE_LIMITS = {
+  document: { maxSize: 50 * 1024 * 1024, types: ['pdf', 'doc', 'docx', 'xls', 'xlsx'] },
+  image:    { maxSize: 10 * 1024 * 1024, types: ['jpg', 'jpeg', 'png', 'gif', 'webp'] },
+  archive:  { maxSize: 100 * 1024 * 1024, types: ['zip', 'rar', '7z'] },
+}
+```
+
+---
+
+## 五十三、批量导入规范（Excel Import）
+
+> 货代系统高频功能：批量导入订单、客户、航线、费率等。
+
+### 53.1 批量导入标准流程（三步）
+
+```
+步骤 1：下载模板 → 步骤 2：上传填好的 Excel → 步骤 3：查看导入结果
+```
+
+### 53.2 导入入口
+
+```vue
+<!-- 工具栏「批量导入」按钮 -->
+<a-button size="small" type="outline" @click="openImportModal">
+  <template #icon><icon-import /></template>批量导入
+</a-button>
+```
+
+### 53.3 导入弹窗（3 步）
+
+```vue
+<a-modal title="批量导入" width="560px" :visible="importVisible" :footer="false">
+  <a-steps :current="importStep" size="small" style="margin-bottom:20px">
+    <a-step title="下载模板" />
+    <a-step title="上传文件" />
+    <a-step title="导入结果" />
+  </a-steps>
+
+  <!-- Step 1 -->
+  <template v-if="importStep === 1">
+    <a-result status="info" title="请先下载模板" sub-title="按照模板格式填写后上传">
+      <template #extra>
+        <a-button type="primary" @click="downloadTemplate">
+          <template #icon><icon-download /></template>下载导入模板
+        </a-button>
+        <a-button @click="importStep = 2">我已有模板，去上传</a-button>
+      </template>
+    </a-result>
+  </template>
+
+  <!-- Step 2 -->
+  <template v-else-if="importStep === 2">
+    <div class="uppy-list-zone" @click="openUppy">
+      <icon-upload style="font-size:24px; color:var(--color-text-3)" />
+      <p class="uppy-list-text">点击上传 Excel 文件</p>
+      <p class="uppy-list-hint">仅支持 .xlsx / .xls，不超过 10MB</p>
+    </div>
+    <div v-if="importFile" class="uppy-file-row">
+      <icon-file class="uppy-file-row__icon" />
+      <span class="uppy-file-row__name">{{ importFile.name }}</span>
+      <a-button type="primary" :loading="importing" @click="submitImport">开始导入</a-button>
+    </div>
+  </template>
+
+  <!-- Step 3 -->
+  <template v-else>
+    <a-result
+      :status="importResult.failCount === 0 ? 'success' : 'warning'"
+      :title="`导入完成：成功 ${importResult.successCount} 条`"
+      :sub-title="importResult.failCount > 0 ? `失败 ${importResult.failCount} 条，请下载错误明细` : ''"
+    >
+      <template #extra>
+        <a-button v-if="importResult.failCount > 0" @click="downloadErrors">下载错误明细</a-button>
+        <a-button type="primary" @click="closeImport">完成</a-button>
+      </template>
+    </a-result>
+  </template>
+</a-modal>
+```
+
+### 53.4 导入规范
+
+| 规则 | 内容 |
+|------|------|
+| 模板格式 | Excel 第 1 行为表头，表头名称与字段说明同 template；必填列用红色标注 |
+| 数据行上限 | 单次导入 **≤ 5000 行**，超出提示分批 |
+| 错误明细 | 提供「下载错误明细」Excel，含原始数据 + 每行错误原因 |
+| 重复数据 | 导入接口返回重复数据时，弹出「跳过重复 / 覆盖」二选一确认 |
+| 进度展示 | 导入行数 > 500 时，接口改为异步，用 `a-progress` 展示进度 |
+
+
+---
+
+## 五十四、Progress 进度条规范
+
+> 适用于：文件上传进度、批量导入进度、异步任务进度。
+
+### 54.1 场景与组件选型
+
+| 场景 | 组件 | 说明 |
+|------|------|------|
+| 文件上传单个文件 | `a-progress` size="mini" | 内联在文件行 |
+| 批量操作异步进度 | `a-progress` 条形 | 弹窗或页面顶部 |
+| 页面加载进度 | `a-progress` line，全宽 | 顶部薄条 |
+| 步骤完成度 | `a-steps` | 见 §47 |
+
+### 54.2 用法示例
+
+```vue
+<!-- 文件上传进度（内联，mini） -->
+<a-progress :percent="file.progress" size="mini" style="width: 80px" :show-text="false" />
+
+<!-- 批量任务进度（弹窗内，带文字） -->
+<a-progress
+  :percent="taskProgress"
+  :status="taskProgress === 100 ? 'success' : 'normal'"
+  :format-text="(p) => `${p}% (${doneCount}/${totalCount})`"
+/>
+
+<!-- 异步任务页面顶部进度条 -->
+<div v-if="importing" class="page-progress-bar">
+  <a-progress :percent="importProgress" :show-text="false" size="mini" status="normal" />
+</div>
+```
+
+```css
+.page-progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  height: 3px;
+}
+.page-progress-bar .arco-progress-line { border-radius: 0; }
+```
+
+### 54.3 进度轮询规范
+
+```ts
+// 异步任务进度轮询（批量导入/导出）
+const pollProgress = async (taskId: string) => {
+  const timer = setInterval(async () => {
+    const { progress, status, result } = await getTaskProgress(taskId)
+    importProgress.value = progress
+    if (status === 'done') {
+      clearInterval(timer)
+      importResult.value = result
+      importStep.value = 3
+    } else if (status === 'failed') {
+      clearInterval(timer)
+      Message.error('任务执行失败，请重试')
+    }
+  }, 1500)  // 1.5s 轮询一次
+}
+```
+
+---
+
+## 五十五、Collapse 折叠面板规范
+
+> 适用于：详情抽屉分区折叠、高级筛选展开、权限模块分组。
+
+### 55.1 何时用 Collapse vs 默认展开
+
+```
+信息量 ≤ 6 个字段    → 不折叠，直接显示
+信息量 > 6 个字段且可分组 → 使用 Collapse
+用户明确不常查看（如历史备注）→ 默认折叠
+核心业务信息（基础信息/货物信息）→ 默认展开，允许折叠
+```
+
+### 55.2 详情抽屉内 Collapse
+
+```vue
+<a-collapse :default-active-keys="['basic', 'cargo']" :bordered="false">
+  <a-collapse-item key="basic" header="基础信息">
+    <div class="detail-form-grid--3">
+      <!-- 字段 -->
+    </div>
+  </a-collapse-item>
+  <a-collapse-item key="cargo" header="货物信息">
+    <div class="detail-form-grid--4">
+      <!-- 字段 -->
+    </div>
+  </a-collapse-item>
+  <a-collapse-item key="remark" header="备注">
+    <p class="detail-value">{{ detail.remark || '—' }}</p>
+  </a-collapse-item>
+</a-collapse>
+```
+
+```css
+/* 详情抽屉内 Collapse 覆盖 */
+.detail-drawer .arco-collapse-item {
+  border-bottom: 1px solid var(--color-border-1) !important;
+  border-top: none !important;
+}
+.detail-drawer .arco-collapse-item-header {
+  padding: 8px 12px !important;
+  font-size: var(--dense-font-title) !important;
+  font-weight: 600 !important;
+  color: var(--color-text-1) !important;
+  background: var(--color-fill-1) !important;
+}
+.detail-drawer .arco-collapse-item-content { padding: 12px !important; }
+```
+
+### 55.3 与 DetailSection 的选择
+
+| 方案 | 适用 |
+|------|------|
+| `DetailSection`（§17.3）| 超宽复杂详情抽屉，各区之间完全分离，无需折叠 |
+| `a-collapse` | 标准宽度详情（400-600px），信息量大需要折叠收纳 |
+| 二者混用 | DetailSection 内部的某些子区可以 Collapse，外层保持 DetailSection 框架 |
+
+---
+
+## 五十六、数据看板规范
+
+> 覆盖运营看板、财务汇总、海外业务大屏等数据展示页。
+
+### 56.1 看板页面布局
+
+```
+┌────────────────────────────────────────────────────┐
+│ [L1] 页面标题 + 日期筛选 + 刷新                    │
+├────────────────────────────────────────────────────┤
+│ [KPI 统计行] 4-6 个核心指标卡片                    │
+├─────────────────────┬──────────────────────────────┤
+│ [图表区 1]          │ [图表区 2]                   │
+│ 折线图/柱状图        │ 饼图/环形图                  │
+│ 50%                 │ 50%                          │
+├─────────────────────┴──────────────────────────────┤
+│ [明细表格] 可选，展示明细数据                       │
+└────────────────────────────────────────────────────┘
+```
+
+### 56.2 看板页 CSS 结构
+
+```vue
+<div class="dashboard-root">
+  <!-- 顶部筛选行 -->
+  <div class="dashboard-header zone-card">
+    <span class="dashboard-title">运营看板</span>
+    <div class="dashboard-filters">
+      <a-radio-group v-model="period" type="button" size="small">
+        <a-radio value="today">今天</a-radio>
+        <a-radio value="week">本周</a-radio>
+        <a-radio value="month">本月</a-radio>
+        <a-radio value="quarter">本季度</a-radio>
+      </a-radio-group>
+      <a-range-picker v-if="period==='custom'" size="small" style="width:220px" />
+      <a-button size="small" type="text" @click="refresh">
+        <template #icon><icon-refresh /></template>
+      </a-button>
+    </div>
+  </div>
+
+  <!-- KPI 行 -->
+  <div class="zone-kpi">
+    <div class="kpi-card" v-for="kpi in kpiList" :key="kpi.key">
+      <div class="kpi-label">{{ kpi.label }}</div>
+      <div class="kpi-body">
+        <span class="kpi-value" :class="kpi.colorClass">{{ kpi.value }}</span>
+        <span class="kpi-unit">{{ kpi.unit }}</span>
+      </div>
+      <div class="kpi-footer">
+        <span class="kpi-trend" :class="kpi.trend > 0 ? 'up' : 'down'">
+          {{ kpi.trend > 0 ? '↑' : '↓' }} {{ Math.abs(kpi.trend) }}% 环比
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 图表区 -->
+  <div class="dashboard-charts">
+    <div class="zone-card dashboard-chart-card">
+      <div class="chart-card-title">订单趋势</div>
+      <div class="chart-wrap" ref="lineChartRef" />
+    </div>
+    <div class="zone-card dashboard-chart-card">
+      <div class="chart-card-title">运输方式占比</div>
+      <div class="chart-wrap" ref="pieChartRef" />
+    </div>
+  </div>
+</div>
+```
+
+```css
+.dashboard-root {
+  display: flex; flex-direction: column;
+  gap: var(--dense-gap-zone);
+  padding: var(--dense-gap-zone);
+  background: var(--color-bg-body);
+  height: 100%; overflow-y: auto;
+}
+.dashboard-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+}
+.dashboard-title { font-size: var(--dense-font-nav); font-weight: 600; color: var(--color-text-1); }
+.dashboard-filters { display: flex; align-items: center; gap: 8px; }
+.dashboard-charts {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--dense-gap-zone);
+}
+.dashboard-chart-card { padding: 14px 16px; }
+.chart-card-title {
+  font-size: var(--dense-font-title); font-weight: 600;
+  color: var(--color-text-1); margin-bottom: 12px;
+}
+.chart-wrap { height: 260px; }
+```
+
+### 56.3 ECharts 主题 Token（与 §21 对齐）
+
+```ts
+// 统一色板
+export const CHART_COLORS = [
+  'var(--primary-6)',   // #165DFF
+  'var(--success-6)',   // #00B42A
+  'var(--warning-6)',   // #FF7D00
+  'var(--danger-6)',    // #F53F3F
+  'var(--purple-6)',    // #722ED1
+  'var(--cyan-6)',      // #0FB6B6
+  'var(--gold-6)',      // #D9A400
+]
+
+// 图表字体统一
+export const CHART_TEXT_STYLE = {
+  fontFamily: '-apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif',
+  fontSize: 11,
+  color: '#86909C',  // color-text-3
+}
+```
+
+---
+
+## 五十七、仓储模块规范
+
+> 覆盖入库单、出库单、库存查询、货架管理等仓储场景。
+
+### 57.1 仓储状态色
+
+| 状态 | `data-s` | 语义 |
+|------|----------|------|
+| 待入库 | `wait` | 已创建，等待入库 |
+| 在库 | `acc` | 已存入仓库 |
+| 部分出库 | `partial` | 部分货物已出库 |
+| 已出库 | `rel` | 全部出库 |
+| 异常 | `rej` | 破损/丢失/差异 |
+| 草稿 | `draft` | 未确认单据 |
+
+### 57.2 库存数量展示规范
+
+```vue
+<!-- 库存数量列：超阈值预警 -->
+<vxe-column field="stock" title="库存数量" width="100" align="right">
+  <template #default="{ row }">
+    <span class="num-val" :class="stockClass(row.stock, row.minStock)">
+      {{ row.stock.toLocaleString() }}
+      <span class="stock-unit">{{ row.unit }}</span>
+    </span>
+  </template>
+</vxe-column>
+```
+
+```ts
+const stockClass = (stock: number, minStock: number) => {
+  if (stock === 0) return 'stock--empty'
+  if (stock <= minStock) return 'stock--low'
+  return ''
+}
+```
+
+```css
+.stock--empty { color: var(--danger-6) !important; font-weight: 600; }
+.stock--low   { color: var(--warning-6) !important; }
+.stock-unit   { font-size: var(--dense-font-micro); color: var(--color-text-3); margin-left: 2px; }
+```
+
+### 57.3 货架位置展示
+
+```vue
+<!-- 货架位置：区域-货架-层-列 -->
+<span class="warehouse-loc mono">
+  {{ row.area }}-{{ row.shelf }}-{{ row.level }}-{{ row.position }}
+</span>
+```
+
+```css
+.warehouse-loc {
+  font-family: var(--mono);
+  font-size: var(--dense-font-data);
+  color: var(--color-text-1);
+  background: var(--color-fill-2);
+  padding: 1px 5px; border-radius: var(--radius-sm);
+  letter-spacing: 0.5px;
+}
+```
+
+### 57.4 出入库单差异核对
+
+差异数量 > 0 时，用红色 + 感叹号图标标注：
+
+```vue
+<span v-if="row.diff !== 0" class="diff-badge">
+  <icon-exclamation-circle-fill />
+  差异 {{ row.diff > 0 ? '+' : '' }}{{ row.diff }}
+</span>
+```
+
+```css
+.diff-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: var(--dense-font-aux); font-weight: 600;
+  color: var(--danger-6);
+}
+```
+
+---
+
+## 五十八、权限树规范（补充 §28）
+
+> §28 已覆盖按钮级/页面级/字段级权限逻辑，本章补充权限管理 UI（角色管理、权限分配）的实现规范。
+
+### 58.1 权限管理页面布局
+
+```
+┌──────────────┬─────────────────────────────────┐
+│  角色列表     │  角色详情                        │
+│  VXE Table  │  ┌─── 基础信息 ────────────────┐  │
+│             │  │ 角色名称 / 描述 / 状态        │  │
+│  [新建角色]  │  └──────────────────────────── ┘  │
+│             │  ┌─── 菜单权限 ────────────────┐  │
+│             │  │ TreeSelect（多选 + 联动）     │  │
+│             │  └──────────────────────────── ┘  │
+│             │  ┌─── 数据权限 ────────────────┐  │
+│             │  │ 本人/本部门/全公司 Radio       │  │
+│             │  └──────────────────────────── ┘  │
+│             │  [保存]  [取消]                   │
+└──────────────┴─────────────────────────────────┘
+```
+
+### 58.2 菜单权限树实现
+
+```vue
+<a-tree-select
+  v-model="roleMenus"
+  :data="menuPermTree"
+  multiple
+  checkable
+  :check-strictly="false"    <!-- 父子联动 -->
+  :default-expand-level="2"
+  :field-names="{ key: 'permCode', title: 'permName', children: 'children' }"
+  placeholder="请选择菜单权限"
+  size="small"
+  style="width: 100%"
+/>
+```
+
+### 58.3 操作日志列表规范
+
+```
+操作日志页面 = 标准列表页，禁止新建/编辑，只有查询和导出。
+```
+
+| 列 | 内容 |
+|----|------|
+| 操作时间 | `YYYY-MM-DD HH:mm:ss`，mono 等宽 |
+| 操作人 | 姓名 + 工号（双行 cell-two-line）|
+| 操作模块 | 如「订单管理」「财务管理」|
+| 操作类型 | 创建/修改/删除/审批/导出（用 a-tag 色块区分）|
+| 操作内容 | 简短描述，超长 tooltip 展开 |
+| 操作 IP | mono 等宽 |
+
+---
+
+## 五十九、国际化与时区规范
+
+> 覆盖海外业务场景：多语言切换、时区展示、多币种、国际日期格式。
+
+### 59.1 语言切换
+
+```vue
+<!-- App 顶部工具栏 -->
+<a-dropdown>
+  <a-button type="text" size="small">
+    <template #icon><icon-language /></template>
+    {{ currentLocale === 'zh-CN' ? '中文' : 'English' }}
+  </a-button>
+  <template #content>
+    <a-doption @click="switchLocale('zh-CN')">中文（简体）</a-doption>
+    <a-doption @click="switchLocale('en-US')">English</a-doption>
+  </template>
+</a-dropdown>
+```
+
+```ts
+// i18n 配置（vue-i18n）
+import { createI18n } from 'vue-i18n'
+const i18n = createI18n({
+  locale: localStorage.getItem('locale') ?? 'zh-CN',
+  fallbackLocale: 'zh-CN',
+  messages: { 'zh-CN': zhCN, 'en-US': enUS },
+})
+```
+
+### 59.2 时区展示规范
+
+```ts
+// utils/datetime.ts
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+// 显示本地时间（带时区标识）
+export const fmtLocalTime = (utcStr: string, tz?: string) => {
+  const targetTz = tz ?? Intl.DateTimeFormat().resolvedOptions().timeZone
+  return dayjs.utc(utcStr).tz(targetTz).format('YYYY-MM-DD HH:mm')
+}
+
+// 显示多时区对比（海外业务）
+export const fmtMultiTz = (utcStr: string) => ({
+  beijing: dayjs.utc(utcStr).tz('Asia/Shanghai').format('MM/DD HH:mm'),
+  local:   dayjs.utc(utcStr).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('MM/DD HH:mm'),
+})
+```
+
+```vue
+<!-- 时区标识展示 -->
+<div class="cell-two-line">
+  <span class="c2-main mono">{{ fmtLocalTime(row.etd) }}</span>
+  <span class="c2-sub">{{ row.departureTimezone ?? 'UTC+8' }}</span>
+</div>
+```
+
+### 59.3 国际化数字/货币规范
+
+```ts
+// 根据 locale 格式化数字
+export const fmtIntlNumber = (v: number, locale = 'zh-CN') =>
+  new Intl.NumberFormat(locale).format(v)
+
+// 根据 locale 格式化货币
+export const fmtIntlCurrency = (v: number, currency: string, locale = 'zh-CN') =>
+  new Intl.NumberFormat(locale, { style: 'currency', currency }).format(v)
+// 示例：fmtIntlCurrency(1234.56, 'USD', 'en-US') → '$1,234.56'
+```
+
+### 59.4 港口/国家代码展示
+
+```vue
+<!-- 港口：代码（上）+ 中文名（下）-->
+<div class="cell-two-line">
+  <span class="c2-main mono">{{ row.portCode }}</span>
+  <span class="c2-sub">{{ row.portName }}</span>
+</div>
+
+<!-- 国家旗帜（emoji）+ 国家代码 -->
+<span class="country-cell">
+  <span class="country-flag">{{ countryFlag(row.countryCode) }}</span>
+  <span class="mono">{{ row.countryCode }}</span>
+</span>
+```
+
+```ts
+// 国家代码 → emoji flag
+const countryFlag = (code: string) =>
+  code.toUpperCase().split('').map(c => String.fromCodePoint(c.charCodeAt(0) + 127397)).join('')
+// 'CN' → '🇨🇳'
+```
+
+```css
+.country-cell { display: inline-flex; align-items: center; gap: 5px; font-size: var(--dense-font-data); }
+.country-flag { font-size: 14px; line-height: 1; }
+```
+
+---
+
