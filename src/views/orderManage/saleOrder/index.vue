@@ -16,10 +16,9 @@ const {
   drawerVisible,
   drawerMode,
   currentRecord,
-  formModel,
+  detailModel,
   statusCounts,
   pagedRows,
-  activeFilterTags,
   hiddenAdvancedActive,
   fetchList,
   handleSearch,
@@ -30,16 +29,20 @@ const {
   handleClearStatus,
   handleTimeQuickChange,
   handlePageChange,
-  removeFilterTag,
-  clearAllFilterTags,
   handleExport,
   handleBatch,
   openDetail,
   openCreate,
-  saveRecord
+  saveRecord,
+  submitRecord,
+  abandonRecord
 } = useSaleOrderList();
 
 const { columnOptions, visibleColumns, isVisible, toggleColumn } = useSaleOrderTableColumns();
+
+const enterEditMode = () => {
+  drawerMode.value = 'edit';
+};
 </script>
 
 <template>
@@ -47,14 +50,11 @@ const { columnOptions, visibleColumns, isVisible, toggleColumn } = useSaleOrderT
     <sale-order-search
       :query="query"
       :filter-expanded="filterExpanded"
-      :filter-tags="activeFilterTags"
       :hidden-advanced-active="hiddenAdvancedActive"
       @search="handleSearch"
       @reset="handleReset"
       @transport-change="handleTransportChange"
       @update:filter-expanded="filterExpanded = $event"
-      @remove-tag="removeFilterTag"
-      @clear-tags="clearAllFilterTags"
       @time-quick-change="handleTimeQuickChange"
     />
 
@@ -99,9 +99,11 @@ const { columnOptions, visibleColumns, isVisible, toggleColumn } = useSaleOrderT
       v-model:visible="drawerVisible"
       :mode="drawerMode"
       :record="currentRecord"
-      :form-model="formModel"
+      :detail="detailModel"
       @save="saveRecord"
-      @edit="currentRecord && openDetail(currentRecord, 'edit')"
+      @submit="submitRecord"
+      @abandon="abandonRecord"
+      @edit="enterEditMode"
     />
   </div>
 </template>

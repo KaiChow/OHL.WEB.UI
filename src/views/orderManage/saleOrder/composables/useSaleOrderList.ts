@@ -3,8 +3,13 @@ import { Message } from '@arco-design/web-vue';
 import { saleOrderMockRecords } from '../../../../mock/saleOrders';
 import type { DrawerMode } from '../../../../types/drawer';
 import { useSaleOrderFilterTags } from './useSaleOrderFilterTags';
+import {
+  createEmptyDetail,
+  detailFromRecord,
+  detailToFormModel
+} from './useSaleOrderDetailForm';
 import type {
-  SaleOrderFormModel,
+  SaleOrderDetailModel,
   SaleOrderQuery,
   SaleOrderRecord,
   TransportMode
@@ -53,7 +58,7 @@ export function useSaleOrderList() {
   const filterExpanded = ref(localStorage.getItem(FILTER_EXPANDED_KEY) === 'true');
   const page = reactive({ current: 1, size: 100, total: 0 });
 
-  const { activeFilterTags, hiddenAdvancedActive } = useSaleOrderFilterTags(query);
+  const { hiddenAdvancedActive } = useSaleOrderFilterTags(query);
 
   watch(filterExpanded, (v) => {
     localStorage.setItem(FILTER_EXPANDED_KEY, String(v));
@@ -62,26 +67,7 @@ export function useSaleOrderList() {
   const drawerVisible = ref(false);
   const drawerMode = ref<DrawerMode>('view');
   const currentRecord = ref<SaleOrderRecord | null>(null);
-  const formModel = ref<SaleOrderFormModel>(createEmptyForm('sea'));
-
-  function createEmptyForm(mode: TransportMode): SaleOrderFormModel {
-    return {
-      DcgNo: '',
-      OrderNo: '',
-      BizType: 'FBA',
-      CargoType: '普货',
-      ImportExport: '出口',
-      Salesman: '',
-      Operator: '',
-      CustomerService: '',
-      Shipper: '',
-      Consignee: '',
-      ContainerInfo: "1X40'HQ",
-      PackingMethod: 'FCL',
-      Status: 'draft',
-      TransportMode: mode
-    };
-  }
+  const detailModel = ref<SaleOrderDetailModel>(createEmptyDetail('sea'));
 
   const baseFiltered = computed(() => {
     const kw = query.keyword.trim().toLowerCase();
@@ -193,64 +179,6 @@ export function useSaleOrderList() {
 
   const handlePageChange = () => fetchList();
 
-  const removeFilterTag = (key: string) => {
-    switch (key) {
-      case 'dcgNo':
-        query.dcgNo = '';
-        break;
-      case 'bizType':
-        query.bizType = '全部';
-        break;
-      case 'importExport':
-        query.importExport = '全部';
-        break;
-      case 'salesman':
-        query.salesman = '';
-        break;
-      case 'operator':
-        query.operator = '';
-        break;
-      case 'customerService':
-        query.customerService = '';
-        break;
-      case 'csDocument':
-        query.csDocument = '';
-        break;
-      case 'packingMethod':
-        query.packingMethod = '全部';
-        break;
-      case 'shipper':
-        query.shipper = '';
-        break;
-      case 'consignee':
-        query.consignee = '';
-        break;
-      case 'quickTag':
-        query.quickTag = '全部';
-        break;
-      case 'keyword':
-        query.keyword = '';
-        break;
-      case 'scope':
-        query.scope = 'all';
-        break;
-      case 'status':
-        query.status = '';
-        break;
-      case 'timeQuick':
-        query.timeQuick = '';
-        break;
-      default:
-        break;
-    }
-    page.current = 1;
-    fetchList();
-  };
-
-  const clearAllFilterTags = () => {
-    handleReset();
-  };
-
   const handleExport = (scope: 'page' | 'all' | 'selected') => {
     const label =
       scope === 'page' ? '当前页' : scope === 'all' ? '全部筛选结果' : `已选 ${selectedIds.value.length} 条`;
@@ -269,35 +197,19 @@ export function useSaleOrderList() {
   const openDetail = (row: SaleOrderRecord, mode: DrawerMode = 'view') => {
     currentRecord.value = row;
     drawerMode.value = mode;
-    if (mode === 'edit') {
-      formModel.value = {
-        DcgNo: row.DcgNo,
-        OrderNo: row.OrderNo,
-        BizType: row.BizType,
-        CargoType: row.CargoType,
-        ImportExport: row.ImportExport,
-        Salesman: row.Salesman,
-        Operator: row.Operator,
-        CustomerService: row.CustomerService,
-        Shipper: row.Shipper,
-        Consignee: row.Consignee,
-        ContainerInfo: row.ContainerInfo,
-        PackingMethod: row.PackingMethod,
-        Status: row.Status,
-        TransportMode: row.TransportMode
-      };
-    }
+    detailModel.value = detailFromRecord(row);
     drawerVisible.value = true;
   };
 
   const openCreate = () => {
     currentRecord.value = null;
     drawerMode.value = 'create';
-    formModel.value = createEmptyForm(query.transportMode);
+    detailModel.value = createEmptyDetail(query.transportMode);
     drawerVisible.value = true;
   };
 
-  const saveRecord = () => {
+  const persistDetail = (closeAfter: boolean, successMsg: string) => {
+    const form = detailToFormModel(detailModel.value);
     if (drawerMode.value === 'create') {
       const nextId = Math.max(...records.value.map((r) => r.Id), 0) + 1;
       const orderNo = `PTP${2024}${String(nextId).padStart(6, '0')}`;
@@ -305,39 +217,51 @@ export function useSaleOrderList() {
         Id: nextId,
         OrderNo: orderNo,
         SubmitTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        Status: 'draft',
-        CargoType: formModel.value.CargoType,
-        BizType: formModel.value.BizType,
-        DcgNo: formModel.value.DcgNo || `DCG${2024}${String(nextId).padStart(6, '0')}`,
+        Status: form.Status,
+        CargoType: form.CargoType,
+        BizType: form.BizType,
+        DcgNo: form.DcgNo || `DCG${2024}${String(nextId).padStart(6, '0')}`,
         WarehouseNo: '',
-        Salesman: formModel.value.Salesman,
-        Shipper: formModel.value.Shipper,
-        Consignee: formModel.value.Consignee,
-        ContainerInfo: formModel.value.ContainerInfo,
-        TransportMode: formModel.value.TransportMode,
-        ImportExport: formModel.value.ImportExport,
-        Operator: formModel.value.Operator,
-        CustomerService: formModel.value.CustomerService,
+        Salesman: form.Salesman,
+        Shipper: form.Shipper,
+        Consignee: form.Consignee,
+        ContainerInfo: form.ContainerInfo,
+        TransportMode: form.TransportMode,
+        ImportExport: form.ImportExport,
+        Operator: form.Operator,
+        CustomerService: form.CustomerService,
         CsDocument: '',
-        PackingMethod: formModel.value.PackingMethod,
+        PackingMethod: form.PackingMethod,
         QuickTag: '',
-        HasRemark: false,
+        HasRemark: Boolean(detailModel.value.CustomerRemark),
         HasFiles: false,
         Scope: 'personal'
       });
-      Message.success('业务单创建成功');
-    } else if (drawerMode.value === 'edit' && currentRecord.value) {
+    } else if (currentRecord.value) {
       const idx = records.value.findIndex((r) => r.Id === currentRecord.value!.Id);
       if (idx >= 0) {
         records.value[idx] = {
           ...records.value[idx],
-          ...formModel.value
+          ...form,
+          HasRemark: Boolean(detailModel.value.CustomerRemark)
         };
       }
-      Message.success('保存成功');
     }
-    drawerVisible.value = false;
+    Message.success(successMsg);
+    if (closeAfter) drawerVisible.value = false;
     fetchList();
+  };
+
+  const saveRecord = () => persistDetail(true, drawerMode.value === 'create' ? '业务单创建成功' : '保存成功');
+
+  const submitRecord = () => {
+    detailModel.value.Status = 'submitted';
+    persistDetail(true, '提交成功');
+  };
+
+  const abandonRecord = () => {
+    detailModel.value.Status = 'abandoned';
+    persistDetail(true, '已废弃');
   };
 
   fetchList();
@@ -352,10 +276,9 @@ export function useSaleOrderList() {
     drawerVisible,
     drawerMode,
     currentRecord,
-    formModel,
+    detailModel,
     statusCounts,
     pagedRows,
-    activeFilterTags,
     hiddenAdvancedActive,
     fetchList,
     handleSearch,
@@ -366,12 +289,12 @@ export function useSaleOrderList() {
     handleClearStatus,
     handleTimeQuickChange,
     handlePageChange,
-    removeFilterTag,
-    clearAllFilterTags,
     handleExport,
     handleBatch,
     openDetail,
     openCreate,
-    saveRecord
+    saveRecord,
+    submitRecord,
+    abandonRecord
   };
 }

@@ -13,14 +13,11 @@ import {
   timeQuickOptions,
   transportTabs
 } from '../config';
-import type { FilterTag } from '../composables/useSaleOrderFilterTags';
-import SaleOrderFilterStrip from './SaleOrderFilterStrip.vue';
 import type { SaleOrderQuery, TransportMode } from '../types';
 
 const props = defineProps<{
   query: SaleOrderQuery;
   filterExpanded: boolean;
-  filterTags: FilterTag[];
   hiddenAdvancedActive: number;
 }>();
 
@@ -29,8 +26,6 @@ const emit = defineEmits<{
   reset: [];
   'update:filterExpanded': [value: boolean];
   'transport-change': [mode: TransportMode];
-  'remove-tag': [key: string];
-  'clear-tags': [];
   'time-quick-change': [value: SaleOrderQuery['timeQuick']];
 }>();
 
@@ -230,12 +225,6 @@ const onTimeChip = (value: SaleOrderQuery['timeQuick']) => {
         </a-tooltip>
       </div>
     </div>
-
-    <sale-order-filter-strip
-      :tags="filterTags"
-      @remove="emit('remove-tag', $event)"
-      @clear-all="emit('clear-tags')"
-    />
   </div>
 </template>
 

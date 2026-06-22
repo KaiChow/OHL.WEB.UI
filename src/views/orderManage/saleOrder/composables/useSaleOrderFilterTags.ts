@@ -52,5 +52,5 @@ export function useSaleOrderFilterTags(query: SaleOrderQuery) {
     return activeFilterTags.value.filter((t) => keys.has(t.key)).length;
   });
 
-  return { activeFilterTags, hiddenAdvancedActive };
+  return { hiddenAdvancedActive };
 }
