@@ -25,6 +25,7 @@ const emit = defineEmits<{
 }>();
 
 const tableRef = ref<VxeTableInstance>();
+const compactRowConfig = { isHover: true, keyField: 'Id', height: 36 };
 
 watch(
   () => props.rows,
@@ -51,7 +52,7 @@ const onCheckboxChange = () => {
       :loading="loading"
       :data="rows"
       :stripe="true"
-      :row-config="{ isHover: true, keyField: 'Id' }"
+      :row-config="compactRowConfig"
       :checkbox-config="{ highlight: true, range: true }"
       :sort-config="{ trigger: 'cell', remote: false }"
       @checkbox-change="onCheckboxChange"

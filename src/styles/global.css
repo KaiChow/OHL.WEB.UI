@@ -1069,9 +1069,35 @@ html, body, #app {
   border-bottom: none !important;
 }
 
-/* ── 行高（高密度默认 36px）──────────────────────────────── */
-.vxe-table.compact  .vxe-body--row { height: var(--dense-row-h) !important; }
-.vxe-table.standard .vxe-body--row { height: 48px !important; }
+/* ── 行高（高密度默认 36px）────────────────────────────────
+   VXE size="small" 默认变量是 40px，compact 必须覆盖变量、td、cell 三层。
+*/
+.vxe-table.compact {
+  --vxe-ui-table-row-height-small: var(--dense-row-h);
+  --vxe-ui-table-row-height-mini: var(--dense-row-h);
+  --vxe-ui-table-cell-padding-small: 4px 8px;
+  --vxe-ui-table-cell-padding-mini: 3px 8px;
+}
+.vxe-table.compact .vxe-body--row,
+.vxe-table.compact .vxe-body--column {
+  height: var(--dense-row-h) !important;
+}
+.vxe-table.compact .vxe-body--column.is--padding .vxe-cell {
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+.vxe-table.compact .vxe-cell {
+  min-height: 0 !important;
+  line-height: 20px !important;
+}
+
+.vxe-table.standard {
+  --vxe-ui-table-row-height-small: 48px;
+}
+.vxe-table.standard .vxe-body--row,
+.vxe-table.standard .vxe-body--column {
+  height: 48px !important;
+}
 
 /* ══════════════════════════════════════════════════════════════
    VXE Table 行状态颜色系统

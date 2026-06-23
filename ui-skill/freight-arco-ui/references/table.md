@@ -21,7 +21,7 @@ Choose the table type before designing columns.
   class="compact"
   height="100%"
   show-overflow="title"
-  :row-config="{ isHover: true, keyField: 'Id' }"
+  :row-config="{ isHover: true, keyField: 'Id', height: 36 }"
 >
 </vxe-table>
 ```
@@ -45,6 +45,7 @@ Rules:
 - Project default tokens are `--dense-header-h: 32px` and `--dense-row-h: 36px`.
 - Main list VXE tables use `class="compact"` unless the page has a documented reason to use `standard`.
 - Do not use 40px as the default workbench row height; it reduces first-screen data density.
+- VXE `size="small"` defaults to a 40px row variable. A compact table must override `--vxe-ui-table-row-height-small` and set `row-config.height = 36`; changing only `.vxe-body--row` is not enough.
 - Do not push main list rows below 34px; checkbox, status pill, icon actions, and text line-height begin to clip.
 - If row content requires more than 36px, first reduce column complexity or move secondary information to detail, then consider `standard`.
 - Row height must be paired with readable typography: body F1 13px, header F3 12px.

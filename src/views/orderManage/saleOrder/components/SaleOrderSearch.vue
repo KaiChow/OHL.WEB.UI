@@ -68,7 +68,7 @@ const onTimeChip = (value: SaleOrderQuery['timeQuick']) => {
                 v-model="query.dcgNo"
                 allow-clear
                 size="small"
-                placeholder="单号 / HBL"
+                placeholder="业务单号 / HBL / MBL"
                 @press-enter="emit('search')"
               />
             </div>
@@ -196,7 +196,7 @@ const onTimeChip = (value: SaleOrderQuery['timeQuick']) => {
                   v-model="query.keyword"
                   allow-clear
                   size="small"
-                  placeholder="单号 / 客户 / 入仓单号"
+                  placeholder="客户 / 港口 / 入仓单号"
                   @press-enter="emit('search')"
                 />
               </div>

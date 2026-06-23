@@ -37,6 +37,7 @@
 - No double scrollbars.
 - No duplicated summary areas unless each has a distinct interaction purpose.
 - Table cap does not repeat pagination totals or status-tab counts.
+- Search/filter UI matches query field count tier: 0-3, 4-8, 9-16, 17-50, or 50+.
 
 ## Components
 
@@ -65,6 +66,8 @@
 - Uses the global system font stack and F1-F6 typography tokens.
 - No arbitrary business text sizes such as 14px/15px/16px.
 - Business UI does not use font-weight 700/800.
+- Filter/detail labels use F4 12px; input/select values use F1/F2 13px; placeholders use F5 11px.
+- Placeholder text is guidance only and does not look like an entered value.
 - Codes and identifiers use mono or tabular numeric styling where comparison matters.
 - Numeric, amount, weight, volume, and date values use tabular numbers where possible.
 - International text expansion is considered: labels and buttons do not depend on short Chinese text.
