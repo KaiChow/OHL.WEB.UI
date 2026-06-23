@@ -44,27 +44,32 @@ Use the global F1-F6 tokens. Do not hard-code page-specific font sizes.
 
 | Level | Token | Size | Weight | Use |
 |-------|-------|------|--------|-----|
-| F1 | `--dense-font-data` | 13px | 500 | Table cells, input values, core links, business identifiers |
+| F1 | `--dense-font-data` | 13px | 400/500 | Table cells, core links, business identifiers |
 | F2 | `--dense-font-nav` | 13px | 500/600 active | Buttons, tabs, chips, segmented controls |
 | F3 | `--dense-font-title` | 12px | 600 | Section titles, VXE headers, drawer titles, compact group headings |
 | F4 | `--dense-font-field` | 12px | 500 | Form labels, filter labels, field names |
-| F5 | `--dense-font-aux` | 11px | 400/500 | Helper text, placeholders, metadata, summary labels |
+| F4 Control | `--dense-font-control` | 12px | 400/500 | Form/filter input values, select values, textarea values, placeholders |
+| F5 | `--dense-font-aux` | 11px | 400/500 | Helper text, metadata, summary labels |
 | F6 | `--dense-font-micro` | 10px | 400/500 | Badges, units, sequence micro text |
 
 Exceptions:
 
-- Detail hero route or major KPI may use a local hero token, max 18px/600.
+- A true page/detail hero may use one local hero token, max 18px/600, only when it is visually separated from normal fact rows.
+- In a dense `dds-hero` key-facts row, all fact values use F1 13px. The primary route may be stronger by weight and placement, but should not jump to a larger size inside the same fact group.
 - Brand/logo shell may use larger or heavier text, but never copy shell typography into business modules.
 - Icons use icon size tokens, not text size tokens.
 
 ## Weight Rules
 
 - Business UI maximum weight is 600.
-- Data values default to 500.
+- Dense table body values default to 400.
+- Use 500 only for primary identifiers, links, numeric totals, selected options, and next-decision values.
 - Labels default to 500.
 - Helper text defaults to 400.
 - Do not use `font-weight: 700/800` inside business modules, tables, forms, drawers, filters, or toolbars.
 - Do not use font weight alone to indicate status, risk, or exception. Use semantic status components.
+- In main workbench tables, avoid making every cell `color-text-1 + 500`; it creates a black sheet. Default cells use `color-text-2 + 400`, while primary object codes, customer/party names, route, and key quantities can use stronger roles.
+- If a page feels like colors are "disabled" or "black only", first check selected-state styling and table body default weight before adding more primary color.
 
 ## International Text Expansion
 
@@ -95,11 +100,12 @@ Use mono or tabular numeric behavior for values users compare.
 Detail header facts must not all look like code.
 
 - Use mono only for order numbers, HBL/MBL, SO/PO, container numbers, and similar identifiers.
-- Route ports are business values, not technical codes by default. Use normal sans font with F1/hero emphasis.
+- Route ports are business values, not technical codes by default. In dense key-facts rows, use normal sans F1 13px with stronger weight/placement instead of larger font size.
 - Dates in hero facts use tabular numeric behavior, not necessarily mono.
 - Carrier, vessel/voyage, customer, and company names use normal sans font.
 - Hero fact labels use F5/meta color; hero fact values use F1/core value color.
-- Only the primary route or primary object identity may be stronger than normal F1.
+- Within the same `dds-hero` fact row, route, ETD/ETA, carrier, vessel/voyage, and customer values must share the same value size.
+- Only the primary route or primary object identity may be stronger than normal F1, and the difference should come from position, weight, or grouping.
 
 ## Attachment Typography
 
@@ -123,20 +129,23 @@ Do not make document type, file name, upload state, and helper text the same vis
 
 ## Form And Filter Typography
 
-Form fields have three different text roles. They should not use the same visual style.
+Form fields have three different text roles. In this project, they use one size and differ by color/weight.
+
+Reason: list filters and detail forms are high-frequency work surfaces. Mixing label 12px, value 13px, and placeholder 11px creates uneven rows, weak internationalization, and visual noise.
 
 | Role | Token | Color | Weight | Rule |
 |------|-------|-------|--------|------|
 | Field label | F4 `--dense-font-field` 12px | `color-text-2` | 500 | Stable field name, same in list filters and detail forms |
-| Entered/selected value | F1/F2 13px | `color-text-1` | 500 | User's actual query/form value, must be easiest to read inside the control |
-| Placeholder/hint | F5 `--dense-font-aux` 11px | `color-text-3` | 400 | Input guidance only, lower priority than real values |
+| Entered/selected value | F4 Control `--dense-font-control` 12px | `color-text-1` | 500 | User's actual query/form value, must be easiest to read inside the control |
+| Placeholder/hint | F4 Control `--dense-font-control` 12px | `color-text-3` | 400 | Input guidance only, lower priority than real values |
 
 Rules:
 
-- Different sizes between label, value, and placeholder are professional when they map to these roles.
-- Placeholder must never look like entered data; it uses F5 and `color-text-3`.
+- Filter labels, detail form labels, input values, select values, textarea values, and placeholders use 12px.
+- Placeholder must never look like entered data; keep the same size but use `color-text-3` and weight 400.
+- Real values use `color-text-1` and weight 500 when they are editable or decision-critical.
 - Filter labels and detail form labels share F4. Do not make list labels 11px and detail labels 12px.
-- Input/select values use F1/F2 13px. Do not reduce actual values to placeholder size.
+- Table data remains F1 13px. Do not apply table typography to form controls.
 - Placeholder copy must be specific to the field: `请输入业务员`, `请选择装箱方式`, `业务单号 / HBL / MBL`.
 - Avoid vague placeholder copy such as `请输入`, `请选择`, `模糊搜索`, unless the label already makes the exact target obvious and space is constrained.
 - For internationalization, keep labels visible and let placeholders be short examples, not the only explanation of the field.
@@ -147,6 +156,8 @@ Rules:
 - No `font-weight: 700/800` in business UI.
 - No custom page font stack that bypasses the global stack.
 - No truncating form labels by default.
-- No placeholder using the same font size/weight/color as an entered value.
+- No Arco default 14px form label leaking into detail/list forms.
+- No form/filter label-value-placeholder size drift such as 12/13/11.
+- No placeholder using the same weight/color as an entered value.
 - No all-caps UI labels unless the business data itself is a code.
 - No letter spacing below `0`.

@@ -70,8 +70,9 @@
 - Uses the global system font stack and F1-F6 typography tokens.
 - No arbitrary business text sizes such as 14px/15px/16px.
 - Business UI does not use font-weight 700/800.
-- Filter/detail labels use F4 12px; input/select values use F1/F2 13px; placeholders use F5 11px.
-- Placeholder text is guidance only and does not look like an entered value.
+- Filter/detail labels, input/select/textarea values, and placeholders use the F4 Control 12px layer.
+- Placeholder text is guidance only and differs from entered values by `color-text-3` and weight 400, not by a smaller font size.
+- No list/detail form uses mixed label/value/placeholder sizes such as 12/13/11 or leaked Arco 14px labels.
 - Codes and identifiers use mono or tabular numeric styling where comparison matters.
 - Numeric, amount, weight, volume, and date values use tabular numbers where possible.
 - International text expansion is considered: labels and buttons do not depend on short Chinese text.
@@ -88,7 +89,9 @@
 
 - Uses Arco tokens, no new hex palette.
 - Page is not dominated by gray.
-- One primary anchor is visible in the first viewport.
+- One primary anchor is visible in the first viewport, but primary tint does not cover whole search/tool/table surfaces.
+- Search card, toolbar, table cap, and default table rows use neutral surfaces; primary appears in active nav, links, focus, hover, selection, status, and thin anchors only.
+- Raw theme channel tokens are not used as complete CSS colors; use `--dense-*` aliases or `rgb()/rgba(var(...))`.
 - Status colors are consistent and only used for semantic state.
 - Customer, company, staff, route, carrier, vessel/voyage, and primary identifiers do not use disabled/empty `color-text-4`.
 - Detail header fact labels are readable metadata and values are stronger than labels.

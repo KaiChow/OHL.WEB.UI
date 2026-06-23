@@ -363,8 +363,8 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 .xf-field         { display: flex; flex-direction: column; gap: 4px; }
 .xf-field--wide   { grid-column: span 2; }
 .xf-label         { font-size: var(--dense-font-field); color: var(--color-text-2); font-weight: 500; }
-.xf-req           { color: var(--danger-6); margin-left: 2px; }
-.xf-err           { font-size: var(--dense-font-aux); color: var(--danger-6); }
+.xf-req           { color: var(--dense-danger-6); margin-left: 2px; }
+.xf-err           { font-size: var(--dense-font-aux); color: var(--dense-danger-6); }
 </style>
 ```
 
@@ -802,14 +802,15 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 
 | 场景 | Token | 实际值 |
 |------|-------|--------|
-| 表格单元格、输入值、链接 | `var(--dense-font-data)` | 13px/500 |
+| 表格单元格、核心链接、业务标识 | `var(--dense-font-data)` | 13px/400-500 |
 | 按钮、Tab、chip | `var(--dense-font-nav)` | 13px/500 |
 | 表头、分区标题、抽屉标题 | `var(--dense-font-title)` | 12px/600 |
 | 筛选标签、form label | `var(--dense-font-field)` | 12px/500 |
-| placeholder、副信息 | `var(--dense-font-aux)` | 11px/400 |
+| 表单/查询控件值、placeholder | `var(--dense-font-control)` | 12px/400-500 |
+| 副信息、统计 label、弱说明 | `var(--dense-font-aux)` | 11px/400 |
 | 序号、badge | `var(--dense-font-micro)` | 10px/400 |
 
-**禁止出现 14px、15px、16px 的业务区文字。禁止 font-weight: 700。**
+**列表查询和详情表单禁止 label/value/placeholder 混用 12/13/11px；统一 12px，通过颜色和字重分层。禁止出现 14px、15px、16px 的业务区文字。禁止 font-weight: 700。**
 
 ---
 
@@ -956,16 +957,20 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 
 ---
 
-## 颜色变量速查（禁止 hex，必须用变量）
+## 颜色变量速查（禁止 hex，必须用完整颜色变量）
+
+`@arco-themes/vue-gi-demo` 的 `--primary-*` / `--warning-*` / `--success-*` / `--danger-*` 是 RGB 通道值，不能直接写 `color: var(--primary-6)` 或 `border-color: var(--primary-2)`。
+
+项目 CSS 优先使用 `src/styles/global.css` 封装后的 `--dense-*` 完整颜色变量；需要透明度时才使用 `rgba(var(--primary-6), 0.08)` 这类写法。
 
 | 含义 | 变量 |
 |------|------|
-| 警告橙（危险货/待处理/icon 警示） | `var(--warning-6)` |
-| 危险红（异常/拒绝/逾期） | `var(--danger-6)` |
-| 成功绿 | `var(--success-6)` |
-| 主色蓝 | `var(--primary-6)` |
-| 警告浅底色 | `var(--warning-1)` |
-| 危险浅底色 | `var(--danger-1)` |
+| 警告橙（危险货/待处理/icon 警示） | `var(--dense-warning-6)` |
+| 危险红（异常/拒绝/逾期） | `var(--dense-danger-6)` |
+| 成功绿 | `var(--dense-success-6)` |
+| 主色蓝 | `var(--dense-primary-6)` |
+| 警告浅底色 | `var(--dense-warning-1)` |
+| 危险浅底色 | `var(--dense-danger-1)` |
 
 ---
 
@@ -1011,9 +1016,10 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 
 ### 颜色
 ```
-❌ color: #ff7d00  →  color: var(--warning-6)
-❌ color: #f53f3f  →  color: var(--danger-6)
-❌ background: #faf0e6  →  background: var(--warning-1)
+❌ color: #ff7d00  →  ✅ color: var(--dense-warning-6)
+❌ color: #f53f3f  →  ✅ color: var(--dense-danger-6)
+❌ background: #faf0e6  →  ✅ background: var(--dense-warning-1)
+❌ border-color: var(--primary-2)  →  ✅ border-color: var(--dense-primary-2)
 ❌ 自写危险货 pill 样式  →  用 s-pill[data-s="wait"] + icon
 ❌ 表格行 row-class-name 铺背景色（状态色只在 s-pill 上）
 ```
@@ -1242,7 +1248,7 @@ onBeforeUnmount(() => {
   font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 :deep(.uppy-Dashboard-AddFiles-title) { font-size: var(--dense-font-data); }
-:deep(.uppy-Dashboard-browse)         { color: var(--primary-6); }
+:deep(.uppy-Dashboard-browse)         { color: var(--dense-primary-6); }
 </style>
 ```
 

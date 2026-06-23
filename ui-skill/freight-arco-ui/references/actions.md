@@ -56,7 +56,9 @@ Default row view mode:
 - The operation column should normally be 88-120px for `查看 + 编辑 + 更多`.
 - Low-frequency actions go into the `更多` dropdown.
 - Direct row actions should sit in one compact action dock (`row-actions`) so the fixed operation column reads as a deliberate action area, not scattered icons.
-- The operation fixed column may use a subtle surface/left boundary to separate actions from data, but it must not become a heavy card or colored status area.
+- The operation fixed column may use a subtle surface/left boundary to separate actions from data, but it must not become a heavy card, black outlined pill, or colored status area.
+- `row-actions` is a light action surface, not a button group frame. Default state uses transparent/subtle primary-tint background and no visible dark border; border may appear only on hover/selected row with Arco primary token.
+- Row action icons default to `color-text-3` or Arco primary-muted. Do not use black/currentColor icons or permanent black borders to make actions visible.
 - The `更多` menu should use grouped content: normal actions first, divider, danger actions last. Dangerous options must be visually separated even when there is only one danger action.
 
 Dropdown order:

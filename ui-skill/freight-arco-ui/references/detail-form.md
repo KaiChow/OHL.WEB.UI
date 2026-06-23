@@ -27,6 +27,13 @@ Do not add a right summary sidebar when `dds-head` and `dds-hero` already show t
 
 Only use a right side panel when it has a distinct purpose such as anchors, exception checklist, audit trail, or collaboration, and it does not duplicate header content.
 
+### Detail Key-Facts Typography
+
+- Values in the same `dds-hero` fact row must use one value size. Do not render route as 17px while ETD, carrier, and vessel/voyage are 13px.
+- Route can be the lead fact through placement, grouping, and 600 weight, but not through an oversized font inside the same compact fact row.
+- Fact labels use F5/meta color; fact values use F1 13px/core text color.
+- Use a larger hero token only when the route/object identity is in a separate hero title area, not mixed with ordinary facts.
+
 ## Detail Sections
 
 - Use `detail-section`.
@@ -39,6 +46,9 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 ## Long Forms
 
 - Use vertical labels for dense enterprise forms.
+- Detail form labels, input values, select values, textarea values, placeholders, and read-only field values use the shared F4 Control 12px layer.
+- Use color and weight for hierarchy: labels use `color-text-2`/500, real values use `color-text-1`/500, placeholders use `color-text-3`/400.
+- Do not allow Arco default 14px labels or 13px table-data typography inside editable/detail form fields.
 - Use 4-column grid on wide screens, reduce at 1280px.
 - Long labels should not truncate important meaning:
   - Prefer label width/vertical label.

@@ -117,6 +117,7 @@ Table lines are functional separators, not decoration.
 
 - Header must have a visible but restrained anchor: subtle primary tint or primary bottom border.
 - Main workbench tables should use `workbench-table` to create a primary rhythm: stronger header anchor, subtle primary tint on the primary identifier column, and visible primary row actions.
+- Primary table borders must use complete CSS colors such as `--dense-primary-2/3` or `rgb(var(--primary-2))`; do not write `border-color: var(--primary-2)` because gi-demo stores primary tokens as RGB channels.
 - Keep a subtle 1px header/body separator when it helps scan the table.
 - Keep low-contrast row separators for dense data rows.
 - Avoid strong primary-colored horizontal lines in the table body or below the header; users read them as focus, current row, or selected state.
@@ -134,6 +135,8 @@ The bottom of a workbench table must look intentionally finished.
 - Do not leave an unexplained white/gray strip below the last row.
 - Do not use a strong colored line at the bottom; it will be read as selection or focus.
 - Empty remaining height is acceptable only when it is visually part of the table surface.
+- Page-to-viewport bottom spacing is not a table concern. Keep 8-10px page bottom padding on dense list pages so the table card does not stick to the browser edge.
+- Do not solve page bottom spacing with table padding or fake rows; that makes the last row look clipped or the data area look broken.
 
 ## Row Actions
 
@@ -141,12 +144,14 @@ The bottom of a workbench table must look intentionally finished.
 - Default visible actions: view/edit/more at most.
 - Row action icons must be visible in the default state; they should not look disabled.
 - Row action buttons should not use heavy permanent borders unless the action needs emphasis.
+- Operation-column action docks must not look like black outlined pills. Use subtle Arco primary tint or transparent surface by default; show border only on row hover/selection.
 - Destructive actions go in dropdown with confirmation.
 - Direct row actions must be object-specific where text is shown.
 - If more than two row actions exist, show primary row action plus `more`.
 - Do not repeat identical text buttons in every row if icon action with tooltip is enough.
 - Fixed operation columns need an intentional action surface: subtle left boundary, compact `row-actions` dock, and consistent icon button size.
 - Avoid loose icon buttons floating directly on the grid background. In dense workbench tables this looks unfinished and makes actions hard to scan.
+- Avoid permanent black/dark action borders. In a dense list they create a repeated black column and break the page's Arco theme rhythm.
 - Row action dropdowns should have grouped normal actions and a separated danger group. Do not let default dropdown styling make irreversible actions look like ordinary menu items.
 
 ## Detail And Nested Tables

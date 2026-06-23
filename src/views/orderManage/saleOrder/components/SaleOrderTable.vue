@@ -100,7 +100,7 @@ const handleAbandon = (row: SaleOrderRecord) => {
           </span>
           <icon-exclamation-circle
             v-if="row.HasRemark"
-            style="margin-left: 4px; color: var(--warning-6); font-size: var(--dense-font-data)"
+            style="margin-left: 4px; color: var(--dense-warning-6); font-size: var(--dense-font-data)"
           />
         </template>
       </vxe-column>
@@ -167,7 +167,7 @@ const handleAbandon = (row: SaleOrderRecord) => {
       </vxe-column>
 
       <!-- 操作列：查看 + 编辑两个高频 icon，其余收进 ⋯ 下拉 -->
-      <vxe-column title="操作" width="120" fixed="right" align="center">
+      <vxe-column title="操作" width="96" fixed="right" align="center">
         <template #default="{ row }">
           <div class="row-actions">
             <a-tooltip content="查看">

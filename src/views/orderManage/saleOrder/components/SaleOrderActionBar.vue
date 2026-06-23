@@ -168,7 +168,7 @@ const handleBatch = (action: string) => {
 }
 .stab--clear:hover {
   color: var(--dense-primary) !important;
-  background: var(--primary-1) !important;
+  background: var(--dense-primary-1) !important;
 }
 .toolbar-caret {
   margin-left: 2px;

@@ -184,7 +184,7 @@ const getFileStatus = (file: DetailAttachmentFile) => statusMeta[file.status];
 }
 
 .attachment-doc-row__required {
-  color: var(--danger-6);
+  color: var(--dense-danger-6);
 }
 
 .attachment-doc-row__files {
@@ -213,7 +213,7 @@ const getFileStatus = (file: DetailAttachmentFile) => statusMeta[file.status];
 }
 
 .attachment-file-item__icon {
-  color: var(--primary-6);
+  color: var(--dense-primary-6);
   font-size: var(--dense-font-data);
 }
 
@@ -256,7 +256,7 @@ const getFileStatus = (file: DetailAttachmentFile) => statusMeta[file.status];
   font-size: var(--dense-font-aux);
 }
 .attachment-empty-file__sub {
-  color: var(--warning-7);
+  color: var(--dense-warning-7);
   font-size: var(--dense-font-aux);
 }
 

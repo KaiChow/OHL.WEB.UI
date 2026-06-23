@@ -54,9 +54,10 @@ Rules:
 ## Filter Typography
 
 - Filter label: F4 12px/500, `color-text-2`.
-- Entered/selected value: F1/F2 13px/500, `color-text-1`.
-- Placeholder: F5 11px/400, `color-text-3`.
-- This visual difference is required; it separates field name, real query value, and guidance.
+- Entered/selected value: F4 Control 12px/500, `color-text-1`.
+- Placeholder: F4 Control 12px/400, `color-text-3`.
+- Size must stay consistent across label, value, and placeholder. Use color and weight, not mixed font sizes, to separate field name, real query value, and guidance.
+- Do not let Arco default 14px form text or a 13px table-data token leak into the search form.
 - Placeholder copy must explain accepted input, not replace the label.
 
 ## Toolbar
@@ -122,6 +123,9 @@ These examples are not templates. Use them to choose equivalent identity/status/
 - Keep row/card gaps predictable: 8-12px.
 - Do not compress search labels into controls.
 - Keep table as the dominant screen area.
+- Operational list pages must keep a small viewport bottom breathing space, usually 8-10px from `page-root--dense` bottom padding.
+- The table card should flex to fill available space, but it must not visually touch the browser or app viewport bottom when scrolled to the last row.
+- Do not create this bottom breathing space by adding fake blank table rows or unexplained inner table gaps. It belongs to the page/layout container.
 
 ## Common Mistakes
 
