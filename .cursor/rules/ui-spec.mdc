@@ -8,58 +8,266 @@ alwaysApply: true
 
 ## 核心原则
 
-`src/styles/global.css` 已实现完整设计系统。**开发前必须先读 global.css，优先用已有类名，禁止另写等效 CSS。**
+`src/styles/global.css` 已实现完整设计系统。**优先用已有类名，禁止另写等效 CSS。**
 
-参考已有页面：`src/views/orderManage/saleOrder/` 是最完整的示例。
+使用任何类名前先 grep 验证它存在于 global.css：
+```bash
+grep -n "\.类名" src/styles/global.css
+```
+无结果 = 该类不存在 = 禁止使用。
 
 ---
 
-## 页面骨架
+## 列表页骨架（直接复用）
 
-### 列表页
 ```vue
-<div class="page-root page-root--dense">
-  <!-- 搜索区：必须用 filter-card 体系，参考 SaleOrderSearch.vue -->
-  <div class="zone-l2-filter-card zone-card filter-card">
-    <div class="filter-card__main">
-      <div class="filter-card__fields">
-        <div class="filter-card__body--basic">
-          <div class="filter-grid">
-            <div class="filter-field">
-              <label class="filter-field__label">字段名</label>
-              <a-input size="small" placeholder="请输入" allow-clear @press-enter="handleSearch" />
+<template>
+  <div class="page-root page-root--dense">
+
+    <div class="zone-l2-filter-card zone-card filter-card">
+      <div class="filter-card__main">
+        <div class="filter-card__fields">
+          <div class="filter-card__body--basic">
+            <div class="filter-grid">
+              <div class="filter-field">
+                <label class="filter-field__label">字段名</label>
+                <a-input size="small" placeholder="请输入" allow-clear @press-enter="handleSearch" />
+              </div>
+              <div class="filter-field">
+                <label class="filter-field__label">状态</label>
+                <a-select size="small" placeholder="请选择" allow-clear @change="handleSearch" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="filter-card__actions-col">
+          <div class="filter-card__actions-primary">
+            <a-button size="small" type="primary" @click="handleSearch">查询</a-button>
+            <a-button size="small" type="text" class="reset-btn" @click="handleReset">重置</a-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar toolbar--dense">
+      <div class="toolbar-group">
+        <a-button size="small" type="primary"><template #icon><icon-plus /></template>新建</a-button>
+      </div>
+      <div class="toolbar-divider" />
+      <div class="toolbar-group toolbar-group--grow">
+        <a-button size="small" type="outline">导出</a-button>
+      </div>
+      <div class="toolbar-aside">
+        <span v-if="selectedCount > 0" class="bulk-hint">已选 {{ selectedCount }} 条</span>
+        <a-button size="small" type="text" @click="fetchList">
+          <template #icon><icon-refresh /></template>
+        </a-button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <vxe-table border="none" size="small" height="100%" show-overflow="title"
+        :row-config="{ isHover: true, keyField: 'Id' }" :data="rows">
+        <vxe-column field="OrderNo" title="单号" width="160" fixed="left">
+          <template #default="{ row }">
+            <span class="link-text link-text--strong mono" @click="openDetail(row)">{{ row.OrderNo }}</span>
+          </template>
+        </vxe-column>
+        <vxe-column field="Status" title="状态" width="80">
+          <template #default="{ row }">
+            <span class="s-pill" :data-s="row.statusKey">{{ row.statusLabel }}</span>
+          </template>
+        </vxe-column>
+        <vxe-column field="Remark" title="备注" min-width="200" />
+        <vxe-column title="操作" width="80" fixed="right">
+          <template #default="{ row }">
+            <a-tooltip content="查看">
+              <a-button type="text" class="row-action-btn" @click="openDetail(row)"><icon-eye /></a-button>
+            </a-tooltip>
+          </template>
+        </vxe-column>
+      </vxe-table>
+    </div>
+
+  </div>
+</template>
+<style scoped>
+/* 禁止在此重写 page-root / toolbar / filter-card / table-wrap */
+</style>
+```
+
+---
+
+## 全页详情骨架（直接复用）
+
+有步骤条 + Tab 多分区时使用：
+
+```vue
+<template>
+  <div class="page-root page-root--dense xp-wrap">
+    <!-- 页头 -->
+    <div class="xp-head zone-card">
+      <div class="xp-head__left">
+        <a-breadcrumb style="font-size:var(--dense-font-aux);margin-bottom:6px">...</a-breadcrumb>
+        <div class="xp-head__title-row">
+          <span class="link-text link-text--strong mono">{{ order.no }}</span>
+          <span class="s-pill" :data-s="order.status">{{ order.statusText }}</span>
+        </div>
+      </div>
+      <div class="xp-head__actions">
+        <a-button size="small" type="text"><template #icon><icon-printer /></template></a-button>
+        <a-button size="small" type="outline"><template #icon><icon-edit /></template>编辑</a-button>
+        <a-button size="small" type="primary">确认</a-button>
+        <a-dropdown trigger="click">
+          <a-button size="small" type="outline"><icon-more /></a-button>
+          <template #content>
+            <a-doption>复制</a-doption>
+            <a-doption class="danger-opt">取消</a-doption>
+          </template>
+        </a-dropdown>
+      </div>
+    </div>
+    <!-- 步骤条 -->
+    <div class="detail-section xp-steps-card">
+      <div class="detail-section__body">
+        <a-steps :current="currentStep" size="small">
+          <a-step title="待确认" /><a-step title="处理中" /><a-step title="已完成" />
+        </a-steps>
+      </div>
+    </div>
+    <!-- Tab 区 -->
+    <div class="xp-tabs-card zone-card">
+      <a-tabs v-model:active-key="activeTab" size="small" class="xp-tabs">
+        <a-tab-pane key="basic" title="基本信息">
+          <div class="xp-tab-body">
+            <div class="detail-section">
+              <div class="detail-section__head"><h4 class="detail-section__title">分区标题</h4></div>
+              <div class="detail-section__body">
+                <div class="detail-form-grid detail-form-grid--4">
+                  <div class="detail-field">
+                    <span class="detail-field__label">字段名</span>
+                    <span class="detail-field__val">字段值</span>
+                  </div>
+                  <div class="detail-field detail-field--wide">  <!-- 跨两列 -->
+                    <span class="detail-field__label">备注</span>
+                    <span class="detail-field__val">...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a-tab-pane>
+      </a-tabs>
+    </div>
+  </div>
+</template>
+<style scoped>
+.xp-wrap { display: flex; flex-direction: column; overflow: hidden; }
+.xp-head { padding: 12px 16px; flex-shrink: 0; display: flex; align-items: flex-start; justify-content: space-between; }
+.xp-head__left { display: flex; flex-direction: column; gap: 2px; }
+.xp-head__title-row { display: flex; align-items: center; gap: 8px; }
+.xp-head__meta { font-size: var(--dense-font-aux); color: var(--color-text-3); }
+.xp-head__actions { display: flex; align-items: center; gap: 6px; }
+.xp-steps-card { flex-shrink: 0; }
+.xp-tabs-card { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.xp-tabs { height: 100%; display: flex; flex-direction: column; }
+:deep(.arco-tabs-content) { flex: 1; overflow: hidden; }
+:deep(.arco-tabs-pane) { height: 100%; overflow-y: auto; }
+.xp-tab-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+</style>
+```
+
+---
+
+## 全页表单骨架（直接复用）
+
+分组填写 + 吸底保存时使用：
+
+```vue
+<template>
+  <div class="page-root page-root--dense xf-wrap">
+    <div class="xf-head zone-card">
+      <a-breadcrumb style="font-size:var(--dense-font-aux);margin-bottom:4px">...</a-breadcrumb>
+      <div style="font-size:var(--dense-font-title);font-weight:600;color:var(--color-text-1)">新建业务单</div>
+    </div>
+    <div class="xf-body">
+      <div class="detail-section">
+        <div class="detail-section__head"><h4 class="detail-section__title">A · 基础信息</h4></div>
+        <div class="detail-section__body">
+          <div class="xf-grid">
+            <div class="xf-field">
+              <label class="xf-label">客户 <span class="xf-req">*</span></label>
+              <a-select v-model="form.customer" size="small" placeholder="请选择" allow-search allow-clear />
+              <div v-if="errors.customer" class="xf-err">{{ errors.customer }}</div>
+            </div>
+            <div class="xf-field xf-field--wide">  <!-- 跨两列 -->
+              <label class="xf-label">备注</label>
+              <a-textarea v-model="form.remark" size="small" :auto-size="{ minRows:2, maxRows:4 }" />
             </div>
           </div>
         </div>
       </div>
-      <div class="filter-card__actions-col">
-        <div class="filter-card__actions-primary">
-          <a-button size="small" type="primary" @click="handleSearch">查询</a-button>
-          <a-button size="small" type="text" class="reset-btn" @click="handleReset">重置</a-button>
-        </div>
-      </div>
+      <!-- 动态行表格分组：detail-section__body style="padding:0" + vxe-table -->
+    </div>
+    <!-- 吸底栏：复用 detail-drawer-footer -->
+    <div class="detail-drawer-footer xf-footer">
+      <a-button size="small" @click="handleCancel">取消</a-button>
+      <a-button size="small" type="outline">存草稿</a-button>
+      <a-button size="small" type="primary" :loading="submitting">提交</a-button>
     </div>
   </div>
-  <div class="toolbar">…</div>
-  <div class="table-wrap">…</div>
-</div>
+</template>
+<style scoped>
+.xf-wrap { display: flex; flex-direction: column; overflow: hidden; }
+.xf-head { padding: 12px 16px; flex-shrink: 0; }
+.xf-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 0; }
+.xf-footer { flex-shrink: 0; display: flex; justify-content: flex-end; gap: 8px; }
+.xf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 16px; }
+.xf-field { display: flex; flex-direction: column; gap: 4px; }
+.xf-field--wide { grid-column: span 2; }
+.xf-label { font-size: var(--dense-font-field); color: var(--color-text-2); font-weight: 500; }
+.xf-req { color: var(--danger-6); margin-left: 2px; }
+.xf-err { font-size: var(--dense-font-aux); color: var(--danger-6); }
+</style>
 ```
 
-### 详情抽屉
+---
+
+## 详情抽屉骨架（直接复用）
+
 ```vue
-<a-drawer class="detail-drawer" …>     <!-- 必须加 detail-drawer，触发 global.css 覆盖 -->
+<a-drawer class="detail-drawer" :width="900" v-model:visible="visible">
   <div class="detail-drawer-body">
-    <div class="detail-drawer-status"> <!-- 顶部状态栏 -->
-    <div class="detail-drawer-scroll"> <!-- 灰底滚动区 -->
-      <div class="detail-section">     <!-- 白卡分区，有阴影 -->
-        <div class="detail-section__head">
-          <h4 class="detail-section__title">标题</h4>
-          <div class="detail-section__actions">…</div>
-        </div>
-        <div class="detail-section__body">…</div>
+    <div class="detail-drawer-status">
+      <div class="detail-drawer-status__no">
+        <span class="link-text link-text--strong mono">PTP2024000001</span>
+      </div>
+      <div class="detail-drawer-status__sub">
+        <span class="s-pill" data-s="wait">待处理</span>
       </div>
     </div>
-    <div class="detail-drawer-footer"> <!-- 吸底，有阴影 -->
+    <div class="detail-drawer-scroll">
+      <div class="detail-section">
+        <div class="detail-section__head">
+          <h4 class="detail-section__title">基本信息</h4>
+          <div class="detail-section__actions">
+            <a-button size="small" type="outline">编辑</a-button>
+          </div>
+        </div>
+        <div class="detail-section__body">
+          <div class="detail-form-grid detail-form-grid--4">
+            <div class="detail-field">
+              <span class="detail-field__label">客户名称</span>
+              <span class="detail-field__val">深圳某某公司</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-drawer-footer">
+      <a-button type="primary" size="small">保存</a-button>
+      <a-button size="small">关闭</a-button>
+    </div>
   </div>
 </a-drawer>
 ```
@@ -71,23 +279,25 @@ alwaysApply: true
 | 禁止 | 必须改用 |
 |------|---------|
 | `.search-bar` / `.sf` / `.sf-label` | `filter-card` / `filter-field` / `filter-field__label` |
-| 自写 `.meta-bar`、`.info-card` 等详情布局类 | `.detail-section` + `__head` + `__body` |
+| `.toolbar-left` / `.toolbar-right` | `toolbar-group` / `toolbar-aside` |
+| 自写 `.meta-bar`、`.info-card` 等详情布局 | `.detail-section` + `__head` + `__body` |
 | 重置按钮 `type="outline"` 或带图标 | `type="text" class="reset-btn"` 纯文字 |
-| **刷新按钮 `type="outline"`** | `type="text"` + icon-only |
-| 行内操作带文字 | `<a-button type="text" class="row-action-btn"><icon /></a-button>` + `<a-tooltip>` |
+| 刷新按钮 `type="outline"` | `type="text"` icon-only，放在 `toolbar-aside` |
+| 原生 `<button>` 做行内操作 | `<a-button type="text" class="row-action-btn">` + `<a-tooltip>` |
+| **`<a-table>`（Arco 原生表格）** | **必须用 `<vxe-table>`，全项目统一** |
 | VXE 所有列用 `width` | 至少一列用 `min-width` |
 | `class="freight-table"` | 删掉（已废弃） |
 | `.stab-count` / `.stab-count--danger` | `.stab-badge` / `.stab-badge--danger` |
-| 硬编码 hex 颜色（`#ff7d00`、`#f53f3f`…） | `var(--warning-6)` / `var(--danger-6)` 等变量 |
+| 硬编码 hex 颜色 | `var(--warning-6)` / `var(--danger-6)` 等变量 |
 | 自写危险货 pill 样式 | `s-pill[data-s="wait"]` + icon |
 | `font-size: 14px / 16px` 硬编码 | `var(--dense-font-data)` 等 Token |
-| `font-weight: 700` | 最大 600，仅 F3 标题 |
-| 整行铺状态背景色 | 只在 `.s-pill[data-s]` 体现状态色 |
-| 抽屉不加 `class="detail-drawer"` | 必须加，否则 Arco 默认 16px 标题不被覆盖 |
+| `font-weight: 700` | 最大 600 |
+| 整行铺状态背景色 | 只在 `.s-pill[data-s]` 体现 |
+| 抽屉不加 `class="detail-drawer"` | 必须加，否则 Arco 默认标题不被覆盖 |
 
 ---
 
-## 字体 Token（禁止硬编码 px）
+## 字体 Token
 
 | 场景 | Token |
 |------|-------|
@@ -96,10 +306,11 @@ alwaysApply: true
 | 表头、分区标题 | `--dense-font-title`（12px/600） |
 | 筛选标签、form label | `--dense-font-field`（12px/500） |
 | placeholder、副信息 | `--dense-font-aux`（11px/400） |
+| 序号、badge | `--dense-font-micro`（10px/400） |
 
 ---
 
-## 状态 Pill（唯一合法写法）
+## 状态 Pill
 
 ```html
 <span class="s-pill" :data-s="'wait'">待处理</span>
@@ -109,35 +320,186 @@ data-s 值：`wait`（橙）/ `op`（蓝）/ `partial`（紫）/ `acc`（青）/
 
 ---
 
-## VXE Table 必填属性
+## 弹窗表单骨架（直接复用）
 
 ```vue
-<vxe-table border="none" size="small" height="100%" show-overflow="title"
-  :row-config="{ isHover: true, keyField: 'Id' }">
-  <vxe-column field="name" title="名称" min-width="160" />  <!-- 至少一列 min-width -->
+<a-modal v-model:visible="visible" title="新建记录" :width="680" :mask-closable="false"
+  @before-ok="handleOk" @cancel="handleCancel">
+  <div class="xf-grid xf-grid--modal">
+    <div class="xf-field">
+      <label class="xf-label">字段名 <span class="xf-req">*</span></label>
+      <a-input v-model="form.name" size="small" allow-clear />
+      <div v-if="errors.name" class="xf-err">{{ errors.name }}</div>
+    </div>
+    <div class="xf-field xf-field--wide">
+      <label class="xf-label">备注</label>
+      <a-textarea v-model="form.remark" size="small" :auto-size="{ minRows:2 }" />
+    </div>
+  </div>
+  <template #footer>
+    <div style="display:flex;justify-content:space-between">
+      <a-button v-if="isEdit" type="text" status="danger" size="small" @click="handleDelete">删除</a-button>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <a-button size="small" @click="handleCancel">取消</a-button>
+        <a-button size="small" type="primary" :loading="submitting" @click="handleOk">确定</a-button>
+      </div>
+    </div>
+  </template>
+</a-modal>
+<style scoped>
+.xf-grid--modal { grid-template-columns: repeat(2, 1fr); }
+</style>
+```
+
+Modal 规范：`:mask-closable="false"` / 危险操作放 footer 左侧 / `width` ≤ 860 / 禁止内套 `detail-section`
+
+---
+
+## 数据概览页骨架（直接复用）
+
+```vue
+<div class="page-root page-root--dense db-wrap">
+  <!-- KPI 行（kpi-card 系列来自 global.css） -->
+  <div class="zone-card db-kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">待处理</div>
+      <div class="kpi-body"><span class="kpi-value kpi-value--warn">12</span><span class="kpi-unit">票</span></div>
+    </div>
+    <div class="kpi-card kpi-card--danger">
+      <div class="kpi-label">逾期</div>
+      <div class="kpi-body"><span class="kpi-value kpi-value--danger">3</span><span class="kpi-unit">票</span></div>
+    </div>
+  </div>
+  <!-- 双列内容区 -->
+  <div class="db-content">
+    <div class="db-main">
+      <!-- 图表 / 待办列表：用 detail-section 包裹 -->
+      <div class="detail-section">
+        <div class="detail-section__head"><h4 class="detail-section__title">趋势图</h4></div>
+        <div class="detail-section__body db-chart-body">
+          <div class="db-chart-placeholder"><!-- 图表组件 --></div>
+        </div>
+      </div>
+    </div>
+    <div class="db-aside">
+      <div class="detail-section">
+        <div class="detail-section__head"><h4 class="detail-section__title">快捷操作</h4></div>
+        <div class="detail-section__body db-shortcuts">
+          <a-button size="small" type="outline" long><template #icon><icon-plus /></template>新建</a-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<style scoped>
+.db-wrap    { overflow-y: auto; }
+.db-kpi-row { display: flex; flex-shrink: 0; }
+.db-content { display: grid; grid-template-columns: 1fr 280px; gap: 8px; margin-top: 8px; }
+.db-main    { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.db-aside   { display: flex; flex-direction: column; gap: 8px; }
+.db-chart-body { padding: 0 16px 16px; }
+.db-chart-placeholder { height: 220px; background: var(--color-fill-1); border-radius: var(--dense-radius); display:flex; align-items:center; justify-content:center; color:var(--color-text-4); font-size:var(--dense-font-aux); }
+.db-shortcuts { display: flex; flex-direction: column; gap: 8px; }
+@media (max-width: 1280px) { .db-content { grid-template-columns: 1fr; } }
+</style>
+```
+
+---
+
+## 分页规范
+
+禁止裸用 `<a-pagination>`，必须用 `table-card-cap` 结构：
+
+```vue
+<div class="zone-l4-table-card zone-card">
+  <div class="table-card-cap">
+    <div class="table-card-cap__left">
+      <span class="table-card-cap__summary">共 <b>{{ page.total }}</b> 条</span>
+    </div>
+    <div class="table-card-cap__right">
+      <a-pagination class="table-card-cap__pager"
+        :current="page.current" :page-size="page.size" :total="page.total"
+        :page-size-options="[50, 100, 200, 500]" size="small" show-page-size show-jumper
+        @change="(p) => { page.current = p; fetchList(); }"
+        @page-size-change="(s) => { page.size = s; fetchList(); }" />
+    </div>
+  </div>
+  <div class="table-wrap">
+    <vxe-table ...>...</vxe-table>
+  </div>
+</div>
+```
+
+默认每页 100 条，page-size-options: [50, 100, 200, 500]
+
+---
+
+## 文件上传规范（Uppy）
+
+禁止使用 `<a-upload>`，全项目统一用 **Uppy**。
+
+安装：`npm install @uppy/core @uppy/dashboard @uppy/xhr-upload @uppy/locales`
+
+main.ts 引入样式：
+```ts
+import '@uppy/core/dist/style.min.css'
+import '@uppy/dashboard/dist/style.min.css'
+```
+
+使用封装好的 `UppyUploader` 组件（禁止各页面自己 new Uppy）：
+```vue
+<div class="detail-section">
+  <div class="detail-section__head"><h4 class="detail-section__title">单据上传</h4></div>
+  <div class="detail-section__body">
+    <uppy-uploader
+      upload-url="/api/upload/order-docs"
+      :max-file-size="20 * 1024 * 1024"
+      :allowed-types="['.pdf', '.xlsx', '.jpg', '.png']"
+      @upload-success="handleUploadSuccess"
+    />
+  </div>
+</div>
+
+<!-- 已上传列表用 vxe-table，状态用 s-pill -->
+<vxe-table border="none" size="small" height="auto" :data="fileList" :row-config="{ keyField:'uid', isHover:true }">
+  <vxe-column field="name" title="文件名" min-width="200" />
+  <vxe-column field="status" title="状态" width="80" align="center">
+    <template #default="{ row }">
+      <span class="s-pill" :data-s="row.status==='done'?'acc':row.status==='error'?'rej':'op'">
+        {{ row.status==='done'?'已上传':row.status==='error'?'失败':'上传中' }}
+      </span>
+    </template>
+  </vxe-column>
+  <vxe-column title="操作" width="80" fixed="right" align="center">
+    <template #default="{ row }">
+      <a-tooltip content="下载"><a-button type="text" class="row-action-btn" @click="downloadFile(row)"><icon-download /></a-button></a-tooltip>
+      <a-tooltip content="删除"><a-button type="text" class="row-action-btn" @click="deleteFile(row)"><icon-delete /></a-button></a-tooltip>
+    </template>
+  </vxe-column>
 </vxe-table>
 ```
 
 ---
 
-## 工具栏唯一合法结构
+## 交互规范
 
-```html
-<div class="toolbar toolbar--dense">
-  <div class="toolbar-group">          <!-- 左：主操作 -->
-    <a-button size="small" type="primary">...</a-button>
-  </div>
-  <div class="toolbar-divider" />
-  <div class="toolbar-group toolbar-group--grow">  <!-- 中：次操作，撑开 -->
-    <a-button size="small" type="outline">导出</a-button>
-  </div>
-  <div class="toolbar-aside">          <!-- 右：刷新/工具，type="text" icon-only -->
-    <a-button size="small" type="text"><template #icon><icon-refresh /></template></a-button>
-  </div>
-</div>
+```
+✅ 表单校验：失焦触发单字段，提交时全量校验
+✅ 加载：列表 :loading，提交按钮 :loading + 防重复点击
+✅ 危险操作：行内删除用 a-popconfirm，批量/不可逆用 Modal.confirm
+✅ 离开脏表单：router 跳转前 Modal.confirm 拦截
+✅ 空状态：state-center + Arco icon，禁止 emoji
+✅ 操作反馈：Message.success / Message.error，禁止 alert()
 ```
 
-❌ 禁止 `.toolbar-left` / `.toolbar-right` | ❌ 禁止 scoped 重写 `.toolbar`
+---
+
+## 适配规范
+
+- 最小宽度 **1280px**，推荐设计宽度 **1440px**
+- 自写的 `xf-grid` / `db-content` 必须加 `@media (max-width:1280px)` 降列
+- 抽屉宽度不超过 `min(1200px, 90vw)`
+- 表格无双层滚动条（`table-wrap` 外层禁止 `overflow:auto`）
 
 ---
 

@@ -3,14 +3,14 @@ import BasicLayout from '../layouts/BasicLayout.vue';
 import { orderManageRoutes } from './modules/orderManage';
 import { logisticsWarehouseRoutes } from './modules/logisticsWarehouse';
 import { financeRoutes } from './modules/finance';
-import { dashboardRoutes } from './modules/dashboard';
+import { customerRoutes } from './modules/customer';
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: BasicLayout,
     redirect: '/order-manage/sale-order',
-    children: [...dashboardRoutes, ...orderManageRoutes, ...logisticsWarehouseRoutes, ...financeRoutes]
+    children: [...orderManageRoutes, ...logisticsWarehouseRoutes, ...financeRoutes, ...customerRoutes]
   }
 ];
 

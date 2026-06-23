@@ -1541,6 +1541,31 @@ html, body, #app {
 .detail-form-grid__span3 { grid-column: span 3; }
 .detail-form-grid__span4 { grid-column: span 4; }
 .detail-form-grid__span6 { grid-column: span 6; }
+
+/* detail-field：只读字段（label 上 + val 下），用于详情展示 */
+.detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.detail-field__label {
+  font-size: var(--dense-font-field);
+  font-weight: var(--dense-weight-field);
+  color: var(--color-text-3);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.detail-field__val {
+  font-size: var(--dense-font-data);
+  font-weight: var(--dense-weight-data);
+  color: var(--color-text-1);
+  line-height: 1.5;
+  word-break: break-word;
+}
+.detail-field--wide  { grid-column: span 2; }
+.detail-field--span3 { grid-column: span 3; }
+
 .detail-form .arco-form-item {
   margin-bottom: var(--dense-gap-field-row);
 }
