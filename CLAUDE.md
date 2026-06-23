@@ -9,6 +9,8 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 
 `src/styles/global.css` 已实现完整的设计系统。**任何组件、页面在开发前，优先使用已有类名，禁止另起炉灶写相同效果的 CSS。**
 
+项目级 UI skill 位于 `ui-skill/freight-arco-ui/SKILL.md`。当任务涉及 UI 设计质量、页面布局、配色、表格、详情、表单、按钮、状态、紧凑高密度时，必须先读该 skill，并按任务读取对应 `references/` 文件。
+
 > **验证协议**：使用任何 CSS 类名前，确认它存在于 global.css。遇到不确定的类名，用 grep 验证：
 > ```bash
 > grep -n "\.filter-field" src/styles/global.css
@@ -716,7 +718,7 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 </div>
 ```
 ```
-✅ 列表页顶部必须有 list-kpi-bar（体现运营感，让用户打开即知全局状态）
+✅ list-kpi-bar 适用场景：页面**没有** stat-tab 状态计数时使用（两者提供相同信息，二选一，禁止同时出现）
 ✅ 点击 lkb-item 等效于在 filter 里选对应状态
 ✅ lkb-val 颜色：正常=默认，待处理=--warn，异常=--danger，完成=--success
 ❌ 禁止只有数字没有 label
@@ -838,6 +840,13 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 | `height` | `"100%"` | 列表页主表格必填；弹窗/详情内子表格可用 `"auto"` |
 | `show-overflow` | `"title"` | 溢出显示 tooltip |
 | `:row-config` | `{ isHover: true, keyField: 'Id' }` | keyField 对应数据主键字段名 |
+| `:stripe` | `true` | 列表页主表格开启斑马纹；子表格/弹窗内可不加 |
+
+> **行高 / 表头高度**（global.css 已定义，禁止覆盖）
+> - 数据行：`--dense-row-h: 36px`（紧凑密度，同屏可见更多行）
+> - 表头行：`--dense-header-h: 32px`（比数据行矮 4px，视觉上"背景"化）
+> - 表头底部：`2px solid arcoblue-3`（蓝色强调线，清晰区隔表头/数据区）
+> - 表头背景：`rgb(var(--gray-1))` 纯色，禁止恢复渐变（渐变 = Excel 2010 风格）
 
 ### 列宽规则
 - **至少一列用 `min-width`**（让表格撑满容器，禁止全部用 `width`）
@@ -850,6 +859,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 <!-- ① 列表页主表格（height="100%"，放在 table-wrap 内） -->
 <div class="table-wrap">
   <vxe-table border="none" size="small" height="100%" show-overflow="title"
+    :stripe="true"
     :row-config="{ isHover:true, keyField:'Id' }" :data="rows" :loading="loading">
     <vxe-column type="checkbox" width="40" fixed="left" />
     <vxe-column field="OrderNo" title="单号" width="160" fixed="left">
@@ -911,6 +921,24 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ```
 
 ---
+
+## 表格行状态颜色系统（global.css 已定义，无需自写）
+
+| 状态 | 触发方式 | 背景色 |
+|------|---------|--------|
+| 默认奇数行 | — | 白色 `var(--color-bg-card)` |
+| 斑马纹偶数行 | `:stripe="true"` → `.row--stripe` | `rgb(var(--gray-2))` ≈ `#F2F3F5` |
+| Hover | `isHover: true` → `.row--hover` | `rgba(arcoblue-6, 0.08)` ≈ 淡蓝 |
+| 选中（checkbox） | `highlight: true` → `.row--checked` | `rgba(arcoblue-6, 0.13)` ≈ 中蓝 |
+| 选中 + Hover | 同上叠加 | `rgba(arcoblue-6, 0.18)` ≈ 深蓝 |
+
+```
+✅ 列表页主表格必须加 :stripe="true"
+✅ :row-config 必须含 isHover: true
+✅ :checkbox-config 含 highlight: true（勾选行高亮）
+❌ 禁止用 row-class-name 自定义行背景色（用 s-pill 表达状态）
+❌ 禁止在 scoped style 里覆盖 .row--hover 颜色
+```
 
 ## 颜色语义（禁止整行铺背景色）
 

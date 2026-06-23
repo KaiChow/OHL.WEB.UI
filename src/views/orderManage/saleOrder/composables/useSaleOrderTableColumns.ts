@@ -14,6 +14,8 @@ const defaultColumns: TableColumnOption[] = [
   { key: 'DcgNo', title: '业务单号' },
   { key: 'WarehouseNo', title: '入仓单号' },
   { key: 'Salesman', title: '业务员' },
+  { key: 'Shipper', title: '发货人' },
+  { key: 'Consignee', title: '收货人' },
   { key: 'ContainerInfo', title: '柜型柜量' }
 ];
 

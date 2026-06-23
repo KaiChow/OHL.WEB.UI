@@ -3,22 +3,13 @@ import { computed, reactive, watch } from 'vue';
 import { IconPlus } from '@arco-design/web-vue/es/icon';
 import { Message } from '@arco-design/web-vue';
 import type { DrawerMode } from '../../../../types/drawer';
-import { getStatusLabel, getStatusPill, bizTypeOptions, importExportOptions, packingOptions } from '../config';
+import { getStatusPill } from '../config';
 import {
-  blFormatOptions,
-  cargoTypeCheckboxOptions,
-  carrierOptions,
   clearanceTermsOptions,
-  companyOptions,
   declareMethodOptions,
   deliveryMethodOptions,
   orderTypeFlagOptions,
-  portOptions,
-  serviceItemOptions,
-  staffRoleOptions,
-  tradeTermsOptions,
   transportDetailTitle,
-  transportTermsOptions,
   yesNoOptions
 } from '../detailConfig';
 import { calcCargoSummary, detailUid, emptyCargoItem } from '../composables/useSaleOrderDetailForm';
@@ -26,6 +17,12 @@ import type { SaleOrderDetailModel, SaleOrderRecord } from '../types';
 import DetailSection from './detail/DetailSection.vue';
 import DetailModule from './detail/DetailModule.vue';
 import DetailCargoBlock from './detail/DetailCargoBlock.vue';
+import DetailAttachmentSection from './detail/DetailAttachmentSection.vue';
+import DetailHeaderHero from './detail/DetailHeaderHero.vue';
+import DetailOverviewSection from './detail/DetailOverviewSection.vue';
+import DetailStaffSection from './detail/DetailStaffSection.vue';
+import DetailBasicSection from './detail/DetailBasicSection.vue';
+import type { DetailAttachmentRow } from '../types';
 
 const props = defineProps<{
   visible: boolean;
@@ -171,8 +168,38 @@ const removeCargoBlock = (id: string) => {
 
 const onCopySplit = () => Message.info('复制分单数据（Mock）');
 
+const uploadAttachment = (row: DetailAttachmentRow) => {
+  row.fileName = row.fileName || `${row.docType}.pdf`;
+  row.status = 'uploaded';
+  row.uploader = row.uploader || props.detail.Operator || '操作A';
+  row.uploadTime = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  Message.success(`${row.docType}已上传`);
+};
+
+const removeAttachment = (id: string) => {
+  const row = props.detail.AttachmentRows.find((item) => item.id === id);
+  if (!row) return;
+  row.fileName = '';
+  row.status = 'missing';
+  row.uploader = '';
+  row.uploadTime = '';
+  Message.success(`${row.docType}已删除`);
+};
+
 /** 复杂业务单详情：近全屏宽型抽屉（§17.1 全屏 / 大型复杂流程） */
 const drawerWidth = 'calc(100vw - 32px)';
+
+/** 当前流程步骤（0-based）基于业务单状态 */
+const STEP_STATUS_MAP: Record<string, number> = {
+  draft: 0, wait: 0,
+  booked: 1,
+  so: 2, inbound: 2,
+  customs: 3,
+  sailing: 4, op: 4,
+  arrived: 5, acc: 5,
+  partial: 4, rel: 4,
+};
+const currentStep = computed(() => STEP_STATUS_MAP[getStatusPill(props.detail.Status)] ?? 0);
 </script>
 
 <template>
@@ -187,229 +214,50 @@ const drawerWidth = 'calc(100vw - 32px)';
     <template #title>{{ drawerTitle }}</template>
 
     <div class="detail-drawer-body">
-      <div class="detail-drawer-status">
-        <span v-if="record || mode !== 'create'" class="s-pill" :data-s="getStatusPill(detail.Status)">
-          {{ getStatusLabel(detail.Status) }}
-        </span>
-        <span class="detail-drawer-status__no mono">{{ detail.DcgNo || '待生成单号' }}</span>
-        <span class="detail-drawer-status__sub">归属公司：{{ detail.OwnerCompany }}</span>
-        <a-button
-          v-if="mode === 'view'"
-          size="small"
-          type="outline"
-          class="detail-drawer-status__edit"
-          @click="emit('edit')"
-        >
-          编辑
-        </a-button>
-        <a-button
-          v-if="mode === 'view'"
-          size="small"
-          type="text"
-          class="detail-drawer-status__edit"
-          @click="emit('view-full')"
-        >
-          完整详情 ↗
-        </a-button>
-      </div>
 
-      <div class="detail-drawer-scroll">
-        <!-- 概览 -->
-        <detail-section title="业务概览">
-          <a-form layout="vertical" :model="detail" size="small" class="detail-form">
-            <div class="detail-form-grid detail-form-grid--4">
-              <a-form-item label="业务类型" required>
-                <a-select v-model="detail.BizType" :disabled="readonly">
-                  <a-option v-for="opt in bizTypeOptions.filter((o) => o !== '全部')" :key="opt" :value="opt">{{ opt }}</a-option>
-                </a-select>
-              </a-form-item>
-              <a-form-item label="装箱方式" required>
-                <a-select v-model="detail.PackingMethod" :disabled="readonly">
-                  <a-option v-for="opt in packingOptions.filter((o) => o !== '全部')" :key="opt" :value="opt">{{ opt }}</a-option>
-                </a-select>
-              </a-form-item>
-              <a-form-item label="客户">
-                <a-input v-model="detail.Customer" :disabled="readonly" placeholder="请输入客户" />
-              </a-form-item>
-              <a-form-item label="PO">
-                <a-input v-model="detail.Po" :disabled="readonly" placeholder="请输入 PO" />
-              </a-form-item>
-              <a-form-item label="业务单号">
-                <a-input v-model="detail.DcgNo" :disabled="readonly" placeholder="留空自动生成" />
-              </a-form-item>
-              <a-form-item label="进/出口">
-                <a-select v-model="detail.ImportExport" :disabled="readonly">
-                  <a-option v-for="opt in importExportOptions.filter((o) => o !== '全部')" :key="opt" :value="opt">{{ opt }}</a-option>
-                </a-select>
-              </a-form-item>
-              <a-form-item label="服务范围" class="detail-form-grid__span2">
-                <a-input v-model="detail.ServiceScope" :disabled="readonly" placeholder="请输入服务范围" />
-              </a-form-item>
-            </div>
-            <a-form-item label="服务项">
-              <a-checkbox-group v-model="detail.ServiceItems" :disabled="readonly">
-                <a-checkbox v-for="item in serviceItemOptions" :key="item" :value="item">{{ item }}</a-checkbox>
-              </a-checkbox-group>
-            </a-form-item>
-          </a-form>
-        </detail-section>
+      <detail-header-hero
+        :detail="detail"
+        :mode="mode"
+        :record="record"
+        :current-step="currentStep"
+        @edit="emit('edit')"
+        @view-full="emit('view-full')"
+      />
 
-        <!-- 权限人员 -->
-        <detail-section title="权限人员列表">
-          <template #actions>
-            <a-button v-if="!readonly" size="small" type="primary" @click="addStaff">
-              <template #icon><icon-plus /></template>
-              添加
-            </a-button>
-          </template>
-          <div class="detail-mini-table-wrap">
-            <table class="detail-mini-table">
-              <thead>
-                <tr>
-                  <th>公司</th>
-                  <th>角色</th>
-                  <th>人员</th>
-                  <th v-if="!readonly" class="detail-mini-table__op">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in detail.StaffRows" :key="row.id">
-                  <td>
-                    <a-select v-model="row.company" :disabled="readonly" size="small">
-                      <a-option v-for="c in companyOptions" :key="c" :value="c">{{ c }}</a-option>
-                    </a-select>
-                  </td>
-                  <td>
-                    <a-select v-model="row.role" :disabled="readonly" size="small">
-                      <a-option v-for="r in staffRoleOptions" :key="r" :value="r">{{ r }}</a-option>
-                    </a-select>
-                  </td>
-                  <td>
-                    <a-input v-model="row.userName" :disabled="readonly" size="small" placeholder="请选择人员" />
-                  </td>
-                  <td v-if="!readonly" class="detail-mini-table__op">
-                    <a-button size="small" type="outline" status="danger" @click="removeStaff(row.id)">删除</a-button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </detail-section>
+      <!-- ④ 主体：顶部摘要已承载关键资料，主体只保留业务录入内容 -->
+      <div class="dds-body">
 
-        <!-- 基础信息 -->
-        <detail-section title="基础信息">
-          <a-form layout="vertical" :model="detail" size="small" class="detail-form">
-            <div class="detail-form-grid detail-form-grid--6">
-              <a-form-item label="收货地" required>
-                <a-select v-model="detail.Pol" :disabled="readonly" allow-search>
-                  <a-option v-for="p in portOptions" :key="'pol-' + p" :value="p">{{ p }}</a-option>
-                </a-select>
-              </a-form-item>
-              <a-form-item label="起运港" required>
-                <a-select v-model="detail.Pol" :disabled="readonly" allow-search>
-                  <a-option v-for="p in portOptions" :key="'pol2-' + p" :value="p">{{ p }}</a-option>
-                </a-select>
-              </a-form-item>
-              <a-form-item label="中转港">
-                <a-select v-model="detail.Pot" :disabled="readonly" allow-clear allow-search>
-                  <a-option v-for="p in portOptions" :key="'pot-' + p" :value="p">{{ p }}</a-option>
-                </a-select>
-              </a-form-item>
-              <a-form-item label="目的港" required>
-                <a-select v-model="detail.Pod" :disabled="readonly" allow-search>
-                  <a-option v-for="p in portOptions" :key="'pod-' + p" :value="p">{{ p }}</a-option>
-                </a-select>
-              </a-form-item>
-              <a-form-item label="目的地" required>
-                <a-input v-model="detail.FinalDestination" :disabled="readonly" />
-              </a-form-item>
-              <a-form-item label="船公司">
-                <a-select v-model="detail.Carrier" :disabled="readonly" allow-search>
-                  <a-option v-for="c in carrierOptions" :key="c" :value="c">{{ c }}</a-option>
-                </a-select>
-              </a-form-item>
-              <a-form-item label="航线">
-                <a-input v-model="detail.Route" :disabled="readonly" />
-              </a-form-item>
-              <a-form-item label="船名航次">
-                <a-input v-model="detail.VesselVoyage" :disabled="readonly" />
-              </a-form-item>
-              <a-form-item label="ETD" required>
-                <a-date-picker v-model="detail.Etd" :disabled="readonly" style="width: 100%" />
-              </a-form-item>
-              <a-form-item label="ETA">
-                <a-date-picker v-model="detail.Eta" :disabled="readonly" style="width: 100%" />
-              </a-form-item>
-              <a-form-item label="运输条款">
-                <a-select v-model="detail.TransportTerms" :disabled="readonly">
-                  <a-option v-for="t in transportTermsOptions" :key="t" :value="t">{{ t }}</a-option>
-                </a-select>
-              </a-form-item>
-              <a-form-item label="贸易条款" required>
-                <a-select v-model="detail.TradeTerms" :disabled="readonly">
-                  <a-option v-for="t in tradeTermsOptions" :key="t" :value="t">{{ t }}</a-option>
-                </a-select>
-              </a-form-item>
-              <a-form-item label="提单格式">
-                <a-select v-model="detail.BlFormat" :disabled="readonly">
-                  <a-option v-for="b in blFormatOptions" :key="b" :value="b">{{ b }}</a-option>
-                </a-select>
-              </a-form-item>
-              <a-form-item label="预计仓库" required>
-                <a-input v-model="detail.EstWarehouse" :disabled="readonly" />
-              </a-form-item>
-              <a-form-item label="预计进仓时间" required>
-                <a-date-picker v-model="detail.EstInboundTime" :disabled="readonly" style="width: 100%" />
-              </a-form-item>
-              <a-form-item label="预计出仓时间">
-                <a-date-picker v-model="detail.EstOutboundTime" :disabled="readonly" style="width: 100%" />
-              </a-form-item>
-              <a-form-item label="是否需要交接单抬头">
-                <a-radio-group v-model="detail.NeedHandoverHeader" :disabled="readonly">
-                  <a-radio :value="true">是</a-radio>
-                  <a-radio :value="false">否</a-radio>
-                </a-radio-group>
-              </a-form-item>
-              <a-form-item label="是否需要进仓拍照">
-                <a-checkbox v-model="detail.NeedInboundPhoto" :disabled="readonly">需要</a-checkbox>
-              </a-form-item>
-              <a-form-item label="货物类型" class="detail-form-grid__span6">
-                <a-checkbox-group v-model="detail.CargoTypes" :disabled="readonly">
-                  <a-checkbox v-for="c in cargoTypeCheckboxOptions" :key="c" :value="c">{{ c }}</a-checkbox>
-                </a-checkbox-group>
-              </a-form-item>
-              <a-form-item label="客户备注" class="detail-form-grid__span3">
-                <a-textarea v-model="detail.CustomerRemark" :disabled="readonly" :auto-size="{ minRows: 2, maxRows: 4 }" />
-              </a-form-item>
-              <a-form-item label="海外代理备注" class="detail-form-grid__span3">
-                <a-textarea v-model="detail.OverseasRemark" :disabled="readonly" :auto-size="{ minRows: 2, maxRows: 4 }" />
-              </a-form-item>
-            </div>
-          </a-form>
-        </detail-section>
+        <div class="detail-drawer-scroll dds-main">
+        <detail-overview-section :detail="detail" :readonly="readonly" />
+
+        <detail-staff-section
+          :detail="detail"
+          :readonly="readonly"
+          @add="addStaff"
+          @remove="removeStaff"
+        />
+
+        <detail-basic-section :detail="detail" :readonly="readonly" />
 
         <!-- 附件 -->
         <detail-section title="附件">
-          <a-form layout="vertical" :model="detail" size="small" class="detail-form">
-            <a-form-item label="其他必传文件">
-              <!-- TODO: 替换为 <uppy-uploader> 组件（待安装 @uppy/* 依赖） -->
-              <a-button v-if="!readonly" size="small" type="outline">点击上传</a-button>
-              <span v-else class="sub-text">暂无附件</span>
-            </a-form-item>
-            <a-form-item label="备注">
-              <a-textarea v-model="detail.AttachmentRemark" :disabled="readonly" :auto-size="{ minRows: 2 }" />
-            </a-form-item>
-          </a-form>
+          <detail-attachment-section
+            :rows="detail.AttachmentRows"
+            :remark="detail.AttachmentRemark"
+            :readonly="readonly"
+            @upload="uploadAttachment"
+            @remove="removeAttachment"
+            @update:remark="detail.AttachmentRemark = $event"
+          />
         </detail-section>
 
         <!-- 货物信息（可重复子项模块 §17.3.8） -->
         <detail-module
           title="货物信息"
-          :badge="detail.CargoBlocks.length > 1 ? `${detail.CargoBlocks.length} 个发货人` : undefined"
         >
           <template #actions>
             <a-button size="small" type="outline" @click="onCopySplit">复制分单数据</a-button>
-            <a-button v-if="!readonly" size="small" type="primary" @click="addCargoBlock">
+            <a-button v-if="!readonly" size="small" type="outline" @click="addCargoBlock">
               <template #icon><icon-plus /></template>
               添加发货人
             </a-button>
@@ -417,6 +265,11 @@ const drawerWidth = 'calc(100vw - 32px)';
           <template #summary>
             <div class="detail-module-summary detail-module-summary--inline">
               <div class="detail-module-summary__stats">
+                <div class="detail-module-summary__stat">
+                  <span class="detail-module-summary__stat-label">发货人</span>
+                  <span class="detail-module-summary__stat-value">{{ detail.CargoBlocks.length }}</span>
+                  <span class="detail-module-summary__stat-unit">个</span>
+                </div>
                 <div class="detail-module-summary__stat detail-module-summary__stat--qty">
                   <span class="detail-module-summary__stat-label">总件数</span>
                   <span class="detail-module-summary__stat-value">{{ cargoSummary.qty.toLocaleString() }}</span>
@@ -455,7 +308,7 @@ const drawerWidth = 'calc(100vw - 32px)';
         <!-- 报关 -->
         <detail-section title="报关信息">
           <template #actions>
-            <a-button v-if="!readonly" size="small" type="primary" @click="addCustoms">
+            <a-button v-if="!readonly" size="small" type="outline" @click="addCustoms">
               <template #icon><icon-plus /></template>
               添加
             </a-button>
@@ -482,7 +335,9 @@ const drawerWidth = 'calc(100vw - 32px)';
                   </td>
                   <td><a-input v-model="row.uploadTime" :disabled="readonly" size="small" /></td>
                   <td v-if="!readonly" class="detail-mini-table__op">
-                    <a-button size="small" type="outline" status="danger" @click="removeCustoms(row.id)">删除</a-button>
+                    <a-popconfirm content="确认删除该报关信息？" @ok="removeCustoms(row.id)">
+                      <a-button size="small" type="text" status="danger">删除</a-button>
+                    </a-popconfirm>
                   </td>
                 </tr>
                 <tr v-if="detail.CustomsRows.length === 0">
@@ -496,7 +351,7 @@ const drawerWidth = 'calc(100vw - 32px)';
         <!-- 尾端派送 -->
         <detail-section title="尾端派送信息">
           <template #actions>
-            <a-button v-if="!readonly" size="small" type="primary" @click="addDelivery">
+            <a-button v-if="!readonly" size="small" type="outline" @click="addDelivery">
               <template #icon><icon-plus /></template>
               添加
             </a-button>
@@ -527,7 +382,9 @@ const drawerWidth = 'calc(100vw - 32px)';
                   <td><a-input v-model="row.expressNo" :disabled="readonly" size="small" /></td>
                   <td><a-input v-model="row.privateWhNo" :disabled="readonly" size="small" /></td>
                   <td v-if="!readonly" class="detail-mini-table__op">
-                    <a-button size="small" type="outline" status="danger" @click="removeDelivery(row.id)">删除</a-button>
+                    <a-popconfirm content="确认删除该派送信息？" @ok="removeDelivery(row.id)">
+                      <a-button size="small" type="text" status="danger">删除</a-button>
+                    </a-popconfirm>
                   </td>
                 </tr>
               </tbody>
@@ -538,7 +395,7 @@ const drawerWidth = 'calc(100vw - 32px)';
         <!-- 清关 -->
         <detail-section title="清关信息">
           <template #actions>
-            <a-button v-if="!readonly" size="small" type="primary" @click="addClearance">
+            <a-button v-if="!readonly" size="small" type="outline" @click="addClearance">
               <template #icon><icon-plus /></template>
               添加
             </a-button>
@@ -587,7 +444,9 @@ const drawerWidth = 'calc(100vw - 32px)';
                   <td><a-input v-model="row.invoiceNo" :disabled="readonly" size="small" /></td>
                   <td><a-input v-model="row.address" :disabled="readonly" size="small" /></td>
                   <td v-if="!readonly" class="detail-mini-table__op">
-                    <a-button size="small" type="outline" status="danger" @click="removeClearance(row.id)">删除</a-button>
+                    <a-popconfirm content="确认删除该清关进口商？" @ok="removeClearance(row.id)">
+                      <a-button size="small" type="text" status="danger">删除</a-button>
+                    </a-popconfirm>
                   </td>
                 </tr>
               </tbody>
@@ -601,7 +460,9 @@ const drawerWidth = 'calc(100vw - 32px)';
             <a-checkbox v-for="f in orderTypeFlagOptions" :key="f" :value="f">{{ f }}</a-checkbox>
           </a-checkbox-group>
         </div>
-      </div>
+        </div><!-- /dds-main -->
+
+      </div><!-- /dds-body -->
 
       <!-- 固定底栏 §37.4 -->
       <footer class="detail-drawer-footer">
@@ -611,11 +472,33 @@ const drawerWidth = 'calc(100vw - 32px)';
         </template>
         <template v-else>
           <a-button @click="close">取消</a-button>
-          <a-button type="outline" status="danger" @click="emit('abandon')">废弃</a-button>
-          <a-button type="outline" @click="emit('save')">保存</a-button>
+          <a-popconfirm content="确认废弃该业务单？" @ok="emit('abandon')">
+            <a-button status="danger">废弃</a-button>
+          </a-popconfirm>
+          <a-button @click="emit('save')">保存</a-button>
           <a-button type="primary" @click="emit('submit')">提交</a-button>
         </template>
       </footer>
     </div>
   </a-drawer>
 </template>
+
+<style scoped>
+/* ══════════════════════════════════════════════════════════
+   布局骨架
+   ══════════════════════════════════════════════════════════ */
+
+/* 主体：单列内容区。顶部摘要已展示关键资料，避免右侧重复摘要挤压表单。 */
+.dds-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dds-main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+</style>

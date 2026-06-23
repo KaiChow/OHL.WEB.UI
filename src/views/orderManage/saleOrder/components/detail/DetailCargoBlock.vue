@@ -117,13 +117,15 @@ const onHeadKeydown = (e: KeyboardEvent) => {
       </a-form>
 
       <div v-if="!readonly" class="detail-table-toolbar">
-        <a-button size="small" type="primary" @click="emit('add-item')">
+        <a-button size="small" type="outline" @click="emit('add-item')">
           <template #icon><icon-plus /></template>
           添加品名
         </a-button>
-        <a-button v-if="canDelete" size="small" type="outline" status="danger" @click.stop="emit('remove-block')">
-          删除发货人
-        </a-button>
+        <a-popconfirm v-if="canDelete" content="确认删除该发货人？" @ok="emit('remove-block')">
+          <a-button size="small" type="text" status="danger" @click.stop>
+            删除发货人
+          </a-button>
+        </a-popconfirm>
       </div>
 
       <div class="detail-mini-table-wrap">
@@ -152,7 +154,9 @@ const onHeadKeydown = (e: KeyboardEvent) => {
               <td><a-input-number v-model="item.grossWeight" :disabled="readonly" size="small" :min="0" /></td>
               <td><a-input-number v-model="item.volume" :disabled="readonly" size="small" :min="0" :precision="2" /></td>
               <td v-if="!readonly" class="detail-mini-table__op">
-                <a-button size="small" type="outline" status="danger" @click="emit('remove-item', item.id)">删除</a-button>
+                <a-popconfirm content="确认删除该品名？" @ok="emit('remove-item', item.id)">
+                  <a-button size="small" type="text" status="danger">删除</a-button>
+                </a-popconfirm>
               </td>
             </tr>
           </tbody>

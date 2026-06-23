@@ -1,4 +1,5 @@
 import type {
+  DetailAttachmentRow,
   DetailCargoBlock,
   DetailCargoItemRow,
   SaleOrderDetailModel,
@@ -63,6 +64,41 @@ function defaultCargoBlock(shipper = '', consignee = ''): DetailCargoBlock {
   };
 }
 
+function defaultAttachments(hasFiles = false): DetailAttachmentRow[] {
+  return [
+    {
+      id: detailUid(),
+      docType: '订舱委托书',
+      fileName: hasFiles ? 'booking-instruction.pdf' : '',
+      required: true,
+      multiple: false,
+      status: hasFiles ? 'uploaded' : 'missing',
+      uploader: hasFiles ? '操作A' : '',
+      uploadTime: hasFiles ? '2026-06-18 10:24' : ''
+    },
+    {
+      id: detailUid(),
+      docType: '报关资料',
+      fileName: hasFiles ? 'customs-docs.zip' : '',
+      required: true,
+      multiple: true,
+      status: hasFiles ? 'review' : 'missing',
+      uploader: hasFiles ? '客服B' : '',
+      uploadTime: hasFiles ? '2026-06-18 11:06' : ''
+    },
+    {
+      id: detailUid(),
+      docType: '提单文件',
+      fileName: hasFiles ? 'hbl-draft.pdf' : '',
+      required: false,
+      multiple: true,
+      status: hasFiles ? 'uploaded' : 'missing',
+      uploader: hasFiles ? '单证C' : '',
+      uploadTime: hasFiles ? '2026-06-19 09:18' : ''
+    }
+  ];
+}
+
 export function createEmptyDetail(mode: TransportMode): SaleOrderDetailModel {
   return {
     DcgNo: '',
@@ -98,6 +134,7 @@ export function createEmptyDetail(mode: TransportMode): SaleOrderDetailModel {
     CustomerRemark: '',
     OverseasRemark: '',
     AttachmentRemark: '',
+    AttachmentRows: defaultAttachments(false),
     OrderTypeFlags: [],
     StaffRows: [
       { id: detailUid(), company: '深圳点达', role: '业务', userName: '' },
@@ -154,6 +191,7 @@ export function detailFromRecord(row: SaleOrderRecord): SaleOrderDetailModel {
     ContainerInfo: row.ContainerInfo,
     CargoType: row.CargoType,
     CargoTypes: row.CargoType ? [row.CargoType] : ['普货'],
+    AttachmentRows: defaultAttachments(row.HasFiles),
     Status: row.Status,
     TransportMode: row.TransportMode,
     StaffRows: [

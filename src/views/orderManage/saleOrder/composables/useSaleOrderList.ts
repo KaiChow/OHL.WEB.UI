@@ -1,6 +1,5 @@
 import { computed, reactive, ref, watch } from 'vue';
 import { Message } from '@arco-design/web-vue';
-import { useRouter } from 'vue-router';
 import { saleOrderMockRecords } from '../../../../mock/saleOrders';
 import type { DrawerMode } from '../../../../types/drawer';
 import { useSaleOrderFilterTags } from './useSaleOrderFilterTags';
@@ -202,14 +201,15 @@ export function useSaleOrderList() {
     drawerVisible.value = true;
   };
 
-  const router = useRouter();
-
   const openCreate = () => {
-    router.push({ name: 'SaleOrderCreate' });
+    currentRecord.value = null;
+    drawerMode.value = 'create';
+    detailModel.value = createEmptyDetail(query.transportMode);
+    drawerVisible.value = true;
   };
 
   const openFullDetail = (row: SaleOrderRecord) => {
-    router.push({ name: 'SaleOrderDetail', query: { id: row.Id } });
+    openDetail(row, 'view');
   };
 
   const persistDetail = (closeAfter: boolean, successMsg: string) => {
@@ -256,16 +256,16 @@ export function useSaleOrderList() {
     fetchList();
   };
 
-  const saveRecord = () => persistDetail(true, drawerMode.value === 'create' ? '业务单创建成功' : '保存成功');
+  const saveRecord = () => persistDetail(true, drawerMode.value === 'create' ? '业务单创建成功' : '业务单保存成功');
 
   const submitRecord = () => {
     detailModel.value.Status = 'submitted';
-    persistDetail(true, '提交成功');
+    persistDetail(true, '业务单提交成功');
   };
 
   const abandonRecord = () => {
     detailModel.value.Status = 'abandoned';
-    persistDetail(true, '已废弃');
+    persistDetail(true, '业务单已废弃');
   };
 
   fetchList();

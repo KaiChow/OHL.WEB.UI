@@ -14,7 +14,7 @@ export const scopeTabs = [
 
 export const statusTabs: { value: string; label: string; danger?: boolean }[] = [
   { value: '', label: '全部' },
-  { value: 'pending_audit', label: '待审单' },
+  { value: 'pending_audit', label: '待审核' },
   { value: 'op_pending', label: '操作待接单' },
   { value: 'unsubmitted', label: '未提交' },
   { value: 'submitted', label: '已提交' },
@@ -25,7 +25,7 @@ export const statusTabs: { value: string; label: string; danger?: boolean }[] = 
 ];
 
 export const statusMeta: Record<SaleOrderStatus, { label: string; pill: string }> = {
-  pending_audit: { label: '待审单', pill: 'wait' },
+  pending_audit: { label: '待审核', pill: 'wait' },
   op_pending: { label: '操作待接单', pill: 'op' },
   unsubmitted: { label: '未提交', pill: 'draft' },
   submitted: { label: '已提交', pill: 'partial' },

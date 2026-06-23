@@ -7,6 +7,8 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 
 **`src/styles/global.css` 已实现完整 UI 设计系统。开发任何页面或组件前，必须先读该文件，复用已有类名，禁止另写等效 CSS。**
 
+项目级 UI skill：`ui-skill/freight-arco-ui/SKILL.md`。涉及页面设计、布局、配色、表格、详情、表单、按钮、状态、质感问题时，先读该 skill，再按任务读取对应 `references/` 文件。
+
 参考已有实现：`src/views/orderManage/saleOrder/` 目录（最完整的示例）。
 
 ---

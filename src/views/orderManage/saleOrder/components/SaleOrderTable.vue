@@ -47,8 +47,10 @@ const onCheckboxChange = () => {
       border="none"
       size="small"
       height="100%"
+      show-overflow="title"
       :loading="loading"
       :data="rows"
+      :stripe="true"
       :row-config="{ isHover: true, keyField: 'Id' }"
       :checkbox-config="{ highlight: true, range: true }"
       :sort-config="{ trigger: 'cell', remote: false }"
@@ -76,7 +78,7 @@ const onCheckboxChange = () => {
         </template>
       </vxe-column>
 
-      <vxe-column field="Status" title="订单状态" width="120">
+      <vxe-column field="Status" title="业务单状态" width="120">
         <template #default="{ row }">
           <span class="s-pill" :data-s="getStatusPill(row.Status)">{{ getStatusLabel(row.Status) }}</span>
         </template>
@@ -109,19 +111,17 @@ const onCheckboxChange = () => {
 
       <vxe-column v-if="isColumnVisible('Salesman')" field="Salesman" title="业务员" width="72" />
 
-      <vxe-column field="Shipper" title="发货人" min-width="180" show-overflow="title">
+      <vxe-column v-if="isColumnVisible('Shipper')" field="Shipper" title="发货人" min-width="180">
         <template #default="{ row }">
-          <a-tooltip :content="row.Shipper" position="top">
-            <span class="ellipsis">{{ row.Shipper }}</span>
-          </a-tooltip>
+          <span v-if="row.Shipper" class="clip-text">{{ row.Shipper }}</span>
+          <span v-else class="date-none">—</span>
         </template>
       </vxe-column>
 
-      <vxe-column field="Consignee" title="收货人" min-width="160" show-overflow="title">
+      <vxe-column v-if="isColumnVisible('Consignee')" field="Consignee" title="收货人" min-width="180">
         <template #default="{ row }">
-          <a-tooltip :content="row.Consignee" position="top">
-            <span class="ellipsis">{{ row.Consignee }}</span>
-          </a-tooltip>
+          <span v-if="row.Consignee" class="clip-text">{{ row.Consignee }}</span>
+          <span v-else class="date-none">—</span>
         </template>
       </vxe-column>
 
@@ -131,22 +131,8 @@ const onCheckboxChange = () => {
         </template>
       </vxe-column>
 
-      <vxe-column title="文件下载" width="80" align="center">
-        <template #default="{ row }">
-          <a-tooltip v-if="row.HasFiles" content="下载附件">
-            <a-button type="text" class="row-action-btn row-action-btn--primary" @click.stop>
-              <icon-download />
-            </a-button>
-          </a-tooltip>
-          <a-tooltip v-else content="暂无附件">
-            <a-button type="text" disabled class="row-action-btn btn-download-disabled">
-              <icon-download />
-            </a-button>
-          </a-tooltip>
-        </template>
-      </vxe-column>
-
-      <vxe-column title="操作" width="114" fixed="right" align="center">
+      <!-- 操作列：查看 + 编辑两个高频 icon，其余收进 ⋯ 下拉 -->
+      <vxe-column title="操作" width="88" fixed="right" align="center">
         <template #default="{ row }">
           <div class="row-actions">
             <a-tooltip content="查看">
@@ -164,7 +150,11 @@ const onCheckboxChange = () => {
                 <icon-more />
               </a-button>
               <template #content>
-                <a-doption>复制</a-doption>
+                <a-doption :disabled="!row.HasFiles" @click.stop>
+                  <template #icon><icon-download /></template>
+                  下载附件{{ row.HasFiles ? '' : '（暂无）' }}
+                </a-doption>
+                <a-doption>复制业务单</a-doption>
                 <a-doption>打印</a-doption>
                 <a-doption class="danger-opt">废弃</a-doption>
               </template>
@@ -173,19 +163,12 @@ const onCheckboxChange = () => {
         </template>
       </vxe-column>
 
-      <template #loading>
-        <div class="table-skeleton">
-          <div v-for="i in 8" :key="i" class="table-skeleton__row" />
-        </div>
-      </template>
-
       <template #empty>
         <div class="state-center state-center--in-table">
-          <div class="state-empty-icon">📋</div>
+          <icon-exclamation-circle class="state-empty-icon" />
           <span>暂无数据，换个条件试试</span>
         </div>
       </template>
     </vxe-table>
   </div>
 </template>
-

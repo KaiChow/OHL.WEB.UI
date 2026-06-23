@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import {
-  IconCopy,
-  IconDownload,
   IconDown,
+  IconDownload,
+  IconMore,
   IconPlus,
-  IconPrinter,
   IconRefresh,
   IconStar
 } from '@arco-design/web-vue/es/icon';
@@ -68,17 +67,17 @@ const handleBatch = (action: string) => {
           v-for="tab in statusTabs"
           :key="tab.value || 'all'"
           type="button"
-          class="stab"
-          :class="{ 'stab--active': query.status === tab.value }"
+          class="stat-tab"
+          :class="{ 'stat-tab--active': query.status === tab.value }"
           @click="emit('status-change', tab.value)"
         >
-          {{ tab.label }}
+          <span class="stat-tab__name">{{ tab.label }}</span>
           <span
             v-if="statusCounts[tab.value] !== undefined"
-            class="stab-badge"
+            class="stat-tab__count"
             :class="{
-              'stab-badge--danger': tab.danger && statusCounts[tab.value] > 0 && query.status !== tab.value,
-              'stab-badge--warn': tab.danger && query.status === tab.value
+              'stat-tab__count--danger': tab.danger && statusCounts[tab.value] > 0 && query.status !== tab.value,
+              'stat-tab__count--warn': tab.danger && query.status === tab.value
             }"
           >
             {{ statusCounts[tab.value] }}
@@ -97,39 +96,9 @@ const handleBatch = (action: string) => {
 
     <div class="toolbar toolbar--dense">
       <div class="toolbar-group">
-        <a-button size="small" type="text" @click="emit('refresh')">
-          <template #icon><icon-refresh /></template>
-        </a-button>
         <a-button v-if="perm.canCreate" size="small" type="primary" @click="emit('create')">
           <template #icon><icon-plus /></template>
           创建业务单
-        </a-button>
-      </div>
-
-      <div v-if="perm.canSpecialTrack" class="toolbar-divider" aria-hidden="true" />
-
-      <div v-if="perm.canSpecialTrack" class="toolbar-group">
-        <div class="toolbar-segment">
-          <a-button size="small" type="outline" class="toolbar-segment__btn">
-            <template #icon><icon-star /></template>
-            特殊跟踪
-          </a-button>
-          <a-button size="small" type="outline" class="toolbar-segment__btn btn-muted-warn">
-            关闭特殊跟踪
-          </a-button>
-        </div>
-      </div>
-
-      <div class="toolbar-divider" aria-hidden="true" />
-
-      <div class="toolbar-group toolbar-group--grow">
-        <a-button size="small" type="outline">
-          <template #icon><icon-copy /></template>
-          复制
-        </a-button>
-        <a-button v-if="perm.canPrint" size="small" type="outline">
-          <template #icon><icon-printer /></template>
-          打印
         </a-button>
         <a-dropdown v-if="perm.canExport" trigger="click" @select="handleExport($event as 'page' | 'all' | 'selected')">
           <a-button size="small" type="outline">
@@ -143,6 +112,11 @@ const handleBatch = (action: string) => {
             <a-doption value="selected">导出已选</a-doption>
           </template>
         </a-dropdown>
+      </div>
+
+      <div class="toolbar-divider" aria-hidden="true" />
+
+      <div class="toolbar-group toolbar-group--grow">
         <a-dropdown v-if="perm.canBatch" trigger="click" @select="handleBatch($event as string)">
           <a-button size="small" type="outline">
             批量操作
@@ -154,10 +128,33 @@ const handleBatch = (action: string) => {
             <a-doption class="danger-opt" value="abandon">批量废弃</a-doption>
           </template>
         </a-dropdown>
+        <!-- 低频操作：收入更多▼ -->
+        <a-dropdown trigger="click">
+          <a-button size="small" type="outline">
+            更多
+            <icon-more class="toolbar-caret" />
+          </a-button>
+          <template #content>
+            <a-doption>复制业务单</a-doption>
+            <a-doption v-if="perm.canPrint">打印</a-doption>
+            <template v-if="perm.canSpecialTrack">
+              <a-doption>
+                <template #icon><icon-star /></template>
+                特殊跟踪
+              </a-doption>
+              <a-doption class="danger-opt">关闭特殊跟踪</a-doption>
+            </template>
+          </template>
+        </a-dropdown>
       </div>
 
       <div class="toolbar-aside">
         <span v-if="selectedCount > 0" class="bulk-hint">已选 {{ selectedCount }} 条</span>
+        <a-tooltip content="刷新">
+          <a-button size="small" type="text" @click="emit('refresh')">
+            <template #icon><icon-refresh /></template>
+          </a-button>
+        </a-tooltip>
       </div>
     </div>
   </div>

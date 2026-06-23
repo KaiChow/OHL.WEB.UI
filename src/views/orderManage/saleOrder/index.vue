@@ -48,6 +48,7 @@ const enterEditMode = () => {
 
 <template>
   <div class="page-root page-root--dense">
+
     <sale-order-search
       :query="query"
       :filter-expanded="filterExpanded"

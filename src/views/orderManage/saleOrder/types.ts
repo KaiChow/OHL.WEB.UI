@@ -136,6 +136,19 @@ export interface DetailClearanceRow {
   address: string;
 }
 
+export type DetailAttachmentStatus = 'uploaded' | 'missing' | 'review';
+
+export interface DetailAttachmentRow {
+  id: string;
+  docType: string;
+  fileName: string;
+  required: boolean;
+  multiple: boolean;
+  status: DetailAttachmentStatus;
+  uploader: string;
+  uploadTime: string;
+}
+
 /** 业务单完整详情（抽屉 / 表单页） */
 export interface SaleOrderDetailModel {
   DcgNo: string;
@@ -171,6 +184,7 @@ export interface SaleOrderDetailModel {
   CustomerRemark: string;
   OverseasRemark: string;
   AttachmentRemark: string;
+  AttachmentRows: DetailAttachmentRow[];
   OrderTypeFlags: string[];
   StaffRows: DetailStaffRow[];
   CargoBlocks: DetailCargoBlock[];
