@@ -1,0 +1,156 @@
+---
+description: OHL 货代系统 UI 规范 — 适用于所有 Vue 页面、组件的开发
+globs: ["src/**/*.vue", "src/**/*.ts"]
+alwaysApply: true
+---
+
+# UI 规范：禁止自写 CSS，必须复用 global.css
+
+## 核心原则
+
+`src/styles/global.css` 已实现完整设计系统。**开发前必须先读 global.css，优先用已有类名，禁止另写等效 CSS。**
+
+参考已有页面：`src/views/orderManage/saleOrder/` 是最完整的示例。
+
+---
+
+## 页面骨架
+
+### 列表页
+```vue
+<div class="page-root page-root--dense">
+  <!-- 搜索区：必须用 filter-card 体系，参考 SaleOrderSearch.vue -->
+  <div class="zone-l2-filter-card zone-card filter-card">
+    <div class="filter-card__main">
+      <div class="filter-card__fields">
+        <div class="filter-card__body--basic">
+          <div class="filter-grid">
+            <div class="filter-field">
+              <label class="filter-field__label">字段名</label>
+              <a-input size="small" placeholder="请输入" allow-clear @press-enter="handleSearch" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-card__actions-col">
+        <div class="filter-card__actions-primary">
+          <a-button size="small" type="primary" @click="handleSearch">查询</a-button>
+          <a-button size="small" type="text" class="reset-btn" @click="handleReset">重置</a-button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="toolbar">…</div>
+  <div class="table-wrap">…</div>
+</div>
+```
+
+### 详情抽屉
+```vue
+<a-drawer class="detail-drawer" …>     <!-- 必须加 detail-drawer，触发 global.css 覆盖 -->
+  <div class="detail-drawer-body">
+    <div class="detail-drawer-status"> <!-- 顶部状态栏 -->
+    <div class="detail-drawer-scroll"> <!-- 灰底滚动区 -->
+      <div class="detail-section">     <!-- 白卡分区，有阴影 -->
+        <div class="detail-section__head">
+          <h4 class="detail-section__title">标题</h4>
+          <div class="detail-section__actions">…</div>
+        </div>
+        <div class="detail-section__body">…</div>
+      </div>
+    </div>
+    <div class="detail-drawer-footer"> <!-- 吸底，有阴影 -->
+  </div>
+</a-drawer>
+```
+
+---
+
+## 禁止 / 必须 对照表
+
+| 禁止 | 必须改用 |
+|------|---------|
+| `.search-bar` / `.sf` / `.sf-label` | `filter-card` / `filter-field` / `filter-field__label` |
+| 自写 `.meta-bar`、`.info-card` 等详情布局类 | `.detail-section` + `__head` + `__body` |
+| 重置按钮 `type="outline"` 或带图标 | `type="text" class="reset-btn"` 纯文字 |
+| **刷新按钮 `type="outline"`** | `type="text"` + icon-only |
+| 行内操作带文字 | `<a-button type="text" class="row-action-btn"><icon /></a-button>` + `<a-tooltip>` |
+| VXE 所有列用 `width` | 至少一列用 `min-width` |
+| `class="freight-table"` | 删掉（已废弃） |
+| `.stab-count` / `.stab-count--danger` | `.stab-badge` / `.stab-badge--danger` |
+| 硬编码 hex 颜色（`#ff7d00`、`#f53f3f`…） | `var(--warning-6)` / `var(--danger-6)` 等变量 |
+| 自写危险货 pill 样式 | `s-pill[data-s="wait"]` + icon |
+| `font-size: 14px / 16px` 硬编码 | `var(--dense-font-data)` 等 Token |
+| `font-weight: 700` | 最大 600，仅 F3 标题 |
+| 整行铺状态背景色 | 只在 `.s-pill[data-s]` 体现状态色 |
+| 抽屉不加 `class="detail-drawer"` | 必须加，否则 Arco 默认 16px 标题不被覆盖 |
+
+---
+
+## 字体 Token（禁止硬编码 px）
+
+| 场景 | Token |
+|------|-------|
+| 表格值、输入值、单号 | `--dense-font-data`（13px/500） |
+| 按钮、Tab、chip | `--dense-font-nav`（13px/500） |
+| 表头、分区标题 | `--dense-font-title`（12px/600） |
+| 筛选标签、form label | `--dense-font-field`（12px/500） |
+| placeholder、副信息 | `--dense-font-aux`（11px/400） |
+
+---
+
+## 状态 Pill（唯一合法写法）
+
+```html
+<span class="s-pill" :data-s="'wait'">待处理</span>
+```
+
+data-s 值：`wait`（橙）/ `op`（蓝）/ `partial`（紫）/ `acc`（青）/ `rel`（绿）/ `draft`（灰）/ `rej`（红）
+
+---
+
+## VXE Table 必填属性
+
+```vue
+<vxe-table border="none" size="small" height="100%" show-overflow="title"
+  :row-config="{ isHover: true, keyField: 'Id' }">
+  <vxe-column field="name" title="名称" min-width="160" />  <!-- 至少一列 min-width -->
+</vxe-table>
+```
+
+---
+
+## 工具栏唯一合法结构
+
+```html
+<div class="toolbar toolbar--dense">
+  <div class="toolbar-group">          <!-- 左：主操作 -->
+    <a-button size="small" type="primary">...</a-button>
+  </div>
+  <div class="toolbar-divider" />
+  <div class="toolbar-group toolbar-group--grow">  <!-- 中：次操作，撑开 -->
+    <a-button size="small" type="outline">导出</a-button>
+  </div>
+  <div class="toolbar-aside">          <!-- 右：刷新/工具，type="text" icon-only -->
+    <a-button size="small" type="text"><template #icon><icon-refresh /></template></a-button>
+  </div>
+</div>
+```
+
+❌ 禁止 `.toolbar-left` / `.toolbar-right` | ❌ 禁止 scoped 重写 `.toolbar`
+
+---
+
+## 上线前自查清单
+
+```
+□ 搜索区：filter-card 体系，无 .sf/.sf-label/.search-bar
+□ 工具栏：toolbar-group + toolbar-aside，刷新 type="text" icon-only
+□ 表格：border="none" size="small" height="100%"，至少一列 min-width
+□ 抽屉：有 class="detail-drawer"，detail-section 分区
+□ 状态：全用 s-pill[data-s]，无行背景色
+□ 颜色：无 hex，全用 CSS 变量
+□ 字体：无 14px/16px，无 font-weight:700
+□ 废弃类：无 freight-table、无 stab-count、无 search-bar
+□ scoped：无重写 global.css 已有类
+```

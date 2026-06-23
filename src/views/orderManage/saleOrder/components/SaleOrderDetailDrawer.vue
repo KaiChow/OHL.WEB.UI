@@ -40,6 +40,7 @@ const emit = defineEmits<{
   submit: [];
   abandon: [];
   edit: [];
+  'view-full': [];
 }>();
 
 const readonly = computed(() => props.mode === 'view');
@@ -200,6 +201,15 @@ const drawerWidth = 'calc(100vw - 32px)';
           @click="emit('edit')"
         >
           编辑
+        </a-button>
+        <a-button
+          v-if="mode === 'view'"
+          size="small"
+          type="text"
+          class="detail-drawer-status__edit"
+          @click="emit('view-full')"
+        >
+          完整详情 ↗
         </a-button>
       </div>
 

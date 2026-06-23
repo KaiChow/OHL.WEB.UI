@@ -2006,6 +2006,17 @@ html, body, #app {
 .arco-select-size-small .arco-select-view-value { font-size: var(--dense-font-data) !important; }
 .danger-opt .arco-dropdown-option-content       { color: #f53f3f !important; }
 
+/* F5 placeholder 全局降级（§7.8.3）：弹窗/抽屉/表单内输入框 placeholder 统一 11px/text-3 */
+.arco-modal .arco-input::placeholder,
+.arco-modal .arco-textarea::placeholder,
+.arco-drawer .arco-input::placeholder,
+.arco-drawer .arco-textarea::placeholder {
+  font-size: var(--dense-font-aux) !important;
+  font-weight: var(--dense-weight-aux) !important;
+  color: var(--color-text-3) !important;
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif !important;
+}
+
 /* 微交互：输入聚焦发光（按钮不做位移） */
 .btn-muted-warn {
   color: #9a6b35 !important;

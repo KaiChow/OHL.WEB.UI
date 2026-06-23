@@ -1,5 +1,6 @@
 import { computed, reactive, ref, watch } from 'vue';
 import { Message } from '@arco-design/web-vue';
+import { useRouter } from 'vue-router';
 import { saleOrderMockRecords } from '../../../../mock/saleOrders';
 import type { DrawerMode } from '../../../../types/drawer';
 import { useSaleOrderFilterTags } from './useSaleOrderFilterTags';
@@ -201,11 +202,14 @@ export function useSaleOrderList() {
     drawerVisible.value = true;
   };
 
+  const router = useRouter();
+
   const openCreate = () => {
-    currentRecord.value = null;
-    drawerMode.value = 'create';
-    detailModel.value = createEmptyDetail(query.transportMode);
-    drawerVisible.value = true;
+    router.push({ name: 'SaleOrderCreate' });
+  };
+
+  const openFullDetail = (row: SaleOrderRecord) => {
+    router.push({ name: 'SaleOrderDetail', query: { id: row.Id } });
   };
 
   const persistDetail = (closeAfter: boolean, successMsg: string) => {
@@ -293,6 +297,7 @@ export function useSaleOrderList() {
     handleBatch,
     openDetail,
     openCreate,
+    openFullDetail,
     saveRecord,
     submitRecord,
     abandonRecord

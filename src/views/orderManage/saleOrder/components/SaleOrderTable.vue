@@ -43,7 +43,7 @@ const onCheckboxChange = () => {
   <div class="table-wrap">
     <vxe-table
       ref="tableRef"
-      class="freight-table compact"
+      class="compact"
       border="none"
       size="small"
       height="100%"
@@ -65,7 +65,7 @@ const onCheckboxChange = () => {
           </span>
           <icon-exclamation-circle
             v-if="row.HasRemark"
-            style="margin-left: 4px; color: #ff7d00; font-size: 13px"
+            style="margin-left: 4px; color: var(--warning-6); font-size: var(--dense-font-data)"
           />
         </template>
       </vxe-column>
@@ -84,7 +84,7 @@ const onCheckboxChange = () => {
 
       <vxe-column v-if="isColumnVisible('CargoType')" field="CargoType" title="货物类型" width="96">
         <template #default="{ row }">
-          <span v-if="isDangerCargo(row.CargoType)" class="danger-cargo-pill">
+          <span v-if="isDangerCargo(row.CargoType)" class="s-pill" data-s="wait">
             <icon-exclamation-circle />
             {{ row.CargoType }}
           </span>
@@ -189,18 +189,3 @@ const onCheckboxChange = () => {
   </div>
 </template>
 
-<style scoped>
-.danger-cargo-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 7px;
-  height: 22px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #a85a20;
-  background: #faf0e6;
-  border: 1px solid #e8d4b8;
-  border-radius: var(--dense-radius);
-}
-</style>

@@ -12,5 +12,11 @@ export const logisticsWarehouseRoutes: RouteRecordRaw[] = [
     name: 'ShipmentTracking',
     component: () => import('../../views/logisticsWarehouse/shipmentTracking/index.vue'),
     meta: { menuKey: 'shipment-tracking', title: '运输跟踪' }
+  },
+  {
+    path: 'logistics-warehouse/inventory',
+    name: 'Inventory',
+    component: () => import('../../views/logisticsWarehouse/inventory/index.vue'),
+    meta: { menuKey: 'inventory', title: '库存管理' }
   }
 ];

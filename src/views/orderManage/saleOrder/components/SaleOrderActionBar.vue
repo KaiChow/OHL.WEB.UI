@@ -97,9 +97,8 @@ const handleBatch = (action: string) => {
 
     <div class="toolbar toolbar--dense">
       <div class="toolbar-group">
-        <a-button size="small" type="outline" @click="emit('refresh')">
+        <a-button size="small" type="text" @click="emit('refresh')">
           <template #icon><icon-refresh /></template>
-          刷新
         </a-button>
         <a-button v-if="perm.canCreate" size="small" type="primary" @click="emit('create')">
           <template #icon><icon-plus /></template>

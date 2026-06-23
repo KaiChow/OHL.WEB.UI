@@ -33,6 +33,7 @@ const {
   handleBatch,
   openDetail,
   openCreate,
+  openFullDetail,
   saveRecord,
   submitRecord,
   abandonRecord
@@ -104,6 +105,7 @@ const enterEditMode = () => {
       @submit="submitRecord"
       @abandon="abandonRecord"
       @edit="enterEditMode"
+      @view-full="currentRecord && openFullDetail(currentRecord)"
     />
   </div>
 </template>
