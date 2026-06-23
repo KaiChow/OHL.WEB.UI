@@ -6,16 +6,18 @@ Choose the correct page structure before writing UI. A large freight SaaS system
 
 Every page must be classified by archetype, then implemented with its matching structure.
 
+Archetypes are reusable structures, not fixed field templates. After choosing an archetype, fill it with the current business object's identity, state, working fields, and actions from `module-patterns.md`.
+
 ## Archetype A: Operational List / Workbench
 
 Use for high-frequency lists such as business orders, customer pool, bills, warehouse receipts, trucking tasks.
 
 Required structure:
 
-1. Optional business segment: transport mode, order type, settlement type.
-2. Dense search/filter layer.
-3. Scope/status tabs and business toolbar.
-4. VXE Table as dominant area.
+1. Optional segment slot: transport mode, order type, settlement type, warehouse, bill type, customer scope, or another real business scope.
+2. Dense search/filter slot.
+3. Scope/status/action slot.
+4. VXE Table dominant work area.
 5. Table cap with summary, pagination, column config.
 
 Rules:
@@ -24,6 +26,7 @@ Rules:
 - Pagination belongs in the table cap/right area, not bottom.
 - Create/submit is primary; refresh/settings are utilities.
 - Do not add page title bands.
+- Table columns must be selected from the object identity and user job. Do not reuse another module's columns.
 
 Read also: `list-page.md`, `table.md`, `actions.md`.
 
@@ -33,8 +36,8 @@ Use for opening a record from a list without losing list context.
 
 Required structure:
 
-1. Header identity: status, business/order no, company/context.
-2. Hero facts: route, customer, ETD/ETA, carrier, key node.
+1. Header identity slot: status, primary number/name, company/context.
+2. Key facts slot: 3-6 facts that explain the object.
 3. Optional milestone bar using domain terms.
 4. Scrollable business sections.
 5. Sticky footer actions.
@@ -44,6 +47,7 @@ Rules:
 - Do not repeat header summary in a right sidebar.
 - Use sections for business groups, not decorative cards.
 - Module header left is title only; header right is actions only.
+- `dds-hero` is a key-facts area. It does not always mean route, ETD, ETA, or carrier.
 
 Read also: `detail-form.md`, `actions.md`.
 
@@ -54,9 +58,10 @@ Use for full creation flows when data entry is the main task.
 Required structure:
 
 1. Compact header with object type and current draft state.
-2. Business grouped form sections.
-3. Repeating sub-entity modules for cargo, documents, fees, contacts.
-4. Sticky footer actions.
+2. Required-core fields needed to create the object.
+3. Business grouped form sections.
+4. Repeating sub-entity modules chosen by object type: cargo, documents, fees, contacts, locations, declarations, lines, or logs.
+5. Sticky footer actions.
 
 Rules:
 
@@ -64,6 +69,7 @@ Rules:
 - Place counts and totals inside module body/summary, not module title.
 - Use validation states that point to the missing business field.
 - Do not hide required core fields behind collapsed panels.
+- Do not show cargo/file/route modules unless the object owns that data.
 
 ## Archetype D: Master Data / Configuration
 
@@ -147,11 +153,13 @@ Rules:
 
 Before designing:
 
-1. Is the user primarily scanning many records? Use A.
-2. Is the user inspecting one record while preserving list context? Use B.
-3. Is the user entering or correcting a full business object? Use C.
-4. Is the data mostly dictionary/configuration? Use D.
-5. Is money/reconciliation central? Use E.
-6. Is stock/location/physical goods central? Use F.
-7. Is management trend/summary central? Use G.
-8. Is the task a narrow confirmation? Use H.
+1. Define the business object.
+2. Define the user's job on this page.
+3. Is the user primarily scanning many records? Use A.
+4. Is the user inspecting one record while preserving list context? Use B.
+5. Is the user entering or correcting a full business object? Use C.
+6. Is the data mostly dictionary/configuration? Use D.
+7. Is money/reconciliation central? Use E.
+8. Is stock/location/physical goods central? Use F.
+9. Is management trend/summary central? Use G.
+10. Is the task a narrow confirmation? Use H.

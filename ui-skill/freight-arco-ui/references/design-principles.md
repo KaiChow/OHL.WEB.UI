@@ -57,7 +57,7 @@ Complex freight pages must expose structure before decoration.
 
 Separate:
 
-- Primary business identity: order no, customer, route, status, ETD/ETA.
+- Primary business identity: object number/name, owner/counterparty, key state, and the 3-6 facts that define the current business object.
 - Business operation: forms, tables, task actions, exception handling.
 - Auxiliary information: remarks, helper text, logs, secondary metadata.
 

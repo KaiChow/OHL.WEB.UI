@@ -24,9 +24,12 @@ Always read these before changing UI:
 1. `src/styles/global.css` - source of truth for tokens and reusable classes.
 2. `CLAUDE.md` - concise coding contract and page skeletons.
 3. `references/design-principles.md` - PESDP highest-level rules.
-4. The relevant reference file below.
+4. `references/module-patterns.md` - reusable module slots and anti-hard-coding rules.
+5. The relevant reference file below.
 
-Do not copy old page-specific CSS. Reuse global classes first, then add only scoped layout glue when a page needs its own grid/flex shell.
+Do not copy old page-specific CSS or page-specific field choices. Reuse global classes first, then add only scoped layout glue when a page needs its own grid/flex shell.
+
+The skill must guide many modules, not one fixed page. Always map the business object and user job before choosing layout, fields, actions, or columns.
 
 ## Reference Map
 
@@ -35,6 +38,7 @@ Read only the files needed for the task:
 | Task | Read |
 |------|------|
 | Any UI/page/component task | `references/design-principles.md` |
+| Any new page or module refactor | `references/module-patterns.md` |
 | Freight wording, status, milestone, field naming | `references/domain-language.md` |
 | New page/module design, route/menu scale, page type choice | `references/page-archetypes.md` |
 | AI-generated page implementation or review | `references/ai-generation-contract.md` |
@@ -52,6 +56,8 @@ Read only the files needed for the task:
 - Use `vxe-table` for all data grids. Do not use `a-table`.
 - Use freight terms for freight concepts. Do not use generic internet labels such as `步骤1`, `处理中`, `进行中` when a logistics term exists.
 - Classify the page archetype before designing layout. Do not force every page into the same list/detail pattern.
+- Do not hard-code `业务单`, route, ETD/ETA, milestones, cargo, or attachment patterns into modules that do not own those concepts.
+- Treat classes such as `dds-head`, `dds-hero`, `detail-section`, and `table-card-cap` as structural slots. Their content must be chosen from the current business object.
 - Use `src/styles/global.css` classes: `page-root`, `zone-card`, `filter-card`, `toolbar`, `table-wrap`, `detail-section`, `detail-form-grid`, `s-pill`, `row-action-btn`.
 - Keep dense layout readable: compact rows and controls, but no zero-spacing compression.
 - Do not add page-level `h1 + description` header bands for operational list pages.
@@ -63,19 +69,22 @@ Read only the files needed for the task:
 
 ## Working Protocol
 
-1. Identify page type: list, detail drawer, full detail, create/edit form, dashboard, modal.
-2. Read `references/design-principles.md`, `references/domain-language.md`, then the matching reference file.
-3. Inspect existing implementation and `global.css`; prefer existing classes and patterns.
-4. Implement with a stable information hierarchy before changing colors.
-5. Validate:
+1. Identify business object and user job.
+2. Map primary identity, key state, main working data, repeated modules, primary action, and grouped actions.
+3. Identify page type: list, detail drawer, full detail, create/edit form, dashboard, modal.
+4. Read `references/design-principles.md`, `references/module-patterns.md`, `references/domain-language.md`, then the matching reference file.
+5. Inspect existing implementation and `global.css`; prefer existing classes and patterns.
+6. Implement with a stable information hierarchy before changing colors.
+7. Validate:
    - `npx vite build`
    - visual check at `http://127.0.0.1:9527/#/...` when a dev server is available.
-6. Report any unrelated build failures separately.
+8. Report any unrelated build failures separately.
 
 ## Output Standard
 
 For UI work, deliver:
 
+- Business object mapping and page archetype when the task is design/generation.
 - Files changed.
 - What design rule changed.
 - What verification ran.

@@ -12,6 +12,7 @@ The project UI skill has moved to:
 Read that file first. Detailed rules are in:
 
 - `ui-skill/freight-arco-ui/references/design-principles.md`
+- `ui-skill/freight-arco-ui/references/module-patterns.md`
 - `ui-skill/freight-arco-ui/references/domain-language.md`
 - `ui-skill/freight-arco-ui/references/page-archetypes.md`
 - `ui-skill/freight-arco-ui/references/ai-generation-contract.md`

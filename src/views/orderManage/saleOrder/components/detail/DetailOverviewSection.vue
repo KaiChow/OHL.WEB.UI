@@ -51,15 +51,19 @@ function toggleService(item: string) {
       </div>
       <a-form-item label="服务项">
         <div class="svc-tags">
-          <button
+          <span
             v-for="item in serviceItemOptions"
             :key="item"
-            type="button"
+            role="checkbox"
+            tabindex="0"
             class="svc-tag"
             :class="{ 'svc-tag--on': detail.ServiceItems.includes(item) }"
-            :disabled="readonly"
+            :aria-checked="detail.ServiceItems.includes(item)"
+            :aria-disabled="readonly"
             @click="toggleService(item)"
-          >{{ item }}</button>
+            @keydown.enter.prevent="toggleService(item)"
+            @keydown.space.prevent="toggleService(item)"
+          >{{ item }}</span>
         </div>
       </a-form-item>
     </a-form>

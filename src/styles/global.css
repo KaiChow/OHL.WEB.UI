@@ -1811,47 +1811,100 @@ html, body, #app {
   min-height: 0;
 }
 
-/* 详情页服务项 / 货物类型：语义标签，不使用原生按钮外观 */
+/* 详情页服务项 / 货物类型：checkbox chip，多选勾选语义 */
 .svc-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.svc-tag {
   display: inline-flex;
-  align-items: center;
-  height: 24px;
-  padding: 0 10px;
-  border: 1px solid var(--dense-border-subtle);
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+  padding: 5px 6px;
+  border: 1px solid var(--color-border-1);
   border-radius: var(--dense-radius);
   background: var(--color-bg-card);
-  color: var(--color-text-3);
-  font-size: var(--dense-font-aux);
+}
+.svc-tag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  height: 26px;
+  min-width: 0;
+  padding: 0 8px 0 6px;
+  border: 1px solid transparent;
+  border-radius: var(--dense-radius);
+  background: transparent;
+  color: var(--color-text-2);
+  font-size: var(--dense-font-nav);
   font-weight: 500;
   cursor: pointer;
+  line-height: 1;
   transition: color .12s ease, background-color .12s ease, border-color .12s ease;
   white-space: nowrap;
   user-select: none;
+  outline: none;
 }
-.svc-tag:hover:not(:disabled) {
-  border-color: var(--primary-3);
-  color: var(--primary-6);
+.svc-tag::before {
+  content: '';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-3);
+  border-radius: 3px;
+  background: var(--color-bg-card);
+  color: #fff;
+  font-size: 10px;
+  line-height: 12px;
+  transition: border-color .12s ease, background-color .12s ease;
+}
+.svc-tag:hover:not([aria-disabled="true"]) {
   background: var(--primary-1);
+  border-color: var(--primary-2);
+  color: var(--primary-6);
+}
+.svc-tag:focus-visible {
+  border-color: var(--primary-3);
+  box-shadow: 0 0 0 2px var(--primary-1);
 }
 .svc-tag--on {
   background: var(--primary-1) !important;
-  border-color: var(--primary-5) !important;
+  border-color: var(--primary-2) !important;
   color: var(--primary-6) !important;
   font-weight: 600 !important;
 }
+.svc-tag--on::before {
+  content: '✓';
+  background: var(--primary-6);
+  border-color: var(--primary-6);
+}
 .svc-tag--risk {
   background: var(--warning-1) !important;
-  border-color: var(--warning-5) !important;
+  border-color: transparent !important;
   color: var(--warning-6) !important;
 }
-.svc-tag:disabled {
+.svc-tag--risk.svc-tag--on {
+  background: var(--warning-1) !important;
+  border-color: var(--warning-3) !important;
+  color: var(--warning-6) !important;
+}
+.svc-tag--risk::before {
+  border-color: var(--warning-4);
+}
+.svc-tag--risk.svc-tag--on::before {
+  content: '✓';
+  background: var(--warning-6);
+  border-color: var(--warning-6);
+}
+.svc-tag[aria-disabled="true"] {
   cursor: default;
   pointer-events: none;
+}
+.svc-tag[aria-disabled="true"]:not(.svc-tag--on):not(.svc-tag--risk) {
+  color: var(--color-text-4);
+  background: transparent;
 }
 
 /* 详情页责任人与字段组标题：跨组件复用 */

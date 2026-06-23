@@ -5,6 +5,7 @@
 - Read `src/styles/global.css`.
 - Confirm whether existing global class already solves the need.
 - Read `references/design-principles.md`.
+- Read `references/module-patterns.md` for new pages or module refactors.
 - Read `references/domain-language.md`.
 - Classify the page with `references/page-archetypes.md`.
 - Read the relevant skill reference.
@@ -16,6 +17,16 @@
 - Structured: separates primary identity, business operation, and auxiliary data.
 - Dense: high useful information density without compression.
 - Premium: quality comes from order, consistency, hierarchy, and restraint.
+
+## Module Generalization Gate
+
+- Business object is explicitly identified.
+- User job is clear: scan, create, audit, reconcile, operate, configure, or analyze.
+- Primary identity and key state are object-specific.
+- Main table/form fields are not copied from another module.
+- Repeated modules are present only when the object owns that data.
+- Steps/milestones appear only when the object has a real business process.
+- Shared classes are used as structural slots, not as fixed business content.
 
 ## Layout
 
@@ -34,6 +45,8 @@
 - Dangerous actions are confirmed.
 - Uploads and file lists have clear single/multiple behavior.
 - Page/module implementation is split into route/page/components/types/mock/composables when scope is large.
+- Module header left is title only; module header right is actions only.
+- Counts, totals, helper text, upload state, and progress are inside module body/summary.
 
 ## Language
 

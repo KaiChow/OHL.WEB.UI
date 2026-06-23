@@ -117,18 +117,22 @@ function toggleCargoType(item: string) {
         </a-form-item>
         <a-form-item label="货物类型" class="detail-form-grid__span6">
           <div class="svc-tags">
-            <button
+            <span
               v-for="c in cargoTypeCheckboxOptions"
               :key="c"
-              type="button"
+              role="checkbox"
+              tabindex="0"
               class="svc-tag"
               :class="{
                 'svc-tag--on': detail.CargoTypes.includes(c),
                 'svc-tag--risk': detail.CargoTypes.includes(c) && RISK_CARGO_TYPES.has(c)
               }"
-              :disabled="readonly"
+              :aria-checked="detail.CargoTypes.includes(c)"
+              :aria-disabled="readonly"
               @click="toggleCargoType(c)"
-            >{{ c }}</button>
+              @keydown.enter.prevent="toggleCargoType(c)"
+              @keydown.space.prevent="toggleCargoType(c)"
+            >{{ c }}</span>
           </div>
         </a-form-item>
         <a-form-item label="客户备注" class="detail-form-grid__span3">
