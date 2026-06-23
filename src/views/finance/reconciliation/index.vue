@@ -158,12 +158,12 @@ function handleReset() {
     </div>
 
     <!-- Toolbar -->
-    <div class="toolbar">
-      <div class="toolbar-left">
+    <div class="toolbar toolbar--dense">
+      <div class="toolbar-group">
         <a-button size="small" type="primary"><template #icon><icon-plus /></template>新建对账单</a-button>
         <a-button size="small" type="outline"><template #icon><icon-download /></template>导出</a-button>
       </div>
-      <div class="toolbar-right">
+      <div class="toolbar-aside">
         <a-button size="small" type="text" @click="tableRef?.recalculate()"><template #icon><icon-refresh /></template></a-button>
       </div>
     </div>

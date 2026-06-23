@@ -238,7 +238,7 @@ function fmtVal(v: number, unit: string) {
 .kpi-lbl { font-size:var(--dense-font-field); color:var(--color-text-2); font-weight:500; }
 .kpi-dot { width:6px; height:6px; border-radius:50%; background:var(--danger-6); }
 .kpi-vrow { display:flex; align-items:baseline; gap:4px; }
-.kpi-val { font-size:22px; font-weight:700; color:var(--color-text-1); line-height:1.2; }
+.kpi-val { font-size:22px; font-weight:600; color:var(--color-text-1); line-height:1.2; }
 .kpi-unit { font-size:var(--dense-font-aux); color:var(--color-text-3); }
 .kpi-chg { font-size:var(--dense-font-aux); display:flex; align-items:center; gap:1px; margin-left:4px; }
 .kpi-chg.up { color:var(--success-6); } .kpi-chg.dn { color:var(--danger-6); }
@@ -274,7 +274,7 @@ function fmtVal(v: number, unit: string) {
 .todo-tab { padding:2px 9px; font-size:var(--dense-font-aux); border:1px solid var(--color-border-2); background:none; cursor:pointer; color:var(--color-text-2); }
 .todo-tab:first-child { border-radius:3px 0 0 3px; } .todo-tab:last-child { border-radius:0 3px 3px 0; border-left:0; }
 .todo-tab.active { background:var(--primary-1); color:var(--primary-6); font-weight:600; border-color:var(--primary-3); }
-.todo-bdg { font-size:var(--dense-font-micro); background:var(--danger-6); color:#fff; border-radius:8px; padding:0 4px; margin-left:3px; }
+.todo-bdg { font-size:var(--dense-font-micro); background:var(--danger-6); color:white; border-radius:8px; padding:0 4px; margin-left:3px; }
 .todo-body { overflow-y:auto; }
 .todo-row { display:flex; align-items:center; gap:8px; padding:6px 14px; border-bottom:1px solid var(--color-border-1); cursor:pointer; }
 .todo-row:hover { background:var(--color-fill-1); }

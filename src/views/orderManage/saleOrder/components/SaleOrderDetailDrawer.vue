@@ -392,11 +392,8 @@ const drawerWidth = 'calc(100vw - 32px)';
         <detail-section title="附件">
           <a-form layout="vertical" :model="detail" size="small" class="detail-form">
             <a-form-item label="其他必传文件">
-              <a-upload v-if="!readonly" action="/" :auto-upload="false">
-                <template #upload-button>
-                  <a-button size="small" type="outline">点击上传</a-button>
-                </template>
-              </a-upload>
+              <!-- TODO: 替换为 <uppy-uploader> 组件（待安装 @uppy/* 依赖） -->
+              <a-button v-if="!readonly" size="small" type="outline">点击上传</a-button>
               <span v-else class="sub-text">暂无附件</span>
             </a-form-item>
             <a-form-item label="备注">

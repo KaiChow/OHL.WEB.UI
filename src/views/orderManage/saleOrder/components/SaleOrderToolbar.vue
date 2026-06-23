@@ -28,32 +28,23 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="toolbar">
-    <div class="toolbar-left">
-      <a-button size="small" type="outline" @click="emit('refresh')">
-        <template #icon><icon-refresh /></template>
-        刷新
-      </a-button>
+  <div class="toolbar toolbar--dense">
+    <div class="toolbar-group toolbar-group--grow">
       <a-button size="small" type="primary" @click="emit('create')">
-        <template #icon><icon-plus /></template>
-        创建业务单
+        <template #icon><icon-plus /></template>创建业务单
       </a-button>
       <a-button size="small" type="outline">
-        <template #icon><icon-star /></template>
-        特殊跟踪
+        <template #icon><icon-star /></template>特殊跟踪
       </a-button>
       <a-button size="small" type="outline" status="warning">关闭特殊跟踪</a-button>
       <a-button size="small" type="outline">
-        <template #icon><icon-copy /></template>
-        复制业务单
+        <template #icon><icon-copy /></template>复制业务单
       </a-button>
       <a-button size="small" type="outline">
-        <template #icon><icon-printer /></template>
-        打印业务单
+        <template #icon><icon-printer /></template>打印业务单
       </a-button>
       <a-button size="small" type="outline">
-        <template #icon><icon-download /></template>
-        导出
+        <template #icon><icon-download /></template>导出
       </a-button>
       <a-dropdown trigger="click">
         <a-button size="small" type="outline">
@@ -68,7 +59,7 @@ const emit = defineEmits<{
       <span v-if="selectedCount > 0" class="bulk-hint">已选 {{ selectedCount }} 条</span>
     </div>
 
-    <div class="toolbar-right toolbar-pager">
+    <div class="toolbar-aside">
       <a-pagination
         :current="current"
         :page-size="pageSize"
@@ -81,6 +72,9 @@ const emit = defineEmits<{
         @change="(p: number) => { emit('update:current', p); emit('page-change'); }"
         @page-size-change="(s: number) => { emit('update:pageSize', s); emit('page-size-change'); }"
       />
+      <a-button size="small" type="text" @click="emit('refresh')">
+        <template #icon><icon-refresh /></template>
+      </a-button>
     </div>
   </div>
 </template>

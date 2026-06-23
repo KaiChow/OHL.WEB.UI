@@ -690,6 +690,59 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 | 详情字段（可编辑） | `<a-form layout="vertical" class="detail-form">` + `<a-form-item label="...">` |
 | 详情 footer | `.detail-drawer-footer` |
 
+### 搜索区
+| 需求 | 用这个 |
+|------|--------|
+| 筛选条件 ≥ 6 个 | `zone-l2-filter-card zone-card filter-card`（多行 filter-grid） |
+| 筛选条件 ≤ 5 个 | `filter-inline`（单行，placeholder 替代 label，高度 ~48px） |
+| 高级展开区 | `filter-card__advanced` + `filter-card__advanced--open` |
+
+### KPI 统计条（列表页必须）
+```vue
+<!-- 放在 filter-card 上方；点击 lkb-item 快速过滤对应状态 -->
+<div class="list-kpi-bar zone-card">
+  <div class="lkb-item" :class="{ 'lkb-item--active': filter === '' }" @click="filter = ''">
+    <span class="lkb-label">全部单量</span>
+    <span class="lkb-val">{{ stats.total }}</span>
+  </div>
+  <div class="lkb-item" :class="{ 'lkb-item--active': filter === 'pending' }" @click="filter = 'pending'">
+    <span class="lkb-label">待审核</span>
+    <span class="lkb-val lkb-val--warn">{{ stats.pending }}</span>
+  </div>
+  <div class="lkb-item" :class="{ 'lkb-item--active': filter === 'abnormal' }" @click="filter = 'abnormal'">
+    <span class="lkb-label">异常订单</span>
+    <span class="lkb-val lkb-val--danger">{{ stats.abnormal }}</span>
+  </div>
+</div>
+```
+```
+✅ 列表页顶部必须有 list-kpi-bar（体现运营感，让用户打开即知全局状态）
+✅ 点击 lkb-item 等效于在 filter 里选对应状态
+✅ lkb-val 颜色：正常=默认，待处理=--warn，异常=--danger，完成=--success
+❌ 禁止只有数字没有 label
+❌ 禁止超过 6 个 lkb-item（超过改用 dashboard 大屏）
+```
+
+### 状态 Tab 两层区分
+| 场景 | 用法 |
+|------|------|
+| 范围切换（我的/全部/权限） | `.stab`（胶囊型，嵌入 toolbar-group，≤4个） |
+| 状态统计（带数量的 Tab） | `.stat-tab` + `.stat-tab__count`（矩形卡片型，在 scope-status-bar 内） |
+
+两者外形不同 — stab 是圆角胶囊，stat-tab 是矩形。同一页面禁止混用两者承担相同层级的导航。
+
+```vue
+<!-- 状态统计 Tab 示例（scope-status-bar__status 区域） -->
+<button class="stat-tab" :class="{ 'stat-tab--active': status === '' }" @click="status = ''">
+  <span class="stat-tab__name">全部</span>
+  <span class="stat-tab__count">{{ counts.total }}</span>
+</button>
+<button class="stat-tab" :class="{ 'stat-tab--active': status === 'pending' }" @click="status = 'pending'">
+  <span class="stat-tab__name">待审核</span>
+  <span class="stat-tab__count stat-tab__count--warn">{{ counts.pending }}</span>
+</button>
+```
+
 ### 数据展示
 | 需求 | 用这个（全部来自 global.css） |
 |------|--------|
@@ -946,11 +999,42 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ❌ font-size: 14px / 16px 硬编码
 ```
 
+### 视觉层级（2026 专业 B 端规范）
+```
+✅ 背景只有两种：页面背景灰（var(--color-bg-body)）+ 卡片纯白（var(--color-bg-card)）
+✅ 区块间用卡片边框（border: 1px solid var(--dense-border-subtle)）拉开层级
+✅ 表头用浅蓝灰（已在 global.css 定义，禁止覆盖）— 表格内唯一的灰色区域
+❌ 禁止在白色卡片内部再加灰色渐变背景（toolbar/scope-status-bar/table-card-cap 已是纯白）
+❌ 禁止"页面背景/卡片/表头/行"全部用不同灰度（Excel/Windows 2003 风格）
+❌ 禁止在 zone-card 内的子区域自定义背景色（除 filter-card__advanced-inner 展开区）
+```
+
+### 工具栏按钮层级
+```
+主操作（创建/新建）  → type="primary"（蓝色实心，最多1个）
+次要操作（复制/打印/导出）→ type="outline"（线框，≤3个直接显示）
+低频/危险操作       → 收进 <a-dropdown> 的"更多▼"按钮，禁止直接暴露在工具栏
+特殊跟踪/关闭跟踪等业务专属操作 → 同上，放 dropdown 内
+✅ 工具栏按钮不超过：1个 primary + 3个 outline + 1个 更多▼
+❌ 禁止 5 个以上按钮并排，用户不知道点哪个
+```
+
+### 操作列（action column）
+```
+✅ 操作列宽度：56px（单个⋯按钮）或 88px（查看+编辑+⋯）
+✅ 常用操作直接显示（最多2个 icon 按钮）
+✅ 其余操作（复制/打印/取消/删除）收进 <a-dropdown> 的 ⋯ 按钮
+✅ 删除必须在 dropdown 内用 <a-doption class="danger-opt">
+❌ 禁止操作列超过 3 个 icon 按钮（行内按钮太多 = 干扰视线）
+❌ 禁止操作列用文字按钮（"查看" "编辑" 文字，应用 icon + tooltip）
+```
+
 ### 表格
 ```
 ❌ <a-table>（禁止使用 Arco 原生表格，全项目统一用 vxe-table）
 ❌ VXE Table 所有列用 width（至少一列用 min-width 撑满容器）
 ❌ emoji 作为空状态图标（用 Arco icon + state-center 类）
+❌ 发货人/收货人等双方信息各占一列（用 cell-two-line 合并为一列，节约宽度）
 ```
 
 ---

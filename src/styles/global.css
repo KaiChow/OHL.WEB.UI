@@ -259,8 +259,8 @@ html, body, #app {
   padding: 0 14px;
   height: 40px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, var(--color-fill-1) 0%, var(--color-bg-card) 100%);
-  border-bottom: 1px solid var(--dense-border);
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--dense-border-subtle);
 }
 .table-card-cap__left {
   display: flex;
@@ -442,8 +442,8 @@ html, body, #app {
   display: flex;
   align-items: center;
   padding: 8px 14px;
-  background: linear-gradient(180deg, var(--color-fill-1) 0%, var(--color-bg-card) 100%);
-  border-bottom: 1px solid var(--dense-border);
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--dense-border-subtle);
 }
 .filter-card__main {
   display: flex;
@@ -825,7 +825,7 @@ html, body, #app {
   align-items: center;
   height: var(--dense-bar-h);
   padding: 0 12px 0 14px;
-  background: linear-gradient(180deg, var(--dense-bg-card-muted) 0%, #fff 100%);
+  background: var(--color-bg-card);
   border-bottom: 1px solid var(--dense-border-subtle);
   gap: 0;
   overflow: hidden;
@@ -923,7 +923,7 @@ html, body, #app {
   gap: 0;
   padding: 6px 14px;
   min-height: var(--dense-bar-h);
-  background: linear-gradient(180deg, #fff 0%, var(--dense-bg-card-muted) 100%);
+  background: var(--color-bg-card);
   border-top: 1px solid var(--dense-border-subtle);
   flex-shrink: 0;
 }
@@ -1102,7 +1102,7 @@ html, body, #app {
 /* ── 操作列 / 固定列质感 ───────────────────────────────────── */
 .vxe-table .col--fixed-right .vxe-body--column {
   border-left: 1px solid #e8ecf3 !important;
-  background: linear-gradient(180deg, var(--color-fill-1) 0%, var(--color-bg-card) 100%) !important;
+  background: var(--color-bg-card) !important;
 }
 .vxe-table .col--fixed-right .vxe-header--column {
   border-left: 1px solid #d8e0ec !important;
@@ -2226,3 +2226,176 @@ html, body, #app {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* =================================================================
+   列表页 KPI 统计条 — list-kpi-bar
+   用法：放在 filter-card 上方或 toolbar 内，展示核心运营指标
+   点击可快速过滤对应状态的数据
+   ================================================================= */
+.list-kpi-bar {
+  display: flex;
+  align-items: stretch;
+  background: var(--color-bg-card);
+  border: 1px solid var(--dense-border-subtle);
+  border-radius: var(--dense-radius);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.lkb-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-right: 1px solid var(--dense-border-subtle);
+  transition: background .12s;
+  min-width: 0;
+  position: relative;
+}
+.lkb-item:last-child { border-right: none; }
+.lkb-item:hover { background: var(--color-fill-1); }
+.lkb-item--active { background: var(--primary-1); }
+.lkb-item--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--primary-6);
+}
+.lkb-label {
+  font-size: var(--dense-font-aux);
+  color: var(--color-text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lkb-val {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--color-text-1);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em;
+}
+.lkb-val--warn    { color: var(--warning-6); }
+.lkb-val--danger  { color: var(--danger-6); }
+.lkb-val--primary { color: var(--primary-6); }
+.lkb-val--success { color: var(--success-6); }
+.lkb-item--active .lkb-val { color: var(--primary-6); }
+.lkb-item--active .lkb-label { color: var(--primary-6); font-weight: 500; }
+
+/* =================================================================
+   内联单行搜索 — filter-inline
+   用法：替代 filter-card（当筛选条件 ≤ 5 个时）
+   所有字段在一行，用 placeholder 承担 label 功能，高度 ~48px
+   ================================================================= */
+.filter-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--dense-border-subtle);
+  border-radius: var(--dense-radius);
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+.filter-inline .arco-input-wrapper,
+.filter-inline .arco-select-view-single {
+  height: 32px !important;
+  min-height: 32px !important;
+  border: 1px solid var(--color-border-2) !important;
+  border-radius: 6px !important;
+  background: var(--color-bg-card);
+  font-size: var(--dense-font-data) !important;
+  flex-shrink: 0;
+}
+.filter-inline .arco-input,
+.filter-inline .arco-select-view-value,
+.filter-inline .arco-select-view-input {
+  font-size: var(--dense-font-data) !important;
+  line-height: 30px !important;
+}
+.filter-inline .arco-input::placeholder,
+.filter-inline .arco-select-view-input::placeholder {
+  font-size: var(--dense-font-aux) !important;
+  color: var(--color-text-3) !important;
+}
+.filter-inline .arco-input-wrapper:focus-within,
+.filter-inline .arco-select-view-single.arco-select-view-focus {
+  border-color: var(--primary-6) !important;
+  box-shadow: 0 0 0 2px var(--primary-2) !important;
+}
+.filter-inline__sep {
+  width: 1px;
+  height: 18px;
+  background: var(--dense-border);
+  flex-shrink: 0;
+}
+.filter-inline .arco-btn:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* =================================================================
+   状态统计 Tab — stat-tab
+   用法：在 scope-status-bar__status 区域，替代 .stab 展示各状态数量
+   外形是矩形卡片（区别于 .stab 圆角胶囊），强调"数字统计"语义
+   ================================================================= */
+.stat-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  height: 28px;
+  font-size: var(--dense-font-nav);
+  font-weight: var(--dense-weight-nav);
+  color: var(--color-text-2);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--dense-radius);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s;
+  flex-shrink: 0;
+  user-select: none;
+}
+.stat-tab:hover {
+  background: var(--color-fill-1);
+  border-color: var(--dense-border-subtle);
+  color: var(--color-text-1);
+}
+.stat-tab--active {
+  background: var(--primary-1);
+  border-color: var(--primary-3);
+  color: var(--primary-6);
+  font-weight: var(--dense-weight-nav-active);
+}
+.stat-tab__name {
+  font-size: var(--dense-font-nav);
+  line-height: 1;
+}
+.stat-tab__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 8px;
+  font-size: var(--dense-font-micro);
+  font-weight: 600;
+  background: var(--color-fill-2);
+  color: var(--color-text-3);
+  transition: all .15s;
+  line-height: 1;
+}
+.stat-tab--active .stat-tab__count {
+  background: var(--primary-2);
+  color: var(--primary-7);
+}
+.stat-tab__count--danger { background: var(--danger-1); color: var(--danger-6); }
+.stat-tab__count--warn   { background: var(--warning-1); color: var(--warning-6); }
+.stat-tab__count--ok     { background: var(--success-1); color: var(--success-6); }

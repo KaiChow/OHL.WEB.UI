@@ -243,7 +243,7 @@ const handleCancel = () => {
     </div>
 
     <!-- 吸底操作栏 -->
-    <div class="detail-drawer-footer" style="position:fixed;bottom:0;left:0;right:0;z-index:100;border-top:1px solid var(--color-border-1);background:#fff">
+    <div class="detail-drawer-footer" style="position:fixed;bottom:0;left:0;right:0;z-index:100;border-top:1px solid var(--color-border-1);background:var(--color-bg-1)">
       <a-button type="primary" size="small" :loading="saving" @click="handleSave">保存</a-button>
       <a-button size="small" @click="handleCancel">取消</a-button>
     </div>

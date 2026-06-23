@@ -166,12 +166,12 @@ const handleBatch = (action: string) => {
 <style scoped>
 .stab--clear {
   margin-left: 4px;
-  color: #8a94a6 !important;
+  color: var(--color-text-3) !important;
   font-weight: 400 !important;
 }
 .stab--clear:hover {
   color: var(--dense-primary) !important;
-  background: #eef1f8 !important;
+  background: var(--primary-1) !important;
 }
 .toolbar-caret {
   margin-left: 2px;
