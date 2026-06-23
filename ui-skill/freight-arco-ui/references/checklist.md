@@ -36,6 +36,7 @@
 - Table remains the largest area.
 - No double scrollbars.
 - No duplicated summary areas unless each has a distinct interaction purpose.
+- Table cap does not repeat pagination totals or status-tab counts.
 
 ## Components
 
@@ -47,6 +48,26 @@
 - Page/module implementation is split into route/page/components/types/mock/composables when scope is large.
 - Module header left is title only; module header right is actions only.
 - Counts, totals, helper text, upload state, and progress are inside module body/summary.
+- Parent-child nested modules use one parent surface, one summary row, compact child heads, child body forms, and child-owned line tables.
+- Parent, child, and row actions are visually separated by level and use object-specific labels.
+- Repeated child items are separated by subtle dividers or child heads, not independent nested cards.
+- Empty nested line tables show an explicit empty/add state and must not collapse into a blank compressed strip.
+- Duplicate totals across module summary, child head, and table cap are removed.
+- List total count is owned by pagination when pagination is present.
+- Main tables, detail line tables, editable line tables, and file tables follow their own table type rules.
+- Table columns expose object identity, key state, main working data, and next-decision fields before passive metadata.
+- Table empty states are explicit and object-specific, not blank table bodies.
+- Editable tables keep inputs readable and aligned without clipping.
+
+## Typography
+
+- Uses the global system font stack and F1-F6 typography tokens.
+- No arbitrary business text sizes such as 14px/15px/16px.
+- Business UI does not use font-weight 700/800.
+- Codes and identifiers use mono or tabular numeric styling where comparison matters.
+- Numeric, amount, weight, volume, and date values use tabular numbers where possible.
+- International text expansion is considered: labels and buttons do not depend on short Chinese text.
+- Long business labels remain understandable and are not truncated by default.
 
 ## Language
 

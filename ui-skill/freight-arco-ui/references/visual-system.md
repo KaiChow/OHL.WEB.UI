@@ -40,6 +40,14 @@ Order of visual strength:
 4. Helper/meta: `color-text-3`.
 5. Empty/disabled: `color-text-4`.
 
+Hierarchy must be created through layout, typography, semantic color, and action priority together.
+
+- Primary identifier must be visually easier to find than passive metadata.
+- Module title, module summary, child title, table header, and row data must use different roles, not random font sizes.
+- Tables must show a primary identifier and next-decision fields before passive fields.
+- Empty states use weak typography and clear action, not large gray blank areas.
+- Do not use bigger font size as the first solution for weak hierarchy.
+
 ## Status System
 
 Use `.s-pill[data-s]`.

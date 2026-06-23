@@ -8,7 +8,7 @@ Use this order:
 2. Search/filter: `zone-l2-filter-card zone-card filter-card`
 3. Scope/status/actions: `zone-l3-action zone-card zone-card--stack`
 4. Table card: `zone-l4-table-card`
-5. Table cap inside table card: left summary, right pagination/settings
+5. Table cap inside table card: right-side pagination/settings; total count is owned by pagination
 6. Table body: `table-wrap`
 
 Do not add a page-level title/description band for operational list pages.
@@ -49,6 +49,15 @@ Toolbar actions are chosen by workflow:
 - Batch action only when multi-selection exists and the operation is safe or confirmed.
 - Refresh/settings/density/columns are utilities, not business actions.
 
+## Table Cap And Pagination
+
+- Pagination belongs in `table-card-cap` at the top-right of the table card.
+- Total count is shown by the pagination component (`show-total`) when needed.
+- Do not repeat the same total as a separate left-side `共 N 条` summary when pagination already shows it.
+- Column settings, density, and other table-only utilities live beside pagination, not in the business action group.
+- The left side of `table-card-cap` should stay empty unless it adds non-duplicated context such as selected-row feedback or a real grouped-table title.
+- Do not use table cap for page titles, instructions, KPI summaries, or duplicated status counts.
+
 ## Status Tabs
 
 - Scope tabs and status tabs may share a row, but must have visual separation.
@@ -88,6 +97,7 @@ These examples are not templates. Use them to choose equivalent identity/status/
 
 - All buttons exposed at once.
 - Pagination at bottom or mixed with unrelated toolbar actions.
+- Duplicating total count in both table cap and pagination.
 - Gray search/tool/table bands with no primary anchor.
 - Tabs squeezed into the same visual weight as action buttons.
 - Repeating the same scope/status filter in multiple rows.

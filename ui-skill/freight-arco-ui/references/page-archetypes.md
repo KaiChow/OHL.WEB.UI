@@ -18,12 +18,13 @@ Required structure:
 2. Dense search/filter slot.
 3. Scope/status/action slot.
 4. VXE Table dominant work area.
-5. Table cap with summary, pagination, column config.
+5. Table cap with right-side pagination, column config, and table-only utilities.
 
 Rules:
 
 - Table is the primary work area.
 - Pagination belongs in the table cap/right area, not bottom.
+- Total count belongs to pagination when pagination is visible; do not duplicate it as an extra table summary.
 - Create/submit is primary; refresh/settings are utilities.
 - Do not add page title bands.
 - Table columns must be selected from the object identity and user job. Do not reuse another module's columns.

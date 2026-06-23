@@ -92,6 +92,84 @@ Module header is structural, not a data summary.
 
 This applies to every module type: cargo, files, fees, contacts, customs, delivery, warehouse, finance lines, logs.
 
+## Module Display Contract
+
+Every business module must have a predictable visual structure.
+
+```text
+module surface
+├── module head
+│   ├── title
+│   └── actions
+├── optional summary row
+├── optional form/body content
+├── optional table/list content
+└── optional empty/validation state
+```
+
+### Surface
+
+- Use one visible surface per business module.
+- Use Arco token background, border, and radius from global classes.
+- Do not nest decorative cards inside a module.
+- Do not create floating panels for small subgroups.
+- Separate adjacent modules with the global module gap, not heavy shadows.
+
+### Header
+
+- Left: one module title only.
+- Right: module-level actions only.
+- Actions must use object-specific labels: `添加发货人`, `添加明细`, `上传附件`, `导入费用`.
+- Do not use a bare `添加` when multiple entity levels exist.
+- Do not show totals, count, status, helper text, upload state, or selected state in the header.
+
+### Summary Row
+
+Use a summary row when the user needs whole-module situation before editing details.
+
+Allowed:
+
+- counts
+- totals
+- validation progress
+- upload status
+- missing required count
+
+Rules:
+
+- Summary labels use auxiliary typography.
+- Summary values use data typography.
+- Use neutral color by default; semantic color only for warning, exception, or completion.
+- Do not repeat the same summary in child heads or table captions.
+
+### Body
+
+- Body order must follow operation order.
+- Forms should use `detail-form` and `detail-form-grid`.
+- Tables should use VXE or shared mini table rules.
+- Empty content must show an explicit empty state with the next action when editable.
+- Avoid blank strips, collapsed empty tables, and unlabeled rows.
+
+### Module Type Decision
+
+| Situation | Use |
+|-----------|-----|
+| One stable field group | `detail-section` |
+| One editable repeated row set | `detail-module` + line table |
+| Repeated parent with child line rows | parent-child detail module |
+| File/document management | attachment module |
+| Read-only audit/history | timeline/log module |
+| Risk or exception queue | exception module |
+
+### Anti-Patterns
+
+- Module header with title + count + action + helper text.
+- Independent card for every child row.
+- Two tables inside one module without a clear parent-child relationship.
+- Add button separated from the table/list it affects.
+- Empty table body shown as whitespace without action or reason.
+- Using border-heavy Excel style to create hierarchy.
+
 ## Reusable Sub-Entity Modules
 
 | Module type | Use for | Body pattern |
@@ -101,6 +179,57 @@ This applies to every module type: cargo, files, fees, contacts, customs, delive
 | Party/contact module | 发货人, 收货人, 客户联系人, 责任人 | Inline chips in view mode; editable table/form rows in edit mode. |
 | Timeline/log module | 操作日志, 审核记录, 节点轨迹 | Time ordered list; no decorative cards per item unless repeated dense rows need separation. |
 | Exception module | 异常, 差异, 风险项 | Semantic status; action/owner/deadline visible; no full-row color blocks. |
+
+## Parent-Child Detail Modules
+
+Use this pattern when one business section owns repeated parent entities and each parent owns repeated line rows.
+
+Examples include cargo party + cargo lines, fee group + fee lines, delivery party + delivery lines, declaration group + declaration documents, warehouse task + stock lines. These examples are for choosing the pattern only; do not hard-code their fields into other modules.
+
+### Structure
+
+```text
+detail-module
+├── detail-section__head
+│   ├── title only
+│   └── module-level actions only
+├── detail-module-summary
+│   └── whole-module counts/totals/progress
+└── detail-child-list
+    ├── detail-child-item
+    │   ├── child head: child identity + optional child-level stats + collapse/action
+    │   ├── child core form: fields that identify this child entity
+    │   └── child line table: rows owned by this child
+    └── detail-child-item
+```
+
+### Hierarchy Rules
+
+- Parent module owns the module title, whole-module totals, and module-level add/copy/import actions.
+- Child item owns one child identity, its form fields, its line table, child-level totals, and child-level delete/collapse.
+- Line table owns row fields and row-level add/delete/edit.
+- Do not show the same total in parent summary, child head, and table header.
+- Do not create an independent card, shadow, or border-heavy panel for every child item.
+- Do not put module totals or helper copy in the module title line.
+- Do not put child-level actions far away from the child they affect.
+
+### Interaction Rules
+
+- Parent add action creates a new child entity.
+- Child add action creates a new line row inside that child.
+- Child delete is danger and confirmed.
+- Line delete is danger and confirmed only when data has been saved or deletion is destructive.
+- Collapse applies to the child item only. Collapsed child head must still show enough identity to recognize it.
+- Default expansion: expand the first child and any child with validation errors; collapse additional complete children when the list is long.
+- Keyboard support is required for custom collapse or checkbox-like controls.
+
+### Visual Rules
+
+- Use one outer module surface. Child items are separated by low-contrast dividers or subtle tinted headers, not nested cards.
+- Use one primary vertical rhythm: module summary, child head, child body, line table.
+- Child form fields should use the same `detail-form` and `detail-form-grid` rules as normal sections.
+- Child line rows should use VXE mini table or the shared mini table class; numeric fields right aligned and operation column compact.
+- Empty line tables must show one clear empty/add state, not a blank compressed strip.
 
 ## Hard-Coding Checks
 

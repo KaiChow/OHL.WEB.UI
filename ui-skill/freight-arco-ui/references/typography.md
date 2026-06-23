@@ -1,0 +1,108 @@
+# Typography And Internationalization
+
+## Goal
+
+Typography must support a dense international freight SaaS system used for long daily sessions.
+
+The type system must be readable for Chinese, English, codes, dates, amounts, ports, vessel/voyage, HBL/MBL, container numbers, and multilingual customer names.
+
+## Font Family
+
+Use a system-first font stack. Do not introduce web fonts unless the product explicitly ships them.
+
+Recommended stack:
+
+```css
+font-family:
+  -apple-system,
+  BlinkMacSystemFont,
+  "Segoe UI",
+  "Inter",
+  "Noto Sans",
+  "Noto Sans CJK SC",
+  "PingFang SC",
+  "Microsoft YaHei",
+  Arial,
+  sans-serif;
+```
+
+Use a mono stack only for identifiers, codes, and aligned technical values:
+
+```css
+font-family:
+  "SF Mono",
+  "Cascadia Mono",
+  "JetBrains Mono",
+  Consolas,
+  "Liberation Mono",
+  monospace;
+```
+
+## Size Scale
+
+Use the global F1-F6 tokens. Do not hard-code page-specific font sizes.
+
+| Level | Token | Size | Weight | Use |
+|-------|-------|------|--------|-----|
+| F1 | `--dense-font-data` | 13px | 500 | Table cells, input values, core links, business identifiers |
+| F2 | `--dense-font-nav` | 13px | 500/600 active | Buttons, tabs, chips, segmented controls |
+| F3 | `--dense-font-title` | 12px | 600 | Section titles, VXE headers, drawer titles, compact group headings |
+| F4 | `--dense-font-field` | 12px | 500 | Form labels, filter labels, field names |
+| F5 | `--dense-font-aux` | 11px | 400/500 | Helper text, placeholders, metadata, summary labels |
+| F6 | `--dense-font-micro` | 10px | 400/500 | Badges, units, sequence micro text |
+
+Exceptions:
+
+- Detail hero route or major KPI may use a local hero token, max 18px/600.
+- Brand/logo shell may use larger or heavier text, but never copy shell typography into business modules.
+- Icons use icon size tokens, not text size tokens.
+
+## Weight Rules
+
+- Business UI maximum weight is 600.
+- Data values default to 500.
+- Labels default to 500.
+- Helper text defaults to 400.
+- Do not use `font-weight: 700/800` inside business modules, tables, forms, drawers, filters, or toolbars.
+- Do not use font weight alone to indicate status, risk, or exception. Use semantic status components.
+
+## International Text Expansion
+
+Design for 1.3-2x text expansion compared with Chinese.
+
+- Do not fixed-width buttons by Chinese label length.
+- Do not truncate business-critical labels such as vessel/voyage, customer, destination, or document type.
+- Use vertical form labels for dense multilingual forms.
+- Use `min-width` plus ellipsis/title for table columns.
+- Do not use negative letter spacing.
+- Do not scale font size by viewport width.
+- Do not rely on icon-only meaning unless tooltip or accessible label exists.
+
+## Codes, Numbers, Dates
+
+Use mono or tabular numeric behavior for values users compare.
+
+| Value | Rule |
+|-------|------|
+| Order no, HBL, MBL, SO, PO, container no | Use `.mono` or mono stack; keep full value available with tooltip/title |
+| Amount, qty, weight, volume | Use `font-variant-numeric: tabular-nums`; right align in tables |
+| Dates/times | Use tabular numbers; keep one display format per page |
+| Port/country codes | Uppercase is allowed when it matches business data |
+| Long customer/company names | Normal sans font; ellipsis with title; do not mono |
+
+## Line Height
+
+- Dense table cell: 1.35-1.45.
+- Form input value: match control height; avoid vertical clipping.
+- Textarea: 1.45.
+- Helper text: 1.4.
+- Section title: 1.4.
+
+## Hard Bans
+
+- No arbitrary `14px`, `15px`, `16px` business text to create emphasis.
+- No `font-weight: 700/800` in business UI.
+- No custom page font stack that bypasses the global stack.
+- No truncating form labels by default.
+- No all-caps UI labels unless the business data itself is a code.
+- No letter spacing below `0`.

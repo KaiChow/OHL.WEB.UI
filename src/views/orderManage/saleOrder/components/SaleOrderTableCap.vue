@@ -22,11 +22,6 @@ const emit = defineEmits<{
 
 <template>
   <div class="table-card-cap">
-    <div class="table-card-cap__left">
-      <span class="table-card-cap__summary">
-        共 <b>{{ total }}</b> 条
-      </span>
-    </div>
     <div class="table-card-cap__right">
       <a-popover trigger="click" position="bl">
         <a-button type="text" class="table-card-cap__tool" title="列显示">
@@ -53,6 +48,7 @@ const emit = defineEmits<{
         :total="total"
         :page-size-options="defaultPageSizeOptions"
         size="small"
+        show-total
         show-page-size
         show-jumper
         @change="(p: number) => { emit('update:current', p); emit('page-change'); }"

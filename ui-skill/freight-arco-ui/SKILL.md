@@ -44,6 +44,7 @@ Read only the files needed for the task:
 | AI-generated page implementation or review | `references/ai-generation-contract.md` |
 | Any list/workbench page | `references/list-page.md` |
 | Detail drawer, long business form, attachments | `references/detail-form.md` |
+| Font, size, numeric/code text, internationalization | `references/typography.md` |
 | Color, visual hierarchy, status colors, “too gray / no quality” | `references/visual-system.md` |
 | Buttons, toolbar, row actions, permissions | `references/actions.md` |
 | VXE Table columns, hover, selection, fixed columns | `references/table.md` |

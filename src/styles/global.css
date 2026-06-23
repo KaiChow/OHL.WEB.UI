@@ -254,34 +254,17 @@ html, body, #app {
   border-radius: var(--dense-radius);
 }
 
-/* 表格顶栏：左统计 + 右分页（规范固定位置） */
+/* 表格顶栏：分页/列设置承载表格工具，不重复展示统计 */
 .table-card-cap {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: flex-end;
+  gap: 8px;
   padding: 0 14px;
   height: 40px;
   flex-shrink: 0;
   background: linear-gradient(180deg, var(--color-bg-card) 0%, var(--primary-1) 100%);
   border-bottom: 1px solid var(--dense-border-subtle);
-}
-.table-card-cap__left {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  flex-shrink: 0;
-}
-.table-card-cap__summary {
-  font-size: var(--dense-font-nav);
-  font-weight: var(--dense-weight-nav);
-  color: var(--color-text-3);
-}
-.table-card-cap__summary b {
-  color: var(--color-text-1);
-  font-weight: var(--dense-weight-data);
-  font-size: var(--dense-font-data);
-  margin: 0 3px;
 }
 .table-card-cap__right {
   display: flex;
@@ -1049,16 +1032,16 @@ html, body, #app {
 .vxe-table--footer-wrapper { background-image: none !important; }
 
 /* ── 表头 ─────────────────────────────────────────────────────── */
-/* 纯色表头：比渐变更现代，靠字重/颜色建立层级，不靠色阶假深度 */
+/* 表头只用浅分隔线区分数据区，强蓝线会误判为选中/焦点状态 */
 .vxe-table .vxe-table--header-wrapper {
-  border-bottom: 2px solid rgb(var(--arcoblue-3)) !important; /* 蓝色强调线区分表头/数据区 */
+  border-bottom: 1px solid var(--dense-border-subtle) !important;
 }
 .vxe-table .vxe-header--row { height: var(--dense-header-h) !important; }
 .vxe-table .vxe-header--column {
   font-size: var(--dense-font-title) !important;
   font-weight: var(--dense-weight-title) !important;
   color: var(--color-text-2) !important;
-  background: linear-gradient(180deg, var(--primary-1) 0%, var(--color-bg-card) 100%) !important;
+  background: var(--color-fill-1) !important;
   letter-spacing: .03em;
   text-transform: none;
   border-right: 1px solid var(--dense-border-subtle) !important;
@@ -1069,7 +1052,7 @@ html, body, #app {
 /* fixed 列表头：稍深一档，区分可固定列 */
 .vxe-table .vxe-header--column.col--fixed-left,
 .vxe-table .vxe-header--column.col--fixed-right {
-  background: var(--primary-1) !important;
+  background: var(--color-fill-1) !important;
   color: var(--color-text-1) !important;
 }
 
@@ -1835,8 +1818,12 @@ html, body, #app {
   border-radius: var(--dense-radius);
   background: transparent;
   color: var(--color-text-2);
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
   font-size: var(--dense-font-nav);
   font-weight: 500;
+  margin: 0;
   cursor: pointer;
   line-height: 1;
   transition: color .12s ease, background-color .12s ease, border-color .12s ease;
@@ -1861,48 +1848,56 @@ html, body, #app {
   transition: border-color .12s ease, background-color .12s ease;
 }
 .svc-tag:hover:not([aria-disabled="true"]) {
-  background: var(--primary-1);
-  border-color: var(--primary-2);
-  color: var(--primary-6);
+  background: rgb(var(--primary-1));
+  border-color: rgb(var(--primary-2));
+  color: rgb(var(--primary-6));
 }
 .svc-tag:focus-visible {
-  border-color: var(--primary-3);
-  box-shadow: 0 0 0 2px var(--primary-1);
+  border-color: rgb(var(--primary-3));
+  box-shadow: 0 0 0 2px rgb(var(--primary-1));
 }
 .svc-tag--on {
-  background: var(--primary-1) !important;
-  border-color: var(--primary-2) !important;
-  color: var(--primary-6) !important;
+  background: rgb(var(--primary-1)) !important;
+  border-color: rgb(var(--primary-2)) !important;
+  color: rgb(var(--primary-6)) !important;
   font-weight: 600 !important;
 }
 .svc-tag--on::before {
   content: '✓';
-  background: var(--primary-6);
-  border-color: var(--primary-6);
+  background: rgb(var(--primary-6));
+  border-color: rgb(var(--primary-6));
 }
 .svc-tag--risk {
-  background: var(--warning-1) !important;
+  background: rgb(var(--warning-1)) !important;
   border-color: transparent !important;
-  color: var(--warning-6) !important;
+  color: rgb(var(--warning-6)) !important;
 }
 .svc-tag--risk.svc-tag--on {
-  background: var(--warning-1) !important;
-  border-color: var(--warning-3) !important;
-  color: var(--warning-6) !important;
+  background: rgb(var(--warning-1)) !important;
+  border-color: rgb(var(--warning-3)) !important;
+  color: rgb(var(--warning-6)) !important;
 }
 .svc-tag--risk::before {
-  border-color: var(--warning-4);
+  border-color: rgb(var(--warning-4));
 }
 .svc-tag--risk.svc-tag--on::before {
   content: '✓';
-  background: var(--warning-6);
-  border-color: var(--warning-6);
+  background: rgb(var(--warning-6));
+  border-color: rgb(var(--warning-6));
 }
 .svc-tag[aria-disabled="true"] {
   cursor: default;
   pointer-events: none;
 }
+.svc-tag:disabled {
+  cursor: default;
+  pointer-events: none;
+}
 .svc-tag[aria-disabled="true"]:not(.svc-tag--on):not(.svc-tag--risk) {
+  color: var(--color-text-4);
+  background: transparent;
+}
+.svc-tag:disabled:not(.svc-tag--on):not(.svc-tag--risk) {
   color: var(--color-text-4);
   background: transparent;
 }
@@ -1938,16 +1933,23 @@ html, body, #app {
   font-weight: 500;
 }
 .form-subgroup-label {
-  margin-bottom: 10px;
-  padding: 0 0 6px;
-  border-bottom: 1px solid var(--dense-border-subtle);
-  color: var(--color-text-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  margin: 2px 0 8px;
+  padding: 0 8px 0 7px;
+  border-left: 2px solid rgb(var(--primary-6));
+  border-radius: 3px;
+  background: rgb(var(--primary-1));
+  color: var(--color-text-2);
   font-size: var(--dense-font-aux);
   font-weight: 600;
-  letter-spacing: .02em;
+  letter-spacing: 0;
+  line-height: 22px;
 }
 .form-subgroup-label--mt {
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 /* ── §20.3 模块总结统计（整模块汇总条）──────────────────────────── */
