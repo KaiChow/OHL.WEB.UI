@@ -98,11 +98,32 @@ Use mono or tabular numeric behavior for values users compare.
 - Helper text: 1.4.
 - Section title: 1.4.
 
+## Form And Filter Typography
+
+Form fields have three different text roles. They should not use the same visual style.
+
+| Role | Token | Color | Weight | Rule |
+|------|-------|-------|--------|------|
+| Field label | F4 `--dense-font-field` 12px | `color-text-2` | 500 | Stable field name, same in list filters and detail forms |
+| Entered/selected value | F1/F2 13px | `color-text-1` | 500 | User's actual query/form value, must be easiest to read inside the control |
+| Placeholder/hint | F5 `--dense-font-aux` 11px | `color-text-3` | 400 | Input guidance only, lower priority than real values |
+
+Rules:
+
+- Different sizes between label, value, and placeholder are professional when they map to these roles.
+- Placeholder must never look like entered data; it uses F5 and `color-text-3`.
+- Filter labels and detail form labels share F4. Do not make list labels 11px and detail labels 12px.
+- Input/select values use F1/F2 13px. Do not reduce actual values to placeholder size.
+- Placeholder copy must be specific to the field: `请输入业务员`, `请选择装箱方式`, `业务单号 / HBL / MBL`.
+- Avoid vague placeholder copy such as `请输入`, `请选择`, `模糊搜索`, unless the label already makes the exact target obvious and space is constrained.
+- For internationalization, keep labels visible and let placeholders be short examples, not the only explanation of the field.
+
 ## Hard Bans
 
 - No arbitrary `14px`, `15px`, `16px` business text to create emphasis.
 - No `font-weight: 700/800` in business UI.
 - No custom page font stack that bypasses the global stack.
 - No truncating form labels by default.
+- No placeholder using the same font size/weight/color as an entered value.
 - No all-caps UI labels unless the business data itself is a code.
 - No letter spacing below `0`.

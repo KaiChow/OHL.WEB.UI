@@ -55,6 +55,7 @@
 - Duplicate totals across module summary, child head, and table cap are removed.
 - List total count is owned by pagination when pagination is present.
 - Main tables, detail line tables, editable line tables, and file tables follow their own table type rules.
+- Main workbench VXE tables use compact density: header 32px, body row 36px, unless a documented two-line/standard-row reason exists.
 - Table columns expose object identity, key state, main working data, and next-decision fields before passive metadata.
 - Table empty states are explicit and object-specific, not blank table bodies.
 - Editable tables keep inputs readable and aligned without clipping.

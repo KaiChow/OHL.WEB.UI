@@ -18,6 +18,7 @@ Choose the table type before designing columns.
 <vxe-table
   border="none"
   size="small"
+  class="compact"
   height="100%"
   show-overflow="title"
   :row-config="{ isHover: true, keyField: 'Id' }"
@@ -26,6 +27,27 @@ Choose the table type before designing columns.
 ```
 
 Use VXE for data grids. A native table is allowed only for a very small static layout table with no sorting, selection, fixed column, virtualization, or resizing needs.
+
+## Row Height Standard
+
+Main workbench tables must be compact enough for all-day operation, but not compressed.
+
+| Table type | Header | Body row | Rule |
+|------------|--------|----------|------|
+| Workbench compact list | 32px | 36px | Default for order, customer, finance, warehouse, and operation lists |
+| Workbench standard list | 36px | 48px | Only for low-frequency review pages or rows with two-line cells |
+| Detail line table | 28-32px | 32-36px | Must align with detail form controls and avoid input clipping |
+| Editable line table | 32px | 36-40px | Use the smallest height that keeps inputs and validation readable |
+| Summary/read-only mini table | 28px | 30-34px | No row actions unless necessary |
+
+Rules:
+
+- Project default tokens are `--dense-header-h: 32px` and `--dense-row-h: 36px`.
+- Main list VXE tables use `class="compact"` unless the page has a documented reason to use `standard`.
+- Do not use 40px as the default workbench row height; it reduces first-screen data density.
+- Do not push main list rows below 34px; checkbox, status pill, icon actions, and text line-height begin to clip.
+- If row content requires more than 36px, first reduce column complexity or move secondary information to detail, then consider `standard`.
+- Row height must be paired with readable typography: body F1 13px, header F3 12px.
 
 ## Column Rules
 

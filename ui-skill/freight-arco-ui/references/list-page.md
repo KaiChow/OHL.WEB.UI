@@ -29,6 +29,36 @@ This structure is fixed; the fields are not. Each list must map columns and filt
 - Advanced filters can be numerous, but must be grouped by business meaning and hidden behind inline expansion.
 - Do not copy order search fields into finance, warehouse, or customer pages.
 
+## Filter Count Tiers
+
+Choose the search UI by field count and user job. Do not use one query layout for every page.
+
+| Query field count | Pattern | Use when | Interaction |
+|-------------------|---------|----------|-------------|
+| 0-3 | Tier 0 keyword/search bar | Users mainly locate by one identifier or keyword | Single dominant input, optional one select, primary query |
+| 4-8 | Tier 1 standard filter row | All fields are high-frequency and fit without wrapping | Always visible, one row or compact two-row grid |
+| 9-16 | Tier 2 expandable filter card | Few high-frequency fields plus secondary filters | 3-6 fields visible; secondary fields inline expand/collapse |
+| 17-50 | Tier 3 grouped advanced filter panel/drawer | Many fields across business groups | Keep top query visible; advanced area grouped by business meaning with local clear/apply |
+| 50+ | Tier 4 saved query workspace | Power users need reusable query schemes | Quick search + saved filters + grouped advanced editor; never show all fields at once |
+
+Rules:
+
+- The first viewport must show the table after the default search area on common desktop sizes.
+- Do not use a modal dialog for frequent advanced search; it interrupts scan-and-adjust work.
+- Do not show 50 fields as a flat form wall.
+- Put active query state in the controls, transport/status tabs, and selected values; do not add a separate selected-filter strip.
+- Text inputs trigger by Enter or Query button; selects and chips may auto-search when safe.
+- Query and reset actions stay in a stable location when advanced filters open or close.
+- For international freight pages, field examples should use domain identifiers such as order no, business no, HBL, MBL, container no, customer, port, and warehouse no.
+
+## Filter Typography
+
+- Filter label: F4 12px/500, `color-text-2`.
+- Entered/selected value: F1/F2 13px/500, `color-text-1`.
+- Placeholder: F5 11px/400, `color-text-3`.
+- This visual difference is required; it separates field name, real query value, and guidance.
+- Placeholder copy must explain accepted input, not replace the label.
+
 ## Toolbar
 
 Order operations by business priority:
