@@ -20,16 +20,17 @@ const emit = defineEmits<{
     <template #actions>
       <a-button v-if="!readonly" size="small" type="outline" @click="emit('add')">
         <template #icon><icon-plus /></template>
-        添加
+        添加责任人
       </a-button>
     </template>
 
-    <div v-if="readonly" class="staff-inline">
+    <div v-if="readonly" class="staff-list">
       <span v-if="detail.StaffRows.length === 0" class="staff-inline__empty">暂未分配</span>
-      <span v-for="row in detail.StaffRows" :key="row.id" class="staff-chip">
-        <span class="staff-chip__role">{{ row.role }}</span>
-        <span class="staff-chip__name">{{ row.userName || '—' }}</span>
-      </span>
+      <div v-for="row in detail.StaffRows" :key="row.id" class="staff-card">
+        <span class="staff-card__role">{{ row.role }}</span>
+        <span class="staff-card__name">{{ row.userName || '—' }}</span>
+        <span class="staff-card__company" :title="row.company">{{ row.company }}</span>
+      </div>
     </div>
 
     <div v-else class="detail-mini-table-wrap">

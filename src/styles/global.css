@@ -1581,8 +1581,9 @@ html, body, #app {
 }
 .dds-company {
   overflow: hidden;
-  color: var(--color-text-3);
-  font-size: var(--dense-font-aux);
+  color: var(--color-text-2);
+  font-size: var(--dense-font-field);
+  font-weight: var(--dense-weight-field);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1608,7 +1609,8 @@ html, body, #app {
   gap: 3px;
   margin-bottom: 4px;
   font-size: var(--dense-font-aux);
-  color: var(--color-text-4);
+  color: var(--color-text-3);
+  font-weight: var(--dense-weight-aux);
   line-height: 1;
 }
 .dds-hero__route-main {
@@ -1625,12 +1627,12 @@ html, body, #app {
   letter-spacing: .04em;
 }
 .dds-hero__arrow {
-  color: var(--color-text-4);
+  color: var(--color-text-3);
   font-size: 15px;
 }
 .dds-hero__sub {
   margin-top: 4px;
-  color: var(--color-text-4);
+  color: var(--color-text-3);
   font-size: var(--dense-font-aux);
 }
 .dds-hero__facts {
@@ -1914,6 +1916,56 @@ html, body, #app {
   color: var(--color-text-4);
   font-size: var(--dense-font-aux);
 }
+.staff-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 220px));
+  gap: 8px;
+  padding: 2px 0;
+}
+.staff-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 3px;
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid var(--dense-border-subtle);
+  border-left: 2px solid rgb(var(--primary-6));
+  border-radius: var(--dense-radius);
+  background: rgb(var(--primary-1));
+}
+.staff-card__role {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid rgb(var(--primary-2));
+  border-radius: var(--dense-radius);
+  background: var(--color-bg-card);
+  color: rgb(var(--primary-6));
+  font-size: var(--dense-font-aux);
+  font-weight: 600;
+  line-height: 20px;
+}
+.staff-card__name {
+  overflow: hidden;
+  color: var(--color-text-1);
+  font-size: var(--dense-font-data);
+  font-weight: var(--dense-weight-data);
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.staff-card__company {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .staff-chip {
   display: inline-flex;
   align-items: center;
@@ -1926,7 +1978,7 @@ html, body, #app {
   font-size: var(--dense-font-aux);
 }
 .staff-chip__role {
-  color: var(--color-text-4);
+  color: var(--color-text-3);
 }
 .staff-chip__name {
   color: var(--color-text-1);

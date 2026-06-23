@@ -48,6 +48,25 @@ Hierarchy must be created through layout, typography, semantic color, and action
 - Empty states use weak typography and clear action, not large gray blank areas.
 - Do not use bigger font size as the first solution for weak hierarchy.
 
+## Text Color Roles
+
+Use text color by information role, not by visual decoration.
+
+| Role | Color | Examples |
+|------|-------|----------|
+| Core business value | `color-text-1` | order no, customer name, staff name, route ports, HBL/MBL, dates that drive work |
+| Normal readable value | `color-text-2` | company/context, selected form value, table secondary value |
+| Label/meta | `color-text-3` | fact labels, helper labels, secondary timestamps, summary labels |
+| Empty/disabled only | `color-text-4` | `—`, `暂无`, disabled option, placeholder-like empty state |
+
+Rules:
+
+- Do not use `color-text-4` for customer, company, staff, carrier, vessel/voyage, route, or any value users must scan.
+- Fact labels in detail headers use `color-text-3`, not `color-text-4`; the corresponding values use `color-text-1`.
+- Staff/person display must show at least role + person name; company/department can be auxiliary but must remain readable.
+- If text is hard to read, first check whether a business value was incorrectly styled as helper/disabled text.
+- Helper text must never compete with key values, but it must still meet readable contrast.
+
 ## Status System
 
 Use `.s-pill[data-s]`.

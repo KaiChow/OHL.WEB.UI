@@ -82,6 +82,9 @@
 - Page is not dominated by gray.
 - One primary anchor is visible in the first viewport.
 - Status colors are consistent and only used for semantic state.
+- Customer, company, staff, route, carrier, vessel/voyage, and primary identifiers do not use disabled/empty `color-text-4`.
+- Detail header fact labels are readable metadata and values are stronger than labels.
+- Staff/party display shows role + name clearly; company/context is auxiliary but readable.
 - No `font-weight: 700/800`; no business text over 13px unless true page/detail hero.
 - No decorative large gradients, large-radius consumer SaaS styling, or attention-heavy panels.
 

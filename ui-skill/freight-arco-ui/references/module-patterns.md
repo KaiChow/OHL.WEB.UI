@@ -180,6 +180,31 @@ Rules:
 | Timeline/log module | 操作日志, 审核记录, 节点轨迹 | Time ordered list; no decorative cards per item unless repeated dense rows need separation. |
 | Exception module | 异常, 差异, 风险项 | Semantic status; action/owner/deadline visible; no full-row color blocks. |
 
+### Party / Staff Display
+
+Use this for responsibility owners, operators, customer contacts, shipper/consignee contacts, and similar people/party data.
+
+Read-only mode:
+
+- Show role + person/party name as the minimum readable unit.
+- Person/party name is the primary value (`color-text-1`, data typography).
+- Role is a compact semantic label or left marker, not weak disabled text.
+- Company/department/contact context is auxiliary (`color-text-3`) but remains readable.
+- Do not render critical party data as a row of pale tags with no hierarchy.
+- Do not use `color-text-4` unless the value is missing or disabled.
+
+Edit mode:
+
+- Use compact table/form rows when the user can change company, role, and person.
+- Add action label must name the entity, such as `添加责任人` or `添加联系人`.
+- Delete is row-level danger action and should stay with the row it affects.
+
+Anti-patterns:
+
+- `业务 赵六 / 操作 张三` as low-contrast tags only.
+- Role, name, and company all using the same weak gray.
+- Hiding company context when the same person name can appear in multiple companies.
+
 ## Parent-Child Detail Modules
 
 Use this pattern when one business section owns repeated parent entities and each parent owns repeated line rows.
