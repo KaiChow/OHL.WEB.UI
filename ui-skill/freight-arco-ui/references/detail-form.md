@@ -195,6 +195,14 @@ Rules:
 - Child body should not repeat child identity fields already visible in the child head unless the field is editable.
 - Line table toolbar should sit directly above the line table and only contain line-level actions.
 - The user must be able to tell whether an action affects the whole module, one child, or one row without reading surrounding text.
+- Child body should use lightweight internal panes when it contains both core fields and child-owned lines. Example: `收发货方` pane + `品名明细` pane.
+- Child metrics should appear as compact data chips in the child head, not as weak gray text detached from the child identity.
+- Use a subtle left accent or sequence marker for expanded child items so users can follow nested ownership while scrolling.
+- The parent summary, child identity band, pane header, and line table header must each have a distinct role. If they all look like plain white rows, the module fails PESDP even when spacing is compact.
+- Use Arco primary token accents sparingly for nested ownership: summary left anchor, expanded child rail, pane title marker, or mini table header. Do not use custom colors or decorative gradients.
+- Child line data with editable rows should use the shared VXE mini table pattern, not a one-off native table, so hover, empty, fixed action, and row height stay consistent.
+- A child line empty state must explain what is missing and where the user acts, such as `暂无品名明细，点击添加品名录入该发货人名下货物`.
+- Long international party names must remain readable through truncation plus tooltip/title; do not weaken customer/shipper/consignee names to helper color.
 
 Default behavior:
 
@@ -210,6 +218,8 @@ Anti-patterns:
 - Child delete placed in the module header.
 - A long form followed by a table with no visual connection to the child it belongs to.
 - Nested borders and shadows that make a child look like a full independent page section.
+- Child title shown as plain body text with no visual hierarchy.
+- Add/delete actions placed at the wrong level, such as line add in parent head or child delete in line table.
 
 ## Footer
 

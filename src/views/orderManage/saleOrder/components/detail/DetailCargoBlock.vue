@@ -58,9 +58,15 @@ const onHeadKeydown = (e: KeyboardEvent) => {
       <span class="detail-subitem__index detail-cargo-block__index">{{ index + 1 }}</span>
       <div class="detail-subitem__meta detail-cargo-block__meta">
         <span class="detail-subitem__title detail-cargo-block__title">发货人 {{ index + 1 }}</span>
-        <span class="detail-subitem__desc detail-cargo-block__shipper" :title="shipperLabel">{{ shipperLabel }}</span>
+        <span class="detail-cargo-block__flow">
+          <span class="detail-subitem__desc detail-cargo-block__shipper" :title="shipperLabel">{{ shipperLabel }}</span>
+          <span v-if="block.consignee" class="detail-cargo-block__route" :title="block.consignee">
+            <span class="detail-cargo-block__arrow">→</span>
+            {{ block.consignee }}
+          </span>
+        </span>
       </div>
-      <div v-if="expanded" class="detail-data-stats detail-subitem__stats">
+      <div class="detail-data-stats detail-subitem__stats">
         <span class="detail-data-stats__item">
           <span class="detail-data-stats__label">件数</span>
           <span class="detail-data-stats__val">{{ blockSummary.qty.toLocaleString() }}</span>
@@ -85,82 +91,124 @@ const onHeadKeydown = (e: KeyboardEvent) => {
       </div>
       <div class="detail-subitem__actions">
         <span v-if="!expanded" class="detail-subitem__state">已收起</span>
+        <a-popconfirm v-if="expanded && !readonly && canDelete" content="确认删除该发货人？" @ok="emit('remove-block')">
+          <a-button size="small" type="text" status="danger" @click.stop>
+            删除发货人
+          </a-button>
+        </a-popconfirm>
         <detail-collapse-toggle :expanded="expanded" @click.stop="toggle" />
       </div>
     </header>
 
     <div v-show="expanded" class="detail-subitem__body detail-cargo-block__body">
-      <a-form layout="vertical" :model="block" size="small" class="detail-form">
-        <div class="detail-form-grid detail-form-grid--4">
-          <a-form-item label="发货人" required>
-            <a-input v-model="block.shipper" :disabled="readonly" />
-          </a-form-item>
-          <a-form-item label="收货人" required>
-            <a-input v-model="block.consignee" :disabled="readonly" />
-          </a-form-item>
-          <a-form-item label="通知人">
-            <a-input v-model="block.notifyParty" :disabled="readonly" />
-          </a-form-item>
-          <a-form-item label="海外代理">
-            <a-input v-model="block.overseasAgent" :disabled="readonly" />
-          </a-form-item>
-          <a-form-item label="VAT">
-            <a-input v-model="block.vatNo" :disabled="readonly" />
-          </a-form-item>
-          <a-form-item label="EORI">
-            <a-input v-model="block.eoriNo" :disabled="readonly" />
-          </a-form-item>
-          <a-form-item label="备注" class="detail-form-grid__span4">
-            <a-textarea v-model="block.remark" :disabled="readonly" :auto-size="{ minRows: 2 }" />
-          </a-form-item>
+      <div class="detail-child-pane">
+        <div class="detail-child-pane__head">
+          <div>
+            <div class="detail-child-pane__title">收发货方</div>
+            <div class="detail-child-pane__desc">维护该发货人对应的收货人、通知人和海外代理</div>
+          </div>
         </div>
-      </a-form>
-
-      <div v-if="!readonly" class="detail-table-toolbar">
-        <a-button size="small" type="outline" @click="emit('add-item')">
-          <template #icon><icon-plus /></template>
-          添加品名
-        </a-button>
-        <a-popconfirm v-if="canDelete" content="确认删除该发货人？" @ok="emit('remove-block')">
-          <a-button size="small" type="text" status="danger" @click.stop>
-            删除发货人
-          </a-button>
-        </a-popconfirm>
+        <a-form layout="vertical" :model="block" size="small" class="detail-form">
+          <div class="detail-form-grid detail-form-grid--4">
+            <a-form-item label="发货人" required>
+              <a-input v-model="block.shipper" :disabled="readonly" />
+            </a-form-item>
+            <a-form-item label="收货人" required>
+              <a-input v-model="block.consignee" :disabled="readonly" />
+            </a-form-item>
+            <a-form-item label="通知人">
+              <a-input v-model="block.notifyParty" :disabled="readonly" />
+            </a-form-item>
+            <a-form-item label="海外代理">
+              <a-input v-model="block.overseasAgent" :disabled="readonly" />
+            </a-form-item>
+            <a-form-item label="VAT">
+              <a-input v-model="block.vatNo" :disabled="readonly" />
+            </a-form-item>
+            <a-form-item label="EORI">
+              <a-input v-model="block.eoriNo" :disabled="readonly" />
+            </a-form-item>
+            <a-form-item label="备注" class="detail-form-grid__span4">
+              <a-textarea v-model="block.remark" :disabled="readonly" :auto-size="{ minRows: 2 }" />
+            </a-form-item>
+          </div>
+        </a-form>
       </div>
 
-      <div class="detail-mini-table-wrap">
-        <table class="detail-mini-table detail-mini-table--wide">
-          <thead>
-            <tr>
-              <th>中文品名</th>
-              <th>英文品名</th>
-              <th>唛头</th>
-              <th>HS CODE</th>
-              <th>件数</th>
-              <th>包装单位</th>
-              <th>毛重 KG</th>
-              <th>体积 CBM</th>
-              <th v-if="!readonly" class="detail-mini-table__op">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in block.items" :key="item.id">
-              <td><a-input v-model="item.cnName" :disabled="readonly" size="small" /></td>
-              <td><a-input v-model="item.enName" :disabled="readonly" size="small" /></td>
-              <td><a-input v-model="item.mark" :disabled="readonly" size="small" /></td>
-              <td><a-input v-model="item.hsCode" :disabled="readonly" size="small" /></td>
-              <td><a-input-number v-model="item.qty" :disabled="readonly" size="small" :min="0" /></td>
-              <td><a-input v-model="item.unit" :disabled="readonly" size="small" /></td>
-              <td><a-input-number v-model="item.grossWeight" :disabled="readonly" size="small" :min="0" /></td>
-              <td><a-input-number v-model="item.volume" :disabled="readonly" size="small" :min="0" :precision="2" /></td>
-              <td v-if="!readonly" class="detail-mini-table__op">
-                <a-popconfirm content="确认删除该品名？" @ok="emit('remove-item', item.id)">
+      <div class="detail-child-pane detail-child-pane--lines">
+        <div class="detail-child-pane__head">
+          <div>
+            <div class="detail-child-pane__title">品名明细</div>
+            <div class="detail-child-pane__desc">该发货人名下的货物品名、件数、重量和体积</div>
+          </div>
+          <a-button v-if="!readonly" size="small" type="outline" @click="emit('add-item')">
+            <template #icon><icon-plus /></template>
+            添加品名
+          </a-button>
+        </div>
+
+        <div class="detail-child-pane__table">
+          <vxe-table
+            class="detail-mini-vxe"
+            border="none"
+            size="small"
+            auto-resize
+            show-overflow="title"
+            :data="block.items"
+            :row-config="{ isHover: true, keyField: 'id', height: 34 }"
+          >
+            <template #empty>
+              <div class="detail-mini-empty">暂无品名明细，点击添加品名录入该发货人名下货物</div>
+            </template>
+            <vxe-column field="cnName" title="中文品名" min-width="120">
+              <template #default="{ row }">
+                <a-input v-model="row.cnName" :disabled="readonly" size="small" />
+              </template>
+            </vxe-column>
+            <vxe-column field="enName" title="英文品名" min-width="140">
+              <template #default="{ row }">
+                <a-input v-model="row.enName" :disabled="readonly" size="small" />
+              </template>
+            </vxe-column>
+            <vxe-column field="mark" title="唛头" min-width="100">
+              <template #default="{ row }">
+                <a-input v-model="row.mark" :disabled="readonly" size="small" />
+              </template>
+            </vxe-column>
+            <vxe-column field="hsCode" title="HS CODE" min-width="120">
+              <template #default="{ row }">
+                <a-input v-model="row.hsCode" :disabled="readonly" size="small" />
+              </template>
+            </vxe-column>
+            <vxe-column field="qty" title="件数" width="110" align="right">
+              <template #default="{ row }">
+                <a-input-number v-model="row.qty" :disabled="readonly" size="small" :min="0" />
+              </template>
+            </vxe-column>
+            <vxe-column field="unit" title="包装单位" width="110">
+              <template #default="{ row }">
+                <a-input v-model="row.unit" :disabled="readonly" size="small" />
+              </template>
+            </vxe-column>
+            <vxe-column field="grossWeight" title="毛重 KG" width="120" align="right">
+              <template #default="{ row }">
+                <a-input-number v-model="row.grossWeight" :disabled="readonly" size="small" :min="0" />
+              </template>
+            </vxe-column>
+            <vxe-column field="volume" title="体积 CBM" width="120" align="right">
+              <template #default="{ row }">
+                <a-input-number v-model="row.volume" :disabled="readonly" size="small" :min="0" :precision="2" />
+              </template>
+            </vxe-column>
+            <vxe-column v-if="!readonly" title="操作" width="72" fixed="right" align="center">
+              <template #default="{ row }">
+                <a-popconfirm content="确认删除该品名？" @ok="emit('remove-item', row.id)">
                   <a-button size="small" type="text" status="danger">删除</a-button>
                 </a-popconfirm>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </template>
+            </vxe-column>
+          </vxe-table>
+        </div>
       </div>
     </div>
   </article>

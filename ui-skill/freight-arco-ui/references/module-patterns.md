@@ -256,6 +256,50 @@ detail-module
 - Child line rows should use VXE mini table or the shared mini table class; numeric fields right aligned and operation column compact.
 - Empty line tables must show one clear empty/add state, not a blank compressed strip.
 
+### Professional Nested Module UI
+
+Deeply nested modules must expose ownership and action scope before showing inputs.
+
+Use this visual contract:
+
+```text
+parent module
+├── parent head: title only + module actions
+├── parent summary: whole-module totals/progress
+└── child item
+    ├── child head: left accent + sequence + child identity + child-level metrics + collapse/delete
+    ├── child pane A: child core fields
+    └── child pane B: child-owned line table + line-level add action
+```
+
+Rules:
+
+- Parent summary must look like a summary strip, not a gray disabled toolbar.
+- Child head must be the strongest nested identity. It needs a visible left accent, sequence, primary child name/code, and compact metrics.
+- Child metrics should use compact data chips, not weak gray text floating at the far right.
+- Child body must be divided by business meaning with internal panes such as `收发货方`, `品名明细`, `费用明细`, or `单证清单`.
+- A child pane is not a nested card. It is a lightweight bordered group inside the child body.
+- Line-table actions live in the line-table pane head, not above the whole child body.
+- Child delete/collapse lives in the child head.
+- Parent add/copy/import actions stay in the parent module head.
+- The user must be able to answer: "this action affects parent, this child, or this row" within one second.
+- Parent summary should use a subtle primary anchor and compact data chips. It may show whole-module totals once, but must not become another toolbar.
+- Child identity should be expressed as an identity band, not plain body text. For party-owned lines, show sequence + primary party + counterparty/route in one readable line, with truncation and title tooltip for long international names.
+- The expanded child body may use a light ownership rail or primary tint to connect the child head to its panes. This is the only allowed nested accent; do not add independent shadows per child.
+- Child panes should have a compact title anchor and optional helper text. The pane title explains business ownership, while fields and tables carry the actual data.
+- Child-owned line rows should use a VXE mini/editable table when they have multiple editable rows, fixed actions, hover, or empty state. Native tables are allowed only for static read-only summary data.
+- Empty child line tables must show an intentional empty state and next action context, not a compressed blank grid.
+
+Avoid:
+
+- A parent summary as a flat gray strip with low-contrast values.
+- Child titles that are just plain text labels embedded in the form.
+- Long uninterrupted form fields followed by a table.
+- Statistics repeated in the parent summary, child head, and line table header.
+- Multiple border-heavy nested cards with competing shadows.
+- Rendering hundreds of input controls without an explicit editable-line pattern.
+- Using gray-only dividers to represent hierarchy; hierarchy must come from ownership bands, pane titles, table headers, and action scope.
+
 ## Hard-Coding Checks
 
 Before delivering a page or skill update, reject these:

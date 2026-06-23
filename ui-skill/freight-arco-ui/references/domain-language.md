@@ -46,6 +46,7 @@ Use stable module names in menu, route titles, tabs, and page headings:
 ## Freight Status Vocabulary
 
 Use `.s-pill[data-s]` or Arco Tag with the same semantic mapping.
+Status visualization means semantic text, background, and border. A leading status dot is optional and must not be treated as the default freight status style.
 
 | Business status | data-s | Semantics |
 |-----------------|--------|-----------|
@@ -70,6 +71,14 @@ Use `.s-pill[data-s]` or Arco Tag with the same semantic mapping.
 | 已废弃 | draft | Abandoned/inactive |
 
 Do not expose raw codes unless the page is a developer/configuration page.
+
+Workflow status and risk attributes must not be mixed:
+
+- Workflow status: `待审核`, `已接单`, `已放舱`, `已拒绝`, `已废弃`.
+- Risk/attribute label: `危险货`, `超大件`, `带电池`, `化工品`.
+- Risk labels may use a warning icon or semantic pill, but should not use the same dot convention as workflow status.
+- In dense list tables, cargo type and risk attributes should not use workflow status pill styling. Keep the column baseline consistent and use a lightweight cargo/risk token when emphasis is needed.
+- Do not show normal cargo values as plain text and risk values as icon-heavy status pills in the same column; this breaks scan rhythm and makes risk look like workflow status.
 
 ## Milestone Names
 

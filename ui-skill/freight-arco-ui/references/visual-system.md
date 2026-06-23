@@ -48,6 +48,27 @@ Hierarchy must be created through layout, typography, semantic color, and action
 - Empty states use weak typography and clear action, not large gray blank areas.
 - Do not use bigger font size as the first solution for weak hierarchy.
 
+## Dense Table Color Hierarchy
+
+Workbench tables need a visible but restrained primary rhythm. A table that is technically compact but visually all gray fails PESDP.
+
+Required:
+
+- Table header may use a subtle Arco primary tint or primary border to anchor the grid.
+- Primary identifiers and business codes use `primary-6/7` links and medium/title weight.
+- Core business values such as customer, shipper, consignee, port, and container quantity use `color-text-1`.
+- Dates and passive metadata may use `color-text-2`; empty values use `color-text-4`.
+- Status pills must be readable at scan distance; use semantic token level 7 for text when level 6 is too weak.
+- Row actions should be visible as actions but not compete with data: text/icon buttons with primary hover, no always-heavy button frames.
+- Zebra stripes must be very low contrast. They should support scanning, not create a gray page.
+
+Avoid:
+
+- Header, body, stripe, fixed column, and toolbar all using similar gray fills.
+- Status labels that look like disabled text.
+- Action icons that look disabled before hover.
+- Making every code/link the same strength when one identifier is the primary object.
+
 ## Text Color Roles
 
 Use text color by information role, not by visual decoration.
@@ -82,6 +103,27 @@ Use `.s-pill[data-s]`.
 | `rej` | rejected, exception, overdue, reversal |
 
 Never color an entire table row by status.
+
+### Status Dot Rule
+
+A status must be visually recognizable, but a leading dot is not the default requirement.
+
+Default:
+
+- Use `.s-pill[data-s]` with semantic background, border, and readable text.
+- Do not add a leading dot to normal table status, detail header status, or attachment status.
+- Do not combine dot + icon + colored background in the same small label.
+
+Optional dot:
+
+- Use `.s-pill.s-pill--dot` or `.dds-status-badge.dds-status-badge--dot` only for timeline legends, compact activity feeds, or a plain text status that has no pill background.
+- A dot must carry semantic color. It must not appear as a black bullet.
+
+Risk labels:
+
+- Risk or attribute labels such as `危险货`, `超大件`, `带电池` are not workflow statuses.
+- Use semantic label color and, when needed, one icon. Do not add a status dot when an icon is already present.
+- Risk labels should support scanning without making the whole row look abnormal.
 
 ## Premium Dense Rules
 

@@ -45,6 +45,36 @@
 
 Inline table editing changes the action priority of the current scope.
 
+## Table Row Action Menu
+
+Row actions must be fast to scan and must not turn the operation column into a text toolbar.
+
+Default row view mode:
+
+- Direct actions: `查看`, `编辑`, `更多` at most.
+- Direct actions use icon-only `a-button type="text" class="row-action-btn"` with tooltip.
+- The operation column should normally be 88-120px for `查看 + 编辑 + 更多`.
+- Low-frequency actions go into the `更多` dropdown.
+- Direct row actions should sit in one compact action dock (`row-actions`) so the fixed operation column reads as a deliberate action area, not scattered icons.
+- The operation fixed column may use a subtle surface/left boundary to separate actions from data, but it must not become a heavy card or colored status area.
+- The `更多` menu should use grouped content: normal actions first, divider, danger actions last. Dangerous options must be visually separated even when there is only one danger action.
+
+Dropdown order:
+
+1. File/document actions such as `下载附件`.
+2. Output actions such as `打印`.
+3. Object reuse actions such as `复制业务单`.
+4. Divider.
+5. Dangerous actions such as `废弃`, `删除`, `撤销`.
+
+Danger rules:
+
+- Dangerous menu options use danger styling.
+- Dangerous row actions require confirmation with business impact copy.
+- Do not execute `废弃`, `删除`, or irreversible actions directly from the dropdown click.
+- Disabled actions should explain why through text or tooltip when the reason is not obvious.
+- Disabled menu options should remain readable but clearly inactive; do not hide a disabled file/download action when its absence would make the menu jump between rows.
+
 ### Row Edit
 
 Row view mode:

@@ -90,6 +90,29 @@ Use mono or tabular numeric behavior for values users compare.
 | Port/country codes | Uppercase is allowed when it matches business data |
 | Long customer/company names | Normal sans font; ellipsis with title; do not mono |
 
+## Detail Header Typography
+
+Detail header facts must not all look like code.
+
+- Use mono only for order numbers, HBL/MBL, SO/PO, container numbers, and similar identifiers.
+- Route ports are business values, not technical codes by default. Use normal sans font with F1/hero emphasis.
+- Dates in hero facts use tabular numeric behavior, not necessarily mono.
+- Carrier, vessel/voyage, customer, and company names use normal sans font.
+- Hero fact labels use F5/meta color; hero fact values use F1/core value color.
+- Only the primary route or primary object identity may be stronger than normal F1.
+
+## Attachment Typography
+
+Attachment modules need a clear reading order:
+
+1. Document type name: F1/F3 strength, core text color.
+2. Required/single/multiple/status markers: F5/F6 auxiliary or semantic tag.
+3. File name: primary link color and F1 data weight.
+4. Size/uploader/upload time: F5 auxiliary color.
+5. Empty file reason: F5 auxiliary; required-missing reason may use warning semantic color.
+
+Do not make document type, file name, upload state, and helper text the same visual weight.
+
 ## Line Height
 
 - Dense table cell: 1.35-1.45.

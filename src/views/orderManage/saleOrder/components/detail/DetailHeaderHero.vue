@@ -47,11 +47,11 @@ const emit = defineEmits<{
     <div class="dds-hero__facts">
       <div class="dds-hero-fact">
         <span class="dds-hero-fact__label">ETD</span>
-        <strong class="dds-hero-fact__value mono">{{ detail.Etd || '—' }}</strong>
+        <strong class="dds-hero-fact__value dds-hero-fact__value--date">{{ detail.Etd || '—' }}</strong>
       </div>
       <div class="dds-hero-fact">
         <span class="dds-hero-fact__label">ETA</span>
-        <strong class="dds-hero-fact__value mono">{{ detail.Eta || '—' }}</strong>
+        <strong class="dds-hero-fact__value dds-hero-fact__value--date">{{ detail.Eta || '—' }}</strong>
       </div>
       <div v-if="detail.Carrier" class="dds-hero-fact">
         <span class="dds-hero-fact__label">船公司</span>
@@ -59,7 +59,7 @@ const emit = defineEmits<{
       </div>
       <div v-if="detail.VesselVoyage" class="dds-hero-fact">
         <span class="dds-hero-fact__label">大船船名/航次</span>
-        <strong class="dds-hero-fact__value mono">{{ detail.VesselVoyage }}</strong>
+        <strong class="dds-hero-fact__value">{{ detail.VesselVoyage }}</strong>
       </div>
       <div v-if="detail.Customer" class="dds-hero-fact dds-hero-fact--customer">
         <span class="dds-hero-fact__label"><icon-user style="font-size:11px" /> 客户</span>

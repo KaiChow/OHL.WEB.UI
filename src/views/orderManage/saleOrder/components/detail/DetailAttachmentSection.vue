@@ -44,10 +44,10 @@ const getFileStatus = (file: DetailAttachmentFile) => statusMeta[file.status];
           <div class="attachment-doc-row__title">
             <span class="attachment-doc-row__name">{{ row.docType }}</span>
             <span v-if="row.required" class="attachment-doc-row__required">必传</span>
-            <span class="attachment-doc-row__mode">{{ row.multiple ? '可上传多个文件' : '仅支持单个文件' }}</span>
           </div>
           <div class="attachment-doc-row__status">
             <span class="s-pill" :data-s="getRowStatus(row).dataS">{{ getRowStatus(row).label }}</span>
+            <span class="attachment-doc-row__mode">{{ row.multiple ? '多文件' : '单文件' }}</span>
             <span class="attachment-doc-row__count">{{ row.files.length }} 个文件</span>
           </div>
         </div>
@@ -85,8 +85,8 @@ const getFileStatus = (file: DetailAttachmentFile) => statusMeta[file.status];
             </div>
           </div>
           <div v-else class="attachment-empty-file">
-            <span>暂无文件</span>
-            <span v-if="row.required">该单证为必传资料</span>
+            <span class="attachment-empty-file__main">暂无文件</span>
+            <span v-if="row.required" class="attachment-empty-file__sub">该单证为必传资料</span>
           </div>
         </div>
 
@@ -132,12 +132,14 @@ const getFileStatus = (file: DetailAttachmentFile) => statusMeta[file.status];
   display: flex;
   flex-direction: column;
   border: 1px solid var(--color-border-1);
+  border-radius: var(--dense-radius);
   background: var(--color-bg-card);
+  overflow: hidden;
 }
 
 .attachment-doc-row {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr) 104px;
+  grid-template-columns: 232px minmax(0, 1fr) 112px;
   min-height: 56px;
 }
 
@@ -151,7 +153,7 @@ const getFileStatus = (file: DetailAttachmentFile) => statusMeta[file.status];
   justify-content: center;
   gap: 6px;
   padding: 10px 12px;
-  background: var(--color-fill-1);
+  background: linear-gradient(180deg, var(--color-bg-card), var(--color-fill-1));
   border-right: 1px solid var(--dense-border-subtle);
   min-width: 0;
 }
@@ -187,7 +189,7 @@ const getFileStatus = (file: DetailAttachmentFile) => statusMeta[file.status];
 
 .attachment-doc-row__files {
   min-width: 0;
-  padding: 6px 8px;
+  padding: 7px 10px;
 }
 
 .attachment-file-list {
@@ -198,7 +200,7 @@ const getFileStatus = (file: DetailAttachmentFile) => statusMeta[file.status];
 
 .attachment-file-item {
   display: grid;
-  grid-template-columns: 18px minmax(180px, 1fr) 64px 66px 72px 132px 86px;
+  grid-template-columns: 18px minmax(180px, 1fr) 64px 66px 80px 132px 86px;
   align-items: center;
   min-height: 28px;
   gap: 8px;
@@ -226,6 +228,7 @@ const getFileStatus = (file: DetailAttachmentFile) => statusMeta[file.status];
   padding: 0;
   text-align: left;
   cursor: pointer;
+  font-weight: var(--dense-weight-data);
 }
 
 .attachment-file-item__size,
@@ -247,7 +250,13 @@ const getFileStatus = (file: DetailAttachmentFile) => statusMeta[file.status];
   align-items: center;
   gap: 8px;
   min-height: 34px;
+}
+.attachment-empty-file__main {
   color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+}
+.attachment-empty-file__sub {
+  color: var(--warning-7);
   font-size: var(--dense-font-aux);
 }
 

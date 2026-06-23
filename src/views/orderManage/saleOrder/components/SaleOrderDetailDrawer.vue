@@ -276,7 +276,7 @@ const currentStep = computed(() => STEP_STATUS_MAP[getStatusPill(props.detail.St
             </a-button>
           </template>
           <template #summary>
-            <div class="detail-module-summary detail-module-summary--inline">
+            <div class="detail-module-summary detail-module-summary--inline detail-module-summary--cargo">
               <div class="detail-module-summary__stats">
                 <div class="detail-module-summary__stat">
                   <span class="detail-module-summary__stat-label">发货人</span>

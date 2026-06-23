@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { Message, Modal } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
   IconDownload,
   IconEdit,
   IconExclamationCircle,
   IconEye,
-  IconMore
+  IconMore,
+  IconPrinter,
+  IconCopy
 } from '@arco-design/web-vue/es/icon';
 import { getStatusLabel, getStatusPill, isDangerCargo } from '../config';
 import type { SaleOrderRecord } from '../types';
@@ -38,13 +41,42 @@ const onCheckboxChange = () => {
   const records = tableRef.value?.getCheckboxRecords() as SaleOrderRecord[] | undefined;
   emit('update:selectedIds', records?.map((r) => r.Id) ?? []);
 };
+
+const handleDownloadFiles = (row: SaleOrderRecord) => {
+  if (!row.HasFiles) {
+    Message.warning('该业务单暂无可下载附件');
+    return;
+  }
+  Message.success(`已开始下载 ${row.OrderNo} 附件`);
+};
+
+const handlePrint = (row: SaleOrderRecord) => {
+  Message.success(`已发送 ${row.OrderNo} 打印任务`);
+};
+
+const handleCopy = (row: SaleOrderRecord) => {
+  Message.success(`已复制业务单 ${row.OrderNo}`);
+};
+
+const handleAbandon = (row: SaleOrderRecord) => {
+  Modal.warning({
+    title: '确认废弃业务单？',
+    content: `废弃后，${row.OrderNo} 将不可继续操作。`,
+    hideCancel: false,
+    okText: '确认废弃',
+    cancelText: '取消',
+    onOk: () => {
+      Message.success(`已废弃业务单 ${row.OrderNo}`);
+    }
+  });
+};
 </script>
 
 <template>
   <div class="table-wrap">
     <vxe-table
       ref="tableRef"
-      class="compact"
+      class="compact workbench-table"
       border="none"
       size="small"
       height="100%"
@@ -85,13 +117,15 @@ const onCheckboxChange = () => {
         </template>
       </vxe-column>
 
-      <vxe-column v-if="isColumnVisible('CargoType')" field="CargoType" title="货物类型" width="96">
+      <vxe-column v-if="isColumnVisible('CargoType')" field="CargoType" title="货物类型" width="96" align="center">
         <template #default="{ row }">
-          <span v-if="isDangerCargo(row.CargoType)" class="s-pill" data-s="wait">
-            <icon-exclamation-circle />
+          <span
+            class="cargo-type-token"
+            :class="{ 'cargo-type-token--risk': isDangerCargo(row.CargoType) }"
+            :title="row.CargoType"
+          >
             {{ row.CargoType }}
           </span>
-          <span v-else>{{ row.CargoType }}</span>
         </template>
       </vxe-column>
 
@@ -133,7 +167,7 @@ const onCheckboxChange = () => {
       </vxe-column>
 
       <!-- 操作列：查看 + 编辑两个高频 icon，其余收进 ⋯ 下拉 -->
-      <vxe-column title="操作" width="88" fixed="right" align="center">
+      <vxe-column title="操作" width="120" fixed="right" align="center">
         <template #default="{ row }">
           <div class="row-actions">
             <a-tooltip content="查看">
@@ -146,18 +180,29 @@ const onCheckboxChange = () => {
                 <icon-edit />
               </a-button>
             </a-tooltip>
-            <a-dropdown trigger="click">
+            <a-dropdown trigger="click" popup-container="body" class="row-action-dropdown">
               <a-button type="text" class="row-action-btn">
                 <icon-more />
               </a-button>
               <template #content>
-                <a-doption :disabled="!row.HasFiles" @click.stop>
-                  <template #icon><icon-download /></template>
-                  下载附件{{ row.HasFiles ? '' : '（暂无）' }}
-                </a-doption>
-                <a-doption>复制业务单</a-doption>
-                <a-doption>打印</a-doption>
-                <a-doption class="danger-opt">废弃</a-doption>
+                <div class="row-action-menu">
+                  <a-doption :disabled="!row.HasFiles" @click="handleDownloadFiles(row)">
+                    <template #icon><icon-download /></template>
+                    下载附件{{ row.HasFiles ? '' : '（暂无）' }}
+                  </a-doption>
+                  <a-doption @click="handlePrint(row)">
+                    <template #icon><icon-printer /></template>
+                    打印
+                  </a-doption>
+                  <a-doption @click="handleCopy(row)">
+                    <template #icon><icon-copy /></template>
+                    复制业务单
+                  </a-doption>
+                </div>
+                <a-divider class="row-action-menu__divider" margin="4px" />
+                <div class="row-action-menu row-action-menu--danger">
+                  <a-doption class="danger-opt" @click="handleAbandon(row)">废弃</a-doption>
+                </div>
               </template>
             </a-dropdown>
           </div>
