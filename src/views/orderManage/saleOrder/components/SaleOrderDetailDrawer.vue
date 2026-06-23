@@ -169,20 +169,33 @@ const removeCargoBlock = (id: string) => {
 const onCopySplit = () => Message.info('复制分单数据（Mock）');
 
 const uploadAttachment = (row: DetailAttachmentRow) => {
-  row.fileName = row.fileName || `${row.docType}.pdf`;
+  const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  const fileNo = row.files.length + 1;
+  const file = {
+    id: `${row.id}-${Date.now()}`,
+    name: row.multiple ? `${row.docType}-${fileNo}.pdf` : `${row.docType}.pdf`,
+    size: row.multiple ? '328 KB' : '246 KB',
+    uploader: props.detail.Operator || '操作A',
+    uploadTime: now,
+    status: 'uploaded' as const
+  };
+  row.files = row.multiple ? [...row.files, file] : [file];
+  row.fileName = row.files.length === 1 ? row.files[0].name : `${row.files.length} 个文件`;
   row.status = 'uploaded';
-  row.uploader = row.uploader || props.detail.Operator || '操作A';
-  row.uploadTime = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  row.uploader = file.uploader;
+  row.uploadTime = file.uploadTime;
   Message.success(`${row.docType}已上传`);
 };
 
-const removeAttachment = (id: string) => {
-  const row = props.detail.AttachmentRows.find((item) => item.id === id);
+const removeAttachment = (rowId: string, fileId?: string) => {
+  const row = props.detail.AttachmentRows.find((item) => item.id === rowId);
   if (!row) return;
-  row.fileName = '';
-  row.status = 'missing';
-  row.uploader = '';
-  row.uploadTime = '';
+  row.files = fileId ? row.files.filter((file) => file.id !== fileId) : [];
+  const lastFile = row.files.at(-1);
+  row.fileName = row.files.length > 1 ? `${row.files.length} 个文件` : (lastFile?.name ?? '');
+  row.status = lastFile?.status ?? 'missing';
+  row.uploader = lastFile?.uploader ?? '';
+  row.uploadTime = lastFile?.uploadTime ?? '';
   Message.success(`${row.docType}已删除`);
 };
 

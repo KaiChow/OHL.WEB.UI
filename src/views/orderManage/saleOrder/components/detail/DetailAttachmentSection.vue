@@ -3,9 +3,11 @@ import {
   IconDelete,
   IconDownload,
   IconEye,
-  IconPlus
+  IconFile,
+  IconPlus,
+  IconUpload
 } from '@arco-design/web-vue/es/icon';
-import type { DetailAttachmentRow } from '../../types';
+import type { DetailAttachmentFile, DetailAttachmentRow } from '../../types';
 
 defineProps<{
   rows: DetailAttachmentRow[];
@@ -15,7 +17,7 @@ defineProps<{
 
 const emit = defineEmits<{
   upload: [row: DetailAttachmentRow];
-  remove: [id: string];
+  remove: [rowId: string, fileId?: string];
   'update:remark': [value: string];
 }>();
 
@@ -24,71 +26,85 @@ const statusMeta: Record<DetailAttachmentRow['status'], { label: string; dataS: 
   missing: { label: '待上传', dataS: 'wait' },
   review: { label: '待复核', dataS: 'op' }
 };
+
+const getRowStatus = (row: DetailAttachmentRow) => {
+  if (!row.files.length) return statusMeta.missing;
+  if (row.files.some((file) => file.status === 'review')) return statusMeta.review;
+  return statusMeta.uploaded;
+};
+
+const getFileStatus = (file: DetailAttachmentFile) => statusMeta[file.status];
 </script>
 
 <template>
   <div class="attachment-section">
-    <div class="attachment-table-wrap">
-      <table class="detail-mini-table detail-mini-table--wide attachment-table">
-        <thead>
-          <tr>
-            <th>单证类型</th>
-            <th>文件</th>
-            <th>上传状态</th>
-            <th>上传人</th>
-            <th>上传时间</th>
-            <th class="detail-mini-table__op">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="row in rows" :key="row.id">
-            <td>
-              <div class="attachment-doc">
-                <span class="attachment-doc__name">{{ row.docType }}</span>
-                <span v-if="row.required" class="attachment-doc__required">必传</span>
-                <span v-if="row.multiple" class="attachment-doc__multi">多文件</span>
-              </div>
-            </td>
-            <td>
-              <span v-if="row.fileName" class="link-text">{{ row.fileName }}</span>
-              <span v-else class="date-none">未上传</span>
-            </td>
-            <td>
-              <span class="s-pill" :data-s="statusMeta[row.status].dataS">{{ statusMeta[row.status].label }}</span>
-            </td>
-            <td>{{ row.uploader || '—' }}</td>
-            <td><span class="date-val">{{ row.uploadTime || '—' }}</span></td>
-            <td class="detail-mini-table__op">
-              <div class="row-actions">
-                <a-tooltip v-if="row.fileName" content="预览">
+    <div class="attachment-doc-list">
+      <article v-for="row in rows" :key="row.id" class="attachment-doc-row">
+        <div class="attachment-doc-row__meta">
+          <div class="attachment-doc-row__title">
+            <span class="attachment-doc-row__name">{{ row.docType }}</span>
+            <span v-if="row.required" class="attachment-doc-row__required">必传</span>
+            <span class="attachment-doc-row__mode">{{ row.multiple ? '可上传多个文件' : '仅支持单个文件' }}</span>
+          </div>
+          <div class="attachment-doc-row__status">
+            <span class="s-pill" :data-s="getRowStatus(row).dataS">{{ getRowStatus(row).label }}</span>
+            <span class="attachment-doc-row__count">{{ row.files.length }} 个文件</span>
+          </div>
+        </div>
+
+        <div class="attachment-doc-row__files">
+          <div v-if="row.files.length" class="attachment-file-list">
+            <div v-for="file in row.files" :key="file.id" class="attachment-file-item">
+              <icon-file class="attachment-file-item__icon" />
+              <button class="attachment-file-item__name link-text" type="button">{{ file.name }}</button>
+              <span class="attachment-file-item__size">{{ file.size }}</span>
+              <span class="s-pill" :data-s="getFileStatus(file).dataS">{{ getFileStatus(file).label }}</span>
+              <span class="attachment-file-item__uploader">{{ file.uploader }}</span>
+              <span class="attachment-file-item__time">{{ file.uploadTime }}</span>
+              <div class="attachment-file-item__actions">
+                <a-tooltip content="预览">
                   <a-button type="text" class="row-action-btn">
                     <icon-eye />
                   </a-button>
                 </a-tooltip>
-                <a-tooltip v-if="row.fileName" content="下载">
+                <a-tooltip content="下载">
                   <a-button type="text" class="row-action-btn">
                     <icon-download />
                   </a-button>
                 </a-tooltip>
-                <a-tooltip v-if="!readonly" :content="row.fileName ? '重新上传' : '上传'">
-                  <a-button type="text" class="row-action-btn" @click="emit('upload', row)">
-                    <icon-plus />
-                  </a-button>
-                </a-tooltip>
                 <a-popconfirm
-                  v-if="!readonly && row.fileName"
-                  content="确认删除该附件？"
-                  @ok="emit('remove', row.id)"
+                  v-if="!readonly"
+                  content="确认删除该文件？"
+                  @ok="emit('remove', row.id, file.id)"
                 >
                   <a-button type="text" class="row-action-btn" status="danger">
                     <icon-delete />
                   </a-button>
                 </a-popconfirm>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+          </div>
+          <div v-else class="attachment-empty-file">
+            <span>暂无文件</span>
+            <span v-if="row.required">该单证为必传资料</span>
+          </div>
+        </div>
+
+        <div class="attachment-doc-row__actions">
+          <a-button
+            v-if="!readonly"
+            size="small"
+            :type="row.files.length ? 'outline' : 'primary'"
+            @click="emit('upload', row)"
+          >
+            <template #icon>
+              <icon-upload v-if="!row.files.length" />
+              <icon-plus v-else />
+            </template>
+            {{ row.files.length ? (row.multiple ? '继续上传' : '替换文件') : '上传文件' }}
+          </a-button>
+        </div>
+      </article>
     </div>
 
     <a-form layout="vertical" size="small" class="detail-form attachment-remark">
@@ -111,38 +127,156 @@ const statusMeta: Record<DetailAttachmentRow['status'], { label: string; dataS: 
   flex-direction: column;
   gap: 8px;
 }
-.attachment-doc {
+
+.attachment-doc-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-1);
+  background: var(--color-bg-card);
+}
+
+.attachment-doc-row {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 104px;
+  min-height: 56px;
+}
+
+.attachment-doc-row + .attachment-doc-row {
+  border-top: 1px solid var(--dense-border-subtle);
+}
+
+.attachment-doc-row__meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--color-fill-1);
+  border-right: 1px solid var(--dense-border-subtle);
+  min-width: 0;
+}
+
+.attachment-doc-row__title,
+.attachment-doc-row__status {
   display: flex;
   align-items: center;
   gap: 6px;
   min-width: 0;
 }
-.attachment-doc__name {
+
+.attachment-doc-row__name {
+  font-size: var(--dense-font-data);
+  font-weight: var(--dense-weight-title);
   color: var(--color-text-1);
-  font-weight: 500;
-}
-.attachment-doc__required,
-.attachment-doc__multi {
-  display: inline-flex;
-  align-items: center;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: var(--dense-radius);
-  font-size: var(--dense-font-micro);
-  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
-.attachment-doc__required {
-  color: var(--danger-6);
-  background: var(--danger-1);
-  border: 1px solid var(--danger-3);
-}
-.attachment-doc__multi {
+
+.attachment-doc-row__required,
+.attachment-doc-row__mode,
+.attachment-doc-row__count {
+  font-size: var(--dense-font-micro);
   color: var(--color-text-3);
-  background: var(--color-fill-1);
-  border: 1px solid var(--color-border-1);
+  white-space: nowrap;
 }
+
+.attachment-doc-row__required {
+  color: var(--danger-6);
+}
+
+.attachment-doc-row__files {
+  min-width: 0;
+  padding: 6px 8px;
+}
+
+.attachment-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attachment-file-item {
+  display: grid;
+  grid-template-columns: 18px minmax(180px, 1fr) 64px 66px 72px 132px 86px;
+  align-items: center;
+  min-height: 28px;
+  gap: 8px;
+  padding: 2px 4px;
+  background: var(--color-bg-card);
+}
+
+.attachment-file-item + .attachment-file-item {
+  border-top: 1px dashed var(--dense-border-subtle);
+}
+
+.attachment-file-item__icon {
+  color: var(--primary-6);
+  font-size: var(--dense-font-data);
+}
+
+.attachment-file-item__name {
+  display: inline-flex;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.attachment-file-item__size,
+.attachment-file-item__uploader,
+.attachment-file-item__time {
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  white-space: nowrap;
+}
+
+.attachment-file-item__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.attachment-empty-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+}
+
+.attachment-doc-row__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 10px;
+  border-left: 1px solid var(--dense-border-subtle);
+}
+
 .attachment-remark {
   padding-top: 2px;
+}
+
+@media (max-width: 1200px) {
+  .attachment-doc-row {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+
+  .attachment-doc-row__actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    border-left: 0;
+    border-top: 1px solid var(--dense-border-subtle);
+  }
+
+  .attachment-file-item {
+    grid-template-columns: 18px minmax(160px, 1fr) 64px 66px 72px 96px 86px;
+  }
 }
 </style>

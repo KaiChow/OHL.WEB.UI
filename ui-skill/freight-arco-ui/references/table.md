@@ -139,11 +139,94 @@ Detail tables must look like part of the module, not a full page table pasted in
 
 ## Editable Table Rules
 
-- Inputs must be full width in cells.
-- Required or invalid cells use field validation styling, not row-wide danger background.
-- Numeric fields use input-number and right alignment where possible.
-- Delete row requires confirmation when saved data would be removed.
+Editable tables must be designed as a stateful work surface, not as a table where every cell is always an input.
+
+### Display vs Edit Mode
+
+Default state is read/display mode.
+
+| Mode | Use when | UI |
+|------|----------|----|
+| Display mode | Normal browsing, large lists, saved data | Text, links, status pills, formatted numbers; no input controls visible |
+| Row edit mode | User edits one record/line at a time | Only the active row renders controls; row actions become save/cancel |
+| Batch edit mode | User edits the same field group across many rows | Explicit toolbar action enters batch edit; editable columns are visually marked |
+| New row mode | User adds unsaved line data | Append or insert one editable row; focus first required field |
+
+Rules:
+
+- Do not render hundreds or thousands of visible inputs by default.
+- Do not mix permanent input controls with read-only rows in the same visual state.
+- Do not use hover alone to reveal editability for required business work; hover may reveal edit icon only.
+- A row can be in exactly one of these states: `view`, `editing`, `new`, `saving`, `error`, `locked`.
+- Use display formatting first: code mono, amount right aligned, date compact, status as `.s-pill`, empty as `—`.
+- Editable cells must keep the same column width and row height as display cells as much as possible; entering edit mode must not shift the table.
+
+### Large Data Editing
+
+Large data means any table where users may see many rows or where virtualization/pagination is needed.
+
+Required behavior:
+
+- Default to display mode for performance and scanability.
+- Enter edit by row action (`编辑`) or double-click only when the page clearly supports inline editing.
+- Save scope must be explicit: row save, selected rows save, or whole table save.
+- Unsaved changes must be visible through a dirty marker on the row or cell.
+- Pagination, filtering, route leave, or drawer close must warn when unsaved edits exist.
+- Editing many rows must use pagination/virtual-safe state keyed by stable row id, not row index.
+- Do not store editing state only in rendered DOM; it must survive horizontal scroll and row re-render.
+- When virtual scroll is enabled, `row-config.height` must match actual row height.
+
+Avoid:
+
+- Every row showing input/select controls all the time.
+- One global save button with no indication of which rows changed.
+- Validation error shown only after page submit when the table has hundreds of rows.
+- Editing state tied to current page index, sorted index, or sequence number.
+
+### Row Edit UI
+
+Row edit mode:
+
+- Direct row actions: `保存`, `取消`; destructive row action stays in dropdown or requires confirmation.
+- If there are more than two actions, show primary action plus more menu.
+- Required fields show validation at cell level.
+- Invalid cells use Arco validation border/text or a compact inline error; do not color the whole row red.
+- Saving row uses row-level loading or disabled save action, not a full-table spinner unless the whole table is saving.
+- Cancel with dirty data requires confirmation only when changes would be lost.
+
+### Batch Edit UI
+
+Batch edit mode:
+
+- Enter from toolbar: `批量编辑` or a domain-specific action such as `批量维护费用`.
+- Toolbar changes to edit context: `保存更改`, `取消编辑`, `已修改 N 行`.
+- Editable columns should be visually marked in header or with a subtle cell affordance.
+- Non-editable columns remain text-only.
+- Batch operations must not hide row selection, sorting, or validation state.
+- If batch edit applies one value to selected rows, use a toolbar form/popover, not inline inputs in every selected row.
+
+### Validation And Errors
+
+- Required and format validation belongs to the cell/field.
+- Cross-row validation belongs to the table summary or module summary row.
+- Duplicate or conflict errors must identify the row and field.
+- Save failure must keep the row in edit/error state and preserve user input.
+- Error copy uses business language: `柜号不能为空`, `费用金额必须大于 0`, `HBL 单号重复`.
+
+### Add/Delete Rows
+
 - Add row should append a valid editable row and focus the first required field when feasible.
+- Unsaved new rows can be removed without confirmation.
+- Delete saved rows requires confirmation when data would be removed.
+- When a row has dependent child rows, delete copy must name the impact.
+
+### Cell Control Rules
+
+- Inputs/selects must be full width in editable cells.
+- Numeric fields use `a-input-number` and right alignment where possible.
+- Code, date, amount, and status fields must keep their display typography in view mode.
+- Use select only for finite options; do not use select for open text.
+- Long text should edit in popover/drawer or multiline cell only when the table is not the main dense workbench.
 - Do not show a compressed empty grid with only headers.
 
 ## Empty State

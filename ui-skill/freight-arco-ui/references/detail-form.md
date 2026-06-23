@@ -109,15 +109,54 @@ Do not show total count, weight, CBM, status, helper text, or upload state in th
 
 ## Attachments
 
-- Single required file: show one upload slot plus current file row.
-- Multiple files: show compact file table with name, type, status, uploader, time, actions.
-- Upload action uses `type="dashed"` or outline/add style.
-- File delete requires confirmation.
-- File status uses Tag or `.s-pill`, not plain text.
-- Required attachment types must be visible as business labels, not hidden only in placeholder text.
-- Multiple files must show count and upload state inside the module body or summary row, not in the module title.
-- File actions should be compact: preview/download/delete, with low-frequency operations in a dropdown.
-- Do not add attachment modules to pages that do not manage files.
+Attachment UI must first classify the business model. Do not use one generic upload table for every file scenario.
+
+### Attachment Patterns
+
+| Pattern | Use when | Required UI |
+|---------|----------|-------------|
+| Document type checklist | Business requires specific documents, such as booking instruction, customs documents, HBL draft | Left side shows document type and requirement; body shows files under that type; action is upload/replace/continue upload |
+| Ungrouped file list | Files belong to the object but do not have document type requirements | One compact file table/list with file name, category if any, status, uploader, time, actions |
+| Single file field | A form field owns exactly one file, such as license, report, seal image | One compact current-file row plus upload/replace action |
+| Multi-file field | One field accepts many files, such as photos, supporting documents | File list under the field plus add-more action and count |
+
+### Document Type Checklist
+
+- Use for logistics documents with compliance or workflow meaning: `订舱委托书`, `报关资料`, `提单文件`, `MSDS`, `电池报告`.
+- Each document type is one row/card. The document type row carries business rules: required/optional, single/multiple, current status, file count.
+- A single-file document type must show `上传文件` when empty and `替换文件` when uploaded.
+- A multi-file document type must show `上传文件` when empty and `继续上传` when files exist.
+- Do not display multi-file data as one fake zip name unless the actual uploaded object is a zip file.
+- Required state must be visible as a business marker near the document type, not only in placeholder text.
+- Upload state must use Tag or `.s-pill`: `待上传`, `待复核`, `已上传`, `上传失败`.
+- File rows under a document type should show: file name, size, status, uploader, upload time, actions.
+- File actions: preview and download are direct actions; delete requires confirmation; low-frequency actions go into a dropdown.
+- Module title remains only `附件` or the business module name. File counts, missing counts, and upload progress belong in the module body/summary row.
+
+### Ungrouped File List
+
+- Use when the page needs attachments but does not have required document categories.
+- Header left is the module title only. Header right can show `上传附件` and optional `批量下载`.
+- The body uses a compact file table/list:
+  - file name with file icon;
+  - file category only when users filter or recognize files by category;
+  - status;
+  - size;
+  - uploader;
+  - upload time;
+  - operation column.
+- If there is only one file total, keep the same file-row structure instead of a large upload card.
+- Empty state should be concise: `暂无附件` plus upload action when editable.
+
+### Single vs Multiple File Behavior
+
+- Single file means replacement, not accumulation. Action text after upload is `替换文件`.
+- Multiple files means accumulation. Action text after upload is `继续上传`.
+- Delete for single file clears the field and returns status to `待上传` when required.
+- Delete for multiple files removes only that file; the document type status is recalculated from remaining files.
+- If multiple files have mixed states, the document type status priority is: failed > review > missing required > uploaded.
+
+Do not add attachment modules to pages that do not manage files.
 
 ## Repeated Modules
 

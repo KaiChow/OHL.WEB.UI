@@ -70,6 +70,16 @@ function defaultAttachments(hasFiles = false): DetailAttachmentRow[] {
       id: detailUid(),
       docType: '订舱委托书',
       fileName: hasFiles ? 'booking-instruction.pdf' : '',
+      files: hasFiles
+        ? [{
+            id: detailUid(),
+            name: 'booking-instruction.pdf',
+            size: '246 KB',
+            uploader: '操作A',
+            uploadTime: '2026-06-18 10:24',
+            status: 'uploaded'
+          }]
+        : [],
       required: true,
       multiple: false,
       status: hasFiles ? 'uploaded' : 'missing',
@@ -80,6 +90,26 @@ function defaultAttachments(hasFiles = false): DetailAttachmentRow[] {
       id: detailUid(),
       docType: '报关资料',
       fileName: hasFiles ? 'customs-docs.zip' : '',
+      files: hasFiles
+        ? [
+            {
+              id: detailUid(),
+              name: 'commercial-invoice.pdf',
+              size: '512 KB',
+              uploader: '客服B',
+              uploadTime: '2026-06-18 11:06',
+              status: 'review'
+            },
+            {
+              id: detailUid(),
+              name: 'packing-list.xlsx',
+              size: '88 KB',
+              uploader: '客服B',
+              uploadTime: '2026-06-18 11:08',
+              status: 'uploaded'
+            }
+          ]
+        : [],
       required: true,
       multiple: true,
       status: hasFiles ? 'review' : 'missing',
@@ -90,6 +120,16 @@ function defaultAttachments(hasFiles = false): DetailAttachmentRow[] {
       id: detailUid(),
       docType: '提单文件',
       fileName: hasFiles ? 'hbl-draft.pdf' : '',
+      files: hasFiles
+        ? [{
+            id: detailUid(),
+            name: 'hbl-draft.pdf',
+            size: '324 KB',
+            uploader: '单证C',
+            uploadTime: '2026-06-19 09:18',
+            status: 'uploaded'
+          }]
+        : [],
       required: false,
       multiple: true,
       status: hasFiles ? 'uploaded' : 'missing',

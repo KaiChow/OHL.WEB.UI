@@ -138,10 +138,20 @@ export interface DetailClearanceRow {
 
 export type DetailAttachmentStatus = 'uploaded' | 'missing' | 'review';
 
+export interface DetailAttachmentFile {
+  id: string;
+  name: string;
+  size: string;
+  uploader: string;
+  uploadTime: string;
+  status: DetailAttachmentStatus;
+}
+
 export interface DetailAttachmentRow {
   id: string;
   docType: string;
   fileName: string;
+  files: DetailAttachmentFile[];
   required: boolean;
   multiple: boolean;
   status: DetailAttachmentStatus;

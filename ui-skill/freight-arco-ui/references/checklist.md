@@ -60,6 +60,10 @@
 - Table columns expose object identity, key state, main working data, and next-decision fields before passive metadata.
 - Table empty states are explicit and object-specific, not blank table bodies.
 - Editable tables keep inputs readable and aligned without clipping.
+- Large editable tables default to display mode; inputs appear only for active row, new row, or explicit batch edit.
+- Table editing state is keyed by stable row id, not row index or sequence number.
+- Inline edit has explicit save/cancel scope and visible dirty state.
+- Pagination, filtering, refresh, route leave, and drawer close handle unsaved table edits.
 
 ## Typography
 
