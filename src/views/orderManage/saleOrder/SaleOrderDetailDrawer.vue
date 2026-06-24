@@ -772,7 +772,7 @@ const closeDrawer = () => {
                               <a-input v-model="row.chineseName" size="small" placeholder="请输入中文品名" />
                             </template>
                           </vxe-column>
-                          <vxe-column field="englishName" title="英文品名" width="300">
+                          <vxe-column field="englishName" title="英文品名" min-width="200">
                             <template #default="{ row }">
                               <a-input v-model="row.englishName" size="small" placeholder="请输入英文品名" />
                             </template>
@@ -850,7 +850,7 @@ const closeDrawer = () => {
                   :data="containerRows"
                   :row-config="{ isHover: true, keyField: 'id', height: 38 }"
                 >
-                  <vxe-column field="containerType" title="柜型" width="100">
+                  <vxe-column field="containerType" title="柜型" width="88">
                     <template #default="{ row }">
                       <a-select v-model="row.containerType" size="small">
                         <a-option value="LCL">LCL</a-option>
@@ -858,33 +858,33 @@ const closeDrawer = () => {
                       </a-select>
                     </template>
                   </vxe-column>
-                  <vxe-column field="cartonNo" title="柜号" width="180" />
-                  <vxe-column field="sealNo" title="封号" width="180" />
-                  <vxe-column field="soNo" title="SO号" width="190">
+                  <vxe-column field="cartonNo" title="柜号" width="160" />
+                  <vxe-column field="sealNo" title="封号" width="160" />
+                  <vxe-column field="soNo" title="SO号" min-width="140">
                     <template #default="{ row }">
                       <a-input v-model="row.soNo" size="small" />
                     </template>
                   </vxe-column>
-                  <vxe-column field="quantity" title="件数" width="100" align="right" />
-                  <vxe-column field="unit" title="包装单位" width="116" />
-                  <vxe-column field="weight" title="毛重(KG)" width="120" align="right" />
-                  <vxe-column field="volume" title="体积(CBM)" width="120" align="right" />
-                  <vxe-column field="planTime" title="预计派送时间" width="170">
+                  <vxe-column field="quantity" title="件数" width="72" align="right" />
+                  <vxe-column field="unit" title="包装单位" width="72" />
+                  <vxe-column field="weight" title="毛重(KG)" width="100" align="right" />
+                  <vxe-column field="volume" title="体积(CBM)" width="100" align="right" />
+                  <vxe-column field="planTime" title="预计派送时间" width="148">
                     <template #default="{ row }">
                       <a-date-picker v-model="row.planTime" size="small" />
                     </template>
                   </vxe-column>
-                  <vxe-column field="actualTime" title="实际派送时间" width="170">
+                  <vxe-column field="actualTime" title="实际派送时间" width="148">
                     <template #default="{ row }">
                       <a-date-picker v-model="row.actualTime" size="small" />
                     </template>
                   </vxe-column>
-                  <vxe-column field="customsTravel" title="海关放行状态" width="124">
+                  <vxe-column field="customsTravel" title="海关放行状态" width="100">
                     <template #default="{ row }">
                       <span class="s-pill" :data-s="row.customsTravel === '否' ? 'wait' : 'acc'">{{ row.customsTravel }}</span>
                     </template>
                   </vxe-column>
-                  <vxe-column field="chargeWeight" title="重量体积比" width="120" align="right" />
+                  <vxe-column field="chargeWeight" title="重量体积比" width="100" align="right" />
                 </vxe-table>
               </div>
         </div>
@@ -912,28 +912,28 @@ const closeDrawer = () => {
                   :data="customsRows"
                   :row-config="{ isHover: true, keyField: 'id', height: 38 }"
                 >
-                  <vxe-column field="shipper" title="发货人" width="160">
+                  <vxe-column field="shipper" title="发货人" width="120">
                     <template #default="{ row }">
                       <a-select v-model="row.shipper" size="small">
                         <a-option value="艾力克">艾力克</a-option>
                       </a-select>
                     </template>
                   </vxe-column>
-                  <vxe-column field="documentName" title="报关资料" width="220">
+                  <vxe-column field="documentName" title="报关资料" min-width="160">
                     <template #default="{ row }">
-                      <a-input v-model="row.documentName" size="small" />
+                      <a-input v-model="row.documentName" size="small" placeholder="报关资料名称" />
                     </template>
                   </vxe-column>
-                  <vxe-column field="declarationNo" title="关单号" width="160">
+                  <vxe-column field="declarationNo" title="关单号" width="148">
                     <template #default="{ row }">
-                      <a-input v-model="row.declarationNo" size="small" />
+                      <a-input v-model="row.declarationNo" size="small" placeholder="关单号" />
                     </template>
                   </vxe-column>
-                  <vxe-column field="quantity" title="件数" width="100" align="right" />
-                  <vxe-column field="unit" title="包装单位" width="116" />
-                  <vxe-column field="weight" title="毛重(KG)" width="120" align="right" />
-                  <vxe-column field="volume" title="体积(CBM)" width="120" align="right" />
-                  <vxe-column field="method" title="报关方式" width="150">
+                  <vxe-column field="quantity" title="件数" width="80" align="right" />
+                  <vxe-column field="unit" title="包装单位" width="80" />
+                  <vxe-column field="weight" title="毛重(KG)" width="100" align="right" />
+                  <vxe-column field="volume" title="体积(CBM)" width="100" align="right" />
+                  <vxe-column field="method" title="报关方式" width="120">
                     <template #default="{ row }">
                       <a-select v-model="row.method" size="small">
                         <a-option value="代理报关">代理报关</a-option>
@@ -941,26 +941,24 @@ const closeDrawer = () => {
                       </a-select>
                     </template>
                   </vxe-column>
-                  <vxe-column field="status" title="报关状态" width="130">
+                  <vxe-column field="status" title="报关状态" width="88">
                     <template #default="{ row }">
-                      <a-select v-model="row.status" size="small">
-                        <a-option value="未报关">未报关</a-option>
-                        <a-option value="报关中">报关中</a-option>
-                        <a-option value="已报关">已报关</a-option>
-                      </a-select>
+                      <span class="s-pill" :data-s="{ '未报关': 'draft', '报关中': 'op', '已报关': 'acc' }[row.status] ?? 'draft'">
+                        {{ row.status }}
+                      </span>
                     </template>
                   </vxe-column>
-                  <vxe-column field="travel" title="是否放行" width="100">
+                  <vxe-column field="travel" title="是否放行" width="84">
                     <template #default="{ row }">
                       <span class="s-pill" :data-s="row.travel === '否' ? 'wait' : 'acc'">{{ row.travel }}</span>
                     </template>
                   </vxe-column>
-                  <vxe-column field="fileStatus" title="报关单" width="130">
+                  <vxe-column field="fileStatus" title="报关单" width="120">
                     <template #default="{ row }">
                       <span class="link-text">{{ row.fileStatus }}</span>
                     </template>
                   </vxe-column>
-                  <vxe-column title="操作" width="74" fixed="right" align="center">
+                  <vxe-column title="操作" width="56" fixed="right" align="center">
                     <template #default>
                       <a-tooltip content="删除报关行">
                         <a-button type="text" class="row-action-btn" status="danger">
@@ -989,44 +987,44 @@ const closeDrawer = () => {
                   :data="warehouseRows"
                   :row-config="{ isHover: true, keyField: 'id', height: 38 }"
                 >
-                  <vxe-column field="inboundNo" title="入仓单号" width="160" />
-                  <vxe-column field="checkFile" title="入仓核实单" width="140">
+                  <vxe-column field="inboundNo" title="入仓单号" width="148" />
+                  <vxe-column field="checkFile" title="入仓核实单" width="100">
                     <template #default="{ row }">
                       <span class="link-text">{{ row.checkFile }}</span>
                     </template>
                   </vxe-column>
-                  <vxe-column field="status" title="状态" width="100">
+                  <vxe-column field="status" title="状态" width="84">
                     <template #default="{ row }">
                       <span class="s-pill" data-s="acc">{{ row.status }}</span>
                     </template>
                   </vxe-column>
-                  <vxe-column field="shipper" title="发货人" width="160" />
-                  <vxe-column field="destination" title="目的地" width="140" />
-                  <vxe-column field="actualDate" title="实际进仓日期" width="170">
+                  <vxe-column field="shipper" title="发货人" width="120" />
+                  <vxe-column field="destination" title="目的地" width="120" />
+                  <vxe-column field="actualDate" title="实际进仓日期" width="148">
                     <template #default="{ row }">
                       <a-date-picker v-model="row.actualDate" size="small" />
                     </template>
                   </vxe-column>
-                  <vxe-column field="fbaNo" title="FBA号" width="160">
+                  <vxe-column field="fbaNo" title="FBA号" width="148">
                     <template #default="{ row }">
-                      <a-input v-model="row.fbaNo" size="small" />
+                      <a-input v-model="row.fbaNo" size="small" placeholder="FBA货件编号" />
                     </template>
                   </vxe-column>
-                  <vxe-column field="labels" title="理货标签" width="160">
+                  <vxe-column field="labels" title="理货标签" width="120">
                     <template #default="{ row }">
-                      <a-input v-model="row.labels" size="small" />
+                      <a-input v-model="row.labels" size="small" placeholder="标签备注" />
                     </template>
                   </vxe-column>
-                  <vxe-column field="quantity" title="件数" width="100" align="right" />
-                  <vxe-column field="unit" title="包装单位" width="116" />
-                  <vxe-column field="weight" title="毛重(KG)" width="120" align="right" />
-                  <vxe-column field="volume" title="体积(CBM)" width="120" align="right" />
-                  <vxe-column field="driverPhone" title="司机电话" width="180">
+                  <vxe-column field="quantity" title="件数" width="72" align="right" />
+                  <vxe-column field="unit" title="包装单位" width="72" />
+                  <vxe-column field="weight" title="毛重(KG)" width="100" align="right" />
+                  <vxe-column field="volume" title="体积(CBM)" width="100" align="right" />
+                  <vxe-column field="driverPhone" title="司机电话" min-width="120">
                     <template #default="{ row }">
                       <a-input v-model="row.driverPhone" size="small" placeholder="请输入司机电话" />
                     </template>
                   </vxe-column>
-                  <vxe-column title="操作" width="74" fixed="right" align="center">
+                  <vxe-column title="操作" width="56" fixed="right" align="center">
                     <template #default>
                       <a-tooltip content="删除入仓行">
                         <a-button type="text" class="row-action-btn" status="danger">

@@ -875,6 +875,34 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 - 内容列：主单号(160) / 名称(min-width:140+) / 备注(min-width:200+)
 - 固定列：左固定 checkbox/序号/主单号；右固定操作列
 
+### 详情内可编辑子表格（class="detail-mini-vxe"）
+
+```
+✅ 详情模块内的子表格（品名明细、装柜信息、报关信息、入仓信息等）必须加 class="detail-mini-vxe"
+✅ global.css 自动处理 ghost border：控件默认极淡边框，hover/focus 时显示 primary-4 边框
+✅ 状态类字段（报关状态/放行状态/入仓状态）用 s-pill[data-s]，不用 a-select
+✅ 只读计算字段（件数/毛重/体积 已自动汇总时）直接显示文本，不套 a-input
+✅ height="auto"（详情子表格不固定高度，随数据行数增长）
+❌ 禁止忘加 class="detail-mini-vxe"（会导致每个单元格都有实线边框，形成 Excel 满格效果）
+❌ 禁止全列用 width（必须用 min-width 让 VXE 自动分配剩余空间）
+```
+
+**列宽分配原则（detail-mini-vxe 每张表只能有 1 个 min-width 列）：**
+
+> ⚠️ **VXE 把剩余空间平摊给所有 min-width 列**。多个 min-width 列并存时，每列各得一大份剩余宽度，导致多列同时出现大量空白（"稀碎"效果）。每张表只允许一列用 min-width。
+
+| 列类型 | 用 width（固定） | 用 min-width（弹性，每表仅 1 列）|
+|--------|-----------------|----------------------------------|
+| 操作列 | width="56" | — |
+| 状态 pill | width="80~100" | — |
+| 数字（件数/毛重/体积） | width="72~100" | — |
+| 日期选择器 | width="148" | — |
+| 包装单位/柜型等枚举 | width="72~88" | — |
+| 编号/单号 | width="140~160" | — |
+| 文本最长/最可变的那列 | — | min-width="120~160"（全表唯一）|
+
+选哪列做 min-width：内容最长或最不确定的一列（通常是备注、资料名称、参考号）。其余列全部 width。
+
 ### 场景对应写法
 
 ```vue

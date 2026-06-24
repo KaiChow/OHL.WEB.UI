@@ -3043,6 +3043,19 @@ button:-moz-focusring,
   width: 100% !important;
   height: var(--dense-control-h-detail) !important;
   min-height: var(--dense-control-h-detail) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+.detail-mini-vxe.vxe-table .arco-input-wrapper.arco-input-size-small:hover,
+.detail-mini-vxe.vxe-table .arco-input-wrapper.arco-input-size-small:focus-within,
+.detail-mini-vxe.vxe-table .arco-input-number.arco-input-number-size-small:hover,
+.detail-mini-vxe.vxe-table .arco-input-number.arco-input-number-size-small:focus-within,
+.detail-mini-vxe.vxe-table .arco-select-view-single.arco-select-size-small:hover,
+.detail-mini-vxe.vxe-table .arco-select-view-single.arco-select-size-small.arco-select-view-focus,
+.detail-mini-vxe.vxe-table .arco-picker-size-small:hover,
+.detail-mini-vxe.vxe-table .arco-picker-size-small.arco-picker-focused {
+  border-color: var(--dense-primary-4) !important;
   background: var(--color-bg-card) !important;
 }
 .detail-mini-vxe.vxe-table .arco-input-size-small .arco-input,
