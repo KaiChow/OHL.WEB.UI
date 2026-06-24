@@ -1,15 +1,15 @@
 /**
  * OHL 规范自动检查脚本
  * 用法: node scripts/check-spec.js
- * 检查 src/views 和 src/components 下所有 .vue / .ts 文件
+ * 检查页面、组件和 UI skill 样式下所有 .vue / .ts / .css 文件
  */
 
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { join, extname } from 'path';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1');
-const SCAN_DIRS = ['src/views', 'src/components'];
-const EXTS = ['.vue', '.ts'];
+const SCAN_DIRS = ['src/views', 'src/components', 'ui-skill'];
+const EXTS = ['.vue', '.ts', '.css'];
 
 // ─── 规则定义 ────────────────────────────────────────────────────────────────
 // { desc, pattern, exclude?, fileFilter? }
@@ -66,6 +66,20 @@ const RULES = [
     // 排除 CSS 变量定义行（--xxx: #yyy 是定义，不是使用）和注释
     exclude: /--[\w-]+\s*:|\/\*|\/\//,
     fileFilter: /\.(vue|css)$/,
+  },
+
+  {
+    desc: '禁止业务 CSS 直接组合主题通道色（应用 global.css 的 --dense-* 语义变量）',
+    pattern: /(rgba?\(var\(--(primary|warning|success|danger)-\d+\)|rgb\(var\(--(primary|warning|success|danger)-\d+\)\))/,
+    fileFilter: /\.(vue|css)$/,
+    exclude: /node_modules|references|\/\*|\/\//,
+  },
+
+  {
+    desc: '禁止黑色/当前色边框或焦点（应用 --dense-primary-* 或 --dense-border*）',
+    pattern: /(border(?:-color)?\s*:\s*(black|#000|#111|#121314|currentColor|var\(--color-text-1\))|outline\s*:\s*[^;]*(ButtonText|currentColor|black|#000))/,
+    fileFilter: /\.(vue|css)$/,
+    exclude: /\/\*|\/\//,
   },
 
   // 禁止硬编码字号
@@ -138,6 +152,32 @@ for (const file of files) {
       });
     }
   }
+}
+
+const globalCss = readFileSync(join(ROOT, 'src/styles/global.css'), 'utf8');
+if (!globalCss.includes('.detail-form .arco-form-item-label-col > .arco-form-item-label')) {
+  violations.push({
+    rule: '详情表单必须覆盖 Arco label 结构，防止默认 14px 泄漏',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .detail-form .arco-form-item-label-col > .arco-form-item-label',
+  });
+}
+if (!globalCss.includes('--vxe-ui-table-row-height-small: 38px')) {
+  violations.push({
+    rule: 'detail-mini-vxe 可编辑表格行高必须匹配 28px 控件，防止输入内容截断',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --vxe-ui-table-row-height-small: 38px',
+  });
+}
+if (!globalCss.includes('.detail-mini-vxe.vxe-table .arco-picker-size-small')) {
+  violations.push({
+    rule: 'detail-mini-vxe 必须覆盖 date picker small 控件高度，防止日期内容截断',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .detail-mini-vxe.vxe-table .arco-picker-size-small',
+  });
 }
 
 // ─── 输出结果 ─────────────────────────────────────────────────────────────────

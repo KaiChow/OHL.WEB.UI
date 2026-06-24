@@ -27,6 +27,7 @@ This structure is fixed; the fields are not. Each list must map columns and filt
 - Do not show a separate “selected filters” strip. Current values are visible in controls/tabs.
 - Basic filters should be the 3-6 highest-frequency query fields for the object.
 - Advanced filters can be numerous, but must be grouped by business meaning and hidden behind inline expansion.
+- Main list query fields should stay in a flat grid by default. Do not add visible group titles or grouped panels inside the query card unless the query count reaches Tier 3 and the user explicitly needs grouped advanced editing.
 - Do not copy order search fields into finance, warehouse, or customer pages.
 
 ## Filter Count Tiers
@@ -49,7 +50,12 @@ Rules:
 - Put active query state in the controls, transport/status tabs, and selected values; do not add a separate selected-filter strip.
 - Text inputs trigger by Enter or Query button; selects and chips may auto-search when safe.
 - Query and reset actions stay in a stable location when advanced filters open or close.
+- Query actions can use a fixed right command panel when it preserves table height and keeps actions stable. A vertical command stack is allowed when it is visually designed as a command surface: one full-width primary query button, full-width secondary reset and expand/collapse buttons, consistent width, subtle border/background, and clear primary/secondary hierarchy. It must not look like a narrow side menu or three loose text links.
+- Fixed query command panels must be internationalization-safe. Do not size them by Chinese labels; use min/max or `clamp()`, allow 1.3-2x text expansion, and give secondary actions tooltip/title/aria labels when text may ellipsize.
+- If secondary query actions cannot fit translated text in the fixed panel, use icon + accessible label or move the actions to a horizontal command row. Do not silently clip action meaning.
 - For international freight pages, field examples should use domain identifiers such as order no, business no, HBL, MBL, container no, customer, port, and warehouse no.
+- Combined keyword filters such as `field type + keyword` are allowed only when they reduce repeated identifier inputs. Use the shared `filter-combo` structure: one fixed-width selector, one flexible input, same 32px height, continuous border, and one clear label such as `单号检索`. Do not place multiple independent query fields into one visual field.
+- A combined keyword filter must list related identifiers only, such as 业务单号 / 业务编号 / HBL / MBL / 柜号. Do not mix unrelated filters such as customer, staff, port, date, and status into the same combo.
 
 ## Filter Typography
 

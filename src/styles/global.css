@@ -128,14 +128,13 @@ html, body, #app {
 .content { flex: 1; min-height: 0; overflow: hidden; background: var(--dense-page-bg, var(--color-bg-body)); }
 
 /* =================================================================
-   Design tokens — 高密度列表页（布局 + Arco 主题映射）
-   色彩规则：--dense-* 仅做语义别名，值必须来自 arco-ui.css / gi-demo，
-   禁止另起 hex 主色，避免与 Arco 组件（按钮/分页/表单）割裂。
+   Design tokens — 高密度列表页（布局 + 固定项目主题）
+   项目主题色固定为 Arco Blue，不依赖运行时主题变量形态。
    ================================================================= */
 :root {
-  /* 项目语义表面别名。主题色阶由 @arco-themes/vue-gi-demo 提供，禁止在 ui-skill/arco-ui.css 覆盖。 */
-  --color-bg-body: var(--color-fill-2);
-  --color-bg-card: var(--color-bg-2);
+  /* 项目基础表面 */
+  --color-bg-body: #F2F3F5;
+  --color-bg-card: #FFFFFF;
 
   /* 布局密度（列表页专用，非色彩） */
   --dense-radius: 6px;
@@ -179,58 +178,65 @@ html, body, #app {
   --dense-pad-head-y: 8px;        /* 分区 head 上下 */
   --dense-pad-head-x: 12px;       /* 分区 head 左右 */
 
-  /* gi-demo 的 --primary-* / --warning-* 等是 RGB 通道值，项目内必须先封装成完整 CSS 颜色。
-     浅主色用于大面积表头/hover/分割线时必须降饱和，避免页面被主色铺满。 */
-  --dense-primary-1: rgba(var(--primary-6), 0.035);
-  --dense-primary-2: rgba(var(--primary-6), 0.075);
-  --dense-primary-3: rgba(var(--primary-6), 0.12);
-  --dense-primary-4: rgba(var(--primary-6), 0.18);
-  --dense-primary-5: rgb(var(--primary-5));
-  --dense-primary-6: rgb(var(--primary-6));
-  --dense-primary-7: rgb(var(--primary-7));
-  --dense-primary-8: rgb(var(--primary-8));
-  --dense-primary-9: rgb(var(--primary-9));
-  --dense-primary-10: rgb(var(--primary-10));
-  --dense-warning-1: rgb(var(--warning-1));
-  --dense-warning-2: rgb(var(--warning-2));
-  --dense-warning-3: rgb(var(--warning-3));
-  --dense-warning-4: rgb(var(--warning-4));
-  --dense-warning-5: rgb(var(--warning-5));
-  --dense-warning-6: rgb(var(--warning-6));
-  --dense-warning-7: rgb(var(--warning-7));
-  --dense-warning-8: rgb(var(--warning-8));
-  --dense-warning-9: rgb(var(--warning-9));
-  --dense-warning-10: rgb(var(--warning-10));
-  --dense-success-1: rgb(var(--success-1));
-  --dense-success-2: rgb(var(--success-2));
-  --dense-success-3: rgb(var(--success-3));
-  --dense-success-4: rgb(var(--success-4));
-  --dense-success-5: rgb(var(--success-5));
-  --dense-success-6: rgb(var(--success-6));
-  --dense-success-7: rgb(var(--success-7));
-  --dense-success-8: rgb(var(--success-8));
-  --dense-success-9: rgb(var(--success-9));
-  --dense-success-10: rgb(var(--success-10));
-  --dense-danger-1: rgb(var(--danger-1));
-  --dense-danger-2: rgb(var(--danger-2));
-  --dense-danger-3: rgb(var(--danger-3));
-  --dense-danger-4: rgb(var(--danger-4));
-  --dense-danger-5: rgb(var(--danger-5));
-  --dense-danger-6: rgb(var(--danger-6));
-  --dense-danger-7: rgb(var(--danger-7));
-  --dense-danger-8: rgb(var(--danger-8));
-  --dense-danger-9: rgb(var(--danger-9));
-  --dense-danger-10: rgb(var(--danger-10));
+  /* 固定项目主题色板：Arco Blue / Orange / Green / Red */
+  --dense-primary-1: #F2F7FF;
+  --dense-primary-2: #E3EEFF;
+  --dense-primary-3: #C7DCFF;
+  --dense-primary-4: #8FB8FF;
+  --dense-primary-5: #4080FF;
+  --dense-primary-6: #165DFF;
+  --dense-primary-7: #0E42D2;
+  --dense-primary-8: #072CA6;
+  --dense-primary-9: #031A79;
+  --dense-primary-10: #000D4D;
+  --dense-warning-1: #FFF7E8;
+  --dense-warning-2: #FFE4BA;
+  --dense-warning-3: #FFCF8B;
+  --dense-warning-4: #FFB65D;
+  --dense-warning-5: #FF9A2E;
+  --dense-warning-6: #FF7D00;
+  --dense-warning-7: #D25F00;
+  --dense-warning-8: #A64500;
+  --dense-warning-9: #792E00;
+  --dense-warning-10: #4D1B00;
+  --dense-success-1: #E8FFEA;
+  --dense-success-2: #AFF0B5;
+  --dense-success-3: #7BE188;
+  --dense-success-4: #4CD263;
+  --dense-success-5: #23C343;
+  --dense-success-6: #00B42A;
+  --dense-success-7: #009A29;
+  --dense-success-8: #008026;
+  --dense-success-9: #006622;
+  --dense-success-10: #004D1C;
+  --dense-danger-1: #FFECE8;
+  --dense-danger-2: #FDCDC5;
+  --dense-danger-3: #FBACA3;
+  --dense-danger-4: #F98981;
+  --dense-danger-5: #F76560;
+  --dense-danger-6: #F53F3F;
+  --dense-danger-7: #CB272D;
+  --dense-danger-8: #A1151E;
+  --dense-danger-9: #770813;
+  --dense-danger-10: #4D000A;
 
   --dense-primary: var(--dense-primary-6);
   --dense-primary-deep: var(--dense-primary-7);
   --dense-primary-soft: var(--dense-primary-1);
-  --dense-page-bg: linear-gradient(180deg, var(--color-fill-1) 0, var(--color-bg-body) 180px, var(--color-bg-body) 100%);
-  --dense-card-border: var(--color-border-1);
-  --dense-card-border-active: var(--dense-primary-2);
-  --dense-surface-tint: linear-gradient(180deg, var(--color-bg-card) 0%, var(--color-fill-1) 100%);
-  --dense-border: var(--color-border-2);
-  --dense-border-subtle: var(--color-border-1);
+  --dense-page-bg: linear-gradient(180deg, #F7FAFF 0, #F6F8FB 150px, #F8FAFC 100%);
+  --dense-card-border: #E7ECF3;
+  --dense-card-border-active: var(--dense-primary-3);
+  --dense-surface-tint: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  --dense-border: #E5E6EB;
+  --dense-border-subtle: #EDF1F6;
+  --dense-row-stripe: #FBFCFE;
+  --dense-table-header-bg: linear-gradient(180deg, #FFFFFF 0%, #F6F9FE 100%);
+  --dense-table-header-border: #DDE6F2;
+  --dense-table-col-border: #F1F4F8;
+  --dense-table-row-border: #EAF0F7;
+  --dense-table-empty-bg: linear-gradient(180deg, #FFFFFF 0, #FFFFFF 76px, #FBFCFE 100%);
+  --dense-table-fixed-bg: linear-gradient(90deg, #F8FAFC 0, #FFFFFF 18px, #FFFFFF 100%);
+  --dense-table-fixed-shadow: -8px 0 18px rgba(16, 24, 40, 0.045);
   --dense-bg-body: var(--color-bg-body);
   --dense-bg-body-top: var(--color-bg-body);
   --dense-bg-card: var(--color-bg-card);
@@ -239,11 +245,68 @@ html, body, #app {
 
   /* 结构阴影（中性灰，不含独立色相） */
   --dense-shadow-card:
-    0 1px 2px rgba(29, 33, 41, 0.04),
-    0 8px 22px rgba(29, 33, 41, 0.05),
+    0 1px 2px rgba(29, 33, 41, 0.03),
+    0 10px 24px rgba(16, 24, 40, 0.055),
     0 0 0 1px var(--dense-card-border);
   --dense-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  --dense-shadow-lift: 0 6px 16px rgba(var(--primary-6), 0.16);
+  --dense-shadow-lift: 0 6px 16px rgba(29, 33, 41, 0.08);
+}
+
+/* 全局交互焦点兜底：
+   Arco normalize 会保留 Firefox 的 ButtonText 虚线焦点，VXE/按钮组合也可能出现深色默认框。
+   项目内的可点击控件统一由组件类提供主色 focus ring，不允许浏览器黑边泄漏到业务界面。 */
+button,
+[type='button'],
+[type='reset'],
+[type='submit'],
+[role='button'],
+.arco-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+button:focus,
+button:focus-visible,
+button:-moz-focusring,
+[type='button']:focus,
+[type='button']:focus-visible,
+[type='button']:-moz-focusring,
+[type='reset']:focus,
+[type='reset']:focus-visible,
+[type='reset']:-moz-focusring,
+[type='submit']:focus,
+[type='submit']:focus-visible,
+[type='submit']:-moz-focusring,
+[role='button']:focus,
+[role='button']:focus-visible {
+  outline: none !important;
+}
+.arco-btn:focus,
+.arco-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.arco-btn-primary:focus-visible,
+.arco-btn-outline:focus-visible,
+.arco-btn-dashed:focus-visible {
+  box-shadow: 0 0 0 2px var(--dense-primary-2) !important;
+}
+.arco-btn-text:focus-visible {
+  box-shadow: 0 0 0 2px var(--dense-primary-1) !important;
+}
+.arco-btn-primary:not(.arco-btn-disabled) {
+  background-color: var(--dense-primary-6) !important;
+  border-color: var(--dense-primary-6) !important;
+  color: #fff !important;
+}
+.arco-btn-primary:not(.arco-btn-disabled):hover,
+.arco-btn-primary:not(.arco-btn-disabled):focus {
+  background-color: var(--dense-primary-7) !important;
+  border-color: var(--dense-primary-7) !important;
+  color: #fff !important;
+}
+.arco-btn-primary:not(.arco-btn-disabled):active {
+  background-color: var(--dense-primary-8) !important;
+  border-color: var(--dense-primary-8) !important;
+  color: #fff !important;
 }
 
 /* =================================================================
@@ -263,6 +326,7 @@ html, body, #app {
 }
 
 .zone-card {
+  background: var(--color-bg-card);
   border-radius: var(--dense-radius);
   overflow: hidden;
   box-shadow: var(--dense-shadow-card), var(--dense-shadow-inset-top);
@@ -279,25 +343,29 @@ html, body, #app {
 .zone-l1-transport {
   display: flex; align-items: flex-end;
   padding: 0 14px;
-  border-bottom: 1px solid var(--dense-card-border-active);
-  background: var(--dense-surface-tint);
+  min-height: 38px;
+  border: 1px solid var(--dense-card-border);
+  border-bottom-color: var(--dense-border-subtle);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
   flex-shrink: 0;
   z-index: 2;
 }
 
 /* L2 筛选卡片 */
 .zone-l2-filter-card {
-  background: var(--dense-bg-card);
+  background: var(--color-bg-card);
   flex-shrink: 0;
   border: 1px solid var(--dense-card-border);
+  border-top: 1px solid var(--dense-primary-3);
 }
 
 /* L3 状态 + 批量操作 */
 .zone-l3-action,
 .zone-card--stack {
-  background: var(--dense-bg-card);
+  background: var(--color-bg-card);
   flex-shrink: 0;
   border: 1px solid var(--dense-card-border);
+  border-top: 1px solid var(--dense-card-border);
   overflow: hidden;
 }
 
@@ -305,9 +373,10 @@ html, body, #app {
 .zone-l4-table-card {
   display: flex; flex-direction: column;
   flex: 1; min-height: 0;
-  background: var(--dense-bg-card);
+  background: var(--color-bg-card);
   overflow: hidden;
   border: 1px solid var(--dense-card-border);
+  border-top-color: var(--dense-card-border);
   border-radius: var(--dense-radius);
 }
 
@@ -320,7 +389,7 @@ html, body, #app {
   padding: 0 14px;
   height: 40px;
   flex-shrink: 0;
-  background: var(--color-bg-card);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
   border-bottom: 1px solid var(--dense-border-subtle);
 }
 .table-card-cap__right {
@@ -445,23 +514,26 @@ html, body, #app {
 .zone-l1-transport {
   display: flex; align-items: flex-end;
   padding: 0 16px;
-  border-bottom: 1px solid var(--dense-card-border-active);
-  background: var(--dense-surface-tint);
+  min-height: 38px;
+  border-bottom: 1px solid var(--dense-border-subtle);
+  background: var(--color-bg-card);
   flex-shrink: 0;
 }
 .seg-btn {
   position: relative;
-  padding: 0 18px;
-  height: 34px;
+  padding: 0 16px;
+  height: 32px;
+  margin-bottom: 3px;
   font-size: var(--dense-font-nav);
   font-weight: var(--dense-weight-nav);
   color: var(--color-text-2);
   background: transparent;
   border: none;
+  border-radius: var(--dense-radius);
   cursor: pointer;
-  transition: color .15s;
+  transition: color .15s, background .15s, box-shadow .15s;
   white-space: nowrap;
-  letter-spacing: .02em;
+  letter-spacing: 0;
 }
 .seg-btn::after {
   content: '';
@@ -473,8 +545,16 @@ html, body, #app {
   transform: translateX(-50%);
   transition: width .2s cubic-bezier(.4,0,.2,1);
 }
-.seg-btn:hover:not(.seg-btn--active) { color: var(--color-text-1); }
-.seg-btn--active { color: var(--dense-primary-deep) !important; font-weight: var(--dense-weight-nav-active); }
+.seg-btn:hover:not(.seg-btn--active) {
+  color: var(--dense-primary-7);
+  background: var(--color-bg-card);
+}
+.seg-btn--active {
+  color: var(--dense-primary-deep) !important;
+  background: var(--dense-primary-1);
+  font-weight: var(--dense-weight-nav-active);
+  box-shadow: inset 0 0 0 1px var(--dense-primary-3);
+}
 .seg-btn--active::after { width: calc(100% - 16px); background: var(--dense-primary); }
 
 /* ── 筛选卡片 v2：字段区 + 右侧操作列（§11.5 高密度）──────── */
@@ -494,40 +574,87 @@ html, body, #app {
   flex-direction: row;
   align-items: stretch;
   min-height: 0;
+  background: var(--color-bg-card);
 }
 .filter-card__fields {
   flex: 1;
   min-width: 0;
+  background: var(--color-bg-card);
 }
-.filter-card__actions-col {
+.filter-card__actions-panel {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  justify-content: space-between;
+  justify-content: flex-start;
   flex-shrink: 0;
-  width: 84px;
-  padding: 10px 10px 10px 12px;
-  border-left: 1px solid var(--dense-border);
-  background: var(--color-bg-card);
-}
-.filter-card__actions-primary {
-  display: flex;
-  flex-direction: column;
   gap: 6px;
+  width: clamp(124px, 7.6vw, 148px);
+  min-width: 124px;
+  padding: 10px 10px;
+  border-left: 1px solid var(--dense-border-subtle);
+  background:
+    linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.88);
 }
-.filter-card__actions-col .arco-btn {
+.filter-card__actions-panel .arco-btn {
+  height: 28px !important;
+  padding: 0 10px !important;
+  min-width: 0;
+}
+.filter-card__query-btn {
   width: 100%;
+  box-shadow: 0 2px 5px rgba(22, 93, 255, 0.16) !important;
 }
-.filter-card__actions-col .arco-btn:hover,
-.filter-card__actions-col .arco-btn:focus-visible {
+.filter-card__query-btn .arco-btn-content {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.filter-card__actions-panel .reset-btn {
+  width: 100%;
+  height: 27px !important;
+  padding: 0 8px !important;
+  color: var(--color-text-2) !important;
+  background: var(--color-bg-card) !important;
+  border: 1px solid var(--dense-border-subtle) !important;
+  border-radius: var(--dense-radius) !important;
+}
+.filter-card__actions-panel .reset-btn .arco-btn-content {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.filter-card__actions-panel .reset-btn:hover {
+  color: var(--dense-primary-7) !important;
+  background: var(--dense-primary-1) !important;
+  border-color: var(--dense-primary-2) !important;
+}
+.filter-card__actions-panel .arco-btn:hover,
+.filter-card__actions-panel .arco-btn:focus-visible {
   transform: none !important;
   box-shadow: none !important;
 }
-.filter-expand-link--col {
+.filter-expand-link.filter-expand-link--panel {
   width: 100%;
-  margin-top: auto;
-  padding-top: 8px;
-  border-top: 1px dashed var(--color-border-1);
+  min-width: 0;
+  height: 27px;
+  margin-top: 0;
+  padding: 0 8px;
+  border: 1px solid var(--dense-border-subtle);
+  border-radius: var(--dense-radius);
+  color: var(--color-text-2);
+  background: var(--color-bg-card);
+}
+.filter-expand-link.filter-expand-link--panel .filter-expand-link__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.filter-expand-link.filter-expand-link--panel:hover {
+  border-color: var(--dense-primary-2);
+  background: var(--dense-primary-1);
+  color: var(--dense-primary-7);
 }
 .filter-card__title {
   display: flex;
@@ -550,17 +677,18 @@ html, body, #app {
   color: var(--color-text-3);
 }
 .filter-card__body--basic {
-  padding: 10px 12px 8px;
-  background: #fff;
-  border-bottom: none;
+  padding: 10px 12px 12px;
+  background:
+    linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 72%, #FBFDFF 100%);
+  border-bottom: 1px solid var(--dense-border-subtle);
 }
 .filter-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px 12px;
+  gap: 8px 12px;
 }
 .filter-grid--advanced {
-  gap: 12px 16px;
+  gap: 8px 12px;
 }
 .filter-field {
   min-width: 0;
@@ -606,10 +734,10 @@ html, body, #app {
 .filter-field .arco-select-view-single {
   height: 32px !important;
   min-height: 32px !important;
-  background: #fff;
-  border: 1px solid var(--color-border-2) !important;
+  background: var(--color-bg-card);
+  border: 1px solid var(--dense-border) !important;
   border-radius: 6px !important;
-  box-shadow: 0 1px 2px rgba(20, 28, 48, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 1px 2px rgba(16, 24, 40, 0.035);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .filter-field .arco-input-wrapper .arco-input,
@@ -634,6 +762,51 @@ html, body, #app {
   border-color: var(--dense-primary) !important;
   box-shadow: 0 0 0 2px var(--dense-primary-2) !important;
 }
+.filter-field .filter-combo.arco-input-group,
+.filter-field .filter-combo {
+  display: flex;
+  width: 100%;
+  height: var(--dense-control-h-filter);
+  min-width: 0;
+}
+.filter-field .filter-combo .arco-select {
+  width: auto;
+}
+.filter-field .filter-combo__select {
+  flex: 0 0 118px;
+  width: 118px !important;
+  min-width: 104px;
+}
+.filter-field .filter-combo--keyword .filter-combo__select {
+  flex-basis: 118px;
+}
+.filter-field .filter-combo .arco-input-wrapper {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.filter-field .filter-combo .arco-select-view-single,
+.filter-field .filter-combo .arco-input-wrapper {
+  height: var(--dense-control-h-filter) !important;
+  min-height: var(--dense-control-h-filter) !important;
+}
+.filter-field .filter-combo .arco-select-view-single {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+.filter-field .filter-combo .arco-input-wrapper {
+  margin-left: -1px;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+.filter-field .filter-combo .arco-select-view-single:hover,
+.filter-field .filter-combo .arco-input-wrapper:hover {
+  z-index: 1;
+}
+.filter-field .filter-combo .arco-select-view-single.arco-select-view-focus,
+.filter-field .filter-combo .arco-input-wrapper:focus-within {
+  position: relative;
+  z-index: 2;
+}
 .filter-card__advanced {
   max-height: 0;
   overflow: hidden;
@@ -641,17 +814,24 @@ html, body, #app {
   transition: max-height 0.24s ease, opacity 0.2s ease;
 }
 .filter-card__advanced--open {
-  max-height: 300px;
+  max-height: 260px;
   opacity: 1;
 }
 .filter-card__advanced-inner {
-  padding: 10px 12px;
-  background: var(--color-fill-1);
-  border-top: 1px dashed var(--color-border-2);
+  padding: 9px 12px 10px;
+  background:
+    linear-gradient(180deg, #F8FAFD 0%, #FFFFFF 100%);
+  border-top: 1px solid #E4EBF5;
   position: relative;
 }
 .filter-card__advanced-inner::before {
-  display: none;
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 12px;
+  width: 86px;
+  height: 1px;
+  background: var(--dense-primary-4);
 }
 .filter-card__advanced-head {
   display: none;
@@ -877,7 +1057,7 @@ html, body, #app {
   align-items: center;
   height: var(--dense-bar-h);
   padding: 0 12px 0 14px;
-  background: var(--color-bg-card);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
   border-bottom: 1px solid var(--dense-border-subtle);
   gap: 0;
   overflow: hidden;
@@ -931,8 +1111,8 @@ html, body, #app {
   font-size: var(--dense-font-nav);
   font-weight: var(--dense-weight-nav);
   color: var(--color-text-2);
-  background: transparent;
-  border: 1px solid transparent;
+  background: var(--color-bg-card);
+  border: 1px solid var(--dense-border-subtle);
   border-radius: 14px;
   cursor: pointer;
   white-space: nowrap;
@@ -940,13 +1120,29 @@ html, body, #app {
   flex-shrink: 0;
   user-select: none;
 }
-.stab:hover { background: var(--dense-primary-1); color: var(--dense-primary-deep); border-color: var(--dense-primary-2); }
+.stab:hover {
+  background: var(--dense-primary-1);
+  color: var(--dense-primary-deep);
+  border-color: var(--dense-primary-3);
+}
+.stab:focus,
+.stab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--dense-primary-1);
+}
 .stab--active {
   background: var(--dense-primary-1) !important;
   border-color: var(--dense-primary-4) !important;
   color: var(--dense-primary-7) !important;
   font-weight: var(--dense-weight-nav-active);
   box-shadow: inset 0 0 0 1px var(--dense-primary-2);
+}
+.stab--active:focus,
+.stab--active:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1px var(--dense-primary-2),
+    0 0 0 2px var(--dense-primary-1);
 }
 .stab-badge {
   display: inline-flex; align-items: center; justify-content: center;
@@ -975,12 +1171,13 @@ html, body, #app {
   gap: 0;
   padding: 6px 14px;
   min-height: var(--dense-bar-h);
-  background: var(--color-bg-card);
-  border-top: 1px solid var(--dense-border-subtle);
+  background: #FFFFFF;
+  border-top: none;
+  border-bottom: 1px solid var(--dense-border-subtle);
   flex-shrink: 0;
 }
 .toolbar--dense {
-  border-bottom: none;
+  border-bottom: 1px solid var(--dense-border-subtle);
 }
 .toolbar-group {
   display: flex;
@@ -996,7 +1193,7 @@ html, body, #app {
 .toolbar-divider {
   width: 1px;
   height: 20px;
-  background: var(--dense-border);
+  background: var(--dense-border-subtle);
   margin: 0 12px;
   flex-shrink: 0;
 }
@@ -1043,6 +1240,8 @@ html, body, #app {
 }
 .toolbar .arco-btn-primary:not(.arco-btn-disabled):hover {
   background: var(--dense-primary-deep) !important;
+  border-color: var(--dense-primary-deep) !important;
+  color: #fff !important;
 }
 
 .status-bar__inner {
@@ -1099,17 +1298,20 @@ html, body, #app {
 /* ── 表头 ─────────────────────────────────────────────────────── */
 /* 表头只用浅分隔线区分数据区，强蓝线会误判为选中/焦点状态 */
 .vxe-table .vxe-table--header-wrapper {
-  border-bottom: 1px solid var(--dense-border-subtle) !important;
+  border-bottom: 1px solid var(--dense-table-header-border) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 1px 0 rgba(16, 24, 40, 0.025);
 }
 .vxe-table .vxe-header--row { height: var(--dense-header-h) !important; }
 .vxe-table .vxe-header--column {
   font-size: var(--dense-font-title) !important;
-  font-weight: var(--dense-weight-field) !important;
-  color: var(--color-text-2) !important;
-  background: var(--color-fill-1) !important;
-  letter-spacing: .03em;
+  font-weight: var(--dense-weight-title) !important;
+  color: var(--color-text-1) !important;
+  background: var(--dense-table-header-bg) !important;
+  letter-spacing: 0;
   text-transform: none;
-  border-right: 1px solid var(--dense-border-subtle) !important;
+  border-right: 1px solid var(--dense-table-col-border) !important;
   border-bottom: none !important;
 }
 .vxe-table .vxe-header--column:last-child { border-right: none !important; }
@@ -1117,19 +1319,21 @@ html, body, #app {
 /* fixed 列表头：稍深一档，区分可固定列 */
 .vxe-table .vxe-header--column.col--fixed-left,
 .vxe-table .vxe-header--column.col--fixed-right {
-  background: var(--color-fill-1) !important;
-  color: var(--color-text-2) !important;
+  background: var(--dense-table-header-bg) !important;
+  color: var(--color-text-1) !important;
 }
 
 /* ── 行分割线：打在 td 上（tr 上无效，HTML 表格模型限制）── */
 .vxe-table .vxe-body--column {
-  border-bottom: 1px solid var(--dense-border-subtle) !important;
-  transition: background .12s;
+  border-right: 1px solid var(--dense-table-col-border) !important;
+  border-bottom: 1px solid var(--dense-table-row-border) !important;
+  transition: background .12s, box-shadow .12s;
   font-size: var(--dense-font-data);
   font-weight: var(--dense-weight-data);
   color: var(--color-text-2);
   line-height: 1.4;
 }
+.vxe-table .vxe-body--column:last-child { border-right: none !important; }
 .vxe-table .vxe-body--row:last-child .vxe-body--column {
   border-bottom: none !important;
 }
@@ -1175,24 +1379,23 @@ html, body, #app {
 
 /* ② 斑马纹（:stripe="true" → .row--stripe）：极浅冷灰，和白底有明显对比 */
 .vxe-table .vxe-body--row.row--stripe .vxe-body--column {
-  background: rgba(var(--primary-6), 0.018);
+  background: var(--dense-row-stripe);
 }
 
 /* ③ Hover（isHover:true → .row--hover；同时 CSS :hover 兜底）*/
 .vxe-table .vxe-body--row.row--hover .vxe-body--column,
 .vxe-table .vxe-body--row:hover    .vxe-body--column {
-  background: rgba(var(--primary-6), 0.07) !important;
-  /* ≈ #dde8ff on white — 清晰可感知的蓝色高亮 */
+  background: var(--dense-primary-1) !important;
 }
 
 /* ④ 选中行（checkbox-config highlight:true → .row--checked）*/
 .vxe-table .vxe-body--row.row--checked .vxe-body--column {
-  background: rgba(var(--primary-6), 0.13) !important;
+  background: var(--dense-primary-2) !important;
 }
 /* 选中行 hover 再加深 */
 .vxe-table .vxe-body--row.row--checked.row--hover .vxe-body--column,
 .vxe-table .vxe-body--row.row--checked:hover    .vxe-body--column {
-  background: rgba(var(--primary-6), 0.18) !important;
+  background: var(--dense-primary-3) !important;
 }
 
 /* ── 序号列 ─────────────────────────────────────────────────── */
@@ -1207,34 +1410,36 @@ html, body, #app {
 /* 默认：纯白遮盖滚动内容；hover/选中继承行状态颜色 */
 .vxe-table .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--column.col--fixed-right {
-  border-left: 1px solid var(--dense-border-subtle) !important;
-  background: var(--color-bg-card);
+  border-left: 1px solid var(--dense-table-header-border) !important;
+  background: var(--dense-table-fixed-bg);
+  box-shadow: var(--dense-table-fixed-shadow);
 }
 /* 斑马纹固定列 */
 .vxe-table .vxe-body--row.row--stripe .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row.row--stripe .vxe-body--column.col--fixed-right {
-  background: rgba(var(--primary-6), 0.018);
+  background: var(--color-bg-card);
 }
 /* hover 固定列 */
 .vxe-table .vxe-body--row.row--hover .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row.row--hover .vxe-body--column.col--fixed-right,
 .vxe-table .vxe-body--row:hover     .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row:hover     .vxe-body--column.col--fixed-right {
-  background: rgba(var(--primary-6), 0.08) !important;
+  background: var(--dense-primary-1) !important;
 }
 /* 选中 固定列 */
 .vxe-table .vxe-body--row.row--checked .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row.row--checked .vxe-body--column.col--fixed-right {
-  background: rgba(var(--primary-6), 0.13) !important;
+  background: var(--dense-primary-2) !important;
 }
 /* 选中 hover 固定列 */
 .vxe-table .vxe-body--row.row--checked.row--hover .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row.row--checked:hover      .vxe-body--column.col--fixed-right {
-  background: rgba(var(--primary-6), 0.18) !important;
+  background: var(--dense-primary-3) !important;
 }
 .vxe-table .col--fixed-right .vxe-header--column,
 .vxe-table .vxe-header--column.col--fixed-right {
-  border-left: 1px solid var(--dense-border-subtle) !important;
+  border-left: 1px solid var(--dense-table-header-border) !important;
+  box-shadow: var(--dense-table-fixed-shadow);
 }
 
 .vxe-table .row-actions {
@@ -1246,7 +1451,7 @@ html, body, #app {
   padding: 1px 2px;
   border: 1px solid transparent;
   border-radius: var(--dense-radius);
-  background: rgba(var(--primary-6), 0.035);
+  background: transparent;
   box-shadow: none;
 }
 .vxe-table .row-action-btn.arco-btn {
@@ -1286,38 +1491,70 @@ html, body, #app {
   border-color: var(--dense-primary) !important;
 }
 
-/* 工作台主表：增强主色节奏，避免一整片灰白。仅用于一级业务列表。 */
+/* 工作台主表：中性结构承载，主色只用于 hover/选中/链接/操作反馈。 */
 .vxe-table.workbench-table .vxe-table--header-wrapper {
-  border-bottom: 1px solid var(--dense-primary-3) !important;
+  border-bottom: 1px solid var(--dense-table-header-border) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 1px 0 rgba(16, 24, 40, 0.035);
 }
 .vxe-table.workbench-table .vxe-header--column {
-  color: var(--color-text-2) !important;
-  background: var(--color-fill-1) !important;
+  color: var(--color-text-1) !important;
+  background: var(--dense-table-header-bg) !important;
+  font-weight: var(--dense-weight-title) !important;
+  border-right: 1px solid var(--dense-table-col-border) !important;
 }
 .vxe-table.workbench-table .vxe-header--column.col--fixed-left,
 .vxe-table.workbench-table .vxe-header--column.col--fixed-right {
-  background: var(--color-fill-1) !important;
-  color: var(--color-text-2) !important;
+  background: var(--dense-table-header-bg) !important;
+  color: var(--color-text-1) !important;
 }
 .vxe-table.workbench-table .vxe-body--row .vxe-body--column:nth-child(3) {
-  background: rgba(var(--primary-6), 0.026);
+  background: transparent !important;
+  box-shadow: none;
+}
+.vxe-table.workbench-table .vxe-body--column {
+  border-right: 1px solid var(--dense-table-col-border) !important;
+  border-bottom: 1px solid var(--dense-table-row-border) !important;
 }
 .vxe-table.workbench-table .vxe-body--row.row--stripe .vxe-body--column {
-  background: rgba(var(--primary-6), 0.028);
+  background: var(--dense-row-stripe);
 }
 .vxe-table.workbench-table .vxe-body--row.row--stripe .vxe-body--column:nth-child(3) {
-  background: rgba(var(--primary-6), 0.048);
+  background: var(--dense-row-stripe) !important;
+  box-shadow: none;
 }
 .vxe-table.workbench-table .vxe-body--row.row--hover .vxe-body--column,
 .vxe-table.workbench-table .vxe-body--row:hover .vxe-body--column {
-  background: rgba(var(--primary-6), 0.085) !important;
+  background: var(--dense-primary-1) !important;
 }
 .vxe-table.workbench-table .vxe-body--row.row--checked .vxe-body--column {
-  background: rgba(var(--primary-6), 0.15) !important;
+  background: var(--dense-primary-2) !important;
+}
+.vxe-table.workbench-table .vxe-body--row.row--hover .vxe-body--column:first-child,
+.vxe-table.workbench-table .vxe-body--row:hover .vxe-body--column:first-child {
+  box-shadow: inset 2px 0 0 var(--dense-primary-4);
+}
+.vxe-table.workbench-table .vxe-body--row.row--checked .vxe-body--column:first-child {
+  box-shadow: inset 2px 0 0 var(--dense-primary-6);
 }
 .vxe-table.workbench-table .vxe-body--column.col--fixed-right {
-  background: var(--color-bg-card) !important;
-  border-left: 1px solid var(--dense-border-subtle) !important;
+  background: var(--dense-table-fixed-bg) !important;
+  border-left: 1px solid var(--dense-table-header-border) !important;
+  border-right: none !important;
+  box-shadow: var(--dense-table-fixed-shadow) !important;
+}
+.vxe-table.workbench-table .vxe-header--column.col--fixed-right {
+  border-left: 1px solid var(--dense-table-header-border) !important;
+  border-right: none !important;
+  box-shadow: var(--dense-table-fixed-shadow) !important;
+}
+.vxe-table.workbench-table .vxe-body--row.row--hover .vxe-body--column.col--fixed-right,
+.vxe-table.workbench-table .vxe-body--row:hover .vxe-body--column.col--fixed-right {
+  background: linear-gradient(90deg, var(--dense-primary-1) 0, #FFFFFF 18px, var(--dense-primary-1) 100%) !important;
+}
+.vxe-table.workbench-table .vxe-body--row.row--checked .vxe-body--column.col--fixed-right {
+  background: linear-gradient(90deg, var(--dense-primary-2) 0, #FFFFFF 18px, var(--dense-primary-2) 100%) !important;
 }
 .vxe-table.workbench-table .row-action-btn.arco-btn {
   color: var(--color-text-3) !important;
@@ -1338,6 +1575,8 @@ html, body, #app {
 }
 .vxe-table.workbench-table .row-action-btn--primary.arco-btn {
   color: var(--dense-primary-6) !important;
+  border-color: transparent !important;
+  background: transparent !important;
 }
 .vxe-table.workbench-table .row-action-btn--primary.arco-btn:hover,
 .vxe-table.workbench-table .row-action-btn--primary.arco-btn:focus,
@@ -1349,30 +1588,68 @@ html, body, #app {
   box-shadow: inset 0 0 0 1px var(--dense-primary-2) !important;
 }
 .vxe-table.workbench-table .row-action-btn--more.arco-btn {
-  color: var(--color-text-3) !important;
+  color: var(--color-text-2) !important;
+  background: transparent !important;
+  border-color: transparent !important;
 }
 .vxe-table.workbench-table .row-actions {
   gap: 2px;
-  min-width: 52px;
+  min-width: 54px;
+  padding: 1px 3px;
   border-color: transparent;
-  background: rgba(var(--primary-6), 0.025);
-  box-shadow: inset 1px 0 0 rgba(var(--primary-6), 0.06);
+  background: transparent;
+  box-shadow: none;
 }
 .vxe-table.workbench-table .vxe-body--row.row--hover .row-actions,
 .vxe-table.workbench-table .vxe-body--row:hover .row-actions {
   border-color: var(--dense-primary-2);
   background: var(--dense-primary-1);
-  box-shadow:
-    inset 1px 0 0 var(--dense-primary-2),
-    0 1px 3px rgba(29, 33, 41, 0.04);
+  box-shadow: inset 0 0 0 1px var(--dense-primary-2);
 }
 .vxe-table.workbench-table .vxe-body--row.row--checked .row-actions {
   border-color: var(--dense-primary-3);
   background: var(--dense-primary-1);
-  box-shadow: inset 1px 0 0 var(--dense-primary-3);
+  box-shadow: inset 0 0 0 1px var(--dense-primary-3);
+}
+.vxe-table.workbench-table .row-actions,
+.vxe-table.workbench-table .row-action-btn.arco-btn,
+.vxe-table.workbench-table .row-action-btn.arco-btn *,
+.vxe-table.workbench-table .row-action-btn.arco-btn::before,
+.vxe-table.workbench-table .row-action-btn.arco-btn::after {
+  outline: none !important;
+}
+.vxe-table.workbench-table .row-actions:focus-within {
+  border-color: transparent !important;
+  background: var(--dense-primary-1) !important;
+  box-shadow: inset 0 0 0 1px var(--dense-primary-2) !important;
+}
+.vxe-table.workbench-table .vxe-header--column.col--current,
+.vxe-table.workbench-table .vxe-body--column.col--current,
+.vxe-table.workbench-table .vxe-footer--column.col--current,
+.vxe-table.workbench-table .vxe-body--column.col--active,
+.vxe-table.workbench-table .vxe-body--column.col--selected {
+  background: inherit !important;
+  box-shadow: none !important;
+}
+.vxe-table.workbench-table .vxe-body--row.row--current > .vxe-body--column,
+.vxe-table.workbench-table .vxe-body--row.row--hover.row--current > .vxe-body--column {
+  background: var(--dense-primary-1) !important;
+}
+.vxe-table.workbench-table .vxe-table--cell-main-area,
+.vxe-table.workbench-table .vxe-table--cell-item-area,
+.vxe-table.workbench-table .vxe-table--cell-extend-area,
+.vxe-table.workbench-table .vxe-table--cell-active-area,
+.vxe-table.workbench-table .vxe-table--cell-copy-area,
+.vxe-table.workbench-table .vxe-table--cell-col-status-area,
+.vxe-table.workbench-table .vxe-table--cell-row-status-area {
+  border-color: var(--dense-primary-3) !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
 .vxe-table.workbench-table {
   background: var(--color-bg-card) !important;
+  border-top: 0 !important;
+  box-shadow: inset 0 1px 0 var(--dense-table-header-border);
 }
 .vxe-table.workbench-table::after {
   content: '';
@@ -1388,7 +1665,7 @@ html, body, #app {
 .vxe-table.workbench-table .vxe-table--render-wrapper,
 .vxe-table.workbench-table .vxe-table--body-wrapper,
 .vxe-table.workbench-table .vxe-table--body-inner-wrapper {
-  background: var(--color-bg-card) !important;
+  background: var(--dense-table-empty-bg) !important;
 }
 .vxe-table.workbench-table .vxe-table--scroll-x-handle {
   height: 14px !important;
@@ -1459,13 +1736,18 @@ html, body, #app {
    状态 pill
    ================================================================= */
 .s-pill {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 0 8px; height: 20px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  box-sizing: border-box;
+  height: 20px;
+  min-width: 48px;
+  padding: 0 8px;
   border-radius: var(--dense-radius);
   font-size: var(--dense-font-aux);
   font-weight: var(--dense-weight-title);
+  line-height: 18px;
   white-space: nowrap;
   letter-spacing: 0;
+  vertical-align: middle;
 }
 .s-pill--dot::before {
   content: '';
@@ -1482,9 +1764,9 @@ html, body, #app {
 }
 .s-pill[data-s="wait"]    { background: var(--dense-warning-1); color: var(--dense-warning-7); border: 1px solid var(--dense-warning-3); }
 .s-pill[data-s="op"]      { background: var(--dense-primary-1); color: var(--dense-primary-7); border: 1px solid var(--dense-primary-3); }
-.s-pill[data-s="partial"] { background: rgb(var(--purple-1)); color: rgb(var(--purple-7)); border: 1px solid rgb(var(--purple-3)); }
+.s-pill[data-s="partial"] { background: var(--dense-primary-1); color: var(--dense-primary-7); border: 1px solid var(--dense-primary-3); }
 .s-pill[data-s="draft"]   { background: var(--color-bg-card); color: var(--color-text-2); border: 1px solid var(--color-border-2); }
-.s-pill[data-s="acc"]     { background: rgb(var(--cyan-1)); color: rgb(var(--cyan-7)); border: 1px solid rgb(var(--cyan-3)); }
+.s-pill[data-s="acc"]     { background: var(--dense-success-1); color: var(--dense-success-7); border: 1px solid var(--dense-success-3); }
 .s-pill[data-s="rel"]     { background: var(--dense-success-1); color: var(--dense-success-7); border: 1px solid var(--dense-success-3); }
 .s-pill[data-s="rej"]     { background: var(--dense-danger-1); color: var(--dense-danger-7); border: 1px solid var(--dense-danger-3); }
 
@@ -1493,17 +1775,21 @@ html, body, #app {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   max-width: 72px;
   height: 20px;
-  padding: 0 6px;
+  min-width: 48px;
+  padding: 0 8px;
   border-radius: var(--dense-radius);
   color: var(--color-text-1);
-  font-size: var(--dense-font-data);
-  font-weight: var(--dense-weight-field);
-  line-height: 20px;
+  border: 1px solid transparent;
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-title);
+  line-height: 18px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  vertical-align: middle;
 }
 .cargo-type-token--risk {
   color: var(--dense-warning-7);
@@ -1516,7 +1802,7 @@ html, body, #app {
    链接 / 单号 / 辅助文字
    ================================================================= */
 .link-text {
-  color: var(--dense-primary);
+  color: var(--dense-primary-6);
   cursor: pointer;
   font-size: var(--dense-font-data);
   font-weight: var(--dense-weight-title);
@@ -1529,7 +1815,7 @@ html, body, #app {
   /* F1 数据链接：与单元格同字号同字重，仅语义色区分 */
   font-size: var(--dense-font-data);
   font-weight: var(--dense-weight-title);
-  color: var(--dense-primary);
+  color: var(--dense-primary-7);
   letter-spacing: .01em;
 }
 .link-text--strong:hover { color: var(--dense-primary-deep); text-decoration: underline; }
@@ -1544,7 +1830,7 @@ html, body, #app {
 .sub-text {
   font-size: var(--dense-font-aux);
   font-weight: var(--dense-weight-aux);
-  color: var(--color-text-3);
+  color: var(--color-text-4);
   line-height: 1.3;
 }
 
@@ -1555,6 +1841,12 @@ html, body, #app {
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--color-text-1);
+  font-weight: var(--dense-weight-field);
+}
+
+.cell-strong {
+  color: var(--color-text-1);
+  font-size: var(--dense-font-data);
   font-weight: var(--dense-weight-field);
 }
 
@@ -1583,7 +1875,7 @@ html, body, #app {
   overflow: hidden; text-overflow: ellipsis;
 }
 
-.date-val  { font-size: var(--dense-font-data); font-weight: var(--dense-weight-field); color: var(--color-text-2); }
+.date-val  { font-size: var(--dense-font-data); font-weight: var(--dense-weight-field); color: var(--color-text-1); }
 .date-plan { font-size: var(--dense-font-aux); font-weight: var(--dense-weight-aux); color: var(--color-text-3); }
 .date-none { font-size: var(--dense-font-aux); font-weight: var(--dense-weight-aux); color: var(--color-text-4); }
 
@@ -1756,6 +2048,7 @@ html, body, #app {
 .detail-drawer .arco-form-item-layout-vertical > .arco-form-item-label-col {
   margin-bottom: var(--dense-gap-label) !important;
 }
+.detail-drawer .arco-form-item-label-col > .arco-form-item-label,
 .detail-drawer .arco-form-item-label > label {
   font-size: var(--dense-font-field) !important;
   font-weight: var(--dense-weight-field);
@@ -1825,9 +2118,9 @@ html, body, #app {
 }
 .dds-status-badge[data-s="wait"]    { background: var(--dense-warning-1); color: var(--dense-warning-6); border: 1px solid var(--dense-warning-3); }
 .dds-status-badge[data-s="op"]      { background: var(--dense-primary-1); color: var(--dense-primary-6); border: 1px solid var(--dense-primary-3); }
-.dds-status-badge[data-s="acc"]     { background: rgb(var(--cyan-1)); color: rgb(var(--cyan-6)); border: 1px solid rgb(var(--cyan-3)); }
+.dds-status-badge[data-s="acc"]     { background: var(--dense-success-1); color: var(--dense-success-6); border: 1px solid var(--dense-success-3); }
 .dds-status-badge[data-s="rel"]     { background: var(--dense-success-1); color: var(--dense-success-6); border: 1px solid var(--dense-success-3); }
-.dds-status-badge[data-s="partial"] { background: rgb(var(--purple-1)); color: rgb(var(--purple-6)); border: 1px solid rgb(var(--purple-3)); }
+.dds-status-badge[data-s="partial"] { background: var(--dense-primary-1); color: var(--dense-primary-6); border: 1px solid var(--dense-primary-3); }
 .dds-status-badge[data-s="draft"]   { background: var(--color-fill-2); color: var(--color-text-3); border: 1px solid var(--color-border-2); }
 .dds-status-badge[data-s="rej"]     { background: var(--dense-danger-1); color: var(--dense-danger-6); border: 1px solid var(--dense-danger-3); }
 .dds-order-no {
@@ -2045,6 +2338,7 @@ html, body, #app {
 .detail-form .arco-form-item {
   margin-bottom: var(--dense-gap-field-row);
 }
+.detail-form .arco-form-item-label-col > .arco-form-item-label,
 .detail-form .arco-form-item-label > label {
   font-size: var(--dense-font-field);
   font-weight: var(--dense-weight-field);
@@ -2144,22 +2438,22 @@ html, body, #app {
   border-color: var(--dense-primary-6);
 }
 .svc-tag--risk {
-  background: rgb(var(--warning-1)) !important;
+  background: var(--dense-warning-1) !important;
   border-color: transparent !important;
-  color: rgb(var(--warning-6)) !important;
+  color: var(--dense-warning-6) !important;
 }
 .svc-tag--risk.svc-tag--on {
-  background: rgb(var(--warning-1)) !important;
-  border-color: rgb(var(--warning-3)) !important;
-  color: rgb(var(--warning-6)) !important;
+  background: var(--dense-warning-1) !important;
+  border-color: var(--dense-warning-3) !important;
+  color: var(--dense-warning-6) !important;
 }
 .svc-tag--risk::before {
-  border-color: rgb(var(--warning-4));
+  border-color: var(--dense-warning-4);
 }
 .svc-tag--risk.svc-tag--on::before {
   content: '✓';
-  background: rgb(var(--warning-6));
-  border-color: rgb(var(--warning-6));
+  background: var(--dense-warning-6);
+  border-color: var(--dense-warning-6);
 }
 .svc-tag[aria-disabled="true"] {
   cursor: default;
@@ -2706,7 +3000,7 @@ html, body, #app {
 }
 .detail-mini-vxe.vxe-table {
   --vxe-ui-table-header-height-small: 30px;
-  --vxe-ui-table-row-height-small: 34px;
+  --vxe-ui-table-row-height-small: 38px;
   border-radius: 0;
   background: var(--color-bg-card) !important;
 }
@@ -2723,8 +3017,8 @@ html, body, #app {
   border-bottom: 1px solid var(--dense-primary-2) !important;
 }
 .detail-mini-vxe.vxe-table .vxe-body--column {
-  height: 34px !important;
-  padding: 3px 6px !important;
+  height: 38px !important;
+  padding: 4px 6px !important;
   color: var(--color-text-1) !important;
   font-size: var(--dense-font-data) !important;
   border-bottom: 1px solid var(--dense-border-subtle) !important;
@@ -2738,14 +3032,32 @@ html, body, #app {
   background-color: var(--dense-primary-1) !important;
 }
 .detail-mini-vxe.vxe-table .vxe-cell {
-  min-height: 24px !important;
+  min-height: 28px !important;
   padding: 0 !important;
+  overflow: visible !important;
 }
 .detail-mini-vxe.vxe-table .arco-input-wrapper.arco-input-size-small,
 .detail-mini-vxe.vxe-table .arco-input-number.arco-input-number-size-small,
-.detail-mini-vxe.vxe-table .arco-select-view-single.arco-select-size-small {
-  height: 24px !important;
+.detail-mini-vxe.vxe-table .arco-select-view-single.arco-select-size-small,
+.detail-mini-vxe.vxe-table .arco-picker-size-small {
+  width: 100% !important;
+  height: var(--dense-control-h-detail) !important;
+  min-height: var(--dense-control-h-detail) !important;
   background: var(--color-bg-card) !important;
+}
+.detail-mini-vxe.vxe-table .arco-input-size-small .arco-input,
+.detail-mini-vxe.vxe-table .arco-input-number-size-small .arco-input-number-input,
+.detail-mini-vxe.vxe-table .arco-select-size-small .arco-select-view-value,
+.detail-mini-vxe.vxe-table .arco-select-size-small .arco-select-view-input,
+.detail-mini-vxe.vxe-table .arco-picker-size-small input {
+  height: calc(var(--dense-control-h-detail) - 2px) !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  font-size: var(--dense-font-control) !important;
+  line-height: calc(var(--dense-control-h-detail) - 2px) !important;
+}
+.detail-mini-vxe.vxe-table .arco-select-size-small .arco-select-view-value {
+  min-height: calc(var(--dense-control-h-detail) - 2px) !important;
 }
 .detail-mini-vxe.vxe-table .vxe-table--fixed-right-wrapper {
   box-shadow: -6px 0 8px -4px rgba(29, 33, 41, 0.08);
@@ -2991,7 +3303,7 @@ html, body, #app {
 .search-form .arco-input-wrapper:focus-within,
 .search-form .arco-select-view-single:focus-within,
 .zone-l5-pager .arco-input-wrapper:focus-within {
-  box-shadow: 0 0 0 3px rgba(var(--primary-6), 0.16);
+  box-shadow: 0 0 0 3px var(--dense-primary-2);
   border-color: var(--dense-primary) !important;
 }
 

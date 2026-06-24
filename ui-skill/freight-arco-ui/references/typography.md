@@ -82,6 +82,7 @@ Design for 1.3-2x text expansion compared with Chinese.
 - Do not use negative letter spacing.
 - Do not scale font size by viewport width.
 - Do not rely on icon-only meaning unless tooltip or accessible label exists.
+- Dense action areas such as filter command panels must survive translated action text. Use flexible widths, ellipsis with `title`/tooltip, or icon + accessible label; never depend on two-character Chinese labels fitting a fixed button.
 
 ## Codes, Numbers, Dates
 

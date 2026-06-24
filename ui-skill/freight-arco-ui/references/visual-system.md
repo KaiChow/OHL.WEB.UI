@@ -56,12 +56,15 @@ For tabs, status filters, quick chips, checkbox chips, segmented controls, and l
 
 ## Token Usage
 
-`@arco-themes/vue-gi-demo` exposes `--primary-*`, `--warning-*`, `--success-*`, and similar variables as RGB channel values, not complete CSS colors.
+`@arco-themes/vue-gi-demo` may expose `--primary-*`, `--warning-*`, `--success-*`, and similar variables as RGB channel values depending on the import path. Page code must not depend on that raw representation.
 
-Correct:
+Correct in global/theme bridge CSS only:
 
 - `rgb(var(--primary-6))`
 - `rgba(var(--primary-6), 0.12)`
+
+Correct in page, component, and skill CSS:
+
 - project aliases such as `var(--dense-primary-6)` from `src/styles/global.css`
 - semantic project aliases such as `var(--dense-warning-6)`, `var(--dense-success-6)`, and `var(--dense-danger-6)`
 
@@ -73,7 +76,27 @@ Incorrect:
 - `color: var(--warning-6)`
 - `background: var(--danger-1)`
 
-The incorrect form creates invalid CSS color values such as `190, 218, 255`; browsers may fall back to current text color, which can make dividers appear black. New UI CSS should use `--dense-primary-*` aliases or explicit `rgb(var(...))`.
+The incorrect form creates invalid CSS color values such as `190, 218, 255`; browsers may fall back to current text color, which can make dividers appear black. New UI CSS should use `--dense-*` aliases.
+
+### Project Token Boundary
+
+`src/styles/global.css` owns the project semantic aliases. Page, component, and skill CSS must consume these aliases instead of rebuilding colors from raw theme channels.
+
+Allowed in page/component CSS:
+
+- `var(--dense-primary-1/2/3/4/6/7)`
+- `var(--dense-warning-*)`, `var(--dense-success-*)`, `var(--dense-danger-*)`
+- Arco neutral surface tokens such as `var(--color-bg-card)`, `var(--color-fill-1)`, `var(--color-border-1)`
+
+Not allowed in page/component CSS:
+
+- `rgba(var(--primary-6), 0.x)`
+- `rgb(var(--primary-6))`
+- `rgb(var(--warning-6))`
+- `rgb(var(--success-6))`
+- `rgb(var(--danger-6))`
+
+Reason: depending on the import path, gi-demo theme values may be available as RGB channels or as precomputed full colors. Raw channel composition can silently become invalid and fall back to black/currentColor. Global semantic aliases absorb that risk once.
 
 ## Gray Budget
 
@@ -81,7 +104,7 @@ The incorrect form creates invalid CSS color values such as `190, 218, 255`; bro
 - `color-text-4` is only for empty value, disabled state, timestamps, or helper text.
 - `color-fill-1/2` is only for secondary containers or disabled controls.
 - Main business values use `color-text-1`.
-- Interactive values use `--dense-primary-6` or `rgb(var(--primary-6))`.
+- Interactive values use `--dense-primary-6` or another project semantic alias.
 - Page-level gray is allowed only as a quiet base. Key active navigation, primary operation, selected state, and core links must create a visible Arco-primary rhythm.
 
 ## Information Hierarchy
@@ -151,6 +174,7 @@ The system uses Arco text tokens, not raw black.
 - Default action icons use `color-text-3` or Arco primary-muted; hover/focus uses `--dense-primary-*`.
 - Repeated controls inside table rows must avoid permanent dark borders because they form a black visual column and reduce all-day comfort.
 - If an area looks "too black", first check whether border/icon styles are using `color-text-1`, browser default `currentColor`, raw black, or invalid RGB token fallback.
+- Native focus rings must not leak into operational UI. All custom button-like controls must set `outline: none` and use a tokenized focus state from `global.css`.
 
 ## Status System
 

@@ -16,6 +16,7 @@ import {
   IconUpload,
 } from '@arco-design/web-vue/es/icon';
 import SaleOrderTableCap from './components/SaleOrderTableCap.vue';
+import SaleOrderDetailDrawer from './SaleOrderDetailDrawer.vue';
 
 type TransportMode = 'sea' | 'air' | 'rail';
 type ScopeKey = 'all' | 'mine' | 'permission';
@@ -427,13 +428,16 @@ const columnOptions: ColumnOption[] = [
   { key: 'businessNo', title: '业务编号' },
   { key: 'inboundNo', title: '入仓单号' },
   { key: 'salesman', title: '业务员' },
-  { key: 'party', title: '发货人/收货人' },
+  { key: 'shipper', title: '发货人' },
+  { key: 'consignee', title: '收货人' },
   { key: 'containerQty', title: '柜型柜量' },
   { key: 'containerNo', title: '柜号' },
-  { key: 'route', title: '起运港/目的港' },
+  { key: 'pol', title: '起运港' },
+  { key: 'pod', title: '目的港' },
   { key: 'hblNo', title: 'HBL 单号' },
   { key: 'mblNo', title: 'MBL 单号' },
-  { key: 'etd', title: 'ETD/ETA' },
+  { key: 'etd', title: 'ETD' },
+  { key: 'eta', title: 'ETA' },
   { key: 'carrierEtd', title: '驳船ETD' },
   { key: 'files', title: '文件下载' },
 ];
@@ -647,8 +651,8 @@ nextTick(() => {
               </div>
               <div class="filter-field">
                 <label class="filter-field__label">单号检索</label>
-                <a-input-group compact>
-                  <a-select v-model="query.keywordField" size="small" class="so-key-select">
+                <a-input-group compact class="filter-combo filter-combo--keyword">
+                  <a-select v-model="query.keywordField" size="small" class="filter-combo__select">
                     <a-option v-for="item in keywordFields" :key="item.value" :value="item.value">{{ item.label }}</a-option>
                   </a-select>
                   <a-input
@@ -726,16 +730,20 @@ nextTick(() => {
             </div>
           </div>
         </div>
-        <div class="filter-card__actions-col">
-          <div class="filter-card__actions-primary">
-            <a-button size="small" type="primary" @click="handleSearch">
-              <template #icon><icon-search /></template>
-              查询
-            </a-button>
-            <a-button size="small" type="text" class="reset-btn" @click="handleReset">重置</a-button>
-          </div>
-          <button class="filter-expand-link filter-expand-link--col" type="button" @click="showAdvanced = !showAdvanced">
-            {{ showAdvanced ? '收起' : '更多' }}
+        <div class="filter-card__actions-panel">
+          <a-button size="small" type="primary" class="filter-card__query-btn" title="查询" @click="handleSearch">
+            <template #icon><icon-search /></template>
+            查询
+          </a-button>
+          <a-button size="small" type="text" class="reset-btn" title="重置" @click="handleReset">重置</a-button>
+          <button
+            class="filter-expand-link filter-expand-link--panel"
+            type="button"
+            :title="showAdvanced ? '收起' : '更多'"
+            :aria-label="showAdvanced ? '收起更多筛选' : '展开更多筛选'"
+            @click="showAdvanced = !showAdvanced"
+          >
+            <span class="filter-expand-link__text">{{ showAdvanced ? '收起' : '更多' }}</span>
             <icon-down />
           </button>
         </div>
@@ -892,12 +900,14 @@ nextTick(() => {
             </template>
           </vxe-column>
           <vxe-column v-if="visibleColumns.salesman" field="salesman" title="业务员" width="98" />
-          <vxe-column v-if="visibleColumns.party" field="shipper" title="发货人 / 收货人" min-width="230">
+          <vxe-column v-if="visibleColumns.shipper" field="shipper" title="发货人" min-width="190">
             <template #default="{ row }">
-              <div class="cell-two-line">
-                <span class="c2-main">{{ row.shipper }}</span>
-                <span class="c2-sub">{{ row.consignee }}</span>
-              </div>
+              <span class="cell-strong ellipsis" :title="row.shipper">{{ row.shipper }}</span>
+            </template>
+          </vxe-column>
+          <vxe-column v-if="visibleColumns.consignee" field="consignee" title="收货人" min-width="190">
+            <template #default="{ row }">
+              <span class="cell-strong ellipsis" :title="row.consignee">{{ row.consignee }}</span>
             </template>
           </vxe-column>
           <vxe-column v-if="visibleColumns.containerQty" field="containerQty" title="柜型柜量" width="104" />
@@ -907,12 +917,14 @@ nextTick(() => {
               <span v-else class="sub-text">-</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.route" field="pol" title="起运港 / 目的港" width="172">
+          <vxe-column v-if="visibleColumns.pol" field="pol" title="起运港" width="118">
             <template #default="{ row }">
-              <div class="cell-two-line">
-                <span class="c2-main">{{ row.pol }}</span>
-                <span class="c2-sub">{{ row.pod }}</span>
-              </div>
+              <span class="cell-strong mono">{{ row.pol }}</span>
+            </template>
+          </vxe-column>
+          <vxe-column v-if="visibleColumns.pod" field="pod" title="目的港" width="126">
+            <template #default="{ row }">
+              <span class="cell-strong mono">{{ row.pod }}</span>
             </template>
           </vxe-column>
           <vxe-column v-if="visibleColumns.hblNo" field="hblNo" title="HBL 单号" width="138" sortable>
@@ -927,12 +939,15 @@ nextTick(() => {
               <span v-else class="sub-text">-</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.etd" field="etd" title="ETD / ETA" width="150" sortable>
+          <vxe-column v-if="visibleColumns.etd" field="etd" title="ETD" width="112" sortable>
             <template #default="{ row }">
-              <div class="cell-two-line">
-                <span class="date-val">{{ row.etd || '-' }}</span>
-                <span class="date-plan">{{ row.eta || '-' }}</span>
-              </div>
+              <span class="date-val">{{ row.etd || '-' }}</span>
+            </template>
+          </vxe-column>
+          <vxe-column v-if="visibleColumns.eta" field="eta" title="ETA" width="112" sortable>
+            <template #default="{ row }">
+              <span v-if="row.eta" class="date-val">{{ row.eta }}</span>
+              <span v-else class="sub-text">-</span>
             </template>
           </vxe-column>
           <vxe-column v-if="visibleColumns.carrierEtd" field="carrierEtd" title="驳船ETD" width="112" />
@@ -984,139 +999,7 @@ nextTick(() => {
       </div>
     </div>
 
-    <a-drawer class="detail-drawer" v-model:visible="detailVisible" :width="980" :footer="false">
-      <div v-if="currentRow" class="detail-drawer-body">
-        <div class="detail-drawer-status">
-          <span class="detail-drawer-status__no mono">{{ currentRow.orderNo || currentRow.businessNo }}</span>
-          <span class="s-pill" :data-s="currentRow.pill">{{ currentRow.statusText }}</span>
-          <span class="detail-drawer-status__sub">{{ currentRow.salesman }} / {{ currentRow.operator }}</span>
-        </div>
-
-        <div class="detail-drawer-scroll">
-          <div class="detail-section">
-            <div class="detail-section__head">
-              <h4 class="detail-section__title">业务概览</h4>
-              <div class="detail-section__actions">
-                <a-button size="small">
-                  <template #icon><icon-edit /></template>
-                  编辑
-                </a-button>
-              </div>
-            </div>
-            <div class="detail-section__body">
-              <div class="detail-form-grid detail-form-grid--4">
-                <div class="detail-field">
-                  <span class="detail-field__label">业务编号</span>
-                  <span class="detail-field__val mono">{{ currentRow.businessNo }}</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">业务类型</span>
-                  <span class="detail-field__val">{{ currentRow.businessType }}</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">货物类型</span>
-                  <span class="detail-field__val">{{ getCargoTypeText(currentRow) }}</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">柜型柜量</span>
-                  <span class="detail-field__val">{{ currentRow.containerQty }}</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">起运港</span>
-                  <span class="detail-field__val">{{ currentRow.pol }}</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">目的港</span>
-                  <span class="detail-field__val">{{ currentRow.pod }}</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">ETD</span>
-                  <span class="detail-field__val">{{ currentRow.etd || '-' }}</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">ETA</span>
-                  <span class="detail-field__val">{{ currentRow.eta || '-' }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="detail-section">
-            <div class="detail-section__head">
-              <h4 class="detail-section__title">收发货方</h4>
-            </div>
-            <div class="detail-section__body">
-              <div class="detail-form-grid detail-form-grid--4">
-                <div class="detail-field detail-field--wide">
-                  <span class="detail-field__label">发货人</span>
-                  <span class="detail-field__val">{{ currentRow.shipper }}</span>
-                </div>
-                <div class="detail-field detail-field--wide">
-                  <span class="detail-field__label">收货人</span>
-                  <span class="detail-field__val">{{ currentRow.consignee }}</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">业务员</span>
-                  <span class="detail-field__val">{{ currentRow.salesman }}</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">客服</span>
-                  <span class="detail-field__val">{{ currentRow.customerService }}</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">操作员</span>
-                  <span class="detail-field__val">{{ currentRow.operator }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="detail-section">
-            <div class="detail-section__head">
-              <h4 class="detail-section__title">单证信息</h4>
-              <div class="detail-section__actions">
-                <a-button size="small">
-                  <template #icon><icon-upload /></template>
-                  上传单证
-                </a-button>
-              </div>
-            </div>
-            <div class="detail-section__body">
-              <div class="detail-form-grid detail-form-grid--4">
-                <div class="detail-field">
-                  <span class="detail-field__label">HBL 单号</span>
-                  <span class="detail-field__val mono">{{ currentRow.hblNo || '-' }}</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">MBL 单号</span>
-                  <span class="detail-field__val mono">{{ currentRow.mblNo || '-' }}</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">单证数量</span>
-                  <span class="detail-field__val">{{ currentRow.fileCount }} 份</span>
-                </div>
-                <div class="detail-field">
-                  <span class="detail-field__label">文件状态</span>
-                  <span class="detail-field__val">
-                    <icon-file />
-                    {{ currentRow.fileCount ? '可下载' : '待上传' }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="detail-drawer-footer">
-          <a-button size="small" @click="detailVisible = false">关闭</a-button>
-          <a-button size="small" @click="downloadFile(currentRow)">
-            <template #icon><icon-download /></template>
-            下载单证
-          </a-button>
-          <a-button size="small" type="primary" @click="feedback('业务单已确认')">确认</a-button>
-        </div>
-      </div>
-    </a-drawer>
+    <sale-order-detail-drawer v-model:visible="detailVisible" :row="currentRow" />
   </div>
 </template>
 
@@ -1125,16 +1008,16 @@ nextTick(() => {
   min-width: 0;
 }
 
-.so-key-select {
-  width: 120px;
-  flex-shrink: 0;
-}
-
 .so-order-cell {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   max-width: 100%;
+  min-height: 22px;
+  padding: 0;
+  border-radius: var(--dense-radius);
+  background: transparent;
+  box-shadow: none;
 }
 
 .so-order-mark {
@@ -1150,14 +1033,5 @@ nextTick(() => {
   font-weight: 600;
   line-height: 15px;
   text-align: center;
-}
-
-:deep(.arco-input-group) {
-  display: flex;
-}
-
-:deep(.arco-input-group .arco-input-wrapper) {
-  flex: 1;
-  min-width: 0;
 }
 </style>

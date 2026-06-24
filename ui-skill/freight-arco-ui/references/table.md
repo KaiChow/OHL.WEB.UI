@@ -61,6 +61,7 @@ Rules:
 - Numeric columns align right.
 - Status/action columns align center.
 - Long text uses ellipsis/title or a two-line cell pattern.
+- Do not combine multiple independent business fields into one list column unless the business explicitly requires grouped display.
 - Use object identity columns early: code/no/name/status before secondary metadata.
 - Put next-decision fields before passive audit fields.
 - Do not default to showing every backend field.
@@ -92,7 +93,8 @@ These are starting ranges, not hard-coded widths for every table.
 - Status pills do not use a leading dot by default. Use `.s-pill--dot` only for timeline/legend-like contexts, not normal table cells.
 - Risk attributes such as dangerous cargo may use an icon inside `.s-pill`, but must not combine icon and leading dot.
 - Cargo type/risk columns should use a consistent cargo token pattern, not workflow status pills. All values keep the same baseline and size; risk values may use warning token color/border without an icon-heavy label.
-- Two-line cell: `cell-two-line`, `c2-main`, `c2-sub`.
+- Table status/attribute tokens in the same visual family must share one size: 20px height, F5 11px text, same padding/radius/line-height. Semantic color may differ; component size must not.
+- Two-line cell: `cell-two-line`, `c2-main`, `c2-sub`. Use it only for primary value + its own auxiliary metadata, not for merging two independent fields such as shipper/consignee, POL/POD, ETD/ETA, HBL/MBL.
 - Empty value: `—` with weak color.
 - Numeric values: tabular numbers and right alignment.
 - Units: micro typography after value, not a separate dominant column unless users sort/filter by unit.
@@ -116,7 +118,7 @@ These are starting ranges, not hard-coded widths for every table.
 Table lines are functional separators, not decoration.
 
 - Header must have a visible but restrained anchor: subtle primary tint or primary bottom border.
-- Main workbench tables should use `workbench-table` to create a primary rhythm: stronger header anchor, subtle primary tint on the primary identifier column, and visible primary row actions.
+- Main workbench tables should use `workbench-table` to create the table surface: neutral header anchor, low-contrast row/column separators, fixed-operation column surface, and primary tint only for hover/selection/actions.
 - Primary table borders must use complete CSS colors such as `--dense-primary-2/3` or `rgb(var(--primary-2))`; do not write `border-color: var(--primary-2)` because gi-demo stores primary tokens as RGB channels.
 - Keep a subtle 1px header/body separator when it helps scan the table.
 - Keep low-contrast row separators for dense data rows.
@@ -124,6 +126,7 @@ Table lines are functional separators, not decoration.
 - Avoid heavy vertical lines. Use column spacing, alignment, and header labels first.
 - Detail/nested tables should use even lighter separators than workbench tables.
 - Selection and hover are the only places where primary tint should visibly span a row.
+- When the data count is small and the table has remaining height, the empty area must still read as the same table surface. Use the shared workbench table background treatment, not fake rows, large blank white blocks, or decorative color bands.
 
 ## Table Bottom Boundary
 
@@ -145,6 +148,7 @@ The bottom of a workbench table must look intentionally finished.
 - Row action icons must be visible in the default state; they should not look disabled.
 - Row action buttons should not use heavy permanent borders unless the action needs emphasis.
 - Operation-column action docks must not look like black outlined pills. Use subtle Arco primary tint or transparent surface by default; show border only on row hover/selection.
+- VXE current cell, selected cell, active cell, and area-selection overlays must not use black/currentColor borders on workbench tables. The project-level `global.css` overrides these to `--dense-primary-*`; do not reintroduce page-scoped VXE cell focus styles.
 - Destructive actions go in dropdown with confirmation.
 - Direct row actions must be object-specific where text is shown.
 - If more than two row actions exist, show primary row action plus `more`.
@@ -152,6 +156,7 @@ The bottom of a workbench table must look intentionally finished.
 - Fixed operation columns need an intentional action surface: subtle left boundary, compact `row-actions` dock, and consistent icon button size.
 - Avoid loose icon buttons floating directly on the grid background. In dense workbench tables this looks unfinished and makes actions hard to scan.
 - Avoid permanent black/dark action borders. In a dense list they create a repeated black column and break the page's Arco theme rhythm.
+- Avoid native browser focus outlines in row action buttons. `row-action-btn` and `row-actions` are the only allowed operation-column action surface; page CSS must not add custom borders or focus rings to them.
 - Row action dropdowns should have grouped normal actions and a separated danger group. Do not let default dropdown styling make irreversible actions look like ordinary menu items.
 
 ## Detail And Nested Tables
@@ -166,7 +171,8 @@ Detail tables must look like part of the module, not a full page table pasted in
 - Keep operation column compact and rightmost.
 - Do not use pagination inside nested detail tables unless the row count is genuinely large.
 - Do not use large table captions for child tables; use the parent module/child head for identity.
-- For nested editable line rows, prefer the shared `detail-mini-vxe` VXE pattern: 30px header, 34px row, Arco primary-tint header, subtle row separators, and fixed right operation when needed.
+- For nested editable line rows, prefer the shared `detail-mini-vxe` VXE pattern: 30px header, 38px row for editable rows, 28px Arco controls, Arco primary-tint header, subtle row separators, and fixed right operation when needed.
+- `detail-mini-vxe` CSS row height, `--vxe-ui-table-row-height-small`, and `row-config.height` must match. Do not set row height to 34px while rendering 28px input/select/date controls, because VXE cell clipping will cut input text and displayed values.
 - Native `<table>` is not allowed for editable detail line rows with hover, fixed operations, empty state, or repeated inputs. Use VXE so table behavior and density remain project-wide.
 - Detail mini table hover must use a restrained primary tint, not gray, so nested editing still has a visible interaction state.
 
@@ -292,3 +298,5 @@ Reject a table design when:
 - truncated data has no title/tooltip;
 - nested tables look like independent page sections;
 - empty tables appear as blank space.
+- operation column shows black outlined pills or browser focus borders;
+- VXE current/active cell creates a dark border that competes with selected/hover state.

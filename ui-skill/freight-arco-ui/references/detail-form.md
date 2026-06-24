@@ -4,6 +4,12 @@
 
 Use `class="detail-drawer"` and `:footer="false"` for complex drawers.
 
+Complex order/detail drawers must pass an explicit wide width such as
+`width="calc(100vw - 32px)"` or a validated `min(1200px, 90vw)` equivalent.
+Do not rely only on the global `.detail-drawer` selector for width because
+Arco Drawer may apply component/inline width after CSS. A complex detail that
+renders as a narrow right rail fails the detail-form contract.
+
 Recommended complex detail order:
 
 1. `dds-head`: status, primary number/name, company/context, view tools.

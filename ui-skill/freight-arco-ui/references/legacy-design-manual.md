@@ -4426,7 +4426,7 @@ page-root
 | `.filters / .fgrid / .field / .factions` | `.filter-card / .filter-grid / .filter-field` | 见 §11 |
 | `.freight-table`（VXE class）| 不需要类名，`global.css` 通过 `.vxe-table` 全局覆盖 | 见 §5.9 |
 | 功能色裸 hex（`#16a34a` / `#dc2626` 等）| `var(--success-6)` / `var(--danger-6)` 等 | 见 §26.1 |
-| `rgb(var(--orange-6))` / `rgb(var(--green-6))` | `var(--warning-6)` / `var(--success-6)` | 见 arco-ui.css |
+| `rgb(var(--orange-6))` / `rgb(var(--green-6))` | `var(--dense-warning-6)` / `var(--dense-success-6)` | 见 `src/styles/global.css` |
 | `font-weight: 700` 普通文本 | 最高 600，KPI 例外可用 800 | 见 §7 |
 | `.stab--active::after` 下划线 | pill 实心背景（global.css 已实现）| 见 §12.3 |
 
@@ -4447,14 +4447,14 @@ page-root
 
 > 本章为货代 SaaS 列表页**项目级统一规范**，与 §11 / §12 / §5 / §14 互补。
 
-### 41.1 设计 Token（色彩映射 Arco，禁止页面内另起 hex）
+### 41.1 设计 Token（色彩由 global.css 固定封装，禁止页面内另起 hex）
 
 | Token | 值 | 用途 |
 |-------|-----|------|
-| 色彩源 | `ui-skill/arco-ui.css` → `@arco-themes/vue-gi-demo` | **唯一**色彩定义层 |
-| 主色别名 | `--dense-primary: var(--primary-6)` | 链接、Tab 激活、自定义控件 |
-| 深/浅主色 | `--dense-primary-deep: var(--primary-7)` / `--dense-primary-soft: var(--primary-1)` | hover、选中底 |
-| 背景/边框 | `--dense-bg-*` / `--dense-border-*` → `var(--color-bg-body)` / `var(--color-border-*)` | 卡片、分隔 |
+| 色彩源 | `src/styles/global.css` 的 `--dense-*` 固定项目主题 token | **唯一项目语义色定义层** |
+| 主色别名 | `--dense-primary: var(--dense-primary-6)` | 链接、Tab 激活、自定义控件 |
+| 深/浅主色 | `--dense-primary-deep` / `--dense-primary-soft` | hover、选中底 |
+| 背景/边框 | `--dense-bg-*` / `--dense-border-*` | 卡片、分隔 |
 | 圆角 | `--dense-radius: 6px` | 卡片、按钮、输入框、Tag |
 | 行高 | `--dense-row-h: 36px` / `--dense-header-h: 32px` / `--dense-bar-h: 36px` | 表格行、表头、工具条 |
 | 字号 | `--dense-font-data` / `--dense-font-nav` / `--dense-font-title` / `--dense-font-field` / `--dense-font-aux` / `--dense-font-micro` | §7 F1–F6 |
