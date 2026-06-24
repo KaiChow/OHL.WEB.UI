@@ -1,6 +1,7 @@
 # OHL 货代系统 — AI 编码规范
 
 ## 技术栈
+
 Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 
 ---
@@ -9,12 +10,20 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 
 `src/styles/global.css` 已实现完整的设计系统。**任何组件、页面在开发前，优先使用已有类名，禁止另起炉灶写相同效果的 CSS。**
 
-项目级 UI skill 位于 `ui-skill/freight-arco-ui/SKILL.md`。当任务涉及 UI 设计质量、页面布局、配色、表格、详情、表单、按钮、状态、紧凑高密度时，必须先读该 skill，并按任务读取对应 `references/` 文件。
+项目级 UI skill（源码 `ui-skill/freight-arco-ui/`，Claude Code 同步路径 `.claude/skills/freight-arco-ui/`）：
+
+- 入口：`ui-skill/freight-arco-ui/SKILL.md` 或 `.claude/skills/freight-arco-ui/SKILL.md`
+- 调用：`/freight-arco-ui`
+- 维护：改源码后运行 `npm run sync-ui-skill`
+
+当任务涉及 UI 设计质量、页面布局、配色、表格、详情、表单、按钮、状态、紧凑高密度时，必须先读该 skill，并按任务读取对应 `references/` 文件。
 
 > **验证协议**：使用任何 CSS 类名前，确认它存在于 global.css。遇到不确定的类名，用 grep 验证：
+>
 > ```bash
 > grep -n "\.filter-field" src/styles/global.css
 > ```
+>
 > 若 grep 无结果，该类名不存在，禁止使用。
 
 ---
@@ -482,6 +491,7 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 ```
 
 **Modal 规范要点：**
+
 ```
 ✅ :mask-closable="false" — 防止误触关闭丢失数据
 ✅ 危险操作（删除）放 footer 左侧，用 status="danger"
@@ -655,6 +665,7 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 ```
 
 **Dashboard 规范要点：**
+
 ```
 ✅ KPI 数值用 global.css 的 kpi-value / kpi-value--warn / kpi-value--danger 等修饰类
 ✅ 图表容器用 detail-section 包裹，标题行可放时间范围切换
@@ -670,6 +681,7 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 ## 已有类名速查（禁止重复实现）
 
 ### 布局
+
 | 需求 | 用这个 global.css 类 |
 |------|---------------------|
 | 列表页根 | `.page-root.page-root--dense` |
@@ -693,6 +705,7 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 | 详情 footer | `.detail-drawer-footer` |
 
 ### 搜索区
+
 | 需求 | 用这个 |
 |------|--------|
 | 筛选条件 ≥ 6 个 | `zone-l2-filter-card zone-card filter-card`（多行 filter-grid） |
@@ -700,6 +713,7 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 | 高级展开区 | `filter-card__advanced` + `filter-card__advanced--open` |
 
 ### KPI 统计条（列表页必须）
+
 ```vue
 <!-- 放在 filter-card 上方；点击 lkb-item 快速过滤对应状态 -->
 <div class="list-kpi-bar zone-card">
@@ -717,6 +731,7 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
   </div>
 </div>
 ```
+
 ```
 ✅ list-kpi-bar 适用场景：页面**没有** stat-tab 状态计数时使用（两者提供相同信息，二选一，禁止同时出现）
 ✅ 点击 lkb-item 等效于在 filter 里选对应状态
@@ -726,6 +741,7 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 ```
 
 ### 状态 Tab 两层区分
+
 | 场景 | 用法 |
 |------|------|
 | 范围切换（我的/全部/权限） | `.stab`（胶囊型，嵌入 toolbar-group，≤4个） |
@@ -746,6 +762,7 @@ Vue 3 + TypeScript + Arco Design Vue + VXE Table + Vite
 ```
 
 ### 数据展示
+
 | 需求 | 用这个（全部来自 global.css） |
 |------|--------|
 | 状态标签 | `<span class="s-pill" :data-s="wait|op|partial|acc|rel|draft|rej">` |
@@ -834,6 +851,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ```
 
 ### 必填属性
+
 | 属性 | 必填值 | 说明 |
 |------|--------|------|
 | `border` | `"none"` | 禁止 `"default"` 或不写 |
@@ -844,18 +862,21 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 | `:stripe` | `true` | 列表页主表格开启斑马纹；子表格/弹窗内可不加 |
 
 > **行高 / 表头高度**（global.css 已定义，禁止覆盖）
+>
 > - 数据行：`--dense-row-h: 36px`（紧凑密度，同屏可见更多行）
 > - 表头行：`--dense-header-h: 32px`（比数据行矮 4px，视觉上"背景"化）
 > - 表头底部：`2px solid arcoblue-3`（蓝色强调线，清晰区隔表头/数据区）
 > - 表头背景：`rgb(var(--gray-1))` 纯色，禁止恢复渐变（渐变 = Excel 2010 风格）
 
 ### 列宽规则
+
 - **至少一列用 `min-width`**（让表格撑满容器，禁止全部用 `width`）
 - 固定宽度列：checkbox(40) / 序号(44) / 状态(80) / 操作(56-80)
 - 内容列：主单号(160) / 名称(min-width:140+) / 备注(min-width:200+)
 - 固定列：左固定 checkbox/序号/主单号；右固定操作列
 
 ### 场景对应写法
+
 ```vue
 <!-- ① 列表页主表格（height="100%"，放在 table-wrap 内） -->
 <div class="table-wrap">
@@ -977,6 +998,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ## 禁止项清单
 
 ### 布局
+
 ```
 ❌ .search-bar / .sf / .sf-label（不在 global.css，必须用 filter-card 体系）
 ❌ .toolbar-left / .toolbar-right（不在 global.css，用 toolbar-group / toolbar-aside）
@@ -987,6 +1009,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ```
 
 ### scope-status-bar 使用判断
+
 | Tab 数量 | 做法 |
 |---------|------|
 | **≤ 4 个**（如：全部/未合作/已合作） | 把 stab 直接放入 `toolbar-group`，**不使用** scope-status-bar |
@@ -1008,6 +1031,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ```
 
 ### 按钮
+
 ```
 ❌ 刷新按钮 type="outline"（刷新 = 工具操作，必须 type="text"）
 ❌ 重置按钮 type="outline" 或携带图标（必须 type="text" 纯文字）
@@ -1015,6 +1039,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ```
 
 ### 颜色
+
 ```
 ❌ color: #ff7d00  →  ✅ color: var(--dense-warning-6)
 ❌ color: #f53f3f  →  ✅ color: var(--dense-danger-6)
@@ -1025,6 +1050,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ```
 
 ### 类名错误（容易写错的）
+
 ```
 ❌ class="freight-table"（已废弃，直接删掉）
 ❌ .stab-count（不存在，用 .stab-badge）
@@ -1034,6 +1060,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ```
 
 ### 视觉层级（2026 专业 B 端规范）
+
 ```
 ✅ 背景只有两种：页面背景灰（var(--color-bg-body)）+ 卡片纯白（var(--color-bg-card)）
 ✅ 区块间用卡片边框（border: 1px solid var(--dense-border-subtle)）拉开层级
@@ -1044,6 +1071,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ```
 
 ### 工具栏按钮层级
+
 ```
 主操作（创建/新建）  → type="primary"（蓝色实心，最多1个）
 次要操作（复制/打印/导出）→ type="outline"（线框，≤3个直接显示）
@@ -1054,6 +1082,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ```
 
 ### 操作列（action column）
+
 ```
 ✅ 操作列宽度：56px（单个⋯按钮）或 88px（查看+编辑+⋯）
 ✅ 常用操作直接显示（最多2个 icon 按钮）
@@ -1064,6 +1093,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ```
 
 ### 表格
+
 ```
 ❌ <a-table>（禁止使用 Arco 原生表格，全项目统一用 vxe-table）
 ❌ VXE Table 所有列用 width（至少一列用 min-width 撑满容器）
@@ -1131,6 +1161,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ```
 
 ### 分页参数规范
+
 ```ts
 // composable 里统一用 reactive
 const page = reactive({ current: 1, size: 100, total: 0 })
@@ -1320,6 +1351,7 @@ onBeforeUnmount(() => {
 ## 交互规范（UI Interaction）
 
 ### 表单校验时机
+
 ```
 ✅ 必填字段：失焦（blur）触发单字段校验
 ✅ 提交时：全量校验，第一个错误字段自动 scroll into view
@@ -1329,6 +1361,7 @@ onBeforeUnmount(() => {
 ```
 
 ### 加载状态
+
 ```
 ✅ 列表查询：vxe-table :loading="loading"
 ✅ 提交按钮：:loading="submitting"，同时 disabled 防重复点击
@@ -1337,6 +1370,7 @@ onBeforeUnmount(() => {
 ```
 
 ### 危险操作确认
+
 ```
 ✅ 删除单条：a-popconfirm（行内确认气泡）
 ✅ 删除批量 / 废弃 / 撤销等不可逆：Modal.confirm({ type:'warning', ... })
@@ -1347,6 +1381,7 @@ onBeforeUnmount(() => {
 ```
 
 ### 空状态
+
 ```html
 <!-- 表格内空状态 -->
 <div class="state-center--in-table">
@@ -1361,6 +1396,7 @@ onBeforeUnmount(() => {
   <a-button size="small" type="outline" @click="fetchList">重新加载</a-button>
 </div>
 ```
+
 ```
 ✅ 空状态图标用 Arco Design icon
 ✅ 操作引导：有操作权限时显示"新建"按钮
@@ -1369,6 +1405,7 @@ onBeforeUnmount(() => {
 ```
 
 ### 消息反馈
+
 ```
 ✅ 操作成功：Message.success('xxx成功')
 ✅ 操作失败：Message.error('xxx失败：' + err.message)
@@ -1383,6 +1420,7 @@ onBeforeUnmount(() => {
 ## 适配规范（Responsive & Compatibility）
 
 ### 后台系统宽度基准
+
 ```
 最小支持宽度：1280px（典型笔记本分辨率）
 推荐设计宽度：1440px
@@ -1390,6 +1428,7 @@ onBeforeUnmount(() => {
 ```
 
 ### 列数适配规则
+
 | 容器 | 默认列数 | 最小宽度触发降列 |
 |------|---------|---------------|
 | `filter-grid` | 4列 | ≤1280px 降为 3 列（global.css 已处理） |
@@ -1406,6 +1445,7 @@ onBeforeUnmount(() => {
 ```
 
 ### 表格宽度策略
+
 ```
 ✅ 至少一列 min-width（内容自动撑宽）
 ✅ 固定宽度列（单号/状态/操作）用 width
@@ -1415,6 +1455,7 @@ onBeforeUnmount(() => {
 ```
 
 ### 抽屉宽度规范
+
 | 场景 | width |
 |------|-------|
 | 轻量查看（只读字段） | 640 |
@@ -1427,6 +1468,7 @@ onBeforeUnmount(() => {
 ## 上线前自查清单
 
 ### 样式规范
+
 ```
 □ 搜索区：用 filter-card 体系，无 .sf/.sf-label/.search-bar
 □ 工具栏：toolbar-group + toolbar-aside，刷新 type="text" icon-only
@@ -1440,6 +1482,7 @@ onBeforeUnmount(() => {
 ```
 
 ### 组件规范
+
 ```
 □ 表格：全部用 vxe-table，无 <a-table>
 □ 分页：用 table-card-cap 结构，无裸 <a-pagination>
@@ -1448,6 +1491,7 @@ onBeforeUnmount(() => {
 ```
 
 ### 交互规范
+
 ```
 □ 表单：失焦校验 + 提交全量校验 + 成功后清除错误
 □ 加载：列表有 :loading，提交按钮有 :loading + 防重复
@@ -1459,6 +1503,7 @@ onBeforeUnmount(() => {
 ```
 
 ### 适配规范
+
 ```
 □ 最小宽度 1280px 下字段不溢出（filter-grid / detail-form-grid 已处理）
 □ 自写的 xf-grid / db-content 加了 @media (max-width:1280px) 降列

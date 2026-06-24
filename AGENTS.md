@@ -1,13 +1,20 @@
 # OHL 货代系统 — AI Agent 开发规范
 
 ## 技术栈
+
 Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 
 ## 最重要的一条规则
 
 **`src/styles/global.css` 已实现完整 UI 设计系统。开发任何页面或组件前，必须先读该文件，复用已有类名，禁止另写等效 CSS。**
 
-项目级 UI skill：`ui-skill/freight-arco-ui/SKILL.md`。涉及页面设计、布局、配色、表格、详情、表单、按钮、状态、质感问题时，先读该 skill，再按任务读取对应 `references/` 文件。
+项目级 UI skill（源码 `ui-skill/freight-arco-ui/`，Codex 同步路径 `.agents/skills/freight-arco-ui/`）：
+
+- 入口：`ui-skill/freight-arco-ui/SKILL.md` 或 `.agents/skills/freight-arco-ui/SKILL.md`
+- 调用：`$freight-arco-ui`
+- 维护：改源码后运行 `npm run sync-ui-skill`
+
+涉及页面设计、布局、配色、表格、详情、表单、按钮、状态、质感问题时，先读该 skill，再按任务读取对应 `references/` 文件。
 
 参考已有实现：`src/views/orderManage/saleOrder/` 目录（最完整的示例）。
 
@@ -100,6 +107,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 ## 已有类名（禁止重复实现）
 
 ### 布局类
+
 - 列表页根：`page-root page-root--dense`
 - 搜索栏：`zone-l2-filter-card filter-card` / `filter-card__main` / `filter-grid` / `filter-field` / `filter-field__label`（禁止 `search-bar`/`sf`/`sf-label`）
 - 工具栏：`toolbar` / `toolbar-group` / `toolbar-group--grow` / `toolbar-aside`（禁止 `toolbar-left`/`toolbar-right`）
@@ -111,6 +119,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 - 详情栅格：`detail-form-grid detail-form-grid--4`（或 --3 / --6）
 
 ### 数据展示类
+
 - 状态标签：`s-pill` + `data-s="wait|op|partial|acc|rel|draft|rej"`
 - 双行单元格：`cell-two-line` / `c2-main` / `c2-sub`
 - 单号链接（蓝粗）：`link-text link-text--strong mono`
@@ -155,6 +164,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 ## 禁止清单
 
 ### 布局
+
 ```
 ❌ .search-bar / .sf / .sf-label（用 filter-card / filter-field / filter-field__label）
 ❌ .toolbar-left / .toolbar-right（用 toolbar-group / toolbar-aside）
@@ -163,6 +173,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 ```
 
 ### 按钮
+
 ```
 ❌ 刷新按钮 type="outline"（必须 type="text"）
 ❌ 重置按钮 type="outline" 或带图标（必须 type="text"，纯文字）
@@ -171,6 +182,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 ```
 
 ### 颜色（禁止 hex，用 CSS 变量）
+
 ```
 ❌ color: #ff7d00  →  var(--warning-6)
 ❌ color: #f53f3f  →  var(--danger-6)
@@ -179,6 +191,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 ```
 
 ### 类名（容易写错）
+
 ```
 ❌ class="freight-table"（已废弃，直接删掉）
 ❌ .stab-count / .stab-count--danger（用 .stab-badge / .stab-badge--danger）

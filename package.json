@@ -7,7 +7,8 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "check-spec": "node scripts/check-spec.js"
+    "check-spec": "node scripts/check-spec.js",
+    "sync-ui-skill": "node scripts/sync-ui-skill.mjs"
   },
   "dependencies": {
     "@arco-design/web-vue": "^2.57.0",

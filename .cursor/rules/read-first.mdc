@@ -6,8 +6,9 @@ alwaysApply: true
 
 # 开发前必读文件（按顺序）
 
-1. `src/styles/global.css` — 所有 Token、布局类、组件类均在此，先读再写
-2. `src/views/orderManage/saleOrder/index.vue` — 最标准的列表页示例
-3. `src/views/orderManage/saleOrder/components/SaleOrderDetailDrawer.vue` — 最标准的抽屉示例
+1. `.cursor/skills/freight-arco-ui/SKILL.md` — PESDP 项目 UI skill（源码 `ui-skill/freight-arco-ui/`，`npm run sync-ui-skill` 同步）
+2. `src/styles/global.css` — 所有 Token、布局类、组件类均在此，先读再写
+3. `src/views/orderManage/saleOrder/index.vue` — 最标准的列表页示例
+4. `src/views/orderManage/saleOrder/SaleOrderDetailDrawer.vue` — 最标准的抽屉示例
 
 **读完确认哪些类可以直接复用后，再开始写代码。禁止不读直接写。**
