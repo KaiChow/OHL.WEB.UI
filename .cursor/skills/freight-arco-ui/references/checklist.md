@@ -43,8 +43,9 @@
 
 - Tables use VXE Table.
 - Forms use Arco controls.
-- Row actions are icon-only with tooltip.
-- Dangerous actions are confirmed.
+- Buttons follow Arco 5 types × 4 statuses per `references/actions.md` (primary/secondary/dashed/outline/text; normal/success/warning/danger).
+- Row actions are icon-only `text` + tooltip.
+- Dangerous actions use `text`/`danger-opt` + `a-popconfirm` or `Modal.confirm`; avoid `status="warning"` on toolbar/footer buttons.
 - Uploads and file lists have clear single/multiple behavior.
 - Page/module implementation is split into route/page/components/types/mock/composables when scope is large.
 - Module header left is title only; module header right is actions only.

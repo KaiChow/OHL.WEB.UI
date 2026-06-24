@@ -439,7 +439,7 @@ const closeDrawer = () => {
               <div class="detail-section__head">
                 <h4 class="detail-section__title">订单信息</h4>
                 <div class="detail-section__actions">
-                  <a-button size="small" type="outline" @click="feedback('订单信息已复制')">
+                  <a-button size="small" type="text" @click="feedback('订单信息已复制')">
                     <template #icon><icon-copy /></template>
                     复制
                   </a-button>
@@ -638,7 +638,7 @@ const closeDrawer = () => {
               <div class="detail-section__head">
                 <h4 class="detail-section__title">货物信息</h4>
                 <div class="detail-section__actions">
-                  <a-button size="small" type="outline" @click="feedback('分单数据已复制')">
+                  <a-button size="small" type="text" @click="feedback('分单数据已复制')">
                     <template #icon><icon-copy /></template>
                     复制分单数据
                   </a-button>
@@ -845,7 +845,7 @@ const closeDrawer = () => {
               <div class="detail-section__head">
                 <h4 class="detail-section__title">装柜信息</h4>
                 <div class="detail-section__actions">
-                  <a-button size="small" type="outline" @click="feedback('封号已清除')">清除柜封号</a-button>
+                  <a-button size="small" type="text" @click="feedback('封号已清除')">清除柜封号</a-button>
                 </div>
               </div>
               <div class="detail-section__body detail-section__body--table">
@@ -899,7 +899,7 @@ const closeDrawer = () => {
               <div class="detail-section__head">
                 <h4 class="detail-section__title">报关信息</h4>
                 <div class="detail-section__actions">
-                  <a-button size="small" type="outline">
+                  <a-button size="small" type="text">
                     <template #icon><icon-upload /></template>
                     发送报关资料
                   </a-button>
@@ -980,7 +980,7 @@ const closeDrawer = () => {
               <div class="detail-section__head">
                 <h4 class="detail-section__title">入仓信息</h4>
                 <div class="detail-section__actions">
-                  <a-button size="small" type="outline">三方仓入仓数据</a-button>
+                  <a-button size="small" type="text">三方仓入仓数据</a-button>
                 </div>
               </div>
               <div class="detail-section__body detail-section__body--table">

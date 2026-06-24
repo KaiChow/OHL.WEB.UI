@@ -176,11 +176,30 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 
 ### 按钮
 
+Arco 五种类型 × 四种状态，完整矩阵见 `ui-skill/freight-arco-ui/references/actions.md`。
+
+| 类型 | 写法 | 本项目用途 |
+|------|------|-----------|
+| primary | `type="primary"` | 每作用域唯一主操作：查询、新建、保存 |
+| secondary | 不写 type | 导出、取消、关闭、存草稿 |
+| dashed | `type="dashed"` | 空状态/继续添加行、继续上传 |
+| outline | `type="outline"` | 模块主操作、订舱/放舱、打印发送类流程 |
+| text | `type="text"` | 重置、刷新、复制、清除；行内 icon |
+
+| 状态 | 本项目 |
+|------|--------|
+| normal | 默认，绝大多数按钮 |
+| success | 极少用；结果用 Message，状态用 s-pill |
+| warning | 禁止用于 toolbar/footer 按钮 |
+| danger | 删除/废弃：`text`+danger+确认，或弹窗/dropdown |
+
 ```
-❌ 刷新按钮 type="outline"（必须 type="text"）
-❌ 重置按钮 type="outline" 或带图标（必须 type="text"，纯文字）
-❌ 行内操作用文字（必须 icon-only + row-action-btn + tooltip）
-❌ 行内操作用原生 <button>（用 <a-button type="text" class="row-action-btn">）
+❌ 刷新/重置用 outline（必须 text）
+❌ 复制/清除用 outline（必须 text 降权）
+❌ 同一作用域多个 primary
+❌ status="warning" 做订舱/放舱等流程按钮
+❌ 行内删除无 a-popconfirm
+❌ btn-muted-warn 等自写警示类
 ```
 
 ### 颜色（禁止 hex，用 CSS 变量）

@@ -67,6 +67,8 @@ Read only the files needed for the task:
 - Do not use whole-row status backgrounds. Status color belongs in `.s-pill`, Tag, or status tabs.
 - Do not place module counts, stats, helper text, or status text in a module title. Module header left is title only; header right is actions only.
 - Use `type="primary"` only for the single main action in a scope.
+- Button types: `primary` / `secondary`(default) / `dashed` / `outline` / `text` — see `references/actions.md`.
+- `status="warning"` and `status="success"` are rarely used on buttons; prefer `s-pill` and `Message`.
 - Use icon-only row actions with tooltip. More than two direct row actions go into a dropdown.
 - Use `apply_patch` for manual file edits.
 

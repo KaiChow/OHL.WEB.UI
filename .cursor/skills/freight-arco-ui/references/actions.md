@@ -1,37 +1,175 @@
 # Actions And Buttons
 
-## Button Priority
+Arco `a-button` has **5 types** and **4 statuses**. Status can combine with any type.
 
-| Priority | Arco style | Usage |
-|----------|------------|-------|
-| Primary | `type="primary"` | One main action per scope |
-| Secondary | `type="outline"` or default | Export, print, batch, add local item |
-| Utility | `type="text"` icon-only | Refresh, settings, density, column config |
-| Danger | `status="danger"` | Delete, abandon, irreversible operations |
+```vue
+<a-button type="primary" status="danger">...</a-button>
+```
 
-## Toolbar Rules
+All operational pages use `size="small"` unless a documented hero/empty-state exception exists.
 
-- Left side: business actions.
-- Right side: utilities and selected count.
-- No more than one primary button in a toolbar.
-- More than four visible actions should be grouped.
-- Use dropdown for low-frequency or dangerous operations.
-- Primary business action normally appears before secondary actions.
-- Refresh, settings, column config, and density are utilities; they should not compete with create/submit.
+---
 
-## Detail/Form Rules
+## 1. Button Types (Arco)
 
-- Footer submit is the only global primary action.
-- Save draft is default/outline, not primary.
-- Local section add/copy is outline/default, not primary.
-- Delete uses text danger plus `a-popconfirm`.
-- Do not use `mini` text buttons in complex detail pages.
-- Section header left contains only the module title. Section header right contains only actions.
-- Module stats, file counts, helper text, upload state, and status belong inside the module body or summary row.
+| Type | Arco 写法 | 视觉 | 项目语义 |
+|------|-----------|------|----------|
+| **primary** | `type="primary"` | 实心主色 | 当前作用域内**唯一**的主正向操作 |
+| **secondary** | 不写 `type`（默认） | 灰底/中性填充 | 次要正向：导出、取消、关闭、存草稿 |
+| **dashed** | `type="dashed"` | 虚线边框 | 「继续添加 / 上传 / 占位引导」类扩容量操作 |
+| **outline** | `type="outline"` | 线框主色 | 需要比 secondary 更显眼、但又不是主操作的流程/模块操作 |
+| **text** | `type="text"` | 无边框文字/图标 | 工具、降权辅助、行内 icon、重置/刷新 |
 
-### Detail Drawer Footer
+### Type Selection Rules
 
-Complex detail drawers use `detail-drawer-footer` with left/right zones:
+```
+primary   → 每作用域最多 1 个：查询、新建、保存、提交、弹窗确定
+secondary → 中性次要：导出、取消、关闭、存草稿、批量（非主流程）
+outline   → 模块/流程次要：订舱、放舱、打印、发送、模块内「添加发货人」
+dashed    → 空状态/表格内「添加一行」「继续上传」；禁止做全局提交
+text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
+```
+
+**层级口诀（PESDP）**：`primary` 定锚点 → `outline` / `secondary` 承业务 → `text` 承工具 → `dashed` 承扩容。
+
+---
+
+## 2. Button Status (Arco)
+
+| Status | Arco 写法 | 语义 | 项目用法 |
+|--------|-----------|------|----------|
+| **normal** | 默认 | 常规 | 绝大多数按钮 |
+| **success** | `status="success"` | 成功态 | **极少用于按钮**；结果用 `Message.success`，状态用 `s-pill[data-s="rel\|acc"]` |
+| **warning** | `status="warning"` | 警告态 | **禁止**用于工具栏/详情吸底；业务警示用 `s-pill` / 文案，不用高饱和 warning 按钮 |
+| **danger** | `status="danger"` | 危险态 | 删除、废弃、撤销；必须配确认 |
+
+### Status × Type Matrix（本项目允许组合）
+
+| 场景 | 推荐组合 | 确认方式 |
+|------|----------|----------|
+| 全局提交 | `primary` + normal | — |
+| 导出/取消 | `secondary` 或 `outline` + normal | — |
+| 模块添加 | `outline` + normal | — |
+| 空状态添加行 | `dashed` + normal | — |
+| 重置/刷新/复制 | `text` + normal | — |
+| 行内删除 | `text` + `danger` + `row-action-btn` | `a-popconfirm` |
+| 吸底废弃 | `text` + `danger` | `Modal.confirm` |
+| 弹窗确定删除 | `primary` + `danger`（仅 confirm 弹窗内） | 已在 Modal 中 |
+| 下拉危险项 | — | `a-doption class="danger-opt"` + 二次确认 |
+
+### Forbidden Combinations
+
+```
+❌ primary + warning          — 主操作不应呈警告色
+❌ outline + warning 做订舱/放舱 — 用 outline + normal；警示信息放 pill/文案
+❌ status="warning" 在列表 toolbar / 详情 footer — 用 normal + 业务文案
+❌ status="success" 做常驻操作按钮 — 用 Message / s-pill
+❌ danger + primary 暴露在列表行/工具栏 — 危险进下拉或 text+danger+确认
+❌ 同一作用域多个 primary
+❌ btn-muted-warn 等自写警示类 — 已废弃，用 outline + normal
+```
+
+---
+
+## 3. Scope Model（作用域）
+
+按钮层级由**作用域**决定，不是由页面决定。
+
+| 作用域 | 允许 primary | outline | secondary | dashed | text |
+|--------|-------------|---------|-----------|--------|------|
+| 筛选区 | 查询 ×1 | — | — | — | 重置 |
+| 列表 toolbar | 新建 ×1 | 导出、批量 | 导出（可与 outline 二选一） | — | 刷新、列设置 |
+| 详情页头 | — | 并单、归档、更多 | — | — | 关闭 |
+| 详情模块头 | — | 模块主操作（添加） | 复制、清除等辅助 | — | 复制、清除（推荐） |
+| 子表/子面板头 | — | 添加品名、添加行 | — | 空状态「添加」 | — |
+| 表格行内 | 行编辑保存 ×1 | — | 行编辑取消 | — | 查看/编辑/删除 icon |
+| 详情吸底 | 保存 ×1 | 订舱、放舱、输出 | 取消（若有） | — | 废弃 danger |
+| 弹窗 footer | 确定 ×1 | — | 取消 | — | 删除 danger（左侧） |
+
+**同一作用域内**：primary ≤ 1；直接可见业务按钮 ≤ 3（超出收入 dropdown）。
+
+---
+
+## 4. Scene Recipes
+
+### 4.1 列表页筛选
+
+```vue
+<a-button size="small" type="primary" @click="handleSearch">查询</a-button>
+<a-button size="small" type="text" class="reset-btn" @click="handleReset">重置</a-button>
+```
+
+- 查询 = `primary`
+- 重置 = `text`（禁止 `outline`）
+
+### 4.2 列表页工具栏
+
+```vue
+<div class="toolbar-group">
+  <a-button size="small" type="primary"><template #icon><icon-plus /></template>新建</a-button>
+</div>
+<div class="toolbar-divider" />
+<div class="toolbar-group toolbar-group--grow">
+  <a-button size="small" @click="handleExport">导出</a-button>
+  <a-dropdown><!-- 批量操作 --></a-dropdown>
+</div>
+<div class="toolbar-aside">
+  <a-button size="small" type="text" @click="fetchList"><template #icon><icon-refresh /></template></a-button>
+</div>
+```
+
+- 新建 = `primary`
+- 导出 = `secondary`（默认）或 `outline`（二选一，模块内统一即可）
+- 刷新 = `text` icon-only（禁止 `outline`）
+
+### 4.3 详情页头
+
+```vue
+<a-button size="small" type="outline">并单</a-button>
+<a-button size="small" type="outline">归档</a-button>
+<a-dropdown>
+  <a-button size="small" type="outline">更多 <icon-down /></a-button>
+  <!-- 复制、打印；危险项用 danger-opt + confirm -->
+</a-dropdown>
+```
+
+- 页头禁止 `primary`
+- 全局危险操作不要与吸底重复
+
+### 4.4 详情模块头
+
+```vue
+<div class="detail-section__actions">
+  <!-- 高频模块主操作 -->
+  <a-button size="small" type="outline" @click="addParty">
+    <template #icon><icon-plus /></template>添加发货人
+  </a-button>
+  <!-- 低频辅助：用 text 降权，不用 outline -->
+  <a-button size="small" type="text" @click="copyData">
+    <template #icon><icon-copy /></template>复制分单数据
+  </a-button>
+</div>
+```
+
+- 每个模块头：**最多 1 个 `outline`**（模块主操作）
+- 复制 / 清除 / 三方仓数据 = `text`
+- 超过 2 个操作 → 第三个起收入 `outline` 下拉「更多」
+
+### 4.5 子表面板（品名明细等）
+
+```vue
+<!-- 有数据时 -->
+<a-button size="small" type="outline" @click="addLine">
+  <template #icon><icon-plus /></template>添加品名
+</a-button>
+
+<!-- 空状态时可用 dashed 强化「可添加」 -->
+<a-button size="small" type="dashed" long @click="addLine">
+  <template #icon><icon-plus /></template>添加品名
+</a-button>
+```
+
+### 4.6 详情吸底
 
 ```vue
 <div class="detail-drawer-footer">
@@ -39,16 +177,9 @@ Complex detail drawers use `detail-drawer-footer` with left/right zones:
     <a-button size="small" type="text" status="danger" @click="confirmAbandon">废弃</a-button>
   </div>
   <div class="detail-drawer-footer__end">
-    <a-dropdown trigger="click">
-      <a-button size="small" type="outline">
-        <template #icon><icon-download /></template>
-        输出
-        <icon-down />
-      </a-button>
-      <template #content>
-        <a-doption>下载入仓单和理货标签</a-doption>
-        <a-doption>打印业务单</a-doption>
-      </template>
+    <a-dropdown>
+      <a-button size="small" type="outline">输出 <icon-down /></a-button>
+      <!-- 下载 / 打印 / 发送 -->
     </a-dropdown>
     <a-button size="small" type="outline">订舱</a-button>
     <a-button size="small" type="outline">放舱</a-button>
@@ -57,94 +188,118 @@ Complex detail drawers use `detail-drawer-footer` with left/right zones:
 </div>
 ```
 
-Rules:
+- 仅「保存」= `primary`
+- 流程操作 = `outline` + normal
+- 废弃 = `text` + `danger` + `Modal.confirm`
 
-- `__start`: irreversible global danger only (`type="text" status="danger"` + `Modal.confirm`). Do not duplicate the same danger action in header dropdown and footer.
-- `__end`: business actions aligned right. At most **one** `type="primary"` (save/submit).
-- Low-frequency output actions (download/print/send) group into one `outline` dropdown such as `输出`.
-- Mid-frequency workflow actions (booking/release) use `type="outline"`, not custom warn classes.
-- Forbidden in footer: `btn-muted-warn`, more than 4 direct visible buttons before grouping, multiple primary buttons, danger `status="danger"` solid buttons without confirmation flow.
+### 4.7 弹窗 Footer
 
-## Permissions
+```vue
+<template #footer>
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <a-button v-if="isEdit" type="text" status="danger" size="small" @click="handleDelete">删除</a-button>
+    <div style="display:flex;gap:8px;margin-left:auto">
+      <a-button size="small" @click="handleCancel">取消</a-button>
+      <a-button size="small" type="primary" :loading="submitting" @click="handleOk">确定</a-button>
+    </div>
+  </div>
+</template>
+```
 
-- No permission: hide the button.
-- Do not render disabled buttons for unavailable permission unless the business needs explicit visibility.
+- 取消 = `secondary`
+- 确定 = `primary`
+- 删除 = `text` + `danger`（左侧）
 
-## Feedback
+### 4.8 表格行内
 
-- Success: `Message.success`.
-- Failure: `Message.error`.
-- Warning/precondition: `Message.warning`.
-- Async button must use `:loading`.
+```vue
+<a-tooltip content="查看">
+  <a-button type="text" class="row-action-btn" @click="openDetail(row)"><icon-eye /></a-button>
+</a-tooltip>
+<a-popconfirm content="确认删除？" @ok="remove(row)">
+  <a-button type="text" class="row-action-btn" status="danger"><icon-delete /></a-button>
+</a-popconfirm>
+```
 
-## Table Editing Actions
+- 行内禁止文字按钮（「查看」「编辑」字样）
+- 删除 = `text` + `danger` + `a-popconfirm`
+- 禁止 `outline` 铺满操作列
 
-Inline table editing changes the action priority of the current scope.
+---
 
-## Table Row Action Menu
-
-Row actions must be fast to scan and must not turn the operation column into a text toolbar.
-
-Default row view mode:
-
-- Direct actions: `查看`, `编辑`, `更多` at most.
-- Direct actions use icon-only `a-button type="text" class="row-action-btn"` with tooltip.
-- The operation column should normally be 88-120px for `查看 + 编辑 + 更多`.
-- Low-frequency actions go into the `更多` dropdown.
-- Direct row actions should sit in one compact action dock (`row-actions`) so the fixed operation column reads as a deliberate action area, not scattered icons.
-- The operation fixed column may use a subtle surface/left boundary to separate actions from data, but it must not become a heavy card, black outlined pill, or colored status area.
-- `row-actions` is a light action surface, not a button group frame. Default state uses transparent/subtle primary-tint background and no visible dark border; border may appear only on hover/selected row with Arco primary token.
-- Row action icons default to `color-text-3` or Arco primary-muted. Do not use black/currentColor icons or permanent black borders to make actions visible.
-- The `更多` menu should use grouped content: normal actions first, divider, danger actions last. Dangerous options must be visually separated even when there is only one danger action.
+## 5. Dropdown And Danger
 
 Dropdown order:
 
-1. File/document actions such as `下载附件`.
-2. Output actions such as `打印`.
-3. Object reuse actions such as `复制业务单`.
-4. Divider.
-5. Dangerous actions such as `废弃`, `删除`, `撤销`.
+1. 文件/下载
+2. 打印/输出
+3. 复制/复用
+4. Divider
+5. 危险操作（`danger-opt`）
 
 Danger rules:
 
-- Dangerous menu options use danger styling.
-- Dangerous row actions require confirmation with business impact copy.
-- Do not execute `废弃`, `删除`, or irreversible actions directly from the dropdown click.
-- Disabled actions should explain why through text or tooltip when the reason is not obvious.
-- Disabled menu options should remain readable but clearly inactive; do not hide a disabled file/download action when its absence would make the menu jump between rows.
+- 下拉危险项：`class="danger-opt"`，点击后 `Modal.confirm` 或业务确认，禁止直接执行
+- 行内删除：`a-popconfirm`
+- 批量/不可逆：`Modal.confirm({ type: 'warning' })`
+- 禁止 `alert()` / `confirm()`
 
-### Row Edit
+---
 
-Row view mode:
+## 6. Toolbar Rules (summary)
 
-- Direct actions: view/edit/more at most.
-- `编辑` is secondary row action unless editing is the primary job of the table.
-- Delete/cancel/revoke stays in more menu or uses danger confirmation.
+- Left: business actions.
+- Right: utilities and selected count.
+- No more than one `primary` per toolbar.
+- More than four visible actions → group into dropdown.
+- Refresh / settings / column config = `text` icon-only.
 
-Row edit mode:
+---
 
-- Direct actions become `保存` and `取消`.
-- `保存` is the primary action only inside that row scope.
-- `取消` is default/text and must not look destructive.
-- If save is async, use row-level loading on `保存`.
-- Do not keep the original `编辑` action visible while the row is already editing.
+## 7. Permissions And Feedback
 
-### Batch Edit
+- No permission → hide button (do not use `disabled` to hide existence unless business requires).
+- Success → `Message.success`
+- Failure → `Message.error`
+- Async → `:loading` on the triggering button
 
-Toolbar before edit:
+---
 
-- Keep normal business actions.
-- `批量编辑` is secondary unless it is the page's main workflow.
+## 8. Table Edit Modes
 
-Toolbar during batch edit:
+### Row edit mode
 
-- Replace normal toolbar context with edit context where practical.
-- Required order: `保存更改` → `取消编辑` → changed count / validation summary.
-- Disable unrelated destructive or navigation actions while dirty edits exist.
-- Keep utilities such as column settings and refresh separated; refresh must warn if unsaved changes exist.
+- `保存` = `primary`（仅该行作用域）
+- `取消` = `secondary` 或 `text`，禁止 `danger`
 
-### Dirty State
+### Batch edit toolbar
 
-- Show changed count near the edit actions: `已修改 N 行`.
-- Row dirty marker or cell dirty marker is required for unsaved edits.
-- Unsaved edits must block silent pagination, filtering, route leave, and drawer close.
+- `保存更改` = `primary`
+- `取消编辑` = `secondary`
+- Show `已修改 N 行` near actions
+- Block pagination/filter/leave while dirty
+
+---
+
+## 9. Visual Restraint (PESDP)
+
+- Primary tint is an **anchor**, not wallpaper. Do not make every action `outline`.
+- `detail-section__actions`：模块主操作用 `outline`，辅助用 `text`。
+- Neutral surfaces (search/toolbar/table cap) stay white/gray; primary appears in active nav, links, focus, selection, one primary button, and thin anchors.
+- Hover: no transform/shadow float on dense toolbars (see `global.css` toolbar/detail-drawer overrides).
+
+---
+
+## 10. Quick Checklist
+
+```
+□ 每个作用域 primary ≤ 1
+□ 重置/刷新 = text，不是 outline
+□ 复制/清除 = text，不是 outline
+□ 导出/取消 = secondary 或 outline（模块内统一）
+□ 模块添加 = outline；空状态添加可用 dashed
+□ 删除/废弃 = text + danger + 确认
+□ 禁止 warning/success 常驻按钮
+□ 行内 = icon + tooltip + row-action-btn
+□ 超过 3 个直接按钮 → dropdown
+```

@@ -282,6 +282,26 @@ grep -n "\.类名" src/styles/global.css
 
 ---
 
+## 按钮类型（Arco 五种 × 四种状态）
+
+完整规范见 `ui-skill/freight-arco-ui/references/actions.md`。
+
+| 类型 | 写法 | 用途 |
+|------|------|------|
+| primary | `type="primary"` | 作用域内唯一主操作 |
+| secondary | 默认不写 type | 导出、取消、存草稿 |
+| dashed | `type="dashed"` | 空状态添加、继续上传 |
+| outline | `type="outline"` | 模块主操作、流程次要 |
+| text | `type="text"` | 重置、刷新、复制、行内 icon |
+
+| 状态 | 用途 |
+|------|------|
+| normal | 默认 |
+| danger | 删除/废弃 + 确认 |
+| warning / success | 极少用于按钮；用 s-pill / Message |
+
+---
+
 ## 禁止 / 必须 对照表
 
 | 禁止 | 必须改用 |
@@ -307,6 +327,9 @@ grep -n "\.类名" src/styles/global.css
 | 抽屉不加 `class="detail-drawer"` | 必须加，否则 Arco 默认标题不被覆盖 |
 | 吸底栏 8 按钮平铺 / `btn-muted-warn` | `detail-drawer-footer__start` + `__end`；低频收入下拉；仅 1 个 `primary` |
 | 详情行内删除直接点 | `a-popconfirm` 包裹 `row-action-btn status="danger"` |
+| 复制/清除用 outline | `type="text"` 降权 |
+| `status="warning"` 流程按钮 | `outline`+normal 或 s-pill |
+| 同一作用域多个 primary | 每作用域仅 1 个 |
 | 组合输入自写边框 | `detail-combo` / `--code-name` / `--action` |
 
 ---
