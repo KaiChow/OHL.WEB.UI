@@ -1,39 +1,38 @@
 # UI Skill — freight-arco-ui
 
-PESDP Design System 2.0 项目级 UI skill，适用于 Vue 3 + Arco Design Vue + VXE Table 货代 SaaS 页面。
+PESDP Design System 2.0 · Vue 3 + Arco + VXE Table · 货代 SaaS
 
-## 源码（唯一维护入口）
+## 专业 Skill 分层
 
 ```
+global.css              ← 样式唯一事实源（Token + 类名）
 ui-skill/freight-arco-ui/
-├── SKILL.md
-├── agents/openai.yaml
+├── SKILL.md            ← 入口：架构、必读顺序、不可协商项
 └── references/
+    ├── design-principles.md   ← PESDP 原则
+    ├── module-patterns.md     ← 英文槽位 / 结构（无字段表）
+    ├── domain-language.md     ← 中文货代用语 + 对象字段示例
+    ├── actions.md · table.md · detail-form.md · list-page.md  ← 可执行细则
+    ├── checklist.md           ← 交付自查
+    └── legacy-design-manual.md ← 归档，新任务不读
+AGENTS.md               ← 一页摘要，指向 skill
+scripts/check-spec.js   ← 自动化验收
 ```
 
-修改 skill 时**只改 `ui-skill/freight-arco-ui/`**，然后运行同步命令。
+**维护：** 只改 `ui-skill/freight-arco-ui/`，然后 `npm run sync-ui-skill`。
 
-## 同步到各 AI 工具
+## 同步
 
-```bash
-npm run sync-ui-skill
-```
+| 工具 | 路径 | 调用 |
+|------|------|------|
+| Cursor | `.cursor/skills/freight-arco-ui/` | 自动 / `@freight-arco-ui` |
+| Codex | `.agents/skills/freight-arco-ui/` | `$freight-arco-ui` |
+| Claude | `.claude/skills/freight-arco-ui/` | `/freight-arco-ui` |
 
-| 工具 | 同步目标 | 调用方式 |
-|------|----------|----------|
-| **Cursor** | `.cursor/skills/freight-arco-ui/` | Agent 自动发现；或 `@freight-arco-ui` |
-| **Codex** | `.agents/skills/freight-arco-ui/` | `$freight-arco-ui` 或隐式触发 |
-| **Claude Code** | `.claude/skills/freight-arco-ui/` | `/freight-arco-ui` 或自动触发 |
-
-## 配套项目文档
+## 配套
 
 | 文件 | 用途 |
 |------|------|
-| `CLAUDE.md` | Claude Code 项目指令（代码骨架 + skill 指针） |
-| `AGENTS.md` | Codex 项目指令（精简版 + skill 指针） |
-| `.cursor/rules/ui-spec.mdc` | Cursor 始终生效的 UI 规范 |
-| `.cursor/rules/read-first.mdc` | Cursor 开发前必读 |
-
-## 兼容入口
-
-根目录 `ui-skill/freight-arco-ui-SKILL.md` 为旧路径兼容，指向 `ui-skill/freight-arco-ui/SKILL.md`。
+| `AGENTS.md` | Agent 一页摘要 |
+| `CLAUDE.md` | Claude 代码骨架（逐步收敛到 skill 链接） |
+| `.cursor/rules/ui-spec.mdc` | Cursor 始终生效的强制项 |

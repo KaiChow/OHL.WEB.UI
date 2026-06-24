@@ -20,10 +20,9 @@
 
 ## Module Generalization Gate
 
-- Business object is explicitly identified.
+- Business object is explicitly identified (see `module-patterns.md` slot mapping).
 - User job is clear: scan, create, audit, reconcile, operate, configure, or analyze.
-- Primary identity and key state are object-specific.
-- Main table/form fields are not copied from another module.
+- Labels and object field examples come from `domain-language.md`, not copied from another module's columns.
 - Repeated modules are present only when the object owns that data.
 - Steps/milestones appear only when the object has a real business process.
 - Shared classes are used as structural slots, not as fixed business content.

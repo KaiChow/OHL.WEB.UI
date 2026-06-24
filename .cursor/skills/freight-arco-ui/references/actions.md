@@ -176,20 +176,21 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
     <a-button size="small" type="text" status="danger" @click="confirmAbandon">废弃</a-button>
   </div>
   <div class="detail-drawer-footer__end">
-    <a-dropdown>
-      <a-button size="small">输出 <icon-down /></a-button>
-      <!-- 下载 / 打印 / 发送 -->
-    </a-dropdown>
-    <a-button size="small">订舱</a-button>
-    <a-button size="small">放舱</a-button>
-    <a-button size="small" type="primary" :loading="submitting">保存</a-button>
+    <div class="detail-drawer-footer__cluster">
+      <a-dropdown>
+        <a-button size="small">输出 <icon-down /></a-button>
+      </a-dropdown>
+      <a-button size="small">订舱</a-button>
+      <a-button size="small">放舱</a-button>
+      <span class="detail-drawer-footer__sep" aria-hidden="true" />
+      <a-button size="small" type="primary" :loading="submitting">保存</a-button>
+    </div>
   </div>
 </div>
 ```
 
-- 仅「保存」= `primary`
-- 吸底流程 = **secondary**（默认），不用 `outline`
-- 废弃 = `text` + `danger` + `Modal.confirm`
+- 仅「保存」= `primary`，与 workflow 按钮用 `detail-drawer-footer__sep` 分隔
+- 吸底流程 = **secondary**（默认），收入 `detail-drawer-footer__cluster` 浅底操作组
 
 ### 4.7 弹窗 Footer
 
@@ -284,12 +285,13 @@ Danger rules:
 
 - Primary tint is an **anchor**, not wallpaper. Do not make every action `outline`.
 - **Three visual tiers in detail drawers** (implemented in `global.css`):
-  - **Page head + footer workflow** → `secondary` (gray fill, neutral border): 并单/归档/更多、输出/订舱/放舱
-  - **Module / child-pane main action** → `outline` (white bg + primary border, hover primary-1): 添加发货人、添加品名、上传 MBL
-  - **Auxiliary** → `text` (text-3, hover primary-1): 复制、清除、发送报关资料
-  - **Danger** → `text` + `status="danger"` (danger-6, hover danger-1): 废弃、行内删除
-  - **Global submit** → `primary` only in footer
-- Row delete: `row-action-btn` + `status="danger"` must render **red**, not gray/blue (`global.css` overrides neutral row-action for `arco-btn-status-danger`).
+  - **Page head + footer workflow** → `secondary` in white micro-shadow chips; footer grouped in `detail-drawer-footer__cluster` with `__sep` before primary
+  - **Module / child-pane main action** → `outline` in `detail-section__actions` action bar (light tint border box)
+  - **Auxiliary** → `text` link-blue in action bar: 复制、清除、发送报关资料
+  - **Section title** → left primary accent bar on `detail-section__title::before`
+  - **Danger** → row delete muted gray until hover; footer abandon stays `text` + `danger`
+  - **Global submit** → `primary` with soft elevation in cluster
+  - **Mini table header** → flat `#F7FAFF`, **no** `header-wrapper` bottom border
 - Neutral surfaces (search/toolbar/table cap) stay white/gray; primary appears in active nav, links, focus, selection, one primary button, and thin anchors.
 - Hover: no transform/shadow float on dense toolbars (see `global.css` toolbar/detail-drawer overrides).
 

@@ -223,12 +223,49 @@ if (!globalCss.includes('.detail-drawer .arco-picker-size-small')) {
     content: 'missing .detail-drawer .arco-picker-size-small',
   });
 }
-if (!globalCss.includes('--dense-mini-vxe-header-bg') || !globalCss.includes('--dense-mini-vxe-hover-bg')) {
+if (!globalCss.includes('--dense-vxe-surface-hover-bg') || !globalCss.includes('--dense-table-header-bg')) {
   violations.push({
-    rule: 'detail-mini-vxe 表头与 hover 必须使用独立 token，禁止同色',
+    rule: '全项目 VXE 表必须定义共用 surface token（--dense-vxe-surface-hover-bg + --dense-table-header-bg）',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing --dense-mini-vxe-header-bg or --dense-mini-vxe-hover-bg',
+    content: 'missing --dense-vxe-surface-hover-bg or --dense-table-header-bg',
+  });
+}
+
+if (!/\.detail-mini-vxe\.vxe-table \.vxe-header--column[\s\S]*--dense-table-header-bg/.test(globalCss)) {
+  violations.push({
+    rule: 'detail-mini-vxe 表头必须与 workbench-table 共用 --dense-table-header-bg',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'detail-mini-vxe header must use --dense-table-header-bg',
+  });
+}
+
+if (!/\.detail-mini-vxe\.vxe-table[\s\S]*--dense-vxe-surface-hover-bg/.test(globalCss)) {
+  violations.push({
+    rule: 'detail-mini-vxe hover 必须与列表共用 --dense-vxe-surface-hover-bg',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'detail-mini-vxe hover must use --dense-vxe-surface-hover-bg',
+  });
+}
+
+const miniHeaderAlias = /--dense-mini-vxe-header-bg:\s*var\(--dense-table-header-bg\)/.test(globalCss);
+if (!miniHeaderAlias) {
+  violations.push({
+    rule: 'detail-mini-vxe 表头 token 必须别名到 --dense-table-header-bg',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: '--dense-mini-vxe-header-bg must alias --dense-table-header-bg',
+  });
+}
+
+if (!/\.detail-mini-vxe\.vxe-table \.vxe-table--header-wrapper\s*\{[^}]*border-bottom:\s*none/.test(globalCss)) {
+  violations.push({
+    rule: 'detail-mini-vxe 禁止 vxe-table--header-wrapper 底边蓝线（靠背景分层即可）',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'detail-mini-vxe header-wrapper must use border-bottom: none',
   });
 }
 
@@ -268,12 +305,12 @@ if (!globalCss.includes('.vxe-table .row-action-btn.arco-btn-status-danger')) {
   });
 }
 
-if (!globalCss.includes('.detail-drawer .detail-section__actions .arco-btn-outline')) {
+if (!globalCss.includes('.detail-drawer-footer__cluster')) {
   violations.push({
-    rule: '详情模块 outline 必须使用白底细边样式，禁止默认浅蓝铺满',
+    rule: '详情吸底业务按钮必须收入 detail-drawer-footer__cluster 操作组',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing detail-drawer detail-section outline hierarchy',
+    content: 'missing .detail-drawer-footer__cluster',
   });
 }
 

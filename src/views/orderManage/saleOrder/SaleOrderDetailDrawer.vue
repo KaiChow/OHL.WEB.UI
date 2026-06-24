@@ -773,7 +773,6 @@ const closeDrawer = () => {
                           <template #empty>
                             <div class="detail-mini-empty">暂无品名明细，点击添加品名录入该发货人名下货物</div>
                           </template>
-                          <vxe-column type="checkbox" width="42" />
                           <vxe-column field="chineseName" title="中文品名" width="260">
                             <template #default="{ row }">
                               <a-input v-model="row.chineseName" size="small" placeholder="请输入中文品名" />

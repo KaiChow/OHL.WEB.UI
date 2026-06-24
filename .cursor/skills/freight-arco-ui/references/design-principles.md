@@ -124,3 +124,16 @@ Before delivery, answer yes to all:
 5. Does it feel premium through order and restraint?
 
 If any answer is no, revise structure before tuning colors.
+
+## Documentation Layers (skill)
+
+| Layer | File | Language |
+|-------|------|----------|
+| Style tokens | `src/styles/global.css` | CSS |
+| Principles | `design-principles.md` | EN |
+| Structure slots | `module-patterns.md` | EN |
+| Domain wording | `domain-language.md` | ZH examples |
+| Component rules | `table.md`, `actions.md`, … | EN + code |
+| Acceptance | `checklist.md`, `check-spec.js` | EN |
+
+Do not duplicate long rule lists in `AGENTS.md` / `CLAUDE.md` — they link to this skill.
