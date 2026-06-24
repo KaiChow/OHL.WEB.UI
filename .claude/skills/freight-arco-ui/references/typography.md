@@ -128,6 +128,42 @@ Do not make document type, file name, upload state, and helper text the same vis
 - Helper text: 1.4.
 - Section title: 1.4.
 
+## Zone Typography Map
+
+Every zone on a list or detail page has a fixed font tier. Do not deviate.
+
+| Zone | Element | Token | Size | Weight | Color |
+|------|---------|-------|------|--------|-------|
+| **Filter (zone-l2)** | Field label (`filter-field__label`) | F4 `--dense-font-field` | 12px | 500 | `color-text-2` |
+| | Input / select value | F4 Control `--dense-font-control` | 12px | 500 | `color-text-1` |
+| | Placeholder | F4 Control `--dense-font-control` | 12px | 400 | `color-text-3` |
+| | Query button (`arco-btn-size-small`) | F2 `--dense-font-nav` | **13px** | 500 | — |
+| | Reset / expand link (same panel) | F2 `--dense-font-nav` | **13px** | 500 | `color-text-2/3` |
+| **Toolbar (zone-l3 top)** | Scope stab tab (`.stab`) | F2 `--dense-font-nav` | 13px | 500/600 active | `color-text-2` |
+| | Action buttons (`a-button size="small"`) | F2 `--dense-font-nav` | 13px | 500 | — |
+| **Status bar (zone-l3 bottom)** | Status stab tab (`.stab`) | F2 `--dense-font-nav` | 13px | 500 | `color-text-2` |
+| | Badge count (`.stab-badge`) | F6 `--dense-font-micro` | **10px** | 600 | `color-text-3` / semantic |
+| **Table (zone-l4)** | Cell data | F1 `--dense-font-data` | 13px | 400 | `color-text-2` |
+| | Primary identifiers (单号/客户/路线) | F1 `--dense-font-data` | 13px | 500 | `color-text-1` |
+| | Column header | F3 `--dense-font-title` | 12px | 600 | `color-text-2` |
+| | Status pill (`.s-pill`) | F6 `--dense-font-micro` | 10px | 500 | semantic |
+| | Row action icon | icon token 14px | — | — | `color-text-3` |
+| **Pagination / table cap** | Page number, total | F5 `--dense-font-aux` | 11px | 400 | `color-text-3` |
+| **Detail drawer head** | Section title | F3 `--dense-font-title` | 12px | 600 | `color-text-1` |
+| | Hero fact value | F1 `--dense-font-data` | 13px | 500 | `color-text-1` |
+| | Hero fact label | F5 `--dense-font-aux` | 11px | 400 | `color-text-3` |
+| **Detail form** | Field label (`a-form-item label`) | F4 `--dense-font-field` | 12px | 500 | `color-text-2` |
+| | Control value (input/select) | F4 Control `--dense-font-control` | 12px | 500 | `color-text-1` |
+| | Placeholder | F4 Control `--dense-font-control` | 12px | 400 | `color-text-3` |
+| **Overlay / portal** | Popconfirm / modal body | F4 Control | 12px | 500 | `color-text-1` |
+| | Select / dropdown options | F4 Control | 12px | 500 | `color-text-1` |
+| | Footer buttons | F2 Nav | 13px | 500 | — |
+| | Tooltip | F5 Aux | 11px | 400 | — |
+
+**Key rule:** Filter area (zone-l2) consistently uses **12px**. Toolbar + status (zone-l3) consistently use **13px**. Table cells use **13px**. These zones live adjacent on the same page — the 1px difference is intentional: 12px for structural metadata (labels, field names), 13px for interactive navigation and data.
+
+Do not mix 12px and 13px within the same zone row.
+
 ## Form And Filter Typography
 
 Form fields have three different text roles. In this project, they use one size and differ by color/weight.

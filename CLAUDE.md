@@ -51,6 +51,7 @@ Professional · Efficient · Structured · Dense · Premium — 效率 > 信息 
 | 模块槽位（结构） | `module-patterns.md` |
 | 货代中文（用语） | `domain-language.md` |
 | 列表 | `list-page.md` |
+| 筛选布局（字段数→结构） | `filter-layout.md` |
 | 详情/表单 | `detail-form.md` |
 | **Arco Form 写法规范** | **`form-rules.md`** |
 | 上传/附件 | `upload.md` |

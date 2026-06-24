@@ -54,6 +54,7 @@ Reference implementation: `src/views/orderManage/saleOrder/`
 | Page type choice | `page-archetypes.md` |
 | AI page generation | `ai-generation-contract.md` |
 | List / workbench | `list-page.md` + `table.md` + `actions.md` |
+| **筛选区字段数 → 布局选型** | **`filter-layout.md`** |
 | Detail / form structure | `detail-form.md` + `actions.md` |
 | **Arco form 写法（校验/提交/combo）** | **`form-rules.md`** |
 | File upload / attachments | `upload.md` |
