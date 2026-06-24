@@ -263,11 +263,12 @@ Required:
 - Always add `class="detail-mini-vxe"` to VXE tables embedded in `detail-section__body` that contain editable controls.
 - Use `detail-section__body--table` on the section body (or `detail-child-pane__table` for nested child panes).
 - Match `row-config.height` to `38` when controls are 28px (`--dense-control-h-detail`).
-- Only one `min-width` column per mini table.
+- Business columns use `min-width`; only checkbox / seq / operation use fixed `width` (see `table.md` width policy).
 
 Forbidden:
 
 - `show-overflow` / `show-header-overflow` on `detail-mini-vxe` (causes clipping and header/body misalignment).
+- `detail-child-pane__desc` when the child title and field labels already explain the block (no redundant module copy).
 - Page-scoped wrappers with `overflow: hidden` around wide detail tables.
 - Padding on `td` (`.vxe-body--column`) instead of `.vxe-cell`.
 - Forgetting `class="detail-mini-vxe"` — inputs show full Arco borders in every cell, creating Excel-like box grid.

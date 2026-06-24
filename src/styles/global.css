@@ -162,9 +162,9 @@ html, body, #app {
   --dense-font-label: var(--dense-font-title); /* 别名：结构标题 F3 */
   --dense-font-filter-label: var(--dense-font-field); /* 别名：与 F4 相同，禁止再分档 */
   --dense-icon-action: 14px;      /* 仅 icon-only 按钮图形，非正文字号 */
-  --dense-control-h-filter: 32px;
-  --dense-control-h-detail: 28px;
-  --dense-control-h-nav: 28px;
+  --dense-control-h-filter: 32px;  /* list filter: a-* size="small" */
+  --dense-control-h-detail: 28px;  /* detail form / detail-mini-vxe: size="small" */
+  --dense-control-h-nav: 28px;     /* toolbar / footer buttons: size="small" */
 
   /* 间距（高密度 = 相对收紧，非取消间距） */
   --dense-gap-zone: 8px;          /* 列表五层卡片之间 */
@@ -2850,11 +2850,11 @@ button:-moz-focusring,
 .detail-module-summary--inline {
   position: relative;
   display: flex;
-  align-items: center;
-  min-height: 32px;
-  padding: var(--dense-pad-head-y) var(--dense-pad-head-x);
-  background: linear-gradient(180deg, var(--dense-primary-1) 0%, var(--color-bg-card) 100%);
-  border-bottom: 1px solid var(--dense-primary-2);
+  align-items: stretch;
+  min-height: 36px;
+  padding: 0;
+  background: var(--color-fill-1);
+  border-bottom: 1px solid var(--dense-border-subtle);
 }
 .detail-module-summary--inline::before {
   content: '';
@@ -2864,16 +2864,19 @@ button:-moz-focusring,
   bottom: 0;
   width: 3px;
   background: var(--dense-primary-6);
+  border-radius: 0;
 }
 .detail-module-summary--inline .detail-module-summary__stats {
   flex: 1;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  min-width: 0;
 }
 .detail-module-summary--cargo {
-  min-height: 38px;
-  padding-left: 16px;
-  background:
-    linear-gradient(90deg, var(--dense-primary-1) 0, var(--color-bg-card) 42%),
-    var(--color-bg-card);
+  min-height: 36px;
+  padding-left: 0;
+  background: var(--color-fill-1);
 }
 .detail-module__badge {
   font-size: var(--dense-font-aux);
@@ -3096,35 +3099,51 @@ button:-moz-focusring,
 }
 .detail-module-summary__stats {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   flex: 1;
   min-width: 0;
-  gap: 8px;
+  gap: 0;
 }
 .detail-module-summary__actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-  padding-left: 12px;
+  padding: 0 12px;
   border-left: 1px solid var(--dense-border-subtle);
 }
 .detail-module-summary__stat {
   position: relative;
   display: flex;
-  align-items: baseline;
-  gap: 4px;
-  min-height: 24px;
-  padding: 2px 9px 2px 10px;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 16px;
   white-space: nowrap;
+  border: none;
+  border-right: 1px solid var(--dense-border-subtle);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.detail-module-summary__stat:last-child {
+  border-right: none;
+}
+.detail-module-summary--bar .detail-module-summary__stat {
+  flex: 0 1 auto;
+  min-height: 24px;
+  padding: 2px 10px;
   border: 1px solid var(--color-border-1);
   border-radius: var(--dense-radius);
   background: var(--color-bg-card);
 }
-.detail-module-summary__stat:not(:last-child) {
+.detail-module-summary--bar .detail-module-summary__stat:not(:last-child) {
+  margin-right: 8px;
   border-right: 1px solid var(--color-border-1);
 }
-.detail-module-summary__stat::before {
+.detail-module-summary--bar .detail-module-summary__stat::before {
   content: '';
   position: absolute;
   left: 0;
@@ -3136,10 +3155,13 @@ button:-moz-focusring,
   background: var(--dense-primary-6);
   opacity: .95;
 }
-.detail-module-summary__stat--weight::before {
+.detail-module-summary--inline .detail-module-summary__stat::before {
+  display: none;
+}
+.detail-module-summary--bar .detail-module-summary__stat--weight::before {
   background: var(--dense-warning-6);
 }
-.detail-module-summary__stat--volume::before {
+.detail-module-summary--bar .detail-module-summary__stat--volume::before {
   background: var(--dense-success-6);
 }
 .detail-module-summary__stat-label {
@@ -3256,6 +3278,8 @@ button:-moz-focusring,
 }
 .detail-child-pane__table {
   padding: 0;
+  overflow-x: auto;
+  overflow-y: visible;
 }
 /* 详情内可编辑子表：与列表 workbench-table 共用表头/hover/边框 token；仅行高与 ghost 控件不同 */
 .detail-mini-vxe.vxe-table {
@@ -3539,6 +3563,8 @@ button:-moz-focusring,
 
 /* =================================================================
    Arco 组件微调（global，不用 :deep）
+   Arco size 规范：业务区只用 size="small"；禁止 medium/large；mini 仅浮层内部由 CSS 归一
+   详见 ui-skill/.../references/component-size.md
    ================================================================= */
 .arco-btn-size-small {
   height: var(--dense-control-h-nav) !important;
@@ -3547,7 +3573,86 @@ button:-moz-focusring,
   padding: 0 10px !important;
   border-radius: var(--dense-radius) !important;
 }
-.arco-btn-size-mini  { height: 20px !important; font-size: 10px !important; padding: 0 6px !important; border-radius: var(--dense-radius) !important; }
+.arco-btn-size-mini {
+  height: 24px !important;
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-nav) !important;
+  padding: 0 8px !important;
+  border-radius: var(--dense-radius) !important;
+}
+
+/* ── 浮层/下拉字号统一：与表单控件、按钮 token 对齐，禁止 Arco 14px / mini 10px 泄漏 ── */
+.arco-popconfirm-body,
+.arco-popconfirm-content,
+.arco-popover-content,
+.arco-popover-title {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control) !important;
+  line-height: 1.45 !important;
+  color: var(--color-text-1) !important;
+}
+.arco-popconfirm-footer .arco-btn,
+.arco-popover-footer .arco-btn,
+.arco-modal-footer .arco-btn,
+.arco-popconfirm-footer .arco-btn-size-mini,
+.arco-modal-footer .arco-btn-size-mini {
+  height: var(--dense-control-h-nav) !important;
+  min-height: var(--dense-control-h-nav) !important;
+  font-size: var(--dense-font-nav) !important;
+  font-weight: var(--dense-weight-nav) !important;
+  padding: 0 10px !important;
+  border-radius: var(--dense-radius) !important;
+}
+.arco-modal-title {
+  font-size: var(--dense-font-title) !important;
+  font-weight: var(--dense-weight-title) !important;
+  line-height: 1.4 !important;
+}
+.arco-modal-body {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control) !important;
+  line-height: 1.45 !important;
+}
+.arco-select-dropdown .arco-select-option,
+.arco-select-dropdown .arco-select-option-content,
+.arco-select-dropdown-list .arco-select-option {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control) !important;
+  line-height: calc(var(--dense-control-h-detail) - 2px) !important;
+  min-height: var(--dense-control-h-detail) !important;
+  color: var(--color-text-1) !important;
+}
+.arco-select-dropdown .arco-select-option-content {
+  display: flex;
+  align-items: center;
+}
+.arco-dropdown-list .arco-dropdown-option,
+.arco-dropdown-list .arco-dropdown-option-content {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control) !important;
+  line-height: 1.45 !important;
+  color: var(--color-text-1) !important;
+}
+.arco-cascader-option-label,
+.arco-cascader-list .arco-cascader-option {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control) !important;
+  line-height: 1.45 !important;
+}
+.arco-picker-container .arco-picker-date,
+.arco-picker-container .arco-picker-cell .arco-picker-date-value {
+  font-size: var(--dense-font-control) !important;
+}
+.arco-message-content,
+.arco-notification-content,
+.arco-notification-title {
+  font-size: var(--dense-font-control) !important;
+  line-height: 1.45 !important;
+}
+.arco-tooltip-content {
+  font-size: var(--dense-font-aux) !important;
+  line-height: 1.4 !important;
+}
 .arco-input-wrapper.arco-input-size-small       { height: 24px !important; border-radius: var(--dense-radius) !important; }
 .arco-select-view-single.arco-select-size-small { height: 24px !important; border-radius: var(--dense-radius) !important; }
 .arco-input-size-small .arco-input,

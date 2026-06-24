@@ -76,36 +76,53 @@ Rules:
 
 ## Column Rules
 
-- At least one content column must use `min-width`.
-- Do not set `width` on every column.
-- Fixed left: checkbox, sequence, main identifier if needed.
-- Fixed right: file/action only.
+### Width policy (mandatory)
+
+Business columns use **`min-width`**, not fixed `width`. Fixed `width` is allowed **only** for structural columns that must not grow:
+
+| Allowed `width` | Examples |
+|-----------------|----------|
+| `type="checkbox"` | `width="40"` |
+| `type="seq"` | `width="44"`–`56` |
+| Operation column | `title="操作"` + `fixed="right"`, `width="56"`–`88` |
+
+Everything else — codes, names, dates, numbers, ports, status pills, file actions, editable inputs — uses **`min-width`** with a starting value from the width table below. VXE distributes extra horizontal space across `min-width` columns so cells are not crushed on wide tables and can scroll on narrow ones.
+
+Rules:
+
+- Do **not** set `width` on business/data columns; use `min-width` instead.
+- Do **not** set `width` on every column (structural columns only).
+- `min-width` values are **floors**, not caps — columns may grow with available space.
+- Fixed left: checkbox, sequence, main identifier when needed (`min-width` + `fixed="left"` is OK).
+- Fixed right: operation only (structural `width`).
 - Numeric columns align right.
 - Status/action columns align center.
-- Long text uses ellipsis/title or a two-line cell pattern.
+- Long text uses ellipsis/title or a two-line cell pattern (`show-overflow="title"` on workbench tables only).
 - Do not combine multiple independent business fields into one list column unless the business explicitly requires grouped display.
 - Use object identity columns early: code/no/name/status before secondary metadata.
 - Put next-decision fields before passive audit fields.
 - Do not default to showing every backend field.
-- Use `show-overflow="title"` or explicit tooltip for truncated business values.
 - Header labels must be business terms, not database field names.
 
 ## Width Rules
 
-| Column kind | Rule |
-|-------------|------|
-| Sequence | 44-56px |
-| Checkbox | 40-48px |
-| Status | 84-110px |
-| Date | 92-120px |
-| DateTime | 150-170px |
-| Order/document code | 140-180px, mono |
-| Customer/company | min-width 160-220px |
-| Port/city | 100-140px |
-| Numeric amount/qty | 90-130px, right aligned |
-| Operation | 72-120px, fixed right only when useful |
+Starting **`min-width`** floors (not fixed `width`):
 
-These are starting ranges, not hard-coded widths for every table.
+| Column kind | min-width floor |
+|-------------|-----------------|
+| Sequence | `width` 44–56 (structural only) |
+| Checkbox | `width` 40–48 (structural only) |
+| Status pill | 84–110 |
+| Date | 92–120 |
+| DateTime / date-picker | 140–170 |
+| Order/document code | 140–180 |
+| Customer/company/name text | 160–220 |
+| Port/city | 100–140 |
+| Numeric amount/qty | 72–110 |
+| Enum/select (柜型/单位) | 72–88 |
+| Operation | `width` 56–88 (structural only) |
+
+These are starting floors; adjust per module but keep the `min-width` vs `width` policy.
 
 ## Cell Patterns
 

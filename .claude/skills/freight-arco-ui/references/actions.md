@@ -6,7 +6,9 @@ Arco `a-button` has **5 types** and **4 statuses**. Status can combine with any 
 <a-button type="primary" status="danger">...</a-button>
 ```
 
-All operational pages use `size="small"` unless a documented hero/empty-state exception exists.
+All operational pages use `size="small"` unless a documented hero/empty-state exception exists. Full mapping: `references/component-size.md`.
+
+**Never omit `size` on form controls** — Arco defaults to `medium` (14px). **Never use `size="medium"` or `size="large"`** in `src/views`.
 
 ---
 

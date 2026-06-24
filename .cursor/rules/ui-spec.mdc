@@ -313,10 +313,11 @@ grep -n "\.类名" src/styles/global.css
 | 刷新按钮 `type="outline"` | `type="text"` icon-only，放在 `toolbar-aside` |
 | 原生 `<button>` 做行内操作 | `<a-button type="text" class="row-action-btn">` + `<a-tooltip>` |
 | **`<a-table>`（Arco 原生表格）** | **必须用 `<vxe-table>`，全项目统一** |
-| VXE 所有列用 `width` | 至少一列用 `min-width` |
+| 业务列用固定 `width` | 业务列用 `min-width`；仅 checkbox/序号/操作列用 `width` |
 | `class="freight-table"` | 删掉（已废弃） |
 | `.stab-count` / `.stab-count--danger` | `.stab-badge` / `.stab-badge--danger` |
 | 硬编码 hex 颜色 | `var(--warning-6)` / `var(--danger-6)` 等变量 |
+| 业务区 `size="medium"` / 省略 size | 统一 `size="small"`（见 `component-size.md`） |
 | 自写危险货 pill 样式 | `s-pill[data-s="wait"]` + icon |
 | `detail-mini-vxe` 加 `show-overflow` | 详情子表禁用；列表主表仍用 `show-overflow="title"` |
 | 详情子表外包 `overflow:hidden` | `detail-section__body--table` |
@@ -487,7 +488,7 @@ Modal 规范：`:mask-closable="false"` / 危险操作放 footer 左侧 / `width
     :data="rows"
     :row-config="{ isHover: true, keyField: 'id', height: 38 }"
   >
-    <!-- 每表仅 1 列 min-width，其余 width -->
+    <!-- 业务列用 min-width；仅 checkbox/序号/操作列用 width -->
   </vxe-table>
 </div>
 ```
@@ -580,7 +581,7 @@ import '@uppy/dashboard/dist/style.min.css'
 ```
 □ 搜索区：filter-card 体系，无 .sf/.sf-label/.search-bar
 □ 工具栏：toolbar-group + toolbar-aside，刷新 type="text" icon-only
-□ 表格：border="none" size="small" height="100%"，至少一列 min-width
+□ 表格：border="none" size="small" height="100%"；业务列 min-width，仅 checkbox/序号/操作用 width
 □ 详情子表：detail-mini-vxe + detail-section__body--table，无 show-overflow
 □ 抽屉：有 class="detail-drawer"，detail-section 分区
 □ 状态：全用 s-pill[data-s]，无行背景色

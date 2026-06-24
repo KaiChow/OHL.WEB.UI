@@ -151,6 +151,26 @@ Rules:
 - Avoid vague placeholder copy such as `请输入`, `请选择`, `模糊搜索`, unless the label already makes the exact target obvious and space is constrained.
 - For internationalization, keep labels visible and let placeholders be short examples, not the only explanation of the field.
 
+## Overlay And Popup Typography
+
+Arco renders many surfaces in a **portal** (popconfirm, modal, select dropdown, dropdown menu, cascader, date panel, message). They do not inherit page-scoped form CSS. They must be normalized in `global.css`.
+
+| Surface | Body / options | Actions |
+|---------|----------------|---------|
+| Popconfirm / Modal body | F4 Control 12px | Footer buttons F2 Nav 13px |
+| Select / Dropdown / Cascader options | F4 Control 12px (same as trigger) | — |
+| Tooltip | F5 Aux 11px | — |
+| Message / Notification | F4 Control 12px | — |
+
+Rules:
+
+- Select trigger value and dropdown option text must be the **same** size and weight (`--dense-font-control` + `--dense-weight-control`).
+- Popconfirm question text and its Cancel/OK buttons must not differ by more than one typography level; buttons use Nav 13px, never `btn-size-mini` 10px.
+- `global.css` must override `.arco-popconfirm-footer`, `.arco-select-dropdown .arco-select-option`, and `.arco-modal-footer` centrally. Do not fix per page in scoped CSS.
+- F6 10px is for badges/units/seq only — not for buttons or dropdown options.
+
+Arco `size` prop: see `component-size.md`. Business UI uses `size="small"` only; omitting `size` equals forbidden `medium`.
+
 ## Hard Bans
 
 - No arbitrary `14px`, `15px`, `16px` business text to create emphasis.
@@ -160,5 +180,6 @@ Rules:
 - No Arco default 14px form label leaking into detail/list forms.
 - No form/filter label-value-placeholder size drift such as 12/13/11.
 - No placeholder using the same weight/color as an entered value.
+- Overlay surfaces (popconfirm, modal, select/dropdown/cascader panels, message) must use the same tokens as their triggers: body/options F4 Control 12px, action buttons F2 Nav 13px. Do not let Arco default 14px or `btn-size-mini` 10px leak into overlays.
 - No all-caps UI labels unless the business data itself is a code.
 - No letter spacing below `0`.

@@ -5,7 +5,7 @@
  */
 
 import { readFileSync, readdirSync, statSync } from 'fs';
-import { join, extname } from 'path';
+import { join, extname, sep } from 'path';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1');
 const SCAN_DIRS = ['src/views', 'src/components', 'ui-skill'];
@@ -312,6 +312,70 @@ if (!globalCss.includes('.detail-drawer-footer__cluster')) {
     line: 1,
     content: 'missing .detail-drawer-footer__cluster',
   });
+}
+
+if (!globalCss.includes('.arco-popconfirm-footer .arco-btn') || !globalCss.includes('.arco-select-dropdown .arco-select-option')) {
+  violations.push({
+    rule: '浮层字号必须在 global.css 统一（popconfirm 按钮 + select 下拉项）',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing overlay typography overrides',
+  });
+}
+
+if (!/\.arco-btn-size-mini\s*\{[^}]*font-size:\s*var\(--dense-font-control\)/.test(globalCss)) {
+  violations.push({
+    rule: 'arco-btn-size-mini 必须使用 F4 Control 12px，禁止 10px',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'arco-btn-size-mini must use --dense-font-control',
+  });
+}
+
+// 业务页禁止 Arco size="medium" | "large" | "mini"
+for (const file of files) {
+  if (!file.includes(`${sep}src${sep}views${sep}`) || !file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + sep, '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  const lines = content.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!/size="(medium|large|mini)"/.test(line)) continue;
+    violations.push({
+      rule: '业务页 Arco 组件禁止 size="medium|large|mini"，统一 size="small"（见 component-size.md）',
+      file: relPath,
+      line: i + 1,
+      content: line.trim().slice(0, 140),
+    });
+  }
+}
+
+// 业务列禁止固定 width（仅 checkbox / seq / 操作列允许）
+function isStructuralVxeColumn(attrs) {
+  if (/type="checkbox"/.test(attrs) || /type="seq"/.test(attrs)) return true;
+  if (/title="操作"/.test(attrs) && /fixed="right"/.test(attrs)) return true;
+  return false;
+}
+
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('<vxe-column')) continue;
+  const lines = content.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.includes('<vxe-column')) continue;
+    const tag = line.trim();
+    if (!/(?<![a-z-])width="/.test(tag)) continue;
+    if (isStructuralVxeColumn(tag)) continue;
+    violations.push({
+      rule: 'VXE 业务列必须用 min-width，禁止 width（仅 checkbox/序号/操作列可用 width）',
+      file: relPath,
+      line: i + 1,
+      content: tag.slice(0, 140),
+    });
+  }
 }
 
 // detail-mini-vxe 禁止 show-overflow（整块匹配，避免表头表体错位）

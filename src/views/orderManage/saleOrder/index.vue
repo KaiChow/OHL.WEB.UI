@@ -865,7 +865,7 @@ nextTick(() => {
           </template>
           <vxe-column type="checkbox" width="40" fixed="left" />
           <vxe-column type="seq" title="序号" width="56" fixed="left" />
-          <vxe-column field="orderNo" title="订单编号" width="150" fixed="left" sortable>
+          <vxe-column field="orderNo" title="订单编号" min-width="150" fixed="left" sortable>
             <template #default="{ row }">
               <span v-if="row.orderNo" class="so-order-cell">
                 <span class="link-text link-text--strong mono" @click="openDetail(row)">{{ row.orderNo }}</span>
@@ -874,32 +874,32 @@ nextTick(() => {
               <span v-else class="sub-text">未生成</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.submittedAt" field="submittedAt" title="提交时间" width="152" sortable />
-          <vxe-column v-if="visibleColumns.status" field="statusText" title="订单状态" width="112" align="center">
+          <vxe-column v-if="visibleColumns.submittedAt" field="submittedAt" title="提交时间" min-width="152" sortable />
+          <vxe-column v-if="visibleColumns.status" field="statusText" title="订单状态" min-width="112" align="center">
             <template #default="{ row }">
               <span class="s-pill" :data-s="row.pill">{{ row.statusText }}</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.cargoType" field="cargoType" title="货物类型" width="112">
+          <vxe-column v-if="visibleColumns.cargoType" field="cargoType" title="货物类型" min-width="112">
             <template #default="{ row }">
               <span class="cargo-type-token" :class="{ 'cargo-type-token--risk': row.cargoRisk }" :title="getCargoTypeText(row)">
                 {{ getCargoTypeText(row) }}
               </span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.businessType" field="businessType" title="业务类型" width="82" />
-          <vxe-column v-if="visibleColumns.businessNo" field="businessNo" title="业务编号" width="132" sortable>
+          <vxe-column v-if="visibleColumns.businessType" field="businessType" title="业务类型" min-width="82" />
+          <vxe-column v-if="visibleColumns.businessNo" field="businessNo" title="业务编号" min-width="132" sortable>
             <template #default="{ row }">
               <span class="mono">{{ row.businessNo }}</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.inboundNo" field="inboundNo" title="入仓单号" width="138">
+          <vxe-column v-if="visibleColumns.inboundNo" field="inboundNo" title="入仓单号" min-width="138">
             <template #default="{ row }">
               <span v-if="row.inboundNo" class="mono">{{ row.inboundNo }}</span>
               <span v-else class="sub-text">-</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.salesman" field="salesman" title="业务员" width="98" />
+          <vxe-column v-if="visibleColumns.salesman" field="salesman" title="业务员" min-width="98" />
           <vxe-column v-if="visibleColumns.shipper" field="shipper" title="发货人" min-width="190">
             <template #default="{ row }">
               <span class="cell-strong ellipsis" :title="row.shipper">{{ row.shipper }}</span>
@@ -910,48 +910,48 @@ nextTick(() => {
               <span class="cell-strong ellipsis" :title="row.consignee">{{ row.consignee }}</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.containerQty" field="containerQty" title="柜型柜量" width="104" />
-          <vxe-column v-if="visibleColumns.containerNo" field="containerNo" title="柜号" width="124">
+          <vxe-column v-if="visibleColumns.containerQty" field="containerQty" title="柜型柜量" min-width="104" />
+          <vxe-column v-if="visibleColumns.containerNo" field="containerNo" title="柜号" min-width="124">
             <template #default="{ row }">
               <span v-if="row.containerNo" class="mono">{{ row.containerNo }}</span>
               <span v-else class="sub-text">-</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.pol" field="pol" title="起运港" width="118">
+          <vxe-column v-if="visibleColumns.pol" field="pol" title="起运港" min-width="118">
             <template #default="{ row }">
               <span class="cell-strong mono">{{ row.pol }}</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.pod" field="pod" title="目的港" width="126">
+          <vxe-column v-if="visibleColumns.pod" field="pod" title="目的港" min-width="126">
             <template #default="{ row }">
               <span class="cell-strong mono">{{ row.pod }}</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.hblNo" field="hblNo" title="HBL 单号" width="138" sortable>
+          <vxe-column v-if="visibleColumns.hblNo" field="hblNo" title="HBL 单号" min-width="138" sortable>
             <template #default="{ row }">
               <span v-if="row.hblNo" class="link-text mono" @click="openDetail(row)">{{ row.hblNo }}</span>
               <span v-else class="sub-text">-</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.mblNo" field="mblNo" title="MBL 单号" width="138" sortable>
+          <vxe-column v-if="visibleColumns.mblNo" field="mblNo" title="MBL 单号" min-width="138" sortable>
             <template #default="{ row }">
               <span v-if="row.mblNo" class="link-text mono">{{ row.mblNo }}</span>
               <span v-else class="sub-text">-</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.etd" field="etd" title="ETD" width="112" sortable>
+          <vxe-column v-if="visibleColumns.etd" field="etd" title="ETD" min-width="112" sortable>
             <template #default="{ row }">
               <span class="date-val">{{ row.etd || '-' }}</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.eta" field="eta" title="ETA" width="112" sortable>
+          <vxe-column v-if="visibleColumns.eta" field="eta" title="ETA" min-width="112" sortable>
             <template #default="{ row }">
               <span v-if="row.eta" class="date-val">{{ row.eta }}</span>
               <span v-else class="sub-text">-</span>
             </template>
           </vxe-column>
-          <vxe-column v-if="visibleColumns.carrierEtd" field="carrierEtd" title="驳船ETD" width="112" />
-          <vxe-column v-if="visibleColumns.files" field="fileCount" title="文件下载" width="88" align="center">
+          <vxe-column v-if="visibleColumns.carrierEtd" field="carrierEtd" title="驳船ETD" min-width="112" />
+          <vxe-column v-if="visibleColumns.files" field="fileCount" title="文件下载" min-width="88" align="center">
             <template #default="{ row }">
               <a-tooltip :content="row.fileCount ? `下载 ${row.fileCount} 份单证` : '暂无单证'">
                 <a-button

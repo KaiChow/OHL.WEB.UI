@@ -56,6 +56,7 @@ Reference implementation: `src/views/orderManage/saleOrder/`
 | List / workbench | `list-page.md` + `table.md` + `actions.md` |
 | Detail / form / attachments | `detail-form.md` + `actions.md` |
 | Typography / i18n | `typography.md` |
+| **Arco `size` (mini/small/medium/large)** | **`component-size.md`** |
 | Color / hierarchy / “too gray” | `visual-system.md` |
 | Buttons / toolbar / row actions | `actions.md` |
 | VXE columns / hover / selection | `table.md` |
@@ -71,6 +72,7 @@ Reference implementation: `src/views/orderManage/saleOrder/`
 - Structural classes (`dds-head`, `detail-section`, `table-card-cap`) are slots — content follows the object
 - One `primary` per scope; row actions icon + tooltip; danger → confirm
 - `detail-mini-vxe`: no `show-overflow`; header bg ≠ row hover bg; no checkbox without batch toolbar
+- Business Arco controls: `size="small"` only — see `component-size.md` (`medium` = Arco default, forbidden)
 
 ## Working Protocol
 

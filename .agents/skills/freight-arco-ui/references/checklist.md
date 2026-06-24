@@ -60,6 +60,9 @@
 - Table columns expose object identity, key state, main working data, and next-decision fields before passive metadata.
 - Table empty states are explicit and object-specific, not blank table bodies.
 - Editable tables keep inputs readable and aligned without clipping.
+- VXE business columns use `min-width`; fixed `width` only on checkbox, seq, and operation columns (`table.md`).
+- Overlay typography: popconfirm/modal/select dropdown options use F4 12px; overlay footer buttons use F2 13px (`typography.md`).
+- Arco `size`: business modules use `size="small"` only; forbid `medium`/`large`/template `mini` (`component-size.md`).
 - Detail embedded VXE tables use `detail-mini-vxe` + `detail-section__body--table`; no `show-overflow` on those tables.
 - Detail form grids use `min-width: 0` children and full-width controls; date pickers follow 28px detail control height.
 - Detail combo fields (port code/name, vessel/voyage, field+copy) use `detail-combo` modifiers from `global.css`, not page-scoped borders.
