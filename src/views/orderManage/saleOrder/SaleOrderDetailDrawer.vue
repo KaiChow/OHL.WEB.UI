@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue';
-import { Message } from '@arco-design/web-vue';
+import { Message, Modal } from '@arco-design/web-vue';
 import {
   IconArchive,
   IconCopy,
@@ -300,6 +300,19 @@ const feedback = (text: string) => {
   Message.success(text);
 };
 
+const confirmAbandon = () => {
+  Modal.confirm({
+    title: '确认废弃业务单',
+    content: '废弃后业务单将无法恢复，是否继续？',
+    okText: '确认废弃',
+    cancelText: '取消',
+    okButtonProps: { status: 'danger' },
+    onOk: () => {
+      feedback('废弃已提交');
+    },
+  });
+};
+
 const syncOrderForm = (row?: DetailSourceRow | null) => {
   if (!row) return;
   orderForm.orderNo = row.orderNo || row.businessNo || 'PTP26060094';
@@ -354,13 +367,13 @@ const closeDrawer = () => {
         <span class="detail-drawer-status__sub">境外单号：{{ orderForm.overseasNo }}</span>
       </div>
       <div class="dds-head__actions">
-        <a-button size="small" @click="feedback('并单窗口已打开')">并单</a-button>
-        <a-button size="small" @click="feedback('归档完成')">
+        <a-button size="small" type="outline" @click="feedback('并单窗口已打开')">并单</a-button>
+        <a-button size="small" type="outline" @click="feedback('归档完成')">
           <template #icon><icon-archive /></template>
           归档
         </a-button>
         <a-dropdown trigger="click">
-          <a-button size="small">
+          <a-button size="small" type="outline">
             更多
             <icon-down />
           </a-button>
@@ -372,11 +385,6 @@ const closeDrawer = () => {
             <a-doption @click="feedback('打印任务已创建')">
               <template #icon><icon-printer /></template>
               打印业务单
-            </a-doption>
-            <a-divider class="row-action-menu__divider" />
-            <a-doption class="danger-opt" @click="feedback('废弃前需要二次确认')">
-              <template #icon><icon-delete /></template>
-              废弃
             </a-doption>
           </template>
         </a-dropdown>
@@ -431,7 +439,7 @@ const closeDrawer = () => {
               <div class="detail-section__head">
                 <h4 class="detail-section__title">订单信息</h4>
                 <div class="detail-section__actions">
-                  <a-button size="small" @click="feedback('订单信息已复制')">
+                  <a-button size="small" type="outline" @click="feedback('订单信息已复制')">
                     <template #icon><icon-copy /></template>
                     复制
                   </a-button>
@@ -453,9 +461,9 @@ const closeDrawer = () => {
                       <a-input v-model="orderForm.inboundNo" size="small" />
                     </a-form-item>
                     <a-form-item label="客户">
-                      <a-input-group compact>
+                      <a-input-group compact class="detail-combo detail-combo--action">
                         <a-input v-model="orderForm.customer" size="small" />
-                        <a-button size="small" type="primary">复制</a-button>
+                        <a-button size="small" type="outline" @click="feedback('客户已复制')">复制</a-button>
                       </a-input-group>
                     </a-form-item>
                     <a-form-item label="业务类型">
@@ -507,30 +515,30 @@ const closeDrawer = () => {
                   <div class="form-subgroup-label">港口与航线</div>
                   <div class="detail-form-grid detail-form-grid--4">
                     <a-form-item label="起运港" required>
-                      <a-input-group compact>
-                        <a-input v-model="orderForm.polCode" size="small" />
-                        <a-input v-model="orderForm.pol" size="small" />
+                      <a-input-group compact class="detail-combo detail-combo--code-name">
+                        <a-input v-model="orderForm.polCode" size="small" placeholder="代码" />
+                        <a-input v-model="orderForm.pol" size="small" placeholder="港口名称" />
                       </a-input-group>
                     </a-form-item>
                     <a-form-item label="目的港" required>
-                      <a-input-group compact>
-                        <a-input v-model="orderForm.podCode" size="small" />
-                        <a-input v-model="orderForm.pod" size="small" />
+                      <a-input-group compact class="detail-combo detail-combo--code-name">
+                        <a-input v-model="orderForm.podCode" size="small" placeholder="代码" />
+                        <a-input v-model="orderForm.pod" size="small" placeholder="港口名称" />
                       </a-input-group>
                     </a-form-item>
                     <a-form-item label="目的地">
-                      <a-input-group compact>
-                        <a-input v-model="orderForm.destinationCode" size="small" />
-                        <a-input v-model="orderForm.destination" size="small" />
+                      <a-input-group compact class="detail-combo detail-combo--code-name">
+                        <a-input v-model="orderForm.destinationCode" size="small" placeholder="代码" />
+                        <a-input v-model="orderForm.destination" size="small" placeholder="目的地" />
                       </a-input-group>
                     </a-form-item>
                     <a-form-item label="船公司">
                       <a-input v-model="orderForm.carrier" size="small" />
                     </a-form-item>
                     <a-form-item label="大船船名/航次" class="detail-form-grid__span2">
-                      <a-input-group compact>
-                        <a-input v-model="orderForm.vessel" size="small" />
-                        <a-input v-model="orderForm.voyage" size="small" />
+                      <a-input-group compact class="detail-combo">
+                        <a-input v-model="orderForm.vessel" size="small" placeholder="船名" />
+                        <a-input v-model="orderForm.voyage" size="small" placeholder="航次" />
                       </a-input-group>
                     </a-form-item>
                     <a-form-item label="合约号" class="detail-form-grid__span2">
@@ -630,11 +638,11 @@ const closeDrawer = () => {
               <div class="detail-section__head">
                 <h4 class="detail-section__title">货物信息</h4>
                 <div class="detail-section__actions">
-                  <a-button size="small" @click="feedback('分单数据已复制')">
+                  <a-button size="small" type="outline" @click="feedback('分单数据已复制')">
                     <template #icon><icon-copy /></template>
                     复制分单数据
                   </a-button>
-                  <a-button size="small" @click="addCargoParty">
+                  <a-button size="small" type="outline" @click="addCargoParty">
                     <template #icon><icon-plus /></template>
                     添加发货人
                   </a-button>
@@ -749,7 +757,7 @@ const closeDrawer = () => {
                           <div class="detail-child-pane__title">品名明细</div>
                           <div class="detail-child-pane__desc">品名、件数、重量和体积归属于当前发货人。</div>
                         </div>
-                        <a-button size="small" @click="addCargoLine(party)">
+                        <a-button size="small" type="outline" @click="addCargoLine(party)">
                           <template #icon><icon-plus /></template>
                           添加品名
                         </a-button>
@@ -816,11 +824,11 @@ const closeDrawer = () => {
                           </vxe-column>
                           <vxe-column title="操作" width="74" fixed="right" align="center">
                             <template #default="{ row }">
-                              <a-tooltip content="删除品名">
-                                <a-button type="text" class="row-action-btn" status="danger" @click="removeCargoLine(party, row)">
+                              <a-popconfirm content="确认删除该品名行？" @ok="removeCargoLine(party, row)">
+                                <a-button type="text" class="row-action-btn" status="danger">
                                   <icon-delete />
                                 </a-button>
-                              </a-tooltip>
+                              </a-popconfirm>
                             </template>
                           </vxe-column>
                         </vxe-table>
@@ -837,7 +845,7 @@ const closeDrawer = () => {
               <div class="detail-section__head">
                 <h4 class="detail-section__title">装柜信息</h4>
                 <div class="detail-section__actions">
-                  <a-button size="small" @click="feedback('封号已清除')">清除柜封号</a-button>
+                  <a-button size="small" type="outline" @click="feedback('封号已清除')">清除柜封号</a-button>
                 </div>
               </div>
               <div class="detail-section__body detail-section__body--table">
@@ -891,11 +899,11 @@ const closeDrawer = () => {
               <div class="detail-section__head">
                 <h4 class="detail-section__title">报关信息</h4>
                 <div class="detail-section__actions">
-                  <a-button size="small">
+                  <a-button size="small" type="outline">
                     <template #icon><icon-upload /></template>
                     发送报关资料
                   </a-button>
-                  <a-button size="small">
+                  <a-button size="small" type="outline">
                     <template #icon><icon-plus /></template>
                     新增报关票数
                   </a-button>
@@ -957,11 +965,11 @@ const closeDrawer = () => {
                   </vxe-column>
                   <vxe-column title="操作" width="56" fixed="right" align="center">
                     <template #default>
-                      <a-tooltip content="删除报关行">
+                      <a-popconfirm content="确认删除该报关行？">
                         <a-button type="text" class="row-action-btn" status="danger">
                           <icon-delete />
                         </a-button>
-                      </a-tooltip>
+                      </a-popconfirm>
                     </template>
                   </vxe-column>
                 </vxe-table>
@@ -972,7 +980,7 @@ const closeDrawer = () => {
               <div class="detail-section__head">
                 <h4 class="detail-section__title">入仓信息</h4>
                 <div class="detail-section__actions">
-                  <a-button size="small">三方仓入仓数据</a-button>
+                  <a-button size="small" type="outline">三方仓入仓数据</a-button>
                 </div>
               </div>
               <div class="detail-section__body detail-section__body--table">
@@ -1022,11 +1030,11 @@ const closeDrawer = () => {
                   </vxe-column>
                   <vxe-column title="操作" width="56" fixed="right" align="center">
                     <template #default>
-                      <a-tooltip content="删除入仓行">
+                      <a-popconfirm content="确认删除该入仓行？">
                         <a-button type="text" class="row-action-btn" status="danger">
                           <icon-delete />
                         </a-button>
-                      </a-tooltip>
+                      </a-popconfirm>
                     </template>
                   </vxe-column>
                 </vxe-table>
@@ -1039,7 +1047,7 @@ const closeDrawer = () => {
               <div class="detail-section__head">
                 <h4 class="detail-section__title">提单管理</h4>
                 <div class="detail-section__actions">
-                  <a-button size="small">
+                  <a-button size="small" type="outline">
                     <template #icon><icon-upload /></template>
                     上传 MBL COPY 件
                   </a-button>
@@ -1073,30 +1081,43 @@ const closeDrawer = () => {
       </div>
     </div>
 
-    <div class="detail-drawer-footer od-footer">
-      <a-button size="small" @click="feedback('入仓单和理货标签已下载')">
-        <template #icon><icon-download /></template>
-        下载入仓单和理货标签
-      </a-button>
-      <a-button size="small" class="btn-muted-warn" @click="feedback('订舱已提交')">订舱</a-button>
-      <a-button size="small" class="btn-muted-warn" @click="feedback('放舱已提交')">放舱</a-button>
-      <a-button size="small" @click="feedback('打印任务已创建')">
-        <template #icon><icon-printer /></template>
-        打印业务单
-      </a-button>
-      <a-button size="small" @click="feedback('提单打印任务已创建')">
-        <template #icon><icon-file /></template>
-        提单打印
-      </a-button>
-      <a-button size="small" @click="feedback('发送舱前通知')">
-        <template #icon><icon-send /></template>
-        发送舱前
-      </a-button>
-      <a-button size="small" type="primary" @click="feedback('订单详情已保存')">
-        <template #icon><icon-save /></template>
-        保存
-      </a-button>
-      <a-button size="small" status="danger" @click="feedback('废弃前需要二次确认')">废弃</a-button>
+    <div class="detail-drawer-footer">
+      <div class="detail-drawer-footer__start">
+        <a-button size="small" type="text" status="danger" @click="confirmAbandon">废弃</a-button>
+      </div>
+      <div class="detail-drawer-footer__end">
+        <a-dropdown trigger="click">
+          <a-button size="small" type="outline">
+            <template #icon><icon-download /></template>
+            输出
+            <icon-down />
+          </a-button>
+          <template #content>
+            <a-doption @click="feedback('入仓单和理货标签已下载')">
+              <template #icon><icon-download /></template>
+              下载入仓单和理货标签
+            </a-doption>
+            <a-doption @click="feedback('打印任务已创建')">
+              <template #icon><icon-printer /></template>
+              打印业务单
+            </a-doption>
+            <a-doption @click="feedback('提单打印任务已创建')">
+              <template #icon><icon-file /></template>
+              提单打印
+            </a-doption>
+            <a-doption @click="feedback('发送舱前通知')">
+              <template #icon><icon-send /></template>
+              发送舱前
+            </a-doption>
+          </template>
+        </a-dropdown>
+        <a-button size="small" type="outline" @click="feedback('订舱已提交')">订舱</a-button>
+        <a-button size="small" type="outline" @click="feedback('放舱已提交')">放舱</a-button>
+        <a-button size="small" type="primary" @click="feedback('订单详情已保存')">
+          <template #icon><icon-save /></template>
+          保存
+        </a-button>
+      </div>
     </div>
   </div>
   </a-drawer>
@@ -1120,13 +1141,9 @@ const closeDrawer = () => {
   gap: var(--dense-gap-module);
 }
 
-.od-footer {
-  justify-content: flex-end;
-}
-
 @media (max-width: 1280px) {
-  .od-footer {
-    flex-wrap: wrap;
+  .od-steps {
+    max-width: 100%;
   }
 }
 </style>

@@ -29,6 +29,42 @@
 - Section header left contains only the module title. Section header right contains only actions.
 - Module stats, file counts, helper text, upload state, and status belong inside the module body or summary row.
 
+### Detail Drawer Footer
+
+Complex detail drawers use `detail-drawer-footer` with left/right zones:
+
+```vue
+<div class="detail-drawer-footer">
+  <div class="detail-drawer-footer__start">
+    <a-button size="small" type="text" status="danger" @click="confirmAbandon">废弃</a-button>
+  </div>
+  <div class="detail-drawer-footer__end">
+    <a-dropdown trigger="click">
+      <a-button size="small" type="outline">
+        <template #icon><icon-download /></template>
+        输出
+        <icon-down />
+      </a-button>
+      <template #content>
+        <a-doption>下载入仓单和理货标签</a-doption>
+        <a-doption>打印业务单</a-doption>
+      </template>
+    </a-dropdown>
+    <a-button size="small" type="outline">订舱</a-button>
+    <a-button size="small" type="outline">放舱</a-button>
+    <a-button size="small" type="primary" :loading="submitting">保存</a-button>
+  </div>
+</div>
+```
+
+Rules:
+
+- `__start`: irreversible global danger only (`type="text" status="danger"` + `Modal.confirm`). Do not duplicate the same danger action in header dropdown and footer.
+- `__end`: business actions aligned right. At most **one** `type="primary"` (save/submit).
+- Low-frequency output actions (download/print/send) group into one `outline` dropdown such as `输出`.
+- Mid-frequency workflow actions (booking/release) use `type="outline"`, not custom warn classes.
+- Forbidden in footer: `btn-muted-warn`, more than 4 direct visible buttons before grouping, multiple primary buttons, danger `status="danger"` solid buttons without confirmation flow.
+
 ## Permissions
 
 - No permission: hide the button.

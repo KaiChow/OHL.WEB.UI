@@ -277,9 +277,49 @@ Form grid in detail drawers:
 - `detail-form-grid` children need `min-width: 0`; controls in `.detail-form` must be `width: 100%`.
 - `detail-drawer` must include `a-picker` / `a-date-picker` in the 28px control height rules, not only input/select.
 
+### Combined Field Inputs (`detail-combo`)
+
+Use when one label owns multiple related controls (port code + name, vessel/voyage, field + copy action).
+
+```vue
+<!-- 港码 + 港名 -->
+<a-form-item label="起运港">
+  <div class="detail-combo detail-combo--code-name">
+    <a-input v-model="form.polCode" size="small" placeholder="代码" />
+    <a-input v-model="form.pol" size="small" placeholder="港口名称" />
+  </div>
+</a-form-item>
+
+<!-- 船名 / 航次 -->
+<a-form-item label="大船船名/航次">
+  <div class="detail-combo">
+    <a-input v-model="form.vessel" size="small" placeholder="船名" />
+    <a-input v-model="form.voyage" size="small" placeholder="航次" />
+  </div>
+</a-form-item>
+
+<!-- 字段 + 复制 -->
+<a-form-item label="客户">
+  <div class="detail-combo detail-combo--action">
+    <a-select v-model="form.customer" size="small" allow-search />
+    <a-button size="small" type="outline" @click="copyCustomer">
+      <template #icon><icon-copy /></template>
+    </a-button>
+  </div>
+</a-form-item>
+```
+
+Rules:
+
+- Modifiers: `--code-name` (fixed narrow first input), `--action` (trailing outline button).
+- Trailing action buttons in combos must be `type="outline"`, never `primary`.
+- Do not put `primary` copy/upload buttons inside form fields.
+- Combo groups share 28px height and primary-tint focus via `global.css`; do not reimplement borders in page scoped CSS.
+
 ## Footer
 
 - Submit/confirm is primary.
 - Save draft is default/outline.
 - Abandon/delete is danger and confirmed.
 - Footer is sticky and always visible.
+- Use `detail-drawer-footer__start` / `__end` for danger-left + actions-right hierarchy (see `actions.md`).

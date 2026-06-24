@@ -62,6 +62,10 @@
 - Editable tables keep inputs readable and aligned without clipping.
 - Detail embedded VXE tables use `detail-mini-vxe` + `detail-section__body--table`; no `show-overflow` on those tables.
 - Detail form grids use `min-width: 0` children and full-width controls; date pickers follow 28px detail control height.
+- Detail combo fields (port code/name, vessel/voyage, field+copy) use `detail-combo` modifiers from `global.css`, not page-scoped borders.
+- Detail drawer footer uses `detail-drawer-footer__start` (danger text + confirm) and `__end` (outline workflow + one primary save); low-frequency outputs grouped in dropdown.
+- Row delete in detail mini tables uses `a-popconfirm`, not direct click.
+- Detail drawer footer forbids `btn-muted-warn` and duplicate global danger actions in header + footer.
 - Large editable tables default to display mode; inputs appear only for active row, new row, or explicit batch edit.
 - Table editing state is keyed by stable row id, not row index or sequence number.
 - Inline edit has explicit save/cancel scope and visible dirty state.

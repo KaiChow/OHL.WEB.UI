@@ -105,6 +105,11 @@ const RULES = [
     pattern: /暂无.*[🏭📦📋🚢✈️🏗️]/u,
     fileFilter: /\.vue$/,
   },
+  {
+    desc: '禁止在页面中使用 btn-muted-warn（业务操作用 type="outline"）',
+    pattern: /btn-muted-warn/,
+    fileFilter: /\.vue$/,
+  },
 ];
 
 // ─── 文件扫描 ─────────────────────────────────────────────────────────────────
@@ -233,6 +238,24 @@ if (!globalCss.includes('--dense-workbench-hover-bg')) {
     file: 'src/styles/global.css',
     line: 1,
     content: 'missing --dense-workbench-hover-bg',
+  });
+}
+
+if (!globalCss.includes('.detail-drawer-footer__start') || !globalCss.includes('.detail-drawer-footer__end')) {
+  violations.push({
+    rule: 'detail-drawer-footer 必须提供 __start / __end 左右分区类',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing detail-drawer-footer__start or detail-drawer-footer__end',
+  });
+}
+
+if (!globalCss.includes('.detail-form .detail-combo')) {
+  violations.push({
+    rule: '详情表单组合输入必须使用 detail-combo 全局类',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .detail-form .detail-combo',
   });
 }
 

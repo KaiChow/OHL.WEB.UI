@@ -865,8 +865,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 >
 > - 数据行：`--dense-row-h: 36px`（紧凑密度，同屏可见更多行）
 > - 表头行：`--dense-header-h: 32px`（比数据行矮 4px，视觉上"背景"化）
-> - 表头底部：`2px solid arcoblue-3`（蓝色强调线，清晰区隔表头/数据区）
-> - 表头背景：`rgb(var(--gray-1))` 纯色，禁止恢复渐变（渐变 = Excel 2010 风格）
+> - 表头分层：靠 `--dense-table-header-bg` 渐变 + 白底数据区，**禁止**给 `vxe-table--header-wrapper` 再加底边线
 
 ### 列宽规则
 

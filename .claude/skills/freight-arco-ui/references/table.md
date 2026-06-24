@@ -117,7 +117,7 @@ These are starting ranges, not hard-coded widths for every table.
 
 Table lines are functional separators, not decoration.
 
-- Header must have a visible but restrained anchor: `--dense-table-header-bg` gradient + 2px `--dense-primary-3` bottom border on `workbench-table`.
+- Header must have a visible but restrained anchor: `--dense-table-header-bg` gradient on `workbench-table` (no extra `vxe-table--header-wrapper` bottom border).
 - Main workbench tables should use `workbench-table` to create the table surface: primary-tinted header anchor, white data rows, `--dense-workbench-hover-bg` on hover (lighter than header), low-contrast row/column separators, and primary accent on selection/actions.
 - Primary table borders must use complete CSS colors such as `--dense-primary-2/3` or `rgb(var(--primary-2))`; do not write `border-color: var(--primary-2)` because gi-demo stores primary tokens as RGB channels.
 - Keep a subtle 1px header/body separator when it helps scan the table.

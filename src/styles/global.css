@@ -1305,12 +1305,10 @@ button:-moz-focusring,
 .vxe-table--footer-wrapper { background-image: none !important; }
 
 /* ── 表头 ─────────────────────────────────────────────────────── */
-/* 表头只用浅分隔线区分数据区，强蓝线会误判为选中/焦点状态 */
+/* 表头与数据区靠背景渐变分层，wrapper 不再额外加底边（避免多一条线、且强色线易误判为选中） */
 .vxe-table .vxe-table--header-wrapper {
-  border-bottom: 1px solid var(--dense-table-header-border) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.96),
-    0 1px 0 rgba(16, 24, 40, 0.025);
+  border-bottom: none !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.96);
 }
 .vxe-table .vxe-header--row { height: var(--dense-header-h) !important; }
 .vxe-table .vxe-header--column {
@@ -1502,7 +1500,7 @@ button:-moz-focusring,
 
 /* 工作台主表：结构层用 primary 渐变表头，交互层用轻洗 hover，避免「全灰 ERP」质感。 */
 .vxe-table.workbench-table .vxe-table--header-wrapper {
-  border-bottom: 2px solid var(--dense-primary-3) !important;
+  border-bottom: none !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.98);
 }
 .vxe-table.workbench-table .vxe-header--column {
@@ -1992,13 +1990,27 @@ button:-moz-focusring,
 .detail-drawer-footer {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 12px;
   padding: 8px 16px;
   border-top: 1px solid var(--dense-border);
   background: var(--color-bg-card);
   box-shadow: 0 -4px 12px rgba(29, 33, 41, 0.06);
   flex-shrink: 0;
+}
+.detail-drawer-footer__start {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.detail-drawer-footer__end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
 }
 .detail-drawer-footer .arco-btn:hover {
   transform: none !important;
@@ -2034,7 +2046,7 @@ button:-moz-focusring,
 .detail-drawer .arco-checkbox-disabled .arco-checkbox-label {
   color: var(--color-text-1);
 }
-/* 详情控件：13px / 28px，与列表数据字号一致（§17.3.9） */
+/* 详情控件：F4 12px / 28px 控件高度 */
 .detail-drawer .arco-input-wrapper.arco-input-size-small,
 .detail-drawer .arco-select-view-single.arco-select-size-small,
 .detail-drawer .arco-input-number.arco-input-number-size-small,
@@ -2401,6 +2413,62 @@ button:-moz-focusring,
   font-size: var(--dense-font-control) !important;
   font-weight: var(--dense-weight-placeholder);
   color: var(--color-text-3) !important;
+}
+
+/* 详情表单：组合控件（港码+港名、船名/航次、字段+复制） */
+.detail-form .detail-combo.arco-input-group,
+.detail-form .detail-combo {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+}
+.detail-form .detail-combo .arco-input-wrapper,
+.detail-form .detail-combo .arco-select-view-single,
+.detail-form .detail-combo > .arco-btn {
+  height: var(--dense-control-h-detail) !important;
+  min-height: var(--dense-control-h-detail) !important;
+}
+.detail-form .detail-combo .arco-input-wrapper {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.detail-form .detail-combo.detail-combo--code-name .arco-input-wrapper:first-child {
+  flex: 0 0 92px;
+  max-width: 108px;
+}
+.detail-form .detail-combo .arco-input-wrapper + .arco-input-wrapper,
+.detail-form .detail-combo .arco-input-wrapper + .arco-btn,
+.detail-form .detail-combo .arco-btn + .arco-input-wrapper {
+  margin-left: -1px;
+}
+.detail-form .detail-combo .arco-input-wrapper:not(:only-child):first-child,
+.detail-form .detail-combo .arco-input-wrapper:not(:last-child) {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+.detail-form .detail-combo .arco-input-wrapper + .arco-input-wrapper,
+.detail-form .detail-combo .arco-input-wrapper + .arco-btn {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+.detail-form .detail-combo .arco-input-wrapper:hover,
+.detail-form .detail-combo .arco-input-wrapper:focus-within {
+  position: relative;
+  z-index: 1;
+}
+.detail-form .detail-combo .arco-input-wrapper:focus-within {
+  z-index: 2;
+}
+.detail-form .arco-input-wrapper.arco-input-size-small:not(.arco-input-disabled):hover,
+.detail-form .arco-select-view-single.arco-select-size-small:not(.arco-select-view-disabled):hover,
+.detail-form .arco-picker-size-small:not(.arco-picker-disabled):hover {
+  border-color: var(--dense-primary-3) !important;
+}
+.detail-form .arco-input-wrapper.arco-input-size-small:focus-within,
+.detail-form .arco-select-view-single.arco-select-size-small.arco-select-view-focus,
+.detail-form .arco-picker-size-small.arco-picker-focused {
+  border-color: var(--dense-primary-4) !important;
+  box-shadow: 0 0 0 2px var(--dense-primary-1) !important;
 }
 
 /* 详情页服务项 / 货物类型：checkbox chip，多选勾选语义 */
@@ -3049,7 +3117,7 @@ button:-moz-focusring,
   background: var(--color-bg-card) !important;
 }
 .detail-mini-vxe.vxe-table .vxe-table--header-wrapper {
-  border-bottom: 1px solid var(--dense-mini-vxe-header-border) !important;
+  border-bottom: none !important;
   box-shadow: none !important;
 }
 .detail-mini-vxe.vxe-table .vxe-header--row {

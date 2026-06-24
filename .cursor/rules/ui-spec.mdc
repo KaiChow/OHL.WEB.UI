@@ -11,9 +11,11 @@ alwaysApply: true
 `src/styles/global.css` 已实现完整设计系统。**优先用已有类名，禁止另写等效 CSS。**
 
 使用任何类名前先 grep 验证它存在于 global.css：
+
 ```bash
 grep -n "\.类名" src/styles/global.css
 ```
+
 无结果 = 该类不存在 = 禁止使用。
 
 ---
@@ -265,8 +267,14 @@ grep -n "\.类名" src/styles/global.css
       </div>
     </div>
     <div class="detail-drawer-footer">
-      <a-button type="primary" size="small">保存</a-button>
-      <a-button size="small">关闭</a-button>
+      <div class="detail-drawer-footer__start">
+        <a-button type="text" status="danger" size="small">废弃</a-button>
+      </div>
+      <div class="detail-drawer-footer__end">
+        <a-button size="small" type="outline">订舱</a-button>
+        <a-button type="primary" size="small">保存</a-button>
+        <a-button size="small">关闭</a-button>
+      </div>
     </div>
   </div>
 </a-drawer>
@@ -297,6 +305,9 @@ grep -n "\.类名" src/styles/global.css
 | `font-weight: 700` | 最大 600 |
 | 整行铺状态背景色 | 只在 `.s-pill[data-s]` 体现 |
 | 抽屉不加 `class="detail-drawer"` | 必须加，否则 Arco 默认标题不被覆盖 |
+| 吸底栏 8 按钮平铺 / `btn-muted-warn` | `detail-drawer-footer__start` + `__end`；低频收入下拉；仅 1 个 `primary` |
+| 详情行内删除直接点 | `a-popconfirm` 包裹 `row-action-btn status="danger"` |
+| 组合输入自写边框 | `detail-combo` / `--code-name` / `--action` |
 
 ---
 
@@ -475,12 +486,14 @@ Modal 规范：`:mask-closable="false"` / 危险操作放 footer 左侧 / `width
 安装：`npm install @uppy/core @uppy/dashboard @uppy/xhr-upload @uppy/locales`
 
 main.ts 引入样式：
+
 ```ts
 import '@uppy/core/dist/style.min.css'
 import '@uppy/dashboard/dist/style.min.css'
 ```
 
 使用封装好的 `UppyUploader` 组件（禁止各页面自己 new Uppy）：
+
 ```vue
 <div class="detail-section">
   <div class="detail-section__head"><h4 class="detail-section__title">单据上传</h4></div>
