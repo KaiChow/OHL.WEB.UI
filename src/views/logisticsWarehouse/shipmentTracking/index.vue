@@ -1,5 +1,7 @@
+<script setup lang="ts">
+import PlaceholderPage from '../../common/PlaceholderPage.vue';
+</script>
+
 <template>
-  <div class="page-root" style="align-items: center; justify-content: center; color: var(--color-text-3)">
-    运输跟踪（待实现）
-  </div>
+  <placeholder-page title="运输跟踪" object-name="运输节点" />
 </template>

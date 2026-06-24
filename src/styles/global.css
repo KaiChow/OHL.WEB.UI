@@ -133,6 +133,10 @@ html, body, #app {
    禁止另起 hex 主色，避免与 Arco 组件（按钮/分页/表单）割裂。
    ================================================================= */
 :root {
+  /* 项目语义表面别名。主题色阶由 @arco-themes/vue-gi-demo 提供，禁止在 ui-skill/arco-ui.css 覆盖。 */
+  --color-bg-body: var(--color-fill-2);
+  --color-bg-card: var(--color-bg-2);
+
   /* 布局密度（列表页专用，非色彩） */
   --dense-radius: 6px;
   --dense-row-h: 36px;     /* 收紧 4px，同屏多显示约 1-2 行 */
@@ -239,7 +243,7 @@ html, body, #app {
     0 8px 22px rgba(29, 33, 41, 0.05),
     0 0 0 1px var(--dense-card-border);
   --dense-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  --dense-shadow-lift: 0 6px 16px rgba(var(--arcoblue-6), 0.16);
+  --dense-shadow-lift: 0 6px 16px rgba(var(--primary-6), 0.16);
 }
 
 /* =================================================================
@@ -1163,7 +1167,7 @@ html, body, #app {
 /* ══════════════════════════════════════════════════════════════
    VXE Table 行状态颜色系统
    层级（低→高）：默认白 → 斑马灰 → hover蓝 → 选中蓝深
-   --arcoblue-6 存的是 "22,93,255"（无 rgb 包裹），可直接做 rgba 第一参数
+   --primary-6 由项目主题提供，表格交互色必须跟随主题。
    ══════════════════════════════════════════════════════════════ */
 
 /* ① 默认行：纯白 */
@@ -1171,25 +1175,24 @@ html, body, #app {
 
 /* ② 斑马纹（:stripe="true" → .row--stripe）：极浅冷灰，和白底有明显对比 */
 .vxe-table .vxe-body--row.row--stripe .vxe-body--column {
-  background: rgba(var(--arcoblue-6), 0.018);
+  background: rgba(var(--primary-6), 0.018);
 }
 
 /* ③ Hover（isHover:true → .row--hover；同时 CSS :hover 兜底）*/
-/* 用 rgba + arcoblue 确保白底/灰底上都明显可见 */
 .vxe-table .vxe-body--row.row--hover .vxe-body--column,
 .vxe-table .vxe-body--row:hover    .vxe-body--column {
-  background: rgba(var(--arcoblue-6), 0.07) !important;
+  background: rgba(var(--primary-6), 0.07) !important;
   /* ≈ #dde8ff on white — 清晰可感知的蓝色高亮 */
 }
 
 /* ④ 选中行（checkbox-config highlight:true → .row--checked）*/
 .vxe-table .vxe-body--row.row--checked .vxe-body--column {
-  background: rgba(var(--arcoblue-6), 0.13) !important;
+  background: rgba(var(--primary-6), 0.13) !important;
 }
 /* 选中行 hover 再加深 */
 .vxe-table .vxe-body--row.row--checked.row--hover .vxe-body--column,
 .vxe-table .vxe-body--row.row--checked:hover    .vxe-body--column {
-  background: rgba(var(--arcoblue-6), 0.18) !important;
+  background: rgba(var(--primary-6), 0.18) !important;
 }
 
 /* ── 序号列 ─────────────────────────────────────────────────── */
@@ -1210,24 +1213,24 @@ html, body, #app {
 /* 斑马纹固定列 */
 .vxe-table .vxe-body--row.row--stripe .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row.row--stripe .vxe-body--column.col--fixed-right {
-  background: rgba(var(--arcoblue-6), 0.018);
+  background: rgba(var(--primary-6), 0.018);
 }
 /* hover 固定列 */
 .vxe-table .vxe-body--row.row--hover .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row.row--hover .vxe-body--column.col--fixed-right,
 .vxe-table .vxe-body--row:hover     .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row:hover     .vxe-body--column.col--fixed-right {
-  background: rgba(var(--arcoblue-6), 0.08) !important;
+  background: rgba(var(--primary-6), 0.08) !important;
 }
 /* 选中 固定列 */
 .vxe-table .vxe-body--row.row--checked .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row.row--checked .vxe-body--column.col--fixed-right {
-  background: rgba(var(--arcoblue-6), 0.13) !important;
+  background: rgba(var(--primary-6), 0.13) !important;
 }
 /* 选中 hover 固定列 */
 .vxe-table .vxe-body--row.row--checked.row--hover .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row.row--checked:hover      .vxe-body--column.col--fixed-right {
-  background: rgba(var(--arcoblue-6), 0.18) !important;
+  background: rgba(var(--primary-6), 0.18) !important;
 }
 .vxe-table .col--fixed-right .vxe-header--column,
 .vxe-table .vxe-header--column.col--fixed-right {
@@ -1243,7 +1246,7 @@ html, body, #app {
   padding: 1px 2px;
   border: 1px solid transparent;
   border-radius: var(--dense-radius);
-  background: rgba(var(--arcoblue-6), 0.035);
+  background: rgba(var(--primary-6), 0.035);
   box-shadow: none;
 }
 .vxe-table .row-action-btn.arco-btn {
@@ -1258,10 +1261,15 @@ html, body, #app {
   background: transparent !important;
   transition: color .12s, background .12s, border-color .12s !important;
 }
-.vxe-table .row-action-btn.arco-btn:hover {
+.vxe-table .row-action-btn.arco-btn:hover,
+.vxe-table .row-action-btn.arco-btn:focus,
+.vxe-table .row-action-btn.arco-btn:focus-visible,
+.vxe-table .row-action-btn.arco-btn:active,
+.vxe-table .row-action-btn.arco-btn[aria-expanded="true"] {
   color: var(--dense-primary) !important;
   background: var(--dense-primary-soft) !important;
   border-color: var(--dense-primary-2) !important;
+  outline: none !important;
   transform: none !important;
   box-shadow: none !important;
 }
@@ -1292,20 +1300,20 @@ html, body, #app {
   color: var(--color-text-2) !important;
 }
 .vxe-table.workbench-table .vxe-body--row .vxe-body--column:nth-child(3) {
-  background: rgba(var(--arcoblue-6), 0.026);
+  background: rgba(var(--primary-6), 0.026);
 }
 .vxe-table.workbench-table .vxe-body--row.row--stripe .vxe-body--column {
-  background: rgba(var(--arcoblue-6), 0.028);
+  background: rgba(var(--primary-6), 0.028);
 }
 .vxe-table.workbench-table .vxe-body--row.row--stripe .vxe-body--column:nth-child(3) {
-  background: rgba(var(--arcoblue-6), 0.048);
+  background: rgba(var(--primary-6), 0.048);
 }
 .vxe-table.workbench-table .vxe-body--row.row--hover .vxe-body--column,
 .vxe-table.workbench-table .vxe-body--row:hover .vxe-body--column {
-  background: rgba(var(--arcoblue-6), 0.085) !important;
+  background: rgba(var(--primary-6), 0.085) !important;
 }
 .vxe-table.workbench-table .vxe-body--row.row--checked .vxe-body--column {
-  background: rgba(var(--arcoblue-6), 0.15) !important;
+  background: rgba(var(--primary-6), 0.15) !important;
 }
 .vxe-table.workbench-table .vxe-body--column.col--fixed-right {
   background: var(--color-bg-card) !important;
@@ -1313,26 +1321,55 @@ html, body, #app {
 }
 .vxe-table.workbench-table .row-action-btn.arco-btn {
   color: var(--color-text-3) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
-.vxe-table.workbench-table .row-action-btn.arco-btn:hover {
+.vxe-table.workbench-table .row-action-btn.arco-btn:hover,
+.vxe-table.workbench-table .row-action-btn.arco-btn:focus,
+.vxe-table.workbench-table .row-action-btn.arco-btn:focus-visible,
+.vxe-table.workbench-table .row-action-btn.arco-btn:active,
+.vxe-table.workbench-table .row-action-btn.arco-btn[aria-expanded="true"] {
   color: var(--dense-primary-7) !important;
   background: var(--dense-primary-1) !important;
-  border-color: var(--dense-primary-3) !important;
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: inset 0 0 0 1px var(--dense-primary-2) !important;
+}
+.vxe-table.workbench-table .row-action-btn--primary.arco-btn {
+  color: var(--dense-primary-6) !important;
+}
+.vxe-table.workbench-table .row-action-btn--primary.arco-btn:hover,
+.vxe-table.workbench-table .row-action-btn--primary.arco-btn:focus,
+.vxe-table.workbench-table .row-action-btn--primary.arco-btn:focus-visible,
+.vxe-table.workbench-table .row-action-btn--primary.arco-btn:active {
+  color: var(--dense-primary-7) !important;
+  background: var(--dense-primary-1) !important;
+  border-color: transparent !important;
+  box-shadow: inset 0 0 0 1px var(--dense-primary-2) !important;
+}
+.vxe-table.workbench-table .row-action-btn--more.arco-btn {
+  color: var(--color-text-3) !important;
 }
 .vxe-table.workbench-table .row-actions {
+  gap: 2px;
+  min-width: 52px;
   border-color: transparent;
-  background: transparent;
-  box-shadow: none;
+  background: rgba(var(--primary-6), 0.025);
+  box-shadow: inset 1px 0 0 rgba(var(--primary-6), 0.06);
 }
 .vxe-table.workbench-table .vxe-body--row.row--hover .row-actions,
 .vxe-table.workbench-table .vxe-body--row:hover .row-actions {
-  border-color: var(--dense-primary-3);
-  background: var(--color-bg-card);
-  box-shadow: 0 1px 4px rgba(29, 33, 41, 0.06);
+  border-color: var(--dense-primary-2);
+  background: var(--dense-primary-1);
+  box-shadow:
+    inset 1px 0 0 var(--dense-primary-2),
+    0 1px 3px rgba(29, 33, 41, 0.04);
 }
 .vxe-table.workbench-table .vxe-body--row.row--checked .row-actions {
-  border-color: var(--dense-primary-4);
-  background: var(--color-bg-card);
+  border-color: var(--dense-primary-3);
+  background: var(--dense-primary-1);
+  box-shadow: inset 1px 0 0 var(--dense-primary-3);
 }
 .vxe-table.workbench-table {
   background: var(--color-bg-card) !important;
@@ -2954,7 +2991,7 @@ html, body, #app {
 .search-form .arco-input-wrapper:focus-within,
 .search-form .arco-select-view-single:focus-within,
 .zone-l5-pager .arco-input-wrapper:focus-within {
-  box-shadow: 0 0 0 3px rgba(var(--arcoblue-6), 0.16);
+  box-shadow: 0 0 0 3px rgba(var(--primary-6), 0.16);
   border-color: var(--dense-primary) !important;
 }
 

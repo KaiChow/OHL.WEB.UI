@@ -1,5 +1,7 @@
+<script setup lang="ts">
+import PlaceholderPage from '../../common/PlaceholderPage.vue';
+</script>
+
 <template>
-  <div class="page-root" style="align-items: center; justify-content: center; color: var(--color-text-3)">
-    入仓管理（待实现）
-  </div>
+  <placeholder-page title="入仓管理" object-name="入仓单" />
 </template>
