@@ -49,6 +49,181 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 - Do not nest cards inside cards.
 - Section order should follow the user's operation order, not the order copied from another module.
 
+## Form Grid Structure
+
+### Canonical Layer Hierarchy
+
+```
+a-form.detail-form               ← Arco form root; sets font, control size token
+└── div.detail-form-grid.detail-form-grid--{n}   ← CSS grid; one per business group
+    ├── a-form-item               ← Arco form item (label + validation)
+    │   └── a-input / a-select / a-date-picker …  ← control; must be size="small"
+    ├── a-form-item.detail-form-grid__span2        ← spans 2 columns
+    │   └── a-textarea …
+    └── div.detail-field          ← read-only field; same grid slot
+        ├── div.detail-field__label
+        └── div.detail-field__val
+```
+
+Rules:
+- `a-form` wraps the **whole section's editable area**. One `<a-form>` per `detail-section`. Do not open a new `<a-form>` for every subgroup.
+- `detail-form-grid` is the **column grid**. Place it directly inside `<a-form>` or after a `form-subgroup-label`. All `a-form-item` and `detail-field` elements are **direct children** of the grid — no extra wrapper div per item.
+- `a-form-item` carries the label, required marker, and validation message. Never write a custom label `<div>` above an input — use `a-form-item`.
+- Controls inside `a-form-item` must be `size="small"` and `width: 100%` (inherited from `.detail-form` in `global.css`).
+
+### Column Count Rules
+
+| Grid class | Columns | Use when |
+|------------|---------|----------|
+| `detail-form-grid--3` | 3 | Narrow section or few fields; labels are long (≥ 6 chars) |
+| `detail-form-grid--4` | 4 | Standard detail section on ≥ 1280px drawer |
+| `detail-form-grid--6` | 6 | Dense sections with many short fields (amounts, dates, codes) |
+
+Do not use 4-column for sections where most labels exceed 8 characters — labels will be truncated. Prefer 3-column.
+
+Do not use 6-column as a default for all forms — it compresses label width to the point where long freight labels clip.
+
+### Span Usage
+
+```vue
+<!-- Normal 1-column item -->
+<a-form-item label="起运港">
+  <div class="detail-combo detail-combo--code-name">…</div>
+</a-form-item>
+
+<!-- 2-column span: textarea, long address, remark -->
+<a-form-item label="备注" class="detail-form-grid__span2">
+  <a-textarea v-model="form.remark" size="small" :auto-size="{ minRows: 2 }" />
+</a-form-item>
+
+<!-- Full-width span in a 4-col grid -->
+<a-form-item label="特殊说明" class="detail-form-grid__span4">
+  <a-textarea v-model="form.note" size="small" :auto-size="{ minRows: 2 }" />
+</a-form-item>
+```
+
+Span rules:
+- Use `__span2` for textarea, multi-line text, or address fields that need more width.
+- Use `__span3` / `__span4` only for full-width fields like long remarks, declaration content, or file upload areas.
+- Do not span a single-line input just to make it look prominent.
+
+### Subgroup Labels
+
+When one `detail-section` contains multiple business sub-concepts, use `form-subgroup-label` to divide them without creating new sections.
+
+```vue
+<a-form class="detail-form" layout="vertical" :model="form">
+  <!-- Group 1 -->
+  <div class="form-subgroup-label">航线信息</div>
+  <div class="detail-form-grid detail-form-grid--4">
+    <a-form-item label="起运港">…</a-form-item>
+    <a-form-item label="目的港">…</a-form-item>
+    <a-form-item label="ETD">…</a-form-item>
+    <a-form-item label="ETA">…</a-form-item>
+  </div>
+
+  <!-- Group 2 -->
+  <div class="form-subgroup-label">船期信息</div>
+  <div class="detail-form-grid detail-form-grid--4">
+    <a-form-item label="大船船名/航次">…</a-form-item>
+    <a-form-item label="船公司">…</a-form-item>
+  </div>
+</a-form>
+```
+
+Rules:
+- `form-subgroup-label` is a **scan label**, not a module title. Keep it short (2–6 characters).
+- Do not add a `form-subgroup-label` for every field — only when there are 2+ distinct business concepts in one section.
+- Never create a new `detail-section` for a subgroup that has fewer than 3 fields.
+
+### Mixed Editable + Read-Only Fields
+
+Read-only fields use `detail-field` (not `a-form-item`) but live in **the same grid**:
+
+```vue
+<div class="detail-form-grid detail-form-grid--4">
+  <!-- Editable -->
+  <a-form-item label="业务员">
+    <a-select v-model="form.staffId" size="small" allow-search />
+  </a-form-item>
+  <!-- Read-only (no edit needed) -->
+  <div class="detail-field">
+    <div class="detail-field__label">创建时间</div>
+    <div class="detail-field__val">{{ order.createdAt }}</div>
+  </div>
+</div>
+```
+
+Do not put read-only fields in a separate grid below the editable grid unless they belong to a different business concept.
+
+### Complete Section Template
+
+```vue
+<div class="detail-section">
+  <div class="detail-section__head">
+    <div class="detail-section__title">基本信息</div>
+    <div class="detail-section__actions">
+      <!-- section-level actions only -->
+    </div>
+  </div>
+  <div class="detail-section__body">
+    <a-form
+      ref="formRef"
+      class="detail-form"
+      layout="vertical"
+      size="small"
+      :model="form"
+    >
+      <div class="form-subgroup-label">单号信息</div>
+      <div class="detail-form-grid detail-form-grid--4">
+        <a-form-item label="业务单号">
+          <a-input v-model="form.businessNo" size="small" disabled />
+        </a-form-item>
+        <a-form-item label="HBL 单号">
+          <a-input v-model="form.hblNo" size="small" />
+        </a-form-item>
+        <a-form-item label="MBL 单号">
+          <a-input v-model="form.mblNo" size="small" />
+        </a-form-item>
+        <a-form-item label="客户" :rules="[{ required: true }]">
+          <div class="detail-combo detail-combo--action">
+            <a-select v-model="form.customerId" size="small" allow-search />
+            <a-button size="small" type="outline" @click="copyCustomer">
+              <template #icon><icon-copy /></template>
+            </a-button>
+          </div>
+        </a-form-item>
+      </div>
+
+      <div class="form-subgroup-label">航线信息</div>
+      <div class="detail-form-grid detail-form-grid--4">
+        <a-form-item label="起运港" :rules="[{ required: true }]">
+          <div class="detail-combo detail-combo--code-name">
+            <a-input v-model="form.polCode" size="small" placeholder="代码" />
+            <a-input v-model="form.pol" size="small" placeholder="港口名称" />
+          </div>
+        </a-form-item>
+        <a-form-item label="目的港" :rules="[{ required: true }]">
+          <div class="detail-combo detail-combo--code-name">
+            <a-input v-model="form.podCode" size="small" placeholder="代码" />
+            <a-input v-model="form.pod" size="small" placeholder="港口名称" />
+          </div>
+        </a-form-item>
+        <a-form-item label="ETD">
+          <a-date-picker v-model="form.etd" size="small" style="width:100%" />
+        </a-form-item>
+        <a-form-item label="ETA">
+          <a-date-picker v-model="form.eta" size="small" style="width:100%" />
+        </a-form-item>
+        <a-form-item label="备注" class="detail-form-grid__span4">
+          <a-textarea v-model="form.remark" size="small" :auto-size="{ minRows: 2 }" />
+        </a-form-item>
+      </div>
+    </a-form>
+  </div>
+</div>
+```
+
 ## Long Forms
 
 - Use vertical labels for dense enterprise forms.

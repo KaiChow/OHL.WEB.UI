@@ -23,6 +23,48 @@ This structure is fixed; the fields are not. Each list must map columns and filt
 - Query button is primary.
 - Reset is text, no icon.
 - More filters are inline expansion, not modal.
+
+### Filter Actions Panel Recipe
+
+The right-side command panel (`filter-card__actions-panel`) must feel like a single command surface, not three loose floating elements. All three controls use the same height (`--dense-control-h-filter` = 32px) and font size (12px).
+
+```vue
+<div class="filter-card__actions-panel">
+  <a-button
+    size="small"
+    type="primary"
+    class="filter-card__query-btn"
+    title="查询"
+    @click="handleSearch"
+  >
+    <template #icon><icon-search /></template>
+    查询
+  </a-button>
+  <a-button
+    size="small"
+    type="text"
+    class="reset-btn"
+    title="重置"
+    @click="handleReset"
+  >重置</a-button>
+  <button
+    class="filter-expand-link filter-expand-link--panel"
+    type="button"
+    :title="showAdvanced ? '收起' : '更多'"
+    @click="showAdvanced = !showAdvanced"
+  >
+    <span class="filter-expand-link__text">{{ showAdvanced ? '收起' : '更多' }}</span>
+    <icon-down />
+  </button>
+</div>
+```
+
+Rules:
+- All three controls: `height: var(--dense-control-h-filter)` (32px), `font-size: 12px`. Do not use `height: auto` or `min-height: 24px` on reset or expand — they must match query button height.
+- Query: `type="primary"` + icon + `class="filter-card__query-btn"` (full-width, box-shadow).
+- Reset: `type="text"` + `class="reset-btn"` (transparent bg, `color-text-2`, hover tints primary-1).
+- Expand/collapse: native `<button>` + `class="filter-expand-link filter-expand-link--panel"` (`color-text-3`, 12px). Do not use `a-button` here — the expand link uses a custom native button to avoid Arco's internal height enforcement.
+- Do not add a custom border or background to the panel container — `global.css` already handles the left accent via `::before`.
 - Advanced filters are grouped by business meaning, not random field order.
 - Do not show a separate “selected filters” strip. Current values are visible in controls/tabs.
 - Basic filters should be the 3-6 highest-frequency query fields for the object.
