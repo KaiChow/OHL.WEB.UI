@@ -79,11 +79,11 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 |--------|-------------|---------|-----------|--------|------|
 | 筛选区 | 查询 ×1 | — | — | — | 重置 |
 | 列表 toolbar | 新建 ×1 | 导出、批量 | 导出（可与 outline 二选一） | — | 刷新、列设置 |
-| 详情页头 | — | 并单、归档、更多 | — | — | 关闭 |
-| 详情模块头 | — | 模块主操作（添加） | 复制、清除等辅助 | — | 复制、清除（推荐） |
+| 详情页头 | — | — | 并单/归档/更多 | — | 关闭 |
+| 详情模块头 | — | 模块主操作（添加） | — | — | 复制、清除 |
 | 子表/子面板头 | — | 添加品名、添加行 | — | 空状态「添加」 | — |
 | 表格行内 | 行编辑保存 ×1 | — | 行编辑取消 | — | 查看/编辑/删除 icon |
-| 详情吸底 | 保存 ×1 | 订舱、放舱、输出 | 取消（若有） | — | 废弃 danger |
+| 详情吸底 | 保存 ×1 | — | 订舱、放舱、输出 | — | 废弃 danger |
 | 弹窗 footer | 确定 ×1 | — | 取消 | — | 删除 danger（左侧） |
 
 **同一作用域内**：primary ≤ 1；直接可见业务按钮 ≤ 3（超出收入 dropdown）。
@@ -125,16 +125,15 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 ### 4.3 详情页头
 
 ```vue
-<a-button size="small" type="outline">并单</a-button>
-<a-button size="small" type="outline">归档</a-button>
+<a-button size="small">并单</a-button>
+<a-button size="small">归档</a-button>
 <a-dropdown>
-  <a-button size="small" type="outline">更多 <icon-down /></a-button>
-  <!-- 复制、打印；危险项用 danger-opt + confirm -->
+  <a-button size="small">更多 <icon-down /></a-button>
 </a-dropdown>
 ```
 
 - 页头禁止 `primary`
-- 全局危险操作不要与吸底重复
+- 页头用 **secondary**（默认），不用 `outline`（与模块线框操作拉开层级）
 
 ### 4.4 详情模块头
 
@@ -178,18 +177,18 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
   </div>
   <div class="detail-drawer-footer__end">
     <a-dropdown>
-      <a-button size="small" type="outline">输出 <icon-down /></a-button>
+      <a-button size="small">输出 <icon-down /></a-button>
       <!-- 下载 / 打印 / 发送 -->
     </a-dropdown>
-    <a-button size="small" type="outline">订舱</a-button>
-    <a-button size="small" type="outline">放舱</a-button>
+    <a-button size="small">订舱</a-button>
+    <a-button size="small">放舱</a-button>
     <a-button size="small" type="primary" :loading="submitting">保存</a-button>
   </div>
 </div>
 ```
 
 - 仅「保存」= `primary`
-- 流程操作 = `outline` + normal
+- 吸底流程 = **secondary**（默认），不用 `outline`
 - 废弃 = `text` + `danger` + `Modal.confirm`
 
 ### 4.7 弹窗 Footer
@@ -284,7 +283,13 @@ Danger rules:
 ## 9. Visual Restraint (PESDP)
 
 - Primary tint is an **anchor**, not wallpaper. Do not make every action `outline`.
-- `detail-section__actions`：模块主操作用 `outline`，辅助用 `text`。
+- **Three visual tiers in detail drawers** (implemented in `global.css`):
+  - **Page head + footer workflow** → `secondary` (gray fill, neutral border): 并单/归档/更多、输出/订舱/放舱
+  - **Module / child-pane main action** → `outline` (white bg + primary border, hover primary-1): 添加发货人、添加品名、上传 MBL
+  - **Auxiliary** → `text` (text-3, hover primary-1): 复制、清除、发送报关资料
+  - **Danger** → `text` + `status="danger"` (danger-6, hover danger-1): 废弃、行内删除
+  - **Global submit** → `primary` only in footer
+- Row delete: `row-action-btn` + `status="danger"` must render **red**, not gray/blue (`global.css` overrides neutral row-action for `arco-btn-status-danger`).
 - Neutral surfaces (search/toolbar/table cap) stay white/gray; primary appears in active nav, links, focus, selection, one primary button, and thin anchors.
 - Hover: no transform/shadow float on dense toolbars (see `global.css` toolbar/detail-drawer overrides).
 

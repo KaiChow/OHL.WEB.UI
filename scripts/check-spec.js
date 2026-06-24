@@ -259,6 +259,24 @@ if (!globalCss.includes('.detail-form .detail-combo')) {
   });
 }
 
+if (!globalCss.includes('.vxe-table .row-action-btn.arco-btn-status-danger')) {
+  violations.push({
+    rule: '行内删除必须保留 danger 红色语义，禁止被默认 row-action 灰/蓝覆盖',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .vxe-table .row-action-btn.arco-btn-status-danger',
+  });
+}
+
+if (!globalCss.includes('.detail-drawer .detail-section__actions .arco-btn-outline')) {
+  violations.push({
+    rule: '详情模块 outline 必须使用白底细边样式，禁止默认浅蓝铺满',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing detail-drawer detail-section outline hierarchy',
+  });
+}
+
 // detail-mini-vxe 禁止 show-overflow（整块匹配，避免表头表体错位）
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;

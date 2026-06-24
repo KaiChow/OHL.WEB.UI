@@ -236,7 +236,7 @@ html, body, #app {
   --dense-workbench-checked-bg: var(--dense-primary-1);
   --dense-workbench-checked-hover-bg: var(--dense-primary-2);
   /* 详情内嵌子表：表头（结构层）与行 hover（交互层）必须可区分 */
-  --dense-mini-vxe-header-bg: linear-gradient(180deg, #FFFFFF 0%, var(--dense-primary-2) 100%);
+  --dense-mini-vxe-header-bg: #F7FAFF;
   --dense-mini-vxe-header-border: var(--dense-primary-3);
   --dense-mini-vxe-hover-bg: rgba(22, 93, 255, 0.05);
   --dense-mini-vxe-checked-bg: var(--dense-primary-1);
@@ -1497,6 +1497,23 @@ button:-moz-focusring,
   background: var(--dense-primary) !important;
   border-color: var(--dense-primary) !important;
 }
+/* 行内删除：默认弱显，hover/focus 才强调 danger，避免满屏红图标抢视线 */
+.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn {
+  color: var(--color-text-3) !important;
+  border-color: transparent !important;
+  background: transparent !important;
+}
+.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:hover,
+.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:focus,
+.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:focus-visible,
+.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:active {
+  color: var(--dense-danger-6) !important;
+  background: var(--dense-danger-1) !important;
+  border-color: var(--dense-danger-3) !important;
+  outline: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
 
 /* 工作台主表：结构层用 primary 渐变表头，交互层用轻洗 hover，避免「全灰 ERP」质感。 */
 .vxe-table.workbench-table .vxe-table--header-wrapper {
@@ -1606,6 +1623,21 @@ button:-moz-focusring,
   color: var(--color-text-2) !important;
   background: transparent !important;
   border-color: transparent !important;
+}
+.vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn {
+  color: var(--color-text-3) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+.vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn:hover,
+.vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn:focus,
+.vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn:focus-visible,
+.vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn:active {
+  color: var(--dense-danger-6) !important;
+  background: var(--dense-danger-1) !important;
+  border-color: transparent !important;
+  box-shadow: inset 0 0 0 1px var(--dense-danger-3) !important;
 }
 .vxe-table.workbench-table .row-actions {
   gap: 2px;
@@ -1992,10 +2024,10 @@ button:-moz-focusring,
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 8px 16px;
+  padding: 10px 16px;
   border-top: 1px solid var(--dense-border);
-  background: var(--color-bg-card);
-  box-shadow: 0 -4px 12px rgba(29, 33, 41, 0.06);
+  background: linear-gradient(180deg, #FCFDFF 0%, var(--color-bg-card) 100%);
+  box-shadow: 0 -6px 20px rgba(16, 24, 40, 0.07);
   flex-shrink: 0;
 }
 .detail-drawer-footer__start {
@@ -2012,6 +2044,24 @@ button:-moz-focusring,
   gap: 8px;
   margin-left: auto;
 }
+.detail-drawer-footer__cluster {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 6px 4px 8px;
+  border-radius: calc(var(--dense-radius) + 2px);
+  border: 1px solid var(--dense-border-subtle);
+  background: var(--color-fill-1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.detail-drawer-footer__sep {
+  width: 1px;
+  height: 20px;
+  margin: 0 2px;
+  background: var(--dense-border);
+  flex-shrink: 0;
+}
 .detail-drawer-footer .arco-btn:hover {
   transform: none !important;
   box-shadow: none !important;
@@ -2025,6 +2075,103 @@ button:-moz-focusring,
 .detail-drawer .arco-btn:focus-visible {
   transform: none !important;
   box-shadow: none !important;
+}
+
+/* 详情抽屉按钮层级（PESDP）：页头/吸底 workflow = secondary 白底微阴影；模块主操作 = outline；辅助 = text 链接态 */
+.detail-drawer .dds-head__actions .arco-btn-secondary,
+.detail-drawer .detail-drawer-footer__cluster .arco-btn-secondary,
+.detail-drawer .detail-drawer-footer__cluster .arco-dropdown .arco-btn-secondary {
+  background: var(--color-bg-card) !important;
+  border-color: var(--dense-border) !important;
+  color: var(--color-text-2) !important;
+  box-shadow: 0 1px 2px rgba(29, 33, 41, 0.05) !important;
+}
+.detail-drawer .dds-head__actions .arco-btn-secondary:not(.arco-btn-disabled):hover,
+.detail-drawer .dds-head__actions .arco-btn-secondary:not(.arco-btn-disabled):focus-visible,
+.detail-drawer .detail-drawer-footer__cluster .arco-btn-secondary:not(.arco-btn-disabled):hover,
+.detail-drawer .detail-drawer-footer__cluster .arco-btn-secondary:not(.arco-btn-disabled):focus-visible,
+.detail-drawer .detail-drawer-footer__cluster .arco-dropdown .arco-btn-secondary:not(.arco-btn-disabled):hover,
+.detail-drawer .detail-drawer-footer__cluster .arco-dropdown .arco-btn-secondary:not(.arco-btn-disabled):focus-visible {
+  background: var(--color-fill-1) !important;
+  border-color: var(--dense-primary-3) !important;
+  color: var(--color-text-1) !important;
+  box-shadow: 0 1px 3px rgba(22, 93, 255, 0.08) !important;
+}
+.detail-drawer .detail-section__actions .arco-btn-outline:not(.arco-btn-disabled),
+.detail-drawer .detail-child-pane__head .arco-btn-outline:not(.arco-btn-disabled),
+.detail-drawer .detail-form .detail-combo--action .arco-btn-outline:not(.arco-btn-disabled) {
+  background: var(--color-bg-card) !important;
+  border-color: var(--dense-primary-4) !important;
+  color: var(--dense-primary-6) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.85) inset, 0 1px 2px rgba(22, 93, 255, 0.07) !important;
+}
+.detail-drawer .detail-section__actions .arco-btn-outline:not(.arco-btn-disabled):hover,
+.detail-drawer .detail-section__actions .arco-btn-outline:not(.arco-btn-disabled):focus-visible,
+.detail-drawer .detail-child-pane__head .arco-btn-outline:not(.arco-btn-disabled):hover,
+.detail-drawer .detail-child-pane__head .arco-btn-outline:not(.arco-btn-disabled):focus-visible,
+.detail-drawer .detail-form .detail-combo--action .arco-btn-outline:not(.arco-btn-disabled):hover,
+.detail-drawer .detail-form .detail-combo--action .arco-btn-outline:not(.arco-btn-disabled):focus-visible {
+  background: var(--dense-primary-1) !important;
+  border-color: var(--dense-primary-5) !important;
+  color: var(--dense-primary-7) !important;
+  box-shadow: 0 1px 3px rgba(22, 93, 255, 0.12) !important;
+}
+.detail-drawer .detail-section__actions {
+  gap: 4px;
+  padding: 3px 4px;
+  border-radius: var(--dense-radius);
+  border: 1px solid var(--dense-border-subtle);
+  background: rgba(247, 250, 255, 0.72);
+}
+.detail-drawer .detail-section__actions .arco-btn-text:not(.arco-btn-status-danger),
+.detail-drawer .detail-child-pane__head .arco-btn-text:not(.arco-btn-status-danger) {
+  color: var(--dense-primary-6) !important;
+  font-size: var(--dense-font-nav) !important;
+}
+.detail-drawer .detail-section__actions .arco-btn-text:not(.arco-btn-status-danger):hover,
+.detail-drawer .detail-section__actions .arco-btn-text:not(.arco-btn-status-danger):focus-visible,
+.detail-drawer .detail-child-pane__head .arco-btn-text:not(.arco-btn-status-danger):hover,
+.detail-drawer .detail-child-pane__head .arco-btn-text:not(.arco-btn-status-danger):focus-visible {
+  color: var(--dense-primary-7) !important;
+  background: var(--dense-primary-1) !important;
+}
+.detail-drawer .arco-btn-text.arco-btn-status-danger:not(.arco-btn-disabled),
+.detail-drawer-footer__start .arco-btn-text.arco-btn-status-danger {
+  color: var(--dense-danger-6) !important;
+}
+.detail-drawer .arco-btn-text.arco-btn-status-danger:not(.arco-btn-disabled):hover,
+.detail-drawer .arco-btn-text.arco-btn-status-danger:not(.arco-btn-disabled):focus-visible,
+.detail-drawer-footer__start .arco-btn-text.arco-btn-status-danger:hover {
+  color: var(--dense-danger-6) !important;
+  background: var(--dense-danger-1) !important;
+}
+.detail-drawer-footer__cluster .arco-btn-primary:not(.arco-btn-disabled) {
+  min-width: 76px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(22, 93, 255, 0.28) !important;
+}
+.detail-drawer-footer__cluster .arco-btn-primary:not(.arco-btn-disabled):hover {
+  box-shadow: 0 3px 10px rgba(22, 93, 255, 0.34) !important;
+}
+.detail-drawer .dds-head {
+  box-shadow: 0 1px 0 var(--dense-border-subtle), 0 4px 14px rgba(16, 24, 40, 0.045);
+  z-index: 2;
+}
+.detail-drawer .detail-section__head {
+  background: linear-gradient(180deg, #FCFDFF 0%, var(--color-bg-card) 100%);
+}
+.detail-drawer .detail-section__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.detail-drawer .detail-section__title::before {
+  content: '';
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--dense-primary-5) 0%, var(--dense-primary-6) 100%);
+  flex-shrink: 0;
 }
 /* 查看模式 disabled：数据须可读（§17.3.8） */
 .detail-drawer .arco-input-wrapper.arco-input-disabled,
@@ -3117,7 +3264,7 @@ button:-moz-focusring,
   background: var(--color-bg-card) !important;
 }
 .detail-mini-vxe.vxe-table .vxe-table--header-wrapper {
-  border-bottom: none !important;
+  border-bottom: 2px solid var(--dense-mini-vxe-header-border) !important;
   box-shadow: none !important;
 }
 .detail-mini-vxe.vxe-table .vxe-header--row {

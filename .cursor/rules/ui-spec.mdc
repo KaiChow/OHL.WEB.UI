@@ -326,6 +326,8 @@ grep -n "\.类名" src/styles/global.css
 | 整行铺状态背景色 | 只在 `.s-pill[data-s]` 体现 |
 | 抽屉不加 `class="detail-drawer"` | 必须加，否则 Arco 默认标题不被覆盖 |
 | 吸底栏 8 按钮平铺 / `btn-muted-warn` | `detail-drawer-footer__start` + `__end`；低频收入下拉；仅 1 个 `primary` |
+| 页头/吸底 workflow 用 outline 铺满 | 页头/吸底用 `secondary`；模块主操作用 `outline` |
+| 行内删除灰色/蓝色 | `status="danger"` + `global.css` 红色 danger 覆盖 |
 | 详情行内删除直接点 | `a-popconfirm` 包裹 `row-action-btn status="danger"` |
 | 复制/清除用 outline | `type="text"` 降权 |
 | `status="warning"` 流程按钮 | `outline`+normal 或 s-pill |

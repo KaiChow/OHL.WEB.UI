@@ -367,13 +367,13 @@ const closeDrawer = () => {
         <span class="detail-drawer-status__sub">境外单号：{{ orderForm.overseasNo }}</span>
       </div>
       <div class="dds-head__actions">
-        <a-button size="small" type="outline" @click="feedback('并单窗口已打开')">并单</a-button>
-        <a-button size="small" type="outline" @click="feedback('归档完成')">
+        <a-button size="small" @click="feedback('并单窗口已打开')">并单</a-button>
+        <a-button size="small" @click="feedback('归档完成')">
           <template #icon><icon-archive /></template>
           归档
         </a-button>
         <a-dropdown trigger="click">
-          <a-button size="small" type="outline">
+          <a-button size="small">
             更多
             <icon-down />
           </a-button>
@@ -1086,8 +1086,9 @@ const closeDrawer = () => {
         <a-button size="small" type="text" status="danger" @click="confirmAbandon">废弃</a-button>
       </div>
       <div class="detail-drawer-footer__end">
+        <div class="detail-drawer-footer__cluster">
         <a-dropdown trigger="click">
-          <a-button size="small" type="outline">
+          <a-button size="small">
             <template #icon><icon-download /></template>
             输出
             <icon-down />
@@ -1111,12 +1112,14 @@ const closeDrawer = () => {
             </a-doption>
           </template>
         </a-dropdown>
-        <a-button size="small" type="outline" @click="feedback('订舱已提交')">订舱</a-button>
-        <a-button size="small" type="outline" @click="feedback('放舱已提交')">放舱</a-button>
+        <a-button size="small" @click="feedback('订舱已提交')">订舱</a-button>
+        <a-button size="small" @click="feedback('放舱已提交')">放舱</a-button>
+        <span class="detail-drawer-footer__sep" aria-hidden="true" />
         <a-button size="small" type="primary" @click="feedback('订单详情已保存')">
           <template #icon><icon-save /></template>
           保存
         </a-button>
+        </div>
       </div>
     </div>
   </div>
