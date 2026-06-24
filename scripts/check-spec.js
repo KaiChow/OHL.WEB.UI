@@ -218,6 +218,14 @@ if (!globalCss.includes('.detail-drawer .arco-picker-size-small')) {
     content: 'missing .detail-drawer .arco-picker-size-small',
   });
 }
+if (!globalCss.includes('--dense-mini-vxe-header-bg') || !globalCss.includes('--dense-mini-vxe-hover-bg')) {
+  violations.push({
+    rule: 'detail-mini-vxe 表头与 hover 必须使用独立 token，禁止同色',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-mini-vxe-header-bg or --dense-mini-vxe-hover-bg',
+  });
+}
 
 // detail-mini-vxe 禁止 show-overflow（整块匹配，避免表头表体错位）
 for (const file of files) {

@@ -232,6 +232,12 @@ html, body, #app {
   --dense-row-stripe: #FBFCFE;
   --dense-table-header-bg: linear-gradient(180deg, #FFFFFF 0%, #F6F9FE 100%);
   --dense-table-header-border: #DDE6F2;
+  /* 详情内嵌子表：表头（结构层）与行 hover（交互层）必须可区分 */
+  --dense-mini-vxe-header-bg: linear-gradient(180deg, #FFFFFF 0%, var(--dense-primary-2) 100%);
+  --dense-mini-vxe-header-border: var(--dense-primary-3);
+  --dense-mini-vxe-hover-bg: rgba(22, 93, 255, 0.05);
+  --dense-mini-vxe-checked-bg: var(--dense-primary-1);
+  --dense-mini-vxe-checked-hover-bg: var(--dense-primary-2);
   --dense-table-col-border: #F1F4F8;
   --dense-table-row-border: #EAF0F7;
   --dense-table-empty-bg: linear-gradient(180deg, #FFFFFF 0, #FFFFFF 76px, #FBFCFE 100%);
@@ -3032,12 +3038,12 @@ button:-moz-focusring,
   background: var(--color-bg-card) !important;
 }
 .detail-mini-vxe.vxe-table .vxe-table--header-wrapper {
-  border-bottom: none !important;
+  border-bottom: 1px solid var(--dense-mini-vxe-header-border) !important;
   box-shadow: none !important;
 }
 .detail-mini-vxe.vxe-table .vxe-header--row {
   height: 30px !important;
-  background: var(--dense-primary-1) !important;
+  background: var(--dense-mini-vxe-header-bg) !important;
 }
 .detail-mini-vxe.vxe-table .vxe-body--row {
   height: 38px !important;
@@ -3045,32 +3051,50 @@ button:-moz-focusring,
 .detail-mini-vxe.vxe-table .vxe-header--column {
   height: 30px !important;
   padding: 0 !important;
-  color: var(--color-text-2) !important;
+  color: var(--color-text-1) !important;
   font-size: var(--dense-font-title) !important;
   font-weight: var(--dense-weight-title) !important;
-  background: var(--dense-primary-1) !important;
+  background: var(--dense-mini-vxe-header-bg) !important;
   border-right: none !important;
-  border-bottom: 1px solid var(--dense-primary-2) !important;
+  border-bottom: 1px solid var(--dense-mini-vxe-header-border) !important;
 }
 .detail-mini-vxe.vxe-table .vxe-header--column.col--fixed-left,
 .detail-mini-vxe.vxe-table .vxe-header--column.col--fixed-right {
-  background: var(--dense-primary-1) !important;
+  background: var(--dense-mini-vxe-header-bg) !important;
 }
 .detail-mini-vxe.vxe-table .vxe-body--column {
   height: 38px !important;
   padding: 0 !important;
   color: var(--color-text-1) !important;
   font-size: var(--dense-font-data) !important;
+  background: var(--color-bg-card) !important;
   border-right: none !important;
   border-bottom: 1px solid var(--dense-border-subtle) !important;
 }
 .detail-mini-vxe.vxe-table .vxe-body--row.row--hover,
 .detail-mini-vxe.vxe-table .vxe-body--row:hover {
-  background-color: var(--dense-primary-1) !important;
+  background-color: transparent !important;
 }
 .detail-mini-vxe.vxe-table .vxe-body--row.row--hover .vxe-body--column,
 .detail-mini-vxe.vxe-table .vxe-body--row:hover .vxe-body--column {
-  background-color: var(--dense-primary-1) !important;
+  background-color: var(--dense-mini-vxe-hover-bg) !important;
+}
+.detail-mini-vxe.vxe-table .vxe-body--row.row--checked .vxe-body--column {
+  background-color: var(--dense-mini-vxe-checked-bg) !important;
+}
+.detail-mini-vxe.vxe-table .vxe-body--row.row--checked.row--hover .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--checked:hover .vxe-body--column {
+  background-color: var(--dense-mini-vxe-checked-hover-bg) !important;
+}
+.detail-mini-vxe.vxe-table .vxe-body--row.row--hover .col--fixed-right .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row:hover .col--fixed-right .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--hover .vxe-body--column.col--fixed-right,
+.detail-mini-vxe.vxe-table .vxe-body--row:hover .vxe-body--column.col--fixed-right {
+  background-color: var(--dense-mini-vxe-hover-bg) !important;
+}
+.detail-mini-vxe.vxe-table .vxe-body--row.row--checked .col--fixed-right .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--checked .vxe-body--column.col--fixed-right {
+  background-color: var(--dense-mini-vxe-checked-bg) !important;
 }
 .detail-mini-vxe.vxe-table .vxe-header--column .vxe-cell {
   padding: 0 6px !important;

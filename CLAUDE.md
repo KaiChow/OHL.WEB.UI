@@ -881,6 +881,7 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 ✅ 详情模块内的子表格（品名明细、装柜信息、报关信息、入仓信息等）必须加 class="detail-mini-vxe"
 ✅ 表格外层用 detail-section__body detail-section__body--table（padding:0，可横向滚动）
 ✅ global.css 自动处理 ghost border：控件默认极淡边框，hover/focus 时显示 primary-4 边框
+✅ 表头用 --dense-mini-vxe-header-bg（primary-2 渐变），行 hover 用 --dense-mini-vxe-hover-bg（5% 主色），二者禁止同色
 ✅ 状态类字段（报关状态/放行状态/入仓状态）用 s-pill[data-s]，不用 a-select
 ✅ 只读计算字段（件数/毛重/体积 已自动汇总时）直接显示文本，不套 a-input
 ✅ height="auto"（详情子表格不固定高度，随数据行数增长）
