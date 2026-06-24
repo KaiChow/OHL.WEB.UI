@@ -229,19 +229,22 @@ html, body, #app {
   --dense-surface-tint: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
   --dense-border: #E5E6EB;
   --dense-border-subtle: #EDF1F6;
-  --dense-row-stripe: #FBFCFE;
-  --dense-table-header-bg: linear-gradient(180deg, #FFFFFF 0%, #F6F9FE 100%);
-  --dense-table-header-border: #DDE6F2;
+  --dense-row-stripe: #F7FAFF;
+  --dense-table-header-bg: linear-gradient(180deg, #FFFFFF 0%, #EEF4FF 52%, var(--dense-primary-2) 100%);
+  --dense-table-header-border: var(--dense-primary-3);
+  --dense-workbench-hover-bg: rgba(22, 93, 255, 0.055);
+  --dense-workbench-checked-bg: var(--dense-primary-1);
+  --dense-workbench-checked-hover-bg: var(--dense-primary-2);
   /* 详情内嵌子表：表头（结构层）与行 hover（交互层）必须可区分 */
   --dense-mini-vxe-header-bg: linear-gradient(180deg, #FFFFFF 0%, var(--dense-primary-2) 100%);
   --dense-mini-vxe-header-border: var(--dense-primary-3);
   --dense-mini-vxe-hover-bg: rgba(22, 93, 255, 0.05);
   --dense-mini-vxe-checked-bg: var(--dense-primary-1);
   --dense-mini-vxe-checked-hover-bg: var(--dense-primary-2);
-  --dense-table-col-border: #F1F4F8;
-  --dense-table-row-border: #EAF0F7;
-  --dense-table-empty-bg: linear-gradient(180deg, #FFFFFF 0, #FFFFFF 76px, #FBFCFE 100%);
-  --dense-table-fixed-bg: linear-gradient(90deg, #F8FAFC 0, #FFFFFF 18px, #FFFFFF 100%);
+  --dense-table-col-border: #E8EEF8;
+  --dense-table-row-border: #E3EBF8;
+  --dense-table-empty-bg: linear-gradient(180deg, #FFFFFF 0, #FFFFFF 72px, #FAFBFF 100%);
+  --dense-table-fixed-bg: #FFFFFF;
   --dense-table-fixed-shadow: -8px 0 18px rgba(16, 24, 40, 0.045);
   --dense-bg-body: var(--color-bg-body);
   --dense-bg-body-top: var(--color-bg-body);
@@ -382,7 +385,7 @@ button:-moz-focusring,
   background: var(--color-bg-card);
   overflow: hidden;
   border: 1px solid var(--dense-card-border);
-  border-top-color: var(--dense-card-border);
+  border-top: 1px solid var(--dense-primary-3);
   border-radius: var(--dense-radius);
 }
 
@@ -395,8 +398,8 @@ button:-moz-focusring,
   padding: 0 14px;
   height: 40px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
-  border-bottom: 1px solid var(--dense-border-subtle);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5F9FF 100%);
+  border-bottom: 1px solid var(--dense-primary-2);
 }
 .table-card-cap__right {
   display: flex;
@@ -1497,18 +1500,16 @@ button:-moz-focusring,
   border-color: var(--dense-primary) !important;
 }
 
-/* 工作台主表：中性结构承载，主色只用于 hover/选中/链接/操作反馈。 */
+/* 工作台主表：结构层用 primary 渐变表头，交互层用轻洗 hover，避免「全灰 ERP」质感。 */
 .vxe-table.workbench-table .vxe-table--header-wrapper {
-  border-bottom: 1px solid var(--dense-table-header-border) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.98),
-    0 1px 0 rgba(16, 24, 40, 0.035);
+  border-bottom: 2px solid var(--dense-primary-3) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.98);
 }
 .vxe-table.workbench-table .vxe-header--column {
   color: var(--color-text-1) !important;
   background: var(--dense-table-header-bg) !important;
   font-weight: var(--dense-weight-title) !important;
-  border-right: 1px solid var(--dense-table-col-border) !important;
+  border-right: 1px solid rgba(143, 184, 255, 0.22) !important;
 }
 .vxe-table.workbench-table .vxe-header--column.col--fixed-left,
 .vxe-table.workbench-table .vxe-header--column.col--fixed-right {
@@ -1520,11 +1521,13 @@ button:-moz-focusring,
   box-shadow: none;
 }
 .vxe-table.workbench-table .vxe-body--column {
+  color: var(--color-text-1) !important;
+  background: var(--color-bg-card) !important;
   border-right: 1px solid var(--dense-table-col-border) !important;
   border-bottom: 1px solid var(--dense-table-row-border) !important;
 }
 .vxe-table.workbench-table .vxe-body--row.row--stripe .vxe-body--column {
-  background: var(--dense-row-stripe);
+  background: var(--dense-row-stripe) !important;
 }
 .vxe-table.workbench-table .vxe-body--row.row--stripe .vxe-body--column:nth-child(3) {
   background: var(--dense-row-stripe) !important;
@@ -1532,10 +1535,14 @@ button:-moz-focusring,
 }
 .vxe-table.workbench-table .vxe-body--row.row--hover .vxe-body--column,
 .vxe-table.workbench-table .vxe-body--row:hover .vxe-body--column {
-  background: var(--dense-primary-1) !important;
+  background: var(--dense-workbench-hover-bg) !important;
 }
 .vxe-table.workbench-table .vxe-body--row.row--checked .vxe-body--column {
-  background: var(--dense-primary-2) !important;
+  background: var(--dense-workbench-checked-bg) !important;
+}
+.vxe-table.workbench-table .vxe-body--row.row--checked.row--hover .vxe-body--column,
+.vxe-table.workbench-table .vxe-body--row.row--checked:hover .vxe-body--column {
+  background: var(--dense-workbench-checked-hover-bg) !important;
 }
 .vxe-table.workbench-table .vxe-body--row.row--hover .vxe-body--column:first-child,
 .vxe-table.workbench-table .vxe-body--row:hover .vxe-body--column:first-child {
@@ -1557,10 +1564,14 @@ button:-moz-focusring,
 }
 .vxe-table.workbench-table .vxe-body--row.row--hover .vxe-body--column.col--fixed-right,
 .vxe-table.workbench-table .vxe-body--row:hover .vxe-body--column.col--fixed-right {
-  background: linear-gradient(90deg, var(--dense-primary-1) 0, #FFFFFF 18px, var(--dense-primary-1) 100%) !important;
+  background: var(--dense-workbench-hover-bg) !important;
 }
 .vxe-table.workbench-table .vxe-body--row.row--checked .vxe-body--column.col--fixed-right {
-  background: linear-gradient(90deg, var(--dense-primary-2) 0, #FFFFFF 18px, var(--dense-primary-2) 100%) !important;
+  background: var(--dense-workbench-checked-bg) !important;
+}
+.vxe-table.workbench-table .vxe-body--row.row--checked.row--hover .vxe-body--column.col--fixed-right,
+.vxe-table.workbench-table .vxe-body--row.row--checked:hover .vxe-body--column.col--fixed-right {
+  background: var(--dense-workbench-checked-hover-bg) !important;
 }
 .vxe-table.workbench-table .row-action-btn.arco-btn {
   color: var(--color-text-3) !important;
@@ -1655,7 +1666,7 @@ button:-moz-focusring,
 .vxe-table.workbench-table {
   background: var(--color-bg-card) !important;
   border-top: 0 !important;
-  box-shadow: inset 0 1px 0 var(--dense-table-header-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 .vxe-table.workbench-table::after {
   content: '';

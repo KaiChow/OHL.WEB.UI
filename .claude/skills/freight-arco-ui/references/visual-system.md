@@ -131,6 +131,7 @@ Workbench tables need a visible but restrained primary rhythm. A table that is t
 
 Required:
 
+- Workbench list tables use `workbench-table` + global tokens: header `--dense-table-header-bg` (white → primary-2 gradient) + 2px `--dense-primary-3` bottom anchor; hover `--dense-workbench-hover-bg` (light primary wash), not the same fill as the header.
 - Table header may use a subtle Arco primary tint or primary border to anchor the grid.
 - Primary identifiers and business codes use `primary-6/7` links and medium/title weight.
 - Core business values such as customer, shipper, consignee, port, and container quantity use `color-text-1`.

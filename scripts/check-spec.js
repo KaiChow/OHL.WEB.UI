@@ -227,6 +227,15 @@ if (!globalCss.includes('--dense-mini-vxe-header-bg') || !globalCss.includes('--
   });
 }
 
+if (!globalCss.includes('--dense-workbench-hover-bg')) {
+  violations.push({
+    rule: 'workbench-table 表头与 hover 必须使用独立 token，避免全灰质感',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-workbench-hover-bg',
+  });
+}
+
 // detail-mini-vxe 禁止 show-overflow（整块匹配，避免表头表体错位）
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
