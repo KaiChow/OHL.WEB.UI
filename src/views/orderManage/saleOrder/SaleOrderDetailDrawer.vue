@@ -359,22 +359,28 @@ const closeDrawer = () => {
     class="detail-drawer"
     :visible="visible"
     width="calc(100vw - 32px)"
+    :header="false"
     :footer="false"
     unmount-on-close
     @update:visible="emit('update:visible', $event)"
   >
   <div class="detail-drawer-body order-detail-page">
     <div class="dds-head">
-      <div class="dds-head__left">
+      <div class="dds-head__main">
         <a-tooltip content="关闭详情">
-          <a-button type="text" class="row-action-btn" @click="closeDrawer">
+          <a-button type="text" class="row-action-btn dds-head__back" @click="closeDrawer">
             <icon-left />
           </a-button>
         </a-tooltip>
-        <span class="dds-order-no mono">{{ orderForm.orderNo }}</span>
-        <span class="s-pill" :data-s="orderForm.statusKey">{{ orderForm.statusText }}</span>
-        <span class="dds-company" :title="orderForm.customer">{{ orderForm.customer }}</span>
-        <span class="detail-drawer-status__sub">境外单号：{{ orderForm.overseasNo }}</span>
+        <div class="dds-head__identity">
+          <span class="dds-order-no mono link-text link-text--strong">{{ orderForm.orderNo }}</span>
+          <span class="s-pill" :data-s="orderForm.statusKey">{{ orderForm.statusText }}</span>
+          <span class="dds-head__meta" :title="`${orderForm.businessType} · ${orderForm.overseasNo}`">
+            {{ orderForm.businessType }}
+            <span class="dds-head__meta-sep">·</span>
+            <span class="mono">{{ orderForm.overseasNo }}</span>
+          </span>
+        </div>
       </div>
       <div class="dds-head__actions">
         <a-button size="small" type="secondary" @click="feedback('并单窗口已打开')">并单</a-button>
@@ -401,7 +407,7 @@ const closeDrawer = () => {
       </div>
     </div>
 
-    <div class="dds-hero">
+    <div class="dds-hero dds-hero--compact">
       <div class="dds-hero__route">
         <span class="dds-hero__label">航线</span>
         <div class="dds-hero__route-main">
@@ -413,7 +419,7 @@ const closeDrawer = () => {
       </div>
       <div class="dds-hero__facts">
         <div class="dds-hero-fact">
-          <span class="dds-hero-fact__label">HBL 单号</span>
+          <span class="dds-hero-fact__label">HBL</span>
           <span class="dds-hero-fact__value mono">{{ orderForm.hblNo }}</span>
         </div>
         <div class="dds-hero-fact">
@@ -429,16 +435,14 @@ const closeDrawer = () => {
           <span class="dds-hero-fact__value">{{ orderForm.carrier }}</span>
         </div>
         <div class="dds-hero-fact dds-hero-fact--customer">
-          <span class="dds-hero-fact__label">客户 / 业务类型</span>
-          <span class="dds-hero-fact__value" :title="`${orderForm.customer} / ${orderForm.businessType}`">
-            {{ orderForm.customer }} / {{ orderForm.businessType }}
-          </span>
+          <span class="dds-hero-fact__label">客户</span>
+          <span class="dds-hero-fact__value" :title="orderForm.customer">{{ orderForm.customer }}</span>
         </div>
       </div>
     </div>
 
-    <div class="dds-steps-bar">
-      <a-steps class="od-steps" size="small" :current="currentStep">
+    <div class="dds-steps-bar dds-steps-bar--compact">
+      <a-steps class="dds-steps" size="small" :current="currentStep">
         <a-step v-for="item in milestones" :key="item" :title="item" />
       </a-steps>
     </div>
@@ -1091,44 +1095,43 @@ const closeDrawer = () => {
     </div>
 
     <div class="detail-drawer-footer">
-      <div class="detail-drawer-footer__start">
-        <a-button size="small" type="text" status="danger" @click="confirmAbandon">废弃</a-button>
-      </div>
       <div class="detail-drawer-footer__end">
-        <div class="detail-drawer-footer__cluster">
-        <a-dropdown trigger="click">
-          <a-button size="small" type="secondary">
-            <template #icon><icon-download /></template>
-            输出
-            <icon-down />
-          </a-button>
-          <template #content>
-            <a-doption @click="feedback('入仓单和理货标签已下载')">
+        <a-button size="small" type="text" status="danger" @click="confirmAbandon">废弃</a-button>
+        <span class="detail-drawer-footer__sep" aria-hidden="true" />
+        <div class="detail-drawer-footer__workflow">
+          <a-dropdown trigger="click">
+            <a-button size="small" type="secondary">
               <template #icon><icon-download /></template>
-              下载入仓单和理货标签
-            </a-doption>
-            <a-doption @click="feedback('打印任务已创建')">
-              <template #icon><icon-printer /></template>
-              打印业务单
-            </a-doption>
-            <a-doption @click="feedback('提单打印任务已创建')">
-              <template #icon><icon-file /></template>
-              提单打印
-            </a-doption>
-            <a-doption @click="feedback('发送舱前通知')">
-              <template #icon><icon-send /></template>
-              发送舱前
-            </a-doption>
-          </template>
-        </a-dropdown>
-        <a-button size="small" type="secondary" @click="feedback('订舱已提交')">订舱</a-button>
-        <a-button size="small" type="secondary" @click="feedback('放舱已提交')">放舱</a-button>
+              输出
+              <icon-down />
+            </a-button>
+            <template #content>
+              <a-doption @click="feedback('入仓单和理货标签已下载')">
+                <template #icon><icon-download /></template>
+                下载入仓单和理货标签
+              </a-doption>
+              <a-doption @click="feedback('打印任务已创建')">
+                <template #icon><icon-printer /></template>
+                打印业务单
+              </a-doption>
+              <a-doption @click="feedback('提单打印任务已创建')">
+                <template #icon><icon-file /></template>
+                提单打印
+              </a-doption>
+              <a-doption @click="feedback('发送舱前通知')">
+                <template #icon><icon-send /></template>
+                发送舱前
+              </a-doption>
+            </template>
+          </a-dropdown>
+          <a-button size="small" type="outline" @click="feedback('订舱已提交')">订舱</a-button>
+          <a-button size="small" type="outline" @click="feedback('放舱已提交')">放舱</a-button>
+        </div>
         <span class="detail-drawer-footer__sep" aria-hidden="true" />
         <a-button size="small" type="primary" @click="feedback('订单详情已保存')">
           <template #icon><icon-save /></template>
           保存
         </a-button>
-        </div>
       </div>
     </div>
   </div>
@@ -1143,19 +1146,10 @@ const closeDrawer = () => {
   overflow: hidden;
 }
 
-.od-steps {
-  max-width: 760px;
-}
-
 .od-detail-scroll {
   display: flex;
   flex-direction: column;
   gap: var(--dense-gap-module);
 }
 
-@media (max-width: 1280px) {
-  .od-steps {
-    max-width: 100%;
-  }
-}
 </style>

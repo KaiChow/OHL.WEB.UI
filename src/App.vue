@@ -2,5 +2,7 @@
 </script>
 
 <template>
-  <router-view />
+  <a-config-provider :update-at-scroll="true" :scroll-to-close="true">
+    <router-view />
+  </a-config-provider>
 </template>

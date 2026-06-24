@@ -585,7 +585,7 @@ button:-moz-focusring,
 .filter-card__main {
   display: flex;
   flex-direction: row;
-  align-items: stretch;
+  align-items: flex-start;
   min-height: 0;
   background: var(--color-bg-card);
 }
@@ -599,11 +599,14 @@ button:-moz-focusring,
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
+  align-self: flex-start;
   flex-shrink: 0;
   gap: 6px;
-  width: clamp(124px, 7.6vw, 148px);
-  min-width: 124px;
-  padding: 10px 10px;
+  width: max-content;
+  min-width: 72px;
+  max-width: 132px;
+  margin-top: 27px;
+  padding: 0 8px 8px 10px;
   border-left: 1px solid var(--dense-border-subtle);
   background:
     linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
@@ -616,6 +619,7 @@ button:-moz-focusring,
 }
 .filter-card__query-btn {
   width: 100%;
+  white-space: nowrap;
   box-shadow: 0 2px 5px rgba(22, 93, 255, 0.16) !important;
 }
 .filter-card__query-btn .arco-btn-content {
@@ -657,6 +661,7 @@ button:-moz-focusring,
   border-radius: var(--dense-radius);
   color: var(--color-text-2);
   background: var(--color-bg-card);
+  white-space: nowrap;
 }
 .filter-expand-link.filter-expand-link--panel .filter-expand-link__text {
   min-width: 0;
@@ -1972,15 +1977,9 @@ button:-moz-focusring,
   width: calc(100vw - 32px) !important;
   max-width: none;
 }
+/* 复杂详情抽屉：关闭/标题在 dds-head 内，禁止再用 Arco 默认 header（会空一行仅 X） */
 .detail-drawer .arco-drawer-header {
-  padding: 8px 16px;
-  min-height: unset;
-  border-bottom: 1px solid var(--dense-border-subtle);
-}
-.detail-drawer .arco-drawer-header-title {
-  font-size: var(--dense-font-title);
-  font-weight: var(--dense-weight-title);
-  line-height: 1.4;
+  display: none;
 }
 .detail-drawer .arco-drawer-body {
   display: flex;
@@ -2026,7 +2025,7 @@ button:-moz-focusring,
 .detail-drawer-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   padding: 10px 16px;
   border-top: 1px solid var(--dense-border);
@@ -2034,6 +2033,7 @@ button:-moz-focusring,
   box-shadow: 0 -6px 20px rgba(16, 24, 40, 0.07);
   flex-shrink: 0;
 }
+/* @deprecated 危险操作已收入 __end 右对齐分组 */
 .detail-drawer-footer__start {
   display: flex;
   align-items: center;
@@ -2046,7 +2046,21 @@ button:-moz-focusring,
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 8px;
-  margin-left: auto;
+  width: 100%;
+}
+.detail-drawer-footer__workflow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+/* @deprecated 保存已收入 __end */
+.detail-drawer-footer__commit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 .detail-drawer-footer__cluster {
   display: inline-flex;
@@ -2062,7 +2076,7 @@ button:-moz-focusring,
 .detail-drawer-footer__sep {
   width: 1px;
   height: 20px;
-  margin: 0 2px;
+  margin: 0 4px;
   background: var(--dense-border);
   flex-shrink: 0;
 }
@@ -2081,8 +2095,10 @@ button:-moz-focusring,
   box-shadow: none !important;
 }
 
-/* 详情抽屉按钮层级（PESDP）：页头/吸底 workflow = secondary 白底微阴影；模块主操作 = outline；辅助 = text 链接态 */
+/* 详情抽屉按钮层级（PESDP）：页头 workflow = secondary；吸底流程 = secondary + outline；仅保存 = primary */
 .detail-drawer .dds-head__actions .arco-btn-secondary,
+.detail-drawer .detail-drawer-footer__workflow .arco-btn-secondary,
+.detail-drawer .detail-drawer-footer__workflow .arco-dropdown .arco-btn-secondary,
 .detail-drawer .detail-drawer-footer__cluster .arco-btn-secondary,
 .detail-drawer .detail-drawer-footer__cluster .arco-dropdown .arco-btn-secondary {
   background: var(--color-bg-card) !important;
@@ -2092,6 +2108,10 @@ button:-moz-focusring,
 }
 .detail-drawer .dds-head__actions .arco-btn-secondary:not(.arco-btn-disabled):hover,
 .detail-drawer .dds-head__actions .arco-btn-secondary:not(.arco-btn-disabled):focus-visible,
+.detail-drawer .detail-drawer-footer__workflow .arco-btn-secondary:not(.arco-btn-disabled):hover,
+.detail-drawer .detail-drawer-footer__workflow .arco-btn-secondary:not(.arco-btn-disabled):focus-visible,
+.detail-drawer .detail-drawer-footer__workflow .arco-dropdown .arco-btn-secondary:not(.arco-btn-disabled):hover,
+.detail-drawer .detail-drawer-footer__workflow .arco-dropdown .arco-btn-secondary:not(.arco-btn-disabled):focus-visible,
 .detail-drawer .detail-drawer-footer__cluster .arco-btn-secondary:not(.arco-btn-disabled):hover,
 .detail-drawer .detail-drawer-footer__cluster .arco-btn-secondary:not(.arco-btn-disabled):focus-visible,
 .detail-drawer .detail-drawer-footer__cluster .arco-dropdown .arco-btn-secondary:not(.arco-btn-disabled):hover,
@@ -2103,7 +2123,8 @@ button:-moz-focusring,
 }
 .detail-drawer .detail-section__actions .arco-btn-outline:not(.arco-btn-disabled),
 .detail-drawer .detail-child-pane__head .arco-btn-outline:not(.arco-btn-disabled),
-.detail-drawer .detail-form .detail-combo--action .arco-btn-outline:not(.arco-btn-disabled) {
+.detail-drawer .detail-form .detail-combo--action .arco-btn-outline:not(.arco-btn-disabled),
+.detail-drawer .detail-drawer-footer__workflow .arco-btn-outline:not(.arco-btn-disabled) {
   background: var(--color-bg-card) !important;
   border-color: var(--dense-primary-4) !important;
   color: var(--dense-primary-6) !important;
@@ -2114,7 +2135,9 @@ button:-moz-focusring,
 .detail-drawer .detail-child-pane__head .arco-btn-outline:not(.arco-btn-disabled):hover,
 .detail-drawer .detail-child-pane__head .arco-btn-outline:not(.arco-btn-disabled):focus-visible,
 .detail-drawer .detail-form .detail-combo--action .arco-btn-outline:not(.arco-btn-disabled):hover,
-.detail-drawer .detail-form .detail-combo--action .arco-btn-outline:not(.arco-btn-disabled):focus-visible {
+.detail-drawer .detail-form .detail-combo--action .arco-btn-outline:not(.arco-btn-disabled):focus-visible,
+.detail-drawer .detail-drawer-footer__workflow .arco-btn-outline:not(.arco-btn-disabled):hover,
+.detail-drawer .detail-drawer-footer__workflow .arco-btn-outline:not(.arco-btn-disabled):focus-visible {
   background: var(--dense-primary-1) !important;
   border-color: var(--dense-primary-5) !important;
   color: var(--dense-primary-7) !important;
@@ -2140,25 +2163,31 @@ button:-moz-focusring,
   background: var(--dense-primary-1) !important;
 }
 .detail-drawer .arco-btn-text.arco-btn-status-danger:not(.arco-btn-disabled),
-.detail-drawer-footer__start .arco-btn-text.arco-btn-status-danger {
+.detail-drawer-footer__start .arco-btn-text.arco-btn-status-danger,
+.detail-drawer-footer__end .arco-btn-text.arco-btn-status-danger {
   color: var(--dense-danger-6) !important;
 }
 .detail-drawer .arco-btn-text.arco-btn-status-danger:not(.arco-btn-disabled):hover,
 .detail-drawer .arco-btn-text.arco-btn-status-danger:not(.arco-btn-disabled):focus-visible,
-.detail-drawer-footer__start .arco-btn-text.arco-btn-status-danger:hover {
+.detail-drawer-footer__start .arco-btn-text.arco-btn-status-danger:hover,
+.detail-drawer-footer__end .arco-btn-text.arco-btn-status-danger:hover {
   color: var(--dense-danger-6) !important;
   background: var(--dense-danger-1) !important;
 }
+.detail-drawer-footer__end .arco-btn-primary:not(.arco-btn-disabled),
+.detail-drawer-footer__commit .arco-btn-primary:not(.arco-btn-disabled),
 .detail-drawer-footer__cluster .arco-btn-primary:not(.arco-btn-disabled) {
   min-width: 76px;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(22, 93, 255, 0.28) !important;
 }
+.detail-drawer-footer__end .arco-btn-primary:not(.arco-btn-disabled):hover,
+.detail-drawer-footer__commit .arco-btn-primary:not(.arco-btn-disabled):hover,
 .detail-drawer-footer__cluster .arco-btn-primary:not(.arco-btn-disabled):hover {
   box-shadow: 0 3px 10px rgba(22, 93, 255, 0.34) !important;
 }
 .detail-drawer .dds-head {
-  box-shadow: 0 1px 0 var(--dense-border-subtle), 0 4px 14px rgba(16, 24, 40, 0.045);
+  box-shadow: 0 1px 0 var(--dense-border-subtle);
   z-index: 2;
 }
 .detail-drawer .detail-section__head {
@@ -2260,18 +2289,51 @@ button:-moz-focusring,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--dense-gap-inline);
-  padding: 8px 16px;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 12px;
   background: var(--color-bg-card);
   border-bottom: 1px solid var(--dense-border);
   flex-shrink: 0;
 }
+.dds-head__main {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.dds-head__identity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.dds-head__back {
+  flex-shrink: 0;
+}
+.dds-head__meta {
+  overflow: hidden;
+  min-width: 0;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dds-head__meta-sep {
+  margin: 0 4px;
+  color: var(--color-border-2);
+}
+/* @deprecated 用 dds-head__main，保留兼容旧模板 */
 .dds-head__left {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-wrap: nowrap;
+  gap: 8px;
   min-width: 0;
+  flex: 1;
 }
 .dds-head__actions {
   display: flex;
@@ -2322,24 +2384,34 @@ button:-moz-focusring,
 .dds-hero {
   display: flex;
   align-items: center;
-  gap: 18px;
-  min-height: 58px;
-  padding: 8px 16px;
-  background: linear-gradient(180deg, var(--color-bg-card) 0%, var(--dense-primary-1) 100%);
-  border-bottom: 1px solid var(--dense-primary-2);
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 12px;
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--dense-border-subtle);
   flex-shrink: 0;
 }
+.dds-hero--compact {
+  min-height: 40px;
+  gap: 10px;
+}
 .dds-hero__route {
-  min-width: 300px;
-  padding-right: 18px;
-  border-right: 1px solid var(--dense-primary-2);
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: 220px;
+  padding-right: 12px;
+  border-right: 1px solid var(--dense-border-subtle);
+}
+.dds-hero--compact .dds-hero__route {
+  max-width: 200px;
+  padding-right: 10px;
 }
 .dds-hero__label,
 .dds-hero-fact__label {
   display: flex;
   align-items: center;
   gap: 3px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   font-size: var(--dense-font-aux);
   color: var(--color-text-3);
   font-weight: var(--dense-weight-aux);
@@ -2362,22 +2434,25 @@ button:-moz-focusring,
   font-size: var(--dense-font-data);
 }
 .dds-hero__sub {
-  margin-top: 4px;
+  margin-top: 2px;
   color: var(--color-text-3);
   font-size: var(--dense-font-aux);
 }
 .dds-hero__facts {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
   flex: 1;
 }
+.dds-hero--compact .dds-hero__facts {
+  gap: 10px;
+}
 .dds-hero-fact {
-  min-width: 80px;
+  min-width: 72px;
 }
 .dds-hero-fact--customer {
-  max-width: 260px;
+  max-width: 200px;
   margin-left: auto;
 }
 .dds-hero-fact__value {
@@ -2397,23 +2472,43 @@ button:-moz-focusring,
   color: var(--color-text-1);
 }
 .dds-steps-bar {
-  padding: 10px 20px;
+  padding: 6px 12px;
   background: var(--color-bg-card);
   border-bottom: 1px solid var(--dense-border);
   flex-shrink: 0;
 }
+.dds-steps-bar--compact {
+  padding: 4px 12px 6px;
+}
+.dds-steps-bar--compact .arco-steps-item-title {
+  font-size: var(--dense-font-aux) !important;
+  line-height: 1.2 !important;
+}
+.dds-steps-bar--compact .arco-steps-icon {
+  width: 22px !important;
+  height: 22px !important;
+  font-size: var(--dense-font-micro) !important;
+  line-height: 22px !important;
+}
+.dds-steps-bar--compact .arco-steps-item-content {
+  margin-top: 2px !important;
+}
 .dds-steps {
-  max-width: 680px;
+  max-width: 720px;
 }
 @media (max-width: 1360px) {
-  .dds-hero {
+  .dds-hero,
+  .dds-hero--compact {
     align-items: flex-start;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    min-height: 0;
+    padding-bottom: 8px;
   }
   .dds-hero__route {
     width: 100%;
-    padding: 0 0 10px;
+    max-width: none;
+    padding: 0 0 8px;
     border-right: 0;
     border-bottom: 1px solid var(--dense-border-subtle);
   }
