@@ -237,6 +237,46 @@ Anti-patterns:
 - Child title shown as plain body text with no visual hierarchy.
 - Add/delete actions placed at the wrong level, such as line add in parent head or child delete in line table.
 
+### Inline Editable Table Visual Rules (`detail-mini-vxe`)
+
+When a detail section contains a VXE table with editable cells (`a-input`, `a-select`, `a-date-picker` inside columns), use class `detail-mini-vxe` on the table. `global.css` handles ghost-border treatment automatically.
+
+Container:
+
+```vue
+<div class="detail-section__body detail-section__body--table">
+  <vxe-table
+    class="detail-mini-vxe"
+    border="none"
+    size="small"
+    height="auto"
+    :data="rows"
+    :row-config="{ isHover: true, keyField: 'id', height: 38 }"
+  >
+    <!-- columns -->
+  </vxe-table>
+</div>
+```
+
+Required:
+
+- Always add `class="detail-mini-vxe"` to VXE tables embedded in `detail-section__body` that contain editable controls.
+- Use `detail-section__body--table` on the section body (or `detail-child-pane__table` for nested child panes).
+- Match `row-config.height` to `38` when controls are 28px (`--dense-control-h-detail`).
+- Only one `min-width` column per mini table.
+
+Forbidden:
+
+- `show-overflow` / `show-header-overflow` on `detail-mini-vxe` (causes clipping and header/body misalignment).
+- Page-scoped wrappers with `overflow: hidden` around wide detail tables.
+- Padding on `td` (`.vxe-body--column`) instead of `.vxe-cell`.
+- Forgetting `class="detail-mini-vxe"` — inputs show full Arco borders in every cell, creating Excel-like box grid.
+
+Form grid in detail drawers:
+
+- `detail-form-grid` children need `min-width: 0`; controls in `.detail-form` must be `width: 100%`.
+- `detail-drawer` must include `a-picker` / `a-date-picker` in the 28px control height rules, not only input/select.
+
 ## Footer
 
 - Submit/confirm is primary.

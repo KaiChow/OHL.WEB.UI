@@ -179,6 +179,63 @@ if (!globalCss.includes('.detail-mini-vxe.vxe-table .arco-picker-size-small')) {
     content: 'missing .detail-mini-vxe.vxe-table .arco-picker-size-small',
   });
 }
+if (!globalCss.includes('.detail-section__body--table')) {
+  violations.push({
+    rule: '详情分区内嵌表格必须使用 detail-section__body--table 全局类',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .detail-section__body--table',
+  });
+}
+if (!globalCss.includes('.detail-mini-vxe.vxe-table .vxe-body--row')) {
+  violations.push({
+    rule: 'detail-mini-vxe 必须显式覆盖 body 行高，防止列表页 vxe 全局规则污染',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .detail-mini-vxe.vxe-table .vxe-body--row',
+  });
+}
+if (!globalCss.includes('col--ellipsis') || !globalCss.includes('.detail-mini-vxe.vxe-table')) {
+  violations.push({
+    rule: 'detail-mini-vxe 必须覆盖 col--ellipsis，防止 show-overflow 裁切与列错位',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing detail-mini-vxe col--ellipsis cell override',
+  });
+} else if (!/\.detail-mini-vxe\.vxe-table[\s\S]*col--ellipsis[\s\S]*\.vxe-cell/.test(globalCss)) {
+  violations.push({
+    rule: 'detail-mini-vxe 必须覆盖 col--ellipsis，防止 show-overflow 裁切与列错位',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing detail-mini-vxe col--ellipsis cell override',
+  });
+}
+if (!globalCss.includes('.detail-drawer .arco-picker-size-small')) {
+  violations.push({
+    rule: 'detail-drawer 必须覆盖 date picker 28px 控件高度',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .detail-drawer .arco-picker-size-small',
+  });
+}
+
+// detail-mini-vxe 禁止 show-overflow（整块匹配，避免表头表体错位）
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  const blocks = content.match(/<vxe-table[\s\S]*?<\/vxe-table>/g) || [];
+  for (const block of blocks) {
+    if (!/class="[^"]*detail-mini-vxe/.test(block)) continue;
+    if (!/show-(?:header-)?overflow/.test(block)) continue;
+    violations.push({
+      rule: 'detail-mini-vxe 禁止 show-overflow / show-header-overflow',
+      file: relPath,
+      line: 1,
+      content: block.split('\n').find((l) => /show-(?:header-)?overflow/.test(l))?.trim().slice(0, 120) ?? '<vxe-table ...>',
+    });
+  }
+}
 
 // ─── 输出结果 ─────────────────────────────────────────────────────────────────
 if (violations.length === 0) {

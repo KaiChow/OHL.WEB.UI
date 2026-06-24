@@ -759,7 +759,6 @@ const closeDrawer = () => {
                           class="detail-mini-vxe"
                           border="none"
                           size="small"
-                          show-overflow="title"
                           :data="party.lines"
                           :row-config="{ isHover: true, keyField: 'id', height: 38 }"
                         >
@@ -841,12 +840,11 @@ const closeDrawer = () => {
                   <a-button size="small" @click="feedback('封号已清除')">清除柜封号</a-button>
                 </div>
               </div>
-              <div class="detail-section__body od-section-table">
+              <div class="detail-section__body detail-section__body--table">
                 <vxe-table
                   class="detail-mini-vxe"
                   border="none"
                   size="small"
-                  show-overflow="title"
                   :data="containerRows"
                   :row-config="{ isHover: true, keyField: 'id', height: 38 }"
                 >
@@ -903,12 +901,11 @@ const closeDrawer = () => {
                   </a-button>
                 </div>
               </div>
-              <div class="detail-section__body od-section-table">
+              <div class="detail-section__body detail-section__body--table">
                 <vxe-table
                   class="detail-mini-vxe"
                   border="none"
                   size="small"
-                  show-overflow="title"
                   :data="customsRows"
                   :row-config="{ isHover: true, keyField: 'id', height: 38 }"
                 >
@@ -978,12 +975,11 @@ const closeDrawer = () => {
                   <a-button size="small">三方仓入仓数据</a-button>
                 </div>
               </div>
-              <div class="detail-section__body od-section-table">
+              <div class="detail-section__body detail-section__body--table">
                 <vxe-table
                   class="detail-mini-vxe"
                   border="none"
                   size="small"
-                  show-overflow="title"
                   :data="warehouseRows"
                   :row-config="{ isHover: true, keyField: 'id', height: 38 }"
                 >
@@ -1122,11 +1118,6 @@ const closeDrawer = () => {
   display: flex;
   flex-direction: column;
   gap: var(--dense-gap-module);
-}
-
-.od-section-table {
-  padding: 0;
-  overflow: hidden;
 }
 
 .od-footer {

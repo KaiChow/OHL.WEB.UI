@@ -187,31 +187,6 @@ Choose repeated modules from the object model:
 
 Use `detail-module` and mini VXE/table patterns when the module has repeated rows. Use a simple `detail-section` when the module has only one compact form group.
 
-### Inline Editable Table Visual Rules (detail-mini-vxe)
-
-When a detail section contains a VXE table with editable cells (a-input, a-select, a-date-picker inside columns), use class `detail-mini-vxe` on the table. `global.css` will handle ghost-border treatment automatically:
-
-- Default: input/select/datepicker borders are **transparent**. Users see data values, not a grid of boxes.
-- Hover row: the entire row gets a primary-1 tint, visually signaling editability.
-- Hover/focus on individual cell control: border appears in `--dense-primary-4`, clearly indicating active input.
-
-Rules:
-
-- Always add `class="detail-mini-vxe"` to VXE tables embedded inside `detail-section__body` that contain editable controls.
-- At least one column per table must use `min-width` (not `width`) to fill the container. Fixed columns (checkbox/序号/状态/操作) use `width`; the last variable-width data column uses `min-width`.
-- Status fields (报关状态, 放行状态, 入仓状态, etc.) must display as `s-pill[data-s]`, not as `a-select`. Only use `a-select` for fields where the user needs to change the value directly in the row.
-- Read-only data columns (件数, 包装单位, 毛重, 体积 when auto-calculated) must display as plain text, not input controls. If a field is truly editable, wrap it in a-input; if read-only, render the value directly.
-- Do not use `height="100%"` for detail section sub-tables. Use `height="auto"` so the table grows with rows.
-
-Anti-patterns:
-
-```
-❌ All columns use width — no min-width column (table may leave blank right area)
-❌ Status fields use a-select (user sees a dropdown on a state that should just be read)
-❌ Forgetting class="detail-mini-vxe" — inputs show full Arco borders in every cell, creating Excel-like box grid
-❌ Read-only calculated fields wrapped in a-input (date, total weight/volume)
-```
-
 ### Parent-Child Nested Modules
 
 Use a parent-child nested module when a repeated entity owns another repeated line set.
@@ -261,6 +236,46 @@ Anti-patterns:
 - Nested borders and shadows that make a child look like a full independent page section.
 - Child title shown as plain body text with no visual hierarchy.
 - Add/delete actions placed at the wrong level, such as line add in parent head or child delete in line table.
+
+### Inline Editable Table Visual Rules (`detail-mini-vxe`)
+
+When a detail section contains a VXE table with editable cells (`a-input`, `a-select`, `a-date-picker` inside columns), use class `detail-mini-vxe` on the table. `global.css` handles ghost-border treatment automatically.
+
+Container:
+
+```vue
+<div class="detail-section__body detail-section__body--table">
+  <vxe-table
+    class="detail-mini-vxe"
+    border="none"
+    size="small"
+    height="auto"
+    :data="rows"
+    :row-config="{ isHover: true, keyField: 'id', height: 38 }"
+  >
+    <!-- columns -->
+  </vxe-table>
+</div>
+```
+
+Required:
+
+- Always add `class="detail-mini-vxe"` to VXE tables embedded in `detail-section__body` that contain editable controls.
+- Use `detail-section__body--table` on the section body (or `detail-child-pane__table` for nested child panes).
+- Match `row-config.height` to `38` when controls are 28px (`--dense-control-h-detail`).
+- Only one `min-width` column per mini table.
+
+Forbidden:
+
+- `show-overflow` / `show-header-overflow` on `detail-mini-vxe` (causes clipping and header/body misalignment).
+- Page-scoped wrappers with `overflow: hidden` around wide detail tables.
+- Padding on `td` (`.vxe-body--column`) instead of `.vxe-cell`.
+- Forgetting `class="detail-mini-vxe"` — inputs show full Arco borders in every cell, creating Excel-like box grid.
+
+Form grid in detail drawers:
+
+- `detail-form-grid` children need `min-width: 0`; controls in `.detail-form` must be `width: 100%`.
+- `detail-drawer` must include `a-picker` / `a-date-picker` in the 28px control height rules, not only input/select.
 
 ## Footer
 

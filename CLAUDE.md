@@ -879,12 +879,17 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
 
 ```
 ✅ 详情模块内的子表格（品名明细、装柜信息、报关信息、入仓信息等）必须加 class="detail-mini-vxe"
+✅ 表格外层用 detail-section__body detail-section__body--table（padding:0，可横向滚动）
 ✅ global.css 自动处理 ghost border：控件默认极淡边框，hover/focus 时显示 primary-4 边框
 ✅ 状态类字段（报关状态/放行状态/入仓状态）用 s-pill[data-s]，不用 a-select
 ✅ 只读计算字段（件数/毛重/体积 已自动汇总时）直接显示文本，不套 a-input
 ✅ height="auto"（详情子表格不固定高度，随数据行数增长）
+✅ row-config.height 必须为 38，与 global.css --vxe-ui-table-row-height-small 一致
 ❌ 禁止忘加 class="detail-mini-vxe"（会导致每个单元格都有实线边框，形成 Excel 满格效果）
+❌ 禁止 detail-mini-vxe 使用 show-overflow（会裁切数字/输入框，且表头表体列宽错位）
+❌ 禁止在详情子表外包 overflow:hidden 的页面私有 class
 ❌ 禁止全列用 width（必须用 min-width 让 VXE 自动分配剩余空间）
+❌ 禁止在 td（.vxe-body--column）上直接写 padding，应交给 .vxe-cell
 ```
 
 **列宽分配原则（detail-mini-vxe 每张表只能有 1 个 min-width 列）：**
@@ -928,10 +933,10 @@ function tagPill(tag: string): string { return TAG_PILL_MAP[tag] ?? 'draft'; }
   </vxe-table>
 </div>
 
-<!-- ② 详情/弹窗内子表格（height="auto"，放在 detail-section__body style="padding:0" 内） -->
-<div class="detail-section__body" style="padding:0">
-  <vxe-table border="none" size="small" height="auto" show-overflow="title"
-    :row-config="{ isHover:true, keyField:'id' }" :data="subRows">
+<!-- ② 详情/弹窗内子表格（height="auto"，放在 detail-section__body--table 内） -->
+<div class="detail-section__body detail-section__body--table">
+  <vxe-table border="none" size="small" height="auto" class="detail-mini-vxe"
+    :row-config="{ isHover:true, keyField:'id', height: 38 }" :data="subRows">
     <vxe-column field="item" title="费用项" min-width="120" />
     <vxe-column field="amount" title="金额" width="110" align="right">
       <template #default="{ row }"><span class="amt-val">{{ row.amount }}</span></template>

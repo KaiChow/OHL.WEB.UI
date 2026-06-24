@@ -115,6 +115,8 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 - 表格容器：`table-wrap`
 - 详情抽屉：`detail-drawer-body` / `detail-drawer-status` / `detail-drawer-scroll` / `detail-drawer-footer`
 - 详情分区：`detail-section` / `detail-section__head` / `detail-section__title` / `detail-section__body` / `detail-section__actions`
+- 详情内嵌子表容器：`detail-section__body--table`（padding:0，横向滚动）
+- 详情可编辑子表：`detail-mini-vxe`（禁止 `show-overflow`，`row-config.height: 38`）
 - 详情字段：`detail-field` / `detail-field__label` / `detail-field__val`
 - 详情栅格：`detail-form-grid detail-form-grid--4`（或 --3 / --6）
 

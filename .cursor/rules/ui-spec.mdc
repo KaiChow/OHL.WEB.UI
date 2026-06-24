@@ -290,6 +290,9 @@ grep -n "\.类名" src/styles/global.css
 | `.stab-count` / `.stab-count--danger` | `.stab-badge` / `.stab-badge--danger` |
 | 硬编码 hex 颜色 | `var(--warning-6)` / `var(--danger-6)` 等变量 |
 | 自写危险货 pill 样式 | `s-pill[data-s="wait"]` + icon |
+| `detail-mini-vxe` 加 `show-overflow` | 详情子表禁用；列表主表仍用 `show-overflow="title"` |
+| 详情子表外包 `overflow:hidden` | `detail-section__body--table` |
+| `style="padding:0"` 代替子表容器类 | `detail-section__body--table` |
 | `font-size: 14px / 16px` 硬编码 | `var(--dense-font-data)` 等 Token |
 | `font-weight: 700` | 最大 600 |
 | 整行铺状态背景色 | 只在 `.s-pill[data-s]` 体现 |
@@ -434,6 +437,37 @@ Modal 规范：`:mask-closable="false"` / 危险操作放 footer 左侧 / `width
 
 ---
 
+## 详情内嵌子表（detail-mini-vxe）
+
+详情分区内的可编辑 VXE 子表（装柜/报关/入仓/品名明细等）：
+
+```vue
+<div class="detail-section__body detail-section__body--table">
+  <vxe-table
+    class="detail-mini-vxe"
+    border="none"
+    size="small"
+    height="auto"
+    :data="rows"
+    :row-config="{ isHover: true, keyField: 'id', height: 38 }"
+  >
+    <!-- 每表仅 1 列 min-width，其余 width -->
+  </vxe-table>
+</div>
+```
+
+```
+✅ 必须 class="detail-mini-vxe" + detail-section__body--table
+✅ row-config.height = 38（匹配 28px 控件）
+❌ 禁止 detail-mini-vxe 使用 show-overflow（表头表体错位、数字裁切）
+❌ 禁止页面 scoped 写 overflow:hidden 包住宽表
+❌ 禁止 style="padding:0" 代替 detail-section__body--table
+```
+
+列表页主表仍用 `show-overflow="title"`；仅 detail-mini-vxe 禁用。
+
+---
+
 ## 文件上传规范（Uppy）
 
 禁止使用 `<a-upload>`，全项目统一用 **Uppy**。
@@ -509,6 +543,7 @@ import '@uppy/dashboard/dist/style.min.css'
 □ 搜索区：filter-card 体系，无 .sf/.sf-label/.search-bar
 □ 工具栏：toolbar-group + toolbar-aside，刷新 type="text" icon-only
 □ 表格：border="none" size="small" height="100%"，至少一列 min-width
+□ 详情子表：detail-mini-vxe + detail-section__body--table，无 show-overflow
 □ 抽屉：有 class="detail-drawer"，detail-section 分区
 □ 状态：全用 s-pill[data-s]，无行背景色
 □ 颜色：无 hex，全用 CSS 变量

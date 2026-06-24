@@ -173,6 +173,10 @@ Detail tables must look like part of the module, not a full page table pasted in
 - Do not use large table captions for child tables; use the parent module/child head for identity.
 - For nested editable line rows, prefer the shared `detail-mini-vxe` VXE pattern: 30px header, 38px row for editable rows, 28px Arco controls, Arco primary-tint header, subtle row separators, and fixed right operation when needed.
 - `detail-mini-vxe` CSS row height, `--vxe-ui-table-row-height-small`, and `row-config.height` must match. Do not set row height to 34px while rendering 28px input/select/date controls, because VXE cell clipping will cut input text and displayed values.
+- `detail-mini-vxe` is isolated from list-page `.vxe-table` global rules in `global.css`. Do not re-apply list-table header height, column `border-right`, or cell padding on `td` directly.
+- Wrap detail-section embedded tables with `detail-section__body detail-section__body--table` (padding 0, horizontal scroll). Do not use page-scoped `overflow: hidden` wrappers around wide child tables.
+- Do **not** set `show-overflow` on `detail-mini-vxe` tables. It adds `col--ellipsis`, clips numbers/inputs, and can desync header/body columns (especially with `fixed="right"`). List/workbench tables still use `show-overflow="title"`.
+- Put padding on `.vxe-cell` inside `detail-mini-vxe`, not on `.vxe-body--column` / `.vxe-header--column`, so VXE colgroup width stays aligned.
 - Native `<table>` is not allowed for editable detail line rows with hover, fixed operations, empty state, or repeated inputs. Use VXE so table behavior and density remain project-wide.
 - Detail mini table hover must use a restrained primary tint, not gray, so nested editing still has a visible interaction state.
 
