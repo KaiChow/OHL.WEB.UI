@@ -254,6 +254,21 @@ const formatTotal = computed(() => ({
   volume: cargoParties.reduce((sum, item) => sum + item.lines.reduce((lineSum, line) => lineSum + Number(line.volume || 0), 0), 0),
 }));
 
+const detailOverview = computed(() => ({
+  parties: cargoParties.length,
+  pieces: formatTotal.value.pieces,
+  weight: formatTotal.value.weight,
+  volume: formatTotal.value.volume,
+  customers: new Set(cargoParties.map((p) => p.shipper).filter(Boolean)).size,
+}));
+
+const partyStats = (party: CargoParty) => ({
+  lines: party.lines.length,
+  pieces: party.lines.reduce((sum, line) => sum + Number(line.quantity || 0), 0),
+  weight: party.lines.reduce((sum, line) => sum + Number(line.weight || 0), 0),
+  volume: party.lines.reduce((sum, line) => sum + Number(line.volume || 0), 0),
+});
+
 const toggleOption = (target: string[], value: string) => {
   const index = target.indexOf(value);
   if (index >= 0) target.splice(index, 1);
@@ -448,6 +463,29 @@ const closeDrawer = () => {
     </div>
 
     <div class="detail-drawer-scroll od-detail-scroll">
+      <div class="detail-overview-kpi">
+        <div class="detail-overview-kpi__item">
+          <span class="detail-overview-kpi__label">总票数</span>
+          <span class="detail-overview-kpi__val detail-overview-kpi__val--primary">{{ detailOverview.parties }}</span>
+        </div>
+        <div class="detail-overview-kpi__item">
+          <span class="detail-overview-kpi__label">总件数</span>
+          <span class="detail-overview-kpi__val">{{ detailOverview.pieces }}<span class="detail-overview-kpi__unit">件</span></span>
+        </div>
+        <div class="detail-overview-kpi__item">
+          <span class="detail-overview-kpi__label">总重量</span>
+          <span class="detail-overview-kpi__val">{{ detailOverview.weight }}<span class="detail-overview-kpi__unit">KG</span></span>
+        </div>
+        <div class="detail-overview-kpi__item">
+          <span class="detail-overview-kpi__label">总体积</span>
+          <span class="detail-overview-kpi__val">{{ detailOverview.volume }}<span class="detail-overview-kpi__unit">CBM</span></span>
+        </div>
+        <div class="detail-overview-kpi__item">
+          <span class="detail-overview-kpi__label">发货人</span>
+          <span class="detail-overview-kpi__val">{{ detailOverview.customers }}</span>
+        </div>
+      </div>
+
       <div>
         <div class="detail-section">
               <div class="detail-section__head">
@@ -520,13 +558,12 @@ const closeDrawer = () => {
               </div>
         </div>
 
-        <div class="detail-section">
+        <div class="detail-section detail-section--core">
               <div class="detail-section__head">
-                <h4 class="detail-section__title">基础信息</h4>
+                <h4 class="detail-section__title">港口与航线</h4>
               </div>
               <div class="detail-section__body">
                 <a-form class="detail-form" layout="vertical" :model="orderForm">
-                  <div class="form-subgroup-label">港口与航线</div>
                   <div class="detail-form-grid detail-form-grid--4">
                     <a-form-item label="起运港" required>
                       <a-input-group compact class="detail-combo detail-combo--code-name">
@@ -559,8 +596,16 @@ const closeDrawer = () => {
                       <a-input v-model="orderForm.contractNo" size="small" />
                     </a-form-item>
                   </div>
+                </a-form>
+              </div>
+        </div>
 
-                  <div class="form-subgroup-label form-subgroup-label--mt">时间与条款</div>
+        <div class="detail-section">
+              <div class="detail-section__head">
+                <h4 class="detail-section__title">时间与条款</h4>
+              </div>
+              <div class="detail-section__body">
+                <a-form class="detail-form" layout="vertical" :model="orderForm">
                   <div class="detail-form-grid detail-form-grid--4">
                     <a-form-item label="ETD" required>
                       <a-date-picker v-model="orderForm.etd" size="small" />
@@ -596,8 +641,16 @@ const closeDrawer = () => {
                       <a-input v-model="orderForm.carrier" size="small" />
                     </a-form-item>
                   </div>
+                </a-form>
+              </div>
+        </div>
 
-                  <div class="form-subgroup-label form-subgroup-label--mt">仓库与备注</div>
+        <div class="detail-section">
+              <div class="detail-section__head">
+                <h4 class="detail-section__title">仓库与备注</h4>
+              </div>
+              <div class="detail-section__body">
+                <a-form class="detail-form" layout="vertical" :model="orderForm">
                   <div class="detail-form-grid detail-form-grid--4">
                     <a-form-item label="预计仓库" required>
                       <a-input-group compact>
@@ -652,11 +705,11 @@ const closeDrawer = () => {
               <div class="detail-section__head">
                 <h4 class="detail-section__title">货物信息</h4>
                 <div class="detail-section__actions">
-                  <a-button size="small" type="text" @click="feedback('分单数据已复制')">
+                  <a-button size="small" type="outline" @click="feedback('分单数据已复制')">
                     <template #icon><icon-copy /></template>
                     复制分单数据
                   </a-button>
-                  <a-button size="small" type="outline" @click="addCargoParty">
+                  <a-button size="small" type="primary" @click="addCargoParty">
                     <template #icon><icon-plus /></template>
                     添加发货人
                   </a-button>
@@ -697,18 +750,27 @@ const closeDrawer = () => {
                     <span class="detail-subitem__index">{{ index + 1 }}</span>
                     <div class="detail-subitem__meta">
                       <span class="detail-subitem__title">{{ party.title }}</span>
-                      <span class="detail-subitem__desc" :title="party.shipper">{{ party.shipper || '未维护发货人' }}</span>
+                      <span class="detail-subitem__shipper" :title="party.shipper">{{ party.shipper || '未维护发货人' }}</span>
                     </div>
                     <div class="detail-subitem__stats">
                       <span class="detail-data-stats">
                         <span class="detail-data-stats__item">
                           <span class="detail-data-stats__label">品名</span>
-                          <span class="detail-data-stats__val">{{ party.lines.length }}</span>
+                          <span class="detail-data-stats__val">{{ partyStats(party).lines }}</span>
+                        </span>
+                        <span class="detail-data-stats__item">
+                          <span class="detail-data-stats__label">件数</span>
+                          <span class="detail-data-stats__val">{{ partyStats(party).pieces }}</span>
                         </span>
                         <span class="detail-data-stats__item">
                           <span class="detail-data-stats__label">重量</span>
-                          <span class="detail-data-stats__val">{{ party.lines.reduce((sum, line) => sum + line.weight, 0) }}</span>
+                          <span class="detail-data-stats__val">{{ partyStats(party).weight }}</span>
                           <span class="detail-data-stats__unit">KG</span>
+                        </span>
+                        <span class="detail-data-stats__item">
+                          <span class="detail-data-stats__label">体积</span>
+                          <span class="detail-data-stats__val">{{ partyStats(party).volume }}</span>
+                          <span class="detail-data-stats__unit">CBM</span>
                         </span>
                       </span>
                     </div>
