@@ -67,10 +67,13 @@ Do not duplicate the same summary in multiple areas unless it has a separate int
 
 High density means more useful information, not smaller everything.
 
+Dense freight UI keeps a visible information rhythm. Labels, controls, buttons, sections, and table rows should be close enough for speed, but still separated enough that users can recognize each unit without rereading.
+
 Use:
 
 - Compact rows and controls.
 - Predictable 8-12px section rhythm.
+- Visible field rhythm: labels name the business dimension, controls provide the input surface, and spacing preserves that name/value relationship.
 - Stable grids and columns.
 - Clear truncation/tooltip strategy.
 
@@ -78,7 +81,7 @@ Avoid:
 
 - Large decorative cards.
 - Large blank header areas.
-- Zero-spacing compression.
+- Zero-rhythm compression where labels, controls, buttons, or sections visually merge into one strip.
 - Hiding key business data to look clean.
 
 ### Premium

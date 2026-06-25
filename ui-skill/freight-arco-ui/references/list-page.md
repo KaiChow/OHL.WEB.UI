@@ -17,6 +17,24 @@ The list page must feel like a freight operation workbench: search, scope/status
 
 This structure is fixed; the fields are not. Each list must map columns and filters from the current business object.
 
+## Zone Boundary
+
+List zones use one neutral module boundary rhythm. `zone-l1-transport`, `zone-l2-filter-card`, `zone-l3-action`, and `zone-l4-table-card` all use `border-top: 1px solid var(--dense-zone-top-border)`.
+
+Do not use primary-colored top borders to decorate normal modules. Arco primary belongs to active page segments, primary actions, links, focus/selection, status pills, and table header anchors. If a module needs more hierarchy, improve structure, spacing, or local title/action grouping before adding colored container lines.
+
+## Page Segment
+
+Use `zone-l1-transport` only when the segment changes the page mode, such as transport mode, order class, warehouse mode, or bill type.
+
+This is not a status filter. It is a compact segmented control:
+
+- Container: `zone-l1-transport zone-card`.
+- Item: `seg-btn`; active item: `seg-btn--active`.
+- Active state uses a white input-like surface, Arco-primary border/inset rhythm, and a thin bottom anchor.
+- Do not use `.stab` for L1 page segments. `.stab` is for scope/status filters inside the action row.
+- Do not use a naked underline tab here; the app route/nav may already use underline active state, and a second underline makes the current page state ambiguous.
+
 ## Search Area
 
 - Use `filter-card`, `filter-grid`, `filter-field`, `filter-field__label`.
@@ -80,7 +98,9 @@ Choose the search UI by field count and user job. Do not use one query layout fo
 | 0-3 | Tier 0 keyword/search bar | Users mainly locate by one identifier or keyword | Single dominant input, optional one select, primary query |
 | 4-8 | Tier 1 core query row | All visible fields are high-frequency and fit without wrapping | Always visible single row |
 | 9-16 | Tier 2 core row + filter drawer | Few high-frequency fields plus secondary filters | 3-5 fields visible; secondary fields in `query-filter-drawer` |
-| 17-50 | Tier 3 core row + grouped drawer | Many fields across business groups | Keep top query visible; drawer grouped by business meaning with local clear/apply |
+| 17-24 | Tier 3 grouped drawer | Many fields across business groups | Keep top query visible; drawer grouped by business meaning with local clear/apply |
+| 25-32 | Tier 3 wide grouped drawer | Many advanced fields but still drawer-usable | `query-filter-drawer--wide` when grouping needs more horizontal space |
+| 33-50 | Tier 4 wide drawer + group navigation | Power users need many occasional fields | `query-filter-drawer--wide` + `query-filter-drawer__nav` |
 | 50+ | Tier 4 saved query workspace | Power users need reusable query schemes | Quick search + saved filters + grouped advanced editor; never show all fields at once |
 
 Rules:
@@ -92,6 +112,8 @@ Rules:
 - Text inputs trigger by Enter or Query button; selects and chips may auto-search when safe.
 - Query and reset actions stay in a stable location in the visible query row.
 - The filter drawer owns secondary conditions and its own clear/apply footer. Do not use an inline expanded panel for normal business list pages.
+- Two visible query rows are allowed only for 6-10 high-frequency fields and must use `filter-card--two-row` + `filter-grid--two-row`; they are not a substitute for 30+ advanced filters.
+- 30+/40+ filters use grouped/wide drawer patterns. 50+ filters use a saved query workspace, not a larger drawer.
 - Query actions must be internationalization-safe. Do not size them by Chinese labels; use min/max or `clamp()`, allow 1.3-2x text expansion, and give secondary actions tooltip/title/aria labels when text may ellipsize.
 - If secondary query actions cannot fit translated text, use icon + accessible label or move the actions to a horizontal command row. Do not silently clip action meaning.
 - For international freight pages, field examples should use domain identifiers such as order no, business no, HBL, MBL, container no, customer, port, and warehouse no.
@@ -143,6 +165,7 @@ Toolbar actions are chosen by workflow:
 - Count badges use semantic tokens only when they carry risk/attention.
 - Use status tabs only when users actually filter by that state many times per day.
 - Do not create fake status tabs just to fill the layout.
+- Small-screen behavior follows `responsive.md`: below `1280px`, status groups may move to a second row and must scroll inside `stat-tab-group` rather than forcing page-level horizontal overflow.
 
 ## Table Column Selection
 

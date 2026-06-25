@@ -14,9 +14,11 @@ Recommended complex detail order:
 
 1. `dds-head`: status, primary number/name, company/context, view tools.
 2. `dds-hero`: object-specific core facts.
-3. `dds-steps-bar`: process steps when useful.
+3. `dds-milestone-bar`: lightweight process milestone when useful.
 4. `dds-body`: scrollable business content.
 5. `detail-drawer-footer`: sticky global actions.
+
+For order entry / sales order detail drawers, use a lightweight milestone strip (`dds-milestone-bar` + `dds-milestone`) instead of `a-steps type="arrow"`. Arrow steps create large colored blocks and make the page feel like an approval or low-code flow. Freight order details need process awareness, not a dominant workflow banner.
 
 `dds-hero` is a structural key-facts area. Its content depends on the business object:
 
@@ -48,6 +50,27 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 - Put counts/stats/helper text inside section body or summary area.
 - Do not nest cards inside cards.
 - Section order should follow the user's operation order, not the order copied from another module.
+- Do not place a full-width KPI/report bar directly under the hero in complex order-entry drawers. Cargo totals belong in the cargo module summary; receivable/payable/profit belongs in the fee module summary. The top area should stay focused on identity, route, schedule, carrier, customer, and current state.
+
+### Order Entry Detail Drawers
+
+Sales/order-entry detail drawers are production workbenches, not dashboard pages.
+
+Required structure:
+
+1. Header: `dds-head` with status, business/order number, customer, owner, and compact view tools.
+2. Key facts: `dds-hero` with route, ETD/ETA, carrier, vessel/voyage, customer.
+3. Milestone: `dds-milestone-bar` with compact text/dot milestones. Do not use `a-steps type="arrow"`.
+4. Sections in working order: 客户委托 → 航线订舱 → 货物信息 → 箱型柜量 → 收发通关 → 费用预估 → 单证资料 → 业务跟进.
+5. Footer: left danger, right grouped secondary workflow, one primary commit.
+
+Rules:
+
+- The drawer must not start with an independent KPI strip. Put totals in the owning module summary using `detail-module-summary--inline`.
+- Cargo module summary owns 件数/毛重/体积. Fee module summary owns 应收/应付/利润预估.
+- Footer high-frequency business-user actions are `保存草稿` and `提交审核`; downstream workflow actions such as `转操作接单` and `提交订舱` should be secondary and grouped when they are not the current primary task.
+- Header actions must not duplicate footer commit actions.
+- Section heads remain title-left/actions-right; do not put totals in section titles.
 
 ## Form Grid Structure
 
@@ -107,34 +130,44 @@ Span rules:
 - Use `__span3` / `__span4` only for full-width fields like long remarks, declaration content, or file upload areas.
 - Do not span a single-line input just to make it look prominent.
 
-### Subgroup Labels
+### Form Subgroups
 
-When one `detail-section` contains multiple business sub-concepts, use `form-subgroup-label` to divide them without creating new sections.
+When one `detail-section` contains multiple business sub-concepts, use `form-subgroup` blocks to divide them without creating new top-level sections. A subgroup is a compact operational panel with a head and one field grid. It is not a card, not a new module, and not a decorative left rail.
 
 ```vue
 <a-form class="detail-form" layout="vertical" :model="form">
-  <!-- Group 1 -->
-  <div class="form-subgroup-label">航线信息</div>
-  <div class="detail-form-grid detail-form-grid--4">
-    <a-form-item label="起运港">…</a-form-item>
-    <a-form-item label="目的港">…</a-form-item>
-    <a-form-item label="ETD">…</a-form-item>
-    <a-form-item label="ETA">…</a-form-item>
+  <div class="form-subgroup">
+    <div class="form-subgroup__head">
+      <span class="form-subgroup__title">路线</span>
+    </div>
+    <div class="detail-form-grid detail-form-grid--4">
+      <a-form-item label="起运港">…</a-form-item>
+      <a-form-item label="目的港">…</a-form-item>
+      <a-form-item label="目的地">…</a-form-item>
+      <a-form-item label="运输条款">…</a-form-item>
+    </div>
   </div>
 
-  <!-- Group 2 -->
-  <div class="form-subgroup-label">船期信息</div>
-  <div class="detail-form-grid detail-form-grid--4">
-    <a-form-item label="大船船名/航次">…</a-form-item>
-    <a-form-item label="船公司">…</a-form-item>
+  <div class="form-subgroup">
+    <div class="form-subgroup__head">
+      <span class="form-subgroup__title">船期</span>
+    </div>
+    <div class="detail-form-grid detail-form-grid--4">
+      <a-form-item label="大船船名/航次">…</a-form-item>
+      <a-form-item label="船公司">…</a-form-item>
+    </div>
   </div>
 </a-form>
 ```
 
 Rules:
-- `form-subgroup-label` is a **scan label**, not a module title. Keep it short (2–6 characters).
-- Do not add a `form-subgroup-label` for every field — only when there are 2+ distinct business concepts in one section.
+- `form-subgroup` is used only inside a `detail-section__body` form when the section has 2+ distinct business concepts such as `路线 / 船期`.
+- `form-subgroup__title` is a scan title. Keep it short (2–6 Chinese characters or equivalent i18n copy). Do not add descriptions under it unless the business meaning would be unclear.
+- Each `form-subgroup` contains exactly one `form-subgroup__head` followed by one `detail-form-grid`.
+- Do not use repeated blue left rails for subgroups. The parent `detail-section__title` owns the vertical primary anchor; subgroups use a small dot + subtle divider to avoid visual noise.
+- Do not add a subgroup for every field — only when there are 2+ distinct business concepts in one section.
 - Never create a new `detail-section` for a subgroup that has fewer than 3 fields.
+- `form-subgroup-label` is legacy-compatible only. New detail forms should use `form-subgroup`; do not generate consecutive bare subgroup labels in one section.
 
 ### Mixed Editable + Read-Only Fields
 

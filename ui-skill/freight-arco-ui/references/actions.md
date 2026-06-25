@@ -114,7 +114,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
   <a-button size="small" type="primary"><template #icon><icon-plus /></template>新建</a-button>
   <!-- 高频直接操作 ≤3 个，用 outline -->
   <a-button size="small" type="outline" @click="handlePrint">打印</a-button>
-  <a-dropdown trigger="click">
+  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
     <a-button size="small" type="outline">导出<icon-down /></a-button>
     <template #content>
       <a-doption>导出 Excel</a-doption>
@@ -122,12 +122,14 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
     </template>
   </a-dropdown>
   <!-- 低频操作收入「更多」，type="text" 降权 -->
-  <a-dropdown trigger="click">
+  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
     <a-button size="small" type="text">更多<icon-down /></a-button>
     <template #content>
       <a-doption>推送通知</a-doption>
       <a-doption>一键下载</a-doption>
       <a-doption>导入</a-doption>
+      <a-divider class="action-menu__divider" />
+      <a-doption class="danger-opt">批量废弃</a-doption>
     </template>
   </a-dropdown>
 </div>
@@ -234,7 +236,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 
 ```vue
 <a-tooltip content="查看">
-  <a-button type="text" class="row-action-btn" @click="openDetail(row)"><icon-eye /></a-button>
+  <a-button type="text" class="row-action-btn row-action-btn--primary" @click="openDetail(row)"><icon-eye /></a-button>
 </a-tooltip>
 <a-popconfirm content="确认删除？" @ok="remove(row)">
   <a-button type="text" class="row-action-btn" status="danger"><icon-delete /></a-button>
@@ -242,27 +244,58 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 ```
 
 - 行内禁止文字按钮（「查看」「编辑」字样）
+- 操作列内按钮必须放在 `row-actions` dock 中；直接主操作加 `row-action-btn--primary`，更多菜单加 `row-action-btn--more`
 - 删除 = `text` + `danger` + `a-popconfirm`
 - 禁止 `outline` 铺满操作列
 
 ---
 
-## 5. Dropdown And Danger
+## 5. Action Menu And Danger
 
-Dropdown order:
+Dropdown is an **action menu**, not a plain list of links. It should feel like a compact freight operation panel: clear trigger hierarchy, stable option rhythm, light Arco-native surface, and a separated danger zone.
 
-1. 文件/下载
-2. 打印/输出
-3. 复制/复用
-4. Divider
-5. 危险操作（`danger-opt`）
+### 5.1 Variants
+
+| Variant | Usage | Required content class | Trigger |
+|---------|-------|----------------------|---------|
+| Toolbar action menu | `导出`, `更多`, batch/low-frequency workflow actions | `content-class="action-menu action-menu--toolbar"` | visible text button with trailing `<icon-down />` |
+| Footer action menu | detail sticky footer `输出`, `流转`, secondary workflow actions | `content-class="action-menu action-menu--footer"` | footer secondary text button with trailing `<icon-down />` |
+| Row action menu | operation-column `···` menu | `content-class="action-menu action-menu--row"` | `row-action-btn row-action-btn--more` |
+
+`a-dropdown` must use `content-class`, not `popup-class`. `popup-class` is not a valid Arco Dropdown prop in this project and will not style the floating menu. `row-action-menu` is legacy-compatible only. New code must use the variant that matches the trigger scope: toolbar → `action-menu--toolbar`; sticky detail footer → `action-menu--footer`; row operation → `action-menu--row`.
+
+### 5.2 Option Order
+
+1. Direct business workflow: close, approve, push, assign.
+2. File/output: export, download, print, import template.
+3. Maintenance/secondary workflow: batch modify, copy, reuse.
+4. `action-menu__divider`.
+5. Dangerous or irreversible actions with `danger-opt`.
+
+Keep options task-oriented. Do not add section labels inside dense menus unless there are more than 8 items and the groups cannot be understood from verbs.
+
+### 5.3 Visual Contract
+
+- Menu panel uses `action-menu`: white-to-subtle surface, restrained border, soft elevation, no decorative color block.
+- Action menus are attached operation surfaces, not floating dialog cards. The panel must visually belong to its trigger: compact radius, restrained shadow, no large blank inset, no heavy card border, and no detached "modal card" feeling.
+- Toolbar and footer menus use content-based width with `width: max-content`, compact variant minimum widths, and `--dense-action-menu-max-w` as the upper bound so Chinese labels stay compact while longer English/i18n labels can expand before truncation.
+- Footer menus are closest to the sticky action bar. They use `action-menu--footer`, smaller minimum width than toolbar menus, and option height around 31px to keep click targets comfortable without creating a bulky popup.
+- Row menus remain compact but cannot drop below a 32px option hit area.
+- Menu content must not create horizontal scrollbars. Use bounded adaptive panel width, `overflow-x: hidden`, no wrapping, and ellipsis only after the max width is reached.
+- Dropdown options are text-first. Do not add icons by default and do not force an icon for every operation; many freight operations do not have a precise icon. Use an option icon only when the action has a strong, unambiguous system metaphor and the whole menu still remains visually even.
+- `action-menu__divider` separates semantic danger, not every two options.
+- `danger-opt` must be the final group and must not look like a normal option.
+- Do not write page-scoped dropdown shadows, radii, item padding, danger colors, or inline divider margins.
 
 Danger rules:
 
-- 下拉危险项：`class="danger-opt"`，点击后 `Modal.confirm` 或业务确认，禁止直接执行
-- 行内删除：`a-popconfirm`
-- 批量/不可逆：`Modal.confirm({ type: 'warning' })`
-- 禁止 `alert()` / `confirm()`
+- Toolbar dropdowns use `content-class="action-menu action-menu--toolbar"`; row dropdowns use `content-class="action-menu action-menu--row"`.
+- Detail sticky footer dropdowns use `content-class="action-menu action-menu--footer"`. Do not reuse toolbar dropdown style in a sticky footer because it reads too wide and visually detached from the footer button group.
+- Divider uses `action-menu__divider`; `row-action-menu__divider` is legacy-compatible only.
+- 下拉危险项：`class="danger-opt"`，点击后 `Modal.confirm` 或业务确认，禁止直接执行。
+- 行内删除：`a-popconfirm`。
+- 批量/不可逆：`Modal.confirm({ type: 'warning' })`。
+- 禁止 `alert()` / `confirm()`。
 
 ---
 

@@ -104,6 +104,26 @@ const RULES = [
     pattern: /btn-muted-warn/,
     fileFilter: /\.vue$/,
   },
+  {
+    desc: '下拉菜单分隔线禁止内联 style（应用 action-menu__divider）',
+    pattern: /<a-divider\b[^>]*\bstyle=/,
+    fileFilter: /\.vue$/,
+  },
+  {
+    desc: '下拉触发按钮禁止内联 icon margin（由 toolbar-group 统一控制 trailing icon 间距）',
+    pattern: /<icon-down\b[^>]*\bstyle=/,
+    fileFilter: /\.vue$/,
+  },
+  {
+    desc: 'a-dropdown 禁止使用无效 popup-class（Arco Dropdown 应使用 content-class）',
+    pattern: /<a-dropdown\b[^>]*\bpopup-class=/,
+    fileFilter: /\.vue$/,
+  },
+  {
+    desc: '下拉菜单分隔线应用 action-menu__divider（row-action-menu__divider 仅兼容旧代码）',
+    pattern: /row-action-menu__divider/,
+    fileFilter: /\.vue$/,
+  },
 ];
 
 // ─── 文件扫描 ─────────────────────────────────────────────────────────────────
@@ -162,12 +182,36 @@ if (!globalCss.includes('.detail-form .arco-form-item-label-col > .arco-form-ite
     content: 'missing .detail-form .arco-form-item-label-col > .arco-form-item-label',
   });
 }
-if (!globalCss.includes('--vxe-ui-table-row-height-small: 38px')) {
+if (!/--dense-row-h-detail-edit\s*:\s*38px/.test(globalCss)) {
   violations.push({
-    rule: 'detail-mini-vxe 可编辑表格行高必须匹配 28px 控件，防止输入内容截断',
+    rule: 'detail-mini-vxe 可编辑表格行高必须通过 --dense-row-h-detail-edit: 38px token 定义',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing --vxe-ui-table-row-height-small: 38px',
+    content: 'missing --dense-row-h-detail-edit: 38px',
+  });
+}
+if (!/--dense-row-h-detail-read\s*:\s*34px/.test(globalCss)) {
+  violations.push({
+    rule: 'detail-mini-vxe 只读表格行高必须通过 --dense-row-h-detail-read: 34px token 定义',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-row-h-detail-read: 34px',
+  });
+}
+if (!/--dense-row-h-summary\s*:\s*32px/.test(globalCss)) {
+  violations.push({
+    rule: 'summary mini table 行高必须通过 --dense-row-h-summary: 32px token 定义',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-row-h-summary: 32px',
+  });
+}
+if (!/--dense-col-w-seq\s*:\s*52px/.test(globalCss)) {
+  violations.push({
+    rule: 'VXE 序号列必须有统一宽度 token：--dense-col-w-seq: 52px',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-col-w-seq: 52px',
   });
 }
 if (!globalCss.includes('.detail-mini-vxe.vxe-table .arco-picker-size-small')) {
@@ -176,6 +220,46 @@ if (!globalCss.includes('.detail-mini-vxe.vxe-table .arco-picker-size-small')) {
     file: 'src/styles/global.css',
     line: 1,
     content: 'missing .detail-mini-vxe.vxe-table .arco-picker-size-small',
+  });
+}
+if (!/--dense-gap-label\s*:\s*4px/.test(globalCss)) {
+  violations.push({
+    rule: '字段节奏缺失：label 与控件的名/值关系需要 --dense-gap-label token 承载',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-gap-label: 4px',
+  });
+}
+if (!/\.filter-card__slim-row\s+\.filter-field\s*\{[\s\S]*?gap\s*:\s*5px/.test(globalCss)) {
+  violations.push({
+    rule: '查询字段节奏缺失：filter-field 需要 5px gap 维持字段名/输入面的可扫读分组',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .filter-card__slim-row .filter-field { gap: 5px }',
+  });
+}
+if (!globalCss.includes('.filter-card--two-row') || !globalCss.includes('.filter-grid--two-row')) {
+  violations.push({
+    rule: '两行高频查询必须有 filter-card--two-row / filter-grid--two-row 全局结构，不能靠重复 slim-row 拼接',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .filter-card--two-row or .filter-grid--two-row',
+  });
+}
+if (!globalCss.includes('.query-filter-drawer--wide') || !globalCss.includes('.query-filter-drawer__nav')) {
+  violations.push({
+    rule: '30+/40+ 查询项必须有宽抽屉与分组导航样式，禁止平铺表单墙',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .query-filter-drawer--wide or .query-filter-drawer__nav',
+  });
+}
+if (!globalCss.includes('.saved-query-workspace')) {
+  violations.push({
+    rule: '50+ 查询项必须有 saved-query-workspace 查询工作区样式，不能继续放大抽屉',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .saved-query-workspace',
   });
 }
 if (!globalCss.includes('.detail-section__body--table')) {
@@ -192,6 +276,14 @@ if (!globalCss.includes('.detail-mini-vxe.vxe-table .vxe-body--row')) {
     file: 'src/styles/global.css',
     line: 1,
     content: 'missing .detail-mini-vxe.vxe-table .vxe-body--row',
+  });
+}
+if (!/\.detail-mini-vxe\.vxe-table\s*\{[\s\S]*--vxe-ui-table-row-height-small:\s*var\(--detail-mini-row-h\)/.test(globalCss)) {
+  violations.push({
+    rule: 'detail-mini-vxe 的 VXE 行高变量必须引用 --detail-mini-row-h，禁止散落硬编码行高',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --vxe-ui-table-row-height-small: var(--detail-mini-row-h)',
   });
 }
 if (!globalCss.includes('col--ellipsis') || !globalCss.includes('.detail-mini-vxe.vxe-table')) {
@@ -290,6 +382,33 @@ if (!globalCss.includes('.detail-form .detail-combo')) {
   });
 }
 
+if (!/@media\s*\(max-width:\s*1279px\)/.test(globalCss) || !globalCss.includes('.merged-bar')) {
+  violations.push({
+    rule: '运营列表必须提供 1280 小屏断点，merged-bar/status/filter 不能在小屏硬挤溢出',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing @media (max-width: 1279px) responsive merged-bar rules',
+  });
+}
+
+if (!/\.stat-tab-group\s*\{[\s\S]*flex:\s*1 1 auto[\s\S]*min-width:\s*0/.test(globalCss)) {
+  violations.push({
+    rule: 'stat-tab-group 必须 flex: 1 1 auto 且 min-width: 0，状态组应内部滚动而不是撑爆页面',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .stat-tab-group flex/min-width responsive contract',
+  });
+}
+
+if (!globalCss.includes('.form-subgroup__head') || !globalCss.includes('.form-subgroup__title')) {
+  violations.push({
+    rule: '详情小模块必须提供 form-subgroup 结构样式，禁止只靠裸 subgroup label 分隔',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .form-subgroup__head or .form-subgroup__title',
+  });
+}
+
 if (!globalCss.includes('.vxe-table .row-action-btn.arco-btn-status-danger')) {
   violations.push({
     rule: '行内删除必须保留 danger 红色语义，禁止被默认 row-action 灰/蓝覆盖',
@@ -314,6 +433,42 @@ if (!globalCss.includes('.arco-popconfirm-footer .arco-btn') || !globalCss.inclu
     file: 'src/styles/global.css',
     line: 1,
     content: 'missing overlay typography overrides',
+  });
+}
+
+if (!globalCss.includes('--dense-action-menu-max-w') || !/\.action-menu,\s*\n\.row-action-menu,[\s\S]*?width:\s*max-content/.test(globalCss)) {
+  violations.push({
+    rule: 'action-menu 必须使用内容自适应宽度，并用 --dense-action-menu-max-w 约束国际化长文案',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing action-menu width: max-content or --dense-action-menu-max-w',
+  });
+}
+
+if (!globalCss.includes('--dense-zone-top-border') || !/\.zone-l2-filter-card\s*\{[\s\S]*?border-top:\s*1px solid var\(--dense-zone-top-border\)/.test(globalCss) || !/\.zone-l3-action,\s*\n\.zone-card--stack\s*\{[\s\S]*?border-top:\s*1px solid var\(--dense-zone-top-border\)/.test(globalCss) || !/\.zone-l4-table-card\s*\{[\s\S]*?border-top:\s*1px solid var\(--dense-zone-top-border\)/.test(globalCss)) {
+  violations.push({
+    rule: '列表 L2/L3/L4 模块顶边界必须统一使用 --dense-zone-top-border，禁止有的主色线有的灰线',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing unified --dense-zone-top-border usage on list zones',
+  });
+}
+
+if (!/\.action-menu--toolbar \.arco-dropdown-option\s*\{[^}]*height:\s*32px/.test(globalCss)) {
+  violations.push({
+    rule: '工具栏 action-menu 选项热区必须为 32px，保持可点击且不突兀',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .action-menu--toolbar .arco-dropdown-option { height: 32px }',
+  });
+}
+
+if (!/\.action-menu,\s*\n\.row-action-menu\s*\{[\s\S]*?overflow-x:\s*hidden/.test(globalCss)) {
+  violations.push({
+    rule: 'action-menu 浮层必须禁止横向滚动，长文案应用省略而不是撑出滚动条',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing action-menu overflow-x: hidden',
   });
 }
 
@@ -407,7 +562,7 @@ for (const file of files) {
   }
 }
 
-// 高频列表默认采用核心查询条 + 筛选抽屉；禁止业务页继续用内联展开筛选区制造灰色表单墙。
+// 高频列表默认采用核心查询条；旧式内联展开筛选区容易形成灰色表单墙。两行高频查询必须使用 two-row 专用结构。
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
@@ -415,11 +570,232 @@ for (const file of files) {
   if (!content.includes('zone-l2-filter-card')) continue;
   for (const match of content.matchAll(/class="filter-card__advanced"/g)) {
     violations.push({
-      rule: '列表查询区禁止内联展开筛选区，低频条件应进入 query-filter-drawer',
+      rule: '列表查询区禁止旧式 filter-card__advanced 展开灰墙；两行高频查询用 filter-card--two-row，低频条件进 query-filter-drawer',
       file: relPath,
       line: getLineNumber(content, match.index),
       content: content.slice(match.index, content.indexOf('\n', match.index)).trim().slice(0, 140),
     });
+  }
+}
+
+// L1 页面模式切换必须使用 segmented control，不复用 scope/status 的 .stab chip。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('zone-l1-transport')) continue;
+  const zonePattern = /<div\b[^>]*class=(["'])[^"']*\bzone-l1-transport\b[^"']*\1[^>]*>[\s\S]*?<\/div>/g;
+  for (const match of content.matchAll(zonePattern)) {
+    if (!/\bclass=(["'])[^"']*\bstab\b/.test(match[0])) continue;
+    violations.push({
+      rule: 'L1 页面模式切换应用 seg-btn，不能复用 scope/status 的 stab chip',
+      file: relPath,
+      line: getLineNumber(content, match.index),
+      content: match[0].split('\n').slice(0, 3).join(' ').trim().slice(0, 140),
+    });
+  }
+}
+
+// 查询抽屉必须是分组筛选工作面，不能退化成白底平铺表单。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('query-filter-drawer')) continue;
+  const required = [
+    'query-filter-drawer__shell',
+    'query-filter-drawer__body',
+    'query-filter-drawer__group',
+    'query-filter-drawer__group-head',
+  ];
+  for (const className of required) {
+    if (content.includes(className)) continue;
+    violations.push({
+      rule: `查询筛选抽屉缺少 ${className}，应使用分组筛选工作面`,
+      file: relPath,
+      line: getLineNumber(content, content.indexOf('query-filter-drawer')),
+      content: 'class="query-filter-drawer"',
+    });
+  }
+  if (content.includes('query-filter-drawer__summary')) {
+    violations.push({
+      rule: '查询筛选抽屉禁止说明性 summary 文案，层级应由标题、分组、字段和底部动作表达',
+      file: relPath,
+      line: getLineNumber(content, content.indexOf('query-filter-drawer__summary')),
+      content: content.slice(content.indexOf('query-filter-drawer__summary'), content.indexOf('\n', content.indexOf('query-filter-drawer__summary'))).trim().slice(0, 140),
+    });
+  }
+}
+
+// VXE 操作列必须使用 row-actions dock，避免 icon 直接漂浮在固定列背景上。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('title="操作"')) continue;
+  const opColumnPattern = /<vxe-column\b[^>]*title="操作"[^>]*>[\s\S]*?<\/vxe-column>/g;
+  for (const match of content.matchAll(opColumnPattern)) {
+    if (match[0].includes('class="row-actions"')) continue;
+    violations.push({
+      rule: 'VXE 操作列必须使用 row-actions dock 承载行级按钮',
+      file: relPath,
+      line: getLineNumber(content, match.index),
+      content: match[0].split('\n').slice(0, 3).join(' ').trim().slice(0, 140),
+    });
+  }
+}
+
+// 工具栏下拉菜单必须使用有效 content-class 绑定 action-menu--toolbar，不能复用行操作菜单命名。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('toolbar-group') || !content.includes('<a-dropdown')) continue;
+  const toolbarPattern = /<div\b[^>]*class=(["'])[^"']*\btoolbar-group\b[^"']*\1[^>]*>[\s\S]*?<\/div>/g;
+  for (const match of content.matchAll(toolbarPattern)) {
+    for (const dropdown of match[0].matchAll(/<a-dropdown\b[^>]*>/g)) {
+      const tag = dropdown[0];
+      if (/content-class=(["'])[^"']*\baction-menu\b[^"']*\baction-menu--toolbar\b[^"']*\1/.test(tag)) continue;
+      violations.push({
+        rule: '工具栏 dropdown 必须使用 content-class="action-menu action-menu--toolbar"，不能使用无效 popup-class',
+        file: relPath,
+        line: getLineNumber(content, match.index + dropdown.index),
+        content: tag.trim().slice(0, 140),
+      });
+    }
+  }
+}
+
+// 详情吸底 footer 的 dropdown 必须使用 footer 语义菜单，避免套用 toolbar 菜单导致弹层过宽、脱离底部操作区。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('detail-drawer-footer') || !content.includes('<a-dropdown')) continue;
+  const footerPattern = /<div\b[^>]*class=(["'])[^"']*\bdetail-drawer-footer\b[^"']*\1[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g;
+  for (const match of content.matchAll(footerPattern)) {
+    for (const dropdown of match[0].matchAll(/<a-dropdown\b[^>]*>/g)) {
+      const tag = dropdown[0];
+      if (/content-class=(["'])[^"']*\baction-menu\b[^"']*\baction-menu--footer\b[^"']*\1/.test(tag)) continue;
+      violations.push({
+        rule: '详情吸底 footer 的 dropdown 必须使用 content-class="action-menu action-menu--footer"，不能复用 toolbar 菜单样式',
+        file: relPath,
+        line: getLineNumber(content, match.index + dropdown.index),
+        content: tag.trim().slice(0, 140),
+      });
+    }
+  }
+}
+
+// 详情小模块禁止使用连续裸 label 形成左侧蓝竖线噪声；新代码应使用 form-subgroup block。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('form-subgroup-label')) continue;
+  for (const match of content.matchAll(/class=(["'])[^"']*\bform-subgroup-label\b[^"']*\1/g)) {
+    violations.push({
+      rule: '详情小模块禁止使用裸 form-subgroup-label；应使用 form-subgroup + form-subgroup__head + detail-form-grid',
+      file: relPath,
+      line: getLineNumber(content, match.index),
+      content: content.slice(match.index, content.indexOf('\n', match.index)).trim().slice(0, 140),
+    });
+  }
+}
+
+// 下拉菜单项默认纯文本，禁止为了装饰给每个业务动作强配图标。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('<a-doption') || !content.includes('#icon')) continue;
+  const optionPattern = /<a-doption\b[\s\S]*?<\/a-doption>/g;
+  for (const match of content.matchAll(optionPattern)) {
+    if (!match[0].includes('#icon')) continue;
+    violations.push({
+      rule: '下拉菜单项默认文本优先，a-doption 禁止强配图标；只有触发按钮/行内图标按钮承担图标语义',
+      file: relPath,
+      line: getLineNumber(content, match.index),
+      content: match[0].split('\n').slice(0, 3).join(' ').trim().slice(0, 140),
+    });
+  }
+}
+
+// 复杂下单详情禁止大蓝箭头步骤和顶层 KPI 报表条，避免详情页退化成流程/KPI 看板。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('detail-drawer')) continue;
+  const arrowStepIndex = content.search(/<a-steps\b[^>]*\btype=(["'])arrow\1/);
+  if (arrowStepIndex >= 0) {
+    violations.push({
+      rule: '复杂订单详情禁止 a-steps type="arrow"，应使用轻量 dds-milestone-bar',
+      file: relPath,
+      line: getLineNumber(content, arrowStepIndex),
+      content: content.slice(arrowStepIndex, content.indexOf('\n', arrowStepIndex)).trim().slice(0, 140),
+    });
+  }
+  if (content.includes('detail-overview-kpi')) {
+    violations.push({
+      rule: '复杂订单详情禁止顶层 detail-overview-kpi 报表条，货量/费用统计应进入所属模块 summary',
+      file: relPath,
+      line: getLineNumber(content, content.indexOf('detail-overview-kpi')),
+      content: 'detail-overview-kpi',
+    });
+  }
+}
+
+// VXE 表格行高与结构列宽必须显式匹配设计 token：主列表 36，详情按职责分 38/34/32，序号列 52。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  const blocks = content.match(/<vxe-table[\s\S]*?<\/vxe-table>/g) || [];
+  for (const block of blocks) {
+    const blockIndex = content.indexOf(block);
+    const firstLine = block.split('\n').slice(0, 10).join(' ');
+    if (/class=(["'])[^"']*\bworkbench-table\b[^"']*\1/.test(firstLine) && !/row-config=(["'])\{[^"']*height:\s*36/.test(firstLine)) {
+      violations.push({
+        rule: 'workbench-table 必须显式设置 row-config.height = 36，避免 VXE small 默认 40px 泄漏',
+        file: relPath,
+        line: getLineNumber(content, blockIndex),
+        content: firstLine.trim().slice(0, 140),
+      });
+    }
+    if (/\bdetail-mini-vxe\b/.test(firstLine) && !/\bdetail-mini-vxe--(editable|readonly|summary)\b/.test(firstLine)) {
+      violations.push({
+        rule: 'detail-mini-vxe 必须声明密度 modifier：editable / readonly / summary',
+        file: relPath,
+        line: getLineNumber(content, blockIndex),
+        content: firstLine.trim().slice(0, 140),
+      });
+    }
+    const detailDensity = firstLine.includes('detail-mini-vxe--editable')
+      ? { height: 38, rule: 'detail-mini-vxe--editable 必须显式设置 row-config.height = 38，承载 28px 表单控件' }
+      : firstLine.includes('detail-mini-vxe--readonly')
+        ? { height: 34, rule: 'detail-mini-vxe--readonly 必须显式设置 row-config.height = 34，只读资料/状态行保持紧凑' }
+        : firstLine.includes('detail-mini-vxe--summary')
+          ? { height: 32, rule: 'detail-mini-vxe--summary 必须显式设置 row-config.height = 32，摘要小表保持紧凑' }
+          : null;
+    if (detailDensity && !new RegExp(`row-config=(["'])\\{[^"']*height:\\s*${detailDensity.height}`).test(firstLine)) {
+      violations.push({
+        rule: detailDensity.rule,
+        file: relPath,
+        line: getLineNumber(content, blockIndex),
+        content: firstLine.trim().slice(0, 140),
+      });
+    }
+    for (const column of block.matchAll(/<vxe-column\b[^>]*\btype=(["'])seq\1[^>]*>/g)) {
+      const tag = column[0];
+      if (/\bwidth=(["'])52\1/.test(tag)) continue;
+      violations.push({
+        rule: 'VXE 序号列统一使用 width="52"，避免主表/详情行号宽度漂移',
+        file: relPath,
+        line: getLineNumber(content, blockIndex + column.index),
+        content: tag.trim().slice(0, 140),
+      });
+    }
   }
 }
 

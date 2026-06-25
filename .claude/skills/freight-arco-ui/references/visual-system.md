@@ -38,6 +38,7 @@ Rules:
 - A viewport should have a small number of primary anchors: active nav, primary action, key links, and focused/selected state.
 - Search cards, toolbar rows, table caps, and table body default surfaces stay neutral unless they are in active/hover/selected state.
 - Do not solve “too gray” by tinting every container. Improve hierarchy through primary identifiers, status pills, table columns, and action priority first.
+- List module top borders are structural boundaries, not active-state anchors. Use `--dense-zone-top-border` consistently for `zone-l1-transport`, `zone-l2-filter-card`, `zone-l3-action`, and `zone-l4-table-card`; do not mix primary top borders with neutral top borders between adjacent modules.
 - If a raw theme token fix makes the page visibly bluer, reduce the semantic alias intensity or move that surface back to neutral.
 - `--dense-primary-1/2/3/4` are project semantic aliases. They may be weaker than the original theme scale to preserve long-term comfort.
 

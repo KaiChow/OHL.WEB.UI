@@ -21,7 +21,7 @@ List workbench tables and detail nested tables must read as **one VXE design sys
 | Header background | `--dense-table-header-bg` | 32px header | 32px header (same gradient) |
 | Header column border | `rgba(143,184,255,0.22)` | yes | yes |
 | Body column/row border | `--dense-table-col-border` / `--dense-table-row-border` | yes | yes |
-| Row hover | `--dense-vxe-surface-hover-bg` | 36px row | 38px row (editable controls) |
+| Row hover | `--dense-vxe-surface-hover-bg` | `--dense-row-h` / 36px row | role-based row token |
 | Row checked | `--dense-vxe-surface-checked-bg` | yes | yes |
 | Left accent on hover | `inset 2px 0 0 --dense-primary-4` | yes | yes |
 | Overflow tooltip | `show-overflow="title"` | required | **forbidden** |
@@ -32,7 +32,8 @@ Shared rules:
 - Header uses `--dense-table-header-bg` gradient on both list and detail. Do not use a flat gray header in detail while list uses gradient.
 - Hover/selection always use `--dense-vxe-surface-hover-bg` / `--dense-vxe-surface-checked-bg`, never the same value as the header background.
 - Do not add `border-bottom` on `vxe-table--header-wrapper`; structure vs data is separated by header gradient + white rows.
-- Detail-only differences: 38px editable row height, ghost Arco controls, padding on `.vxe-cell` not on `td`, no `show-overflow`, no checkbox without batch toolbar.
+- Detail-only differences: role-based row height, ghost Arco controls for editable rows, padding on `.vxe-cell` not on `td`, no `show-overflow`, no checkbox without batch toolbar.
+- Sequence columns are structural rhythm, not page-specific layout. Use the same project width for list and detail sequence columns: `width="52"` unless there is a documented module exception.
 
 ## Required Setup
 
@@ -60,16 +61,24 @@ Main workbench tables must be compact enough for all-day operation, but not comp
 |------------|--------|----------|------|
 | Workbench compact list | 32px | 36px | Default for order, customer, finance, warehouse, and operation lists |
 | Workbench standard list | 36px | 48px | Only for low-frequency review pages or rows with two-line cells |
-| Detail line table | 32px | 32-38px | Header aligns with list; body 38px when editable |
-| Editable line table | 32px | 38px | Smallest height that keeps 28px inputs readable |
-| Summary/read-only mini table | 28px | 30-34px | No row actions unless necessary |
+| Detail editable line table | 32px | 38px | Use when row cells render `a-input`, `a-select`, `a-input-number`, date picker, or inline row editing |
+| Detail readonly line table | 32px | 34px | Use for documents, file status, timeline-like records, read-only child rows |
+| Summary/read-only mini table | 28-32px | 32px | Use for compact totals, short read-only facts, no operation column unless necessary |
 
 Rules:
 
 - Project default tokens are `--dense-header-h: 32px` and `--dense-row-h: 36px`.
+- Detail editable row token is `--dense-row-h-detail-edit: 38px`; this is intentionally 2px taller than the main list because it hosts 28px Arco controls.
+- Detail readonly row token is `--dense-row-h-detail-read: 34px`; this keeps document/status child rows compact and prevents detail drawers from becoming loose.
+- Summary mini row token is `--dense-row-h-summary: 32px`; use it only for short totals or read-only facts, not editable child rows.
 - Main list VXE tables use `class="compact"` unless the page has a documented reason to use `standard`.
 - Do not use 40px as the default workbench row height; it reduces first-screen data density.
 - VXE `size="small"` defaults to a 40px row variable. A compact table must override `--vxe-ui-table-row-height-small` and set `row-config.height = 36`; changing only `.vxe-body--row` is not enough.
+- `detail-mini-vxe--editable` must set `row-config.height = 38`.
+- `detail-mini-vxe--readonly` must set `row-config.height = 34`.
+- `detail-mini-vxe--summary` must set `row-config.height = 32`.
+- CSS-only row height is not enough because VXE virtualization, fixed columns, and scroll calculations use the table config.
+- Do not apply editable density to read-only documents, attachments, logs, or status-only rows. Density is chosen by the row job, not by the surrounding drawer.
 - Do not push main list rows below 34px; checkbox, status pill, icon actions, and text line-height begin to clip.
 - If row content requires more than 36px, first reduce column complexity or move secondary information to detail, then consider `standard`.
 - Row height must be paired with readable typography: body F1 13px, header F3 12px.
@@ -83,7 +92,7 @@ Business columns use **`min-width`**, not fixed `width`. Fixed `width` is allowe
 | Allowed `width` | Examples |
 |-----------------|----------|
 | `type="checkbox"` | `width="40"` |
-| `type="seq"` | `width="44"`–`56` |
+| `type="seq"` | `width="52"` project default |
 | Operation column | `title="操作"` + `fixed="right"`, `width="56"`–`88` |
 
 Everything else — codes, names, dates, numbers, ports, status pills, file actions, editable inputs — uses **`min-width`** with a starting value from the width table below. VXE distributes extra horizontal space across `min-width` columns so cells are not crushed on wide tables and can scroll on narrow ones.
@@ -110,7 +119,7 @@ Starting **`min-width`** floors (not fixed `width`):
 
 | Column kind | min-width floor |
 |-------------|-----------------|
-| Sequence | `width` 44–56 (structural only) |
+| Sequence | `width="52"` project default (structural only) |
 | Checkbox | `width` 40–48 (structural only) |
 | Status pill | 84–110 |
 | Date | 92–120 |
@@ -232,29 +241,33 @@ const xTable = ref<VxeTableInstance>()
 <!-- 操作列：主操作 icon + ··· dropdown -->
 <vxe-column title="操作" width="88" fixed="right" align="center">
   <template #default="{ row }">
-    <a-tooltip content="查看详情">
-      <a-button size="small" type="text" class="row-action-btn" @click="handleView(row)">
-        <template #icon><icon-eye /></template>
-      </a-button>
-    </a-tooltip>
-    <a-dropdown trigger="click" position="br">
-      <a-button size="small" type="text" class="row-action-btn" title="更多操作">
-        <template #icon><icon-more /></template>
-      </a-button>
-      <template #content>
-        <a-doption @click="handleEdit(row)">编辑</a-doption>
-        <a-doption @click="handlePrint(row)">打印</a-doption>
-        <a-divider style="margin:4px 0" />
-        <a-popconfirm content="确认废弃？此操作不可恢复。" @ok="handleVoid(row)">
-          <a-doption class="danger-opt">废弃</a-doption>
-        </a-popconfirm>
-      </template>
-    </a-dropdown>
+    <div class="row-actions">
+      <a-tooltip content="查看详情">
+        <a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="handleView(row)">
+          <template #icon><icon-eye /></template>
+        </a-button>
+      </a-tooltip>
+      <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--row">
+        <a-button size="small" type="text" class="row-action-btn row-action-btn--more" title="更多操作">
+          <template #icon><icon-more /></template>
+        </a-button>
+        <template #content>
+          <a-doption @click="handleEdit(row)">编辑</a-doption>
+          <a-doption @click="handlePrint(row)">打印</a-doption>
+          <a-divider class="action-menu__divider" />
+          <a-popconfirm content="确认废弃？此操作不可恢复。" @ok="handleVoid(row)">
+            <a-doption class="danger-opt">废弃</a-doption>
+          </a-popconfirm>
+        </template>
+      </a-dropdown>
+    </div>
   </template>
 </vxe-column>
 ```
 
 - 操作列宽度：1 个 icon = `width="56"`；2 个 icon = `width="88"`。
+- Operation column content must be wrapped by `row-actions`; icon buttons must not float directly on the grid background.
+- Primary direct row action uses `row-action-btn row-action-btn--primary`; more menu uses `row-action-btn row-action-btn--more`.
 - danger 操作始终在 dropdown 内，且用 `a-popconfirm` 二次确认，不能直接触发。
 - Do not repeat identical text buttons in every row if icon action with tooltip is enough.
 - Fixed operation columns need an intentional action surface: subtle left boundary, compact `row-actions` dock, and consistent icon button size.
@@ -275,10 +288,12 @@ Detail tables must look like part of the module, not a full page table pasted in
 - Keep operation column compact and rightmost.
 - Do not use pagination inside nested detail tables unless the row count is genuinely large.
 - Do not use large table captions for child tables; use the parent module/child head for identity.
-- For nested editable line rows, use `detail-mini-vxe`: **same header/hover/border tokens as `workbench-table`**, with 32px header, 38px editable row, 28px Arco controls, and fixed right operation when needed.
+- For nested editable line rows, use `detail-mini-vxe detail-mini-vxe--editable`: **same header/hover/border tokens as `workbench-table`**, with 32px header, 38px editable row, 28px Arco controls, and fixed right operation when needed.
+- For nested read-only line rows, use `detail-mini-vxe detail-mini-vxe--readonly`: 32px header, 34px body row, no visible input controls by default.
+- For short summary tables, use `detail-mini-vxe detail-mini-vxe--summary`: 28-32px header rhythm, 32px body row, no row actions unless the summary itself is editable.
 - `detail-mini-vxe` shares `--dense-table-header-bg` and `--dense-vxe-surface-hover-bg` with list tables. Data rows stay white; hover is primary wash on white. **Do not** use a separate flat-gray header in detail.
 - Detail mini tables without batch toolbar must **not** include a `type="checkbox"` column (VXE default checkbox reads as a solid blue square and has no batch action in detail sub-tables).
-- `detail-mini-vxe` CSS row height, `--vxe-ui-table-row-height-small`, and `row-config.height` must match. Do not set row height to 34px while rendering 28px input/select/date controls, because VXE cell clipping will cut input text and displayed values.
+- `detail-mini-vxe` CSS row height, `--vxe-ui-table-row-height-small`, and `row-config.height` must match the chosen density variant. Do not set readonly height 34px while rendering 28px input/select/date controls, because VXE cell clipping will cut input text and displayed values.
 - `detail-mini-vxe` is isolated from list-page `.vxe-table` global rules in `global.css` for **cell padding and row height only**. Header/hover/border tokens must match `workbench-table`.
 - Wrap detail-section embedded tables with `detail-section__body detail-section__body--table` (padding 0, horizontal scroll). Do not use page-scoped `overflow: hidden` wrappers around wide child tables.
 - Do **not** set `show-overflow` on `detail-mini-vxe` tables. It adds `col--ellipsis`, clips numbers/inputs, and can desync header/body columns (especially with `fixed="right"`). List/workbench tables still use `show-overflow="title"`.

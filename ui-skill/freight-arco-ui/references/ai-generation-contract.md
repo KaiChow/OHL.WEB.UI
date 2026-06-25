@@ -41,6 +41,43 @@ Before generating UI:
 8. Verify with `npx vite build`.
 9. Visually inspect the route when a dev server is available.
 
+## Executable Design Language Contract
+
+All UI requirements, reviews, and reference updates must be written as **AI-executable design language**. A rule is not acceptable if it only describes taste.
+
+When turning feedback into a rule, translate subjective judgement into implementation structure:
+
+| Vague feedback | Required design-language form |
+|----------------|-------------------------------|
+| `不好看`, `太丑`, `没质感` | Define the surface, hierarchy, token, component class, state, spacing rhythm, and forbidden fallback. |
+| `高密度` | Define row/control height, gap tier, visible information rhythm, truncation/tooltip behavior, and minimum readable separation. |
+| `专业`, `高级`, `SaaS感` | Define business object ownership, primary/secondary/auxiliary hierarchy, Arco token usage, and visual restraint. |
+| `操作不规范` | Define action scope, trigger type, button type/status, dropdown variant, danger confirmation, and maximum visible actions. |
+
+Every new or changed UI rule must include at least four of these executable anchors:
+
+1. **Object / scope** — page zone, component, table type, drawer, toolbar, field group, or action scope.
+2. **Required structure** — class name, component pattern, slot, DOM relationship, or file/reference location.
+3. **Token / density** — global CSS variable, Arco size, row height, gap, typography tier, or color alias.
+4. **State behavior** — default, hover, active, selected, disabled, loading, empty, error, or danger handling.
+5. **Business semantics** — freight object, status, action verb, ownership, or user job.
+6. **Forbidden fallback** — the specific old/simple pattern that must not be generated.
+7. **Verification** — checklist item, `check-spec` rule, or static search pattern when automation is feasible.
+
+Rules that only say `不要贴在一起`, `要有设计感`, `更高级`, `更美观`, `更专业`, or `统一一下` must be rewritten before implementation. The rewrite must explain what an AI should code: which class to use, what spacing/token/state applies, where danger or hierarchy sits, and what old pattern is rejected.
+
+Good rule example:
+
+```text
+Toolbar dropdowns use `content-class="action-menu action-menu--toolbar"`; row operation dropdowns use `content-class="action-menu action-menu--row"`. Toolbar menus use content-adaptive width (`width: max-content`) with compact min width and `--dense-action-menu-max-w` upper bound for i18n labels; row menus keep at least 32px option hit area. Options use F4 control typography and are text-first: do not add icons by default, and never force icons just to make every option look decorated. Put irreversible actions in the final `danger-opt` group separated by `action-menu__divider`. Do not use invalid `popup-class`, fixed page-scoped menu widths, `row-action-menu` for toolbar menus, horizontal scrollbars, or page-scoped dropdown shadows/padding/colors.
+```
+
+Bad rule example:
+
+```text
+Dropdown should look more premium and not ugly.
+```
+
 ## Structure Requirements
 
 For large modules:
@@ -67,8 +104,17 @@ src/views/<domain>/<module>/
 - Do not create an independent color palette.
 - Do not add large decorative gradients, oversized cards, marketing hero areas, or consumer SaaS styling.
 - Use VXE Table for data grids.
+- Generate main list tables as `class="compact workbench-table"` with `row-config.height = 36`.
+- Generate editable detail/nested tables as `class="detail-mini-vxe detail-mini-vxe--editable"` with `row-config.height = 38`; do not rely on CSS-only row height.
+- Generate readonly detail/nested tables, such as documents, files, and status records, as `class="detail-mini-vxe detail-mini-vxe--readonly"` with `row-config.height = 34`.
+- Generate compact summary tables as `class="detail-mini-vxe detail-mini-vxe--summary"` with `row-config.height = 32`; do not use this variant for rows with visible form controls.
+- Generate VXE sequence columns with `width="52"` in both workbench and detail tables unless a documented module exception exists.
 - Use icon-only row actions with tooltip.
 - Group low-frequency actions in dropdowns.
+- For order-entry/detail drawers, use `dds-milestone-bar` for compact process awareness. Do not generate `a-steps type="arrow"` or a full-width KPI/report strip under the hero. Cargo totals belong in the cargo module summary; fee totals/profit belong in the fee module summary.
+- For detail sections with internal groups, generate `form-subgroup` blocks with `form-subgroup__head`, `form-subgroup__title`, and a following `detail-form-grid`. Do not generate consecutive bare `form-subgroup-label` elements or repeated blue left rails.
+- Generate list workbenches with the responsive contract from `responsive.md`: filter rows may wrap below `1280px`, merged toolbar/status may become two rows, and `stat-tab-group` must scroll internally instead of creating page-level horizontal overflow.
+- Select query UI by field count from `filter-layout.md`: 1-8 visible core filters, 9-16 core row + drawer, 17-32 grouped drawer, 33-50 wide drawer with group navigation, and 50+ saved query workspace. Do not generate a flat 30/40/50-field query wall.
 - Keep table/list area dominant on operational pages.
 
 ## Business Generation Rules

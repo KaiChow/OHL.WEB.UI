@@ -55,6 +55,7 @@ Reference implementation: `src/views/orderManage/saleOrder/`
 | AI page generation | `ai-generation-contract.md` |
 | List / workbench | `list-page.md` + `table.md` + `actions.md` |
 | **筛选区字段数 → 布局选型** | **`filter-layout.md`** |
+| **小屏 / 分辨率适配** | **`responsive.md`** |
 | Detail / form structure | `detail-form.md` + `actions.md` |
 | **Arco form 写法（校验/提交/combo）** | **`form-rules.md`** |
 | File upload / attachments | `upload.md` |
@@ -77,6 +78,7 @@ Reference implementation: `src/views/orderManage/saleOrder/`
 - One `primary` per scope; row actions icon + tooltip; danger → confirm
 - `detail-mini-vxe`: no `show-overflow`; header bg ≠ row hover bg; no checkbox without batch toolbar
 - Business Arco controls: `size="small"` only — see `component-size.md` (`medium` = Arco default, forbidden)
+- UI rules must be written as AI-executable design language: scope + structure/class + token/density + state + business semantics + forbidden fallback. Vague taste rules like “更好看/更有质感/不要贴在一起” must be translated before coding.
 
 ## Working Protocol
 

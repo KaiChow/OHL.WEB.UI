@@ -3,8 +3,8 @@ import { ref, reactive, computed } from 'vue'
 import { Modal } from '@arco-design/web-vue'
 import type { VxeTableInstance } from 'vxe-table'
 import {
-  IconRefresh, IconSearch, IconDownload, IconEye, IconPlus, IconDown,
-  IconUpload, IconMore, IconSettings, IconFilter
+  IconRefresh, IconSearch, IconEye, IconPlus, IconDown,
+  IconMore, IconSettings, IconFilter
 } from '@arco-design/web-vue/es/icon'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -189,8 +189,8 @@ function handleBatchVoid() {
   <div class="page-root page-root--dense mbl-order-page">
     <!-- ── L1 Transport Tabs ───────────────────────────────────────────────── -->
     <div class="zone-l1-transport zone-card">
-      <button class="stab" :class="{ 'stab--active': transportTab === 'sea' }" type="button" @click="transportTab = 'sea'">海运</button>
-      <button class="stab" :class="{ 'stab--active': transportTab === 'air' }" type="button" @click="transportTab = 'air'">空运</button>
+      <button class="seg-btn" :class="{ 'seg-btn--active': transportTab === 'sea' }" type="button" @click="transportTab = 'sea'">海运</button>
+      <button class="seg-btn" :class="{ 'seg-btn--active': transportTab === 'air' }" type="button" @click="transportTab = 'air'">空运</button>
     </div>
 
     <!-- ── L2 Filter — 目标导向查询：核心定位行 + 更多筛选抽屉 -->
@@ -246,65 +246,79 @@ function handleBatchVoid() {
       placement="right"
       class="query-filter-drawer"
     >
-      <a-form class="detail-form" layout="vertical" size="small" :model="q">
-        <div class="detail-form-grid detail-form-grid--2">
-          <div class="form-subgroup-label">订单信息</div>
-          <a-form-item label="业务类型">
-            <a-select v-model="q.bizType" size="small" allow-clear placeholder="请选择">
-              <a-option value="export">出口</a-option>
-              <a-option value="import">进口</a-option>
-              <a-option value="transit">转运</a-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item label="订单类型">
-            <a-select v-model="q.orderType" size="small" allow-clear placeholder="请选择">
-              <a-option value="normal">普通单</a-option>
-              <a-option value="combined">拼柜单</a-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item label="操作员">
-            <a-input v-model="q.operator" size="small" allow-clear placeholder="请输入姓名" @press-enter="handleSearch" />
-          </a-form-item>
-          <a-form-item label="是否船司主单">
-            <a-select v-model="q.isCarrierMbl" size="small" allow-clear placeholder="请选择">
-              <a-option value="yes">是</a-option>
-              <a-option value="no">否</a-option>
-            </a-select>
-          </a-form-item>
+      <div class="query-filter-drawer__shell">
+        <div class="query-filter-drawer__body">
+          <a-form class="detail-form" layout="vertical" size="small" :model="q">
+            <div class="query-filter-drawer__group">
+              <div class="query-filter-drawer__group-head">订单信息</div>
+              <div class="detail-form-grid detail-form-grid--2">
+                <a-form-item label="业务类型">
+                  <a-select v-model="q.bizType" size="small" allow-clear placeholder="请选择">
+                    <a-option value="export">出口</a-option>
+                    <a-option value="import">进口</a-option>
+                    <a-option value="transit">转运</a-option>
+                  </a-select>
+                </a-form-item>
+                <a-form-item label="订单类型">
+                  <a-select v-model="q.orderType" size="small" allow-clear placeholder="请选择">
+                    <a-option value="normal">普通单</a-option>
+                    <a-option value="combined">拼柜单</a-option>
+                  </a-select>
+                </a-form-item>
+                <a-form-item label="操作员">
+                  <a-input v-model="q.operator" size="small" allow-clear placeholder="请输入姓名" @press-enter="handleSearch" />
+                </a-form-item>
+                <a-form-item label="是否船司主单">
+                  <a-select v-model="q.isCarrierMbl" size="small" allow-clear placeholder="请选择">
+                    <a-option value="yes">是</a-option>
+                    <a-option value="no">否</a-option>
+                  </a-select>
+                </a-form-item>
+              </div>
+            </div>
 
-          <div class="form-subgroup-label form-subgroup-label--span form-subgroup-label--mt">航线信息</div>
-          <a-form-item label="船名">
-            <a-input v-model="q.vessel" size="small" allow-clear placeholder="船名" @press-enter="handleSearch" />
-          </a-form-item>
-          <a-form-item label="航次">
-            <a-input v-model="q.voyage" size="small" allow-clear placeholder="航次" @press-enter="handleSearch" />
-          </a-form-item>
-          <a-form-item label="柜子类型">
-            <a-select v-model="q.containerType" size="small" allow-clear placeholder="请选择">
-              <a-option value="normal">普通柜</a-option>
-              <a-option value="reefer">温控柜</a-option>
-              <a-option value="dg">危险品柜</a-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item label="合约号">
-            <a-input v-model="q.contractNo" size="small" allow-clear placeholder="合约号" @press-enter="handleSearch" />
-          </a-form-item>
-          <a-form-item label="境外代理">
-            <a-input v-model="q.foreignAgent" size="small" allow-clear placeholder="境外代理" @press-enter="handleSearch" />
-          </a-form-item>
+            <div class="query-filter-drawer__group">
+              <div class="query-filter-drawer__group-head">航线信息</div>
+              <div class="detail-form-grid detail-form-grid--2">
+                <a-form-item label="船名">
+                  <a-input v-model="q.vessel" size="small" allow-clear placeholder="船名" @press-enter="handleSearch" />
+                </a-form-item>
+                <a-form-item label="航次">
+                  <a-input v-model="q.voyage" size="small" allow-clear placeholder="航次" @press-enter="handleSearch" />
+                </a-form-item>
+                <a-form-item label="柜子类型">
+                  <a-select v-model="q.containerType" size="small" allow-clear placeholder="请选择">
+                    <a-option value="normal">普通柜</a-option>
+                    <a-option value="reefer">温控柜</a-option>
+                    <a-option value="dg">危险品柜</a-option>
+                  </a-select>
+                </a-form-item>
+                <a-form-item label="合约号">
+                  <a-input v-model="q.contractNo" size="small" allow-clear placeholder="合约号" @press-enter="handleSearch" />
+                </a-form-item>
+                <a-form-item label="境外代理">
+                  <a-input v-model="q.foreignAgent" size="small" allow-clear placeholder="境外代理" @press-enter="handleSearch" />
+                </a-form-item>
+              </div>
+            </div>
 
-          <div class="form-subgroup-label form-subgroup-label--span form-subgroup-label--mt">时间范围</div>
-          <a-form-item label="ETD 范围">
-            <a-range-picker v-model="q.etdRange" size="small" style="width:100%" />
-          </a-form-item>
-          <a-form-item label="ATA 范围">
-            <a-range-picker v-model="q.ataRange" size="small" style="width:100%" />
-          </a-form-item>
-          <a-form-item label="ATD 范围">
-            <a-range-picker v-model="q.atdRange" size="small" style="width:100%" />
-          </a-form-item>
+            <div class="query-filter-drawer__group">
+              <div class="query-filter-drawer__group-head">时间范围</div>
+              <div class="detail-form-grid detail-form-grid--2">
+                <a-form-item label="ETD 范围">
+                  <a-range-picker v-model="q.etdRange" size="small" style="width:100%" />
+                </a-form-item>
+                <a-form-item label="ATA 范围">
+                  <a-range-picker v-model="q.ataRange" size="small" style="width:100%" />
+                </a-form-item>
+                <a-form-item label="ATD 范围">
+                  <a-range-picker v-model="q.atdRange" size="small" style="width:100%" />
+                </a-form-item>
+              </div>
+            </div>
+          </a-form>
         </div>
-      </a-form>
+      </div>
       <template #footer>
         <div class="detail-drawer-footer">
           <div class="detail-drawer-footer__start">
@@ -326,29 +340,23 @@ function handleBatchVoid() {
             <template #icon><icon-plus /></template>新建主单
           </a-button>
           <a-button size="small" type="outline" @click="">拼柜主单</a-button>
-          <a-dropdown trigger="click" popup-class="row-action-menu">
-            <a-button size="small" type="outline">导出<icon-down style="margin-left:2px" /></a-button>
+          <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+            <a-button size="small" type="outline">导出<icon-down /></a-button>
             <template #content>
               <a-doption @click="">导出 Excel</a-doption>
               <a-doption @click="">导出 PDF</a-doption>
             </template>
           </a-dropdown>
-          <a-dropdown trigger="click" popup-class="row-action-menu">
-            <a-button size="small" type="text">更多<icon-down style="margin-left:2px" /></a-button>
+          <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+            <a-button size="small" type="text">更多<icon-down /></a-button>
             <template #content>
               <a-doption @click="">柜子类型查询</a-doption>
-              <a-doption @click="">
-                <template #icon><icon-upload /></template>
-                上传MBL COPY件
-              </a-doption>
-              <a-doption @click="">
-                <template #icon><icon-download /></template>
-                下载MBL COPY件
-              </a-doption>
+              <a-doption @click="">上传MBL COPY件</a-doption>
+              <a-doption @click="">下载MBL COPY件</a-doption>
               <a-doption @click="">批量核准</a-doption>
               <a-doption @click="">批量修改租柜</a-doption>
               <a-doption @click="">批量修改装载升柜</a-doption>
-              <a-divider style="margin:4px 0" />
+              <a-divider class="action-menu__divider" />
               <a-doption class="danger-opt" @click="handleBatchVoid">批量废弃</a-doption>
             </template>
           </a-dropdown>
@@ -427,7 +435,7 @@ function handleBatchVoid() {
           @checkbox-all="({ records }) => (selectedRows = records)"
         >
           <vxe-column type="checkbox" width="40" fixed="left" />
-          <vxe-column type="seq" title="序号" width="55" fixed="left" />
+          <vxe-column type="seq" title="序号" width="52" fixed="left" />
 
           <!-- 默认显示列 -->
           <vxe-column field="mblNo" title="MBL单号" min-width="150" fixed="left" sortable>
@@ -470,36 +478,32 @@ function handleBatchVoid() {
 
           <vxe-column title="操作" width="88" fixed="right" align="center">
             <template #default="{ row }">
-              <a-tooltip content="查看详情">
-                <a-button size="small" type="text" class="row-action-btn" @click="">
-                  <template #icon><icon-eye /></template>
-                </a-button>
-              </a-tooltip>
-              <a-dropdown trigger="click" position="br" popup-class="row-action-menu">
-                <a-tooltip content="更多操作">
-                  <a-button size="small" type="text" class="row-action-btn">
-                    <template #icon><icon-more /></template>
+              <div class="row-actions">
+                <a-tooltip content="查看详情">
+                  <a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="">
+                    <template #icon><icon-eye /></template>
                   </a-button>
                 </a-tooltip>
-                <template #content>
-                  <a-doption @click="">编辑</a-doption>
-                  <a-doption @click="">
-                    <template #icon><icon-upload /></template>
-                    上传COPY件
-                  </a-doption>
-                  <a-doption @click="">
-                    <template #icon><icon-download /></template>
-                    下载COPY件
-                  </a-doption>
-                  <a-divider style="margin:4px 0" />
-                  <a-popconfirm
-                    :content="`确认废弃主单 ${row.mblNo}？此操作不可恢复。`"
-                    @ok=""
-                  >
-                    <a-doption class="danger-opt">废弃</a-doption>
-                  </a-popconfirm>
-                </template>
-              </a-dropdown>
+                <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--row">
+                  <a-tooltip content="更多操作">
+                    <a-button size="small" type="text" class="row-action-btn row-action-btn--more">
+                      <template #icon><icon-more /></template>
+                    </a-button>
+                  </a-tooltip>
+                  <template #content>
+                    <a-doption @click="">编辑</a-doption>
+                    <a-doption @click="">上传COPY件</a-doption>
+                    <a-doption @click="">下载COPY件</a-doption>
+                    <a-divider class="action-menu__divider" />
+                    <a-popconfirm
+                      :content="`确认废弃主单 ${row.mblNo}？此操作不可恢复。`"
+                      @ok=""
+                    >
+                      <a-doption class="danger-opt">废弃</a-doption>
+                    </a-popconfirm>
+                  </template>
+                </a-dropdown>
+              </div>
             </template>
           </vxe-column>
         </vxe-table>
