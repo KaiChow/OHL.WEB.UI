@@ -315,12 +315,20 @@ if (!/\.page-root--dense\s*\{[\s\S]*?padding:\s*8px 10px var\(--dense-page-botto
     content: 'missing page-root--dense bottom padding token',
   });
 }
-if (!/\.detail-section::before\s*\{[\s\S]*?background:\s*var\(--dense-primary-6\)/.test(globalCss)) {
+if (/\.detail-section::before\s*\{[\s\S]*?background:\s*var\(--dense-primary-6\)/.test(globalCss)) {
   violations.push({
-    rule: 'detail-section 必须有主色结构锚点，避免详情模块变成灰色卡片堆',
+    rule: 'detail-section 禁止使用全高主色左 rail；顶层模块只用 title 短锚点，避免左侧小块混乱',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing .detail-section::before primary anchor',
+    content: 'remove full-height .detail-section::before primary rail',
+  });
+}
+if (!/\.detail-section__title::before\s*\{[\s\S]*?background:\s*var\(--dense-primary-6\)/.test(globalCss)) {
+  violations.push({
+    rule: 'detail-section 顶层锚点必须在 detail-section__title::before，不能散落在多个左侧 rail',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .detail-section__title::before primary marker',
   });
 }
 if (!/\.detail-section__head\s*\{[\s\S]*?background:\s*var\(--dense-surface-head\)/.test(globalCss)) {

@@ -191,6 +191,7 @@ Detail pages must expose hierarchy across the whole vertical stack:
 - `form-subgroup` owns an internal concept. It is a compact sub-surface with subtle left/inset primary-2 anchor, not another card and not a bare gray label.
 - `detail-module-summary--inline` owns module-level totals. It uses a primary rail and white stat cells; it must not look like a disabled gray table row.
 - `detail-mini-vxe` headers share `--dense-table-header-bg` with list tables. Detail child tables must not fall back to flat gray headers.
+- Left-side anchors must not multiply at the same edge. Top-level sections use a short title marker, subgroups use dots, summaries use rails only inside repeated modules, and child rails appear only for current/expanded child items.
 
 ## Dark Color Boundaries
 

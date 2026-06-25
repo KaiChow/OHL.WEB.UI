@@ -65,6 +65,16 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 - `detail-section` is a primary operational surface. It uses white/near-white body, blue-tinted border, restrained shadow, `--dense-surface-head` header, and a small title marker. It must not look like a flat gray row stack.
 - Module body backgrounds should stay white or blue-white. Gray fill is only for disabled/empty/secondary states, not normal editable form areas.
 
+### Left Anchor Hierarchy
+
+Detail pages may use primary-color anchors, but only as a controlled hierarchy. Too many left-side markers make the page look broken.
+
+- Top-level module: `detail-section__title::before` is the only default section anchor. Do not add a full-height `detail-section::before` rail on every section.
+- Internal concept: `form-subgroup__title::before` or legacy `form-subgroup-label::before` uses a small dot. Do not use another left border for subgroup labels.
+- Repeated child item: child-head rail appears only for expanded/current child items. Collapsed child rows must not show a permanent primary rail.
+- Module summary: `detail-module-summary--inline::before` is allowed only for repeated data summaries. It must not replace the section title anchor.
+- In one vertical column, anchors must step down by strength: section short bar > summary rail > child current rail > subgroup dot. Do not stack full-height rail + title bar + dot at the same left edge.
+
 ### Process-Bearing Operational Detail Drawers
 
 Process-bearing detail drawers are production workbenches, not dashboard pages. Use this pattern for business objects where users must understand current state, edit/verify grouped data, and commit the next workflow action.

@@ -3345,15 +3345,6 @@ button:-moz-focusring,
   gap: 8px;
 }
 
-.detail-drawer .detail-section__title::before {
-  content: '';
-  width: 3px;
-  height: 12px;
-  border-radius: 2px;
-  background: linear-gradient(180deg, var(--dense-primary-5) 0%, var(--dense-primary-6) 100%);
-  flex-shrink: 0;
-}
-
 /* 详情表单：白底实线边框，保证字段可辨认 */
 .detail-drawer .detail-form .arco-input-wrapper:not(.arco-input-disabled),
 .detail-drawer .detail-form .arco-textarea-wrapper:not(.arco-textarea-disabled),
@@ -3868,13 +3859,7 @@ button:-moz-focusring,
 }
 
 .detail-section::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 2px;
-  background: var(--dense-primary-6);
-  opacity: .9;
-  pointer-events: none;
+  content: none;
 }
 
 .detail-section__head {
@@ -3882,7 +3867,7 @@ button:-moz-focusring,
   align-items: center;
   justify-content: space-between;
   gap: var(--dense-gap-inline);
-  padding: var(--dense-pad-head-y) var(--dense-pad-head-x);
+  padding: var(--dense-pad-head-y) var(--dense-pad-head-x) var(--dense-pad-head-y) calc(var(--dense-pad-head-x) + 2px);
   background: var(--dense-surface-head);
   border-bottom: 1px solid var(--dense-border);
 }
@@ -4604,8 +4589,8 @@ button:-moz-focusring,
   gap: 6px;
   min-height: 20px;
   margin: 2px 0 7px;
-  padding: 0 0 0 8px;
-  border-left: 2px solid var(--dense-primary-6);
+  padding: 0;
+  border-left: 0;
   background: transparent;
   color: var(--color-text-2);
   font-size: var(--dense-font-field);
@@ -4752,16 +4737,22 @@ button:-moz-focusring,
   left: 0;
   top: 8px;
   bottom: 8px;
-  width: 3px;
+  width: 2px;
   border-radius: 0 2px 2px 0;
-  background: var(--dense-primary-6);
-  opacity: .75;
+  background: var(--dense-primary-4);
+  opacity: 0;
+  transition: opacity 0.12s ease;
 }
 
 .detail-module__subitem--expanded .detail-subitem__head,
 .detail-module__subitem--expanded .detail-cargo-block__head {
   background: var(--dense-surface-head);
   border-bottom-color: var(--dense-primary-2);
+}
+
+.detail-module__subitem--expanded .detail-subitem__head::before,
+.detail-module__subitem--expanded .detail-cargo-block__head::before {
+  opacity: .9;
 }
 
 .detail-subitem__head:hover,
