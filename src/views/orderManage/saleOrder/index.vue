@@ -913,30 +913,30 @@ function handleBatchVoid() {
 
           <div class="detail-section">
             <div class="detail-section__head">
-              <div class="detail-section__title">货物信息</div>
+              <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+                <div class="detail-section__title">货物信息</div>
+                <div class="detail-data-stats">
+                <div class="detail-data-stats__item">
+                  <span class="detail-data-stats__label">总量</span>
+                  <span class="detail-data-stats__val">{{ cargoTotal }}</span>
+                  <span class="detail-data-stats__unit">件</span>
+                </div>
+                <div class="detail-data-stats__item">
+                  <span class="detail-data-stats__label">毛重</span>
+                  <span class="detail-data-stats__val">{{ weightTotal }}</span>
+                  <span class="detail-data-stats__unit">kg</span>
+                </div>
+                <div class="detail-data-stats__item">
+                  <span class="detail-data-stats__label">体积</span>
+                  <span class="detail-data-stats__val">{{ volumeTotal }}</span>
+                  <span class="detail-data-stats__unit">CBM</span>
+                </div>
+              </div>
+              </div>
               <div class="detail-section__actions">
                 <a-button size="small" type="outline" @click="addCargoLine">
                   <template #icon><icon-plus /></template>添加货物
                 </a-button>
-              </div>
-            </div>
-            <div class="detail-module-summary detail-module-summary--inline detail-module-summary--cargo">
-              <div class="detail-module-summary__stats">
-                <div class="detail-module-summary__stat detail-module-summary__stat--qty">
-                  <span class="detail-module-summary__stat-label">货量</span>
-                  <span class="detail-module-summary__stat-value">{{ cargoTotal }}</span>
-                  <span class="detail-module-summary__stat-unit">件</span>
-                </div>
-                <div class="detail-module-summary__stat detail-module-summary__stat--weight">
-                  <span class="detail-module-summary__stat-label">毛重</span>
-                  <span class="detail-module-summary__stat-value">{{ weightTotal }}</span>
-                  <span class="detail-module-summary__stat-unit">kg</span>
-                </div>
-                <div class="detail-module-summary__stat detail-module-summary__stat--volume">
-                  <span class="detail-module-summary__stat-label">体积</span>
-                  <span class="detail-module-summary__stat-value">{{ volumeTotal }}</span>
-                  <span class="detail-module-summary__stat-unit">CBM</span>
-                </div>
               </div>
             </div>
             <div class="detail-section__body detail-section__body--table">
@@ -1070,26 +1070,31 @@ function handleBatchVoid() {
 
           <div class="detail-section">
             <div class="detail-section__head">
-              <div class="detail-section__title">费用预估</div>
-              <div class="detail-section__actions">
-                <a-button size="small" type="outline" @click="addFeeLine('应收')">添加应收</a-button>
-                <a-button size="small" type="outline" @click="addFeeLine('应付')">添加应付</a-button>
+              <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+                <div class="detail-section__title">费用预估</div>
+                <div class="detail-data-stats">
+                  <div class="detail-data-stats__item">
+                    <span class="detail-data-stats__label">应收</span>
+                    <span class="detail-data-stats__val">USD {{ receivableTotal }}</span>
+                  </div>
+                  <div class="detail-data-stats__item">
+                    <span class="detail-data-stats__label">应付</span>
+                    <span class="detail-data-stats__val">USD {{ payableTotal }}</span>
+                  </div>
+                  <div class="detail-data-stats__item">
+                    <span class="detail-data-stats__label">利润预估</span>
+                    <span class="detail-data-stats__val">USD {{ profitEstimate }}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="detail-module-summary detail-module-summary--inline">
-              <div class="detail-module-summary__stats">
-                <div class="detail-module-summary__stat">
-                  <span class="detail-module-summary__stat-label">应收</span>
-                  <span class="detail-module-summary__stat-value">USD {{ receivableTotal }}</span>
-                </div>
-                <div class="detail-module-summary__stat">
-                  <span class="detail-module-summary__stat-label">应付</span>
-                  <span class="detail-module-summary__stat-value">USD {{ payableTotal }}</span>
-                </div>
-                <div class="detail-module-summary__stat detail-module-summary__stat--qty">
-                  <span class="detail-module-summary__stat-label">利润预估</span>
-                  <span class="detail-module-summary__stat-value">USD {{ profitEstimate }}</span>
-                </div>
+              <div class="detail-section__actions">
+                <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+                  <a-button size="small" type="outline">添加费用<icon-down /></a-button>
+                  <template #content>
+                    <a-doption @click="addFeeLine('应收')">应收</a-doption>
+                    <a-doption @click="addFeeLine('应付')">应付</a-doption>
+                  </template>
+                </a-dropdown>
               </div>
             </div>
             <div class="detail-section__body detail-section__body--table">

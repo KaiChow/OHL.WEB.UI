@@ -56,9 +56,11 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 ## Detail Sections
 
 - Use `detail-section`.
-- Header left: section title only.
-- Header right: actions only.
-- Put counts/stats/helper text inside section body or summary area.
+- Header left: section title + optional aggregate stats chips (`detail-data-stats`). Wrap title and stats in a shared `flex:1` container so they stay left-aligned together against the right-side actions.
+- Header right: actions only (`detail-section__actions`). Maximum one `outline` button per module head; consolidate multiple add actions into one `outline` dropdown.
+- Do **not** put stats in a separate row between the section head and the table — this creates two equal-weight rows with no hierarchy. Use `detail-data-stats__item` chips inline in the head instead.
+- Do **not** combine `.detail-module-summary` (card) with `.detail-module-summary--inline` (embedded row) — they conflict. Use only the variant class without the base card class.
+- Do **not** use `--stat--qty / --stat--weight / --stat--volume` color modifiers together on the same stats bar — multiple accent colors (blue+orange+green) violate PESDP single-anchor rule. Keep all stat values `color-text-1`.
 - Do not nest cards inside cards.
 - Section order should follow the user's operation order, not the order copied from another module.
 - Do not place a full-width KPI/report bar directly under the hero in complex operational drawers. Quantities, amounts, progress, and validation totals belong in the owning module summary. The top area should stay focused on `primary_identity`, `key_state`, `business_context`, `owner`, and the object's `key_facts`.

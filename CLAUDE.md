@@ -58,6 +58,7 @@ Professional · Efficient · Structured · Dense · Premium — 效率 > 信息 
 | 弹窗/确认框 | `modal.md` |
 | 表格 | `table.md` |
 | 按钮 | `actions.md` |
+| **图标体系（双库规范）** | **`icons.md`** |
 | 视觉层次 | `visual-system.md` |
 | 字体 | `typography.md` |
 | 自查 | `checklist.md` |

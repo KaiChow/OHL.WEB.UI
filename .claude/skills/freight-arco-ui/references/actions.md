@@ -92,9 +92,49 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 
 ---
 
-## 4. Scene Recipes
+## 4. Button Content Form
 
-### 4.1 列表页筛选
+Button content is decided by action scope and recognition cost, not by decoration.
+
+| Content form | Use when | Required pattern | Forbidden |
+|--------------|----------|------------------|-----------|
+| Icon-only | row actions, toolbar utilities, compact fixed-width tools | Arco/lucide icon + tooltip/accessible label; `type="text"` except documented row dock variants | icon-only for module add/save/submit or business workflow verbs |
+| Icon + text | primary creation, additive module actions, upload/import/export/download/print when the icon has a universal metaphor | icon first, text second, `size="small"`; trailing down icon only for dropdown trigger | forcing icons on every workflow action |
+| Text-only | business workflow verbs, footer workflow, drawer head actions, modal footer, dropdown options | concise object/action text; stable button type by scope | adding vague icons when no precise metaphor exists |
+| Text + trailing chevron | dropdown trigger such as `更多`, `导出`, `输出`, `流转` | text + `<icon-down />`; use `content-class="action-menu ..."` | standalone chevron without text except row `···` menu |
+
+### Content Decision Rules
+
+- Row operation column: icon-only + tooltip. It is a repeated dense column; text buttons make the table noisy and wide.
+- Toolbar utility actions: icon-only when the command is a familiar utility (`刷新`, `列设置`, `密度`, `全屏`). Add tooltip. Do not use framed outline buttons for utilities.
+- Primary creation: icon + text when the action adds a new object (`新建`, `添加`, `上传`). Use plus/upload icon only when the metaphor is exact.
+- Module/child add actions: icon + text is preferred for `添加...` because it improves scanning in module heads. Keep at most one outline add action per module head.
+- Business workflow actions: text-only unless the icon is universally precise. Examples: `查船期`, `申请舱位`, `同步报价`, `提交审核`, `转操作接单`, `放舱`. These should not get decorative icons.
+- Footer workflow actions: text-only secondary buttons inside `detail-drawer-footer__cluster`; only dropdown triggers get trailing chevron.
+- Dropdown options: text-only by default. Do not add icons per option. Use an option icon only when it is a strong system metaphor and the whole menu stays visually even.
+- Danger actions: row danger is icon-only + tooltip + confirm; footer/header danger is text-only `text + danger` with confirm; dropdown danger is text-only `danger-opt` in final group.
+- If an action has no precise icon, use text-only. Ambiguous icons increase recognition cost in an 8-hour operational system.
+
+### Content Form By Scope
+
+| Scope | Default content form | Examples |
+|-------|----------------------|----------|
+| Filter | Text-only primary/query, text-only reset/filter entry | `查询`, `重置`, `筛选` |
+| Toolbar primary create | Icon + text | `+ 新建业务单` |
+| Toolbar direct business action | Text-only or icon + text if universal | `打印业务单`, `导出` |
+| Toolbar utility | Icon-only + tooltip | refresh, column settings |
+| Detail head | Text-only secondary | `复制委托`, `打印托书`, `关闭` |
+| Detail module head | Icon + text for add; text-only for workflow; text for auxiliary | `+ 添加货物`, `同步报价`, `客户档案` |
+| Child/table local add | Icon + text; dashed only in empty state | `+ 添加箱型` |
+| Detail footer | Text-only secondary + one primary | `保存草稿`, `提交审核` |
+| Row action | Icon-only + tooltip | view/edit/delete/more |
+| Dropdown option | Text-only | `批量关单`, `一键下载`, `批量废弃` |
+
+---
+
+## 5. Scene Recipes
+
+### 5.1 列表页筛选
 
 ```vue
 <a-button size="small" type="primary" @click="handleSearch">查询</a-button>
@@ -104,7 +144,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 - 查询 = `primary`
 - 重置 = `text`（禁止 `outline`）
 
-### 4.2 列表页工具栏
+### 5.2 列表页工具栏
 
 **收纳规则：直接可见业务按钮 ≤ 3，超出收入「更多」dropdown。**
 
@@ -144,7 +184,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 - 刷新 = `text` icon-only + `toolbar-aside`（禁止 `outline`）
 - 已选 N 项 = `toolbar-aside` 左侧，`v-if="selectedRows.length"`
 
-### 4.3 详情页头
+### 5.3 详情页头
 
 ```vue
 <a-button size="small">并单</a-button>
@@ -157,7 +197,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 - 页头禁止 `primary`
 - 页头用 **secondary**（默认），不用 `outline`（与模块线框操作拉开层级）
 
-### 4.4 详情模块头
+### 5.4 详情模块头
 
 ```vue
 <div class="detail-section__actions">
@@ -176,7 +216,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 - 复制 / 清除 / 三方仓数据 = `text`
 - 超过 2 个操作 → 第三个起收入 `outline` 下拉「更多」
 
-### 4.5 子表面板（品名明细等）
+### 5.5 子表面板（品名明细等）
 
 ```vue
 <!-- 有数据时 -->
@@ -190,7 +230,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 </a-button>
 ```
 
-### 4.6 详情吸底
+### 5.6 详情吸底
 
 ```vue
 <div class="detail-drawer-footer">
@@ -214,7 +254,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 - 仅「保存」= `primary`，与 workflow 按钮用 `detail-drawer-footer__sep` 分隔
 - 吸底流程 = **secondary**（默认），收入 `detail-drawer-footer__cluster` 浅底操作组
 
-### 4.7 弹窗 Footer
+### 5.7 弹窗 Footer
 
 ```vue
 <template #footer>
@@ -232,7 +272,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 - 确定 = `primary`
 - 删除 = `text` + `danger`（左侧）
 
-### 4.8 表格行内
+### 5.8 表格行内
 
 ```vue
 <a-tooltip content="查看">
@@ -250,11 +290,11 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 
 ---
 
-## 5. Action Menu And Danger
+## 6. Action Menu And Danger
 
 Dropdown is an **action menu**, not a plain list of links. It should feel like a compact freight operation panel: clear trigger hierarchy, stable option rhythm, light Arco-native surface, and a separated danger zone.
 
-### 5.1 Variants
+### 6.1 Variants
 
 | Variant | Usage | Required content class | Trigger |
 |---------|-------|----------------------|---------|
@@ -264,7 +304,7 @@ Dropdown is an **action menu**, not a plain list of links. It should feel like a
 
 `a-dropdown` must use `content-class`, not `popup-class`. `popup-class` is not a valid Arco Dropdown prop in this project and will not style the floating menu. `row-action-menu` is legacy-compatible only. New code must use the variant that matches the trigger scope: toolbar → `action-menu--toolbar`; sticky detail footer → `action-menu--footer`; row operation → `action-menu--row`.
 
-### 5.2 Option Order
+### 6.2 Option Order
 
 1. Direct business workflow: close, approve, push, assign.
 2. File/output: export, download, print, import template.
@@ -274,7 +314,7 @@ Dropdown is an **action menu**, not a plain list of links. It should feel like a
 
 Keep options task-oriented. Do not add section labels inside dense menus unless there are more than 8 items and the groups cannot be understood from verbs.
 
-### 5.3 Visual Contract
+### 6.3 Visual Contract
 
 - Menu panel uses `action-menu`: white-to-subtle surface, restrained border, soft elevation, no decorative color block.
 - Action menus are attached operation surfaces, not floating dialog cards. The panel must visually belong to its trigger: compact radius, restrained shadow, no large blank inset, no heavy card border, and no detached "modal card" feeling.
@@ -299,7 +339,7 @@ Danger rules:
 
 ---
 
-## 6. Toolbar Rules (summary)
+## 7. Toolbar Rules (summary)
 
 - Left: business actions.
 - Right: utilities and selected count.
@@ -309,7 +349,7 @@ Danger rules:
 
 ---
 
-## 7. Permissions And Feedback
+## 8. Permissions And Feedback
 
 - No permission → hide button (do not use `disabled` to hide existence unless business requires).
 - Success → `Message.success`
@@ -318,7 +358,7 @@ Danger rules:
 
 ---
 
-## 8. Table Edit Modes
+## 9. Table Edit Modes
 
 ### Row edit mode
 
@@ -334,7 +374,7 @@ Danger rules:
 
 ---
 
-## 9. Visual Restraint (PESDP)
+## 10. Visual Restraint (PESDP)
 
 - Primary tint is an **anchor**, not wallpaper. Do not make every action `outline`.
 - **Three visual tiers in detail drawers** (implemented in `global.css`):
@@ -350,7 +390,7 @@ Danger rules:
 
 ---
 
-## 10. Quick Checklist
+## 11. Quick Checklist
 
 ```
 □ 每个作用域 primary ≤ 1
