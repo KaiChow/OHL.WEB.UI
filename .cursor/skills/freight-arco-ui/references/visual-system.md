@@ -108,6 +108,18 @@ Reason: depending on the import path, gi-demo theme values may be available as R
 - Interactive values use `--dense-primary-6` or another project semantic alias.
 - Page-level gray is allowed only as a quiet base. Key active navigation, primary operation, selected state, and core links must create a visible Arco-primary rhythm.
 
+## Operational Surface Rhythm
+
+Business users spend long sessions in list and detail pages. The interface must not become a gray ERP sheet. Use a blue-white operational rhythm:
+
+- Page background is the quiet base: `--dense-page-bg`. It may be lightly blue-white, but it must not compete with cards.
+- Primary working surfaces are white or near-white: `color-bg-card`, `--dense-surface-section`, or `--dense-surface-head`.
+- Every major operational surface needs one restrained primary anchor: active segment, section title marker, table header tint, selected chip, identity band, or module summary rail.
+- Do not use gray fill as the main way to separate modules. Use white surfaces, subtle blue-tinted borders, section title markers, table header tint, and object-owned key facts.
+- Repeated detail modules must have distinguishable levels: module head, module summary, child head, child body, and line table header. If all levels look like flat white/gray rows, the module fails PESDP.
+- Gray panels are allowed only for disabled, empty, inactive, or secondary background states. They must not contain primary identity, key facts, main form fields, or editable line data as if they were muted.
+- Long-session comfort comes from low saturation and consistent hierarchy, not from removing color. Use `--dense-primary-1/2/3` for surfaces and boundaries, `--dense-primary-6/7` only for anchors and interactive values.
+
 ## Information Hierarchy
 
 Order of visual strength:
@@ -125,6 +137,7 @@ Hierarchy must be created through layout, typography, semantic color, and action
 - Tables must show a primary identifier and next-decision fields before passive fields.
 - Empty states use weak typography and clear action, not large gray blank areas.
 - Do not use bigger font size as the first solution for weak hierarchy.
+- Detail header identity bands must expose the working object at scan distance: `key_state`, `primary_identity`, `business_context`, `owner`, and 3-6 object-owned `key_facts`. These values are business anchors, not meta notes.
 
 ## Dense Table Color Hierarchy
 
@@ -135,7 +148,7 @@ Required:
 - Workbench list tables use `workbench-table` + global tokens: header `--dense-table-header-bg` (white → primary-2 gradient); hover `--dense-workbench-hover-bg` (light primary wash), not the same fill as the header. Do not add an extra `header-wrapper` bottom border — header/body separation comes from background contrast and row separators.
 - Table header may use a subtle Arco primary tint or primary border to anchor the grid.
 - Primary identifiers and business codes use `primary-6/7` links and medium/title weight.
-- Core business values such as customer, shipper, consignee, port, and container quantity use `color-text-1`.
+- Core business values such as primary identity, party/context, location, quantity, amount, due date, and other next-decision fields use `color-text-1`.
 - Dates and passive metadata may use `color-text-2`; empty values use `color-text-4`.
 - Status pills must be readable at scan distance; use semantic token level 7 for text when level 6 is too weak.
 - Row actions should be visible as actions but not compete with data: text/icon buttons with primary hover, no always-heavy button frames.
@@ -154,24 +167,36 @@ Use text color by information role, not by visual decoration.
 
 | Role | Color | Examples |
 |------|-------|----------|
-| Core business value | `color-text-1` | order no, customer name, staff name, route ports, HBL/MBL, dates that drive work |
+| Core business value | `color-text-1` | primary identifier, owner/person, party/context, location, amount, quantity, due date, dates that drive work |
 | Normal readable value | `color-text-2` | company/context, selected form value, table secondary value |
 | Label/meta | `color-text-3` | fact labels, helper labels, secondary timestamps, summary labels |
 | Empty/disabled only | `color-text-4` | `—`, `暂无`, disabled option, placeholder-like empty state |
 
 Rules:
 
-- Do not use `color-text-4` for customer, company, staff, carrier, vessel/voyage, route, or any value users must scan.
+- Do not use `color-text-4` for `primary_identity`, `key_state`, `owner`, `business_context`, or any object-owned `key_fact` users must scan.
 - Fact labels in detail headers use `color-text-3`, not `color-text-4`; the corresponding values use `color-text-1`.
+- Detail header primary numbers may use the project primary text role to anchor the object. Supporting business facts stay `color-text-1/2` according to importance; only labels and non-decision helper copy may be `color-text-3`.
 - Staff/person display must show at least role + person name; company/department can be auxiliary but must remain readable.
 - If text is hard to read, first check whether a business value was incorrectly styled as helper/disabled text.
 - Helper text must never compete with key values, but it must still meet readable contrast.
+
+## Detail Surface Hierarchy
+
+Detail pages must expose hierarchy across the whole vertical stack:
+
+- `dds-head` owns identity and actions. It may use a subtle top/inset primary anchor.
+- `dds-hero` owns 3-6 key facts. The lead fact may sit on a primary-1 surface or rail; supporting facts remain readable on white.
+- `detail-section` owns a module. It uses a white card, blue-tinted border, section title marker, and `--dense-surface-head` header. Do not render section heads as plain gray divider rows.
+- `form-subgroup` owns an internal concept. It is a compact sub-surface with subtle left/inset primary-2 anchor, not another card and not a bare gray label.
+- `detail-module-summary--inline` owns module-level totals. It uses a primary rail and white stat cells; it must not look like a disabled gray table row.
+- `detail-mini-vxe` headers share `--dense-table-header-bg` with list tables. Detail child tables must not fall back to flat gray headers.
 
 ## Dark Color Boundaries
 
 The system uses Arco text tokens, not raw black.
 
-- `color-text-1` is for core readable business values only: order number, customer, route, amount, and other scan-critical data.
+- `color-text-1` is for core readable business values only: primary identifier, key fact, amount, quantity, party/context, and other scan-critical data.
 - UI chrome such as borders, dividers, operation docks, icon button frames, card edges, and table separators must not use raw black, currentColor black, or strong dark outlines.
 - Default action icons use `color-text-3` or Arco primary-muted; hover/focus uses `--dense-primary-*`.
 - Repeated controls inside table rows must avoid permanent dark borders because they form a black visual column and reduce all-day comfort.

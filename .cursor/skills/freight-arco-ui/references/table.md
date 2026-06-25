@@ -139,16 +139,16 @@ These are starting floors; adjust per module but keep the `min-width` vs `width`
 - Normal links: `link-text mono`.
 - Status: `.s-pill[data-s]`.
 - Status pills do not use a leading dot by default. Use `.s-pill--dot` only for timeline/legend-like contexts, not normal table cells.
-- Risk attributes such as dangerous cargo may use an icon inside `.s-pill`, but must not combine icon and leading dot.
-- Cargo type/risk columns should use a consistent cargo token pattern, not workflow status pills. All values keep the same baseline and size; risk values may use warning token color/border without an icon-heavy label.
+- Risk attributes may use an icon inside `.s-pill` when the icon has an unambiguous meaning, but must not combine icon and leading dot.
+- Attribute/risk columns should use a consistent attribute token pattern, not workflow status pills. All values keep the same baseline and size; risk values may use warning token color/border without an icon-heavy label.
 - Table status/attribute tokens in the same visual family must share one size: 20px height, F5 11px text, same padding/radius/line-height. Semantic color may differ; component size must not.
-- Two-line cell: `cell-two-line`, `c2-main`, `c2-sub`. Use it only for primary value + its own auxiliary metadata, not for merging two independent fields such as shipper/consignee, POL/POD, ETD/ETA, HBL/MBL.
+- Two-line cell: `cell-two-line`, `c2-main`, `c2-sub`. Use it only for primary value + its own auxiliary metadata, not for merging two independent fields. Examples of independent pairs: two parties, two locations, two dates, two identifiers.
 - Empty value: `—` with weak color.
 - Numeric values: tabular numbers and right alignment.
 - Units: micro typography after value, not a separate dominant column unless users sort/filter by unit.
 - Booleans: use clear text or compact Tag; do not use only color.
 - File availability: use file action state; disabled download when no file.
-- Customer, shipper, consignee, carrier, route, port, and container values are core business values. Do not style them as helper/disabled text.
+- Primary identifiers, parties, locations, operators, quantities, amounts, dates, and other next-decision values are core business values. Do not style them as helper/disabled text.
 - Passive metadata such as submit time, uploader time, and audit time can be one level weaker than object identifiers.
 
 ## Row Interaction
@@ -375,7 +375,7 @@ Batch edit mode:
 - Cross-row validation belongs to the table summary or module summary row.
 - Duplicate or conflict errors must identify the row and field.
 - Save failure must keep the row in edit/error state and preserve user input.
-- Error copy uses business language: `柜号不能为空`, `费用金额必须大于 0`, `HBL 单号重复`.
+- Error copy uses business language and names the failing object/value. Examples: `柜号不能为空`, `费用金额必须大于 0`, `HBL 单号重复`.
 
 ### Add/Delete Rows
 

@@ -291,6 +291,46 @@ if (!globalCss.includes('.saved-query-workspace')) {
     content: 'missing .saved-query-workspace',
   });
 }
+if (!globalCss.includes('--dense-surface-head') || !globalCss.includes('--dense-surface-section') || !globalCss.includes('--dense-surface-rail')) {
+  violations.push({
+    rule: '全局视觉层级必须定义 surface head/section/rail token，禁止详情/列表退回大片灰底',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-surface-head / --dense-surface-section / --dense-surface-rail',
+  });
+}
+if (!/--dense-page-bottom-space\s*:\s*(?:8|9|10|11|12)px/.test(globalCss)) {
+  violations.push({
+    rule: '列表页必须定义 --dense-page-bottom-space: 8-12px，表格不能贴到视口底部',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-page-bottom-space: 8-12px',
+  });
+}
+if (!/\.page-root--dense\s*\{[\s\S]*?padding:\s*8px 10px var\(--dense-page-bottom-space\)/.test(globalCss)) {
+  violations.push({
+    rule: 'page-root--dense 必须用 --dense-page-bottom-space 作为底部 padding，禁止列表页贴底',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing page-root--dense bottom padding token',
+  });
+}
+if (!/\.detail-section::before\s*\{[\s\S]*?background:\s*var\(--dense-primary-6\)/.test(globalCss)) {
+  violations.push({
+    rule: 'detail-section 必须有主色结构锚点，避免详情模块变成灰色卡片堆',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .detail-section::before primary anchor',
+  });
+}
+if (!/\.detail-section__head\s*\{[\s\S]*?background:\s*var\(--dense-surface-head\)/.test(globalCss)) {
+  violations.push({
+    rule: 'detail-section__head 必须使用 --dense-surface-head，禁止灰色 divider 头部',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing detail-section__head --dense-surface-head',
+  });
+}
 if (!globalCss.includes('.detail-section__body--table')) {
   violations.push({
     rule: '详情分区内嵌表格必须使用 detail-section__body--table 全局类',

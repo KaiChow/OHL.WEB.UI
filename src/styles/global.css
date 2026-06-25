@@ -300,6 +300,8 @@ body,
 
   /* 间距：高密度靠稳定信息节奏，不靠取消字段/按钮/分区之间的可读间隔 */
   --dense-gap-zone: 8px;
+  --dense-page-bottom-space: 10px;
+  /* 列表页底部视口呼吸区：表格不能贴到浏览器/任务栏边缘 */
   /* 列表五层卡片之间 */
   --dense-gap-module: 12px;
   /* 详情分区块之间 */
@@ -365,15 +367,18 @@ body,
   --dense-primary: var(--dense-primary-6);
   --dense-primary-deep: var(--dense-primary-7);
   --dense-primary-soft: var(--dense-primary-1);
-  --dense-page-bg: linear-gradient(180deg, #F7FAFF 0, #F6F8FB 150px, #F8FAFC 100%);
-  --dense-card-border: #E7ECF3;
+  --dense-page-bg: linear-gradient(180deg, #F3F8FF 0, #F8FBFF 160px, #FAFCFF 100%);
+  --dense-card-border: #DCE7F5;
   --dense-card-border-active: var(--dense-primary-3);
-  --dense-zone-top-border: var(--dense-card-border);
-  --dense-surface-tint: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
-  --dense-border: #E5E6EB;
-  --dense-border-subtle: #EDF1F6;
-  --dense-row-stripe: #F7FAFF;
-  --dense-table-header-bg: linear-gradient(180deg, #FFFFFF 0%, #EEF4FF 52%, var(--dense-primary-2) 100%);
+  --dense-zone-top-border: #D7E5F7;
+  --dense-surface-tint: linear-gradient(180deg, #FFFFFF 0%, #F7FAFF 100%);
+  --dense-surface-head: linear-gradient(180deg, #FFFFFF 0%, #F4F8FF 100%);
+  --dense-surface-section: linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
+  --dense-surface-rail: linear-gradient(90deg, var(--dense-primary-1) 0, #FFFFFF 42px);
+  --dense-border: #DDE7F4;
+  --dense-border-subtle: #E8F0FA;
+  --dense-row-stripe: #F8FBFF;
+  --dense-table-header-bg: linear-gradient(180deg, #FFFFFF 0%, #EAF2FF 48%, #DCEAFF 100%);
   --dense-table-header-border: var(--dense-primary-3);
   /* 全项目 VXE 数据表共用交互色（列表 workbench-table + 详情 detail-mini-vxe） */
   --dense-vxe-surface-hover-bg: rgba(22, 93, 255, 0.055);
@@ -401,8 +406,8 @@ body,
 
   /* 结构阴影（中性灰，不含独立色相） */
   --dense-shadow-card:
-    0 1px 2px rgba(29, 33, 41, 0.03),
-    0 10px 24px rgba(16, 24, 40, 0.055),
+    0 1px 2px rgba(22, 93, 255, 0.035),
+    0 10px 24px rgba(16, 52, 96, 0.06),
     0 0 0 1px var(--dense-card-border);
   --dense-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.95);
   --dense-shadow-lift: 0 6px 16px rgba(29, 33, 41, 0.08);
@@ -485,7 +490,7 @@ button:-moz-focusring,
 }
 
 .page-root--dense {
-  padding: 8px 10px 10px;
+  padding: 8px 10px var(--dense-page-bottom-space);
   gap: var(--dense-gap-zone);
 }
 
@@ -3853,12 +3858,23 @@ button:-moz-focusring,
 }
 
 .detail-section {
+  position: relative;
   margin-bottom: var(--dense-gap-module);
   border-radius: var(--dense-radius);
-  border: 1px solid var(--dense-border-subtle);
+  border: 1px solid var(--dense-card-border);
   background: var(--color-bg-card);
   box-shadow: var(--dense-shadow-card);
   overflow: hidden;
+}
+
+.detail-section::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--dense-primary-6);
+  opacity: .9;
+  pointer-events: none;
 }
 
 .detail-section__head {
@@ -3867,15 +3883,28 @@ button:-moz-focusring,
   justify-content: space-between;
   gap: var(--dense-gap-inline);
   padding: var(--dense-pad-head-y) var(--dense-pad-head-x);
-  background: var(--color-bg-card);
-  border-bottom: 1px solid var(--dense-border-subtle);
+  background: var(--dense-surface-head);
+  border-bottom: 1px solid var(--dense-border);
 }
 
 .detail-section__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin: 0;
   font-size: var(--dense-font-title);
   font-weight: var(--dense-weight-title);
   color: var(--color-text-1);
+}
+
+.detail-section__title::before {
+  content: '';
+  width: 3px;
+  height: 13px;
+  border-radius: 2px;
+  background: var(--dense-primary-6);
+  box-shadow: 0 0 0 3px var(--dense-primary-1);
+  flex-shrink: 0;
 }
 
 .detail-module .detail-section__title {
@@ -3893,6 +3922,7 @@ button:-moz-focusring,
 
 .detail-section__body {
   padding: var(--dense-pad-section-y) var(--dense-pad-section-x);
+  background: var(--dense-surface-section);
 }
 
 /* 详情分区内嵌 VXE 子表：去掉 body 内边距，允许横向滚动，避免列宽被裁切 */
@@ -3990,9 +4020,10 @@ button:-moz-focusring,
   flex-direction: column;
   gap: 8px;
   padding: 8px 10px 10px;
-  border: 1px solid var(--dense-border-subtle);
+  border: 1px solid var(--dense-border);
   border-radius: var(--dense-radius);
-  background: linear-gradient(180deg, #FBFDFF 0%, #FFFFFF 100%);
+  background: var(--dense-surface-section);
+  box-shadow: inset 2px 0 0 var(--dense-primary-2);
 }
 
 .form-subgroup+.form-subgroup {
@@ -4004,7 +4035,7 @@ button:-moz-focusring,
   align-items: center;
   min-height: 22px;
   padding: 0 0 6px;
-  border-bottom: 1px solid var(--dense-border-subtle);
+  border-bottom: 1px solid var(--dense-border);
 }
 
 .form-subgroup__title {
@@ -4036,7 +4067,7 @@ button:-moz-focusring,
   align-items: center;
   min-height: 22px;
   margin: 0 0 8px;
-  color: var(--color-text-1);
+  color: var(--dense-primary-7);
   font-size: var(--dense-font-title);
   font-weight: var(--dense-weight-title);
 }
@@ -4590,7 +4621,7 @@ button:-moz-focusring,
 /* ── §20.3 模块总结统计（整模块汇总条）──────────────────────────── */
 .detail-module-summary {
   border-radius: var(--dense-radius);
-  border: 1px solid var(--dense-border-subtle);
+  border: 1px solid var(--dense-card-border);
   background: var(--color-bg-card);
   box-shadow: var(--dense-shadow-card);
   overflow: hidden;
@@ -4602,7 +4633,7 @@ button:-moz-focusring,
   gap: var(--dense-gap-inline);
   min-height: 32px;
   padding: var(--dense-pad-head-y) var(--dense-pad-head-x);
-  background: linear-gradient(180deg, var(--color-fill-1) 0%, var(--color-bg-card) 100%);
+  background: var(--dense-surface-head);
 }
 
 /* 嵌在 detail-module 内：无独立卡片，仅汇总指标行 */
@@ -4612,8 +4643,8 @@ button:-moz-focusring,
   align-items: stretch;
   min-height: 36px;
   padding: 0;
-  background: var(--color-fill-1);
-  border-bottom: 1px solid var(--dense-border-subtle);
+  background: linear-gradient(90deg, var(--dense-primary-1) 0, var(--color-bg-card) 36px);
+  border-bottom: 1px solid var(--dense-border);
 }
 
 .detail-module-summary--inline::before {
@@ -4638,7 +4669,7 @@ button:-moz-focusring,
 .detail-module-summary--cargo {
   min-height: 36px;
   padding-left: 0;
-  background: var(--color-fill-1);
+  background: linear-gradient(90deg, var(--dense-primary-1) 0, var(--color-bg-card) 36px);
 }
 
 .detail-module__badge {
@@ -4669,7 +4700,7 @@ button:-moz-focusring,
 }
 
 .detail-module__subitem {
-  border-bottom: 1px solid var(--dense-border-subtle);
+  border-bottom: 1px solid var(--dense-border);
   background: var(--color-bg-card);
 }
 
@@ -4682,9 +4713,7 @@ button:-moz-focusring,
 }
 
 .detail-module__subitem--expanded {
-  background:
-    linear-gradient(90deg, var(--dense-primary-1) 0, var(--color-bg-card) 34px),
-    var(--color-bg-card);
+  background: var(--dense-surface-rail);
 }
 
 .detail-module__subitem--expanded .detail-subitem__index,
@@ -4731,7 +4760,7 @@ button:-moz-focusring,
 
 .detail-module__subitem--expanded .detail-subitem__head,
 .detail-module__subitem--expanded .detail-cargo-block__head {
-  background: linear-gradient(180deg, var(--dense-primary-1) 0%, var(--color-bg-card) 100%);
+  background: var(--dense-surface-head);
   border-bottom-color: var(--dense-primary-2);
 }
 
@@ -4870,9 +4899,7 @@ button:-moz-focusring,
   flex-direction: column;
   gap: 8px;
   padding: 10px 12px 12px 24px;
-  background:
-    linear-gradient(90deg, var(--dense-primary-1) 0, var(--color-bg-card) 34px),
-    var(--color-bg-card);
+  background: var(--dense-surface-rail);
 }
 
 .detail-module-summary__title {
@@ -5054,7 +5081,7 @@ button:-moz-focusring,
 }
 
 .detail-child-pane {
-  border: 1px solid var(--dense-border);
+  border: 1px solid var(--dense-card-border);
   border-radius: var(--dense-radius);
   background: var(--color-bg-card);
   overflow: hidden;
@@ -5067,8 +5094,8 @@ button:-moz-focusring,
   gap: 10px;
   min-height: 36px;
   padding: 7px 10px 7px 12px;
-  background: linear-gradient(90deg, var(--dense-primary-1) 0, var(--color-bg-card) 30%);
-  border-bottom: 1px solid var(--dense-border-subtle);
+  background: var(--dense-surface-head);
+  border-bottom: 1px solid var(--dense-border);
 }
 
 .detail-child-pane__title {
@@ -5170,7 +5197,7 @@ button:-moz-focusring,
 .detail-mini-vxe.vxe-table .vxe-body--column {
   height: var(--detail-mini-row-h) !important;
   padding: 0 !important;
-  color: var(--color-text-1) !important;
+  color: var(--color-text-2) !important;
   font-size: var(--dense-font-data) !important;
   background: var(--color-bg-card) !important;
   border-right: 1px solid var(--dense-table-col-border) !important;
@@ -6358,4 +6385,10 @@ button:-moz-focusring,
 .stat-tab__count--ok {
   background: var(--dense-success-1);
   color: var(--dense-success-6);
+}
+
+.detail-mini-vxe.vxe-table .vxe-body--column:first-child,
+.detail-mini-vxe.vxe-table .vxe-body--column .link-text,
+.detail-mini-vxe.vxe-table .vxe-body--column .cell-primary {
+  color: var(--color-text-1) !important;
 }

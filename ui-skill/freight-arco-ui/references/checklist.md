@@ -40,6 +40,7 @@
 - No double scrollbars.
 - No duplicated summary areas unless each has a distinct interaction purpose.
 - Table cap does not repeat pagination totals or status-tab counts.
+- Dense list pages keep the global viewport bottom breathing space: `page-root--dense` uses `--dense-page-bottom-space`; table cards do not visually touch the browser/app bottom edge.
 - Search/filter UI matches query field count tier: 0-3, 4-8, 9-16, 17-50, or 50+.
 - L1 page segments use `zone-l1-transport` + `seg-btn`; scope/status filters use `.stab` or `.stat-tab`, not the other way around.
 - List zones use one neutral top-boundary token: `--dense-zone-top-border` on L1/L2/L3/L4 modules; primary-colored top borders are not used as generic module decoration.

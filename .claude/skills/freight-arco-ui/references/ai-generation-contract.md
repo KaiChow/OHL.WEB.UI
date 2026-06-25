@@ -130,7 +130,7 @@ src/views/<domain>/<module>/
 - Generate VXE sequence columns with `width="52"` in both workbench and detail tables unless a documented module exception exists.
 - Use icon-only row actions with tooltip.
 - Group low-frequency actions in dropdowns.
-- For order-entry/detail drawers, use `dds-milestone-bar` for compact process awareness. Do not generate `a-steps type="arrow"` or a full-width KPI/report strip under the hero. Cargo totals belong in the cargo module summary; fee totals/profit belong in the fee module summary.
+- For process-bearing operational detail drawers, use `dds-milestone-bar` for compact process awareness. Do not generate `a-steps type="arrow"` or a full-width KPI/report strip under the hero. Repeated data totals belong in the owning module summary, not in the hero.
 - For detail sections with internal groups, generate `form-subgroup` blocks with `form-subgroup__head`, `form-subgroup__title`, and a following `detail-form-grid`. Do not generate consecutive bare `form-subgroup-label` elements or repeated blue left rails.
 - Generate list workbenches with the responsive contract from `responsive.md`: filter rows may wrap below `1280px`, merged toolbar/status may become two rows, and `stat-tab-group` must scroll internally instead of creating page-level horizontal overflow.
 - Select query UI by field count from `filter-layout.md`: 1-8 visible core filters, 9-16 core row + drawer, 17-32 grouped drawer, 33-50 wide drawer with group navigation, and 50+ saved query workspace. Do not generate a flat 30/40/50-field query wall.
@@ -142,9 +142,9 @@ src/views/<domain>/<module>/
 - Do not use generic states such as `处理中` or generic steps such as `步骤1`.
 - Do not combine unrelated business fields into one table column.
 - Do not duplicate the same summary in header and right side panel.
-- Use transport-specific milestone names.
+- Use object-specific milestone names only when the object owns a real process.
 - For long labels, preserve meaning and adjust layout.
-- Do not copy fields, milestones, attachments, cargo, route, ETD/ETA, or actions from `业务单` into unrelated modules.
+- Do not copy fields, milestones, attachments, repeated entities, key facts, or actions from one business object into unrelated modules.
 - Treat every shared class as a UI slot. Fill it with object-specific data.
 - If a page's object does not have a process, do not render a steps bar.
 

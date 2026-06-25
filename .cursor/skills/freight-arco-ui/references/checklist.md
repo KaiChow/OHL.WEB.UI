@@ -40,6 +40,7 @@
 - No double scrollbars.
 - No duplicated summary areas unless each has a distinct interaction purpose.
 - Table cap does not repeat pagination totals or status-tab counts.
+- Dense list pages keep the global viewport bottom breathing space: `page-root--dense` uses `--dense-page-bottom-space`; table cards do not visually touch the browser/app bottom edge.
 - Search/filter UI matches query field count tier: 0-3, 4-8, 9-16, 17-50, or 50+.
 - L1 page segments use `zone-l1-transport` + `seg-btn`; scope/status filters use `.stab` or `.stat-tab`, not the other way around.
 - List zones use one neutral top-boundary token: `--dense-zone-top-border` on L1/L2/L3/L4 modules; primary-colored top borders are not used as generic module decoration.
@@ -78,7 +79,7 @@
 - Detail form grids use `min-width: 0` children and full-width controls; date pickers follow 28px detail control height.
 - Detail combo fields (port code/name, vessel/voyage, field+copy) use `detail-combo` modifiers from `global.css`, not page-scoped borders.
 - Detail sections with multiple business sub-concepts use `form-subgroup` blocks (`form-subgroup__head` + `form-subgroup__title` + `detail-form-grid`); do not stack bare subgroup labels with repeated blue left rails.
-- Order-entry/detail drawers use `dds-milestone-bar` for process awareness; they must not use `a-steps type="arrow"` or a full-width `detail-overview-kpi` report strip under the hero.
+- Process-bearing operational detail drawers use `dds-milestone-bar` for process awareness; they must not use `a-steps type="arrow"` or a full-width `detail-overview-kpi` report strip under the hero.
 - Cargo/fee totals are placed inside their owning `detail-module-summary--inline`; top-level KPI bars do not duplicate section summaries.
 - Detail drawer footer uses `detail-drawer-footer__start` (danger text + confirm) and `__end` (secondary workflow + one primary save); low-frequency outputs grouped in dropdown.
 - Detail head/footer workflow buttons use `secondary` (default); module/child main actions use `outline`; auxiliary uses `text`.
@@ -119,7 +120,7 @@
 - List modules follow `responsive.md`: no filter/toolbar/status module creates page-level horizontal scroll; below `1280px`, status groups may wrap to a second row and scroll internally.
 - Raw theme channel tokens are not used as complete CSS colors; use `--dense-*` aliases or `rgb()/rgba(var(...))`.
 - Status colors are consistent and only used for semantic state.
-- Customer, company, staff, route, carrier, vessel/voyage, and primary identifiers do not use disabled/empty `color-text-4`.
+- Primary identity, key state, owner/person, business context, and object-owned key facts do not use disabled/empty `color-text-4`.
 - Detail header fact labels are readable metadata and values are stronger than labels.
 - Complex detail drawers explicitly set a wide drawer width; they do not rely on global CSS alone and must not collapse into a narrow right rail.
 - Staff/party display shows role + name clearly; company/context is auxiliary but readable.

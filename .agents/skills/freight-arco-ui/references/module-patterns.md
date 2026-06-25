@@ -21,16 +21,16 @@ Write rules at this level:
 
 Do not write rules at this level:
 
-- `业务单详情必须显示航线/ETD/船公司` as a universal detail rule;
-- `货物信息模块必须...` as the base pattern for every repeated module;
-- `提单文件必须...` as the base pattern for every attachment module;
+- a specific record page's field list as a universal detail rule;
+- one repeated module's fields as the base pattern for every repeated module;
+- one document type's file behavior as the base pattern for every attachment module;
 - a page screenshot's field list as a project-wide standard.
 
 When a rule needs a concrete freight term, label it as an example and keep the reusable slot first:
 
 ```text
-Good: `key_facts` contains 3-6 next-decision facts owned by the object. Example: shipment order uses route, ETD/ETA, carrier, vessel/voyage, customer.
-Bad: every `dds-hero` must show route, ETD, ETA, carrier, vessel/voyage, customer.
+Good: `key_facts` contains 3-6 next-decision facts owned by the object. Example: a shipment object may use lane, schedule, carrier, vehicle/vessel, and customer facts.
+Bad: every `dds-hero` must show the same field list copied from one shipment screen.
 ```
 
 If a proposed rule cannot be expressed as slot + surface + token/state + forbidden fallback, it is too page-specific and must be rewritten before coding.

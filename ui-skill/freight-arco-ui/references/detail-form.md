@@ -62,6 +62,8 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 - Do not nest cards inside cards.
 - Section order should follow the user's operation order, not the order copied from another module.
 - Do not place a full-width KPI/report bar directly under the hero in complex operational drawers. Quantities, amounts, progress, and validation totals belong in the owning module summary. The top area should stay focused on `primary_identity`, `key_state`, `business_context`, `owner`, and the object's `key_facts`.
+- `detail-section` is a primary operational surface. It uses white/near-white body, blue-tinted border, restrained shadow, `--dense-surface-head` header, and a small title marker. It must not look like a flat gray row stack.
+- Module body backgrounds should stay white or blue-white. Gray fill is only for disabled/empty/secondary states, not normal editable form areas.
 
 ### Process-Bearing Operational Detail Drawers
 

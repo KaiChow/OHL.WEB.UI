@@ -18,7 +18,7 @@ Recommended complex detail order:
 4. `dds-body`: scrollable business content.
 5. `detail-drawer-footer`: sticky global actions.
 
-For order entry / sales order detail drawers, use a lightweight milestone strip (`dds-milestone-bar` + `dds-milestone`) instead of `a-steps type="arrow"`. Arrow steps create large colored blocks and make the page feel like an approval or low-code flow. Freight order details need process awareness, not a dominant workflow banner.
+For process-bearing operational details, use a lightweight milestone strip (`dds-milestone-bar` + `dds-milestone`) instead of `a-steps type="arrow"`. Arrow steps create large colored blocks and make the page feel like an approval or low-code flow. Dense business details need process awareness, not a dominant workflow banner.
 
 `dds-hero` is a structural key-facts area. Its content depends on the business object:
 
@@ -29,7 +29,7 @@ For order entry / sales order detail drawers, use a lightweight milestone strip 
 - Trucking/delivery: pickup/delivery address, appointment time, vehicle/team, container.
 - Configuration: effective state, owner organization, last update, usage count.
 
-Do not force route, ETD/ETA, carrier, or customer into pages that do not own those facts.
+Do not force any object-specific key fact into a page that does not own that fact. Shared structure does not imply shared business content.
 
 Do not add a right summary sidebar when `dds-head` and `dds-hero` already show the same status, identity, and key facts. Repeated summaries reduce form width and violate PESDP efficiency.
 
@@ -37,10 +37,10 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 
 ### Detail Key-Facts Typography
 
-- Values in the same `dds-hero` fact row must use one value size. Do not render route as 17px while ETD, carrier, and vessel/voyage are 13px.
-- Route can be the lead fact through placement, grouping, and 600 weight, but not through an oversized font inside the same compact fact row.
+- Values in the same `dds-hero` fact row must use one value size. Do not render the lead fact larger than neighboring facts inside the same compact row.
+- The lead fact can be stronger through placement, grouping, and 600 weight, but not through an oversized font inside the same compact fact row.
 - Fact labels use F5/meta color; fact values use F1 13px/core text color.
-- Use a larger hero token only when the route/object identity is in a separate hero title area, not mixed with ordinary facts.
+- Use a larger hero token only when the lead fact or object identity is in a separate hero title area, not mixed with ordinary facts.
 
 ### Detail Head Business Emphasis
 
@@ -61,25 +61,27 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 - Put counts/stats/helper text inside section body or summary area.
 - Do not nest cards inside cards.
 - Section order should follow the user's operation order, not the order copied from another module.
-- Do not place a full-width KPI/report bar directly under the hero in complex order-entry drawers. Cargo totals belong in the cargo module summary; receivable/payable/profit belongs in the fee module summary. The top area should stay focused on identity, route, schedule, carrier, customer, and current state.
+- Do not place a full-width KPI/report bar directly under the hero in complex operational drawers. Quantities, amounts, progress, and validation totals belong in the owning module summary. The top area should stay focused on `primary_identity`, `key_state`, `business_context`, `owner`, and the object's `key_facts`.
+- `detail-section` is a primary operational surface. It uses white/near-white body, blue-tinted border, restrained shadow, `--dense-surface-head` header, and a small title marker. It must not look like a flat gray row stack.
+- Module body backgrounds should stay white or blue-white. Gray fill is only for disabled/empty/secondary states, not normal editable form areas.
 
-### Order Entry Detail Drawers
+### Process-Bearing Operational Detail Drawers
 
-Sales/order-entry detail drawers are production workbenches, not dashboard pages.
+Process-bearing detail drawers are production workbenches, not dashboard pages. Use this pattern for business objects where users must understand current state, edit/verify grouped data, and commit the next workflow action.
 
 Required structure:
 
-1. Header: `dds-head` with status, business/order number, customer, owner, and compact view tools.
-2. Key facts: `dds-hero` with route, ETD/ETA, carrier, vessel/voyage, customer.
-3. Milestone: `dds-milestone-bar` with compact text/dot milestones. Do not use `a-steps type="arrow"`.
-4. Sections in working order: 客户委托 → 航线订舱 → 货物信息 → 箱型柜量 → 收发通关 → 费用预估 → 单证资料 → 业务跟进.
+1. Header: `dds-head` with `key_state`, `primary_identity`, `business_context`, `owner`, and compact view tools.
+2. Key facts: `dds-hero` with 3-6 object-owned `key_facts` selected from the user's next decision.
+3. Milestone: `dds-milestone-bar` with compact text/dot milestones when the object has a real process. Do not use `a-steps type="arrow"`.
+4. Sections in the user's working order: required core group → main working data → repeated sub-entities → documents/files → finance/validation when owned by the object → activity/audit.
 5. Footer: left danger, right grouped secondary workflow, one primary commit.
 
 Rules:
 
 - The drawer must not start with an independent KPI strip. Put totals in the owning module summary using `detail-module-summary--inline`.
-- Cargo module summary owns 件数/毛重/体积. Fee module summary owns 应收/应付/利润预估.
-- Footer high-frequency business-user actions are `保存草稿` and `提交审核`; downstream workflow actions such as `转操作接单` and `提交订舱` should be secondary and grouped when they are not the current primary task.
+- Repeated data module summaries own their own counts, quantities, amounts, validation progress, and exception totals. Do not duplicate those totals in the hero or section title.
+- Footer high-frequency actions are the current user's save/submit/confirm action. Downstream workflow actions should be secondary and grouped when they are not the current primary task.
 - Header actions must not duplicate footer commit actions.
 - Section heads remain title-left/actions-right; do not put totals in section titles.
 
@@ -323,16 +325,16 @@ Anti-patterns:
 
 ## Business Option Groups
 
-Use structured option groups for service items, cargo types, order flags, and similar multi-select business markers.
+Use structured option groups for service items, attribute types, object flags, and similar multi-select business markers.
 
 - Use `.svc-tags` and `.svc-tag` for compact checkbox chips.
-- Service items and cargo types are user selection actions, not status badges.
+- Service items and object attributes are user selection actions, not status badges.
 - Do not render checkbox chips with native `<button>` elements. Use Arco checkbox or a custom element with `role="checkbox"`, `aria-checked`, and keyboard support.
 - Each option must show checkbox affordance: empty square when unselected, checked square when selected.
 - Selected items use subtle primary or semantic tint, not strong filled badges.
 - Unselected items must remain readable and visibly selectable.
 - Disabled/read-only mode must remain readable and should not look interactive.
-- Risk-sensitive options such as dangerous cargo use warning semantic tokens.
+- Risk-sensitive options use warning semantic tokens.
 - Do not use raw `<button>` browser styling, disconnected outline chips, black-border selected state, or status-pill styling for business option groups.
 
 ## Module Header Rule
@@ -499,7 +501,7 @@ Form grid in detail drawers:
 
 ### Combined Field Inputs (`detail-combo`)
 
-Use when one label owns multiple related controls (port code + name, vessel/voyage, field + copy action).
+Use when one label owns multiple related controls, such as code + name, paired identity fields, or a field + copy/action button.
 
 ```vue
 <!-- 港码 + 港名 -->

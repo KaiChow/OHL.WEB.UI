@@ -194,6 +194,7 @@ Use them to choose equivalent identity, status, next-decision, and supporting fi
 - Do not compress search labels into controls.
 - Keep table as the dominant screen area.
 - Operational list pages must keep a small viewport bottom breathing space, usually 8-10px from `page-root--dense` bottom padding.
+- The bottom breathing space is a global list-page contract: `page-root--dense` uses `padding-bottom: var(--dense-page-bottom-space)`. Do not solve it per page with table padding, fake rows, footer margins, or page-scoped overrides.
 - The table card should flex to fill available space, but it must not visually touch the browser or app viewport bottom when scrolled to the last row.
 - Do not create this bottom breathing space by adding fake blank table rows or unexplained inner table gaps. It belongs to the page/layout container.
 
