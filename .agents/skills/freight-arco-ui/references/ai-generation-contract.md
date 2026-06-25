@@ -45,6 +45,25 @@ Before generating UI:
 
 All UI requirements, reviews, and reference updates must be written as **AI-executable design language**. A rule is not acceptable if it only describes taste.
 
+### Specification Granularity
+
+AI-generated UI must follow **class-of-surface rules**, not page-by-page copied rules.
+
+When writing or applying a rule:
+
+1. Start from the reusable slot: `primary_identity`, `key_state`, `key_facts`, `main_working_data`, `supporting_data`, `sub_entity`, or `action_scope`.
+2. Bind the slot to a reusable surface: filter card, toolbar, table, detail identity band, form subgroup, repeated line module, attachment module, timeline, footer, dropdown menu.
+3. Pick existing structural classes and tokens from `global.css`.
+4. Fill labels and field examples from the current business object.
+
+Business terms such as route, ETD, cargo, HBL, invoice amount, warehouse stock, or customer credit are examples of slot content. They are not reusable structure by themselves.
+
+Forbidden:
+
+- creating one global rule per screenshot, such as a separate standard for `货物信息`, another for `提单信息`, and another for `客户委托`;
+- copying shipment/order fields into finance, customer, warehouse, configuration, or document pages because the component class is shared;
+- naming global classes after a single backend field when the need is really identity, key fact, repeated line, document type, or action scope.
+
 When turning feedback into a rule, translate subjective judgement into implementation structure:
 
 | Vague feedback | Required design-language form |

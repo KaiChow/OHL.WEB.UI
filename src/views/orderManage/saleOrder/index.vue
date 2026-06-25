@@ -729,9 +729,9 @@ function handleBatchVoid() {
             <div class="dds-head__identity">
               <span class="dds-status-badge dds-status-badge--dot" :data-s="orderForm.orderStatusKey">{{ orderForm.orderStatus }}</span>
               <span class="dds-order-no">{{ orderForm.orderNo }}</span>
-              <span class="dds-head__meta">{{ orderForm.customer }}</span>
+              <span class="dds-head__meta dds-head__meta--customer" :title="orderForm.customer">{{ orderForm.customer }}</span>
               <span class="dds-head__meta-sep">/</span>
-              <span class="dds-head__meta">{{ orderForm.salesman }} 负责</span>
+              <span class="dds-head__meta dds-head__meta--owner">{{ orderForm.salesman }} 负责</span>
             </div>
           </div>
           <div class="dds-head__actions">
@@ -745,9 +745,9 @@ function handleBatchVoid() {
           <div class="dds-hero__route">
             <div class="dds-hero__label">运输路线</div>
             <div class="dds-hero__route-main">
-              <span class="dds-hero__port">{{ orderForm.pol }}</span>
+              <span class="dds-hero__port" :title="orderForm.pol">{{ orderForm.pol }}</span>
               <span class="dds-hero__arrow">→</span>
-              <span class="dds-hero__port">{{ orderForm.pod }}</span>
+              <span class="dds-hero__port" :title="orderForm.pod">{{ orderForm.pod }}</span>
             </div>
             <div class="dds-hero__sub">{{ orderForm.transportMode }} / {{ orderForm.packingType }} / {{ orderForm.tradeTerm }}</div>
           </div>
@@ -762,15 +762,15 @@ function handleBatchVoid() {
             </div>
             <div class="dds-hero-fact">
               <span class="dds-hero-fact__label">船公司</span>
-              <span class="dds-hero-fact__value">{{ orderForm.carrier }}</span>
+              <span class="dds-hero-fact__value" :title="orderForm.carrier">{{ orderForm.carrier }}</span>
             </div>
             <div class="dds-hero-fact">
               <span class="dds-hero-fact__label">大船船名/航次</span>
-              <span class="dds-hero-fact__value">{{ orderForm.vessel }} / {{ orderForm.voyage }}</span>
+              <span class="dds-hero-fact__value" :title="`${orderForm.vessel} / ${orderForm.voyage}`">{{ orderForm.vessel }} / {{ orderForm.voyage }}</span>
             </div>
             <div class="dds-hero-fact dds-hero-fact--customer">
               <span class="dds-hero-fact__label">客户</span>
-              <span class="dds-hero-fact__value">{{ orderForm.customer }}</span>
+              <span class="dds-hero-fact__value" :title="orderForm.customer">{{ orderForm.customer }}</span>
             </div>
           </div>
         </div>

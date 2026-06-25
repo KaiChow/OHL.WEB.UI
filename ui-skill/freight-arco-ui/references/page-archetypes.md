@@ -70,11 +70,11 @@ Rules:
 - Place counts and totals inside module body/summary, not module title.
 - Use validation states that point to the missing business field.
 - Do not hide required core fields behind collapsed panels.
-- Do not show cargo/file/route modules unless the object owns that data.
+- Do not show any repeated-entity, file, location/path, finance, timeline, or other domain module unless the object owns that data.
 
 ## Archetype D: Master Data / Configuration
 
-Use for customer files, routes, carriers, warehouses, dictionaries, permissions.
+Use for master-data and configuration objects. Examples: customer files, routes, carriers, warehouses, dictionaries, permissions.
 
 Required structure:
 

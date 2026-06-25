@@ -174,6 +174,35 @@ for (const file of files) {
 }
 
 const globalCss = readFileSync(join(ROOT, 'src/styles/global.css'), 'utf8');
+const modulePatterns = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/module-patterns.md'), 'utf8');
+const aiGenerationContract = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/ai-generation-contract.md'), 'utf8');
+const checklist = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/checklist.md'), 'utf8');
+
+if (!modulePatterns.includes('Specification Granularity Rule')) {
+  violations.push({
+    rule: 'UI 规范必须定义 Specification Granularity Rule，防止按单页面/单字段写规则',
+    file: 'ui-skill/freight-arco-ui/references/module-patterns.md',
+    line: 1,
+    content: 'missing Specification Granularity Rule',
+  });
+}
+if (!aiGenerationContract.includes('Specification Granularity')) {
+  violations.push({
+    rule: 'AI 生成契约必须包含规范粒度要求：先槽位/表面，再填业务字段示例',
+    file: 'ui-skill/freight-arco-ui/references/ai-generation-contract.md',
+    line: 1,
+    content: 'missing Specification Granularity',
+  });
+}
+if (!checklist.includes('New or changed rules are written for a reusable surface/class of problem')) {
+  violations.push({
+    rule: '交付清单必须检查规范粒度，禁止把截图或单模块字段写成全局规范',
+    file: 'ui-skill/freight-arco-ui/references/checklist.md',
+    line: 1,
+    content: 'missing reusable surface/class of problem checklist',
+  });
+}
+
 if (!globalCss.includes('.detail-form .arco-form-item-label-col > .arco-form-item-label')) {
   violations.push({
     rule: '详情表单必须覆盖 Arco label 结构，防止默认 14px 泄漏',
@@ -508,6 +537,51 @@ function isStructuralVxeColumn(attrs) {
 
 function getLineNumber(content, index) {
   return content.slice(0, index).split('\n').length;
+}
+
+function collectReferenceFiles(dir) {
+  const abs = join(ROOT, dir);
+  const results = [];
+  try {
+    for (const name of readdirSync(abs)) {
+      if (name === 'legacy-design-manual.md' || name === 'domain-language.md') continue;
+      const full = join(abs, name);
+      const stat = statSync(full);
+      if (stat.isDirectory()) {
+        results.push(...collectReferenceFiles(join(dir, name)));
+      } else if (extname(name) === '.md') {
+        results.push(full);
+      }
+    }
+  } catch {
+    // 目录不存在时静默跳过
+  }
+  return results;
+}
+
+function isExampleOrCodeLine(line) {
+  return /```|\bExample\b|\bexamples\b|示例|例如|such as|e\.g\.|Good:|Bad:|Object examples|universal detail rule|base pattern|app route\/nav|^\s*\|/.test(line);
+}
+
+// active UI 规范必须写成“槽位/表面/状态”粒度，不能把单个业务字段写成全局强制规则。
+const referenceFiles = collectReferenceFiles('ui-skill/freight-arco-ui/references');
+const hardCodedDomainRule = /(必须|禁止|Required|Do not|Generate|Use|For)\b?.*(业务单|订单详情|货物信息|提单信息|客户委托|航线订舱|箱型柜量|ETD|ETA|HBL|MBL|route|carrier|vessel|voyage|cargo)/i;
+const allowedGranularityFiles = /module-patterns\.md|ai-generation-contract\.md|checklist\.md/;
+for (const file of referenceFiles) {
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const lines = readFileSync(file, 'utf8').split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!hardCodedDomainRule.test(line)) continue;
+    if (isExampleOrCodeLine(line) || isExampleOrCodeLine(lines[i - 1] ?? '') || isExampleOrCodeLine(lines[i - 2] ?? '')) continue;
+    if (allowedGranularityFiles.test(relPath) && /copy|复制|unrelated|示例|example|字段/.test(line)) continue;
+    violations.push({
+      rule: 'active UI 规范粒度过细：禁止把单个业务字段/模块名写成全局强规则，应改为槽位 + 表面 + token/state + 示例',
+      file: relPath,
+      line: i + 1,
+      content: line.trim().slice(0, 160),
+    });
+  }
 }
 
 function getOpenDivClassStack(content, index) {

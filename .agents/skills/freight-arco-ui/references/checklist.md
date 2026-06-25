@@ -24,9 +24,12 @@
 - Business object is explicitly identified (see `module-patterns.md` slot mapping).
 - User job is clear: scan, create, audit, reconcile, operate, configure, or analyze.
 - Labels and object field examples come from `domain-language.md`, not copied from another module's columns.
+- New or changed rules are written for a reusable surface/class of problem, not for one screenshot, one backend field list, or one module name.
+- Business field names in a rule are marked as examples of slots; they are not treated as mandatory content for every page using the same class.
 - Repeated modules are present only when the object owns that data.
 - Steps/milestones appear only when the object has a real business process.
 - Shared classes are used as structural slots, not as fixed business content.
+- Global CSS class names describe structure or role, such as identity band, key fact, line module, document checklist, or action menu; they do not encode one page's business field unless that field is a real reusable domain object.
 
 ## Layout
 

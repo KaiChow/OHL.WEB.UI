@@ -8,6 +8,33 @@ Define **where** information and actions live, not **which** business fields eve
 
 Do not hard-code one page (e.g. shipment order) and paste it into every menu.
 
+## Specification Granularity Rule
+
+Project UI rules must describe a **reusable class of business surface**, not a single screen, module name, or backend field set.
+
+Write rules at this level:
+
+- business object slot: identity, state, key facts, working data, supporting data, sub-entity, action scope;
+- reusable surface: list workbench, detail identity band, query drawer, repeated line module, document checklist, timeline, exception panel;
+- component contract: class name, DOM relationship, Arco/VXE component, token, density, state, forbidden fallback;
+- object examples: shown only to explain how slots are filled for a domain object.
+
+Do not write rules at this level:
+
+- `业务单详情必须显示航线/ETD/船公司` as a universal detail rule;
+- `货物信息模块必须...` as the base pattern for every repeated module;
+- `提单文件必须...` as the base pattern for every attachment module;
+- a page screenshot's field list as a project-wide standard.
+
+When a rule needs a concrete freight term, label it as an example and keep the reusable slot first:
+
+```text
+Good: `key_facts` contains 3-6 next-decision facts owned by the object. Example: shipment order uses route, ETD/ETA, carrier, vessel/voyage, customer.
+Bad: every `dds-hero` must show route, ETD, ETA, carrier, vessel/voyage, customer.
+```
+
+If a proposed rule cannot be expressed as slot + surface + token/state + forbidden fallback, it is too page-specific and must be rewritten before coding.
+
 ## Design Order
 
 Fill these slots **before** choosing layout or components:
@@ -140,6 +167,8 @@ Reject before ship:
 - Customer page with shipment milestones because the drawer has steps.
 - Same columns/actions on every module.
 - Structural class treated as business requirement (`dds-hero` ≠ must show route).
+- Spec text that uses one business module name as the rule itself instead of an example of a reusable slot.
+- New global CSS class whose name encodes a single backend field or page-specific module when a slot class already exists.
 
 ## Pre-Implementation Mapping
 

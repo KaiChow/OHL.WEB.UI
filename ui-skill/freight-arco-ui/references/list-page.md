@@ -179,14 +179,14 @@ Use this order:
 6. Secondary metadata.
 7. File/action columns.
 
-Object examples:
+Object examples. These examples are slot-filling references, not table templates:
 
 - Shipment/order: 业务单号, 状态, 客户, 业务员, 起运港, 目的港, ETD, ETA, 柜量, HBL, MBL.
 - Customer: 客户名称, 客户状态, 类型, 负责人, 等级/信用, 最近跟进, 联系人, 来源.
 - Finance bill: 账单号, 确认状态, 往来单位, 币种, 金额, 已开票/已核销, 到期日, 业务单号.
 - Warehouse: 入仓单号, 状态, 仓库, 客户, SKU/品名, 件数, 重量, 体积, 入仓时间.
 
-These examples are not templates. Use them to choose equivalent identity/status/decision fields for the current module.
+Use them to choose equivalent identity, status, next-decision, and supporting fields for the current module. Do not copy a row from this list as a universal column standard.
 
 ## Dense Layout
 

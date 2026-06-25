@@ -52,7 +52,7 @@ If these conditions are not true, keep one core row and move secondary filters t
 For `30+ / 40+ / 50+` filters:
 
 - Do not expose all fields as a visible filter area.
-- Group fields by business object: identifiers, parties, route, schedule, cargo, container, finance, document, owner, audit/system.
+- Group fields by business object slots: identifiers, parties/context, location/route when owned by the object, schedule/time, repeated entity attributes, finance, document, owner, audit/system.
 - Provide local group scan anchors. For 33-50 fields, use a group navigation rail or sticky group index inside the wide drawer.
 - Provide "clear current group" and "clear all" semantics; do not make reset ambiguous.
 - Preserve applied filters after closing. Reopening the surface must show the active values.
@@ -201,7 +201,7 @@ Drawer rules:
 - Body structure is fixed: `query-filter-drawer__shell` → scrollable `__body` → repeated `__group`.
 - Each business group uses `query-filter-drawer__group` + `query-filter-drawer__group-head` + inner `detail-form-grid`.
 - Use `detail-form` + `detail-form-grid` for drawer filter fields.
-- Group by business meaning: 单号信息 / 订单信息 / 人员信息 / 客户往来 / 港口路线 / 航线信息 / 时间范围 / 货物信息.
+- Group by business meaning, not backend order. Example group labels for freight objects include 单号信息 / 订单信息 / 人员信息 / 客户往来 / 港口路线 / 航线信息 / 时间范围 / 货物信息. These labels are examples; choose equivalent groups from the current object's slots.
 - Drawer footer uses left clear + right cancel/apply.
 - Applying drawer filters closes the drawer and triggers search.
 - Do not put table, KPI, charts, instruction copy, descriptive summaries, or usage hints in the filter drawer. The drawer title, business group heads, field labels, and footer actions already provide the hierarchy.

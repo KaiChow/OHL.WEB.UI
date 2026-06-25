@@ -76,7 +76,7 @@ Exceptions:
 Design for 1.3-2x text expansion compared with Chinese.
 
 - Do not fixed-width buttons by Chinese label length.
-- Do not truncate business-critical labels such as vessel/voyage, customer, destination, or document type.
+- Do not truncate business-critical labels such as paired identifiers, parties, destinations, document types, or next-decision fields.
 - Use vertical form labels for dense multilingual forms.
 - Use `min-width` plus ellipsis/title for table columns.
 - Do not use negative letter spacing.
@@ -100,13 +100,13 @@ Use mono or tabular numeric behavior for values users compare.
 
 Detail header facts must not all look like code.
 
-- Use mono only for order numbers, HBL/MBL, SO/PO, container numbers, and similar identifiers.
-- Route ports are business values, not technical codes by default. In dense key-facts rows, use normal sans F1 13px with stronger weight/placement instead of larger font size.
+- Use mono only for technical identifiers, document numbers, container numbers, and similar code-like values.
+- Locations, parties, carriers, warehouses, and other named business values are not technical codes by default. In dense key-facts rows, use normal sans F1 13px with stronger weight/placement instead of larger font size.
 - Dates in hero facts use tabular numeric behavior, not necessarily mono.
-- Carrier, vessel/voyage, customer, and company names use normal sans font.
+- Party, organization, carrier, vehicle/vessel, warehouse, and other business names use normal sans font.
 - Hero fact labels use F5/meta color; hero fact values use F1/core value color.
-- Within the same `dds-hero` fact row, route, ETD/ETA, carrier, vessel/voyage, and customer values must share the same value size.
-- Only the primary route or primary object identity may be stronger than normal F1, and the difference should come from position, weight, or grouping.
+- Within the same `dds-hero` fact row, all key-fact values must share the same value size.
+- Only the lead fact or primary object identity may be stronger than normal F1, and the difference should come from position, weight, or grouping.
 
 ## Attachment Typography
 

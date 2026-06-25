@@ -24,9 +24,12 @@
 - Business object is explicitly identified (see `module-patterns.md` slot mapping).
 - User job is clear: scan, create, audit, reconcile, operate, configure, or analyze.
 - Labels and object field examples come from `domain-language.md`, not copied from another module's columns.
+- New or changed rules are written for a reusable surface/class of problem, not for one screenshot, one backend field list, or one module name.
+- Business field names in a rule are marked as examples of slots; they are not treated as mandatory content for every page using the same class.
 - Repeated modules are present only when the object owns that data.
 - Steps/milestones appear only when the object has a real business process.
 - Shared classes are used as structural slots, not as fixed business content.
+- Global CSS class names describe structure or role, such as identity band, key fact, line module, document checklist, or action menu; they do not encode one page's business field unless that field is a real reusable domain object.
 
 ## Layout
 
@@ -75,7 +78,7 @@
 - Detail form grids use `min-width: 0` children and full-width controls; date pickers follow 28px detail control height.
 - Detail combo fields (port code/name, vessel/voyage, field+copy) use `detail-combo` modifiers from `global.css`, not page-scoped borders.
 - Detail sections with multiple business sub-concepts use `form-subgroup` blocks (`form-subgroup__head` + `form-subgroup__title` + `detail-form-grid`); do not stack bare subgroup labels with repeated blue left rails.
-- Order-entry/detail drawers use `dds-milestone-bar` for process awareness; they must not use `a-steps type="arrow"` or a full-width `detail-overview-kpi` report strip under the hero.
+- Process-bearing operational detail drawers use `dds-milestone-bar` for process awareness; they must not use `a-steps type="arrow"` or a full-width `detail-overview-kpi` report strip under the hero.
 - Cargo/fee totals are placed inside their owning `detail-module-summary--inline`; top-level KPI bars do not duplicate section summaries.
 - Detail drawer footer uses `detail-drawer-footer__start` (danger text + confirm) and `__end` (secondary workflow + one primary save); low-frequency outputs grouped in dropdown.
 - Detail head/footer workflow buttons use `secondary` (default); module/child main actions use `outline`; auxiliary uses `text`.
@@ -116,7 +119,7 @@
 - List modules follow `responsive.md`: no filter/toolbar/status module creates page-level horizontal scroll; below `1280px`, status groups may wrap to a second row and scroll internally.
 - Raw theme channel tokens are not used as complete CSS colors; use `--dense-*` aliases or `rgb()/rgba(var(...))`.
 - Status colors are consistent and only used for semantic state.
-- Customer, company, staff, route, carrier, vessel/voyage, and primary identifiers do not use disabled/empty `color-text-4`.
+- Primary identity, key state, owner/person, business context, and object-owned key facts do not use disabled/empty `color-text-4`.
 - Detail header fact labels are readable metadata and values are stronger than labels.
 - Complex detail drawers explicitly set a wide drawer width; they do not rely on global CSS alone and must not collapse into a narrow right rail.
 - Staff/party display shows role + name clearly; company/context is auxiliary but readable.

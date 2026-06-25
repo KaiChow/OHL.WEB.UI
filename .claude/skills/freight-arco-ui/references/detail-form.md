@@ -42,6 +42,17 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 - Fact labels use F5/meta color; fact values use F1 13px/core text color.
 - Use a larger hero token only when the route/object identity is in a separate hero title area, not mixed with ordinary facts.
 
+### Detail Head Business Emphasis
+
+`dds-head` and `dds-hero` are the working identity band for business users. They must make the object immediately recognizable during daily operation.
+
+- `dds-head` fills object-level slots: `key_state`, `primary_identity`, `business_context`, `owner`, and `view_tools`. The primary identity uses the project primary text role; context and owner use readable business-value roles, not helper/disabled color.
+- `dds-hero` fills 3-6 `key_facts` owned by the object. A key fact is any value users need before choosing the next operation, such as lane, schedule, counterparty, amount, risk, stock, location, or due date depending on object type.
+- The lead fact is selected from the object's user job. Example: shipment/order users often scan by lane first, while reconciliation users may scan by counterparty + amount, and warehouse users may scan by location + stock state.
+- Lead facts gain emphasis through grouping, left accent, primary-tint surface, 600 weight, and placement. Do not make the whole header blue, do not add decorative gradients, and do not increase random font sizes.
+- `color-text-4` is forbidden for `primary_identity`, `business_context`, `owner`, or any `key_fact` used to decide the next operation.
+- Long business values must remain readable with ellipsis plus `title`/tooltip. Do not weaken them to gray text to hide overflow.
+
 ## Detail Sections
 
 - Use `detail-section`.
