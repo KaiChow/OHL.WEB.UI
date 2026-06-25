@@ -299,15 +299,10 @@ function handleViewDetail(row: PaymentRow) {
 <template>
   <div class="page-root page-root--dense">
 
-    <!-- ① 筛选区：4行可见（专项财务工作台，所有字段均为日常高频）
-         行1: 管理公司 | 收付类型 | 账单公司(type+select combo) | ETD | ETA
-         行2: 核销状态 | 币种 | ATD | ATA
-         行3: 单号检索(span3 combo) | 核销编号 | 账单编号(+精准查询)
-         行4: HBL NO | MBL NO | 预核销码 | [查询 重置 更多]
-    -->
+    <!-- ① 筛选区：收付款账单工作台只露出高频定位/收窄条件；专项条件进入筛选抽屉 -->
     <div class="zone-l2-filter-card zone-card filter-card">
 
-      <!-- 行1：身份维度 + 账单公司 + 关键时间节点 -->
+      <!-- 行1：账单归属 + 往来单位 -->
       <div class="filter-card__slim-row">
         <div class="filter-field">
           <label class="filter-field__label">管理公司</label>
@@ -321,27 +316,15 @@ function handleViewDetail(row: PaymentRow) {
           </a-select>
         </div>
         <div class="filter-field filter-field--span2">
-          <label class="filter-field__label">账单公司</label>
+          <label class="filter-field__label">往来单位</label>
           <div class="filter-combo arco-input-group">
             <a-select v-model="q.billCoType" size="small" class="filter-combo__select filter-combo--keyword">
-              <a-option value="include">作度单位</a-option>
+              <a-option value="include">包含单位</a-option>
               <a-option value="exclude">排除单位</a-option>
             </a-select>
-            <a-select v-model="q.billCo" size="small" allow-clear placeholder="请选择" />
+            <a-select v-model="q.billCo" size="small" class="filter-combo__fill" allow-clear placeholder="请选择往来单位" />
           </div>
         </div>
-        <div class="filter-field filter-field--date">
-          <label class="filter-field__label">ETD</label>
-          <a-range-picker v-model="q.etdRange" size="small" style="width:100%" />
-        </div>
-        <div class="filter-field filter-field--date">
-          <label class="filter-field__label">ETA</label>
-          <a-range-picker v-model="q.etaRange" size="small" style="width:100%" />
-        </div>
-      </div>
-
-      <!-- 行2：核销维度 + ATD/ATA -->
-      <div class="filter-card__slim-row">
         <div class="filter-field">
           <label class="filter-field__label">核销状态</label>
           <a-select v-model="q.writeOffStatus" size="small" allow-clear placeholder="请选择">
@@ -351,25 +334,9 @@ function handleViewDetail(row: PaymentRow) {
             <a-option value="cancelled">已取消</a-option>
           </a-select>
         </div>
-        <div class="filter-field">
-          <label class="filter-field__label">币种</label>
-          <a-select v-model="q.currency" size="small" allow-clear placeholder="">
-            <a-option value="USD">USD</a-option>
-            <a-option value="CNY">CNY</a-option>
-            <a-option value="EUR">EUR</a-option>
-          </a-select>
-        </div>
-        <div class="filter-field filter-field--date">
-          <label class="filter-field__label">ATD</label>
-          <a-range-picker v-model="q.atdRange" size="small" style="width:100%" />
-        </div>
-        <div class="filter-field filter-field--date">
-          <label class="filter-field__label">ATA</label>
-          <a-range-picker v-model="q.ataRange" size="small" style="width:100%" />
-        </div>
       </div>
 
-      <!-- 行3：主标识符检索 -->
+      <!-- 行2：主标识符检索 + 操作按钮 -->
       <div class="filter-card__slim-row">
         <div class="filter-field filter-field--span3">
           <label class="filter-field__label">单号检索</label>
@@ -377,41 +344,21 @@ function handleViewDetail(row: PaymentRow) {
             <a-select v-model="q.noType" size="small" class="filter-combo__select filter-combo--keyword">
               <a-option value="orderNo">订单编号</a-option>
               <a-option value="billNo">账单编号</a-option>
+              <a-option value="writeOffNo">核销编号</a-option>
               <a-option value="hbl">HBL NO</a-option>
               <a-option value="mbl">MBL NO</a-option>
               <a-option value="preCode">预核销码</a-option>
             </a-select>
             <a-input v-model="q.noKeyword" size="small" allow-clear placeholder="多个请用空格分隔" />
-            <a-checkbox v-model="q.noSingle" size="small" style="white-space:nowrap;padding:0 8px">单个</a-checkbox>
-            <a-checkbox v-model="q.noPrecise" size="small" style="white-space:nowrap;padding-right:8px">精准查询</a-checkbox>
           </div>
         </div>
         <div class="filter-field">
-          <label class="filter-field__label">核销编号</label>
-          <a-input v-model="q.writeOffNo" size="small" allow-clear placeholder="多个请用空格分隔" />
-        </div>
-        <div class="filter-field filter-field--span2">
-          <label class="filter-field__label">账单编号</label>
-          <div style="display:flex;gap:6px;align-items:center">
-            <a-input v-model="q.billNo" size="small" allow-clear placeholder="多个请用英文分号分隔" style="flex:1" />
-            <a-checkbox v-model="q.billNoPrecise" size="small" style="white-space:nowrap">精准查询</a-checkbox>
-          </div>
-        </div>
-      </div>
-
-      <!-- 行4：单号组 + 操作按钮 -->
-      <div class="filter-card__slim-row">
-        <div class="filter-field">
-          <label class="filter-field__label">HBL NO</label>
-          <a-input v-model="q.hblNo" size="small" allow-clear placeholder="" />
-        </div>
-        <div class="filter-field">
-          <label class="filter-field__label">MBL NO</label>
-          <a-input v-model="q.mblNo" size="small" allow-clear placeholder="" />
-        </div>
-        <div class="filter-field">
-          <label class="filter-field__label">预核销码</label>
-          <a-input v-model="q.preWriteOffCode" size="small" allow-clear placeholder="" />
+          <label class="filter-field__label">币种</label>
+          <a-select v-model="q.currency" size="small" allow-clear placeholder="请选择">
+            <a-option value="USD">USD</a-option>
+            <a-option value="CNY">CNY</a-option>
+            <a-option value="EUR">EUR</a-option>
+          </a-select>
         </div>
         <div class="filter-card__inline-actions">
           <a-button size="small" type="primary" class="filter-card__query-btn" @click="handleSearch">
@@ -421,7 +368,7 @@ function handleViewDetail(row: PaymentRow) {
           <a-button size="small" type="text" class="reset-btn" @click="handleReset">重置</a-button>
           <a-button size="small" type="text" class="reset-btn" @click="advancedFilterVisible = true">
             <template #icon><icon-filter /></template>
-            更多
+            筛选
           </a-button>
         </div>
       </div>
@@ -501,6 +448,16 @@ function handleViewDetail(row: PaymentRow) {
         </div>
         <div class="toolbar-aside">
           <span v-if="selectedRows.length" class="toolbar-selected-tip">已选 {{ selectedRows.length }} 条</span>
+          <a-pagination
+            v-model:current="page"
+            v-model:page-size="pageSize"
+            :total="total"
+            size="small"
+            class="toolbar-pager"
+            show-total
+            show-page-size
+            :page-size-options="[50, 100, 200]"
+          />
           <a-tooltip content="刷新">
             <a-button size="small" type="text" @click="handleSearch">
               <template #icon><icon-refresh /></template>
@@ -511,12 +468,13 @@ function handleViewDetail(row: PaymentRow) {
               <template #icon><icon-settings /></template>
             </a-button>
           </a-tooltip>
-          <!-- 危险操作物理隔离：低频+高风险，放右端减少误触 -->
+          <!-- 低频/危险操作物理隔离：放右端减少误触 -->
           <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-            <a-tooltip content="危险操作">
+            <a-tooltip content="更多操作">
               <a-button size="small" type="text"><icon-more /></a-button>
             </a-tooltip>
             <template #content>
+              <a-divider class="action-menu__divider" />
               <a-doption class="danger-opt" @click="handleBatchCancelBill">批量取消账单</a-doption>
             </template>
           </a-dropdown>
@@ -526,20 +484,6 @@ function handleViewDetail(row: PaymentRow) {
 
     <!-- ③ 主表格 -->
     <div class="zone-l4-table-card" style="flex:1;min-height:0;display:flex;flex-direction:column">
-      <div class="table-card-cap">
-        <div class="table-card-cap__start"></div>
-        <div class="table-card-cap__end">
-          <a-pagination
-            v-model:current="page"
-            v-model:page-size="pageSize"
-            :total="total"
-            size="small"
-            show-total
-            show-page-size
-            :page-size-options="[50, 100, 200]"
-          />
-        </div>
-      </div>
       <div class="table-wrap" style="flex:1;min-height:0">
         <vxe-table
           ref="xTable"

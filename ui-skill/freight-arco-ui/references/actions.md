@@ -232,16 +232,21 @@ Button content is decided by action scope and recognition cost, not by decoratio
 左侧 toolbar-group（工作流区）
   [主操作 primary] [高频操作A outline↓] [高频操作B outline↓] [高频操作C outline] ...
 
-右侧 toolbar-aside（工具 + 危险隔离）
-  [已选N条]  [刷新 icon]  [列设置 icon]  [··· 危险/低频操作]
+右侧 toolbar-aside（页面/表格工具 + 危险隔离）
+  [已选N条]  [刷新 icon]  [列设置 icon]  [··· 低频/危险操作]
+
+表格 table-card-cap（可选：表格上下文 + 分页）
+  [非重复上下文]  [分页]  [列设置 icon]  [密度 icon]
 ```
 
 关键规则：
 - `primary` 锚点 ×1，是当前页面最核心的正向操作。
 - 工作流区只放**高频**（每天使用）+ **低风险**操作，类型统一为 `outline`。个数无硬限，以工具栏不折行为限（通常 1280px 下不超过 6–7 个 outline 按钮）。
 - **dropdown 按钮（带 ↓）是一个操作组，不是多个按钮**。`导出↓` 内含 Excel/PDF 两个子选项，视觉权重等同一个按钮，不应计入「按钮数量」。
-- 右侧 `···` 专门盛放：低频操作 + 所有不可逆/破坏性操作（无论频率）。
-- 刷新、列设置、密度调整 = `text` icon-only，放 `toolbar-aside`，禁止 `outline`。
+- 右侧 `···` 专门盛放：页面级低频操作 + 所有不可逆/破坏性操作（无论频率）。
+- 页面级刷新 = `text` icon-only，放 `toolbar-aside`，禁止 `outline`。
+- 列设置、密度调整、表格全屏等表格工具可以放 `toolbar-aside`；当页面启用 `table-card-cap` 且 cap 内有分页或非重复上下文时，也可以放在 cap 分页旁边。
+- 禁止为了放列设置单独生成一条空 `table-card-cap`；这会在 toolbar 和表头之间制造无效双层横条。
 - 已选 N 条反馈放 `toolbar-aside` 左侧，`v-if="selectedRows.length"`。
 
 #### 代码结构
@@ -277,14 +282,14 @@ Button content is decided by action scope and recognition cost, not by decoratio
   <div class="toolbar-aside">
     <span v-if="selectedRows.length" class="toolbar-selected-tip">已选 {{ selectedRows.length }} 条</span>
 
-    <!-- 工具：icon-only + tooltip -->
+    <!-- 页面级工具：icon-only + tooltip -->
     <a-tooltip content="刷新">
       <a-button size="small" type="text" @click="fetchList">
         <template #icon><icon-refresh /></template>
       </a-button>
     </a-tooltip>
     <a-tooltip content="列设置">
-      <a-button size="small" type="text">
+      <a-button size="small" type="text" @click="xTable?.openCustom()">
         <template #icon><icon-settings /></template>
       </a-button>
     </a-tooltip>
@@ -304,10 +309,26 @@ Button content is decided by action scope and recognition cost, not by decoratio
 </div>
 ```
 
+当列表启用 `table-card-cap` 承载分页或非重复表格上下文时，表格级工具也可以放在 cap 内，与分页同属表格控制面：
+
+```vue
+<div class="table-card-cap">
+  <div class="table-card-cap__right">
+    <a-pagination ... />
+    <a-tooltip content="列设置">
+      <a-button size="small" type="text" class="table-card-cap__tool" @click="xTable?.openCustom()">
+        <template #icon><icon-settings /></template>
+      </a-button>
+    </a-tooltip>
+  </div>
+</div>
+```
+
 规则补充：
 - 危险操作只放 `toolbar-aside` 右端 `···` 菜单，禁止出现在左侧 `toolbar-group`。
 - 危险项必须是菜单末尾，用 `action-menu__divider` 与其他选项分隔，并触发 `Modal.confirm`。
-- 刷新 = `text` icon-only + `toolbar-aside`（禁止 `outline`）。
+- 页面级刷新 = `text` icon-only + `toolbar-aside`（禁止 `outline`）。
+- 表格级列设置/密度/全屏 = `text` icon-only。默认跟随 `toolbar-aside`；只有已有 `table-card-cap` 承载分页/上下文时，才使用 `table-card-cap__tool` 与分页相邻。
 - 无新建时不写 `primary`，改从 `outline` 开始。
 
 ### 5.3 详情页头

@@ -155,6 +155,8 @@ Rules:
 - 两行网格的标准结构：Row1 = 维度(1)+维度(1)+业务对象combo(span2)，Row2 = 维度(1)+维度(1)+主标识符combo(span2)，合计每行恰好 4 列。
 - `filter-card--two-row` 的外层 matrix 仍然使用，它负责将 `filter-grid` 和 `filter-card__inline-actions--matrix` 左右排列。
 - 所有字段等宽 = 视觉无层次（PESDP 违规）。主标识符 span2 是结构语义，不是为了美观。
+- `filter-combo` uses explicit control roles: the leading selector is `filter-combo__select` (fixed width), and the trailing control fills the remaining space. Text inputs inherit the fill behavior from `global.css`; trailing selects must add `filter-combo__fill`.
+- Do not style every `.arco-select` inside `filter-combo` as `width:auto`; this breaks `select + select` combos such as party include/exclude + party selector.
 
 ```vue
 <!-- 正确：4列网格，span2 体现业务权重 -->
@@ -164,7 +166,13 @@ Rules:
       <!-- Row 1 -->
       <div class="filter-field"><label class="filter-field__label">管理公司</label>...</div>       <!-- 1 -->
       <div class="filter-field"><label class="filter-field__label">收付类型</label>...</div>       <!-- 1 -->
-      <div class="filter-field filter-field--span2"><label class="filter-field__label">账单公司</label><!-- combo --></div> <!-- 2 -->
+      <div class="filter-field filter-field--span2">
+        <label class="filter-field__label">往来单位</label>
+        <div class="filter-combo arco-input-group">
+          <a-select size="small" class="filter-combo__select filter-combo--keyword">...</a-select>
+          <a-select size="small" class="filter-combo__fill" allow-clear placeholder="请选择往来单位" />
+        </div>
+      </div> <!-- 2 -->
       <!-- Row 2 -->
       <div class="filter-field"><label class="filter-field__label">核销状态</label>...</div>       <!-- 1 -->
       <div class="filter-field"><label class="filter-field__label">币种</label>...</div>           <!-- 1 -->

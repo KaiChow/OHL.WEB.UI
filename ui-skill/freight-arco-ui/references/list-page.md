@@ -136,7 +136,7 @@ Order operations by business priority:
 1. Main action: create/new/submit, `primary`.
 2. Secondary direct actions: export/print/batch, `outline`.
 3. Low-frequency actions: `More` dropdown.
-4. Utility actions: refresh/settings/density, right side icon-only `text` + tooltip.
+4. Utility actions: refresh/settings/density, right side icon-only `text` + tooltip. Table-only tools may move into `table-card-cap` only when that cap already carries pagination or non-repeated table context.
 
 Refresh is a utility, not the first business operation.
 
@@ -148,13 +148,15 @@ Toolbar actions are chosen by workflow:
 - Export/print/import when the page has reporting or document output.
 - Batch action only when multi-selection exists and the operation is safe or confirmed.
 - Refresh/settings/density/columns are utilities, not business actions.
+- Column settings, density, pagination, and other table-only utilities can sit in `toolbar-aside` for compact pages. Move them beside pagination in `table-card-cap` only when the cap is already needed; do not create an otherwise empty cap just for a tool icon or pagination.
 
 ## Table Cap And Pagination
 
-- Pagination belongs in `table-card-cap` at the top-right of the table card.
+- Pagination belongs in `table-card-cap` at the top-right of the table card when the cap is already part of the table structure. For compact pages without a meaningful cap, use `toolbar-pager` in `toolbar-aside` so pagination remains visible without adding an empty horizontal band.
 - Total count is shown by the pagination component (`show-total`) when needed.
 - Do not repeat the same total as a separate left-side `共 N 条` summary when pagination already shows it.
-- Column settings, density, and other table-only utilities live beside pagination, not in the business action group.
+- Column settings, density, and other table-only utilities live beside pagination when a meaningful `table-card-cap` exists; otherwise keep them as right-side toolbar utilities.
+- Do not render an empty `table-card-cap` between the toolbar and table header. If it only contains one or two utility icons and no pagination/context, it creates a dead horizontal band and should be removed.
 - The left side of `table-card-cap` should stay empty unless it adds non-duplicated context such as selected-row feedback or a real grouped-table title.
 - Do not use table cap for page titles, instructions, KPI summaries, or duplicated status counts.
 
