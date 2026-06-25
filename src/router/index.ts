@@ -4,13 +4,14 @@ import { orderManageRoutes } from './modules/orderManage';
 import { logisticsWarehouseRoutes } from './modules/logisticsWarehouse';
 import { financeRoutes } from './modules/finance';
 import { customerRoutes } from './modules/customer';
+import { domesticFinanceRoutes } from './modules/domesticFinance';
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: BasicLayout,
     redirect: '/order-manage/sale-order',
-    children: [...orderManageRoutes, ...logisticsWarehouseRoutes, ...financeRoutes, ...customerRoutes]
+    children: [...orderManageRoutes, ...logisticsWarehouseRoutes, ...financeRoutes, ...customerRoutes, ...domesticFinanceRoutes]
   }
 ];
 

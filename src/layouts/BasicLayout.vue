@@ -169,20 +169,4 @@ const closeTab = (tab: AppTabItem, event: MouseEvent) => {
 </template>
 
 <style scoped>
-.tabnav-close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 2px;
-  font-size: 14px;
-  line-height: 1;
-  color: var(--color-text-3);
-  transition: background 0.12s, color 0.12s;
-}
-.tabnav-close:hover {
-  background: var(--color-fill-2);
-  color: var(--color-text-1);
-}
 </style>
