@@ -230,8 +230,8 @@ const xTable = ref<VxeTableInstance>()
 - Use `a-tooltip` + `a-button type="text" class="row-action-btn"`.
 - Default visible actions: view/edit/more at most.
 - Row action icons must be visible in the default state; they should not look disabled.
-- Row action buttons should not use heavy permanent borders unless the action needs emphasis.
-- Operation-column action docks must not look like black outlined pills. Use subtle Arco primary tint or transparent surface by default; show border only on row hover/selection.
+- Row action buttons must not use permanent borders unless the action itself needs emphasis.
+- `row-actions` is an alignment wrapper only. It must not look like a framed action box, outlined pill, capsule, or toolbar dock; no persistent border, background, shadow, or hover/selection wrapper chrome.
 - VXE current cell, selected cell, active cell, and area-selection overlays must not use black/currentColor borders on workbench tables. The project-level `global.css` overrides these to `--dense-primary-*`; do not reintroduce page-scoped VXE cell focus styles.
 - Destructive actions go in dropdown with confirmation.
 - Direct row actions must be object-specific where text is shown.
@@ -266,14 +266,14 @@ const xTable = ref<VxeTableInstance>()
 ```
 
 - 操作列宽度：1 个 icon = `width="56"`；2 个 icon = `width="88"`。
-- Operation column content must be wrapped by `row-actions`; icon buttons must not float directly on the grid background.
+- Operation column content must be wrapped by `row-actions` for alignment only; the wrapper must not draw a persistent border, background, shadow, capsule, or boxed dock.
 - Primary direct row action uses `row-action-btn row-action-btn--primary`; more menu uses `row-action-btn row-action-btn--more`.
 - danger 操作始终在 dropdown 内，且用 `a-popconfirm` 二次确认，不能直接触发。
 - Do not repeat identical text buttons in every row if icon action with tooltip is enough.
-- Fixed operation columns need an intentional action surface: subtle left boundary, compact `row-actions` dock, and consistent icon button size.
-- Avoid loose icon buttons floating directly on the grid background. In dense workbench tables this looks unfinished and makes actions hard to scan.
+- Fixed operation columns keep the table fixed-column boundary only; row operation affordance belongs to each icon button hover/focus state, not to a framed container.
+- Avoid loose icon buttons without a `row-actions` alignment wrapper, but keep that wrapper visually transparent.
 - Avoid permanent black/dark action borders. In a dense list they create a repeated black column and break the page's Arco theme rhythm.
-- Avoid native browser focus outlines in row action buttons. `row-action-btn` and `row-actions` are the only allowed operation-column action surface; page CSS must not add custom borders or focus rings to them.
+- Avoid native browser focus outlines in row action buttons. `row-action-btn` is the only allowed operation-column action surface; page CSS must not add custom borders or focus rings to `row-actions`.
 - Row action dropdowns should have grouped normal actions and a separated danger group. Do not let default dropdown styling make irreversible actions look like ordinary menu items.
 
 ## Detail And Nested Tables

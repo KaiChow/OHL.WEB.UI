@@ -432,6 +432,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 - 行内禁止文字按钮（「查看」「编辑」字样）
 - 操作列内按钮必须放在 `row-actions` dock 中；直接主操作加 `row-action-btn--primary`，更多菜单加 `row-action-btn--more`
+- `row-actions` 只是对齐容器，不画常驻边框、背景、阴影或胶囊框；视觉反馈只允许落在单个 `row-action-btn` 的 hover / focus 态上
 - 删除 = `text` + `danger` + `a-popconfirm`
 - 禁止 `outline` 铺满操作列
 
