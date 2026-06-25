@@ -39,15 +39,31 @@ Do not decide drawer usage by "one row vs two rows" alone. Decide by field count
 | `33-50` | core row + saved filters / recent filters entry | `query-filter-drawer--wide` with group navigation and sticky footer | power users need many occasional fields | one long 50-field drawer without navigation |
 | `50+` | quick search + saved query workspace entry | saved query workspace / advanced query page or tab | reusable query schemes, cross-module conditions, or admin-level search | showing all fields at once in a drawer or page wall |
 
-Two visible rows are allowed only when all conditions are true:
+### Visible Row Count Decision（核心判断规则）
 
-- The total visible field count is `6-10`.
-- Every visible field is a high-frequency daily filter for this business object.
-- The second row does not push the VXE table below the first useful viewport on common desktop screens.
-- Query/reset/filter actions remain in a stable command area, not repeated per row.
-- The layout uses `filter-card--two-row` and `filter-grid filter-grid--two-row`, not repeated `filter-card__slim-row`.
+不要用「最多 N 行」来判断可见字段数量。正确的判断标准是：
 
-If these conditions are not true, keep one core row and move secondary filters to the drawer.
+> **这些字段，目标用户在日常工作中多久用一次？**
+
+| 用户角色 & 使用场景 | 可见行数 | 说明 |
+|---|---|---|
+| 普通列表浏览（采购/销售一般列表） | 1 行（3-5 字段） | 多数用户只用 1-2 个条件，其余字段属于偶发 |
+| 中等频率列表（运单列表、舱位列表） | 1-2 行（5-10 字段） | 日常高频字段可见，其余进抽屉 |
+| **专项重型工作台**（财务核销、操作稽核、对账中心） | **3-4 行（10-16 字段）** | 操作员全天在此页工作，每个可见字段每天都会用到 |
+| 全量高级搜索 | 抽屉/独立搜索页 | 字段多、用户多样，不适合全部平铺 |
+
+**判断是否可增加可见行：**
+
+1. **使用频率**：所有可见字段都是目标用户每天必用的。若有字段只是「偶尔会用」，它属于抽屉。
+2. **表格可见性**：增加一行筛选后，VXE 表格的首行是否仍在 1440px 屏幕的首屏视口内？如是，则可加行。
+3. **空间利用率**：当前筛选行是否有肉眼可见的大块空白区？有空白就是在浪费操作员的空间效率。
+
+实现规则：
+
+- 多行布局使用多个 `filter-card__slim-row` 堆叠，不使用 `filter-card--two-row`（该 class 仅用于 2 行 grid 布局）。
+- 操作按钮（查询/重置/更多）放在**最后一行** `filter-card__slim-row` 的末尾 `filter-card__inline-actions` 中。
+- 每行内字段宽度按权重分配：主标识符 combo `span2-3`，维度过滤器 `span1`，日期范围 `filter-field--date`（固定 240px）。
+- 行间不加 border，padding 节奏即可产生自然分组感。
 
 For `30+ / 40+ / 50+` filters:
 
@@ -122,6 +138,46 @@ Rules:
 - Query and reset must stay in the visible row.
 - The visible row should stay one line on standard desktop widths (`>= 1440px`). Below the responsive breakpoints in `responsive.md`, it may wrap according to the global CSS contract; do not solve small-screen pressure by removing label/control spacing.
 - Do not show a page-level title/description band above operational list filters.
+
+### Filter Field Visual Hierarchy（字段宽度与业务权重）
+
+同一可见筛选行内，字段宽度必须反映其业务权重，不能让所有字段等宽平铺。
+
+| 字段类型 | 业务角色 | 宽度 | 理由 |
+|---------|---------|------|------|
+| 主标识符检索 combo | 定位记录的首要维度（单号/账单号/订单号） | `filter-field--span2` | combo 内含 type 选择器 + 输入框，需空间；是用户最先输入的字段 |
+| 业务对象 combo | 往来方/公司 + 包含/排除切换 | `filter-field--span2` | 两控件并排，span1 显示过窄 |
+| 维度过滤器 | 状态/类型/币种/日期 等单一下拉 | `filter-field`（span1） | 单一控件，紧凑即可 |
+
+实现规则：
+
+- 使用 `filter-grid`（4列，`repeat(4, minmax(0, 1fr))`）而不是 `filter-grid filter-grid--two-row`——后者 class 叠加时 4列规则覆盖 5列规则，导致 span3 溢出产生第三行。
+- 两行网格的标准结构：Row1 = 维度(1)+维度(1)+业务对象combo(span2)，Row2 = 维度(1)+维度(1)+主标识符combo(span2)，合计每行恰好 4 列。
+- `filter-card--two-row` 的外层 matrix 仍然使用，它负责将 `filter-grid` 和 `filter-card__inline-actions--matrix` 左右排列。
+- 所有字段等宽 = 视觉无层次（PESDP 违规）。主标识符 span2 是结构语义，不是为了美观。
+
+```vue
+<!-- 正确：4列网格，span2 体现业务权重 -->
+<div class="zone-l2-filter-card zone-card filter-card filter-card--two-row">
+  <div class="filter-card__matrix">
+    <div class="filter-grid">
+      <!-- Row 1 -->
+      <div class="filter-field"><label class="filter-field__label">管理公司</label>...</div>       <!-- 1 -->
+      <div class="filter-field"><label class="filter-field__label">收付类型</label>...</div>       <!-- 1 -->
+      <div class="filter-field filter-field--span2"><label class="filter-field__label">账单公司</label><!-- combo --></div> <!-- 2 -->
+      <!-- Row 2 -->
+      <div class="filter-field"><label class="filter-field__label">核销状态</label>...</div>       <!-- 1 -->
+      <div class="filter-field"><label class="filter-field__label">币种</label>...</div>           <!-- 1 -->
+      <div class="filter-field filter-field--span2"><label class="filter-field__label">单号检索</label><!-- combo --></div> <!-- 2 -->
+    </div>
+    <div class="filter-card__inline-actions filter-card__inline-actions--matrix">
+      <a-button size="small" type="primary" class="filter-card__query-btn">查询</a-button>
+      <a-button size="small" type="text" class="reset-btn">重置</a-button>
+      <a-button size="small" type="text" class="reset-btn">更多</a-button>
+    </div>
+  </div>
+</div>
+```
 
 ## Two-Row Visible Query
 

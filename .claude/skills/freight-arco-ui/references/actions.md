@@ -69,7 +69,73 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 ❌ danger + primary 暴露在列表行/工具栏 — 危险进下拉或 text+danger+确认
 ❌ 同一作用域多个 primary
 ❌ btn-muted-warn 等自写警示类 — 已废弃，用 outline + normal
+❌ 用颜色区分同作用域工具栏按钮 — 颜色在系统里承载状态语义（成功/警告/危险），
+   把工作流按钮涂色会与 s-pill 状态系统冲突，产生「完成了？还是有问题？」的歧义
 ```
+
+### Toolbar Visual Differentiation（不用颜色的区分机制）
+
+工具栏多个同类按钮的区分依靠三层机制，不依靠 status 颜色：
+
+**第一层 — Type 决定重要性**
+
+| 层级 | 场景 | Type |
+|------|------|------|
+| 核心正向操作 | 选择销账、新建、提交 | `primary` × 1 |
+| 高频工作流 | 导出、对中、账单下载等 daily 操作 | `outline` |
+| 中低频辅助 | 账单修改、刷新日期等 occasional 操作 | `text` |
+
+**第二层 — Divider 决定功能归属**
+
+同 type 的按钮按功能语义分组，组间插入 `toolbar-divider`（竖线分隔）：
+
+```vue
+<div class="toolbar-group">
+  <!-- 核销主操作 -->
+  <a-button size="small" type="primary" @click="handleWriteOff">选择销账</a-button>
+
+  <div class="toolbar-divider" />
+
+  <!-- 输出组：导出 + 下载 -->
+  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+    <a-button size="small" type="outline">导出<icon-down /></a-button>
+    <template #content>...</template>
+  </a-dropdown>
+  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+    <a-button size="small" type="outline">账单下载<icon-down /></a-button>
+    <template #content>...</template>
+  </a-dropdown>
+
+  <div class="toolbar-divider" />
+
+  <!-- 对账组：对中 + 导入 -->
+  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+    <a-button size="small" type="outline">对中<icon-down /></a-button>
+    <template #content>...</template>
+  </a-dropdown>
+  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+    <a-button size="small" type="outline">上对比导入<icon-down /></a-button>
+    <template #content>...</template>
+  </a-dropdown>
+
+  <div class="toolbar-divider" />
+
+  <!-- 维护组：降权为 text -->
+  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+    <a-button size="small" type="text">账单修改<icon-down /></a-button>
+    <template #content>...</template>
+  </a-dropdown>
+  <a-button size="small" type="text" @click="handleRefreshDueDate">刷新DueDate</a-button>
+</div>
+```
+
+**第三层 — Icon 提供形状识别**
+
+为 outline/text 操作按钮加精确图标（下载用 `icon-download`，上传用 `icon-upload`，同步用 `icon-refresh`，编辑用 `icon-edit`），让操作员通过图标形状而非颜色快速定位。无精确图标时宁可不加，禁止用模糊图标制造视觉噪声。
+
+**记忆口诀**
+
+> Type 分级别 → Divider 分功能 → Icon 给形状 → 颜色只给锚点和危险
 
 ---
 
@@ -146,43 +212,103 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 ### 5.2 列表页工具栏
 
-**收纳规则：直接可见业务按钮 ≤ 3，超出收入「更多」dropdown。**
+**收纳决策：按「频率 × 风险」分类，不按个数限制。**
+
+旧规则「≤ 3 个可见按钮」针对的反模式是：大量等权重无分组按钮堆叠、主操作失焦。它不适用于货代 SaaS 的高密度工作台——操作员全天使用同一工具栏，隐藏高频操作会造成大量额外点击。真正的设计目标是：层次清晰、危险隔离、视觉有锚点，而不是限制个数。
+
+#### 分类决策表
+
+在实现工具栏前，先对每个操作做以下三问：
+
+| 问题 | 高 → 可见 | 低/危 → 隐藏或隔离 |
+|------|----------|--------------------|
+| **频率**：操作员每天是否会用到？ | 是 → 放左侧工作流区，`outline` | 否 → 收入右侧 `···` 菜单 |
+| **风险**：操作是否不可逆/批量破坏？ | 否 → 正常显示 | 是 → 强制放右侧 `···` + 二次确认，无论频率高低 |
+| **空间**：工具栏是否还有余量？ | 是 → 展示 | 否 → 按频率从后往前收入 `···` |
+
+#### 结构模型
+
+```
+左侧 toolbar-group（工作流区）
+  [主操作 primary] [高频操作A outline↓] [高频操作B outline↓] [高频操作C outline] ...
+
+右侧 toolbar-aside（工具 + 危险隔离）
+  [已选N条]  [刷新 icon]  [列设置 icon]  [··· 危险/低频操作]
+```
+
+关键规则：
+- `primary` 锚点 ×1，是当前页面最核心的正向操作。
+- 工作流区只放**高频**（每天使用）+ **低风险**操作，类型统一为 `outline`。个数无硬限，以工具栏不折行为限（通常 1280px 下不超过 6–7 个 outline 按钮）。
+- **dropdown 按钮（带 ↓）是一个操作组，不是多个按钮**。`导出↓` 内含 Excel/PDF 两个子选项，视觉权重等同一个按钮，不应计入「按钮数量」。
+- 右侧 `···` 专门盛放：低频操作 + 所有不可逆/破坏性操作（无论频率）。
+- 刷新、列设置、密度调整 = `text` icon-only，放 `toolbar-aside`，禁止 `outline`。
+- 已选 N 条反馈放 `toolbar-aside` 左侧，`v-if="selectedRows.length"`。
+
+#### 代码结构
 
 ```vue
-<div class="toolbar-group">
-  <!-- 有新建时：primary ×1 -->
-  <a-button size="small" type="primary"><template #icon><icon-plus /></template>新建</a-button>
-  <!-- 高频直接操作 ≤3 个，用 outline -->
-  <a-button size="small" type="outline" @click="handlePrint">打印</a-button>
-  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-    <a-button size="small" type="outline">导出<icon-down /></a-button>
-    <template #content>
-      <a-doption>导出 Excel</a-doption>
-      <a-doption>导出 PDF</a-doption>
-    </template>
-  </a-dropdown>
-  <!-- 低频操作收入「更多」，type="text" 降权 -->
-  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-    <a-button size="small" type="text">更多<icon-down /></a-button>
-    <template #content>
-      <a-doption>推送通知</a-doption>
-      <a-doption>一键下载</a-doption>
-      <a-doption>导入</a-doption>
-      <a-divider class="action-menu__divider" />
-      <a-doption class="danger-opt">批量废弃</a-doption>
-    </template>
-  </a-dropdown>
-</div>
-<div class="toolbar-aside">
-  <a-button size="small" type="text" @click="fetchList"><template #icon><icon-refresh /></template></a-button>
+<div class="toolbar">
+  <div class="toolbar-group">
+    <!-- primary ×1：最核心正向操作 -->
+    <a-button size="small" type="primary">
+      <template #icon><icon-plus /></template>新建
+    </a-button>
+
+    <!-- 高频低风险操作：全部用 outline，dropdown 内含子操作 -->
+    <a-button size="small" type="outline" @click="handlePrint">打印</a-button>
+
+    <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+      <a-button size="small" type="outline">导出<icon-down /></a-button>
+      <template #content>
+        <a-doption>导出 Excel</a-doption>
+        <a-doption>导出 PDF</a-doption>
+      </template>
+    </a-dropdown>
+
+    <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+      <a-button size="small" type="outline">账单修改<icon-down /></a-button>
+      <template #content>
+        <a-doption>修改金额</a-doption>
+        <a-doption>修改币种</a-doption>
+      </template>
+    </a-dropdown>
+  </div>
+
+  <div class="toolbar-aside">
+    <span v-if="selectedRows.length" class="toolbar-selected-tip">已选 {{ selectedRows.length }} 条</span>
+
+    <!-- 工具：icon-only + tooltip -->
+    <a-tooltip content="刷新">
+      <a-button size="small" type="text" @click="fetchList">
+        <template #icon><icon-refresh /></template>
+      </a-button>
+    </a-tooltip>
+    <a-tooltip content="列设置">
+      <a-button size="small" type="text">
+        <template #icon><icon-settings /></template>
+      </a-button>
+    </a-tooltip>
+
+    <!-- 危险/低频操作：物理隔离到最右端 ··· -->
+    <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+      <a-tooltip content="更多操作">
+        <a-button size="small" type="text"><icon-more /></a-button>
+      </a-tooltip>
+      <template #content>
+        <a-doption>低频操作A</a-doption>
+        <a-divider class="action-menu__divider" />
+        <a-doption class="danger-opt" @click="handleDanger">批量废弃</a-doption>
+      </template>
+    </a-dropdown>
+  </div>
 </div>
 ```
 
-- 新建 = `primary`（无新建时不写 primary，改从 outline 开始）
-- 高频直接操作 = `outline`（打印/导出/批量操作，≤3 个）
-- 低频操作 = 收入 `type="text"` 的「更多▼」dropdown
-- 刷新 = `text` icon-only + `toolbar-aside`（禁止 `outline`）
-- 已选 N 项 = `toolbar-aside` 左侧，`v-if="selectedRows.length"`
+规则补充：
+- 危险操作只放 `toolbar-aside` 右端 `···` 菜单，禁止出现在左侧 `toolbar-group`。
+- 危险项必须是菜单末尾，用 `action-menu__divider` 与其他选项分隔，并触发 `Modal.confirm`。
+- 刷新 = `text` icon-only + `toolbar-aside`（禁止 `outline`）。
+- 无新建时不写 `primary`，改从 `outline` 开始。
 
 ### 5.3 详情页头
 

@@ -56,6 +56,7 @@
 - Row actions are icon-only `text` + tooltip.
 - Dropdown actions use `action-menu`: toolbar menus use `action-menu--toolbar` with content-adaptive width, compact minimum width, `--dense-action-menu-max-w` upper bound, and 32px option rhythm; row `···` menus use `action-menu--row` with at least 32px options; options are text-first and must not force icons for every operation; danger groups are separated with `action-menu__divider`; menus must not create horizontal scrollbars.
 - Dangerous actions use `text`/`danger-opt` + `a-popconfirm` or `Modal.confirm`; avoid `status="warning"` on toolbar/footer buttons.
+- Toolbar visibility follows frequency × risk classification, not a hard button count: classify each action as (daily/occasional/rare) × (reversible/irreversible/destructive) before placing it. Daily + reversible → left `toolbar-group` as `outline`; rare or destructive → right `toolbar-aside` `···` menu. A dropdown button (with ↓) is one operation group, not multiple buttons, and does not inflate the visible count. The old "≤ 3 visible buttons" rule only applied to simple flat single-action buttons without dropdowns; it does not apply to operational workbenches where operators use every workflow action many times per day.
 - Uploads and file lists have clear single/multiple behavior.
 - Page/module implementation is split into route/page/components/types/mock/composables when scope is large.
 - Module header left is title only; module header right is actions only.
