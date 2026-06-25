@@ -51,13 +51,7 @@ const RULES = [
   },
 
   // 禁止裸用 a-pagination（须在 table-card-cap 结构内）
-  {
-    desc: '禁止在非 table-card-cap 组件内裸写 <a-pagination>',
-    pattern: /<a-pagination/,
-    fileFilter: /\.vue$/,
-    // 允许在 TableCap 相关文件里用；SaleOrderToolbar 是历史遗留（工具栏+分页合一），待拆分
-    fileExclude: /TableCap\.vue$|SaleOrderToolbar\.vue$/i,
-  },
+  // 结构型规则在下方单独检查，避免只按文件名放行导致 table-card-cap 内误报。
 
   // 禁止硬编码 hex 颜色（注释行和 CSS 变量定义除外）
   {
@@ -355,6 +349,78 @@ function isStructuralVxeColumn(attrs) {
   if (/type="checkbox"/.test(attrs) || /type="seq"/.test(attrs)) return true;
   if (/title="操作"/.test(attrs) && /fixed="right"/.test(attrs)) return true;
   return false;
+}
+
+function getLineNumber(content, index) {
+  return content.slice(0, index).split('\n').length;
+}
+
+function getOpenDivClassStack(content, index) {
+  const before = content.slice(0, index);
+  const stack = [];
+  for (const match of before.matchAll(/<\/div>|<div\b[^>]*>/g)) {
+    const tag = match[0];
+    if (tag.startsWith('</div')) {
+      stack.pop();
+      continue;
+    }
+    const classMatch = tag.match(/\bclass=(["'])(.*?)\1/);
+    stack.push(classMatch ? classMatch[2] : '');
+  }
+  return stack;
+}
+
+function hasOpenAncestorClass(content, index, className) {
+  return getOpenDivClassStack(content, index)
+    .some((classAttr) => classAttr.split(/\s+/).includes(className));
+}
+
+// a-pagination 必须位于 table-card-cap 打开的结构内，而不是按文件名特批。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  for (const match of content.matchAll(/<a-pagination\b/g)) {
+    if (hasOpenAncestorClass(content, match.index, 'table-card-cap')) continue;
+    violations.push({
+      rule: '禁止在非 table-card-cap 结构内裸写 <a-pagination>',
+      file: relPath,
+      line: getLineNumber(content, match.index),
+      content: content.slice(match.index, content.indexOf('\n', match.index)).trim().slice(0, 120),
+    });
+  }
+}
+
+// 展开筛选区必须使用 filter-grid / 分组承载低频字段，禁止继续用 slim-row 做多行平铺。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  for (const match of content.matchAll(/class="filter-card__slim-row"/g)) {
+    if (!hasOpenAncestorClass(content, match.index, 'filter-card__advanced-inner')) continue;
+    violations.push({
+      rule: '筛选展开区禁止使用 filter-card__slim-row 平铺，应用 filter-grid filter-grid--advanced 分组',
+      file: relPath,
+      line: getLineNumber(content, match.index),
+      content: content.slice(match.index, content.indexOf('\n', match.index)).trim().slice(0, 140),
+    });
+  }
+}
+
+// 高频列表默认采用核心查询条 + 筛选抽屉；禁止业务页继续用内联展开筛选区制造灰色表单墙。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('zone-l2-filter-card')) continue;
+  for (const match of content.matchAll(/class="filter-card__advanced"/g)) {
+    violations.push({
+      rule: '列表查询区禁止内联展开筛选区，低频条件应进入 query-filter-drawer',
+      file: relPath,
+      line: getLineNumber(content, match.index),
+      content: content.slice(match.index, content.indexOf('\n', match.index)).trim().slice(0, 140),
+    });
+  }
 }
 
 for (const file of files) {

@@ -106,23 +106,41 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 
 ### 4.2 列表页工具栏
 
+**收纳规则：直接可见业务按钮 ≤ 3，超出收入「更多」dropdown。**
+
 ```vue
 <div class="toolbar-group">
+  <!-- 有新建时：primary ×1 -->
   <a-button size="small" type="primary"><template #icon><icon-plus /></template>新建</a-button>
-</div>
-<div class="toolbar-divider" />
-<div class="toolbar-group toolbar-group--grow">
-  <a-button size="small" @click="handleExport">导出</a-button>
-  <a-dropdown><!-- 批量操作 --></a-dropdown>
+  <!-- 高频直接操作 ≤3 个，用 outline -->
+  <a-button size="small" type="outline" @click="handlePrint">打印</a-button>
+  <a-dropdown trigger="click">
+    <a-button size="small" type="outline">导出<icon-down /></a-button>
+    <template #content>
+      <a-doption>导出 Excel</a-doption>
+      <a-doption>导出 PDF</a-doption>
+    </template>
+  </a-dropdown>
+  <!-- 低频操作收入「更多」，type="text" 降权 -->
+  <a-dropdown trigger="click">
+    <a-button size="small" type="text">更多<icon-down /></a-button>
+    <template #content>
+      <a-doption>推送通知</a-doption>
+      <a-doption>一键下载</a-doption>
+      <a-doption>导入</a-doption>
+    </template>
+  </a-dropdown>
 </div>
 <div class="toolbar-aside">
   <a-button size="small" type="text" @click="fetchList"><template #icon><icon-refresh /></template></a-button>
 </div>
 ```
 
-- 新建 = `primary`
-- 导出 = `secondary`（默认）或 `outline`（二选一，模块内统一即可）
-- 刷新 = `text` icon-only（禁止 `outline`）
+- 新建 = `primary`（无新建时不写 primary，改从 outline 开始）
+- 高频直接操作 = `outline`（打印/导出/批量操作，≤3 个）
+- 低频操作 = 收入 `type="text"` 的「更多▼」dropdown
+- 刷新 = `text` icon-only + `toolbar-aside`（禁止 `outline`）
+- 已选 N 项 = `toolbar-aside` 左侧，`v-if="selectedRows.length"`
 
 ### 4.3 详情页头
 

@@ -180,6 +180,42 @@ The bottom of a workbench table must look intentionally finished.
 - Page-to-viewport bottom spacing is not a table concern. Keep 8-10px page bottom padding on dense list pages so the table card does not stick to the browser edge.
 - Do not solve page bottom spacing with table padding or fake rows; that makes the last row look clipped or the data area look broken.
 
+## Column Visibility — Default Columns + Settings
+
+Workbench tables with more than 12 columns **must** define default visible columns and offer a column picker.
+
+**Rules:**
+- Default visible: 8–12 columns covering identity, status, key business values, and operation.
+- Extra columns: `field`-only columns with `:visible="false"` — appear in picker, hidden by default.
+- Do not default to showing every backend field. Use next-decision fields first.
+- Column picker button goes in `table-card-cap__right`, `type="text" class="table-card-cap__tool"`.
+
+```vue
+<!-- table-card-cap: column settings button -->
+<a-tooltip content="列设置">
+  <a-button size="small" type="text" class="table-card-cap__tool" @click="xTable?.openCustom()">
+    <template #icon><icon-settings /></template>
+  </a-button>
+</a-tooltip>
+
+<!-- vxe-table setup -->
+<vxe-table
+  ref="xTable"
+  :custom-config="{ storage: true, storageKey: 'module-name-cols' }"
+  ...
+>
+  <!-- default visible -->
+  <vxe-column field="orderNo" title="订单编号" min-width="148" />
+  <!-- hidden by default, user-restorable -->
+  <vxe-column field="weight" title="毛重(kg)" min-width="88" :visible="false" />
+</vxe-table>
+```
+
+```ts
+import type { VxeTableInstance } from 'vxe-table'
+const xTable = ref<VxeTableInstance>()
+```
+
 ## Row Actions
 
 - Use `a-tooltip` + `a-button type="text" class="row-action-btn"`.
@@ -190,7 +226,36 @@ The bottom of a workbench table must look intentionally finished.
 - VXE current cell, selected cell, active cell, and area-selection overlays must not use black/currentColor borders on workbench tables. The project-level `global.css` overrides these to `--dense-primary-*`; do not reintroduce page-scoped VXE cell focus styles.
 - Destructive actions go in dropdown with confirmation.
 - Direct row actions must be object-specific where text is shown.
-- If more than two row actions exist, show primary row action plus `more`.
+- If more than two row actions exist, show primary row action (eye/edit) + `···` dropdown for the rest.
+
+```vue
+<!-- 操作列：主操作 icon + ··· dropdown -->
+<vxe-column title="操作" width="88" fixed="right" align="center">
+  <template #default="{ row }">
+    <a-tooltip content="查看详情">
+      <a-button size="small" type="text" class="row-action-btn" @click="handleView(row)">
+        <template #icon><icon-eye /></template>
+      </a-button>
+    </a-tooltip>
+    <a-dropdown trigger="click" position="br">
+      <a-button size="small" type="text" class="row-action-btn" title="更多操作">
+        <template #icon><icon-more /></template>
+      </a-button>
+      <template #content>
+        <a-doption @click="handleEdit(row)">编辑</a-doption>
+        <a-doption @click="handlePrint(row)">打印</a-doption>
+        <a-divider style="margin:4px 0" />
+        <a-popconfirm content="确认废弃？此操作不可恢复。" @ok="handleVoid(row)">
+          <a-doption class="danger-opt">废弃</a-doption>
+        </a-popconfirm>
+      </template>
+    </a-dropdown>
+  </template>
+</vxe-column>
+```
+
+- 操作列宽度：1 个 icon = `width="56"`；2 个 icon = `width="88"`。
+- danger 操作始终在 dropdown 内，且用 `a-popconfirm` 二次确认，不能直接触发。
 - Do not repeat identical text buttons in every row if icon action with tooltip is enough.
 - Fixed operation columns need an intentional action surface: subtle left boundary, compact `row-actions` dock, and consistent icon button size.
 - Avoid loose icon buttons floating directly on the grid background. In dense workbench tables this looks unfinished and makes actions hard to scan.

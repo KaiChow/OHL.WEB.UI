@@ -725,11 +725,131 @@ button:-moz-focusring,
   padding: 10px 12px 10px;
   background: var(--color-bg-card);
 }
+/* 压缩模式：去掉 label 后减少垂直 padding */
+.filter-card--compact .filter-card__body--basic {
+  padding: 6px 12px;
+}
+.filter-card--compact .filter-card__actions-panel {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+/* ── filter-card--slim ── 单行高密度 64px 筛选区 ─────────────────────
+   label 在上 / control 在下 / actions 水平内联，底部对齐 control 行
+   用法：Tier 1（4-8 字段单行）、Tier 2 基础行（展开区复用 __advanced）
+   高密度不是无间距：label 与 control 保留 5px 呼吸感，避免贴边和压迫
+   ──────────────────────────────────────────────────────────────────── */
+.filter-card__slim-row {
+  display: flex;
+  align-items: flex-end;      /* 所有子项底部对齐 → label/control 自然上下排，control 行水平对齐 */
+  padding: 6px 12px 7px 16px;
+  gap: 8px;
+  background: var(--color-bg-card);
+  min-height: 64px;
+  box-sizing: border-box;
+}
+/* 字段在 slim-row 内：label→control 竖排，flex-end 底对齐 */
+.filter-card__slim-row .filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;          /* 高密度仍需清晰留白，避免 label 贴住控件 */
+  flex: 1 1 0;
+  min-width: 100px;
+}
+.filter-card__slim-row .filter-field--span2 { flex: 2 1 0; }
+.filter-card__slim-row .filter-field--span3 { flex: 3 1 0; }
+.filter-card__slim-row .filter-field--date  { flex: 1 1 0; }  /* 与其他字段一致，填满行宽 */
+/* 日期范围固定宽度：不随布局拉伸，保持控件比例 */
+.filter-card__slim-row .filter-field--date {
+  flex: 0 0 240px !important;
+  min-width: 200px !important;
+  max-width: 240px !important;
+}
+/* 日期选择器内部控件不超出字段宽度 */
+.filter-card__slim-row .filter-field--date .arco-picker,
+.filter-card__slim-row .filter-field--date .arco-picker-range {
+  width: 100% !important;
+  max-width: 240px !important;
+}
+/* label 在 slim-row 内：保留 5px 间距，形成字段名/输入区的清晰层次 */
+.filter-card__slim-row .filter-field__label {
+  margin-bottom: 0;
+  line-height: 16px;
+}
+
+/* ── filter-card__inline-actions ── 水平操作区 ──────────────────────
+   高度 = var(--dense-control-h-filter) = 32px，与 control 行 bottom-align 后平齐
+   ──────────────────────────────────────────────────────────────────── */
+.filter-card__inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  height: var(--dense-control-h-filter);
+  padding-left: 12px;
+  border-left: 1px solid var(--color-border-1);
+}
+.filter-card__inline-actions .filter-card__query-btn {
+  width: auto;
+  white-space: nowrap;
+  font-weight: var(--dense-weight-nav-active);
+  box-shadow: 0 2px 6px rgba(22, 93, 255, 0.22) !important;
+}
+.filter-card__inline-actions .reset-btn {
+  height: var(--dense-control-h-filter) !important;
+  padding: 0 8px !important;
+  color: var(--color-text-2) !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: var(--dense-radius) !important;
+}
+.filter-card__inline-actions .reset-btn:hover {
+  color: var(--dense-primary-6) !important;
+  background: var(--dense-primary-1) !important;
+  box-shadow: none !important;
+}
+.filter-card__inline-actions .arco-btn:hover,
+.filter-card__inline-actions .arco-btn:focus-visible { transform: none !important; }
+.filter-card__inline-actions .arco-btn-primary:hover,
+.filter-card__inline-actions .arco-btn-primary:focus-visible {
+  box-shadow: 0 3px 8px rgba(22, 93, 255, 0.26) !important;
+}
+
+/* ── filter-expand-link--inline ── 展开/收起（内联变体） ────────────── */
+.filter-expand-link--inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: var(--dense-control-h-filter);
+  padding: 0 6px;
+  border: none;
+  border-radius: var(--dense-radius);
+  color: var(--color-text-3);
+  background: transparent;
+  font-size: var(--dense-font-nav);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.12s, background 0.12s;
+}
+.filter-expand-link--inline:hover {
+  color: var(--dense-primary-6);
+  background: var(--dense-primary-1);
+}
+.filter-expand-link--inline .arco-icon {
+  font-size: 12px;
+  transition: transform 0.2s;
+}
+.filter-expand-link--inline.is-open .arco-icon {
+  transform: rotate(180deg);
+}
+
 .filter-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px 12px;
 }
+.filter-grid--5col { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.filter-grid--6col { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .filter-grid--advanced {
   gap: 8px 12px;
 }
@@ -763,7 +883,7 @@ button:-moz-focusring,
 .filter-field__label {
   display: block;
   margin-bottom: var(--dense-gap-label);
-  font-size: var(--dense-font-field);
+  font-size: var(--dense-font-field);   /* 12px：可读，与页面字体体系一致 */
   font-weight: var(--dense-weight-field);
   color: var(--color-text-2);
   letter-spacing: 0;
@@ -857,14 +977,27 @@ button:-moz-focusring,
   transition: max-height 0.24s ease, opacity 0.2s ease;
 }
 .filter-card__advanced--open {
-  max-height: 260px;
+  max-height: 340px;  /* slim-row × N + advanced-inner padding */
   opacity: 1;
 }
 .filter-card__advanced-inner {
-  padding: 8px 12px 10px;
+  padding: 8px 12px 10px 16px;
   background: var(--color-fill-1);
-  border-top: none;
+  border-top: 1px solid var(--dense-border-subtle);
   position: relative;
+}
+/* advanced 内使用 filter-grid 承载低频字段，避免继续用 slim-row 形成多行平铺墙 */
+.filter-card__advanced-inner .filter-grid + .form-subgroup-label {
+  margin-top: 10px;
+}
+/* advanced 内的 slim-row 顶部去掉重复 padding-top（首行稍小） */
+.filter-card__advanced-inner .filter-card__slim-row {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.filter-card__advanced-inner .filter-card__slim-row + .filter-card__slim-row {
+  padding-top: 0;
+  border-top: 1px solid var(--dense-border-subtle);
 }
 .filter-card__advanced-inner::before {
   display: none;
@@ -1122,6 +1255,58 @@ button:-moz-focusring,
   scrollbar-width: none;
 }
 .scope-status-bar__status::-webkit-scrollbar { display: none; }
+
+/* ── merged-bar ── 工具栏 + Tab 合并单行 48px ─────────────────────────
+   替代 zone-l3 内的 toolbar + scope-status-bar 两行结构
+   布局：[业务操作] bar-sep [scope stabs] bar-sep [stat-tabs] → [工具图标]
+   ──────────────────────────────────────────────────────────────────── */
+.merged-bar {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 12px 0 16px;
+  background: var(--color-bg-card);
+  gap: 0;
+  overflow: hidden;
+}
+.merged-bar .toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+/* 竖向分隔线 */
+.bar-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--dense-border);
+  margin: 0 10px;
+  flex-shrink: 0;
+}
+/* scope / cargo stab 组 */
+.stab-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+/* stat-tab 状态组（弹性，可横向滚动） */
+.stat-tab-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.stat-tab-group::-webkit-scrollbar { display: none; }
+/* 右侧工具区 */
+.merged-bar .toolbar-aside {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
 
 /* scope-tab 已废弃，范围与状态统一使用 .stab */
 .status-bar {
@@ -2689,6 +2874,7 @@ button:-moz-focusring,
   width: 100%;
 }
 .detail-form-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.detail-form-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .detail-form-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .detail-form-grid--6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .detail-form-grid--compact { padding: 0 0 8px; }
@@ -2696,6 +2882,21 @@ button:-moz-focusring,
 .detail-form-grid__span3 { grid-column: span 3; }
 .detail-form-grid__span4 { grid-column: span 4; }
 .detail-form-grid__span6 { grid-column: span 6; }
+.form-subgroup-label--span { grid-column: 1 / -1; }
+
+.query-filter-drawer .arco-drawer-body {
+  padding: 12px 16px 16px;
+}
+.query-filter-drawer .detail-drawer-footer {
+  padding: 0;
+  border-top: none;
+}
+.query-filter-drawer .detail-form .arco-form-item-label-col {
+  margin-bottom: 4px !important;
+}
+.query-filter-drawer .detail-form .arco-form-item-label-col > .arco-form-item-label {
+  line-height: 16px !important;
+}
 
 /* detail-field：只读字段（label 上 + val 下），用于详情展示 */
 .detail-field {

@@ -22,14 +22,14 @@ This structure is fixed; the fields are not. Each list must map columns and filt
 - Use `filter-card`, `filter-grid`, `filter-field`, `filter-field__label`.
 - Query button is primary.
 - Reset is text, no icon.
-- More filters are inline expansion, not modal.
+- Low-frequency filters use the right-side `query-filter-drawer` by default. Inline expansion is an exception only when allowed by `filter-layout.md`.
 
-### Filter Actions Panel Recipe
+### Filter Actions Recipe
 
-The right-side command panel (`filter-card__actions-panel`) must feel like a single command surface, not three loose floating elements. All three controls use the same height (`--dense-control-h-filter` = 32px) and font size (12px).
+The visible query row uses `filter-card__inline-actions`: one primary query button, one text reset button, and one text filter-entry button when a drawer exists. The controls must feel like a single command surface, not loose floating elements.
 
 ```vue
-<div class="filter-card__actions-panel">
+<div class="filter-card__inline-actions">
   <a-button
     size="small"
     type="primary"
@@ -47,28 +47,27 @@ The right-side command panel (`filter-card__actions-panel`) must feel like a sin
     title="重置"
     @click="handleReset"
   >重置</a-button>
-  <button
-    class="filter-expand-link filter-expand-link--panel"
-    type="button"
-    :title="showAdvanced ? '收起' : '更多'"
-    @click="showAdvanced = !showAdvanced"
+  <a-button
+    size="small"
+    type="text"
+    class="reset-btn"
+    title="更多筛选"
+    @click="advancedFilterVisible = true"
   >
-    <span class="filter-expand-link__text">{{ showAdvanced ? '收起' : '更多' }}</span>
-    <icon-down />
-  </button>
+    <template #icon><icon-filter /></template>筛选
+  </a-button>
 </div>
 ```
 
 Rules:
 - All three controls: `height: var(--dense-control-h-filter)` (32px), `font-size: 12px`. Do not use `height: auto` or `min-height: 24px` on reset or expand — they must match query button height.
-- Query: `type="primary"` + icon + `class="filter-card__query-btn"` (full-width, box-shadow).
+- Query: `type="primary"` + icon + `class="filter-card__query-btn"`.
 - Reset: `type="text"` + `class="reset-btn"` (transparent bg, `color-text-2`, hover tints primary-1).
-- Expand/collapse: native `<button>` + `class="filter-expand-link filter-expand-link--panel"` (`color-text-3`, 12px). Do not use `a-button` here — the expand link uses a custom native button to avoid Arco's internal height enforcement.
-- Do not add a custom border or background to the panel container — `global.css` already handles the left accent via `::before`.
-- Advanced filters are grouped by business meaning, not random field order.
+- More filters: `type="text"` + `class="reset-btn"` + filter icon, opens `query-filter-drawer`.
+- Advanced filters are grouped by business meaning inside the drawer, not random field order.
 - Do not show a separate “selected filters” strip. Current values are visible in controls/tabs.
 - Basic filters should be the 3-6 highest-frequency query fields for the object.
-- Advanced filters can be numerous, but must be grouped by business meaning and hidden behind inline expansion.
+- Advanced filters can be numerous, but must be grouped by business meaning and hidden behind the drawer.
 - Main list query fields should stay in a flat grid by default. Do not add visible group titles or grouped panels inside the query card unless the query count reaches Tier 3 and the user explicitly needs grouped advanced editing.
 - Do not copy order search fields into finance, warehouse, or customer pages.
 
@@ -79,9 +78,9 @@ Choose the search UI by field count and user job. Do not use one query layout fo
 | Query field count | Pattern | Use when | Interaction |
 |-------------------|---------|----------|-------------|
 | 0-3 | Tier 0 keyword/search bar | Users mainly locate by one identifier or keyword | Single dominant input, optional one select, primary query |
-| 4-8 | Tier 1 standard filter row | All fields are high-frequency and fit without wrapping | Always visible, one row or compact two-row grid |
-| 9-16 | Tier 2 expandable filter card | Few high-frequency fields plus secondary filters | 3-6 fields visible; secondary fields inline expand/collapse |
-| 17-50 | Tier 3 grouped advanced filter panel/drawer | Many fields across business groups | Keep top query visible; advanced area grouped by business meaning with local clear/apply |
+| 4-8 | Tier 1 core query row | All visible fields are high-frequency and fit without wrapping | Always visible single row |
+| 9-16 | Tier 2 core row + filter drawer | Few high-frequency fields plus secondary filters | 3-5 fields visible; secondary fields in `query-filter-drawer` |
+| 17-50 | Tier 3 core row + grouped drawer | Many fields across business groups | Keep top query visible; drawer grouped by business meaning with local clear/apply |
 | 50+ | Tier 4 saved query workspace | Power users need reusable query schemes | Quick search + saved filters + grouped advanced editor; never show all fields at once |
 
 Rules:
@@ -91,10 +90,10 @@ Rules:
 - Do not show 50 fields as a flat form wall.
 - Put active query state in the controls, transport/status tabs, and selected values; do not add a separate selected-filter strip.
 - Text inputs trigger by Enter or Query button; selects and chips may auto-search when safe.
-- Query and reset actions stay in a stable location when advanced filters open or close.
-- Query actions can use a fixed right command panel when it preserves table height and keeps actions stable. A vertical command stack is allowed when it is visually designed as a command surface: one full-width primary query button, full-width secondary reset and expand/collapse buttons, consistent width, subtle border/background, and clear primary/secondary hierarchy. It must not look like a narrow side menu or three loose text links.
-- Fixed query command panels must be internationalization-safe. Do not size them by Chinese labels; use min/max or `clamp()`, allow 1.3-2x text expansion, and give secondary actions tooltip/title/aria labels when text may ellipsize.
-- If secondary query actions cannot fit translated text in the fixed panel, use icon + accessible label or move the actions to a horizontal command row. Do not silently clip action meaning.
+- Query and reset actions stay in a stable location in the visible query row.
+- The filter drawer owns secondary conditions and its own clear/apply footer. Do not use an inline expanded panel for normal business list pages.
+- Query actions must be internationalization-safe. Do not size them by Chinese labels; use min/max or `clamp()`, allow 1.3-2x text expansion, and give secondary actions tooltip/title/aria labels when text may ellipsize.
+- If secondary query actions cannot fit translated text, use icon + accessible label or move the actions to a horizontal command row. Do not silently clip action meaning.
 - For international freight pages, field examples should use domain identifiers such as order no, business no, HBL, MBL, container no, customer, port, and warehouse no.
 - Combined keyword filters such as `field type + keyword` are allowed only when they reduce repeated identifier inputs. Use the shared `filter-combo` structure: one fixed-width selector, one flexible input, same 32px height, continuous border, and one clear label such as `单号检索`. Do not place multiple independent query fields into one visual field.
 - A combined keyword filter must list related identifiers only, such as 业务单号 / 业务编号 / HBL / MBL / 柜号. Do not mix unrelated filters such as customer, staff, port, date, and status into the same combo.

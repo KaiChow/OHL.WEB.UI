@@ -11,6 +11,7 @@ export const appMenus: AppMenuItem[] = [
     title: '进出口订单管理',
     children: [
       { key: 'sale-order', title: '业务单', routeName: 'SaleOrder' },
+      { key: 'mbl-order', title: '大单管理', routeName: 'MblOrder' },
     ],
   },
   {
