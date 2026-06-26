@@ -61,13 +61,14 @@ const advancedFilterVisible = ref(false)
 
 const q = reactive({
   // visible row
+  transportMode: 'sea',
   manageCo: '',
   payType: '',
   billCoType: 'include',   // include | exclude
   billCo: '',
   writeOffStatus: '',
   currency: '',
-  noType: 'orderNo',
+  noType: 'businessNo',
   noKeyword: '',
   noSingle: false,
   noPrecise: false,
@@ -100,9 +101,56 @@ const q = reactive({
   // drawer - 订单
   companyType: '',
   bizType: '',
+  importExportType: '',
+  businessNo: '',
+  orderNo: '',
+  fbaNo: '',
+  poNo: '',
+  sender: '',
+  receiver: '',
+  bookingSender: '',
+  customer: '',
+  originPlace: '',
+  destinationPlace: '',
+  pol: '',
   orderOwnerCo: '',
   soNo: '',
   pod: '',
+  podCountry: '',
+  polCountry: '',
+  carrier: '',
+  vessel: '',
+  voyage: '',
+  routeName: '',
+  contractNo: '',
+  overseasAgent: '',
+  overseasNo: '',
+  packingType: '',
+  containerType: '',
+  cargoName: '',
+  cargoType: '',
+  orderStatus: '',
+  customsMethod: '',
+  operationRemark: '',
+  bookingContent: '',
+  storageTimeRange: [] as string[],
+  orderTimeRange: [] as string[],
+  sailingTimeRange: [] as string[],
+  financePodRange: [] as string[],
+  documentKeyword: '',
+  market: '',
+  serviceScope: '',
+  customerType: '',
+  tradeTerms: '',
+  oceanFreightRecorded: '',
+  noBookingOrder: false,
+  noContinueOrder: false,
+  inboundUnsubmitted: false,
+  lastShipmentNoReceipt: false,
+  sensitiveCargo: false,
+  fullContainer: false,
+  flashBox: false,
+  sameCarrier: false,
   containerNo: '',
   externalNo: '',
   invoiceNo: '',
@@ -206,8 +254,8 @@ function handleSearch() {
 
 function handleReset() {
   Object.assign(q, {
-    manageCo: '', payType: '', billCoType: 'include', billCo: '',
-    writeOffStatus: '', currency: '', noType: 'orderNo', noKeyword: '',
+    transportMode: 'sea', manageCo: '', payType: '', billCoType: 'include', billCo: '',
+    writeOffStatus: '', currency: '', noType: 'businessNo', noKeyword: '',
     noSingle: false, noPrecise: false, writeOffNo: '',
     billNo: '', billNoPrecise: true,
     etdRange: [], etaRange: [], atdRange: [], ataRange: [],
@@ -216,8 +264,18 @@ function handleReset() {
     salesman: '', customerService: '', operator: '',
     amountMin: '', amountMax: '', taxRate: '', feeItem: '', feeItemExclude: false,
     isInvoiced: '', isFullTax: '',
-    companyType: '', bizType: '', orderOwnerCo: '', soNo: '', pod: '',
-    containerNo: '', externalNo: '', invoiceNo: '',
+    companyType: '', bizType: '', importExportType: '', businessNo: '', orderNo: '',
+    fbaNo: '', poNo: '', sender: '', receiver: '', bookingSender: '', customer: '',
+    originPlace: '', destinationPlace: '', pol: '', orderOwnerCo: '', soNo: '', pod: '',
+    podCountry: '', polCountry: '', carrier: '', vessel: '', voyage: '', routeName: '',
+    contractNo: '', overseasAgent: '', overseasNo: '', packingType: '', containerType: '',
+    cargoName: '', cargoType: '', orderStatus: '', customsMethod: '',
+    operationRemark: '', bookingContent: '', storageTimeRange: [], orderTimeRange: [],
+    sailingTimeRange: [], financePodRange: [], documentKeyword: '', market: '',
+    serviceScope: '', customerType: '', tradeTerms: '', oceanFreightRecorded: '',
+    noBookingOrder: false, noContinueOrder: false, inboundUnsubmitted: false,
+    lastShipmentNoReceipt: false, sensitiveCargo: false, fullContainer: false,
+    flashBox: false, sameCarrier: false, containerNo: '', externalNo: '', invoiceNo: '',
     domesticFreight: '', operations: '', podStatus: '',
     billDept: '', excludeOp: '', preWriteOffCode: '', proxyBillDone: '',
     hblNo: '', mblNo: '',
@@ -237,8 +295,18 @@ function handleDrawerClear() {
     salesman: '', customerService: '', operator: '',
     amountMin: '', amountMax: '', taxRate: '', feeItem: '', feeItemExclude: false,
     isInvoiced: '', isFullTax: '',
-    companyType: '', bizType: '', orderOwnerCo: '', soNo: '', pod: '',
-    containerNo: '', externalNo: '', invoiceNo: '',
+    companyType: '', bizType: '', importExportType: '', businessNo: '', orderNo: '',
+    fbaNo: '', poNo: '', sender: '', receiver: '', bookingSender: '', customer: '',
+    originPlace: '', destinationPlace: '', pol: '', orderOwnerCo: '', soNo: '', pod: '',
+    podCountry: '', polCountry: '', carrier: '', vessel: '', voyage: '', routeName: '',
+    contractNo: '', overseasAgent: '', overseasNo: '', packingType: '', containerType: '',
+    cargoName: '', cargoType: '', orderStatus: '', customsMethod: '',
+    operationRemark: '', bookingContent: '', storageTimeRange: [], orderTimeRange: [],
+    sailingTimeRange: [], financePodRange: [], documentKeyword: '', market: '',
+    serviceScope: '', customerType: '', tradeTerms: '', oceanFreightRecorded: '',
+    noBookingOrder: false, noContinueOrder: false, inboundUnsubmitted: false,
+    lastShipmentNoReceipt: false, sensitiveCargo: false, fullContainer: false,
+    flashBox: false, sameCarrier: false, containerNo: '', externalNo: '', invoiceNo: '',
     domesticFreight: '', operations: '', podStatus: '',
     billDept: '', excludeOp: '', preWriteOffCode: '', proxyBillDone: '',
     hblNo: '', mblNo: '',
@@ -299,6 +367,13 @@ function handleViewDetail(row: PaymentRow) {
 <template>
   <div class="page-root page-root--dense">
 
+    <!-- ① 业务单模式：海运/空运/铁路会改变查询项和业务语义，作为 L1 页面段 -->
+    <div class="zone-l1-transport zone-card">
+      <button class="seg-btn" :class="{ 'seg-btn--active': q.transportMode === 'sea' }" @click="q.transportMode = 'sea'">海运</button>
+      <button class="seg-btn" :class="{ 'seg-btn--active': q.transportMode === 'air' }" @click="q.transportMode = 'air'">空运</button>
+      <button class="seg-btn" :class="{ 'seg-btn--active': q.transportMode === 'rail' }" @click="q.transportMode = 'rail'">铁路</button>
+    </div>
+
     <!-- ① 筛选区：收付款账单工作台只露出高频定位/收窄条件；专项条件进入筛选抽屉 -->
     <div class="zone-l2-filter-card zone-card filter-card">
 
@@ -336,12 +411,13 @@ function handleViewDetail(row: PaymentRow) {
         </div>
       </div>
 
-      <!-- 行2：主标识符检索 + 操作按钮 -->
+      <!-- 行2：业务单定位 + 操作按钮 -->
       <div class="filter-card__slim-row">
         <div class="filter-field filter-field--span3">
-          <label class="filter-field__label">单号检索</label>
+          <label class="filter-field__label">业务单检索</label>
           <div class="filter-combo arco-input-group">
             <a-select v-model="q.noType" size="small" class="filter-combo__select filter-combo--keyword">
+              <a-option value="businessNo">业务单号</a-option>
               <a-option value="orderNo">订单编号</a-option>
               <a-option value="billNo">账单编号</a-option>
               <a-option value="writeOffNo">核销编号</a-option>
@@ -349,7 +425,7 @@ function handleViewDetail(row: PaymentRow) {
               <a-option value="mbl">MBL NO</a-option>
               <a-option value="preCode">预核销码</a-option>
             </a-select>
-            <a-input v-model="q.noKeyword" size="small" allow-clear placeholder="多个请用空格分隔" />
+            <a-input v-model="q.noKeyword" size="small" allow-clear placeholder="请输入业务单号 / 订单号 / HBL / MBL" />
           </div>
         </div>
         <div class="filter-field">
@@ -382,6 +458,7 @@ function handleViewDetail(row: PaymentRow) {
         <div class="toolbar-group">
           <!-- 核销主操作 -->
           <a-button size="small" type="primary" @click="handleWriteOff">选择销账</a-button>
+          <span v-if="selectedRows.length" class="toolbar-selected-tip toolbar-selected-tip--near-action">已选 {{ selectedRows.length }} 条</span>
 
           <div class="toolbar-divider" />
 
@@ -447,25 +524,9 @@ function handleViewDetail(row: PaymentRow) {
           </a-button>
         </div>
         <div class="toolbar-aside">
-          <span v-if="selectedRows.length" class="toolbar-selected-tip">已选 {{ selectedRows.length }} 条</span>
-          <a-pagination
-            v-model:current="page"
-            v-model:page-size="pageSize"
-            :total="total"
-            size="small"
-            class="toolbar-pager"
-            show-total
-            show-page-size
-            :page-size-options="[50, 100, 200]"
-          />
           <a-tooltip content="刷新">
             <a-button size="small" type="text" @click="handleSearch">
               <template #icon><icon-refresh /></template>
-            </a-button>
-          </a-tooltip>
-          <a-tooltip content="列设置">
-            <a-button size="small" type="text" @click="xTable?.openCustom()">
-              <template #icon><icon-settings /></template>
             </a-button>
           </a-tooltip>
           <!-- 低频/危险操作物理隔离：放右端减少误触 -->
@@ -483,7 +544,29 @@ function handleViewDetail(row: PaymentRow) {
     </div>
 
     <!-- ③ 主表格 -->
-    <div class="zone-l4-table-card" style="flex:1;min-height:0;display:flex;flex-direction:column">
+    <div class="zone-l4-table-card payment-main-table">
+      <div class="table-card-cap table-card-cap--primary">
+        <div class="table-card-cap__start">
+          <span class="table-card-cap__title">账单列表</span>
+        </div>
+        <div class="table-card-cap__right">
+          <a-pagination
+            v-model:current="page"
+            v-model:page-size="pageSize"
+            :total="total"
+            size="small"
+            class="table-card-cap__pager"
+            show-total
+            show-page-size
+            :page-size-options="[50, 100, 200]"
+          />
+          <a-tooltip content="列设置">
+            <a-button size="small" type="text" class="table-card-cap__tool" @click="xTable?.openCustom()">
+              <template #icon><icon-settings /></template>
+            </a-button>
+          </a-tooltip>
+        </div>
+      </div>
       <div class="table-wrap" style="flex:1;min-height:0">
         <vxe-table
           ref="xTable"
@@ -499,45 +582,43 @@ function handleViewDetail(row: PaymentRow) {
           @checkbox-all="({ records }) => (selectedRows = records)"
         >
           <vxe-column type="checkbox" width="36" fixed="left" />
-          <vxe-column field="seq" title="序号" width="52" fixed="left" align="center">
-            <template #default="{ rowIndex }">{{ page > 1 ? (page - 1) * pageSize + rowIndex + 1 : rowIndex + 1 }}</template>
-          </vxe-column>
-          <vxe-column field="unWrittenOff" title="未核销金额" width="100" align="right" />
-          <vxe-column field="type" title="类型" width="60">
+          <vxe-column type="seq" title="序号" width="52" fixed="left" align="center" />
+          <vxe-column field="unWrittenOff" title="未核销金额" min-width="104" align="right" />
+          <vxe-column field="type" title="类型" min-width="64">
             <template #default="{ row }">
               <span class="s-pill" :data-s="row.type === '应收' ? 'op' : 'wait'">{{ row.type }}</span>
             </template>
           </vxe-column>
-          <vxe-column field="inboundNo" title="入仓编号" width="100" />
-          <vxe-column field="billNo" title="账单编号" width="140">
+          <vxe-column field="inboundNo" title="入仓编号" min-width="104" />
+          <vxe-column field="billNo" title="账单编号" min-width="140">
             <template #default="{ row }">
               <a class="link-primary">{{ row.billNo }}</a>
             </template>
           </vxe-column>
           <vxe-column field="billCompany" title="账单公司" min-width="140" />
-          <vxe-column field="currency" title="币种" width="60" />
-          <vxe-column field="amount" title="金额" width="90" align="right" />
-          <vxe-column field="preWriteOff" title="预核销" width="80" align="right" />
-          <vxe-column field="actualWriteOff" title="实际核销" width="90" align="right" />
-          <vxe-column field="taxRate" title="税率" width="60" align="right" />
-          <vxe-column field="taxAmount" title="税额" width="70" align="right" />
-          <vxe-column field="mbl" title="MBL" width="140" />
-          <vxe-column field="orderNo" title="订单号" width="140">
+          <vxe-column field="currency" title="币种" min-width="64" />
+          <vxe-column field="amount" title="金额" min-width="92" align="right" />
+          <vxe-column field="preWriteOff" title="预核销" min-width="84" align="right" />
+          <vxe-column field="actualWriteOff" title="实际核销" min-width="92" align="right" />
+          <vxe-column field="taxRate" title="税率" min-width="64" align="right" />
+          <vxe-column field="taxAmount" title="税额" min-width="72" align="right" />
+          <vxe-column field="mbl" title="MBL" min-width="140" />
+          <vxe-column field="orderNo" title="订单号" min-width="140">
             <template #default="{ row }">
               <a class="link-primary">{{ row.orderNo }}</a>
             </template>
           </vxe-column>
-          <vxe-column field="etd" title="ETD" width="90" />
-          <vxe-column field="eta" title="ETA" width="90" />
-          <vxe-column field="atd" title="ATD" width="90" />
-          <vxe-column field="ata" title="ATA" width="90" />
-          <vxe-column field="podTime" title="POD时间" width="90" />
-          <vxe-column field="podStatus" title="POD状态" width="80">
+          <vxe-column field="etd" title="ETD" min-width="92" />
+          <vxe-column field="eta" title="ETA" min-width="92" />
+          <vxe-column field="atd" title="ATD" min-width="92" />
+          <vxe-column field="ata" title="ATA" min-width="92" />
+          <vxe-column field="podTime" title="POD时间" min-width="92" />
+          <vxe-column field="podStatus" title="POD状态" min-width="84">
             <template #default="{ row }">
               <span v-if="row.podStatus" class="s-pill" data-s="wait">{{ row.podStatus }}</span>
             </template>
           </vxe-column>
-          <vxe-column field="c88" title="C88" width="90" />
+          <vxe-column field="c88" title="C88" min-width="92" />
           <vxe-column title="操作" width="60" fixed="right" align="center">
             <template #default="{ row }">
               <div class="row-actions">
@@ -554,35 +635,45 @@ function handleViewDetail(row: PaymentRow) {
     </div>
 
     <!-- ④ 待核销账单子表 -->
-    <div class="zone-l4-table-card" style="flex:0 0 260px;display:flex;flex-direction:column">
-      <div class="table-card-cap">
-        <div class="table-card-cap__start" style="display:flex;align-items:center;gap:4px">
-          <span class="table-card-cap__title">待核销账单：</span>
+    <div class="workbench-subpanel payment-writeoff-panel">
+      <div class="subpanel-cap">
+        <div class="subpanel-cap__main">
+          <span class="subpanel-cap__title">待核销账单</span>
+          <span class="subpanel-cap__meta">{{ subTableData.length }} 条</span>
+          <span v-if="selectedSubRows.length" class="toolbar-selected-tip">已选 {{ selectedSubRows.length }} 条</span>
+        </div>
+        <div class="subpanel-cap__actions">
           <a-button size="small" type="primary" @click="handleWriteOffSubmit">核销</a-button>
-          <a-button size="small" type="outline">预核销</a-button>
-          <a-button size="small" type="outline">预核销销账</a-button>
-          <a-button size="small" type="outline">待核销账单一键对冲</a-button>
-          <a-button size="small" type="outline">标记环整</a-button>
-          <a-button size="small" type="outline">
+          <a-button size="small" type="secondary">预核销</a-button>
+          <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+            <a-button size="small" type="text">更多处理<icon-down /></a-button>
+            <template #content>
+              <a-doption>预核销销账</a-doption>
+              <a-doption>待核销账单一键对冲</a-doption>
+              <a-doption>标记环整</a-doption>
+              <a-doption>未分配利润</a-doption>
+            </template>
+          </a-dropdown>
+          <a-button size="small" type="text">
             <template #icon><icon-upload /></template>导入
           </a-button>
-          <a-button size="small" type="outline" status="danger" @click="handleSubRemoveBatch">
-            批量移除
-          </a-button>
-          <a-button size="small" type="outline">未分配利润</a-button>
           <a-tooltip content="刷新">
             <a-button size="small" type="text" @click="handleSubRefresh">
               <template #icon><icon-refresh /></template>
             </a-button>
           </a-tooltip>
-          <a-button size="small" type="text" status="danger" @click="handleReleasePre">释放预选记录</a-button>
-        </div>
-        <div class="table-card-cap__end">
           <a-tooltip content="列设置">
             <a-button size="small" type="text" @click="xSubTable?.openCustom()">
               <template #icon><icon-settings /></template>
             </a-button>
           </a-tooltip>
+          <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+            <a-button size="small" type="text" status="danger">风险操作<icon-down /></a-button>
+            <template #content>
+              <a-doption class="danger-opt" @click="handleSubRemoveBatch">移除选中账单</a-doption>
+              <a-doption class="danger-opt" @click="handleReleasePre">释放预选记录</a-doption>
+            </template>
+          </a-dropdown>
         </div>
       </div>
       <div class="table-wrap" style="flex:1;min-height:0">
@@ -601,33 +692,33 @@ function handleViewDetail(row: PaymentRow) {
           @checkbox-all="({ records }) => (selectedSubRows = records)"
         >
           <vxe-column type="checkbox" width="36" fixed="left" />
-          <vxe-column field="no" title="No" width="52" fixed="left" align="center" />
-          <vxe-column field="type" title="类型" width="60">
+          <vxe-column type="seq" title="No" width="52" fixed="left" align="center" />
+          <vxe-column field="type" title="类型" min-width="64">
             <template #default="{ row }">
               <span class="s-pill" :data-s="row.type === '应收' ? 'op' : 'wait'">{{ row.type }}</span>
             </template>
           </vxe-column>
-          <vxe-column field="billNo" title="账单编号" width="140">
+          <vxe-column field="billNo" title="账单编号" min-width="140">
             <template #default="{ row }">
               <a class="link-primary">{{ row.billNo }}</a>
             </template>
           </vxe-column>
           <vxe-column field="billCompany" title="账单公司" min-width="130" />
-          <vxe-column field="currency" title="币种" width="60" />
-          <vxe-column field="selectedAmount" title="选择金额" width="90" align="right" />
-          <vxe-column field="writeOffStatus" title="核销状态" width="80">
+          <vxe-column field="currency" title="币种" min-width="64" />
+          <vxe-column field="selectedAmount" title="选择金额" min-width="92" align="right" />
+          <vxe-column field="writeOffStatus" title="核销状态" min-width="84">
             <template #default="{ row }">
               <span class="s-pill" :data-s="row.writeOffStatusKey">{{ row.writeOffStatus }}</span>
             </template>
           </vxe-column>
-          <vxe-column field="etd" title="ETD" width="90" />
-          <vxe-column field="eta" title="ETA" width="90" />
-          <vxe-column field="hbl" title="HBL" width="120" />
-          <vxe-column field="orderNo" title="订单编号" width="140" />
-          <vxe-column field="ownerCompany" title="归属公司" width="120" />
-          <vxe-column field="salesman" title="业务员" width="70" />
-          <vxe-column field="operator" title="操作员" width="70" />
-          <vxe-column field="fileCount" title="文件" width="60" align="center" />
+          <vxe-column field="etd" title="ETD" min-width="92" />
+          <vxe-column field="eta" title="ETA" min-width="92" />
+          <vxe-column field="hbl" title="HBL" min-width="120" />
+          <vxe-column field="orderNo" title="订单编号" min-width="140" />
+          <vxe-column field="ownerCompany" title="归属公司" min-width="120" />
+          <vxe-column field="salesman" title="业务员" min-width="72" />
+          <vxe-column field="operator" title="操作员" min-width="72" />
+          <vxe-column field="fileCount" title="文件" min-width="64" align="center" />
           <vxe-column title="操作" width="60" fixed="right" align="center">
             <template #default="{ row }">
               <div class="row-actions">
@@ -646,76 +737,94 @@ function handleViewDetail(row: PaymentRow) {
     <!-- ⑤ 更多筛选抽屉 -->
     <a-drawer
       v-model:visible="advancedFilterVisible"
-      title="收付款筛选"
-      :width="720"
-      class="query-filter-drawer query-filter-drawer--grouped"
+      title="业务单查询项"
+      :width="920"
+      class="query-filter-drawer query-filter-drawer--wide"
     >
       <div class="query-filter-drawer__shell">
         <div class="query-filter-drawer__body">
           <a-form class="detail-form" layout="vertical" size="small" :model="q">
 
-            <!-- 账单编号 -->
+            <!-- 单号信息 -->
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">账单编号</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="账单编号" style="grid-column:span 2">
-                  <div style="display:flex;gap:8px;align-items:center">
-                    <a-input v-model="q.billNo" size="small" allow-clear placeholder="多个请用英文分号分隔" style="flex:1" />
-                    <a-checkbox v-model="q.billNoPrecise" size="small">精准查询</a-checkbox>
-                  </div>
+              <div class="query-filter-drawer__group-head">单号信息</div>
+              <div class="detail-form-grid detail-form-grid--3">
+                <a-form-item label="业务单号">
+                  <a-input v-model="q.businessNo" size="small" allow-clear placeholder="请输入业务单号" />
+                </a-form-item>
+                <a-form-item label="订单编号">
+                  <a-input v-model="q.orderNo" size="small" allow-clear placeholder="请输入订单编号" />
+                </a-form-item>
+                <a-form-item label="账单编号">
+                  <a-input v-model="q.billNo" size="small" allow-clear placeholder="多个请用英文分号分隔" />
+                </a-form-item>
+                <a-form-item label="HBL NO">
+                  <a-input v-model="q.hblNo" size="small" allow-clear placeholder="请输入 HBL 单号" />
+                </a-form-item>
+                <a-form-item label="MBL NO">
+                  <a-input v-model="q.mblNo" size="small" allow-clear placeholder="请输入 MBL 单号" />
+                </a-form-item>
+                <a-form-item label="FBA NO">
+                  <a-input v-model="q.fbaNo" size="small" allow-clear placeholder="请输入 FBA 单号" />
+                </a-form-item>
+                <a-form-item label="SO NO">
+                  <a-input v-model="q.soNo" size="small" allow-clear placeholder="请输入 SO 号" />
+                </a-form-item>
+                <a-form-item label="PO">
+                  <a-input v-model="q.poNo" size="small" allow-clear placeholder="请输入 PO" />
+                </a-form-item>
+                <a-form-item label="合约号">
+                  <a-input v-model="q.contractNo" size="small" allow-clear placeholder="请输入合约号" />
                 </a-form-item>
               </div>
             </div>
 
-            <!-- 账单时间 -->
+            <!-- 时间范围 -->
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">账单时间</div>
+              <div class="query-filter-drawer__group-head">时间范围</div>
               <div class="detail-form-grid detail-form-grid--3">
+                <a-form-item label="进仓时间">
+                  <a-range-picker v-model="q.storageTimeRange" size="small" style="width:100%" />
+                </a-form-item>
+                <a-form-item label="下单时间">
+                  <a-range-picker v-model="q.orderTimeRange" size="small" style="width:100%" />
+                </a-form-item>
                 <a-form-item label="ETD">
                   <a-range-picker v-model="q.etdRange" size="small" style="width:100%" />
                 </a-form-item>
-                <a-form-item label="ETA">
-                  <a-range-picker v-model="q.etaRange" size="small" style="width:100%" />
+                <a-form-item label="财务POD">
+                  <a-range-picker v-model="q.financePodRange" size="small" style="width:100%" />
                 </a-form-item>
-                <a-form-item label="ATD">
-                  <a-range-picker v-model="q.atdRange" size="small" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="ATA">
-                  <a-range-picker v-model="q.ataRange" size="small" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="POD时间">
-                  <a-range-picker v-model="q.podTimeRange" size="small" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="C88时间">
-                  <a-range-picker v-model="q.c88TimeRange" size="small" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="System Due Date">
-                  <a-range-picker v-model="q.systemDueDateRange" size="small" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="提交时间">
-                  <a-range-picker v-model="q.submitTimeRange" size="small" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="财务确认时间">
-                  <a-range-picker v-model="q.financialConfirmRange" size="small" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="实际派送时间">
-                  <a-range-picker v-model="q.actualDeliveryRange" size="small" style="width:100%" />
+                <a-form-item label="船前时间">
+                  <a-range-picker v-model="q.sailingTimeRange" size="small" style="width:100%" />
                 </a-form-item>
               </div>
             </div>
 
-            <!-- 人员信息 -->
+            <!-- 人员与往来方 -->
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">人员信息</div>
+              <div class="query-filter-drawer__group-head">人员与往来方</div>
               <div class="detail-form-grid detail-form-grid--3">
+                <a-form-item label="发货人">
+                  <a-select v-model="q.sender" size="small" allow-clear placeholder="请选择发货人" />
+                </a-form-item>
+                <a-form-item label="收货人">
+                  <a-select v-model="q.receiver" size="small" allow-clear placeholder="请选择收货人" />
+                </a-form-item>
+                <a-form-item label="提单发货人">
+                  <a-select v-model="q.bookingSender" size="small" allow-clear placeholder="请选择提单发货人" />
+                </a-form-item>
+                <a-form-item label="客户">
+                  <a-select v-model="q.customer" size="small" allow-clear placeholder="请选择客户" />
+                </a-form-item>
                 <a-form-item label="业务员">
-                  <a-select v-model="q.salesman" size="small" allow-clear placeholder="请选择" />
+                  <a-input v-model="q.salesman" size="small" allow-clear placeholder="请输入业务员" />
                 </a-form-item>
                 <a-form-item label="客服">
-                  <a-select v-model="q.customerService" size="small" allow-clear placeholder="请选择" />
+                  <a-input v-model="q.customerService" size="small" allow-clear placeholder="请输入客服" />
                 </a-form-item>
                 <a-form-item label="操作员">
-                  <a-select v-model="q.operator" size="small" allow-clear placeholder="请选择" />
+                  <a-input v-model="q.operator" size="small" allow-clear placeholder="请输入操作员" />
                 </a-form-item>
                 <a-form-item label="运营">
                   <a-select v-model="q.operations" size="small" allow-clear placeholder="请选择" />
@@ -726,9 +835,102 @@ function handleViewDetail(row: PaymentRow) {
               </div>
             </div>
 
-            <!-- 财务信息 -->
+            <!-- 港口路线 -->
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">财务信息</div>
+              <div class="query-filter-drawer__group-head">港口路线</div>
+              <div class="detail-form-grid detail-form-grid--3">
+                <a-form-item label="收货地">
+                  <a-select v-model="q.originPlace" size="small" allow-clear placeholder="请选择" />
+                </a-form-item>
+                <a-form-item label="起运港">
+                  <a-select v-model="q.pol" size="small" allow-clear placeholder="请选择" />
+                </a-form-item>
+                <a-form-item label="目的港">
+                  <a-select v-model="q.pod" size="small" allow-clear placeholder="请选择" />
+                </a-form-item>
+                <a-form-item label="目的地">
+                  <a-select v-model="q.destinationPlace" size="small" allow-clear placeholder="请选择" />
+                </a-form-item>
+                <a-form-item label="起运港国家">
+                  <a-select v-model="q.polCountry" size="small" allow-clear placeholder="请选择" />
+                </a-form-item>
+                <a-form-item label="目的港国家">
+                  <a-select v-model="q.podCountry" size="small" allow-clear placeholder="请选择" />
+                </a-form-item>
+              </div>
+            </div>
+
+            <!-- 航线信息 -->
+            <div class="query-filter-drawer__group">
+              <div class="query-filter-drawer__group-head">航线信息</div>
+              <div class="detail-form-grid detail-form-grid--3">
+                <a-form-item label="船公司">
+                  <a-select v-model="q.carrier" size="small" allow-clear placeholder="请选择船司" />
+                </a-form-item>
+                <a-form-item label="船名">
+                  <a-input v-model="q.vessel" size="small" allow-clear placeholder="请输入船名" />
+                </a-form-item>
+                <a-form-item label="航次">
+                  <a-input v-model="q.voyage" size="small" allow-clear placeholder="请输入航次" />
+                </a-form-item>
+                <a-form-item label="航线">
+                  <a-input v-model="q.routeName" size="small" allow-clear placeholder="请输入航线" />
+                </a-form-item>
+                <a-form-item label="境外代理">
+                  <a-select v-model="q.overseasAgent" size="small" allow-clear placeholder="请选择境外代理" />
+                </a-form-item>
+                <a-form-item label="境外单号">
+                  <a-input v-model="q.overseasNo" size="small" allow-clear placeholder="请输入境外单号" />
+                </a-form-item>
+                <a-form-item label="柜号">
+                  <a-input v-model="q.containerNo" size="small" allow-clear placeholder="请输入柜号" />
+                </a-form-item>
+                <a-form-item label="柜型柜量">
+                  <a-select v-model="q.containerType" size="small" allow-clear placeholder="请选择" />
+                </a-form-item>
+              </div>
+            </div>
+
+            <!-- 订单属性 -->
+            <div class="query-filter-drawer__group">
+              <div class="query-filter-drawer__group-head">订单属性</div>
+              <div class="detail-form-grid detail-form-grid--3">
+                <a-form-item label="进/出口单">
+                  <a-select v-model="q.importExportType" size="small" allow-clear placeholder="请选择进/出口单类型">
+                    <a-option value="import">进口</a-option>
+                    <a-option value="export">出口</a-option>
+                  </a-select>
+                </a-form-item>
+                <a-form-item label="业务类型">
+                  <a-select v-model="q.bizType" size="small" allow-clear placeholder="请选择业务类型" />
+                </a-form-item>
+                <a-form-item label="订单状态">
+                  <a-select v-model="q.orderStatus" size="small" allow-clear placeholder="请选择订单状态" />
+                </a-form-item>
+                <a-form-item label="报关方式">
+                  <a-select v-model="q.customsMethod" size="small" allow-clear placeholder="请选择报关方式" />
+                </a-form-item>
+                <a-form-item label="装箱方式">
+                  <a-select v-model="q.packingType" size="small" allow-clear placeholder="请选择装箱方式" />
+                </a-form-item>
+                <a-form-item label="货物类型">
+                  <a-select v-model="q.cargoType" size="small" allow-clear placeholder="请选择货物类型" />
+                </a-form-item>
+                <a-form-item label="品名">
+                  <a-input v-model="q.cargoName" size="small" allow-clear placeholder="请输入品名" />
+                </a-form-item>
+                <a-form-item label="操作备注">
+                  <a-input v-model="q.operationRemark" size="small" allow-clear placeholder="请输入操作备注" />
+                </a-form-item>
+                <a-form-item label="提单内容">
+                  <a-input v-model="q.bookingContent" size="small" allow-clear placeholder="请输入提单内容" />
+                </a-form-item>
+              </div>
+            </div>
+
+            <!-- 财务与客户属性 -->
+            <div class="query-filter-drawer__group">
+              <div class="query-filter-drawer__group-head">财务与客户属性</div>
               <div class="detail-form-grid detail-form-grid--3">
                 <a-form-item label="费用项目">
                   <div style="display:flex;gap:4px">
@@ -758,7 +960,7 @@ function handleViewDetail(row: PaymentRow) {
                     <a-option value="no">否</a-option>
                   </a-select>
                 </a-form-item>
-                <a-form-item label="国内收收运费">
+                <a-form-item label="国内收运费">
                   <a-select v-model="q.domesticFreight" size="small" allow-clear placeholder="请选择" />
                 </a-form-item>
                 <a-form-item label="代收付账单是否核完">
@@ -770,49 +972,60 @@ function handleViewDetail(row: PaymentRow) {
                 <a-form-item label="发票号">
                   <a-input v-model="q.invoiceNo" size="small" allow-clear placeholder="请输入" />
                 </a-form-item>
-              </div>
-            </div>
-
-            <!-- 订单信息 -->
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">订单信息</div>
-              <div class="detail-form-grid detail-form-grid--3">
-                <a-form-item label="公司类型">
-                  <a-select v-model="q.companyType" size="small" allow-clear placeholder="请选择" />
-                </a-form-item>
-                <a-form-item label="业务类型">
-                  <a-select v-model="q.bizType" size="small" allow-clear placeholder="请选择" />
+                <a-form-item label="文件">
+                  <a-input v-model="q.documentKeyword" size="small" allow-clear placeholder="请输入文件" />
                 </a-form-item>
                 <a-form-item label="订单归属公司">
                   <a-select v-model="q.orderOwnerCo" size="small" allow-clear placeholder="请选择订单归属公司" />
                 </a-form-item>
-                <a-form-item label="SO NO">
-                  <a-input v-model="q.soNo" size="small" allow-clear placeholder="请输入" />
+                <a-form-item label="市场">
+                  <a-select v-model="q.market" size="small" allow-clear placeholder="请选择市场" />
                 </a-form-item>
-                <a-form-item label="目的港">
-                  <a-select v-model="q.pod" size="small" allow-clear placeholder="请选择目的港" />
+                <a-form-item label="服务范围">
+                  <a-select v-model="q.serviceScope" size="small" allow-clear placeholder="请选择服务范围" />
                 </a-form-item>
-                <a-form-item label="柜号">
-                  <a-input v-model="q.containerNo" size="small" allow-clear placeholder="请输入" />
+                <a-form-item label="客户类型">
+                  <a-select v-model="q.customerType" size="small" allow-clear placeholder="请选择客户类型" />
                 </a-form-item>
-                <a-form-item label="墙外单号">
-                  <a-input v-model="q.externalNo" size="small" allow-clear placeholder="请输入" />
+                <a-form-item label="贸易条款">
+                  <a-select v-model="q.tradeTerms" size="small" allow-clear placeholder="请选择条款" />
+                </a-form-item>
+                <a-form-item label="海运费是否已录入">
+                  <a-select v-model="q.oceanFreightRecorded" size="small" allow-clear placeholder="请选择">
+                    <a-option value="yes">是</a-option>
+                    <a-option value="no">否</a-option>
+                  </a-select>
                 </a-form-item>
               </div>
             </div>
 
-            <!-- 系统信息 -->
+            <!-- 业务标记 -->
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">系统信息</div>
+              <div class="query-filter-drawer__group-head">业务标记</div>
               <div class="detail-form-grid detail-form-grid--3">
-                <a-form-item label="账号归属部门">
-                  <a-select v-model="q.billDept" size="small" allow-clear placeholder="请选择" />
+                <a-form-item label="无客服订单">
+                  <a-checkbox v-model="q.noBookingOrder" size="small" />
                 </a-form-item>
-                <a-form-item label="POD状态">
-                  <a-select v-model="q.podStatus" size="small" allow-clear placeholder="请选择" />
+                <a-form-item label="不含继承单">
+                  <a-checkbox v-model="q.noContinueOrder" size="small" />
                 </a-form-item>
-                <a-form-item label="预核销码">
-                  <a-input v-model="q.preWriteOffCode" size="small" allow-clear placeholder="请输入" />
+                <a-form-item label="入仓未核实">
+                  <a-checkbox v-model="q.inboundUnsubmitted" size="small" />
+                </a-form-item>
+                <a-form-item label="最后一单(未回款)">
+                  <a-checkbox v-model="q.lastShipmentNoReceipt" size="small" />
+                </a-form-item>
+                <a-form-item label="是否敏感货物">
+                  <a-checkbox v-model="q.sensitiveCargo" size="small" />
+                </a-form-item>
+                <a-form-item label="是否甩柜">
+                  <a-checkbox v-model="q.fullContainer" size="small" />
+                </a-form-item>
+                <a-form-item label="是否闪送柜">
+                  <a-checkbox v-model="q.flashBox" size="small" />
+                </a-form-item>
+                <a-form-item label="是否同行">
+                  <a-checkbox v-model="q.sameCarrier" size="small" />
                 </a-form-item>
               </div>
             </div>

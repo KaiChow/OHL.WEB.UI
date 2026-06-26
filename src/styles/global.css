@@ -371,23 +371,26 @@ body,
   --dense-primary: var(--dense-primary-6);
   --dense-primary-deep: var(--dense-primary-7);
   --dense-primary-soft: var(--dense-primary-1);
-  --dense-page-bg: linear-gradient(180deg, #F3F8FF 0, #F8FBFF 160px, #FAFCFF 100%);
-  --dense-card-border: #DCE7F5;
+  --dense-brand-surface: #F2F7FA;
+  --dense-brand-line: #D5E1EA;
+  --dense-brand-line-strong: #A9BCCB;
+  --dense-page-bg: #F2F5F8;
+  --dense-card-border: #DCE5EC;
   --dense-card-border-active: var(--dense-primary-3);
-  --dense-zone-top-border: #D7E5F7;
-  --dense-surface-tint: linear-gradient(180deg, #FFFFFF 0%, #F7FAFF 100%);
-  --dense-surface-head: linear-gradient(180deg, #FFFFFF 0%, #F4F8FF 100%);
-  --dense-surface-section: linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
+  --dense-zone-top-border: var(--dense-brand-line);
+  --dense-surface-tint: #FFFFFF;
+  --dense-surface-head: #FAFBFC;
+  --dense-surface-section: #FFFFFF;
   --dense-surface-rail: linear-gradient(90deg, var(--dense-primary-1) 0, #FFFFFF 42px);
-  --dense-border: #DDE7F4;
-  --dense-border-subtle: #E8F0FA;
-  --dense-row-stripe: #F8FBFF;
-  --dense-table-header-bg: linear-gradient(180deg, #FFFFFF 0%, #EAF2FF 48%, #DCEAFF 100%);
-  --dense-table-header-border: var(--dense-primary-3);
+  --dense-border: #DCE4EA;
+  --dense-border-subtle: #E8EEF3;
+  --dense-row-stripe: #FFFFFF;
+  --dense-table-header-bg: #FAFBFC;
+  --dense-table-header-border: #E6ECF2;
   /* 全项目 VXE 数据表共用交互色（列表 workbench-table + 详情 detail-mini-vxe） */
-  --dense-vxe-surface-hover-bg: rgba(22, 93, 255, 0.055);
-  --dense-vxe-surface-checked-bg: var(--dense-primary-1);
-  --dense-vxe-surface-checked-hover-bg: var(--dense-primary-2);
+  --dense-vxe-surface-hover-bg: #F8FBFF;
+  --dense-vxe-surface-checked-bg: #EFF6FF;
+  --dense-vxe-surface-checked-hover-bg: #EAF3FF;
   --dense-workbench-hover-bg: var(--dense-vxe-surface-hover-bg);
   --dense-workbench-checked-bg: var(--dense-vxe-surface-checked-bg);
   --dense-workbench-checked-hover-bg: var(--dense-vxe-surface-checked-hover-bg);
@@ -397,11 +400,11 @@ body,
   --dense-mini-vxe-hover-bg: var(--dense-vxe-surface-hover-bg);
   --dense-mini-vxe-checked-bg: var(--dense-vxe-surface-checked-bg);
   --dense-mini-vxe-checked-hover-bg: var(--dense-vxe-surface-checked-hover-bg);
-  --dense-table-col-border: #E8EEF8;
-  --dense-table-row-border: #E3EBF8;
-  --dense-table-empty-bg: linear-gradient(180deg, #FFFFFF 0, #FFFFFF 72px, #FAFBFF 100%);
+  --dense-table-col-border: transparent;
+  --dense-table-row-border: #EEF2F6;
+  --dense-table-empty-bg: #FFFFFF;
   --dense-table-fixed-bg: #FFFFFF;
-  --dense-table-fixed-shadow: -8px 0 18px rgba(16, 24, 40, 0.045);
+  --dense-table-fixed-shadow: -6px 0 14px rgba(16, 24, 40, 0.032);
   --dense-bg-body: var(--color-bg-body);
   --dense-bg-body-top: var(--color-bg-body);
   --dense-bg-card: var(--color-bg-card);
@@ -410,11 +413,98 @@ body,
 
   /* 结构阴影（中性灰，不含独立色相） */
   --dense-shadow-card:
-    0 1px 2px rgba(22, 93, 255, 0.035),
-    0 10px 24px rgba(16, 52, 96, 0.06),
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 8px 20px rgba(28, 43, 64, 0.055),
     0 0 0 1px var(--dense-card-border);
   --dense-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.95);
   --dense-shadow-lift: 0 6px 16px rgba(29, 33, 41, 0.08);
+}
+
+/* VXE native theme bridge:
+   vxe-table ships its own gray light theme (#f8f8f9 / #f5f7fa / #fafafa).
+   Bridge those variables to the project dense table tokens so VXE internal
+   wrappers, fixed columns, hover, stripe, current, and custom panels do not
+   fall back to gray ERP defaults. Keep both v4.5 legacy --vxe-* and newer
+   --vxe-ui-* variables because the original OHL project is on vxe-table 4.5.x. */
+:root,
+[data-vxe-ui-theme='light'] {
+  --vxe-font-color: var(--color-text-2);
+  --vxe-primary-color: var(--dense-primary-6);
+  --vxe-primary-lighten-color: var(--dense-primary-5);
+  --vxe-primary-darken-color: var(--dense-primary-7);
+  --vxe-font-lighten-color: var(--color-text-3);
+  --vxe-font-darken-color: var(--color-text-1);
+  --vxe-font-disabled-color: var(--color-text-4);
+  --vxe-ui-font-color: var(--color-text-2);
+  --vxe-ui-font-primary-color: var(--dense-primary-6);
+  --vxe-ui-font-lighten-color: var(--color-text-3);
+  --vxe-ui-font-darken-color: var(--color-text-1);
+  --vxe-ui-font-disabled-color: var(--color-text-4);
+  --vxe-table-popup-border-color: var(--dense-card-border);
+  --vxe-table-filter-panel-background-color: var(--color-bg-card);
+  --vxe-ui-layout-background-color: var(--color-bg-card);
+  --vxe-ui-base-popup-border-color: var(--dense-card-border);
+  --vxe-ui-base-popup-box-shadow: var(--dense-shadow-lift);
+  --vxe-table-header-font-color: var(--color-text-1);
+  --vxe-table-header-font-weight: var(--dense-weight-title);
+  --vxe-table-footer-font-color: var(--color-text-1);
+  --vxe-table-footer-background-color: var(--color-bg-card);
+  --vxe-table-header-background-color: var(--dense-table-header-bg);
+  --vxe-table-column-to-row-background-color: var(--dense-table-header-bg);
+  --vxe-table-column-hover-background-color: var(--dense-vxe-surface-hover-bg);
+  --vxe-table-column-current-background-color: var(--dense-vxe-surface-checked-bg);
+  --vxe-table-column-hover-current-background-color: var(--dense-vxe-surface-checked-hover-bg);
+  --vxe-ui-table-header-font-color: var(--color-text-1);
+  --vxe-ui-table-header-font-weight: var(--dense-weight-title);
+  --vxe-ui-table-footer-font-color: var(--color-text-1);
+  --vxe-ui-table-footer-background-color: var(--color-bg-card);
+  --vxe-ui-table-header-background-color: var(--dense-table-header-bg);
+  --vxe-ui-table-column-to-row-background-color: var(--dense-table-header-bg);
+  --vxe-ui-table-column-hover-background-color: var(--dense-vxe-surface-hover-bg);
+  --vxe-ui-table-column-current-background-color: var(--dense-vxe-surface-checked-bg);
+  --vxe-ui-table-column-hover-current-background-color: var(--dense-vxe-surface-checked-hover-bg);
+  --vxe-table-border-color: var(--dense-table-row-border);
+  --vxe-table-resizable-line-color: var(--dense-table-row-border);
+  --vxe-table-resizable-drag-line-color: var(--dense-primary-4);
+  --vxe-table-column-icon-border-color: var(--color-text-4);
+  --vxe-table-column-icon-border-hover-color: var(--dense-primary-6);
+  --vxe-ui-table-border-color: var(--dense-table-row-border);
+  --vxe-ui-table-resizable-line-color: var(--dense-table-row-border);
+  --vxe-ui-table-resizable-drag-line-color: var(--dense-primary-4);
+  --vxe-ui-table-column-icon-border-color: var(--color-text-4);
+  --vxe-ui-table-column-icon-border-hover-color: var(--dense-primary-6);
+  --vxe-table-row-hover-background-color: var(--dense-vxe-surface-hover-bg);
+  --vxe-table-row-striped-background-color: var(--dense-row-stripe);
+  --vxe-table-row-hover-striped-background-color: var(--dense-vxe-surface-hover-bg);
+  --vxe-table-row-radio-checked-background-color: var(--dense-vxe-surface-checked-bg);
+  --vxe-table-row-hover-radio-checked-background-color: var(--dense-vxe-surface-checked-hover-bg);
+  --vxe-table-row-checkbox-checked-background-color: var(--dense-vxe-surface-checked-bg);
+  --vxe-table-row-hover-checkbox-checked-background-color: var(--dense-vxe-surface-checked-hover-bg);
+  --vxe-table-row-current-background-color: var(--dense-vxe-surface-checked-bg);
+  --vxe-table-row-hover-current-background-color: var(--dense-vxe-surface-checked-hover-bg);
+  --vxe-ui-table-row-hover-background-color: var(--dense-vxe-surface-hover-bg);
+  --vxe-ui-table-row-striped-background-color: var(--dense-row-stripe);
+  --vxe-ui-table-row-hover-striped-background-color: var(--dense-vxe-surface-hover-bg);
+  --vxe-ui-table-row-radio-checked-background-color: var(--dense-vxe-surface-checked-bg);
+  --vxe-ui-table-row-hover-radio-checked-background-color: var(--dense-vxe-surface-checked-hover-bg);
+  --vxe-ui-table-row-checkbox-checked-background-color: var(--dense-vxe-surface-checked-bg);
+  --vxe-ui-table-row-hover-checkbox-checked-background-color: var(--dense-vxe-surface-checked-hover-bg);
+  --vxe-ui-table-row-current-background-color: var(--dense-vxe-surface-checked-bg);
+  --vxe-ui-table-row-hover-current-background-color: var(--dense-vxe-surface-checked-hover-bg);
+  --vxe-table-fixed-scrolling-box-shadow-color: rgba(16, 24, 40, 0.06);
+  --vxe-table-fixed-left-scrolling-box-shadow: 6px 0 14px rgba(16, 24, 40, 0.032);
+  --vxe-table-fixed-right-scrolling-box-shadow: var(--dense-table-fixed-shadow);
+  --vxe-table-cell-area-border-color: var(--dense-primary-3);
+  --vxe-table-cell-area-background-color: var(--dense-primary-1);
+  --vxe-table-cell-area-status-background-color: var(--dense-primary-1);
+  --vxe-toolbar-custom-active-background-color: var(--dense-vxe-surface-checked-bg);
+  --vxe-ui-table-fixed-scrolling-box-shadow-color: rgba(16, 24, 40, 0.06);
+  --vxe-ui-table-fixed-left-scrolling-box-shadow: 6px 0 14px rgba(16, 24, 40, 0.032);
+  --vxe-ui-table-fixed-right-scrolling-box-shadow: var(--dense-table-fixed-shadow);
+  --vxe-ui-table-cell-area-border-color: var(--dense-primary-3);
+  --vxe-ui-table-cell-area-background-color: var(--dense-primary-1);
+  --vxe-ui-table-cell-area-status-background-color: var(--dense-primary-1);
+  --vxe-ui-toolbar-custom-active-background-color: var(--dense-vxe-surface-checked-bg);
 }
 
 /* 全局交互焦点兜底：
@@ -519,9 +609,9 @@ button:-moz-focusring,
   padding: 7px 14px;
   min-height: 44px;
   border: 1px solid var(--dense-card-border);
-  border-top: 1px solid var(--dense-zone-top-border);
+  border-top: 2px solid var(--dense-zone-top-border);
   border-bottom-color: var(--dense-border-subtle);
-  background: linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
+  background: var(--dense-surface-section);
   flex-shrink: 0;
   z-index: 2;
 }
@@ -531,7 +621,7 @@ button:-moz-focusring,
   background: var(--color-bg-card);
   flex-shrink: 0;
   border: 1px solid var(--dense-card-border);
-  border-top: 1px solid var(--dense-zone-top-border);
+  border-top: 2px solid var(--dense-zone-top-border);
 }
 
 /* L3 状态 + 批量操作 */
@@ -540,7 +630,7 @@ button:-moz-focusring,
   background: var(--color-bg-card);
   flex-shrink: 0;
   border: 1px solid var(--dense-card-border);
-  border-top: 1px solid var(--dense-zone-top-border);
+  border-top: 2px solid var(--dense-zone-top-border);
   overflow: hidden;
 }
 
@@ -557,7 +647,7 @@ button:-moz-focusring,
   background: var(--color-bg-card);
   overflow: hidden;
   border: 1px solid var(--dense-card-border);
-  border-top: 1px solid var(--dense-zone-top-border);
+  border-top: 2px solid var(--dense-zone-top-border);
   border-radius: var(--dense-radius);
 }
 
@@ -568,10 +658,44 @@ button:-moz-focusring,
   justify-content: flex-end;
   gap: 8px;
   padding: 0 14px;
-  height: 40px;
+  height: 36px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #FFFFFF 0%, #F5F9FF 100%);
-  border-bottom: 1px solid var(--dense-primary-2);
+  background: var(--dense-surface-head);
+  border-bottom: 1px solid var(--dense-border-subtle);
+}
+
+.table-card-cap--primary {
+  justify-content: space-between;
+}
+
+.table-card-cap__start,
+.table-card-cap__end {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.table-card-cap__start {
+  gap: 8px;
+}
+
+.table-card-cap__title {
+  color: var(--color-text-1);
+  font-size: var(--dense-font-title);
+  font-weight: var(--dense-weight-title);
+  line-height: 1;
+}
+
+.table-card-cap--primary .table-card-cap__title {
+  padding-left: 8px;
+  border-left: 3px solid var(--dense-primary-5);
+}
+
+.table-card-cap__meta {
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
+  line-height: 1;
 }
 
 .table-card-cap__right {
@@ -1260,9 +1384,20 @@ button:-moz-focusring,
 .filter-field .filter-combo.arco-input-group,
 .filter-field .filter-combo {
   display: flex;
+  align-items: stretch;
   width: 100%;
   height: var(--dense-control-h-filter);
   min-width: 0;
+  overflow: visible;
+}
+
+.filter-field .filter-combo > * {
+  position: relative;
+  min-width: 0;
+}
+
+.filter-field .filter-combo > * + * {
+  margin-left: -1px;
 }
 
 .filter-field .filter-combo__select {
@@ -1282,32 +1417,40 @@ button:-moz-focusring,
   width: auto;
 }
 
+.filter-field .filter-combo .arco-select-view,
 .filter-field .filter-combo .arco-select-view-single,
 .filter-field .filter-combo .arco-input-wrapper {
   height: var(--dense-control-h-filter) !important;
   min-height: var(--dense-control-h-filter) !important;
 }
 
-.filter-field .filter-combo__select .arco-select-view-single {
+.filter-field .filter-combo > .arco-select-view:not(:last-child),
+.filter-field .filter-combo > .arco-select-view-single:not(:last-child),
+.filter-field .filter-combo > .filter-combo__select:not(:last-child),
+.filter-field .filter-combo > *:not(:last-child) .arco-select-view,
+.filter-field .filter-combo > *:not(:last-child) .arco-select-view-single,
+.filter-field .filter-combo > *:not(:last-child).arco-input-wrapper {
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
 }
 
-.filter-field .filter-combo .arco-input-wrapper,
+.filter-field .filter-combo > .arco-select-view:not(:first-child),
+.filter-field .filter-combo > .arco-select-view-single:not(:first-child),
+.filter-field .filter-combo > *:not(:first-child) .arco-select-view,
+.filter-field .filter-combo > *:not(:first-child) .arco-select-view-single,
+.filter-field .filter-combo > *:not(:first-child).arco-input-wrapper,
 .filter-field .filter-combo__fill .arco-select-view-single {
-  margin-left: -1px;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
 }
 
-.filter-field .filter-combo .arco-select-view-single:hover,
-.filter-field .filter-combo .arco-input-wrapper:hover {
+.filter-field .filter-combo > *:hover {
   z-index: 1;
 }
 
-.filter-field .filter-combo .arco-select-view-single.arco-select-view-focus,
-.filter-field .filter-combo .arco-input-wrapper:focus-within {
-  position: relative;
+.filter-field .filter-combo > *:focus-within,
+.filter-field .filter-combo > .arco-select-opened,
+.filter-field .filter-combo > .arco-select-focused {
   z-index: 2;
 }
 
@@ -1994,9 +2137,9 @@ button:-moz-focusring,
   gap: 0;
   padding: 6px 14px;
   min-height: var(--dense-bar-h);
-  background: #FFFFFF;
+  background: var(--color-bg-card);
   border-top: none;
-  border-bottom: 1px solid var(--dense-border-subtle);
+  border-bottom: none;
   flex-shrink: 0;
 }
 
@@ -2020,7 +2163,7 @@ button:-moz-focusring,
 .toolbar-divider {
   width: 1px;
   height: 20px;
-  background: var(--dense-border-subtle);
+  background: rgba(31, 75, 153, 0.12);
   margin: 0 12px;
   flex-shrink: 0;
 }
@@ -2063,10 +2206,39 @@ button:-moz-focusring,
   box-shadow: none !important;
 }
 
+.toolbar .arco-btn-outline:not(.arco-btn-disabled) {
+  color: var(--color-text-2) !important;
+  border-color: var(--dense-border-subtle) !important;
+  background: var(--color-bg-card) !important;
+}
+
 .toolbar .arco-btn-outline:not(.arco-btn-disabled):hover {
-  border-color: var(--dense-primary-2) !important;
-  background: var(--dense-primary-soft) !important;
-  color: var(--dense-primary-deep) !important;
+  border-color: var(--dense-primary-3) !important;
+  background: var(--dense-primary-1) !important;
+  color: var(--dense-primary-7) !important;
+}
+
+.toolbar .arco-btn-secondary:not(.arco-btn-disabled),
+.toolbar .arco-btn:not(.arco-btn-primary):not(.arco-btn-outline):not(.arco-btn-text):not(.arco-btn-dashed):not(.arco-btn-disabled) {
+  color: var(--color-text-2) !important;
+  border-color: var(--dense-border-subtle) !important;
+  background: var(--color-fill-1) !important;
+}
+
+.toolbar .arco-btn-secondary:not(.arco-btn-disabled):hover,
+.toolbar .arco-btn:not(.arco-btn-primary):not(.arco-btn-outline):not(.arco-btn-text):not(.arco-btn-dashed):not(.arco-btn-disabled):hover {
+  color: var(--color-text-1) !important;
+  border-color: var(--dense-border) !important;
+  background: var(--color-bg-card) !important;
+}
+
+.toolbar .arco-btn-text:not(.row-action-btn):not(.arco-btn-disabled) {
+  color: var(--color-text-2) !important;
+}
+
+.toolbar .arco-btn-text:not(.row-action-btn):not(.arco-btn-disabled):hover {
+  color: var(--dense-primary-7) !important;
+  background: var(--dense-primary-1) !important;
 }
 
 .toolbar .arco-btn-primary:not(.arco-btn-disabled):hover {
@@ -2233,6 +2405,10 @@ button:-moz-focusring,
    VXE size="small" 默认变量是 40px，compact 必须覆盖变量、td、cell 三层。
 */
 .vxe-table.compact {
+  --vxe-table-row-height-small: var(--dense-row-h);
+  --vxe-table-row-height-mini: var(--dense-row-h);
+  --vxe-table-cell-padding-small: 4px 8px;
+  --vxe-table-cell-padding-mini: 3px 8px;
   --vxe-ui-table-row-height-small: var(--dense-row-h);
   --vxe-ui-table-row-height-mini: var(--dense-row-h);
   --vxe-ui-table-cell-padding-small: 4px 8px;
@@ -2255,6 +2431,7 @@ button:-moz-focusring,
 }
 
 .vxe-table.standard {
+  --vxe-table-row-height-small: 48px;
   --vxe-ui-table-row-height-small: 48px;
 }
 
@@ -2280,18 +2457,18 @@ button:-moz-focusring,
 /* ③ Hover（isHover:true → .row--hover；同时 CSS :hover 兜底）*/
 .vxe-table .vxe-body--row.row--hover .vxe-body--column,
 .vxe-table .vxe-body--row:hover .vxe-body--column {
-  background: var(--dense-primary-1) !important;
+  background: var(--dense-vxe-surface-hover-bg) !important;
 }
 
 /* ④ 选中行（checkbox-config highlight:true → .row--checked）*/
 .vxe-table .vxe-body--row.row--checked .vxe-body--column {
-  background: var(--dense-primary-2) !important;
+  background: var(--dense-vxe-surface-checked-bg) !important;
 }
 
 /* 选中行 hover 再加深 */
 .vxe-table .vxe-body--row.row--checked.row--hover .vxe-body--column,
 .vxe-table .vxe-body--row.row--checked:hover .vxe-body--column {
-  background: var(--dense-primary-3) !important;
+  background: var(--dense-vxe-surface-checked-hover-bg) !important;
 }
 
 /* ── 序号列 ─────────────────────────────────────────────────── */
@@ -2322,19 +2499,19 @@ button:-moz-focusring,
 .vxe-table .vxe-body--row.row--hover .vxe-body--column.col--fixed-right,
 .vxe-table .vxe-body--row:hover .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row:hover .vxe-body--column.col--fixed-right {
-  background: var(--dense-primary-1) !important;
+  background: var(--dense-vxe-surface-hover-bg) !important;
 }
 
 /* 选中 固定列 */
 .vxe-table .vxe-body--row.row--checked .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row.row--checked .vxe-body--column.col--fixed-right {
-  background: var(--dense-primary-2) !important;
+  background: var(--dense-vxe-surface-checked-bg) !important;
 }
 
 /* 选中 hover 固定列 */
 .vxe-table .vxe-body--row.row--checked.row--hover .col--fixed-right .vxe-body--column,
 .vxe-table .vxe-body--row.row--checked:hover .vxe-body--column.col--fixed-right {
-  background: var(--dense-primary-3) !important;
+  background: var(--dense-vxe-surface-checked-hover-bg) !important;
 }
 
 .vxe-table .col--fixed-right .vxe-header--column,
@@ -2426,7 +2603,7 @@ button:-moz-focusring,
   color: var(--color-text-1) !important;
   background: var(--dense-table-header-bg) !important;
   font-weight: var(--dense-weight-title) !important;
-  border-right: 1px solid rgba(143, 184, 255, 0.22) !important;
+  border-right: 1px solid var(--dense-table-col-border) !important;
 }
 
 .vxe-table.workbench-table .vxe-header--column.col--fixed-left,
@@ -2472,11 +2649,11 @@ button:-moz-focusring,
 
 .vxe-table.workbench-table .vxe-body--row.row--hover .vxe-body--column:first-child,
 .vxe-table.workbench-table .vxe-body--row:hover .vxe-body--column:first-child {
-  box-shadow: inset 2px 0 0 var(--dense-primary-4);
+  box-shadow: none;
 }
 
 .vxe-table.workbench-table .vxe-body--row.row--checked .vxe-body--column:first-child {
-  box-shadow: inset 2px 0 0 var(--dense-primary-6);
+  box-shadow: none;
 }
 
 .vxe-table.workbench-table .vxe-body--column.col--fixed-right {
@@ -2659,6 +2836,89 @@ button:-moz-focusring,
 .vxe-table.workbench-table .vxe-table--scroll-x-left-corner,
 .vxe-table.workbench-table .vxe-table--scroll-x-right-corner {
   background: var(--color-fill-1) !important;
+}
+
+/* Secondary workbench panel: child task surface below a primary list table */
+.workbench-subpanel {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 238px;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-bg-card);
+  border: 1px solid var(--dense-card-border);
+  border-top: 1px solid var(--dense-brand-line);
+  border-radius: var(--dense-radius);
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.035),
+    0 0 0 1px rgba(255, 255, 255, 0.72) inset;
+}
+
+.subpanel-cap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 38px;
+  padding: 0 12px 0 14px;
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--dense-border-subtle);
+  flex-shrink: 0;
+}
+
+.subpanel-cap__main,
+.subpanel-cap__actions {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.subpanel-cap__main {
+  gap: 8px;
+}
+
+.subpanel-cap__actions {
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.subpanel-cap__title {
+  position: relative;
+  color: var(--color-text-1);
+  font-size: var(--dense-font-title);
+  font-weight: var(--dense-weight-title);
+  line-height: 1;
+  padding-left: 8px;
+  white-space: nowrap;
+}
+
+.subpanel-cap__title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--dense-primary-5);
+  transform: translateY(-50%);
+}
+
+.subpanel-cap__meta {
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.workbench-subpanel .table-wrap {
+  background: var(--color-bg-card);
+}
+
+.workbench-subpanel .vxe-table.workbench-table .vxe-header--column {
+  background: #F8FAFE !important;
 }
 
 .vxe-table .col--fixed-right .vxe-cell,
@@ -4076,13 +4336,15 @@ button:-moz-focusring,
   width: min(640px, calc(100vw - 24px)) !important;
 }
 
-.query-filter-drawer--wide.arco-drawer {
-  width: min(920px, calc(100vw - 24px)) !important;
+.query-filter-drawer--wide.arco-drawer,
+.arco-drawer.query-filter-drawer--wide,
+.arco-drawer:has(.business-query-shell) {
+  width: min(1120px, calc(100vw - 24px)) !important;
 }
 
 .query-filter-drawer .arco-drawer-header {
-  height: 56px;
-  padding: 0 18px 0 20px;
+  height: 52px;
+  padding: 0 16px;
   border-bottom: 1px solid var(--dense-border-subtle);
   background: linear-gradient(180deg, var(--color-bg-card) 0%, var(--color-fill-1) 100%);
 }
@@ -4140,13 +4402,19 @@ button:-moz-focusring,
 .query-filter-drawer__nav-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
   min-height: 28px;
   padding: 0 9px;
+  border: 0;
   border-radius: var(--dense-radius);
+  background: transparent;
   color: var(--color-text-2);
   font-size: var(--dense-font-control);
   font-weight: var(--dense-weight-control);
+  text-align: left;
   cursor: pointer;
+  outline: none;
 }
 
 .query-filter-drawer__nav-item:hover,
@@ -4239,6 +4507,275 @@ button:-moz-focusring,
   border: 1px solid var(--dense-border-subtle);
   border-radius: var(--dense-radius);
   background: var(--color-bg-card);
+}
+
+.business-query-workspace {
+  min-height: 100%;
+  padding: 0;
+  border-top: none;
+  background: transparent;
+}
+
+.business-query-shell {
+  --query-ws-pad-x: 16px;
+  --query-ws-pad-y: 16px;
+  --query-ws-gap: 12px;
+  --query-ws-side-w: 224px;
+  --query-ws-nav-w: 152px;
+  --query-ws-nav-pad-x: 8px;
+  --query-ws-group-pad: 12px;
+
+  display: grid;
+  grid-template-columns: var(--query-ws-side-w, 224px) var(--query-ws-nav-w, 152px) minmax(0, 1fr);
+  gap: 0;
+  min-height: 100%;
+  padding: 0;
+  border-top: 0;
+  background: var(--color-fill-1);
+}
+
+.business-query-schemes,
+.business-query-nav {
+  min-width: 0;
+  border-right: 1px solid var(--dense-border-subtle);
+  background: var(--color-bg-card);
+  overflow-y: auto;
+}
+
+.business-query-schemes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: var(--query-ws-pad-y, 16px) var(--query-ws-pad-x, 16px);
+}
+
+.business-query-side__head,
+.business-query-nav__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+}
+
+.business-query-nav {
+  padding: var(--query-ws-pad-y, 16px) var(--query-ws-nav-pad-x, 8px);
+  background: linear-gradient(180deg, var(--color-bg-card) 0%, var(--color-fill-1) 100%);
+}
+
+.business-query-nav__title {
+  padding: 0 var(--query-ws-nav-pad-x, 8px) 8px;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
+}
+
+.business-query-nav .query-filter-drawer__nav-item+.query-filter-drawer__nav-item {
+  margin-top: 4px;
+}
+
+.business-query-nav-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--color-fill-2);
+  color: var(--color-text-3);
+  font-size: var(--dense-font-micro);
+  font-weight: var(--dense-weight-aux);
+  line-height: 18px;
+}
+
+.query-filter-drawer__nav-item--active .business-query-nav-count,
+.query-filter-drawer__nav-item:hover .business-query-nav-count {
+  background: var(--dense-primary-2);
+  color: var(--dense-primary-7);
+}
+
+.query-scheme {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px;
+  border: 1px solid var(--dense-border-subtle);
+  border-radius: var(--dense-radius);
+  background: var(--color-bg-card);
+  color: var(--color-text-2);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+
+.query-scheme:hover {
+  border-color: var(--dense-brand-line-strong);
+  background: var(--dense-brand-surface);
+}
+
+.query-scheme--active {
+  border-color: var(--dense-primary-3);
+  background: var(--dense-primary-1);
+  box-shadow: inset 3px 0 0 var(--dense-primary-5);
+}
+
+.query-scheme__name {
+  color: var(--color-text-1);
+  font-size: var(--dense-font-control);
+  font-weight: var(--dense-weight-control);
+  line-height: 1.2;
+}
+
+.query-scheme__meta {
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
+  line-height: 1.3;
+}
+
+.business-query-recent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--dense-border-subtle);
+}
+
+.business-query-recent__title {
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
+}
+
+.business-query-recent__item {
+  min-height: 26px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--dense-radius);
+  background: transparent;
+  color: var(--color-text-2);
+  font-size: var(--dense-font-aux);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+
+.business-query-recent__item:hover {
+  background: var(--color-fill-2);
+  color: var(--color-text-1);
+}
+
+.business-query-editor {
+  min-width: 0;
+  scroll-behavior: smooth;
+  padding: var(--query-ws-pad-y, 16px) var(--query-ws-pad-x, 16px) 88px;
+  background: var(--color-fill-1);
+  overflow-y: auto;
+}
+
+.business-query-editor__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--query-ws-gap, 12px);
+  margin-bottom: var(--query-ws-gap, 12px);
+}
+
+.business-query-editor__title {
+  color: var(--color-text-1);
+  font-size: var(--dense-font-title);
+  font-weight: var(--dense-weight-title);
+  line-height: 18px;
+}
+
+.business-query-editor__meta {
+  margin-top: 3px;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
+  line-height: 16px;
+}
+
+.business-query-group-card {
+  scroll-margin-top: var(--query-ws-pad-y, 16px);
+  border-color: var(--dense-card-border);
+  box-shadow: var(--dense-shadow-card);
+}
+
+.business-query-group-card+.business-query-group-card {
+  margin-top: var(--query-ws-gap, 12px);
+}
+
+.business-query-group-card .query-filter-drawer__group-head {
+  position: relative;
+  margin-bottom: var(--query-ws-gap, 12px);
+}
+
+.business-query-group-card .query-filter-drawer__group-head .subpanel-cap__meta {
+  margin-left: 2px;
+}
+
+.business-query-group-clear {
+  margin-left: auto !important;
+  height: 24px !important;
+  padding: 0 6px !important;
+}
+
+.business-query-group-card .detail-form-grid {
+  gap: var(--query-ws-gap, 12px);
+}
+
+.business-query-group-card .arco-form-item-label-col:has(+ .arco-form-item-wrapper .arco-checkbox) {
+  display: none;
+}
+
+.business-query-group-card .arco-checkbox {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+}
+
+.business-query-group-card .arco-checkbox-label {
+  color: var(--color-text-2);
+  font-size: var(--dense-font-control);
+  font-weight: var(--dense-weight-control);
+}
+
+.business-query-nav {
+  position: relative;
+}
+
+.business-query-nav .query-filter-drawer__nav-item--active {
+  box-shadow: inset 2px 0 0 var(--dense-primary-5);
+}
+
+@media (max-width: 1180px) {
+  .business-query-shell {
+    --query-ws-side-w: 200px;
+    --query-ws-nav-w: 144px;
+  }
+
+  .business-query-editor .detail-form-grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .business-query-shell {
+    grid-template-columns: 132px minmax(0, 1fr);
+  }
+
+  .business-query-schemes {
+    display: none;
+  }
+
+  .business-query-editor .detail-form-grid--3 {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* detail-field：只读字段（label 上 + val 下），用于详情展示 */
@@ -5133,8 +5670,12 @@ button:-moz-focusring,
 
 /* 详情内子表：与列表 workbench-table 共用表头/hover/边框 token；按职责选择行高 */
 .detail-mini-vxe.vxe-table {
+  --vxe-table-header-height-small: var(--dense-header-h);
   --vxe-ui-table-header-height-small: var(--dense-header-h);
   --detail-mini-row-h: var(--dense-row-h-detail-read);
+  --vxe-table-row-height-small: var(--detail-mini-row-h);
+  --vxe-table-cell-padding-small: 0 6px;
+  --vxe-table-cell-padding-mini: 0 6px;
   --vxe-ui-table-row-height-small: var(--detail-mini-row-h);
   --vxe-ui-table-cell-padding-small: 0 6px;
   --vxe-ui-table-cell-padding-mini: 0 6px;
@@ -5176,7 +5717,7 @@ button:-moz-focusring,
   font-size: var(--dense-font-title) !important;
   font-weight: var(--dense-weight-title) !important;
   background: var(--dense-table-header-bg) !important;
-  border-right: 1px solid rgba(143, 184, 255, 0.22) !important;
+  border-right: 1px solid var(--dense-table-col-border) !important;
   border-bottom: none !important;
 }
 
@@ -5674,8 +6215,8 @@ button:-moz-focusring,
 }
 
 .action-menu--toolbar .arco-dropdown-option {
-  height: 30px;
-  line-height: 30px;
+  height: 32px;
+  line-height: 32px;
   padding: 0 9px;
 }
 

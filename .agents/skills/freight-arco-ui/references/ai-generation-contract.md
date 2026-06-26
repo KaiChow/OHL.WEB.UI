@@ -6,6 +6,17 @@ Use this contract when AI creates, refactors, or reviews pages in `FE.OHL.WEB.UI
 
 The goal is to prevent one-off pages and ensure every generated page follows PESDP, Arco, VXE Table, routing/module structure, and project-level reuse.
 
+## Four-Layer Prompt Contract
+
+AI must reason through these layers in order:
+
+1. **Product Positioning** — next-generation international freight forwarding SaaS, not traditional ERP.
+2. **Design Philosophy** — business workflows, readability, consistency, trust, and operational efficiency before decoration.
+3. **Visual Language** — restrained Arco-based enterprise SaaS: neutral surfaces, white work areas, clear hierarchy, high density, low visual complexity.
+4. **Implementation Rules** — `global.css` tokens, Arco/VXE components, page archetypes, action rules, table rules, and `check-spec`.
+
+Do not implement a visual idea only because it resembles a modern SaaS reference. It must preserve freight workflow efficiency and pass the implementation rules.
+
 ## Required Read Order
 
 Before generating UI:
@@ -120,8 +131,16 @@ src/views/<domain>/<module>/
 ## Visual Generation Rules
 
 - Use Arco components and theme tokens.
+- Always use Arco Design components whenever possible.
+- Do not redesign existing Arco interaction behaviors.
+- Avoid custom controls unless a shared Arco/VXE pattern cannot satisfy the business interaction.
+- Maintain spacing on the project 8px rhythm through existing `--dense-gap-*`, padding, and component-size tokens.
+- Prefer responsive desktop layouts; do not create page-level horizontal overflow at common desktop widths.
 - Do not create an independent color palette.
 - Do not add large decorative gradients, oversized cards, marketing hero areas, or consumer SaaS styling.
+- Do not sacrifice information density for aesthetics.
+- Prioritize usability over visual novelty.
+- Every design decision should improve reading speed, reduce errors, minimize clicks, or improve workflow efficiency.
 - Use VXE Table for data grids.
 - Generate main list tables as `class="compact workbench-table"` with `row-config.height = 36`.
 - Generate editable detail/nested tables as `class="detail-mini-vxe detail-mini-vxe--editable"` with `row-config.height = 38`; do not rely on CSS-only row height.

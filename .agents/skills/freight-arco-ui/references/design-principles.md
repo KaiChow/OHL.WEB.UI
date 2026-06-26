@@ -4,6 +4,10 @@
 
 Build **Cargo SaaS Premium Dense** interfaces for international freight forwarding operations.
 
+This is a next-generation international freight forwarding SaaS platform, not a traditional ERP. The product should feel modern, premium, trustworthy, and globally oriented while preserving the operational efficiency required by freight forwarding professionals.
+
+Reference products such as Linear, Stripe Dashboard, Flexport, Ramp, Notion Enterprise, and Vercel Dashboard are useful for studying information hierarchy, visual rhythm, restraint, and component organization. Do not copy their visual style, density, radius, whitespace, or consumer-dashboard patterns directly.
+
 The product is a high-frequency enterprise production tool, not a marketing site, OA system, CMS backend, or traditional ERP skin.
 
 Core user reality:
@@ -18,6 +22,17 @@ Priority order:
 2. Information
 3. Interaction
 4. Visual expression
+
+## Four-Layer Design Model
+
+All UI decisions must flow through four layers:
+
+1. Product Positioning: international freight forwarding SaaS, not ERP.
+2. Design Philosophy: business before UI, information first, trust, readability, consistency, operational efficiency.
+3. Visual Language: restrained Arco enterprise SaaS, neutral surfaces, white work areas, clear hierarchy, high density with low visual complexity.
+4. Implementation Rules: `global.css` tokens, Arco/VXE components, page archetypes, action rules, table rules, and `check-spec`.
+
+If a proposal sounds visually attractive but weakens the implementation rules or business philosophy, reject it.
 
 ## PESDP Principles
 
@@ -103,6 +118,66 @@ Do not create quality by:
 - Excessive shadows.
 
 Use Arco Design Vue and `@arco-themes/vue-gi-demo` tokens as the color source. Custom color should be exceptional and justified.
+
+## PESDP+ Operating Principles
+
+PESDP is the core design model. PESDP+ adds execution principles for judging whether a page can survive real freight operations.
+
+### Consistency
+
+Maintain one design language across components, spacing, colors, icons, interactions, and behaviors.
+
+- Use `src/styles/global.css` tokens and shared structural classes before page-scoped CSS.
+- Reuse Arco/VXE patterns from the skill references instead of inventing local equivalents.
+- Do not let one module introduce a new button style, table chrome, spacing rhythm, status color, or drawer behavior unless it becomes a documented shared pattern.
+
+### Readability
+
+Information should be scannable within seconds.
+
+- The primary object identity, key state, critical amount/date, owner/counterparty, and next available action must be easy to find without reading every field.
+- Important values attract attention through position, typography, column order, status semantics, and link/action hierarchy; color is only one supporting signal.
+- Dense pages must reduce visual complexity while preserving useful information.
+
+### Action-first
+
+Operations should stay close to the data they affect.
+
+- Prefer inline row actions, table-local toolbars, drawers, and contextual workflows over unnecessary page transitions.
+- High-frequency reversible actions stay visible near their working data.
+- Destructive, irreversible, or low-frequency batch actions are physically separated and confirmed.
+
+### Focus
+
+Every screen and every local scope needs a clear focus.
+
+- A page may have multiple scopes, such as filter, main table, and child table; each scope can have one primary action.
+- Do not create multiple competing emphasis points inside the same scope.
+- If everything looks equally important, revise structure before adding more color or weight.
+
+### Trust
+
+Enterprise-grade UI must feel calm, stable, and predictable.
+
+- Use restrained colors, stable layouts, predictable hover/focus/selected states, and explicit confirmation for risk.
+- Avoid sudden layout shifts, decorative motion, saturated panels, and ambiguous status colors.
+- Error, empty, loading, disabled, and permission states must be clear and business-specific.
+
+### Business Before UI
+
+Visual decisions must serve freight workflows and business efficiency before decoration.
+
+- Map the business object and user job before choosing layout.
+- Do not copy another module's fields or action order because the screen shape looks similar.
+- If a visual choice hides a key operational fact or adds repeated clicks, it fails even if it looks cleaner.
+
+### Information First
+
+Data is the product. Visual design exists to improve understanding, not compete with information.
+
+- Tables, forms, statuses, amounts, dates, and identifiers are the main content.
+- Decoration, color, icons, and empty space must support scanability and decision-making.
+- The interface should make business relationships obvious: identity, object-owned facts, workflow/financial/operation data by page archetype, then auxiliary information.
 
 ## Style Boundaries
 

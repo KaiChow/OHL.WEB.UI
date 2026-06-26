@@ -4,6 +4,8 @@ List query design is driven by the user's job, not by showing every field that e
 
 Core target: keep the default top work area compact so the first viewport is dominated by the VXE table. In a normal freight workbench, the query area plus toolbar/status row should stay near 112px.
 
+For production workbench pages used all day by sales/operators/coordinators, visible filters are judged by daily frequency, not by visual minimalism. A two-row query area is acceptable when every visible field is used repeatedly and the table still dominates the first viewport. The design failure to avoid is a gray 50-field form wall, not the existence of high-frequency visible filters.
+
 Density is created by removing low-value fields and decorative space, not by erasing the field rhythm. A query field is a small "name / input surface" unit: the label identifies the business dimension, the control is the input plane, and the gap between them lets operators scan the row without the label visually merging into the control border.
 
 ## Query Goals
@@ -73,6 +75,7 @@ For `30+ / 40+ / 50+` filters:
 - Provide "clear current group" and "clear all" semantics; do not make reset ambiguous.
 - Preserve applied filters after closing. Reopening the surface must show the active values.
 - For 50+ fields, use saved query schemes: name, save, update, duplicate, set default, and recent queries. Treat this as a query workspace, not a bigger drawer.
+- In 50+ query workspaces, group navigation should be anchors over all condition modules, not exclusive tabs that hide other groups. Operators often combine identifiers, time ranges, parties, route, and flags in one query session.
 
 ## Default Pattern
 
@@ -156,6 +159,8 @@ Rules:
 - `filter-card--two-row` 的外层 matrix 仍然使用，它负责将 `filter-grid` 和 `filter-card__inline-actions--matrix` 左右排列。
 - 所有字段等宽 = 视觉无层次（PESDP 违规）。主标识符 span2 是结构语义，不是为了美观。
 - `filter-combo` uses explicit control roles: the leading selector is `filter-combo__select` (fixed width), and the trailing control fills the remaining space. Text inputs inherit the fill behavior from `global.css`; trailing selects must add `filter-combo__fill`.
+- `filter-combo` is a connected control: adjacent controls share one visual surface, use `margin-left:-1px`, and all joined inner corners must be radius `0`. If two controls should keep independent rounded corners, separate them with an explicit gap and do not use `filter-combo`.
+- Never render `select + input` or `select + select` with both joined corners rounded. That double-radius seam reads as two unrelated controls and fails the dense workbench standard.
 - Do not style every `.arco-select` inside `filter-combo` as `width:auto`; this breaks `select + select` combos such as party include/exclude + party selector.
 
 ```vue
@@ -317,6 +322,15 @@ Required capabilities:
 - Grouped advanced editor with collapse/expand by group.
 - Applied filters summary by business group, not by a long comma string.
 - Clear current group and clear all.
+
+Alignment contract:
+
+- Use one 8px-based spacing system for the whole workspace. Do not mix ad hoc 10px, 12px, 14px, and 16px padding per column.
+- The drawer header, saved-query column, group-anchor column, and editor column must share the same left/right outer inset token (`--query-ws-pad-x`) so vertical start lines feel intentional.
+- The three-column workspace uses fixed rail widths plus a flexible editor: saved schemes around `224px`, group anchors around `152px`, editor `minmax(0, 1fr)`.
+- Column internal rhythm is fixed: outer padding `16px`, nav inner item inset `8px`, group/card gap `12px`, group body gap `12px`.
+- Section title anchors (`subpanel-cap__title`, `query-filter-drawer__group-head`) use the same short primary rail style. Avoid stacking multiple unrelated blue rails in the same vertical band.
+- Cards and nav items align their text to the same local content start. Active indicators may sit inside the item, but must not push the text column.
 
 Forbidden:
 

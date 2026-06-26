@@ -5,6 +5,7 @@
 - Read `src/styles/global.css`.
 - Confirm whether existing global class already solves the need.
 - Read `references/design-principles.md`.
+- Apply the four-layer model before designing: Product Positioning -> Design Philosophy -> Visual Language -> Implementation Rules.
 - Convert vague UI feedback into AI-executable design language before editing: define scope, structure/class, token/density, state behavior, business semantics, forbidden fallback, and verification where possible.
 - Read `references/module-patterns.md` for new pages or module refactors.
 - Read `references/domain-language.md`.
@@ -18,6 +19,26 @@
 - Structured: separates primary identity, business operation, and auxiliary data.
 - Dense: high useful information density with visible information rhythm; compact does not mean visually merged controls.
 - Premium: quality comes from order, consistency, hierarchy, and restraint.
+
+## PESDP+ Gate
+
+- Consistency: uses shared tokens, classes, component patterns, icon style, and interaction behavior; no page-local design language.
+- Readability: primary identity, key state, critical amount/date, owner/counterparty, and next action are scannable within seconds.
+- Action-first: operations are close to the data they affect; high-frequency reversible actions are visible, while destructive/low-frequency actions are separated and confirmed.
+- Focus: each local scope has one primary focus and at most one primary action; emphasis does not compete inside the same scope.
+- Trust: layouts are stable, interactions predictable, colors restrained, and risk/permission/error states explicit.
+- Business Before UI: layout and visual choices serve the current freight workflow and user job, not decorative cleanliness.
+- Information First: data relationships are clearer after the design change; visual chrome does not compete with identifiers, amounts, dates, statuses, and actions.
+- Brand-Neutral: the page does not read as gray ERP. It has a visible but restrained freight SaaS rhythm through active navigation, primary action, selected/focused states, status pills, links, and brand-neutral hairlines.
+
+## Operational Workbench Gate
+
+- The page is judged as a production workbench when sales/operators/coordinators use it for repeated daily office work.
+- Production workbench priority is business efficiency first, long-session visual comfort second, visual beauty third.
+- Table-dominant list pages target 70-80% first-viewport business data ownership; 75% is a target signal, not a universal rule for details, drawers, approvals, or exception pages.
+- Daily status tabs remain visible when users process records by state.
+- Daily reversible workflow actions remain directly reachable as neutral grouped actions; rare, risky, or destructive actions move to dropdown/confirm flows.
+- Modernization preserves operational affordances while removing old ERP noise: all-blue buttons, warning workflow buttons, red normal data, heavy vertical grids, gray form walls, and equal-weight bordered zones.
 
 ## Module Generalization Gate
 
@@ -36,6 +57,7 @@
 - Uses `page-root page-root--dense` for operational pages.
 - No page-level marketing header.
 - Search/tool/status/table layers have clear separation.
+- Layout follows the project 8px rhythm through shared gap/padding tokens; spacing changes use tokens or shared classes, not page-local guesswork.
 - Table remains the largest area.
 - No double scrollbars.
 - No duplicated summary areas unless each has a distinct interaction purpose.
@@ -43,14 +65,17 @@
 - Dense list pages keep the global viewport bottom breathing space: `page-root--dense` uses `--dense-page-bottom-space`; table cards do not visually touch the browser/app bottom edge.
 - Search/filter UI matches query field count tier: 0-3, 4-8, 9-16, 17-50, or 50+.
 - L1 page segments use `zone-l1-transport` + `seg-btn`; scope/status filters use `.stab` or `.stat-tab`, not the other way around.
-- List zones use one neutral top-boundary token: `--dense-zone-top-border` on L1/L2/L3/L4 modules; primary-colored top borders are not used as generic module decoration.
+- List zones use one brand-neutral top-boundary token: `--dense-zone-top-border` on L1/L2/L3/L4 modules; saturated primary top borders are not used as generic module decoration.
 - Filter drawers use `query-filter-drawer__shell/body/group/group-head`; fields are grouped by business meaning, not rendered as a flat white form wall, and must not include descriptive summary/instruction copy above the groups.
 - Query field count follows `filter-layout.md`: two visible rows are allowed only for 6-10 high-frequency fields; 17-32 use grouped drawers; 33-50 use wide drawer with group navigation; 50+ use saved query workspace.
+- 50+ query workspaces use group anchors over all condition modules; they do not hide groups behind exclusive tabs when operators need to combine identifiers, time, route, parties, and flags.
 
 ## Components
 
 - Tables use VXE Table.
 - Forms use Arco controls.
+- Arco components are used whenever possible; existing Arco interactions are not redesigned locally.
+- Custom controls are avoided unless the business interaction cannot be expressed with shared Arco/VXE patterns.
 - Buttons follow Arco 5 types × 4 statuses per `references/actions.md` (primary/secondary/dashed/outline/text; normal/success/warning/danger).
 - Button content form follows `actions.md`: row actions and toolbar utilities are icon-only with tooltip; creation/add actions use icon + text when the icon metaphor is exact; workflow/footer/head actions are text-only; dropdown options are text-only by default.
 - Row actions are icon-only `text` + tooltip.
@@ -116,9 +141,14 @@
 ## Visual
 
 - Uses Arco tokens, no new hex palette.
-- Page is not dominated by gray.
+- Main surface follows the 2026 Brand-Neutral Premium Dense standard from `visual-system.md`: cool brand-neutral page base, white work surfaces, light shadow, weak brand-neutral boundary, no flat gray ERP surface and no blue-gradient page/table chrome.
+- Main palette follows the Deep-Sea Neutral color contract from `visual-system.md`: cool neutral page base, white work surfaces, neutral headers, weak row separators, transparent vertical grid by default, primary only for anchors/interactions, semantic colors only for state/risk.
+- Page is not dominated by gray, blue, or repeated bordered boxes.
 - One primary anchor is visible in the first viewport, but primary tint does not cover whole search/tool/table surfaces.
-- Search card, toolbar, table cap, and default table rows use neutral surfaces; primary appears in active nav, links, focus, hover, selection, status, and thin anchors only.
+- Search card, toolbar, table cap, and default table rows use brand-neutral/white surfaces; primary appears in active nav, links, focus, hover, selection, status, and thin anchors only.
+- Workbench table header is brand-neutral (`--dense-table-header-bg`), not gray sheet fill or blue gradient; table body uses weak horizontal separators and no dominant vertical grid lines.
+- Card boundaries do not read as blue frames or plain gray boxes; hierarchy comes from gap, white surface, subtle shadow, and brand-neutral 1px boundary.
+- Toolbar workflow buttons are separated by type/group/icon, not by arbitrary success/warning/purple colors. Semantic colors remain reserved for status, validation, risk, and destructive actions.
 - List modules follow `responsive.md`: no filter/toolbar/status module creates page-level horizontal scroll; below `1280px`, status groups may wrap to a second row and scroll internally.
 - Raw theme channel tokens are not used as complete CSS colors; use `--dense-*` aliases or `rgb()/rgba(var(...))`.
 - Status colors are consistent and only used for semantic state.

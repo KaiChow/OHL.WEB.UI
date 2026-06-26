@@ -18,9 +18,9 @@ List workbench tables and detail nested tables must read as **one VXE design sys
 
 | Layer | Token / class | List (`workbench-table`) | Detail (`detail-mini-vxe`) |
 |-------|----------------|--------------------------|----------------------------|
-| Header background | `--dense-table-header-bg` | 32px header | 32px header (same gradient) |
-| Header column border | `rgba(143,184,255,0.22)` | yes | yes |
-| Body column/row border | `--dense-table-col-border` / `--dense-table-row-border` | yes | yes |
+| Header background | `--dense-table-header-bg` | 32px near-white brand-neutral header | 32px near-white brand-neutral header |
+| Header column border | `--dense-table-col-border` | off or near-invisible by default | off or near-invisible by default |
+| Body column/row border | `--dense-table-col-border` / `--dense-table-row-border` | vertical weak/off, horizontal weak | vertical weak/off, horizontal weak |
 | Row hover | `--dense-vxe-surface-hover-bg` | `--dense-row-h` / 36px row | role-based row token |
 | Row checked | `--dense-vxe-surface-checked-bg` | yes | yes |
 | Left accent on hover | `inset 2px 0 0 --dense-primary-4` | yes | yes |
@@ -29,9 +29,12 @@ List workbench tables and detail nested tables must read as **one VXE design sys
 Shared rules:
 
 - Every operational VXE table must use either `class="compact workbench-table"` (main list) or `class="detail-mini-vxe"` (detail module child table). Do not leave tables on bare `.vxe-table` global defaults for production pages.
-- Header uses `--dense-table-header-bg` gradient on both list and detail. Do not use a flat gray header in detail while list uses gradient.
+- VXE theme tokens are centralized in `src/styles/global.css`. The bridge must cover both `vxe-table@4.5.x` legacy `--vxe-*` variables and newer `--vxe-ui-*` variables, including header, border, hover, stripe, checked/current rows, fixed-column shadow, custom panel, and row-height tokens.
+- Header uses brand-neutral `--dense-table-header-bg` on both list and detail. Do not use gray sheet fill or blue gradients for normal table headers.
 - Hover/selection always use `--dense-vxe-surface-hover-bg` / `--dense-vxe-surface-checked-bg`, never the same value as the header background.
-- Do not add `border-bottom` on `vxe-table--header-wrapper`; structure vs data is separated by header gradient + white rows.
+- Data rows are the main working surface and should read white by default. Zebra stripes are optional and should normally be `#FFFFFF` or visually indistinguishable from white on dense freight workbenches.
+- Do not add `border-bottom` on `vxe-table--header-wrapper`; structure vs data is separated by brand-neutral header contrast and weak row separators.
+- Do not let column borders dominate. Workbench tables default to horizontal scan rhythm; vertical separators are disabled or near-invisible unless the page documents a finance comparison exception.
 - Detail-only differences: role-based row height, ghost Arco controls for editable rows, padding on `.vxe-cell` not on `td`, no `show-overflow`, no checkbox without batch toolbar.
 - Sequence columns are structural rhythm, not page-specific layout. Use the same project width for list and detail sequence columns: `width="52"` unless there is a documented module exception.
 
@@ -73,7 +76,7 @@ Rules:
 - Summary mini row token is `--dense-row-h-summary: 32px`; use it only for short totals or read-only facts, not editable child rows.
 - Main list VXE tables use `class="compact"` unless the page has a documented reason to use `standard`.
 - Do not use 40px as the default workbench row height; it reduces first-screen data density.
-- VXE `size="small"` defaults to a 40px row variable. A compact table must override `--vxe-ui-table-row-height-small` and set `row-config.height = 36`; changing only `.vxe-body--row` is not enough.
+- VXE `size="small"` defaults to a 40px row variable. A compact table must override both `--vxe-table-row-height-small` and `--vxe-ui-table-row-height-small`, then set `row-config.height = 36`; changing only `.vxe-body--row` is not enough.
 - `detail-mini-vxe--editable` must set `row-config.height = 38`.
 - `detail-mini-vxe--readonly` must set `row-config.height = 34`.
 - `detail-mini-vxe--summary` must set `row-config.height = 32`.
@@ -156,7 +159,7 @@ These are starting floors; adjust per module but keep the `min-width` vs `width`
 - Hover and selected states must cover fixed columns consistently.
 - Hover uses primary tint, not gray.
 - Selection uses a stronger primary tint.
-- Zebra stripes are optional and must remain low contrast.
+- Zebra stripes are optional and must remain low contrast. Prefer no visible stripe for dense workbench pages when row separators already provide scan rhythm.
 - Do not merge cells for the main list unless the business explicitly requires grouped display.
 - Editable row hover must not hide validation borders.
 - Fixed left/right shadows must remain subtle and consistent with Arco theme.
@@ -165,13 +168,13 @@ These are starting floors; adjust per module but keep the `min-width` vs `width`
 
 Table lines are functional separators, not decoration.
 
-- Header must have a visible but restrained anchor: `--dense-table-header-bg` gradient on `workbench-table` (no extra `vxe-table--header-wrapper` bottom border).
-- Main workbench tables should use `workbench-table` to create the table surface: primary-tinted header anchor, white data rows, `--dense-workbench-hover-bg` on hover (lighter than header), low-contrast row/column separators, and primary accent on selection/actions.
-- Primary table borders must use complete CSS colors such as `--dense-primary-2/3` or `rgb(var(--primary-2))`; do not write `border-color: var(--primary-2)` because gi-demo stores primary tokens as RGB channels.
+- Header must be brand-neutral and calm: `--dense-table-header-bg` on `workbench-table` (no extra `vxe-table--header-wrapper` bottom border).
+- Main workbench tables should use `workbench-table` to create the table surface: brand-neutral header, white data rows, `--dense-workbench-hover-bg` on hover, weak horizontal row separators, and primary accent on selection/actions.
+- Primary table borders must use project aliases such as `--dense-primary-2/3`; page and skill CSS must not use raw `rgb(var(--primary-*)))` or `border-color: var(--primary-*)` because gi-demo theme values may be RGB channels.
 - Keep a subtle 1px header/body separator when it helps scan the table.
 - Keep low-contrast row separators for dense data rows.
 - Avoid strong primary-colored horizontal lines in the table body or below the header; users read them as focus, current row, or selected state.
-- Avoid heavy vertical lines. Use column spacing, alignment, and header labels first.
+- Avoid visible vertical lines. Use column spacing, alignment, numeric right alignment, and header labels first.
 - Detail/nested tables should use even lighter separators than workbench tables.
 - Selection and hover are the only places where primary tint should visibly span a row.
 - When the data count is small and the table has remaining height, the empty area must still read as the same table surface. Use the shared workbench table background treatment, not fake rows, large blank white blocks, or decorative color bands.
@@ -293,7 +296,7 @@ Detail tables must look like part of the module, not a full page table pasted in
 - For short summary tables, use `detail-mini-vxe detail-mini-vxe--summary`: 28-32px header rhythm, 32px body row, no row actions unless the summary itself is editable.
 - `detail-mini-vxe` shares `--dense-table-header-bg` and `--dense-vxe-surface-hover-bg` with list tables. Data rows stay white; hover is primary wash on white. **Do not** use a separate flat-gray header in detail.
 - Detail mini tables without batch toolbar must **not** include a `type="checkbox"` column (VXE default checkbox reads as a solid blue square and has no batch action in detail sub-tables).
-- `detail-mini-vxe` CSS row height, `--vxe-ui-table-row-height-small`, and `row-config.height` must match the chosen density variant. Do not set readonly height 34px while rendering 28px input/select/date controls, because VXE cell clipping will cut input text and displayed values.
+- `detail-mini-vxe` CSS row height, both VXE row-height variables (`--vxe-table-row-height-small` / `--vxe-ui-table-row-height-small`), and `row-config.height` must match the chosen density variant. Do not set readonly height 34px while rendering 28px input/select/date controls, because VXE cell clipping will cut input text and displayed values.
 - `detail-mini-vxe` is isolated from list-page `.vxe-table` global rules in `global.css` for **cell padding and row height only**. Header/hover/border tokens must match `workbench-table`.
 - Wrap detail-section embedded tables with `detail-section__body detail-section__body--table` (padding 0, horizontal scroll). Do not use page-scoped `overflow: hidden` wrappers around wide child tables.
 - Do **not** set `show-overflow` on `detail-mini-vxe` tables. It adds `col--ellipsis`, clips numbers/inputs, and can desync header/body columns (especially with `fixed="right"`). List/workbench tables still use `show-overflow="title"`.

@@ -71,11 +71,14 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 ❌ btn-muted-warn 等自写警示类 — 已废弃，用 outline + normal
 ❌ 用颜色区分同作用域工具栏按钮 — 颜色在系统里承载状态语义（成功/警告/危险），
    把工作流按钮涂色会与 s-pill 状态系统冲突，产生「完成了？还是有问题？」的歧义
+❌ 为了“现代 SaaS 感”给导入/下载/对账等普通 workflow 动作分配绿色、橙色、紫色
 ```
 
-### Toolbar Visual Differentiation（不用颜色的区分机制）
+### Toolbar Visual Differentiation（现代 SaaS 不靠彩色按钮）
 
-工具栏多个同类按钮的区分依靠三层机制，不依靠 status 颜色：
+工具栏多个同类按钮的区分依靠三层机制，不依靠 status 颜色。现代感来自层级、分组、留白和图标识别，不来自把每个动词涂成不同颜色。
+
+生产作业台例外：如果业务员/操作员每天反复使用某些动作，它们可以保持直接可见。不要为了“极简 SaaS 感”把高频动作藏进更多菜单。正确做法是降低按钮色彩强度、按业务组分隔、保留一个 primary，而不是减少必要操作入口。
 
 **第一层 — Type 决定重要性**
 
@@ -154,7 +157,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 | 详情吸底 | 保存 ×1 | — | 订舱、放舱、输出 | — | 废弃 danger |
 | 弹窗 footer | 确定 ×1 | — | 取消 | — | 删除 danger（左侧） |
 
-**同一作用域内**：primary ≤ 1；直接可见业务按钮 ≤ 3（超出收入 dropdown）。
+**同一作用域内**：primary ≤ 1；简单平铺按钮通常 ≤ 3。生产作业台的高频可逆动作可以超过 3，但必须通过 `toolbar-divider`、dropdown group、neutral type、右侧 utilities 分区控制噪音，并且不能换行。危险、低频、不可逆动作仍然收入 dropdown 或确认流。
 
 ---
 
@@ -492,7 +495,7 @@ Danger rules:
 - Left: business actions.
 - Right: utilities and selected count.
 - No more than one `primary` per toolbar.
-- More than four visible actions → group into dropdown.
+- More than four visible actions → group by workflow. Daily reversible actions may remain visible as neutral buttons/dropdown triggers; low-frequency or risky actions go into dropdown.
 - Refresh / settings / column config = `text` icon-only.
 
 ---
@@ -525,6 +528,7 @@ Danger rules:
 ## 10. Visual Restraint (PESDP)
 
 - Primary tint is an **anchor**, not wallpaper. Do not make every action `outline`.
+- Semantic colors are for state and risk, not workflow decoration. Import/export/download/reconcile/refresh stay in type hierarchy unless they are truly success/warning/danger states.
 - **Three visual tiers in detail drawers** (implemented in `global.css`):
   - **Page head + footer workflow** → `secondary` in white micro-shadow chips; footer grouped in `detail-drawer-footer__cluster` with `__sep` before primary
   - **Module / child-pane main action** → `outline` in `detail-section__actions` action bar (light tint border box)
@@ -532,7 +536,7 @@ Danger rules:
   - **Section title** → left primary accent bar on `detail-section__title::before`
   - **Danger** → row delete muted gray until hover; footer abandon stays `text` + `danger`
   - **Global submit** → `primary` with soft elevation in cluster
-  - **Mini table header** → flat `#F7FAFF`, **no** `header-wrapper` bottom border
+  - **Mini table header** → flat `--dense-table-header-bg`, **no** `header-wrapper` bottom border
 - Neutral surfaces (search/toolbar/table cap) stay white/gray; primary appears in active nav, links, focus, selection, one primary button, and thin anchors.
 - Hover: no transform/shadow float on dense toolbars (see `global.css` toolbar/detail-drawer overrides).
 
@@ -549,5 +553,5 @@ Danger rules:
 □ 删除/废弃 = text + danger + 确认
 □ 禁止 warning/success 常驻按钮
 □ 行内 = icon + tooltip + row-action-btn
-□ 超过 3 个直接按钮 → dropdown
+□ 高频可逆动作可见；低频/危险动作 → dropdown
 ```

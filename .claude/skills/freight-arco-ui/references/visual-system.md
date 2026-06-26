@@ -2,20 +2,98 @@
 
 ## Goal
 
-Build a modern dense freight SaaS interface under PESDP: clear hierarchy, compact operations, Arco-native theme color, low visual noise, and long-term comfort.
+Build a modern dense freight operations workbench under PESDP: clear hierarchy, compact operations, Arco-native theme color, low visual noise, and long-term comfort for high-frequency office work.
 
-The system must not look like a gray traditional ERP. It also must not look like a decorative marketing SaaS.
+The system must not look like a gray traditional ERP, and it must not look like an over-tinted blue domestic admin template. It also must not look like a decorative marketing SaaS.
 
 Premium quality must come from order, consistency, hierarchy, and restraint. Do not use visual decoration to compensate for weak information architecture.
+
+## Professional ERP Positioning
+
+This project targets a professional freight ERP/SaaS interface for sales, operators, and coordinators who work in the system for 8+ hours per day. The priority order is:
+
+1. Business efficiency.
+2. Long-session visual comfort.
+3. Visual beauty.
+
+For table-dominant workbench pages, the first viewport should usually reserve 70-80% of usable page space for business data. Use 75% as a target signal, not as a rigid rule for detail forms, drawers, approval reviews, or exception pages.
+
+The correct direction is not "old ERP" and not "minimal SaaS dashboard." The target is **Modern Freight Operations Workbench**: dense data, low visual noise, visible high-frequency workflows, semantic status, and stable Arco/VXE interaction.
+
+## Old vs New Calibration
+
+Old ERP-style pages often have real operational value:
+
+- more daily filters are visible;
+- status tabs support repeated handoff work;
+- high-frequency actions are one click away;
+- table density is high and familiar to operators.
+
+Their failure is visual execution, not the existence of those controls:
+
+- too many saturated blue buttons;
+- warning/orange used as a workflow button instead of a risk state;
+- red row/text overuse for normal data;
+- visible vertical grid lines and heavy borders;
+- search, toolbar, tabs, and table all have similar visual weight.
+
+Over-minimal SaaS pages create the opposite failure:
+
+- daily filters are hidden behind extra clicks;
+- status tabs disappear even when users work by status all day;
+- toolbar actions become too few or too quiet;
+- the page looks premium but slows production work.
+
+Therefore, modernizing this system means **keeping the operational affordances and correcting color, hierarchy, grouping, and density**.
+
+## 2026 Enterprise SaaS Calibration
+
+When comparing against modern enterprise SaaS products, the valid critique is not "add more color" or "make everything larger." The valid critique is that the main work surface must avoid three old ERP signals:
+
+- overuse of blue tint on containers, headers, borders, and buttons;
+- visible vertical grid lines and repeated framed boxes;
+- flat same-weight zones where search, toolbar, table, and child table all feel equally bordered.
+
+The target standard is **Brand-Neutral Premium Dense**:
+
+1. Brand-neutral page base: calm, cool, and professional, but not flat gray.
+2. White working surfaces.
+3. Subtle shadow plus very light brand-neutral hairlines.
+4. Weak horizontal table separators.
+5. Primary color only for active, selected, focused, linked, and one main action.
+6. Semantic colors only for status, validation, risk, and destructive actions.
+7. Freight density preserved through compact controls and information rhythm, not through Excel-like borders.
+
+Do not copy consumer SaaS defaults into freight operations. Large 12px card radii, spacious 44-46px rows, and multicolor workflow buttons may look modern in a light dashboard, but they reduce first-screen throughput in high-frequency freight finance and operation workbenches. Use those only for low-frequency review or analytics pages with a documented archetype reason.
+
+## Deep-Sea Neutral Color Contract
+
+The default product palette is **deep-sea neutral**: cool, stable, professional, and logistics-oriented without turning the whole page blue.
+
+| Role | Token/value | Rule |
+|------|-------------|------|
+| Page workbench base | `--dense-page-bg: #F2F5F8` | Quiet cool base; not pure gray, not blue gradient. |
+| Primary work surface | `var(--color-bg-card)` / white | Search, toolbar, table card, drawer body. |
+| Header/cap surface | `--dense-table-header-bg: #FAFBFC`, `--dense-surface-head` | Neutral cool-white, not pale-blue admin fill or gray slab. |
+| Structural boundary | `--dense-card-border: #DCE5EC`, `--dense-brand-line: #D5E1EA` | Subtle freight-neutral hairline; never heavy blue frame. |
+| Row divider | `--dense-table-row-border: #EEF2F6` | Horizontal only by default; weak enough that rows still read as white data surface. |
+| Column divider | `--dense-table-col-border: transparent` | Vertical grid lines off unless a documented finance comparison exception exists. |
+| Hover/selected wash | `--dense-vxe-surface-hover-bg`, `--dense-workbench-hover-bg` | Very light primary wash, lower strength than header. |
+| Primary anchor | `--dense-primary-6/7` | Query, create, active segment, links, focus, one main action. |
+| Semantic states | `--dense-warning-*`, `--dense-success-*`, `--dense-danger-*`, `cyan/purple` aliases when available | Status, validation, risk, and destructive intent only. |
+
+Do not solve "too gray" with random accent colors. First check whether the page has the required anchors: active page segment, one primary action, scan-critical links, semantic status pills, selected/hover states, and neutral freight hairlines.
+
+Do not solve "too blue" by removing all primary anchors. The page needs enough primary rhythm to feel like a product, but blue must remain an interaction/status signal, not wallpaper.
 
 ## Color Rhythm
 
 | Layer | Rule |
 |------|------|
-| Page background | Use neutral Arco surfaces: `color-bg-body` / `color-fill-1`. Do not tint the whole page with primary. |
-| Cards | Use white `color-bg-card`, subtle border, and `--dense-shadow-card`. |
+| Page background | Use a brand-neutral cool surface via `--dense-page-bg`. Do not use flat gray or blue gradients as the page base. |
+| Cards | Use white `color-bg-card`, `--dense-shadow-card`, and the lightest practical brand-neutral boundary. Card boundaries must feel crisp, not gray or blue-framed. |
 | Active navigation | Use project primary aliases such as `--dense-primary-*`, not custom blue. |
-| Table header | Prefer `color-bg-card` / `color-fill-1`; use primary only as a thin anchor line or hover/selection tint. |
+| Table header | Use cool brand-neutral header fill (`--dense-table-header-bg`). Do not use gray sheet headers or blue gradients for normal workbench headers. |
 | Status | Use semantic tokens only: `warning`, `primary`, `success`, `danger`, `cyan`, `purple`, neutral. |
 | Disabled/empty | Use `color-text-4` and `color-fill-1/2`, only for low-priority information. |
 
@@ -37,8 +115,9 @@ Rules:
 
 - A viewport should have a small number of primary anchors: active nav, primary action, key links, and focused/selected state.
 - Search cards, toolbar rows, table caps, and table body default surfaces stay neutral unless they are in active/hover/selected state.
-- Do not solve “too gray” by tinting every container. Improve hierarchy through primary identifiers, status pills, table columns, and action priority first.
-- List module top borders are structural boundaries, not active-state anchors. Use `--dense-zone-top-border` consistently for `zone-l1-transport`, `zone-l2-filter-card`, `zone-l3-action`, and `zone-l4-table-card`; do not mix primary top borders with neutral top borders between adjacent modules.
+- Do not solve "too gray" by tinting every container. Improve hierarchy through brand-neutral hairlines, surface layering, primary identifiers, status pills, table columns, and action priority first.
+- Do not solve "too blue" by assigning arbitrary colors to workflow buttons. Buttons use type hierarchy; colors use semantic meaning.
+- List module top borders are structural brand hairlines, not active-state anchors. Use `--dense-zone-top-border` consistently for `zone-l1-transport`, `zone-l2-filter-card`, `zone-l3-action`, and `zone-l4-table-card`; do not mix primary top borders with plain gray top borders between adjacent modules.
 - If a raw theme token fix makes the page visibly bluer, reduce the semantic alias intensity or move that surface back to neutral.
 - `--dense-primary-1/2/3/4` are project semantic aliases. They may be weaker than the original theme scale to preserve long-term comfort.
 
@@ -106,19 +185,35 @@ Reason: depending on the import path, gi-demo theme values may be available as R
 - `color-fill-1/2` is only for secondary containers or disabled controls.
 - Main business values use `color-text-1`.
 - Interactive values use `--dense-primary-6` or another project semantic alias.
-- Page-level gray is allowed only as a quiet base. Key active navigation, primary operation, selected state, and core links must create a visible Arco-primary rhythm.
+- Page-level gray is allowed only as a quiet base. If the viewport reads as gray/white after active navigation, primary operation, selected state, core links, and status pills are visible, the surface fails the theme requirement.
 
-## Operational Surface Rhythm
+## Main Surface Standard
 
-Business users spend long sessions in list and detail pages. The interface must not become a gray ERP sheet. Use a blue-white operational rhythm:
+Business users spend long sessions in list and detail pages. The interface must not become a gray ERP sheet or a blue-tinted grid. Use this main surface model:
 
-- Page background is the quiet base: `--dense-page-bg`. It may be lightly blue-white, but it must not compete with cards.
-- Primary working surfaces are white or near-white: `color-bg-card`, `--dense-surface-section`, or `--dense-surface-head`.
-- Every major operational surface needs one restrained primary anchor: active segment, section title marker, table header tint, selected chip, identity band, or module summary rail.
-- Do not use gray fill as the main way to separate modules. Use white surfaces, subtle blue-tinted borders, section title markers, table header tint, and object-owned key facts.
+- Page background is the quiet base: `--dense-page-bg`, normally a cool brand-neutral surface, not plain gray.
+- Primary working surfaces are white: `color-bg-card`, `--dense-surface-section`, or `--dense-surface-head`.
+- Surface separation is created by gap, shadow, and brand-neutral boundary. Do not stack visible blue borders around every zone.
+- Every major operational surface needs one restrained anchor: active segment, section title marker, selected chip, identity band, primary identifier, or status system. It does not need a blue container background.
+- Do not use gray fill as the main way to separate modules. Use white surfaces, subtle brand-neutral boundaries, section title markers, object-owned key facts, and clear action grouping.
 - Repeated detail modules must have distinguishable levels: module head, module summary, child head, child body, and line table header. If all levels look like flat white/gray rows, the module fails PESDP.
 - Gray panels are allowed only for disabled, empty, inactive, or secondary background states. They must not contain primary identity, key facts, main form fields, or editable line data as if they were muted.
-- Long-session comfort comes from low saturation and consistent hierarchy, not from removing color. Use `--dense-primary-1/2/3` for surfaces and boundaries, `--dense-primary-6/7` only for anchors and interactive values.
+- Long-session comfort comes from low saturation and consistent hierarchy, not from removing all color. Use `--dense-brand-surface` / `--dense-brand-line` for structural rhythm, `--dense-primary-1/2/3` only for hover, selected, focus, and small anchors, and `--dense-primary-6/7` only for anchors and interactive values.
+
+### Main Surface Token Contract
+
+| Surface | Required token behavior |
+|---------|-------------------------|
+| `--dense-brand-surface` | Very light cool brand surface for small anchors and controlled rhythm. |
+| `--dense-brand-line` | Brand-neutral hairline for zone top boundaries; stronger than plain gray, weaker than active primary. |
+| `--dense-page-bg` | Cool brand-neutral page base, no flat gray and no blue gradient. |
+| `--dense-shadow-card` | Neutral elevation plus subtle 1px boundary; no blue glow. |
+| `--dense-card-border` | Very light brand-neutral boundary, not blue frame. |
+| `--dense-surface-head` | White/cool head surface; no gray slab and no blue gradient by default. |
+| `--dense-table-header-bg` | Cool neutral-white header fill, normally equivalent to `#FAFBFC`; avoid the old pale-blue admin header or gray sheet fill. |
+| `--dense-table-col-border` | Transparent or near-invisible by default; vertical grid lines must not dominate. |
+| `--dense-table-row-border` | Weak horizontal separator for scan rhythm. |
+| `--dense-workbench-hover-bg` | Light primary wash for interaction only. |
 
 ## Information Hierarchy
 
@@ -139,24 +234,38 @@ Hierarchy must be created through layout, typography, semantic color, and action
 - Do not use bigger font size as the first solution for weak hierarchy.
 - Detail header identity bands must expose the working object at scan distance: `key_state`, `primary_identity`, `business_context`, `owner`, and 3-6 object-owned `key_facts`. These values are business anchors, not meta notes.
 
+## Data-Driven Focus
+
+Data is the primary content. The visual system must make business data easier to understand, not compete with it.
+
+- A dense operational screen should make the current object, key state, key amount/date, responsible party, and next action visible before decorative chrome.
+- The strongest visual emphasis belongs to the current scope's primary business decision, not to every toolbar button, card edge, or table line.
+- Use typography, alignment, column order, grouping, and semantic status first; use color as a supporting signal.
+- If two or more areas compete for primary attention in the same scope, reduce emphasis before adding another accent.
+- Trust comes from stable layout, predictable interaction states, and restrained semantic color. Avoid saturated backgrounds, animated emphasis, and sudden layout shifts in workbench pages.
+
 ## Dense Table Color Hierarchy
 
-Workbench tables need a visible but restrained primary rhythm. A table that is technically compact but visually all gray fails PESDP.
+Workbench tables need a visible but restrained interaction rhythm. A table that is technically compact but visually all gray fails PESDP; a table with blue header gradients and vertical blue-gray grid lines also fails PESDP.
 
 Required:
 
-- Workbench list tables use `workbench-table` + global tokens: header `--dense-table-header-bg` (white → primary-2 gradient); hover `--dense-workbench-hover-bg` (light primary wash), not the same fill as the header. Do not add an extra `header-wrapper` bottom border — header/body separation comes from background contrast and row separators.
-- Table header may use a subtle Arco primary tint or primary border to anchor the grid.
+- Workbench list tables use `workbench-table` + global tokens: brand-neutral header `--dense-table-header-bg`; hover `--dense-workbench-hover-bg` (light primary wash), not the same fill as the header. Do not add an extra `header-wrapper` bottom border — header/body separation comes from background contrast and weak row separators.
+- Table header must be calm and neutral. Primary belongs to sortable/focused/selected states, links, and row hover accents, not normal header fill.
+- Vertical grid lines are off by default. If a finance page genuinely needs vertical separation for numeric comparison, use a very weak `--dense-table-col-border` and document the module exception.
 - Primary identifiers and business codes use `primary-6/7` links and medium/title weight.
 - Core business values such as primary identity, party/context, location, quantity, amount, due date, and other next-decision fields use `color-text-1`.
 - Dates and passive metadata may use `color-text-2`; empty values use `color-text-4`.
 - Status pills must be readable at scan distance; use semantic token level 7 for text when level 6 is too weak.
 - Row actions should be visible as actions but not compete with data: text/icon buttons with primary hover, no always-heavy button frames.
 - Zebra stripes must be very low contrast. They should support scanning, not create a gray page.
+- In dense workbench lists, default zebra should normally be disabled or `#FFFFFF`. Use row separators, hover, selected state, and primary identifiers for scan rhythm before adding stripe color.
 
 Avoid:
 
 - Header, body, stripe, fixed column, and toolbar all using similar gray fills.
+- Blue header gradients on normal workbench tables.
+- Repeated visible column borders that make the grid read like Excel.
 - Status labels that look like disabled text.
 - Action icons that look disabled before hover.
 - Making every code/link the same strength when one identifier is the primary object.
@@ -188,6 +297,7 @@ Detail pages must expose hierarchy across the whole vertical stack:
 - `dds-head` owns identity and actions. It may use a subtle top/inset primary anchor.
 - `dds-hero` owns 3-6 key facts. The lead fact may sit on a primary-1 surface or rail; supporting facts remain readable on white.
 - `detail-section` owns a module. It uses a white card, blue-tinted border, section title marker, and `--dense-surface-head` header. Do not render section heads as plain gray divider rows.
+- In the modern brand-neutral standard, `detail-section` uses a white card, brand-neutral boundary, restrained shadow, section title marker, and `--dense-surface-head` header. Blue-tinted borders are reserved for active/focused/selected module states, not normal module chrome.
 - `form-subgroup` owns an internal concept. It is a compact sub-surface with subtle left/inset primary-2 anchor, not another card and not a bare gray label.
 - `detail-module-summary--inline` owns module-level totals. It uses a primary rail and white stat cells; it must not look like a disabled gray table row.
 - `detail-mini-vxe` headers share `--dense-table-header-bg` with list tables. Detail child tables must not fall back to flat gray headers.
@@ -243,17 +353,18 @@ Risk labels:
 
 ## Premium Dense Rules
 
-- Prefer subtle border + surface hierarchy over strong shadows.
-- Prefer Arco default radius unless a global dense token already defines otherwise.
+- Prefer subtle shadow + surface hierarchy over visible borders. Use borders as the last 1px boundary, not as the main design language.
+- Prefer project dense radius (`--dense-radius`) unless a component has a documented exception. Do not use large consumer SaaS radius for dense freight pages.
 - Keep long-term reading comfortable: no heavy contrast blocks, no saturated full-width backgrounds.
 - Use whitespace as grouping rhythm, not as decorative emptiness.
 - If a page feels "plain", first improve hierarchy and business grouping, then adjust token-based color accents.
+- If a page feels "too gray", first check whether every major surface has a restrained brand anchor: active segment, primary action, selected rows, links/status pills, and `--dense-zone-top-border`. Do not fix it by adding gray fills or coloring every workflow button.
 
 ## Hard Bans
 
 - No standalone hex colors in new UI CSS.
 - No large gray panels that do not carry hierarchy.
-- No decorative gradients except the approved subtle page/surface tint based on Arco primary tokens.
+- No decorative blue gradients on page background, normal card heads, table headers, or table caps.
 - No `font-weight: 700/800` in business UI.
 - No negative letter spacing.
 - No large-radius consumer SaaS styling unless Arco default component radius produces it.

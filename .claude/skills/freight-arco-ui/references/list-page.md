@@ -17,6 +17,21 @@ The list page must feel like a freight operation workbench: search, scope/status
 
 This structure is fixed; the fields are not. Each list must map columns and filters from the current business object.
 
+## Operational Workbench Priority
+
+Freight list pages are production tools for sales, operators, and coordinators. They are not marketing dashboards and not read-only analytics pages.
+
+Priority:
+
+1. Keep daily business data visible.
+2. Keep high-frequency search/status/action paths short.
+3. Keep long-session visual comfort through neutral surfaces and low noise.
+4. Add visual beauty only when it improves scanning, confidence, or error prevention.
+
+For data-dominant workbench pages, the first viewport should normally allocate 70-80% of usable page space to the data area. The practical target is 75% data space after the default search/action/status area. This number is not a rigid rule for drawers, editing pages, or exception review flows.
+
+Daily status tabs and daily reversible actions should stay visible when operators use them repeatedly. Hiding them behind "More" only to look cleaner is a PESDP failure.
+
 ## Zone Boundary
 
 List zones use one neutral module boundary rhythm. `zone-l1-transport`, `zone-l2-filter-card`, `zone-l3-action`, and `zone-l4-table-card` all use `border-top: 1px solid var(--dense-zone-top-border)`.
@@ -134,9 +149,10 @@ Rules:
 Order operations by business priority:
 
 1. Main action: create/new/submit, `primary`.
-2. Secondary direct actions: export/print/batch, `outline`.
-3. Low-frequency actions: `More` dropdown.
-4. Utility actions: refresh/settings/density, right side icon-only `text` + tooltip. Table-only tools may move into `table-card-cap` only when that cap already carries pagination or non-repeated table context.
+2. Daily reversible workflow actions: direct `secondary` or `outline` buttons, grouped with dividers/dropdowns when needed.
+3. Output/batch groups: visible dropdown triggers when used daily.
+4. Low-frequency, risky, or maintenance actions: `More` dropdown.
+5. Utility actions: refresh/settings/density, right side icon-only `text` + tooltip. Table-only tools may move into `table-card-cap` only when that cap already carries pagination or non-repeated table context.
 
 Refresh is a utility, not the first business operation.
 
@@ -149,6 +165,7 @@ Toolbar actions are chosen by workflow:
 - Batch action only when multi-selection exists and the operation is safe or confirmed.
 - Refresh/settings/density/columns are utilities, not business actions.
 - Column settings, density, pagination, and other table-only utilities can sit in `toolbar-aside` for compact pages. Move them beside pagination in `table-card-cap` only when the cap is already needed; do not create an otherwise empty cap just for a tool icon or pagination.
+- For high-frequency production pages, 5-7 visible toolbar commands are acceptable when they are grouped, neutral, and do not wrap. The rule is not "few buttons"; the rule is "one primary, clear grouping, no color noise, no line wrap."
 
 ## Table Cap And Pagination
 
@@ -166,6 +183,7 @@ Toolbar actions are chosen by workflow:
 - Active state uses Arco primary tokens and no native black focus border.
 - Count badges use semantic tokens only when they carry risk/attention.
 - Use status tabs only when users actually filter by that state many times per day.
+- If sales/operators process the list by state every day, status tabs are required visible workflow controls, not optional decoration.
 - Do not create fake status tabs just to fill the layout.
 - Small-screen behavior follows `responsive.md`: below `1280px`, status groups may move to a second row and must scroll inside `stat-tab-group` rather than forcing page-level horizontal overflow.
 
@@ -195,6 +213,7 @@ Use them to choose equivalent identity, status, next-decision, and supporting fi
 - Keep row/card gaps predictable: 8-12px.
 - Do not compress search labels into controls.
 - Keep table as the dominant screen area.
+- On table-dominant production workbenches, the default search + toolbar + status area should not become a form wall. It should leave the table visible in the first viewport and target 70-80% data ownership.
 - Operational list pages must keep a small viewport bottom breathing space, usually 8-10px from `page-root--dense` bottom padding.
 - The bottom breathing space is a global list-page contract: `page-root--dense` uses `padding-bottom: var(--dense-page-bottom-space)`. Do not solve it per page with table padding, fake rows, footer margins, or page-scoped overrides.
 - The table card should flex to fill available space, but it must not visually touch the browser or app viewport bottom when scrolled to the last row.
@@ -202,7 +221,8 @@ Use them to choose equivalent identity, status, next-decision, and supporting fi
 
 ## Common Mistakes
 
-- All buttons exposed at once.
+- Hiding daily workflow buttons or status tabs only to look minimal.
+- All buttons exposed with the same blue/outline weight.
 - Pagination at bottom or mixed with unrelated toolbar actions.
 - Duplicating total count in both table cap and pagination.
 - Gray search/tool/table bands with no primary anchor.

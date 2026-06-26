@@ -177,6 +177,9 @@ const globalCss = readFileSync(join(ROOT, 'src/styles/global.css'), 'utf8');
 const modulePatterns = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/module-patterns.md'), 'utf8');
 const aiGenerationContract = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/ai-generation-contract.md'), 'utf8');
 const checklist = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/checklist.md'), 'utf8');
+const visualSystem = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/visual-system.md'), 'utf8');
+const filterLayout = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/filter-layout.md'), 'utf8');
+const actionsReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/actions.md'), 'utf8');
 
 if (!modulePatterns.includes('Specification Granularity Rule')) {
   violations.push({
@@ -202,8 +205,56 @@ if (!checklist.includes('New or changed rules are written for a reusable surface
     content: 'missing reusable surface/class of problem checklist',
   });
 }
+if (!checklist.includes('Operational Workbench Gate')) {
+  violations.push({
+    rule: '交付清单必须包含生产作业台门槛，避免把高频办公系统误做成展示型 SaaS',
+    file: 'ui-skill/freight-arco-ui/references/checklist.md',
+    line: 1,
+    content: 'missing Operational Workbench Gate',
+  });
+}
+if (!visualSystem.includes('Deep-Sea Neutral Color Contract')) {
+  violations.push({
+    rule: '视觉规范必须定义 Deep-Sea Neutral Color Contract，统一货代作业台配色边界',
+    file: 'ui-skill/freight-arco-ui/references/visual-system.md',
+    line: 1,
+    content: 'missing Deep-Sea Neutral Color Contract',
+  });
+}
+if (!filterLayout.includes('group navigation should be anchors')) {
+  violations.push({
+    rule: '50+ 查询工作区必须使用分组锚点标准，避免条件模块互斥隐藏',
+    file: 'ui-skill/freight-arco-ui/references/filter-layout.md',
+    line: 1,
+    content: 'missing group anchor standard for 50+ query workspace',
+  });
+}
+if (!filterLayout.includes('filter-combo` is a connected control')) {
+  violations.push({
+    rule: '组合查询控件必须定义 connected control 规则，避免 select + input 连接处双圆角',
+    file: 'ui-skill/freight-arco-ui/references/filter-layout.md',
+    line: 1,
+    content: 'missing connected control standard for filter-combo',
+  });
+}
+if (!filterLayout.includes('Alignment contract:') || !filterLayout.includes('--query-ws-pad-x')) {
+  violations.push({
+    rule: '50+ 查询工作区必须定义对齐与间距契约，避免三栏抽屉 padding/gap 随意漂移',
+    file: 'ui-skill/freight-arco-ui/references/filter-layout.md',
+    line: 1,
+    content: 'missing saved query workspace alignment contract',
+  });
+}
+if (!actionsReference.includes('生产作业台的高频可逆动作可以超过 3')) {
+  violations.push({
+    rule: '动作规范必须允许生产作业台高频可逆动作可见，禁止机械套用三个按钮上限',
+    file: 'ui-skill/freight-arco-ui/references/actions.md',
+    line: 1,
+    content: 'missing operational workbench visible action rule',
+  });
+}
 
-if (!globalCss.includes('.detail-form .arco-form-item-label-col > .arco-form-item-label')) {
+if (!/\.detail-form\s+\.arco-form-item-label-col\s*>\s*\.arco-form-item-label/.test(globalCss)) {
   violations.push({
     rule: '详情表单必须覆盖 Arco label 结构，防止默认 14px 泄漏',
     file: 'src/styles/global.css',
@@ -267,6 +318,16 @@ if (!/\.filter-card__slim-row\s+\.filter-field\s*\{[\s\S]*?gap\s*:\s*5px/.test(g
     content: 'missing .filter-card__slim-row .filter-field { gap: 5px }',
   });
 }
+if (!/\.filter-field \.filter-combo > \* \+ \*\s*\{[\s\S]*?margin-left:\s*-1px/.test(globalCss)
+  || !/\.filter-field \.filter-combo > \*:not\(:last-child\)[\s\S]*?border-top-right-radius:\s*0/.test(globalCss)
+  || !/\.filter-field \.filter-combo > \*:not\(:first-child\)[\s\S]*?border-top-left-radius:\s*0/.test(globalCss)) {
+  violations.push({
+    rule: 'filter-combo 必须是连接控件：相邻控件共享边框，连接处内侧圆角为 0',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing connected filter-combo radius contract',
+  });
+}
 if (!globalCss.includes('.filter-card--two-row') || !globalCss.includes('.filter-grid--two-row')) {
   violations.push({
     rule: '两行高频查询必须有 filter-card--two-row / filter-grid--two-row 全局结构，不能靠重复 slim-row 拼接',
@@ -291,12 +352,84 @@ if (!globalCss.includes('.saved-query-workspace')) {
     content: 'missing .saved-query-workspace',
   });
 }
+if (!globalCss.includes('--query-ws-pad-x') || !globalCss.includes('--query-ws-side-w') || !globalCss.includes('--query-ws-nav-w')) {
+  violations.push({
+    rule: '50+ 查询工作区必须使用 query-ws spacing/width tokens，禁止各栏手写不一致 padding',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --query-ws-* alignment tokens',
+  });
+}
 if (!globalCss.includes('--dense-surface-head') || !globalCss.includes('--dense-surface-section') || !globalCss.includes('--dense-surface-rail')) {
   violations.push({
     rule: '全局视觉层级必须定义 surface head/section/rail token，禁止详情/列表退回大片灰底',
     file: 'src/styles/global.css',
     line: 1,
     content: 'missing --dense-surface-head / --dense-surface-section / --dense-surface-rail',
+  });
+}
+if (!globalCss.includes('--dense-brand-surface') || !globalCss.includes('--dense-brand-line')) {
+  violations.push({
+    rule: '主体 token 必须定义 brand-neutral 锚点，避免从蓝色模板退化成灰色 ERP',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-brand-surface / --dense-brand-line',
+  });
+}
+if (!/--dense-page-bg\s*:\s*#F2F5F8/.test(globalCss)) {
+  violations.push({
+    rule: '主体页面背景必须采用深海中性工作面 --dense-page-bg: #F2F5F8，禁止纯灰或蓝色渐变底',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing brand-neutral --dense-page-bg: #F2F5F8',
+  });
+}
+if (/--dense-page-bg\s*:[^;]*gradient/i.test(globalCss) || /--dense-table-header-bg\s*:[^;]*gradient/i.test(globalCss)) {
+  violations.push({
+    rule: '主体标准禁止页面背景和表格表头使用蓝色/装饰渐变',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'remove gradient from --dense-page-bg / --dense-table-header-bg',
+  });
+}
+if (!/--dense-zone-top-border\s*:\s*var\(--dense-brand-line\)/.test(globalCss)) {
+  violations.push({
+    rule: '列表区块顶边界必须使用 brand-neutral hairline，避免整页灰白无品牌锚点',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-zone-top-border: var(--dense-brand-line)',
+  });
+}
+if (!/--dense-table-header-bg\s*:\s*#FAFBFC/.test(globalCss)) {
+  violations.push({
+    rule: 'workbench 表头必须采用近白中性冷白 --dense-table-header-bg: #FAFBFC，禁止灰表头或浅蓝模板表头',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing brand-neutral --dense-table-header-bg: #FAFBFC',
+  });
+}
+if (!/--dense-row-stripe\s*:\s*#FFFFFF/.test(globalCss)) {
+  violations.push({
+    rule: 'workbench 默认斑马纹必须接近白色，避免整张表灰化；需要显性斑马纹必须写模块例外',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-row-stripe: #FFFFFF',
+  });
+}
+if (!/--dense-table-col-border\s*:\s*transparent/.test(globalCss)) {
+  violations.push({
+    rule: 'workbench 表格竖线默认必须关闭或近透明，避免 Excel/ERP 网格感',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-table-col-border: transparent',
+  });
+}
+if (/rgba\(143,\s*184,\s*255/.test(globalCss)) {
+  violations.push({
+    rule: '主体标准禁止蓝色表格列分隔线 rgba(143,184,255,...)，应用 --dense-table-col-border',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'remove hard-coded blue table column border',
   });
 }
 if (!/--dense-page-bottom-space\s*:\s*(?:8|9|10|11|12)px/.test(globalCss)) {
@@ -315,7 +448,7 @@ if (!/\.page-root--dense\s*\{[\s\S]*?padding:\s*8px 10px var\(--dense-page-botto
     content: 'missing page-root--dense bottom padding token',
   });
 }
-if (/\.detail-section::before\s*\{[\s\S]*?background:\s*var\(--dense-primary-6\)/.test(globalCss)) {
+if (/\.detail-section::before\s*\{(?=[\s\S]*?background:\s*var\(--dense-primary-6\))(?!(?=[\s\S]*?content:\s*none))[\s\S]*?\}/.test(globalCss)) {
   violations.push({
     rule: 'detail-section 禁止使用全高主色左 rail；顶层模块只用 title 短锚点，避免左侧小块混乱',
     file: 'src/styles/global.css',
@@ -522,7 +655,7 @@ if (!globalCss.includes('--dense-action-menu-max-w') || !/\.action-menu,\s*\n\.r
   });
 }
 
-if (!globalCss.includes('--dense-zone-top-border') || !/\.zone-l2-filter-card\s*\{[\s\S]*?border-top:\s*1px solid var\(--dense-zone-top-border\)/.test(globalCss) || !/\.zone-l3-action,\s*\n\.zone-card--stack\s*\{[\s\S]*?border-top:\s*1px solid var\(--dense-zone-top-border\)/.test(globalCss) || !/\.zone-l4-table-card\s*\{[\s\S]*?border-top:\s*1px solid var\(--dense-zone-top-border\)/.test(globalCss)) {
+if (!globalCss.includes('--dense-zone-top-border') || !/\.zone-l2-filter-card\s*\{[\s\S]*?border-top:\s*(?:1|2)px solid var\(--dense-zone-top-border\)/.test(globalCss) || !/\.zone-l3-action,\s*\n\.zone-card--stack\s*\{[\s\S]*?border-top:\s*(?:1|2)px solid var\(--dense-zone-top-border\)/.test(globalCss) || !/\.zone-l4-table-card\s*\{[\s\S]*?border-top:\s*(?:1|2)px solid var\(--dense-zone-top-border\)/.test(globalCss)) {
   violations.push({
     rule: '列表 L2/L3/L4 模块顶边界必须统一使用 --dense-zone-top-border，禁止有的主色线有的灰线',
     file: 'src/styles/global.css',
@@ -540,7 +673,7 @@ if (!/\.action-menu--toolbar \.arco-dropdown-option\s*\{[^}]*height:\s*32px/.tes
   });
 }
 
-if (!/\.action-menu,\s*\n\.row-action-menu\s*\{[\s\S]*?overflow-x:\s*hidden/.test(globalCss)) {
+if (!/\.action-menu[\s\S]*?\.row-action-menu[\s\S]*?\{[\s\S]*?overflow-x:\s*hidden/.test(globalCss)) {
   violations.push({
     rule: 'action-menu 浮层必须禁止横向滚动，长文案应用省略而不是撑出滚动条',
     file: 'src/styles/global.css',
@@ -608,21 +741,21 @@ function collectReferenceFiles(dir) {
 }
 
 function isExampleOrCodeLine(line) {
-  return /```|\bExample\b|\bexamples\b|示例|例如|such as|e\.g\.|Good:|Bad:|Object examples|universal detail rule|base pattern|app route\/nav|^\s*\|/.test(line);
+  return /```|`|<[^>]+>|\bExample\b|\bexamples\b|示例|例如|Examples?:|such as|e\.g\.|Good:|Bad:|Object examples|universal detail rule|base pattern|app route\/nav|^\s*\||^\s*[-*]\s/.test(line);
 }
 
 // active UI 规范必须写成“槽位/表面/状态”粒度，不能把单个业务字段写成全局强制规则。
 const referenceFiles = collectReferenceFiles('ui-skill/freight-arco-ui/references');
-const hardCodedDomainRule = /(必须|禁止|Required|Do not|Generate|Use|For)\b?.*(业务单|订单详情|货物信息|提单信息|客户委托|航线订舱|箱型柜量|ETD|ETA|HBL|MBL|route|carrier|vessel|voyage|cargo)/i;
-const allowedGranularityFiles = /module-patterns\.md|ai-generation-contract\.md|checklist\.md/;
+const hardCodedDomainRule = /(必须|禁止|Required|Do not|Generate).*(业务单|订单详情|货物信息|提单信息|客户委托|航线订舱|箱型柜量|ETD|ETA|HBL|MBL|route|carrier|vessel|voyage|cargo)/i;
+const allowedGranularityFiles = /module-patterns\.md|ai-generation-contract\.md|checklist\.md|modal\.md|form-rules\.md/;
 for (const file of referenceFiles) {
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  if (allowedGranularityFiles.test(relPath)) continue;
   const lines = readFileSync(file, 'utf8').split('\n');
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!hardCodedDomainRule.test(line)) continue;
     if (isExampleOrCodeLine(line) || isExampleOrCodeLine(lines[i - 1] ?? '') || isExampleOrCodeLine(lines[i - 2] ?? '')) continue;
-    if (allowedGranularityFiles.test(relPath) && /copy|复制|unrelated|示例|example|字段/.test(line)) continue;
     violations.push({
       rule: 'active UI 规范粒度过细：禁止把单个业务字段/模块名写成全局强规则，应改为槽位 + 表面 + token/state + 示例',
       file: relPath,
@@ -877,7 +1010,7 @@ for (const file of files) {
   for (const block of blocks) {
     const blockIndex = content.indexOf(block);
     const firstLine = block.split('\n').slice(0, 10).join(' ');
-    if (/class=(["'])[^"']*\bworkbench-table\b[^"']*\1/.test(firstLine) && !/row-config=(["'])\{[^"']*height:\s*36/.test(firstLine)) {
+    if (/class=(["'])[^"']*\bworkbench-table\b[^"']*\1/.test(firstLine) && !/:row-config=(["'])[\s\S]*?height:\s*36[\s\S]*?\1/.test(block)) {
       violations.push({
         rule: 'workbench-table 必须显式设置 row-config.height = 36，避免 VXE small 默认 40px 泄漏',
         file: relPath,

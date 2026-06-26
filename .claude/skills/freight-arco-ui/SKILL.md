@@ -26,6 +26,17 @@ Project-level **UI delivery contract** for `FE.OHL.WEB.UI`.
 
 **Rule:** Structure in English slots → labels from `domain-language.md` → CSS from `global.css` → details in topic references. Do not duplicate long rule blocks across `AGENTS.md` / `CLAUDE.md` / skill.
 
+## Four-Layer Prompt Model
+
+All agents should understand the project in this order:
+
+1. **Product Positioning** — build a professional freight operations workbench for sales, operators, and coordinators, not a decorative dashboard or traditional ERP sheet.
+2. **Design Philosophy** — business workflows, readability, consistency, trust, and operational efficiency come before decoration.
+3. **Visual Language** — restrained Arco-based enterprise SaaS: brand-neutral surfaces, white work areas, clear hierarchy, high density, low visual noise; never flat gray ERP or blue-tinted admin.
+4. **Implementation Rules** — use `global.css` tokens, Arco/VXE components, skill references, and `check-spec` rules.
+
+Do not jump from positioning directly to custom visuals. Every visual decision must pass through philosophy and implementation rules first.
+
 ## PESDP
 
 - **Professional** — freight/logistics language and structure
@@ -34,7 +45,27 @@ Project-level **UI delivery contract** for `FE.OHL.WEB.UI`.
 - **Dense** — high information, not cramped chaos
 - **Premium** — hierarchy and restraint, not decoration
 
+## PESDP+ Operating Principles
+
+- **Consistency** — one design language across tokens, components, spacing, colors, icons, interactions, and behavior.
+- **Readability** — key identity, state, amount/date, and next action must be scannable within seconds.
+- **Action-first** — operations stay close to the data they affect; use inline actions, drawers, and contextual flows before page transitions.
+- **Focus** — each scope has one primary focus and one primary action; avoid competing emphasis points.
+- **Trust** — restrained colors, stable layouts, predictable interactions, and clear confirmation for risk.
+- **Business Before UI** — visual decisions serve freight workflows and business efficiency before decoration.
+- **Information First** — data is the product; visual design improves understanding and must not compete with information.
+
 Priority: **efficiency > information > interaction > visual decoration**
+
+## Operational Workbench Calibration
+
+The product is used by freight sales, operators, and coordinators for continuous office work. The interface must optimize for high-frequency business throughput first, long-session visual comfort second, and visual beauty third.
+
+Target experience: a modern international freight ERP/SaaS workbench. It should preserve dense visible business data, short operation paths, status scanning, and stable repeated workflows while removing old ERP signals such as heavy grids, all-blue buttons, gray form walls, and unclear hierarchy.
+
+For list/workbench pages, aim to keep most first-screen space owned by business data, normally 70-80% when the module is table-dominant. Treat 75% as a workbench target, not a universal rule for detail, review, modal, or exception pages.
+
+Do not hide daily filters, status tabs, or reversible workflow actions merely to look minimal. Modern restraint means neutral grouping, semantic color, and one clear primary anchor, not removing the controls operators need all day.
 
 ## First Load (minimal)
 
