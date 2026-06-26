@@ -53,8 +53,14 @@ interface PendingWriteOffRow {
 }
 
 // ─── Table refs ───────────────────────────────────────────────────────────────
-const xTable = ref<VxeTableInstance>()
-const xSubTable = ref<VxeTableInstance>()
+type VxeTableWithCustom = VxeTableInstance & { openCustom?: () => void }
+
+const xTable = ref<VxeTableWithCustom>()
+const xSubTable = ref<VxeTableWithCustom>()
+
+const openTableCustom = (table?: VxeTableWithCustom) => {
+  table?.openCustom?.()
+}
 
 // ─── Filter state ─────────────────────────────────────────────────────────────
 const advancedFilterVisible = ref(false)
@@ -561,7 +567,7 @@ function handleViewDetail(row: PaymentRow) {
             :page-size-options="[50, 100, 200]"
           />
           <a-tooltip content="列设置">
-            <a-button size="small" type="text" class="table-card-cap__tool" @click="xTable?.openCustom()">
+            <a-button size="small" type="text" class="table-card-cap__tool" @click="openTableCustom(xTable)">
               <template #icon><icon-settings /></template>
             </a-button>
           </a-tooltip>
@@ -663,7 +669,7 @@ function handleViewDetail(row: PaymentRow) {
             </a-button>
           </a-tooltip>
           <a-tooltip content="列设置">
-            <a-button size="small" type="text" @click="xSubTable?.openCustom()">
+            <a-button size="small" type="text" @click="openTableCustom(xSubTable)">
               <template #icon><icon-settings /></template>
             </a-button>
           </a-tooltip>

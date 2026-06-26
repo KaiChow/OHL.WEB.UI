@@ -164,7 +164,9 @@ Toolbar actions are chosen by workflow:
 - Export/print/import when the page has reporting or document output.
 - Batch action only when multi-selection exists and the operation is safe or confirmed.
 - Refresh/settings/density/columns are utilities, not business actions.
-- Column settings, density, pagination, and other table-only utilities can sit in `toolbar-aside` for compact pages. Move them beside pagination in `table-card-cap` only when the cap is already needed; do not create an otherwise empty cap just for a tool icon or pagination.
+- Batch business actions belong with the left `toolbar-group` workflow buttons, usually as `批量操作↓`; do not isolate them in the right utility area.
+- Column settings, density, pagination, refresh, and other table-only utilities can sit in `toolbar-aside` for compact pages. When a meaningful `table-card-cap` exists, put refresh at `table-card-cap__start` before selection feedback, and keep pagination/settings/density in `table-card-cap__right`; do not create an otherwise empty cap just for a tool icon or pagination.
+- When row selection is active and a meaningful `table-card-cap` exists, put selected-row feedback in `table-card-cap__start`: `toolbar-selection-context` (`已选 N 条` + `清空`). Keep total count in pagination `show-total`; do not repeat `共 N 条` on the cap left.
 - For high-frequency production pages, 5-7 visible toolbar commands are acceptable when they are grouped, neutral, and do not wrap. The rule is not "few buttons"; the rule is "one primary, clear grouping, no color noise, no line wrap."
 
 ## Table Cap And Pagination
@@ -172,7 +174,7 @@ Toolbar actions are chosen by workflow:
 - Pagination belongs in `table-card-cap` at the top-right of the table card when the cap is already part of the table structure. For compact pages without a meaningful cap, use `toolbar-pager` in `toolbar-aside` so pagination remains visible without adding an empty horizontal band.
 - Total count is shown by the pagination component (`show-total`) when needed.
 - Do not repeat the same total as a separate left-side `共 N 条` summary when pagination already shows it.
-- Column settings, density, and other table-only utilities live beside pagination when a meaningful `table-card-cap` exists; otherwise keep them as right-side toolbar utilities.
+- Refresh lives at the left edge of `table-card-cap` when a meaningful cap exists, because it is a high-frequency table action that should stay close to the table header. Column settings, density, and pagination live on the cap right; otherwise keep table tools as right-side toolbar utilities.
 - Do not render an empty `table-card-cap` between the toolbar and table header. If it only contains one or two utility icons and no pagination/context, it creates a dead horizontal band and should be removed.
 - The left side of `table-card-cap` should stay empty unless it adds non-duplicated context such as selected-row feedback or a real grouped-table title.
 - Do not use table cap for page titles, instructions, KPI summaries, or duplicated status counts.

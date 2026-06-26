@@ -386,11 +386,11 @@ body,
   --dense-border-subtle: #E8EEF3;
   --dense-row-stripe: #FFFFFF;
   --dense-table-header-bg: #FAFBFC;
-  --dense-table-header-border: #E6ECF2;
+  --dense-table-header-border: #DDE8F1;
   /* 全项目 VXE 数据表共用交互色（列表 workbench-table + 详情 detail-mini-vxe） */
-  --dense-vxe-surface-hover-bg: #F8FBFF;
-  --dense-vxe-surface-checked-bg: #EFF6FF;
-  --dense-vxe-surface-checked-hover-bg: #EAF3FF;
+  --dense-vxe-surface-hover-bg: #EFF6FF;
+  --dense-vxe-surface-checked-bg: #E4F0FF;
+  --dense-vxe-surface-checked-hover-bg: #DCEBFF;
   --dense-workbench-hover-bg: var(--dense-vxe-surface-hover-bg);
   --dense-workbench-checked-bg: var(--dense-vxe-surface-checked-bg);
   --dense-workbench-checked-hover-bg: var(--dense-vxe-surface-checked-hover-bg);
@@ -401,7 +401,7 @@ body,
   --dense-mini-vxe-checked-bg: var(--dense-vxe-surface-checked-bg);
   --dense-mini-vxe-checked-hover-bg: var(--dense-vxe-surface-checked-hover-bg);
   --dense-table-col-border: transparent;
-  --dense-table-row-border: #EEF2F6;
+  --dense-table-row-border: #E7EEF5;
   --dense-table-empty-bg: #FFFFFF;
   --dense-table-fixed-bg: #FFFFFF;
   --dense-table-fixed-shadow: -6px 0 14px rgba(16, 24, 40, 0.032);
@@ -464,11 +464,13 @@ body,
   --vxe-ui-table-column-current-background-color: var(--dense-vxe-surface-checked-bg);
   --vxe-ui-table-column-hover-current-background-color: var(--dense-vxe-surface-checked-hover-bg);
   --vxe-table-border-color: var(--dense-table-row-border);
+  --vxe-table-border-width: 1px;
   --vxe-table-resizable-line-color: var(--dense-table-row-border);
   --vxe-table-resizable-drag-line-color: var(--dense-primary-4);
   --vxe-table-column-icon-border-color: var(--color-text-4);
   --vxe-table-column-icon-border-hover-color: var(--dense-primary-6);
   --vxe-ui-table-border-color: var(--dense-table-row-border);
+  --vxe-ui-table-border-width: 1px;
   --vxe-ui-table-resizable-line-color: var(--dense-table-row-border);
   --vxe-ui-table-resizable-drag-line-color: var(--dense-primary-4);
   --vxe-ui-table-column-icon-border-color: var(--color-text-4);
@@ -651,7 +653,7 @@ button:-moz-focusring,
   border-radius: var(--dense-radius);
 }
 
-/* 表格顶栏：分页/列设置承载表格工具，不重复展示统计 */
+/* 表格顶栏：分页承载总数，左侧仅放非重复上下文（如勾选统计） */
 .table-card-cap {
   display: flex;
   align-items: center;
@@ -660,8 +662,8 @@ button:-moz-focusring,
   padding: 0 14px;
   height: 36px;
   flex-shrink: 0;
-  background: var(--dense-surface-head);
-  border-bottom: 1px solid var(--dense-border-subtle);
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--dense-table-header-border);
 }
 
 .table-card-cap--primary {
@@ -2197,6 +2199,42 @@ button:-moz-focusring,
   flex-shrink: 0;
 }
 
+.toolbar-selection-context {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 6px 0 9px;
+  border: 1px solid var(--dense-primary-2);
+  border-radius: var(--dense-radius);
+  background: var(--dense-primary-1);
+  color: var(--dense-primary-7);
+  white-space: nowrap;
+}
+
+.toolbar-selected-tip {
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 500;
+}
+
+.toolbar-selected-tip b {
+  font-weight: 700;
+}
+
+.toolbar-selection-clear.arco-btn {
+  height: 24px !important;
+  padding: 0 6px !important;
+  border: 0 !important;
+  color: var(--dense-primary-7) !important;
+  background: transparent !important;
+}
+
+.toolbar-selection-clear.arco-btn:hover {
+  color: var(--dense-primary-8) !important;
+  background: rgba(22, 93, 255, 0.08) !important;
+}
+
 /* 工具栏/筛选区按钮：禁止 hover 位移与浮起阴影 */
 .toolbar .arco-btn:hover,
 .toolbar .arco-btn:focus-visible,
@@ -2357,6 +2395,8 @@ button:-moz-focusring,
 }
 
 .vxe-table .vxe-header--column {
+  height: var(--dense-header-h) !important;
+  padding: 0 !important;
   font-size: var(--dense-font-title) !important;
   font-weight: var(--dense-weight-title) !important;
   color: var(--color-text-1) !important;
@@ -2364,7 +2404,7 @@ button:-moz-focusring,
   letter-spacing: 0;
   text-transform: none;
   border-right: 1px solid var(--dense-table-col-border) !important;
-  border-bottom: none !important;
+  border-bottom: 1px solid var(--dense-table-header-border) !important;
 }
 
 .vxe-table .vxe-header--column:last-child {
@@ -2407,6 +2447,8 @@ button:-moz-focusring,
 .vxe-table.compact {
   --vxe-table-row-height-small: var(--dense-row-h);
   --vxe-table-row-height-mini: var(--dense-row-h);
+  --vxe-table-column-padding-small: 0;
+  --vxe-table-column-padding-mini: 0;
   --vxe-table-cell-padding-small: 4px 8px;
   --vxe-table-cell-padding-mini: 3px 8px;
   --vxe-ui-table-row-height-small: var(--dense-row-h);
@@ -2418,6 +2460,19 @@ button:-moz-focusring,
 .vxe-table.compact .vxe-body--row,
 .vxe-table.compact .vxe-body--column {
   height: var(--dense-row-h) !important;
+}
+
+.vxe-table.compact .vxe-header--row,
+.vxe-table.compact .vxe-header--column {
+  height: var(--dense-header-h) !important;
+}
+
+.vxe-table.compact .vxe-header--column .vxe-cell {
+  min-height: 0 !important;
+  height: var(--dense-header-h) !important;
+  line-height: var(--dense-header-h) !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .vxe-table.compact .vxe-body--column.is--padding .vxe-cell {
@@ -2600,10 +2655,13 @@ button:-moz-focusring,
 }
 
 .vxe-table.workbench-table .vxe-header--column {
+  height: var(--dense-header-h) !important;
+  padding: 0 !important;
   color: var(--color-text-1) !important;
   background: var(--dense-table-header-bg) !important;
   font-weight: var(--dense-weight-title) !important;
   border-right: 1px solid var(--dense-table-col-border) !important;
+  border-bottom: 1px solid var(--dense-table-header-border) !important;
 }
 
 .vxe-table.workbench-table .vxe-header--column.col--fixed-left,
@@ -2649,11 +2707,11 @@ button:-moz-focusring,
 
 .vxe-table.workbench-table .vxe-body--row.row--hover .vxe-body--column:first-child,
 .vxe-table.workbench-table .vxe-body--row:hover .vxe-body--column:first-child {
-  box-shadow: none;
+  box-shadow: inset 2px 0 0 var(--dense-primary-4);
 }
 
 .vxe-table.workbench-table .vxe-body--row.row--checked .vxe-body--column:first-child {
-  box-shadow: none;
+  box-shadow: inset 2px 0 0 var(--dense-primary-5);
 }
 
 .vxe-table.workbench-table .vxe-body--column.col--fixed-right {
@@ -3122,6 +3180,31 @@ button:-moz-focusring,
 }
 
 .link-text--strong:hover {
+  color: var(--dense-primary-deep);
+  text-decoration: underline;
+}
+
+.link-text.c2-main,
+.link-text--strong.c2-main {
+  color: var(--dense-primary-7);
+  font-weight: var(--dense-weight-title);
+}
+
+.link-text.c2-main:hover,
+.link-text--strong.c2-main:hover {
+  color: var(--dense-primary-deep);
+}
+
+.link-primary {
+  color: var(--dense-primary-6);
+  cursor: pointer;
+  font-size: var(--dense-font-data);
+  font-weight: var(--dense-weight-title);
+  text-decoration: none;
+  transition: color .1s;
+}
+
+.link-primary:hover {
   color: var(--dense-primary-deep);
   text-decoration: underline;
 }

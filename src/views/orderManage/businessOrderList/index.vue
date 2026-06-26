@@ -56,7 +56,12 @@ interface BusinessOrderRow {
   priority: 'normal' | 'warn' | 'risk';
 }
 
-const xTable = ref<VxeTableInstance>();
+type VxeTableWithCustom = VxeTableInstance & {
+  openCustom?: () => void;
+  clearCheckboxRow?: () => void;
+};
+
+const xTable = ref<VxeTableWithCustom>();
 const queryEditorRef = ref<HTMLElement>();
 const advancedVisible = ref(false);
 const activeGroupKey = ref('identifiers');
@@ -348,16 +353,30 @@ const handleReset = () => {
   Object.assign(q, createQuery());
 };
 
+const resetAdvancedField = (field: AdvancedField, base: ReturnType<typeof createQuery>) => {
+  const key = field.key as keyof ReturnType<typeof createQuery>;
+  (q as Record<string, unknown>)[field.key] = base[key];
+};
+
 const clearAdvanced = () => {
   const base = createQuery();
   for (const group of advancedGroups) {
-    for (const field of group.fields) q[field.key] = base[field.key];
+    for (const field of group.fields) resetAdvancedField(field, base);
   }
 };
 
 const clearAdvancedGroup = (group: AdvancedGroup) => {
   const base = createQuery();
-  for (const field of group.fields) q[field.key] = base[field.key];
+  for (const field of group.fields) resetAdvancedField(field, base);
+};
+
+const openTableCustom = () => {
+  xTable.value?.openCustom?.();
+};
+
+const clearSelection = () => {
+  selectedRows.value = [];
+  xTable.value?.clearCheckboxRow?.();
 };
 
 const scrollToAdvancedGroup = (groupKey: string) => {
@@ -457,8 +476,12 @@ const handleDanger = (label: string) => {
             <a-button size="small" type="outline">批量操作<icon-down /></a-button>
             <template #content>
               <a-doption>批量修改</a-doption>
-              <a-doption>批量废弃</a-doption>
+              <a-doption>关闭特殊跟踪</a-doption>
+              <a-doption>同步文件状态</a-doption>
+              <a-doption>刷新物流节点</a-doption>
               <a-doption>批量推送邮件</a-doption>
+              <a-divider class="action-menu__divider" />
+              <a-doption class="danger-opt" @click="handleDanger('批量废弃')">批量废弃</a-doption>
             </template>
           </a-dropdown>
         </div>
@@ -485,32 +508,24 @@ const handleDanger = (label: string) => {
             </span>
           </button>
         </div>
-        <div class="toolbar-aside">
-          <span v-if="selectedRows.length" class="toolbar-selected-tip">已选 {{ selectedRows.length }} 条</span>
-          <a-tooltip content="刷新">
-            <a-button size="small" type="text" @click="handleSearch">
-              <template #icon><icon-refresh /></template>
-            </a-button>
-          </a-tooltip>
-          <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-            <a-tooltip content="更多操作">
-              <a-button size="small" type="text"><icon-more /></a-button>
-            </a-tooltip>
-            <template #content>
-              <a-doption>关闭特殊跟踪</a-doption>
-              <a-doption>同步文件状态</a-doption>
-              <a-doption>刷新物流节点</a-doption>
-              <a-divider class="action-menu__divider" />
-              <a-doption class="danger-opt" @click="handleDanger('批量废弃')">批量废弃</a-doption>
-            </template>
-          </a-dropdown>
-        </div>
       </div>
     </div>
 
     <div class="zone-l4-table-card">
       <div class="table-card-cap table-card-cap--primary">
-        <div class="table-card-cap__start" />
+        <div class="table-card-cap__start">
+          <a-tooltip content="刷新">
+            <a-button size="small" type="text" class="table-card-cap__tool" @click="handleSearch">
+              <template #icon><icon-refresh /></template>
+            </a-button>
+          </a-tooltip>
+          <div v-if="selectedRows.length" class="toolbar-selection-context">
+            <span class="toolbar-selected-tip">已选 <b>{{ selectedRows.length }}</b> 条</span>
+            <a-button size="small" type="text" class="toolbar-selection-clear" @click="clearSelection">
+              清空
+            </a-button>
+          </div>
+        </div>
         <div class="table-card-cap__right">
           <a-pagination
             v-model:current="page"
@@ -523,7 +538,7 @@ const handleDanger = (label: string) => {
             :page-size-options="[50, 100, 200]"
           />
           <a-tooltip content="列设置">
-            <a-button size="small" type="text" class="table-card-cap__tool" @click="xTable?.openCustom()">
+            <a-button size="small" type="text" class="table-card-cap__tool" @click="openTableCustom">
               <template #icon><icon-settings /></template>
             </a-button>
           </a-tooltip>
@@ -543,13 +558,12 @@ const handleDanger = (label: string) => {
           @checkbox-change="({ records }) => (selectedRows = records)"
           @checkbox-all="({ records }) => (selectedRows = records)"
         >
-          <vxe-column type="checkbox" width="36" fixed="left" />
+          <vxe-column type="checkbox" width="40" fixed="left" />
           <vxe-column type="seq" title="序号" width="52" fixed="left" align="center" />
           <vxe-column field="orderNo" title="订单编号" min-width="150" sortable fixed="left">
             <template #default="{ row }">
               <div class="cell-two-line">
                 <a class="link-text link-text--strong c2-main">{{ row.orderNo }}</a>
-                <span class="c2-sub">{{ row.fileReady ? '文件已同步' : '待补文件' }}</span>
               </div>
             </template>
           </vxe-column>
