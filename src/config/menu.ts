@@ -9,6 +9,13 @@ export const appMenus: AppMenuItem[] = [
     ],
   },
   {
+    key: 'crm',
+    title: 'CRM',
+    children: [
+      { key: 'customer-pool', title: '客户池', routeName: 'CustomerPool' },
+    ],
+  },
+  {
     key: 'system-manage',
     title: '系统管理',
     children: [
