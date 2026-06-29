@@ -12,11 +12,17 @@ alwaysApply: true
 
 | 任务 | 读 |
 |------|-----|
+| **新菜单 / 不确定用哪种布局** | **`domain-routing.md`** |
 | 新列表页 | `list-page.md` + **`filter-layout.md`** + `table.md` + `actions.md` |
 | 筛选区 | **`filter-layout.md`**（先数字段数 → Tier → 结构 class） |
-| 弹窗/抽屉 | **`modal.md`**（Modal vs Drawer 决策表） |
+| 弹窗/抽屉 | **`modal.md`** + `overlay-dimensions.md` |
 | 详情/长表单 | `detail-form.md` |
-| 新模块 | `module-patterns.md` + `domain-language.md` |
+| 全页新建/客户端下单 | **`full-page-form.md`** + `form-rules.md` |
+| 主数据/字典/设置 | **`master-data.md`** |
+| 权限/角色 | **`permissions.md`** |
+| BI/看板 | **`dashboard.md`** |
+| 空态/加载/Message | **`feedback.md`** |
+| 新模块 | `module-patterns.md` + `domain-language.md` + **`domain-routing.md`** |
 | 任意类名 | grep `src/styles/global.css` |
 
 路径：`ui-skill/freight-arco-ui/references/`（已 sync 到 `.agents/skills/`）。

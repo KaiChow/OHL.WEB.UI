@@ -157,8 +157,10 @@
 - Primary identity, key state, owner/person, business context, and object-owned key facts do not use disabled/empty `color-text-4`.
 - Detail header fact labels are readable metadata and values are stronger than labels.
 - Drawer/modal width matches `overlay-dimensions.md` tier (no arbitrary 900/1080).
-- Complex detail drawers use `class="detail-drawer"` (D4, max 1200px); read-only simple detail uses `detail-drawer--standard` (720px).
+- Complex detail drawers use `class="detail-drawer"` (D4); read-only simple detail uses `detail-drawer--standard` (720px).
 - Filter drawers use `query-filter-drawer` (640px) or `--wide` (1120px).
+- Master-data pages use `md-layout`; permission pages use `perm-layout`; BI uses `db-wrap`; full-page create uses `xf-wrap` + `detail-form`.
+- Empty/loading/success/error follow `feedback.md`.
 - Staff/party display shows role + name clearly; company/context is auxiliary but readable.
 - No `font-weight: 700/800`; no business text over 13px unless true page/detail hero.
 - No decorative large gradients, large-radius consumer SaaS styling, or attention-heavy panels.

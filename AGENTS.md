@@ -14,8 +14,17 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 
 ## Skill 读什么
 
-完整索引 → `ui-skill/freight-arco-ui/SKILL.md` · Reference Map  
+完整索引 → `ui-skill/freight-arco-ui/SKILL.md` · **大系统域路由** → `references/domain-routing.md`  
 编码流程 → `.cursor/rules/spec-first-coding.mdc`
+
+| 域 | 读 |
+|----|-----|
+| 新菜单选型 | `domain-routing.md` |
+| 主数据/设置 | `master-data.md` |
+| 权限 | `permissions.md` |
+| BI/看板 | `dashboard.md` |
+| 全页表单/客户端下单 | `full-page-form.md` |
+| 空态/反馈 | `feedback.md` |
 
 `references/legacy-design-manual.md` 仅历史归档，新任务勿全读。
 

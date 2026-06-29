@@ -72,6 +72,8 @@ Rules:
 - Do not hide required core fields behind collapsed panels.
 - Do not show any repeated-entity, file, location/path, finance, timeline, or other domain module unless the object owns that data.
 
+Read also: `full-page-form.md`, `form-rules.md`, `upload.md`.
+
 ## Archetype D: Master Data / Configuration
 
 Use for master-data and configuration objects. Examples: customer files, routes, carriers, warehouses, dictionaries, permissions.
@@ -87,6 +89,8 @@ Rules:
 - Configuration pages may use lower density than operational workbenches, but still avoid marketing spacing.
 - Delete/disable actions require confirmation.
 - Show effective state and last update metadata when useful.
+
+Read also: `master-data.md`, `permissions.md` (roles), `feedback.md`.
 
 ## Archetype E: Finance / Reconciliation
 
@@ -139,6 +143,8 @@ Rules:
 - Dashboards may have more visual spacing than operational pages, but still use Arco tokens and restrained color.
 - Do not overuse decorative charts.
 - Every metric must have a business owner and time range.
+
+Read also: `dashboard.md`, `table.md` (drill-down), `feedback.md`.
 
 ## Archetype H: Modal / Confirmation
 

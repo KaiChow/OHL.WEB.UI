@@ -405,6 +405,8 @@ Modal 规范：`:mask-closable="false"` / 危险操作放 footer 左侧 / `width
 
 ## 数据概览页骨架（直接复用）
 
+见 `dashboard.md`；类名已在 `global.css`：`db-wrap`、`db-kpi-row`、`db-content`、`db-main`、`db-aside`、`db-chart-host`。
+
 ```vue
 <div class="page-root page-root--dense db-wrap">
   <!-- KPI 行（kpi-card 系列来自 global.css） -->
@@ -440,17 +442,18 @@ Modal 规范：`:mask-closable="false"` / 危险操作放 footer 左侧 / `width
   </div>
 </div>
 <style scoped>
-.db-wrap    { overflow-y: auto; }
-.db-kpi-row { display: flex; flex-shrink: 0; }
-.db-content { display: grid; grid-template-columns: 1fr 280px; gap: 8px; margin-top: 8px; }
-.db-main    { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.db-aside   { display: flex; flex-direction: column; gap: 8px; }
-.db-chart-body { padding: 0 16px 16px; }
-.db-chart-placeholder { height: 220px; background: var(--color-fill-1); border-radius: var(--dense-radius); display:flex; align-items:center; justify-content:center; color:var(--color-text-4); font-size:var(--dense-font-aux); }
-.db-shortcuts { display: flex; flex-direction: column; gap: 8px; }
-@media (max-width: 1280px) { .db-content { grid-template-columns: 1fr; } }
+/* db-wrap / db-content 等已在 global.css；页面仅保留 page-root 壳 */
 </style>
 ```
+
+---
+
+## 主数据 / 权限布局（global.css）
+
+- 主数据左树右表：`md-wrap` + `md-layout` + `md-layout__tree` + `md-layout__main` → `master-data.md`
+- 权限左角色右配置：`perm-wrap` + `perm-layout` → `permissions.md`
+- 全页表单：`xf-wrap` + `detail-form` → `full-page-form.md`（禁止新页使用 xf-label）
+- 大系统菜单选型：`domain-routing.md`
 
 ---
 

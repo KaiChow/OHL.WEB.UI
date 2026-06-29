@@ -83,14 +83,20 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 
 | Task | Read |
 |------|------|
+| **Large system / which doc for which menu** | **`domain-routing.md`** |
 | Any UI task | `design-principles.md` |
-| New page / module | `module-patterns.md` → `domain-language.md` |
+| New page / module | `module-patterns.md` → `domain-language.md` → **`domain-routing.md`** |
 | Page type choice | `page-archetypes.md` |
 | AI page generation | `ai-generation-contract.md` |
 | List / workbench | `list-page.md` + `table.md` + `actions.md` |
 | **筛选区字段数 → 布局选型** | **`filter-layout.md`** |
 | **小屏 / 分辨率适配** | **`responsive.md`** |
 | Detail / form structure | `detail-form.md` + `actions.md` |
+| **全页新建/编辑、客户端下单** | **`full-page-form.md`** + `form-rules.md` |
+| **主数据 / 字典 / 设置** | **`master-data.md`** |
+| **权限 / 角色** | **`permissions.md`** |
+| **空态 / 加载 / Message** | **`feedback.md`** |
+| **BI / 看板** | **`dashboard.md`** |
 | **Arco form 写法（校验/提交/combo）** | **`form-rules.md`** |
 | File upload / attachments | `upload.md` |
 | Modal / dialog / confirm | `modal.md` + **`overlay-dimensions.md`** |

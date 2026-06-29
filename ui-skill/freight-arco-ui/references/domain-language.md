@@ -178,3 +178,40 @@ Preferred field labels:
 - Empty states should tell users the next useful action, not give marketing copy.
 - Error messages should mention the failed business object: `业务单提交失败`, `附件上传失败`, `报关资料缺失`.
 - Avoid playful tone, emoji, marketing adjectives, and decorative slogans.
+
+## Platform & Corporate Modules
+
+Use these module names and labels outside shipment operations. Do not reuse 业务单/ETD/MBL columns on these pages.
+
+| Area | Module names | Primary identity | Typical status |
+|------|--------------|------------------|----------------|
+| 用户管理 | 用户管理、账号管理 | 登录账号 / 工号 | 启用、停用、锁定 |
+| 组织 | 组织架构、部门管理 | 部门名称 / 组织编码 | 启用、停用 |
+| 权限 | 角色管理、权限配置 | 角色名称 | 系统角色、自定义 |
+| 系统设置 | 系统设置、参数配置 | 参数组 / 配置项名称 | 已启用、已停用 |
+| 通知 | 通知列表、公告管理 | 主题 | 草稿、待发布、已发布、已过期 |
+| 文件中心 | 文件管理、单证中心 | 文件名 / 单证类型 | 已上传、待审核、已归档 |
+| 运价 | 运价维护、价卡管理 | 价卡名称 / 航线 | 生效、失效、待审核 |
+| BI | 经营看板、业务分析 | 指标名称 / 报表名称 | — |
+| 行政 | 行政申请、用印申请 | 申请单号 | 待审批、已通过、已驳回 |
+| HR | 人事档案、请假申请 | 员工姓名 / 申请单号 | 待审批、已通过、已驳回 |
+| 客户端 | 在线下单、委托录入 | 委托编号 / 草稿号 | 草稿、已提交、已受理 |
+
+### Platform status mapping
+
+| Label | data-s |
+|-------|--------|
+| 启用 / 已启用 / 已发布 / 已通过 | acc / rel |
+| 停用 / 已停用 / 已过期 | draft |
+| 待审核 / 待审批 / 待发布 | wait |
+| 锁定 / 已驳回 / 失败 | rej |
+| 处理中 | op |
+
+### Platform copy examples
+
+| Avoid | Prefer |
+|-------|--------|
+| 用户详情信息 | 账号信息 / 基本信息 |
+| 配置项 | 参数名称（写清业务含义）|
+| 提交申请 | 提交请假申请 / 提交用印申请 |
+| 暂无内容 | 暂无角色，点击新建角色 |

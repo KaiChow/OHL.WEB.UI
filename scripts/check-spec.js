@@ -675,6 +675,15 @@ if (!/--dense-modal-w-max:\s*860px/.test(globalCss)) {
     content: 'missing --dense-modal-w-max: 860px',
   });
 }
+
+if (!globalCss.includes('.md-layout') || !globalCss.includes('.perm-layout') || !globalCss.includes('.db-wrap') || !globalCss.includes('.xf-wrap')) {
+  violations.push({
+    rule: '多域布局类须在 global.css 提供：md-layout / perm-layout / db-wrap / xf-wrap',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing multi-domain layout classes',
+  });
+}
 if (!globalCss.includes('--dense-font-overlay') || !/\.arco-modal-title\s*\{[^}]*font-size:\s*var\(--dense-font-overlay\)/.test(globalCss)) {
   violations.push({
     rule: 'Modal 标题必须使用 F0 --dense-font-overlay（14px），且大于表单正文 12px',
