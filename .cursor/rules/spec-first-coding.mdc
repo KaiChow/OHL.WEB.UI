@@ -35,6 +35,5 @@ alwaysApply: true
 
 ## 3. 交付前
 
-```bash
-node scripts/check-spec.js
-```
+1. 对抗式审查 → `.cursor/rules/adversarial-review.mdc`（输出 `[审查] 通过 | 不通过`）
+2. `node scripts/check-spec.js`

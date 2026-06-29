@@ -1402,6 +1402,10 @@ button:-moz-focusring,
   margin-left: -1px;
 }
 
+.filter-field .filter-combo>*+* {
+  margin-left: -1px;
+}
+
 .filter-field .filter-combo__select {
   flex: 0 0 118px;
   width: 118px !important;
@@ -1436,12 +1440,28 @@ button:-moz-focusring,
   border-bottom-right-radius: 0 !important;
 }
 
+.filter-field .filter-combo>*:not(:last-child),
+.filter-field .filter-combo>*:not(:last-child) .arco-select-view,
+.filter-field .filter-combo>*:not(:last-child) .arco-select-view-single,
+.filter-field .filter-combo>*:not(:last-child).arco-input-wrapper {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
 .filter-field .filter-combo>.arco-select-view:not(:first-child),
 .filter-field .filter-combo>.arco-select-view-single:not(:first-child),
 .filter-field .filter-combo>*:not(:first-child) .arco-select-view,
 .filter-field .filter-combo>*:not(:first-child) .arco-select-view-single,
 .filter-field .filter-combo>*:not(:first-child).arco-input-wrapper,
 .filter-field .filter-combo__fill .arco-select-view-single {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.filter-field .filter-combo>*:not(:first-child),
+.filter-field .filter-combo>*:not(:first-child) .arco-select-view,
+.filter-field .filter-combo>*:not(:first-child) .arco-select-view-single,
+.filter-field .filter-combo>*:not(:first-child).arco-input-wrapper {
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
 }

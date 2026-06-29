@@ -1,0 +1,27 @@
+---
+description: UI 交付前对抗式审查；只引用 skill 挑刺，不发明新规则
+alwaysApply: true
+---
+
+# 交付前对抗式审查（强制）
+
+`src/views/**`、`src/components/**` UI 任务：**结束前以「驳回 PR」立场**对照 skill 审查（编码流程见 `spec-first-coding.mdc`）。细则只在 reference 里，本文件不重复。
+
+## 五问（每项须引用 reference 名，禁止自创规则）
+
+1. 筛选字段数 → Tier → DOM 结构是否符合 **`filter-layout.md`**？
+2. Modal / Drawer 是否符合 **`modal.md`**？
+3. 列表 zone / 表格 / 分页是否符合 **`list-page.md`** + **`table.md`**？
+4. 按钮层级是否符合 **`actions.md`**（每作用域 1× primary）？
+5. 类名是否 grep **`global.css`**？有无自写等效 CSS？
+
+## 输出（有不通过项则先修再结束）
+
+```
+[审查] 通过 | 不通过
+- 问题：<reference 名>
+- 证据：<路径或结构>
+- 修复：<按 reference 一句话>
+```
+
+须同时通过 `node scripts/check-spec.js`；脚本与审查互补，不互相替代。
