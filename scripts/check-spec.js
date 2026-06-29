@@ -1101,6 +1101,22 @@ for (const file of files) {
   for (const block of blocks) {
     const blockIndex = content.indexOf(block);
     const firstLine = block.split('\n').slice(0, 10).join(' ');
+    if (/class=(["'])[^"']*\bworkbench-table\b[^"']*\1/.test(firstLine) && !/\bborder=(["'])none\1/.test(block)) {
+      violations.push({
+        rule: 'workbench-table 必须使用 border="none"（无全网格线，仅弱横线分隔行）',
+        file: relPath,
+        line: getLineNumber(content, blockIndex),
+        content: firstLine.trim().slice(0, 140),
+      });
+    }
+    if (/\bdetail-mini-vxe\b/.test(firstLine) && !/\bborder=(["'])none\1/.test(block)) {
+      violations.push({
+        rule: 'detail-mini-vxe 必须使用 border="none"（与列表表同一边框策略）',
+        file: relPath,
+        line: getLineNumber(content, blockIndex),
+        content: firstLine.trim().slice(0, 140),
+      });
+    }
     if (/class=(["'])[^"']*\bworkbench-table\b[^"']*\1/.test(firstLine) && !/:row-config=(["'])[\s\S]*?height:\s*36[\s\S]*?\1/.test(block)) {
       violations.push({
         rule: 'workbench-table 必须显式设置 row-config.height = 36，避免 VXE small 默认 40px 泄漏',

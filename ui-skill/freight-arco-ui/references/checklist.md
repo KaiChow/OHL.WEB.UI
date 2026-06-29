@@ -100,7 +100,8 @@
 - Table empty states are explicit and object-specific, not blank table bodies.
 - Editable tables keep inputs readable and aligned without clipping.
 - VXE business columns use `min-width`; fixed `width` only on checkbox, seq, and operation columns (`table.md`).
-- VXE sequence columns use the project default `width="52"` in both workbench and detail tables unless a module exception is documented.
+- VXE tables use `border="none"`; no vertical grid lines; weak horizontal row separators only (`table.md` Border Policy).
+- VXE sequence columns: `width="52"`, `align="center"`, title `序号`; required on detail editable mini tables with ≥2 rows; optional on workbench lists (default omit when identity column is fixed left).
 - Overlay typography: popconfirm/modal/select dropdown options use F4 12px; overlay footer buttons use F2 13px (`typography.md`).
 - Arco `size`: business modules use `size="small"` only; forbid `medium`/`large`/template `mini` (`component-size.md`).
 - Detail embedded VXE tables use `detail-mini-vxe` + one density modifier + `detail-section__body--table`; no `show-overflow` on those tables.

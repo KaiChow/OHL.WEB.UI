@@ -316,6 +316,8 @@ grep -n "\.类名" src/styles/global.css
 | 原生 `<button>` 做行内操作 | `<a-button type="text" class="row-action-btn">` + `<a-tooltip>` |
 | **`<a-table>`（Arco 原生表格）** | **必须用 `<vxe-table>`，全项目统一** |
 | 业务列用固定 `width` | 业务列用 `min-width`；仅 checkbox/序号/操作列用 `width` |
+| `border="full"` 或 VXE 默认网格线 | **`border="none"`** + `workbench-table` / `detail-mini-vxe`（仅弱横线，无竖线） |
+| 列表强塞序号列 | 有固定单号列时默认不加 `type="seq"`；详情可编辑子表 ≥2 行必须加 |
 | `class="freight-table"` | 删掉（已废弃） |
 | `.stab-count` / `.stab-count--danger` | `.stab-badge` / `.stab-badge--danger` |
 | 硬编码 hex 颜色 | `var(--warning-6)` / `var(--danger-6)` 等变量 |
@@ -588,7 +590,8 @@ import '@uppy/dashboard/dist/style.min.css'
 ```
 □ 搜索区：filter-card 体系，无 .sf/.sf-label/.search-bar
 □ 工具栏：toolbar-group + toolbar-aside，刷新 type="text" icon-only
-□ 表格：border="none" size="small" height="100%"；业务列 min-width，仅 checkbox/序号/操作用 width
+□ 表格：`border="none"`；无竖向网格线；`workbench-table` / `detail-mini-vxe`；业务列 min-width
+□ 序号：宽 52、居中；详情可编辑子表≥2行必有；列表默认无序号（有单号列时）
 □ 详情子表：detail-mini-vxe + detail-section__body--table，无 show-overflow
 □ 抽屉：有 class="detail-drawer"，detail-section 分区
 □ 状态：全用 s-pill[data-s]，无行背景色

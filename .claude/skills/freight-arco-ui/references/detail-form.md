@@ -118,6 +118,7 @@ a-form.detail-form               ← Arco form root; sets font, control size tok
 ```
 
 Rules:
+
 - `a-form` wraps the **whole section's editable area**. One `<a-form>` per `detail-section`. Do not open a new `<a-form>` for every subgroup.
 - `detail-form-grid` is the **column grid**. Place it directly inside `<a-form>` or after a `form-subgroup-label`. All `a-form-item` and `detail-field` elements are **direct children** of the grid — no extra wrapper div per item.
 - `a-form-item` carries the label, required marker, and validation message. Never write a custom label `<div>` above an input — use `a-form-item`.
@@ -155,6 +156,7 @@ Do not use 6-column as a default for all forms — it compresses label width to 
 ```
 
 Span rules:
+
 - Use `__span2` for textarea, multi-line text, or address fields that need more width.
 - Use `__span3` / `__span4` only for full-width fields like long remarks, declaration content, or file upload areas.
 - Do not span a single-line input just to make it look prominent.
@@ -190,6 +192,7 @@ When one `detail-section` contains multiple business sub-concepts, use `form-sub
 ```
 
 Rules:
+
 - `form-subgroup` is used only inside a `detail-section__body` form when the section has 2+ distinct business concepts such as `路线 / 船期`.
 - `form-subgroup__title` is a scan title. Keep it short (2–6 Chinese characters or equivalent i18n copy). Do not add descriptions under it unless the business meaning would be unclear.
 - Each `form-subgroup` contains exactly one `form-subgroup__head` followed by one `detail-form-grid`.

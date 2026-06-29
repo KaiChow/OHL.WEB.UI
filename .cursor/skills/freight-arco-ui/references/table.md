@@ -36,7 +36,8 @@ Shared rules:
 - Do not add `border-bottom` on `vxe-table--header-wrapper`; structure vs data is separated by brand-neutral header contrast and weak row separators.
 - Do not let column borders dominate. Workbench tables default to horizontal scan rhythm; vertical separators are disabled or near-invisible unless the page documents a finance comparison exception.
 - Detail-only differences: role-based row height, ghost Arco controls for editable rows, padding on `.vxe-cell` not on `td`, no `show-overflow`, no checkbox without batch toolbar.
-- Sequence columns are structural rhythm, not page-specific layout. Use the same project width for list and detail sequence columns: `width="52"` unless there is a documented module exception.
+- **Borders:** `border="none"` + no vertical lines + weak horizontal row separators — see **Border Policy**.
+- **Sequence:** see **Sequence Column (序号)** — width `52`, detail editable tables require it; list tables usually omit.
 
 ## Required Setup
 
@@ -84,7 +85,102 @@ Rules:
 - Do not apply editable density to read-only documents, attachments, logs, or status-only rows. Density is chosen by the row job, not by the surrounding drawer.
 - Do not push main list rows below 34px; checkbox, status pill, icon actions, and text line-height begin to clip.
 - If row content requires more than 36px, first reduce column complexity or move secondary information to detail, then consider `standard`.
-- Row height must be paired with readable typography: body F1 13px, header F3 12px.
+- Row height must be paired with readable typography: body F1 13px, header F3 13px.
+
+## Border Policy
+
+### Decision (PESDP)
+
+Freight workbench tables are **scan surfaces**, not Excel grids. The project default is:
+
+| Line type | Show? | Token | Why |
+|-----------|-------|-------|-----|
+| **Vertical column borders** | **No** | `--dense-table-col-border: transparent` | Multi-column horizontal scan; vertical lines create spreadsheet noise and steal density |
+| **Horizontal row borders** | **Yes (weak)** | `--dense-table-row-border` | Helps the eye track a row across 10–20 columns without boxing every cell |
+| **Header / body separation** | **Yes (subtle)** | `--dense-table-header-bg` + `--dense-table-header-border` on header cells | Structure comes from header contrast, not a heavy blue/primary line |
+| **Outer table frame** | **No** | `border="none"` on `<vxe-table>` | Card / `table-wrap` already defines the module boundary |
+| **Zebra stripe** | **Off by default** | `--dense-row-stripe` ≈ white | Row separators + hover are enough; zebra + borders = muddy |
+
+**Do not** switch to full grid (`border="full"` / visible column lines) on operational list or detail mini tables. Full grids are allowed only for rare finance side-by-side comparison modules — document the exception in the module spec.
+
+### Implementation (mandatory)
+
+```vue
+<vxe-table border="none" class="compact workbench-table" ... />
+<vxe-table border="none" class="detail-mini-vxe detail-mini-vxe--editable" ... />
+```
+
+| Surface | `border` attr | Vertical lines | Horizontal lines |
+|---------|---------------|----------------|------------------|
+| List `workbench-table` | `none` | off | weak row separator on body cells |
+| Detail `detail-mini-vxe` | `none` | off | same weak row separator |
+| Summary `detail-mini-vxe--summary` | `none` | off | same or lighter |
+
+Rules:
+
+- Never use VXE default bordered skin on production pages.
+- Never add page-scoped `border-right` / `border-bottom` on `.vxe-body--column`.
+- Hover/selection tint replaces strong borders for row state — primary row background, not black outlines.
+- `detail-mini-vxe` header wrapper: `border-bottom: none`; header/body split uses header background only.
+- Editable cell validation may use Arco field border; that is control chrome, not table grid lines.
+
+### Visual hierarchy (what users should see)
+
+```
+┌─ table card ─────────────────────────────────────┐
+│  HEADER ROW  (near-white bg, no vertical lines) │
+│  data row    ─────────────────── weak 1px line   │
+│  data row    ─────────────────── weak 1px line   │
+│  hover row   ███ primary tint, no extra border │
+└──────────────────────────────────────────────────┘
+```
+
+## Sequence Column (序号)
+
+Structural rhythm column — **not** business data. Token: `--dense-col-w-seq` (52px). Typography: F6 micro 10px, `color-text-4`, centered (`.vxe-cell--seq` in `global.css`).
+
+### Markup
+
+```vue
+<!-- List: after checkbox when both exist -->
+<vxe-column type="checkbox" width="40" fixed="left" />
+<vxe-column type="seq" title="序号" width="52" fixed="left" align="center" />
+
+<!-- Detail mini table -->
+<vxe-column type="seq" title="序号" width="52" align="center" />
+```
+
+| Attribute | Value | Rule |
+|-----------|-------|------|
+| `type` | `seq` | VXE built-in index; do not hand-roll `<span>{{ index + 1 }}</span>` |
+| `width` | **`52`** | Project default; `check-spec` enforces |
+| `title` | `序号` | Chinese label; not `#` / `No.` |
+| `align` | `center` | Required |
+| `fixed` | `left` on list when checkbox or identity is fixed | Keeps index visible while scrolling |
+
+### When to include
+
+| Table | Seq column | Rule |
+|-------|------------|------|
+| **Detail editable mini-vxe** (品名/装柜/费用行) | **Required** when ≥2 rows | Users refer to “第 N 行” while editing |
+| **Detail readonly mini-vxe** | **Recommended** when ≥3 rows | Optional for 1–2 rows |
+| **Main workbench list** | **Optional** | Default **omit** when a strong identity column (单号/编号) is already `fixed="left"` |
+| **Main list + batch checkbox** | **Usually omit** | Checkbox + identity is enough; do not add seq just for decoration |
+| **Main list without fixed identity** | Consider seq | Rare; fix identity column first instead |
+| **File / attachment table** | **Omit** | File name is the row identity |
+| **Summary mini table** | **Omit** | Too few rows |
+
+### When seq is misleading
+
+- Do not use seq as row **identity** for save/delete/API — always use stable `keyField` / row id.
+- Pagination seq is **page-local** (1…pageSize), not global record index — that is acceptable for visual reference only.
+- Do not use seq instead of a business line number field when the backend assigns line numbers.
+
+### Column order (left fixed block)
+
+```
+checkbox (40, if batch) → seq (52, if used) → primary identity (min-width, fixed left) → … → 操作 (fixed right)
+```
 
 ## Column Rules
 
@@ -166,18 +262,12 @@ These are starting floors; adjust per module but keep the `min-width` vs `width`
 
 ## Grid Lines
 
-Table lines are functional separators, not decoration.
+See **Border Policy** above for the full contract. Short form:
 
-- Header must be brand-neutral and calm: `--dense-table-header-bg` on `workbench-table` (no extra `vxe-table--header-wrapper` bottom border).
-- Main workbench tables should use `workbench-table` to create the table surface: brand-neutral header, white data rows, `--dense-workbench-hover-bg` on hover, weak horizontal row separators, and primary accent on selection/actions.
-- Primary table borders must use project aliases such as `--dense-primary-2/3`; page and skill CSS must not use raw `rgb(var(--primary-*)))` or `border-color: var(--primary-*)` because gi-demo theme values may be RGB channels.
-- Keep a subtle 1px header/body separator when it helps scan the table.
-- Keep low-contrast row separators for dense data rows.
-- Avoid strong primary-colored horizontal lines in the table body or below the header; users read them as focus, current row, or selected state.
-- Avoid visible vertical lines. Use column spacing, alignment, numeric right alignment, and header labels first.
-- Detail/nested tables should use even lighter separators than workbench tables.
-- Selection and hover are the only places where primary tint should visibly span a row.
-- When the data count is small and the table has remaining height, the empty area must still read as the same table surface. Use the shared workbench table background treatment, not fake rows, large blank white blocks, or decorative color bands.
+- `border="none"` on every operational `vxe-table`.
+- No vertical column lines; weak horizontal row separators only.
+- Header/body split via `--dense-table-header-bg`, not heavy borders.
+- Selection/hover use primary tint — not stronger grid lines.
 
 ## Table Bottom Boundary
 
