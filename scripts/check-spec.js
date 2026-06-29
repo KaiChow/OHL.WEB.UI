@@ -255,13 +255,13 @@ if (!actionsReference.includes('生产作业台的高频可逆动作可以超过
 }
 
 if (
-  !/\.arco-form-item-label-col\s*>\s*\.arco-form-item-label[\s\S]*--dense-font-field/.test(globalCss)
+  !/\.arco-form-size-small\s+\.arco-form-item-label-col\s*>\s*\.arco-form-item-label[\s\S]*--dense-font-field/.test(globalCss)
 ) {
   violations.push({
-    rule: '§ Arco Form Controls 必须覆盖 form-item label，防止默认 14px 泄漏',
+    rule: '§ Arco Form Controls 必须覆盖 Arco size="small" form label 14px 默认，统一为 --dense-font-field 12px',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing .arco-form-item-label-col > .arco-form-item-label with --dense-font-field',
+    content: 'missing .arco-form-size-small .arco-form-item-label-col > .arco-form-item-label with --dense-font-field',
   });
 }
 if (!/--dense-row-h-detail-edit\s*:\s*38px/.test(globalCss)) {
@@ -956,14 +956,55 @@ for (const file of files) {
   const content = readFileSync(file, 'utf8');
   if (!content.includes('title="操作"')) continue;
   const opColumnPattern = /<vxe-column\b[^>]*title="操作"[^>]*>[\s\S]*?<\/vxe-column>/g;
+  const isWorkbenchList = content.includes('workbench-table');
   for (const match of content.matchAll(opColumnPattern)) {
-    if (match[0].includes('class="row-actions"')) continue;
-    violations.push({
-      rule: 'VXE 操作列必须使用 row-actions dock 承载行级按钮',
-      file: relPath,
-      line: getLineNumber(content, match.index),
-      content: match[0].split('\n').slice(0, 3).join(' ').trim().slice(0, 140),
-    });
+    const block = match[0];
+    if (!block.includes('class="row-actions"')) {
+      violations.push({
+        rule: 'VXE 操作列必须使用 row-actions dock 承载行级按钮',
+        file: relPath,
+        line: getLineNumber(content, match.index),
+        content: block.split('\n').slice(0, 3).join(' ').trim().slice(0, 140),
+      });
+      continue;
+    }
+    if (!isWorkbenchList) continue;
+    const widthMatch = block.match(/\bwidth="(\d+)"/);
+    if (widthMatch && Number(widthMatch[1]) > 88) {
+      violations.push({
+        rule: '列表操作列 width 不得超过 88（见 table.md Row Actions 矩阵）',
+        file: relPath,
+        line: getLineNumber(content, match.index),
+        content: block.split('\n')[0].trim().slice(0, 140),
+      });
+    }
+    const directBtnCount = (block.match(/class="[^"]*\brow-action-btn\b(?![^"]*--more)[^"]*"/g) || []).length;
+    const hasMoreMenu = block.includes('row-action-btn--more') || block.includes('action-menu--row');
+    if (directBtnCount >= 3) {
+      violations.push({
+        rule: '列表操作列禁止 3 个及以上直出 icon；N≥3 须主操作 + ···（table.md Row Actions）',
+        file: relPath,
+        line: getLineNumber(content, match.index),
+        content: `直出 ${directBtnCount} 个 row-action-btn`,
+      });
+    }
+    if (directBtnCount >= 2 && !hasMoreMenu && /status="danger"/.test(block)) {
+      violations.push({
+        rule: '列表操作列含危险动作时禁止双 icon 直出；危险项须收入 ···',
+        file: relPath,
+        line: getLineNumber(content, match.index),
+        content: block.split('\n').slice(0, 5).join(' ').trim().slice(0, 140),
+      });
+    }
+    if (/class="[^"]*row-action-btn[^"]*"[^>]*status="danger"/.test(block) ||
+        /status="danger"[^>]*class="[^"]*row-action-btn/.test(block)) {
+      violations.push({
+        rule: '列表主表操作列禁止直出 status="danger" 删除 icon；须进 action-menu--row + danger-opt',
+        file: relPath,
+        line: getLineNumber(content, match.index),
+        content: block.split('\n').slice(0, 6).join(' ').trim().slice(0, 140),
+      });
+    }
   }
 }
 

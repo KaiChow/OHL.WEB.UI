@@ -113,6 +113,7 @@
 - Detail drawer footer uses `detail-drawer-footer__start` (danger text + confirm) and `__end` (secondary workflow + one primary save); low-frequency outputs grouped in dropdown.
 - Detail head/footer workflow buttons use `secondary` (default); module/child main actions use `outline`; auxiliary uses `text`.
 - Row delete in detail mini tables uses `a-popconfirm` + `status="danger"`; `global.css` must render danger red on row-action-btn.
+- List workbench operation columns follow [`table.md`](table.md) Row Actions matrix: max 2 affordances, width ≤ 88, no flat danger icon, no 3+ flat icons.
 - Detail drawer footer forbids `btn-muted-warn` and duplicate global danger actions in header + footer.
 - Large editable tables default to display mode; inputs appear only for active row, new row, or explicit batch edit.
 - Table editing state is keyed by stable row id, not row index or sequence number.

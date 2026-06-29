@@ -108,29 +108,33 @@ import { Ship, ContainerFour, FileText, Stamp, Cube } from '@icon-park/vue-next'
 使用 **Arco 内置图标**。
 
 ```vue
+<!-- 列表主表：见 table.md Row Actions 矩阵；删除进 ···，不直出 icon -->
 <div class="row-actions">
   <a-tooltip content="查看详情">
     <a-button size="small" type="text" class="row-action-btn row-action-btn--primary">
       <template #icon><icon-eye /></template>
     </a-button>
   </a-tooltip>
-  <a-tooltip content="编辑">
-    <a-button size="small" type="text" class="row-action-btn">
-      <template #icon><icon-edit /></template>
+  <a-dropdown trigger="click" content-class="action-menu action-menu--row">
+    <a-button size="small" type="text" class="row-action-btn row-action-btn--more" title="更多操作">
+      <template #icon><icon-more /></template>
     </a-button>
-  </a-tooltip>
-  <a-popconfirm content="确认删除？">
-    <a-button size="small" type="text" status="danger" class="row-action-btn">
-      <template #icon><icon-delete /></template>
-    </a-button>
-  </a-popconfirm>
+    <template #content>
+      <a-doption>编辑</a-doption>
+      <a-divider class="action-menu__divider" />
+      <a-popconfirm content="确认删除？">
+        <a-doption class="danger-opt">删除</a-doption>
+      </a-popconfirm>
+    </template>
+  </a-dropdown>
 </div>
 ```
 
 规则：
+- 1–N 分档 → [`table.md`](table.md) Row Actions
 - 主操作 → `row-action-btn--primary`（eye / edit）
-- 更多菜单触发 → `row-action-btn--more`（`<icon-more />`）
-- 删除 → `<icon-delete />` + `status="danger"` + `a-popconfirm`
+- 更多 → `row-action-btn--more`（`<icon-more />`）
+- 列表删除用菜单项 `danger-opt`，不用直出 `<icon-delete />`；仅 `detail-mini-vxe--editable` 可直出 danger icon
 - **行内禁止文字按钮**，必须 icon-only + tooltip
 
 ---

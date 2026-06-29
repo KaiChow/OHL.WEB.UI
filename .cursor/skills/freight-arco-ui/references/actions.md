@@ -54,7 +54,8 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 | 模块添加 | `outline` + normal | — |
 | 空状态添加行 | `dashed` + normal | — |
 | 重置/刷新/复制 | `text` + normal | — |
-| 行内删除 | `text` + `danger` + `row-action-btn` | `a-popconfirm` |
+| 行内删除（`detail-mini-vxe--editable`） | `text` + `danger` + `row-action-btn` | `a-popconfirm` |
+| 列表行删除 | `action-menu--row` + `danger-opt` | `a-popconfirm` |
 | 吸底废弃 | `text` + `danger` | `Modal.confirm` |
 | 弹窗确定删除 | `primary` + `danger`（仅 confirm 弹窗内） | 已在 Modal 中 |
 | 下拉危险项 | — | `a-doption class="danger-opt"` + 二次确认 |
@@ -429,20 +430,36 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 ### 5.8 表格行内
 
+**1–N 分档决策表** → [`table.md`](table.md) **Row Actions**（先分类 A/B/C/D，再查矩阵）。
+
+| 场景 | 直出 | 危险操作 |
+|------|------|----------|
+| **列表主表** `workbench-table` | 最多 2 个 affordance；N≥3 或含 D → `[A] + ···` | 永远在 `···` 内 + `danger-opt` + `a-popconfirm` |
+| **详情可编辑子表** `detail-mini-vxe--editable` | 同上上限 | 允许 1 个直出 danger icon + `a-popconfirm`（行编辑场景） |
+
 ```vue
-<a-tooltip content="查看">
-  <a-button type="text" class="row-action-btn row-action-btn--primary" @click="openDetail(row)"><icon-eye /></a-button>
-</a-tooltip>
-<a-popconfirm content="确认删除？" @ok="remove(row)">
-  <a-button type="text" class="row-action-btn" status="danger"><icon-delete /></a-button>
-</a-popconfirm>
+<!-- 列表：主操作 + 更多（含删除） -->
+<div class="row-actions">
+  <a-tooltip content="查看">
+    <a-button type="text" class="row-action-btn row-action-btn--primary" @click="openDetail(row)"><icon-eye /></a-button>
+  </a-tooltip>
+  <a-dropdown trigger="click" content-class="action-menu action-menu--row">
+    <a-button type="text" class="row-action-btn row-action-btn--more" title="更多操作"><icon-more /></a-button>
+    <template #content>
+      <a-divider class="action-menu__divider" />
+      <a-popconfirm content="确认删除？" @ok="remove(row)">
+        <a-doption class="danger-opt">删除</a-doption>
+      </a-popconfirm>
+    </template>
+  </a-dropdown>
+</div>
 ```
 
 - 行内禁止文字按钮（「查看」「编辑」字样）
-- 操作列内按钮必须放在 `row-actions` dock 中；直接主操作加 `row-action-btn--primary`，更多菜单加 `row-action-btn--more`
-- `row-actions` 只是对齐容器，不画常驻边框、背景、阴影或胶囊框；视觉反馈只允许落在单个 `row-action-btn` 的 hover / focus 态上
-- 删除 = `text` + `danger` + `a-popconfirm`
-- 禁止 `outline` 铺满操作列
+- 操作列内按钮必须放在 `row-actions` 中；主操作 `row-action-btn--primary`，更多 `row-action-btn--more`
+- `row-actions` 只是对齐容器，不画常驻边框/背景/阴影
+- 列表主表禁止直出 `status="danger"` 删除 icon；禁止 `outline` 铺满操作列
+- 列宽：`56`（1  affordance）/ `88`（2 affordance）；禁止 `>88`
 
 ---
 

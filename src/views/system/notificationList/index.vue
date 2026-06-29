@@ -8,7 +8,7 @@ import {
   IconPlus,
   IconEye,
   IconEdit,
-  IconDelete,
+  IconMore,
 } from '@arco-design/web-vue/es/icon';
 import NotificationFormModal from './NotificationFormModal.vue';
 import NotificationDetailDrawer from './NotificationDetailDrawer.vue';
@@ -344,7 +344,7 @@ fetchList();
           <vxe-column field="effectivePeriod" title="生效周期" min-width="80" align="center" />
           <vxe-column field="creator" title="创建人" min-width="80" />
           <vxe-column field="lastEditTime" title="最后编辑时间" min-width="160" />
-          <vxe-column title="操作" width="120" fixed="right" align="center">
+          <vxe-column title="操作" width="88" fixed="right" align="center">
             <template #default="{ row }">
               <div class="row-actions">
                 <a-tooltip v-if="row.status === 'draft' || row.status === 'pending'" content="编辑">
@@ -356,18 +356,25 @@ fetchList();
                     <icon-edit />
                   </a-button>
                 </a-tooltip>
-                <a-tooltip v-if="row.status === 'published' || row.status === 'expired'" content="查看">
-                  <a-button type="text" class="row-action-btn" @click="openView(row)">
+                <a-tooltip v-else-if="row.status === 'published' || row.status === 'expired'" content="查看">
+                  <a-button
+                    type="text"
+                    class="row-action-btn row-action-btn--primary"
+                    @click="openView(row)"
+                  >
                     <icon-eye />
                   </a-button>
                 </a-tooltip>
-                <a-popconfirm content="确认删除该通知？" @ok="handleDelete(row)">
-                  <a-tooltip content="删除">
-                    <a-button type="text" class="row-action-btn" status="danger">
-                      <icon-delete />
-                    </a-button>
-                  </a-tooltip>
-                </a-popconfirm>
+                <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--row">
+                  <a-button type="text" class="row-action-btn row-action-btn--more" title="更多操作">
+                    <icon-more />
+                  </a-button>
+                  <template #content>
+                    <a-popconfirm content="确认删除该通知？" @ok="handleDelete(row)">
+                      <a-doption class="danger-opt">删除</a-doption>
+                    </a-popconfirm>
+                  </template>
+                </a-dropdown>
               </div>
             </template>
           </vxe-column>

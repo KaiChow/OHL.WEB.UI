@@ -49,6 +49,10 @@
 
 统一：12px / 500 / `text-2` / label→控件 **4px**。
 
+**Arco 泄漏：** `a-form size="small"` 时 Arco 内置 label 为 **14px**（`.arco-form-size-small .arco-form-item-label`），须由 `global.css` § Arco Form Controls 压回 `--dense-font-field`。**列表 `filter-field__label` 与 Modal `a-form-item` label 必须同为 12px。**
+
+**14px 仅用于 F0 浮层标题**（`.arco-modal-title`），不是字段 label。
+
 ## 使用场景（Scenario）
 
 仅以下 **场景** 允许覆盖 Default；不得按业务模块新增场景。
@@ -58,7 +62,7 @@
 | **Textarea 多行** | `.arco-textarea-size-small` | 不固定 28px 高；行高 1.45 |
 | **Disabled / 只读** | `.arco-*-disabled` | 灰底；文字仍 `text-1` 可读 |
 | **Form-item 列宽** | `.arco-form-item-content >` | 控件 `width: 100%` |
-| **表格行内编辑** | `.detail-mini-vxe` | 透明边框；hover/focus 才显形 |
+| **表格行内编辑** | `.detail-mini-vxe` | 透明边框；hover/focus 才显形；单元格内只读值勿用 `link-text`（见 `table.md`） |
 | **组合控件** | `.filter-combo` / `.detail-combo` | 多控件拼接圆角（布局 struct，非模块） |
 | **分页跳转等** | `.table-card-cap__pager` | 分页专用（非表单字段） |
 

@@ -5952,6 +5952,20 @@ button:-moz-focusring,
   box-shadow: -6px 0 8px -4px rgba(29, 33, 41, 0.08);
 }
 
+/* Scenario: 子表单元格只读展示 — 误用 link-text 时不呈现链接色；行内按钮/真链接除外 */
+.detail-mini-vxe.vxe-table .vxe-cell .link-text:not(.arco-btn):not(a),
+.detail-mini-vxe.vxe-table .vxe-cell .link-text--strong:not(.arco-btn):not(a) {
+  color: var(--color-text-1) !important;
+  font-weight: var(--dense-weight-data);
+  cursor: default;
+}
+
+.detail-mini-vxe.vxe-table .vxe-cell .link-text:not(.arco-btn):not(a):hover,
+.detail-mini-vxe.vxe-table .vxe-cell .link-text--strong:not(.arco-btn):not(a):hover {
+  color: var(--color-text-1) !important;
+  text-decoration: none;
+}
+
 .detail-mini-empty {
   display: flex;
   align-items: center;
@@ -6230,12 +6244,14 @@ button:-moz-focusring,
    文档: ui-skill/freight-arco-ui/references/form-field.md
    ================================================================= */
 
-/* A · Field label（字段名） */
+/* A · Field label（字段名）— 须覆盖 Arco .arco-form-size-small label 14px 默认 */
 .field-label,
 .filter-field__label,
-.arco-form-item-label-col>.arco-form-item-label,
-.arco-form-item-label>label {
-  font-size: var(--dense-font-field);
+.arco-form-size-small .arco-form-item-label-col > .arco-form-item-label,
+.arco-form-size-mini .arco-form-item-label-col > .arco-form-item-label,
+.arco-form-item-label-col > .arco-form-item-label,
+.arco-form-item-label > label {
+  font-size: var(--dense-font-field) !important;
   font-weight: var(--dense-weight-field);
   color: var(--color-text-2);
   line-height: 1.35;
@@ -7357,10 +7373,4 @@ button:-moz-focusring,
 .stat-tab__count--ok {
   background: var(--dense-success-1);
   color: var(--dense-success-6);
-}
-
-.detail-mini-vxe.vxe-table .vxe-body--column:first-child,
-.detail-mini-vxe.vxe-table .vxe-body--column .link-text,
-.detail-mini-vxe.vxe-table .vxe-body--column .cell-primary {
-  color: var(--color-text-1) !important;
 }

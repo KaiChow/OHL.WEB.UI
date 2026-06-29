@@ -287,6 +287,7 @@ The bottom of a workbench table must look intentionally finished.
 Workbench tables with more than 12 columns **must** define default visible columns and offer a column picker.
 
 **Rules:**
+
 - Default visible: 8–12 columns covering identity, status, key business values, and operation.
 - Extra columns: `field`-only columns with `:visible="false"` — appear in picker, hidden by default.
 - Do not default to showing every backend field. Use next-decision fields first.
@@ -320,18 +321,92 @@ const xTable = ref<VxeTableInstance>()
 
 ## Row Actions
 
+Applies to **`workbench-table` list operation columns** unless noted. Menu order / danger styling → [`actions.md`](actions.md) §6.
+
+### Action classes (classify before layout)
+
+| Class | Examples | Direct exposure on list |
+|-------|----------|-------------------------|
+| **A · Primary** | 查看、编辑（按行状态互斥时占 **同一槽位**） | 最多 1 个直出 |
+| **B · Secondary** | 第二高频可逆动作（如「复制单行」「下载附件」） | 仅当整行 **恰好 2 个非危险** 动作时与 A 并列直出 |
+| **C · Workflow** | 转移、推送、分配、打印 | 收入 `···` |
+| **D · Danger** | 删除、废弃、作废 | **列表主表永远进 `···`**，禁止直出 danger icon |
+
+Counting rules:
+
+- Mutually exclusive actions (e.g. 草稿→编辑 / 已发布→查看) count as **one** slot before applying the matrix.
+- If the primary identifier column already opens detail (link-text), the operation column may show edit or `···` only — matrix unchanged.
+- Low-frequency actions must not steal a direct slot just because only two verbs exist; if one verb is **D**, pattern is `[A] + ···`, not two flat icons.
+
+### Display matrix (1–N)
+
+| Effective actions* | Contains D? | Visible pattern | Column `width` |
+|--------------------|-------------|-----------------|----------------|
+| 0 | — | Remove operation column | — |
+| 1 | No | `[A]` | `56` |
+| 1 | Yes | `[A]` + `···(D)` | `88` |
+| 2 | No (both A/B daily) | `[A][B]` — two tooltips, **no** `···` | `88` |
+| 2 | Yes | `[A]` + `···(B and/or D)` | `88` |
+| ≥3 | Any | `[A]` + `···(B+C+D)` | `88` |
+
+\*After merging mutually exclusive verbs. **Hard limits:** operation column shows **at most 2 affordances** (icon buttons including `···` trigger); **never** `width` > `88`; **never** three flat icons.
+
+Decision flow:
+
+```
+count effective actions (merge exclusive A verbs)
+├─ 0 → no column
+├─ 1 & no D → [A] width 56
+├─ 1 & has D → [A] + ··· width 88
+├─ 2 & no D → [A][B] width 88
+└─ else → [A] + ··· width 88
+```
+
+### Implementation contract
+
 - Use `a-tooltip` + `a-button type="text" class="row-action-btn"`.
-- Default visible actions: view/edit/more at most.
-- Row action icons must be visible in the default state; they should not look disabled.
-- Row action buttons must not use permanent borders unless the action itself needs emphasis.
-- `row-actions` is an alignment wrapper only. It must not look like a framed action box, outlined pill, capsule, or toolbar dock; no persistent border, background, shadow, or hover/selection wrapper chrome.
-- VXE current cell, selected cell, active cell, and area-selection overlays must not use black/currentColor borders on workbench tables. The project-level `global.css` overrides these to `--dense-primary-*`; do not reintroduce page-scoped VXE cell focus styles.
-- Destructive actions go in dropdown with confirmation.
-- Direct row actions must be object-specific where text is shown.
-- If more than two row actions exist, show primary row action (eye/edit) + `···` dropdown for the rest.
+- Wrap in `row-actions` (alignment only — no border/background/capsule chrome).
+- Primary direct action: `row-action-btn row-action-btn--primary` (eye / edit).
+- More trigger: `row-action-btn row-action-btn--more` + `content-class="action-menu action-menu--row"`.
+- Row action icons stay visible in default state; no permanent borders on buttons.
+- Danger in `···`: `action-menu__divider` then `a-popconfirm` + `a-doption.danger-opt` — never flat `status="danger"` on list rows.
+- VXE cell focus/selection on workbench tables: use project `global.css` tokens only; no page-scoped black focus rings.
+
+### Examples
 
 ```vue
-<!-- 操作列：主操作 icon + ··· dropdown -->
+<!-- N=1：仅主操作 -->
+<vxe-column title="操作" width="56" fixed="right" align="center">
+  <template #default="{ row }">
+    <div class="row-actions">
+      <a-tooltip content="查看详情">
+        <a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="handleView(row)">
+          <template #icon><icon-eye /></template>
+        </a-button>
+      </a-tooltip>
+    </div>
+  </template>
+</vxe-column>
+
+<!-- N=2：两个日常可逆动作，并列直出 -->
+<vxe-column title="操作" width="88" fixed="right" align="center">
+  <template #default="{ row }">
+    <div class="row-actions">
+      <a-tooltip content="查看">
+        <a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="handleView(row)">
+          <template #icon><icon-eye /></template>
+        </a-button>
+      </a-tooltip>
+      <a-tooltip content="编辑">
+        <a-button size="small" type="text" class="row-action-btn" @click="handleEdit(row)">
+          <template #icon><icon-edit /></template>
+        </a-button>
+      </a-tooltip>
+    </div>
+  </template>
+</vxe-column>
+
+<!-- N≥3 或含危险：主操作 + ··· -->
 <vxe-column title="操作" width="88" fixed="right" align="center">
   <template #default="{ row }">
     <div class="row-actions">
@@ -358,16 +433,17 @@ const xTable = ref<VxeTableInstance>()
 </vxe-column>
 ```
 
-- 操作列宽度：1 个 icon = `width="56"`；2 个 icon = `width="88"`。
-- Operation column content must be wrapped by `row-actions` for alignment only; the wrapper must not draw a persistent border, background, shadow, capsule, or boxed dock.
-- Primary direct row action uses `row-action-btn row-action-btn--primary`; more menu uses `row-action-btn row-action-btn--more`.
-- danger 操作始终在 dropdown 内，且用 `a-popconfirm` 二次确认，不能直接触发。
-- Do not repeat identical text buttons in every row if icon action with tooltip is enough.
-- Fixed operation columns keep the table fixed-column boundary only; row operation affordance belongs to each icon button hover/focus state, not to a framed container.
-- Avoid loose icon buttons without a `row-actions` alignment wrapper, but keep that wrapper visually transparent.
-- Avoid permanent black/dark action borders. In a dense list they create a repeated black column and break the page's Arco theme rhythm.
-- Avoid native browser focus outlines in row action buttons. `row-action-btn` is the only allowed operation-column action surface; page CSS must not add custom borders or focus rings to `row-actions`.
-- Row action dropdowns should have grouped normal actions and a separated danger group. Do not let default dropdown styling make irreversible actions look like ordinary menu items.
+### `detail-mini-vxe` exception
+
+Editable detail subtables (`detail-mini-vxe--editable`) may expose **one** delete icon directly (`status="danger"` + `a-popconfirm`) when the row job is inline line editing. Same matrix limits apply (max 2 affordances; no third flat icon). Read-only detail subtables follow the list matrix — danger stays in menu if present.
+
+### Anti-patterns
+
+- Three flat icons (e.g. edit + view + delete) or `width="120"`.
+- Hiding a daily **B** action inside `···` when the row only has two non-danger verbs.
+- Flat danger delete on workbench list rows.
+- Loose icons outside `row-actions`.
+- Text buttons («查看») in operation columns — icon + tooltip only.
 
 ## Detail And Nested Tables
 
@@ -393,6 +469,7 @@ Detail tables must look like part of the module, not a full page table pasted in
 - Put padding on `.vxe-cell` inside `detail-mini-vxe`, not on `.vxe-body--column` / `.vxe-header--column`, so VXE colgroup width stays aligned.
 - Native `<table>` is not allowed for editable detail line rows with hover, fixed operations, empty state, or repeated inputs. Use VXE so table behavior and density remain project-wide.
 - Detail mini table hover must use `--dense-vxe-surface-hover-bg` (alias `--dense-workbench-hover-bg`), not the header gradient.
+- In `detail-mini-vxe` cells, **do not** use `link-text` for plain read-only values — use normal cell text. If `link-text` is used on a non-interactive `span`, `global.css` neutralizes it to `text-1`. Keep `link-text` only on real actions (`a`, `a-button`).
 
 ## Editable Table Rules
 

@@ -147,7 +147,7 @@ src/views/<domain>/<module>/
 - Generate readonly detail/nested tables, such as documents, files, and status records, as `class="detail-mini-vxe detail-mini-vxe--readonly"` with `row-config.height = 34`.
 - Generate compact summary tables as `class="detail-mini-vxe detail-mini-vxe--summary"` with `row-config.height = 32`; do not use this variant for rows with visible form controls.
 - Generate VXE sequence columns with `width="52"` in both workbench and detail tables unless a documented module exception exists.
-- Use icon-only row actions with tooltip.
+- Use icon-only row actions with tooltip; apply the 1–N display matrix in [`table.md`](table.md) Row Actions (max 2 affordances, width 56/88, list danger in `···`).
 - Group low-frequency actions in dropdowns.
 - For process-bearing operational detail drawers, use `dds-milestone-bar` for compact process awareness. Do not generate `a-steps type="arrow"` or a full-width KPI/report strip under the hero. Repeated data totals belong in the owning module summary, not in the hero.
 - For detail sections with internal groups, generate `form-subgroup` blocks with `form-subgroup__head`, `form-subgroup__title`, and a following `detail-form-grid`. Do not generate consecutive bare `form-subgroup-label` elements or repeated blue left rails.
