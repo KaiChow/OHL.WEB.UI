@@ -141,6 +141,8 @@
 - Filter/detail fields preserve the name/value rhythm: label as metadata, control as input surface, with a visible grouping interval between them.
 - Placeholder text is guidance only and differs from entered values by `color-text-3` and weight 400, not by a smaller font size.
 - No list/detail form uses mixed label/value/placeholder sizes such as 12/13/11 or leaked Arco 14px labels.
+- The same Arco control keeps the same text tier across list filter, modal form, drawer form, and advanced query drawer; no per-surface font-size fork for the same control.
+- The same information role keeps the same text tier across the app: label=12, editable value/placeholder=12, readonly detail value=13, nav/button/pager trigger=13, helper/meta=11.
 - Codes and identifiers use mono or tabular numeric styling where comparison matters.
 - Numeric, amount, weight, volume, and date values use tabular numbers where possible.
 - International text expansion is considered: labels and buttons do not depend on short Chinese text.

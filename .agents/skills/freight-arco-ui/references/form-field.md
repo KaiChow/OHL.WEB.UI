@@ -10,6 +10,8 @@
 1. 模板统一 `size="small"`（见 `component-size.md`）
 2. 控件外观只改 `§ Arco Form Controls`，禁止在 `filter-field` / `detail-form` / `detail-drawer` 等布局 class 下重复写 height / font-size
 3. 布局 class（`filter-field`、`detail-form-grid`）只管 **排列与栅格**，不管控件皮肤
+4. **同一 Arco 组件在任意业务场景使用同一字号层级**：`a-input` / `a-select` / `a-date-picker` / `a-input-number` / `a-textarea` 的值与 placeholder 一律 F4 Control 12px；不得因为它出现在列表筛选、弹窗表单、详情编辑或查询抽屉里就切换成另一档字号
+5. **同一信息角色使用同一字号层级**：字段 label 一律 F4 12px；可编辑值/placeholder 一律 F4 Control 12px；只读详情值一律 F1 13px；导航与按钮文字一律 F2 13px
 
 ## Token
 
@@ -66,6 +68,19 @@
 | **组合控件** | `.filter-combo` / `.detail-combo` | 多控件拼接圆角（布局 struct，非模块） |
 | **分页跳转等** | `.table-card-cap__pager` | 分页专用（非表单字段） |
 
+### Typography Contract By Role
+
+| Role | Token | Size |
+|------|-------|------|
+| Field label | `--dense-font-field` | 12px |
+| Editable control value | `--dense-font-control` | 12px |
+| Editable control placeholder | `--dense-font-control` | 12px |
+| Read-only detail value | `--dense-font-data` | 13px |
+| Button / tab / pager trigger | `--dense-font-nav` | 13px |
+| Pager summary / helper / weak meta | `--dense-font-aux` | 11px |
+
+Do not create page-local variants such as “drawer select uses 13px” or “toolbar button uses 12px”. The surface may change; the component role does not.
+
 ## 禁止
 
 ```
@@ -73,6 +88,8 @@
 ❌ 在 src/views scoped 覆盖 .arco-input-wrapper 尺寸
 ❌ 以「列表筛选」「Modal 表单」为由建立第二套控件 token
 ❌ xf-grid / xf-label 自写表单控件样式
+❌ 因为控件所在页面不同，就把同一 Arco 组件切成 12px / 13px 两套值文字
+❌ 把按钮文字写成 F4 12px；按钮/Tab/分页触发器属于 F2 Nav 13px
 ```
 
 ## 模板示例
