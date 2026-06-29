@@ -298,6 +298,14 @@ if (!typographyReference.includes('Same Component Rule')) {
     content: 'missing Same Component Rule',
   });
 }
+if (!typographyReference.includes('Component Typography Map')) {
+  violations.push({
+    rule: '字体规范必须提供 Component Typography Map，便于按组件快速查字号层级',
+    file: 'ui-skill/freight-arco-ui/references/typography.md',
+    line: 1,
+    content: 'missing Component Typography Map',
+  });
+}
 if (!formFieldReference.includes('Typography Contract By Role') || !formFieldReference.includes('同一 Arco 组件在任意业务场景使用同一字号层级')) {
   violations.push({
     rule: '表单控件规范必须定义按角色分层的字号契约，并禁止同类控件分场景分字号',
@@ -421,6 +429,38 @@ if (/\.adv-group-title\s*\{[^}]*font-weight:\s*700/.test(globalCss)) {
     file: 'src/styles/global.css',
     line: 1,
     content: 'adv-group-title uses font-weight: 700',
+  });
+}
+if (/\.filter-card__advanced-title\s*\{[^}]*font-size:\s*12px/.test(globalCss)) {
+  violations.push({
+    rule: 'filter-card__advanced-title 属于结构标题，不得硬编码 12px，应使用 F3 Title token',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'filter-card__advanced-title uses 12px',
+  });
+}
+if (/\.filter-card__advanced-hint\s*\{[^}]*font-size:\s*12px/.test(globalCss)) {
+  violations.push({
+    rule: 'filter-card__advanced-hint 属于弱提示，不得硬编码 12px，应使用 F5 Aux token',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'filter-card__advanced-hint uses 12px',
+  });
+}
+if (/\.filter-active-strip__placeholder\s*\{[^}]*font-size:\s*12px/.test(globalCss)) {
+  violations.push({
+    rule: 'filter-active-strip__placeholder 属于可编辑占位层级，必须使用 F4 Control token',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'filter-active-strip__placeholder uses 12px',
+  });
+}
+if (/\.merged-bar \.toolbar-group \.arco-btn \.arco-icon\s*\{[^}]*font-size:\s*13px/.test(globalCss)) {
+  violations.push({
+    rule: 'toolbar 按钮 icon 必须使用 --dense-icon-action，而非正文 13px 文本字号',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'toolbar button icon uses 13px',
   });
 }
 

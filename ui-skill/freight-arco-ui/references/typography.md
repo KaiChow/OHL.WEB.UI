@@ -172,6 +172,56 @@ The same component type must not change text size because it appears in a differ
 
 Do not justify a second size system by saying a component is in a drawer, a detail panel, a table cap, or a specific page.
 
+### Allowed Exceptions
+
+These are limited exceptions and should stay rare:
+
+- shell/brand typography outside business modules, such as app logo or brand mark
+- icon graphics that use `--dense-icon-action` or F6 micro sizing as shapes, not as text
+- badge/pill/micro status counters that intentionally use F6 10px
+
+Outside these cases, prefer tokens over hard-coded `10px/11px/12px/13px`.
+
+## Component Typography Map
+
+Use this table as the fast lookup for implementation and review.
+
+| Component / surface | Text role | Token | Size |
+|---------------------|-----------|-------|------|
+| `a-input` value | editable value | `--dense-font-control` | 12px |
+| `a-input` placeholder | placeholder | `--dense-font-control` | 12px |
+| `a-select` trigger value | editable value | `--dense-font-control` | 12px |
+| `a-select` dropdown option | overlay option | `--dense-font-control` | 12px |
+| `a-date-picker` / `a-range-picker` input | editable value | `--dense-font-control` | 12px |
+| `a-input-number` input | editable value | `--dense-font-control` | 12px |
+| `a-textarea` value / placeholder | editable value | `--dense-font-control` | 12px |
+| `a-form-item` label | field label | `--dense-font-field` | 12px |
+| `.filter-field__label` | field label | `--dense-font-field` | 12px |
+| `.detail-field__label` | readonly field label | `--dense-font-field` | 12px |
+| `.detail-field__val` | readonly detail value | `--dense-font-data` | 13px |
+| `a-button` text | nav/action text | `--dense-font-nav` | 13px |
+| Tabs / segmented / status tab text | nav/action text | `--dense-font-nav` | 13px |
+| Pager page buttons | nav/action text | `--dense-font-nav` | 13px |
+| Pager select trigger | editable control | `--dense-font-control` | 12px |
+| Pager total / jumper text | helper/meta | `--dense-font-aux` | 11px |
+| `detail-section__title` | structure title | `--dense-font-title` | 13px |
+| `query-filter-drawer__group-head` | structure title | `--dense-font-title` | 13px |
+| `form-subgroup__title` | structure title | `--dense-font-title` | 13px |
+| Table header | structure title | `--dense-font-title` | 13px |
+| Table body text | data | `--dense-font-data` | 13px |
+| Modal / drawer title | overlay chrome | `--dense-font-overlay` | 14px |
+| Tooltip | helper/meta | `--dense-font-aux` | 11px |
+| `s-pill` / badge / seq micro text | micro | `--dense-font-micro` | 10px |
+| Icon-only action icon | icon graphic | `--dense-icon-action` | 14px graphic |
+
+Decision shortcut:
+
+- If users **edit** it, default to 12px.
+- If users **read business data** from it, default to 13px.
+- If it is **navigation / action text**, default to 13px.
+- If it is **helper/meta**, default to 11px.
+- If it is **micro state/count**, default to 10px.
+
 **Zone rules:**
 
 - Filter + editable form: **all 12px** in one row (label / value / placeholder).

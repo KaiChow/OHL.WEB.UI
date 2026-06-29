@@ -1038,7 +1038,7 @@ button:-moz-focusring,
 }
 
 .filter-card--s2-expand .filter-card__actions-panel .filter-expand-link--panel .arco-icon {
-  font-size: 12px;
+  font-size: var(--dense-font-field);
 }
 
 .filter-card__actions-panel {
@@ -1358,7 +1358,7 @@ button:-moz-focusring,
 }
 
 .filter-expand-link--inline .arco-icon {
-  font-size: 12px;
+  font-size: var(--dense-font-field);
   transition: transform 0.2s;
 }
 
@@ -1572,13 +1572,13 @@ button:-moz-focusring,
 }
 
 .filter-card__advanced-title {
-  font-size: 12px;
+  font-size: var(--dense-font-title);
   font-weight: var(--dense-weight-title);
   color: var(--color-text-1);
 }
 
 .filter-card__advanced-hint {
-  font-size: 12px;
+  font-size: var(--dense-font-aux);
   color: var(--color-text-3);
 }
 
@@ -1710,7 +1710,7 @@ button:-moz-focusring,
 }
 
 .filter-active-strip__placeholder {
-  font-size: 12px;
+  font-size: var(--dense-font-control);
   color: #b0b8c4;
 }
 
@@ -1914,7 +1914,7 @@ button:-moz-focusring,
 }
 
 .merged-bar .toolbar-group .arco-btn .arco-icon {
-  font-size: 13px;
+  font-size: var(--dense-icon-action);
 }
 
 .toolbar-group .arco-btn .arco-icon:last-child:not(:first-child),
@@ -3230,7 +3230,7 @@ button:-moz-focusring,
   justify-content: center;
   gap: 8px;
   color: var(--color-text-3);
-  font-size: 13px;
+  font-size: var(--dense-font-data);
   pointer-events: none;
 }
 
@@ -3485,7 +3485,7 @@ button:-moz-focusring,
   align-items: center;
   padding: 1px 7px;
   border-radius: 3px;
-  font-size: 11px;
+  font-size: var(--dense-font-aux);
   font-weight: 500;
   background: var(--color-fill-2);
   color: var(--color-text-2);
@@ -3520,7 +3520,7 @@ button:-moz-focusring,
   gap: 3px;
   padding: 1px 6px;
   border-radius: 3px;
-  font-size: 11px;
+  font-size: var(--dense-font-aux);
   font-weight: 500;
   background: var(--dense-warning-1);
   color: var(--dense-warning-7);
@@ -6251,7 +6251,7 @@ button:-moz-focusring,
 }
 
 .detail-collapse-toggle__icon {
-  font-size: 12px;
+  font-size: var(--dense-font-field);
   flex-shrink: 0;
   transition: transform 0.2s ease, color 0.12s ease;
 }
@@ -6863,7 +6863,7 @@ button:-moz-focusring,
 }
 
 .adv-toggle-btn .adv-arrow {
-  font-size: 10px;
+  font-size: var(--dense-font-micro);
   transition: transform .2s;
   display: inline-block;
 }
@@ -6920,7 +6920,7 @@ button:-moz-focusring,
 }
 
 .adv-range-sep {
-  font-size: 11px;
+  font-size: var(--dense-font-aux);
   color: var(--color-text-4);
   flex-shrink: 0;
 }
