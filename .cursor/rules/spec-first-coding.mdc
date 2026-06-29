@@ -1,0 +1,40 @@
+---
+description: UI 编码前强制查 skill 决策链；禁止不读规范直接写 template
+alwaysApply: true
+---
+
+# 编码前先查规范（强制）
+
+涉及 `src/views/**`、`src/components/**`：**必须先 Read skill reference，再写 template**。  
+细则以 skill 为唯一事实源，本文件只规定 **流程**，不重复规范正文。
+
+## 0. 任务 → 必读（写第一行 template 前）
+
+| 任务 | 读 |
+|------|-----|
+| 新列表页 | `list-page.md` + **`filter-layout.md`** + `table.md` + `actions.md` |
+| 筛选区 | **`filter-layout.md`**（先数字段数 → Tier → 结构 class） |
+| 弹窗/抽屉 | **`modal.md`**（Modal vs Drawer 决策表） |
+| 详情/长表单 | `detail-form.md` |
+| 新模块 | `module-patterns.md` + `domain-language.md` |
+| 任意类名 | grep `src/styles/global.css` |
+
+路径：`ui-skill/freight-arco-ui/references/`（已 sync 到 `.agents/skills/`）。
+
+## 1. 写 template 前必须完成的决策（答案在 reference 里查，禁止凭记忆）
+
+1. **筛选**：字段总数 → Tier → DOM 结构（**`filter-layout.md`** 为唯一决策源）
+2. **筛选 DOM**：按 Tier 选用 skill 给出的结构组合（如双行见 `filter-card--two-row` 示例），**禁止自拼未在 reference 出现的结构**
+3. **Overlay**：字段数 + 是否含子表/多分区 → 查 `modal.md` 容器表
+
+## 2. 写代码
+
+- 类名写前 grep `global.css`
+- 禁止自写等效布局 CSS
+- 用户要求「只按 skill」时，禁止参考其他 `src/views/**` 页面
+
+## 3. 交付前
+
+```bash
+node scripts/check-spec.js
+```

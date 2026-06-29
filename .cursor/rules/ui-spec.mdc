@@ -6,6 +6,8 @@ alwaysApply: true
 
 # UI 规范：禁止自写 CSS，必须复用 global.css
 
+**不在此重复决策细则：** 筛选 Tier / 布局结构 → `ui-skill/freight-arco-ui/references/filter-layout.md`；Modal vs Drawer → `modal.md`；编码流程 → `.cursor/rules/spec-first-coding.mdc`。本文件仅提供 DOM 骨架示例。
+
 ## 核心原则
 
 `src/styles/global.css` 已实现完整设计系统。**优先用已有类名，禁止另写等效 CSS。**

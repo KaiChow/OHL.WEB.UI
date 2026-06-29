@@ -73,8 +73,11 @@ Do not hide daily filters, status tabs, or reversible workflow actions merely to
 2. `references/design-principles.md`
 3. `references/module-patterns.md` + `references/domain-language.md` (new pages)
 4. One topic file from the map below
+5. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
 
-Reference implementation: `src/views/orderManage/saleOrder/`
+**Coding gate:** `.cursor/rules/spec-first-coding.mdc` — read references first; run `check-spec.js` before delivery.
+
+Optional mirror of an existing page only when the user explicitly asks. Default: skill + `global.css`.
 
 ## Reference Map
 

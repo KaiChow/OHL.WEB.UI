@@ -67,7 +67,7 @@
 - L1 page segments use `zone-l1-transport` + `seg-btn`; scope/status filters use `.stab` or `.stat-tab`, not the other way around.
 - List zones use one brand-neutral top-boundary token: `--dense-zone-top-border` on L1/L2/L3/L4 modules; saturated primary top borders are not used as generic module decoration.
 - Filter drawers use `query-filter-drawer__shell/body/group/group-head`; fields are grouped by business meaning, not rendered as a flat white form wall, and must not include descriptive summary/instruction copy above the groups.
-- Query field count follows `filter-layout.md`: two visible rows are allowed only for 6-10 high-frequency fields; 17-32 use grouped drawers; 33-50 use wide drawer with group navigation; 50+ use saved query workspace.
+- Query field count and two-row structure: **`filter-layout.md`** (6–10 visible fields → `filter-card--two-row` + `filter-grid`; not stacked slim-rows).
 - 50+ query workspaces use group anchors over all condition modules; they do not hide groups behind exclusive tabs when operators need to combine identifiers, time, route, parties, and flags.
 
 ## Components

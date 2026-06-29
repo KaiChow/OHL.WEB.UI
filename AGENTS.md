@@ -10,17 +10,12 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 
 1. **样式** — 先读 `src/styles/global.css`，复用类名，禁止自写等效 CSS。
 2. **Skill** — 页面/布局/表格/按钮/质感问题先读 `$freight-arco-ui`（`ui-skill/freight-arco-ui/`），按任务读 `references/` 对应文件。
-3. **示例** — 列表与抽屉参考 `src/views/orderManage/saleOrder/`。
+3. **编码门禁** — 见 `.cursor/rules/spec-first-coding.mdc`：先决策 Tier / 筛选结构 / Modal·Drawer，再写代码；交付前跑 `check-spec.js`。
 
 ## Skill 读什么
 
-| 任务 | 文件 |
-|------|------|
-| 任何 UI | `references/design-principles.md` |
-| 新页面 / 模块 | `references/module-patterns.md` → 字段用语见 `domain-language.md` |
-| 列表页 | `list-page.md` + `table.md` + `actions.md` |
-| 详情 / 表单 | `detail-form.md` + `actions.md` |
-| 交付前 | `checklist.md` + `node scripts/check-spec.js` |
+完整索引 → `ui-skill/freight-arco-ui/SKILL.md` · Reference Map  
+编码流程 → `.cursor/rules/spec-first-coding.mdc`
 
 `references/legacy-design-manual.md` 仅历史归档，新任务勿全读。
 

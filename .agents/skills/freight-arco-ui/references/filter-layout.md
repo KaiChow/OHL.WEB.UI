@@ -34,7 +34,7 @@ Do not decide drawer usage by "one row vs two rows" alone. Decide by field count
 | Total query fields | Visible area | Advanced surface | Use this when | Forbidden fallback |
 |--------------------|--------------|------------------|---------------|--------------------|
 | `1-3` | `filter-inline` or compact `filter-card__slim-row` | none | one keyword/identifier dominates | opening a drawer just for two secondary fields |
-| `4-8` | one `filter-card__slim-row` | optional drawer only for rare flags | all fields are daily high-frequency filters | showing 8 unrelated fields because they fit technically |
+| `4-8` | one `filter-card__slim-row`, or `filter-card--two-row` + `filter-grid` when 6-10 daily fields | none (Tier 1) | all fields are daily high-frequency | drawer for Tier-1 fields; stacked slim-rows |
 | `9-16` | one core row, 3-5 fields visible | `query-filter-drawer` grouped by business meaning | a few secondary filters are useful but not first-scan keys | inline gray form wall |
 | `17-24` | one core row | `query-filter-drawer query-filter-drawer--grouped` | advanced filters span 4-6 business groups | two-line visible query unless all visible fields are daily high-frequency |
 | `25-32` | one core row + optional saved preset entry | `query-filter-drawer query-filter-drawer--wide` with grouped sections | many advanced filters, but still usable as a drawer | flat drawer with no grouping |
@@ -60,12 +60,19 @@ Do not decide drawer usage by "one row vs two rows" alone. Decide by field count
 2. **表格可见性**：增加一行筛选后，VXE 表格的首行是否仍在 1440px 屏幕的首屏视口内？如是，则可加行。
 3. **空间利用率**：当前筛选行是否有肉眼可见的大块空白区？有空白就是在浪费操作员的空间效率。
 
-实现规则：
+### Visible layout structure（结构选型）
 
-- 多行布局使用多个 `filter-card__slim-row` 堆叠，不使用 `filter-card--two-row`（该 class 仅用于 2 行 grid 布局）。
-- 操作按钮（查询/重置/更多）放在**最后一行** `filter-card__slim-row` 的末尾 `filter-card__inline-actions` 中。
-- 每行内字段宽度按权重分配：主标识符 combo `span2-3`，维度过滤器 `span1`，日期范围 `filter-field--date`（固定 240px）。
-- 行间不加 border，padding 节奏即可产生自然分组感。
+| 可见字段数 | DOM 结构 |
+|-----------|----------|
+| 1 行（约 3–5 个字段） | `filter-card__slim-row` + 行末 `filter-card__inline-actions` |
+| 2 行（6–10 个高频字段，仍 Tier 1 全 inline） | `filter-card--two-row` → `filter-card__matrix` → **`filter-grid`（4 列）** + `filter-card__inline-actions--matrix` |
+
+禁止：
+
+- 多个独立 `filter-card__slim-row` 堆叠拼双行（列无法对齐、按钮错位）
+- 在 `filter-card--two-row` 内叠加 `filter-grid--two-row`（与 4 列 `filter-grid` 规则冲突）
+
+字段宽度：主标识 combo / 日期范围用 `filter-field--span2`；维度过滤器 span1。操作按钮在双行模式下只放在 **`inline-actions--matrix`**，不要塞进第二行字段末尾。
 
 For `30+ / 40+ / 50+` filters:
 
@@ -192,28 +199,30 @@ Rules:
 </div>
 ```
 
-## Two-Row Visible Query
+## Two-Row Visible Query (6–10 fields)
 
-Use this only for `6-10` high-frequency fields. It is not a replacement for advanced search.
+Use only when every visible field is daily high-frequency and total visible count is 6–10. Structure: see **Visible layout structure** above.
 
 ```vue
 <div class="zone-l2-filter-card zone-card filter-card filter-card--two-row">
   <div class="filter-card__matrix">
-    <div class="filter-grid filter-grid--two-row">
+    <div class="filter-grid">
       <div class="filter-field">...</div>
-      <div class="filter-field">...</div>
+      <!-- 4-column grid; use filter-field--span2 for wide fields -->
     </div>
-    <div class="filter-card__inline-actions filter-card__inline-actions--matrix">...</div>
+    <div class="filter-card__inline-actions filter-card__inline-actions--matrix">
+      <a-button size="small" type="primary" class="filter-card__query-btn">查询</a-button>
+      <a-button size="small" type="text" class="reset-btn">重置</a-button>
+    </div>
   </div>
 </div>
 ```
 
 Rules:
 
-- Use exactly one query command area for both rows.
-- Keep fields grouped by reading order; do not put route fields in row one and their paired dates far away in row two.
-- Do not use two visible rows for low-frequency "just in case" filters.
-- Do not exceed 10 visible fields. Above 10, use a drawer.
+- One query command area (`inline-actions--matrix`) for both rows.
+- Do not use two visible rows for low-frequency filters.
+- Above 10 visible fields, use Tier 2+ drawer — not more visible rows.
 
 ## More Filter Drawer
 

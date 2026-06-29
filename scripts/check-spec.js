@@ -330,7 +330,7 @@ if (!/\.filter-field \.filter-combo > \* \+ \*\s*\{[\s\S]*?margin-left:\s*-1px/.
 }
 if (!globalCss.includes('.filter-card--two-row') || !globalCss.includes('.filter-grid--two-row')) {
   violations.push({
-    rule: '两行高频查询必须有 filter-card--two-row / filter-grid--two-row 全局结构，不能靠重复 slim-row 拼接',
+    rule: '全局 CSS 须含 filter-card--two-row 结构；双行可见筛选用 matrix + filter-grid（4列），禁止多个 slim-row 堆叠',
     file: 'src/styles/global.css',
     line: 1,
     content: 'missing .filter-card--two-row or .filter-grid--two-row',

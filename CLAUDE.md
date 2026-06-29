@@ -8,7 +8,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 |------|------|------|
 | 样式 | `src/styles/global.css` | Token、布局类 — **禁止页面自写等效 CSS** |
 | UI Skill | `ui-skill/freight-arco-ui/SKILL.md` | PESDP 交付合同、reference 索引 |
-| 参考实现 | `src/views/orderManage/saleOrder/` | 列表 + 详情抽屉 |
+| 编码门禁 | `.cursor/rules/spec-first-coding.mdc` | 先决策 Tier / 结构 / Modal·Drawer，再写代码 |
 | 自动检查 | `node scripts/check-spec.js` | 规范扫描 |
 
 调用 skill：`/freight-arco-ui` · 维护：只改 `ui-skill/freight-arco-ui/` → `npm run sync-ui-skill`
@@ -43,29 +43,12 @@ Professional · Efficient · Structured · Dense · Premium — 效率 > 信息 
 
 ## Reference 索引
 
-路径：`ui-skill/freight-arco-ui/references/`（同步：`.claude/skills/freight-arco-ui/references/`）
-
-| 任务 | 文件 |
-|------|------|
-| 原则 | `design-principles.md` |
-| 模块槽位（结构） | `module-patterns.md` |
-| 货代中文（用语） | `domain-language.md` |
-| 列表 | `list-page.md` |
-| 筛选布局（字段数→结构） | `filter-layout.md` |
-| 详情/表单 | `detail-form.md` |
-| **Arco Form 写法规范** | **`form-rules.md`** |
-| 上传/附件 | `upload.md` |
-| 弹窗/确认框 | `modal.md` |
-| 表格 | `table.md` |
-| 按钮 | `actions.md` |
-| **图标体系（双库规范）** | **`icons.md`** |
-| 视觉层次 | `visual-system.md` |
-| 字体 | `typography.md` |
-| 自查 | `checklist.md` |
+完整任务 → 文件映射见 **`ui-skill/freight-arco-ui/SKILL.md` → Reference Map**。  
+编码前先读 → **`.cursor/rules/spec-first-coding.mdc`**。
 
 ## 代码骨架
 
-Vue 完整骨架见 **`.cursor/rules/ui-spec.mdc`** 或 skill 内 `list-page.md` / `detail-form.md`。
+Vue DOM 骨架见 **`.cursor/rules/ui-spec.mdc`**；筛选 Tier / 双行结构 / Modal·Drawer 决策不在 ui-spec 重复，见 **`filter-layout.md`** / **`modal.md`**。
 
 类名使用前：`grep -n "\.类名" src/styles/global.css`
 

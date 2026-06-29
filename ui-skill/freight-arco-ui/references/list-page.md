@@ -93,6 +93,7 @@ The visible query row uses `filter-card__inline-actions`: one primary query butt
 ```
 
 Rules:
+
 - All three controls: `height: var(--dense-control-h-filter)` (32px), `font-size: 12px`. Do not use `height: auto` or `min-height: 24px` on reset or expand — they must match query button height.
 - Query: `type="primary"` + icon + `class="filter-card__query-btn"`.
 - Reset: `type="text"` + `class="reset-btn"` (transparent bg, `color-text-2`, hover tints primary-1).
@@ -106,28 +107,18 @@ Rules:
 
 ## Filter Count Tiers
 
-Choose the search UI by field count and user job. Do not use one query layout for every page.
+**Authoritative:** field count → Tier → DOM structure is defined in **`filter-layout.md`** (Query Count Decision Matrix + Visible layout structure). Do not duplicate that matrix here.
 
-| Query field count | Pattern | Use when | Interaction |
-|-------------------|---------|----------|-------------|
-| 0-3 | Tier 0 keyword/search bar | Users mainly locate by one identifier or keyword | Single dominant input, optional one select, primary query |
-| 4-8 | Tier 1 core query row | All visible fields are high-frequency and fit without wrapping | Always visible single row |
-| 9-16 | Tier 2 core row + filter drawer | Few high-frequency fields plus secondary filters | 3-5 fields visible; secondary fields in `query-filter-drawer` |
-| 17-24 | Tier 3 grouped drawer | Many fields across business groups | Keep top query visible; drawer grouped by business meaning with local clear/apply |
-| 25-32 | Tier 3 wide grouped drawer | Many advanced fields but still drawer-usable | `query-filter-drawer--wide` when grouping needs more horizontal space |
-| 33-50 | Tier 4 wide drawer + group navigation | Power users need many occasional fields | `query-filter-drawer--wide` + `query-filter-drawer__nav` |
-| 50+ | Tier 4 saved query workspace | Power users need reusable query schemes | Quick search + saved filters + grouped advanced editor; never show all fields at once |
-
-Rules:
+List-page rules that stay in this file:
 
 - The first viewport must show the table after the default search area on common desktop sizes.
 - Do not use a modal dialog for frequent advanced search; it interrupts scan-and-adjust work.
 - Do not show 50 fields as a flat form wall.
 - Put active query state in the controls, transport/status tabs, and selected values; do not add a separate selected-filter strip.
 - Text inputs trigger by Enter or Query button; selects and chips may auto-search when safe.
-- Query and reset actions stay in a stable location in the visible query row.
+- Query and reset actions stay in a stable location in the visible query row or `inline-actions--matrix`.
 - The filter drawer owns secondary conditions and its own clear/apply footer. Do not use an inline expanded panel for normal business list pages.
-- Two visible query rows are allowed only for 6-10 high-frequency fields and must use `filter-card--two-row` + `filter-grid--two-row`; they are not a substitute for 30+ advanced filters.
+- Two visible rows (6–10 daily fields): `filter-card--two-row` + `filter-card__matrix` + `filter-grid` + `inline-actions--matrix` — see `filter-layout.md`. Not a substitute for Tier 2 drawer when secondary filters dominate.
 - 30+/40+ filters use grouped/wide drawer patterns. 50+ filters use a saved query workspace, not a larger drawer.
 - Query actions must be internationalization-safe. Do not size them by Chinese labels; use min/max or `clamp()`, allow 1.3-2x text expansion, and give secondary actions tooltip/title/aria labels when text may ellipsize.
 - If secondary query actions cannot fit translated text, use icon + accessible label or move the actions to a horizontal command row. Do not silently clip action meaning.
