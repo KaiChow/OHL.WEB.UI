@@ -17,18 +17,21 @@ This project uses **one business density**. Map Arco `size` in templates; map re
 
 ## Size → Token Mapping (`global.css`)
 
+**表单字段统一规范见 [`form-field.md`](form-field.md)** — CSS 区块 `§ Form Field Contract`。
+
 | Surface | Template `size` | Height token | Value | Typography |
 |---------|-----------------|--------------|-------|------------|
-| List filter / search | `small` | `--dense-control-h-filter` | 32px | F4 Control 12px |
+| **All form fields**（filter / detail / modal / search） | `small` | `--dense-control-h-form` | **28px** | F4 Control 12px |
 | Toolbar / footer / section actions | `small` | `--dense-control-h-nav` | 28px | F2 Nav 13px (buttons) |
-| Detail form + drawer fields | `small` | `--dense-control-h-detail` | 28px | F4 Control 12px |
-| Detail / table cell editors | `small` | `--dense-control-h-detail` | 28px | F4 Control 12px |
+| Detail / table cell editors | `small` | `--dense-control-h-form` | 28px | F4 Control 12px |
 | Table row icon actions | *(no size or `small`)* | `.row-action-btn` | 22×22px | icon token 14px |
 | VXE main list table | `size="small"` + `class="compact"` | `--dense-row-h` | 36px row | F1 13px cells |
 | VXE detail mini table | `size="small"` + `detail-mini-vxe` | row-config `height` | 38px row | F1 13px / F4 in cells |
 | Overlay confirm buttons | *(Arco mini internally)* | override in `global.css` | 28px | F2 Nav 13px |
 | Overlay modal/popover title | *(portal)* | `.arco-modal-title` | — | F0 Overlay **14px** |
 | Overlay modal body / dropdown options | *(portal)* | match trigger | 28px row | F4 Control 12px |
+
+Legacy aliases `--dense-control-h-filter` / `--dense-control-h-detail` both point to `--dense-control-h-form`. Do not assign them different values.
 
 Heights are **not** Arco's stock small/medium table — they are project overrides. Always pair template `size="small"` with the correct surface class (`filter-field`, `detail-form`, `detail-drawer`, `detail-mini-vxe`).
 

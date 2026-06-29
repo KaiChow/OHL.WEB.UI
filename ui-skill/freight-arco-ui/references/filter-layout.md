@@ -137,7 +137,7 @@ The visible row should read as ordered field units, not as a strip of attached l
 
 - Each `filter-field` is vertical: label above, control below, both left-aligned.
 - Label uses metadata strength (`color-text-3`, F4 control size); the control carries the active input surface.
-- The label-to-control gap is the smallest visible grouping interval in the query row. Use 5-6px in `filter-card__slim-row`; detail forms use `--dense-gap-label`.
+- Label → control gap: **`--dense-gap-label` (4px)** everywhere — see `form-field.md` § Form Field Contract.
 - If the gap is reduced until the label touches the control frame, the field loses its name/value hierarchy and the row feels mechanically compressed rather than premium dense.
 
 Rules:

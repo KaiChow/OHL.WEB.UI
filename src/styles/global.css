@@ -315,12 +315,12 @@ body,
   --dense-perm-roles-w: 200px;
   /* 权限页角色列表宽度 */
 
-  --dense-control-h-filter: 32px;
-  /* list filter: a-* size="small" */
-  --dense-control-h-detail: 28px;
-  /* detail form / detail-mini-vxe: size="small" */
+  /* 表单控件 — 唯一高度源；filter / detail / modal / search 均引用此 token */
+  --dense-control-h-form: 28px;
+  --dense-control-lh-form: calc(var(--dense-control-h-form) - 2px);
+  --dense-control-h-filter: var(--dense-control-h-form);
+  --dense-control-h-detail: var(--dense-control-h-form);
   --dense-control-h-nav: 28px;
-  /* toolbar / footer buttons: size="small" */
   --dense-action-menu-min-w: 128px;
   --dense-action-menu-toolbar-min-w: 128px;
   --dense-action-menu-footer-min-w: 126px;
@@ -1145,8 +1145,7 @@ button:-moz-focusring,
 .filter-card__slim-row .filter-field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  /* 字段名/输入面之间的最小可扫读间隔 */
+  gap: var(--dense-gap-label);
   flex: 1 1 0;
   min-width: 100px;
 }
@@ -1178,14 +1177,14 @@ button:-moz-focusring,
   max-width: 240px !important;
 }
 
-/* label 在 slim-row 内：保留 5px 间距，形成字段名/输入区的清晰层次 */
+/* slim-row 内 label 间距由 .filter-field gap 承担，不再单独 margin */
 .filter-card__slim-row .filter-field__label {
   margin-bottom: 0;
-  line-height: 16px;
+  line-height: 1.35;
 }
 
 /* ── filter-card__inline-actions ── 水平操作区 ──────────────────────
-   高度 = var(--dense-control-h-filter) = 32px，与 control 行 bottom-align 后平齐
+   高度与 --dense-control-h-form 平齐
    ──────────────────────────────────────────────────────────────────── */
 .filter-card__inline-actions {
   display: flex;
@@ -1318,6 +1317,131 @@ button:-moz-focusring,
   gap: 8px 12px;
 }
 
+/* =================================================================
+   § Form Field Contract — 表单字段唯一事实源（global.css）
+   Surfaces: .filter-field | .filter-inline | .detail-form | .search-form
+   列表筛选 / 筛选抽屉 / Modal / 详情 / 高级查询 — 同一套 label + 控件
+   Token: --dense-control-h-form · --dense-control-lh-form · --dense-gap-label
+   规范文档: ui-skill/freight-arco-ui/references/form-field.md
+   ================================================================= */
+
+/* 1 · Label */
+.filter-field__label,
+.detail-form .arco-form-item-label-col > .arco-form-item-label,
+.detail-form .arco-form-item-label > label,
+.search-form .arco-form-item-label-col > .arco-form-item-label,
+.search-form .arco-form-item-label > label {
+  font-size: var(--dense-font-field);
+  font-weight: var(--dense-weight-field);
+  color: var(--color-text-2);
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+.filter-field__label {
+  display: block;
+  margin-bottom: var(--dense-gap-label);
+}
+
+.detail-form .arco-form-item-layout-vertical > .arco-form-item-label-col,
+.search-form .arco-form-item-layout-vertical > .arco-form-item-label-col {
+  margin-bottom: var(--dense-gap-label) !important;
+  padding-bottom: 0;
+}
+
+/* 2 · Control shell */
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-input-wrapper,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-select-view-single,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-input-number.arco-input-number-size-small,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-picker-size-small,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-picker-range.arco-picker-size-small {
+  height: var(--dense-control-h-form) !important;
+  min-height: var(--dense-control-h-form) !important;
+  border-radius: var(--dense-radius) !important;
+  background: var(--color-bg-card);
+  border: 1px solid var(--dense-border) !important;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.filter-field .arco-input-wrapper,
+.filter-field .arco-select-view-single,
+.filter-field .arco-input-number.arco-input-number-size-small,
+.filter-field .arco-picker-size-small,
+.filter-field .arco-picker-range.arco-picker-size-small {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 1px 2px rgba(16, 24, 40, 0.035);
+}
+
+:is(.filter-field, .detail-form, .search-form) .arco-input-wrapper,
+:is(.filter-field, .detail-form, .search-form) .arco-select,
+:is(.filter-field, .detail-form, .search-form) .arco-input-number,
+:is(.filter-field, .detail-form, .search-form) .arco-picker,
+:is(.filter-field, .detail-form, .search-form) .arco-picker-range {
+  width: 100%;
+}
+
+.filter-inline .arco-input-wrapper,
+.filter-inline .arco-select-view-single {
+  flex-shrink: 0;
+}
+
+/* 3 · Control inner */
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-input-wrapper .arco-input,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-select-view-value,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-select-view-input,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-input-number-size-small .arco-input-number-input,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-picker-size-small input,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-picker-range.arco-picker-size-small input {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control);
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  line-height: var(--dense-control-lh-form) !important;
+}
+
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-select-view-single.arco-select-view-size-small .arco-select-view-value,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-select-view-single.arco-select-view-size-small .arco-select-view-input,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-select-view-single.arco-select-size-small .arco-select-view-value,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-select-view-single.arco-select-size-small .arco-select-view-input {
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  line-height: var(--dense-control-lh-form) !important;
+}
+
+/* 4 · Placeholder */
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-input::placeholder,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-textarea::placeholder,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-select-view-input::placeholder,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-picker-size-small input::placeholder {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-placeholder);
+  color: var(--color-text-3) !important;
+}
+
+/* 5 · Hover / Focus */
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-input-wrapper:not(.arco-input-disabled):hover,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-select-view-single:not(.arco-select-view-disabled):hover,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-input-number.arco-input-number-size-small:not(.arco-input-number-disabled):hover,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-picker-size-small:not(.arco-picker-disabled):hover {
+  border-color: var(--dense-primary-3) !important;
+}
+
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-input-wrapper:focus-within,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-select-view-single.arco-select-view-focus,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-input-number.arco-input-number-size-small:focus-within,
+:is(.filter-field, .filter-inline, .detail-form, .search-form) .arco-picker-size-small.arco-picker-focused {
+  border-color: var(--dense-primary-4) !important;
+  box-shadow: 0 0 0 2px var(--dense-primary-1) !important;
+}
+
+/* 6 · Textarea（多行，不参与固定高度） */
+:is(.detail-form, .search-form) .arco-textarea-wrapper.arco-textarea-size-small .arco-textarea {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control);
+  line-height: 1.45;
+}
+
 .filter-field {
   min-width: 0;
 }
@@ -1353,59 +1477,6 @@ button:-moz-focusring,
 .filter-expand-link .arco-icon {
   font-size: var(--dense-font-title);
   flex-shrink: 0;
-}
-
-.filter-field__label {
-  display: block;
-  margin-bottom: var(--dense-gap-label);
-  font-size: var(--dense-font-field);
-  /* 12px：可读，与页面字体体系一致 */
-  font-weight: var(--dense-weight-field);
-  color: var(--color-text-2);
-  letter-spacing: 0;
-  line-height: 1.35;
-}
-
-.filter-field .arco-input-wrapper,
-.filter-field .arco-select {
-  width: 100%;
-}
-
-.filter-field .arco-input-wrapper,
-.filter-field .arco-select-view-single {
-  height: var(--dense-control-h-filter) !important;
-  min-height: var(--dense-control-h-filter) !important;
-  background: var(--color-bg-card);
-  border: 1px solid var(--dense-border) !important;
-  border-radius: var(--dense-radius) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 1px 2px rgba(16, 24, 40, 0.035);
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.filter-field .arco-input-wrapper .arco-input,
-.filter-field .arco-select-view-value,
-.filter-field .arco-select-view-input {
-  font-size: var(--dense-font-control) !important;
-  font-weight: var(--dense-weight-control);
-  line-height: 30px !important;
-}
-
-.filter-field .arco-input::placeholder,
-.filter-field .arco-select-view-input::placeholder {
-  font-size: var(--dense-font-control) !important;
-  font-weight: var(--dense-weight-placeholder);
-  color: var(--color-text-3) !important;
-}
-
-.filter-field .arco-input-wrapper:hover,
-.filter-field .arco-select-view-single:hover {
-  border-color: var(--color-border-3) !important;
-}
-
-.filter-field .arco-input-wrapper:focus-within,
-.filter-field .arco-select-view-single.arco-select-view-focus {
-  border-color: var(--dense-primary) !important;
-  box-shadow: 0 0 0 2px var(--dense-primary-2) !important;
 }
 
 .filter-field .filter-combo.arco-input-group,
@@ -1590,31 +1661,7 @@ button:-moz-focusring,
 }
 
 .search-form .arco-form-item-label>label {
-  font-size: var(--dense-font-field);
-  font-weight: var(--dense-weight-field);
-  color: var(--color-text-2);
   white-space: nowrap;
-}
-
-.search-form .arco-input,
-.search-form .arco-select-view-value,
-.search-form .arco-select-view-input,
-.search-form .arco-input-number-input {
-  font-size: var(--dense-font-control) !important;
-  font-weight: var(--dense-weight-control);
-}
-
-.search-form .arco-input::placeholder,
-.search-form .arco-select-view-input::placeholder {
-  color: var(--color-text-3);
-  font-size: var(--dense-font-control);
-  font-weight: var(--dense-weight-placeholder);
-}
-
-.search-form .arco-select,
-.search-form .arco-input-wrapper {
-  width: 100%;
-  border-radius: var(--dense-radius);
 }
 
 .search-form-actions {
@@ -3777,51 +3824,8 @@ button:-moz-focusring,
   color: var(--color-text-1);
 }
 
-/* 详情控件：F4 12px / 28px 控件高度 */
-.detail-drawer .arco-input-wrapper.arco-input-size-small,
-.detail-drawer .arco-select-view-single.arco-select-size-small,
-.detail-drawer .arco-input-number.arco-input-number-size-small,
-.detail-drawer .arco-picker-size-small {
-  height: var(--dense-control-h-detail) !important;
-  min-height: var(--dense-control-h-detail) !important;
-}
-
-.detail-drawer .arco-input-size-small .arco-input,
-.detail-drawer .arco-select-size-small .arco-select-view-value,
-.detail-drawer .arco-select-size-small .arco-select-view-input,
-.detail-drawer .arco-input-number-size-small .arco-input-number-input,
-.detail-drawer .arco-picker-size-small input {
-  font-size: var(--dense-font-control) !important;
-  font-weight: var(--dense-weight-control);
-  line-height: calc(var(--dense-control-h-detail) - 2px) !important;
-}
-
-.detail-drawer .arco-textarea-wrapper.arco-textarea-size-small .arco-textarea {
-  font-size: var(--dense-font-control) !important;
-  font-weight: var(--dense-weight-control);
-  line-height: 1.45;
-}
-
 .detail-drawer .arco-checkbox-label {
   font-size: var(--dense-font-control);
-}
-
-.detail-drawer .arco-form-item-label-col {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  line-height: 1.2;
-}
-
-.detail-drawer .arco-form-item-layout-vertical>.arco-form-item-label-col {
-  margin-bottom: var(--dense-gap-label) !important;
-}
-
-.detail-drawer .arco-form-item-label-col>.arco-form-item-label,
-.detail-drawer .arco-form-item-label>label {
-  font-size: var(--dense-font-field) !important;
-  font-weight: var(--dense-weight-field);
-  line-height: 1.2;
-  height: auto;
 }
 
 .detail-drawer .arco-form-item-wrapper-col,
@@ -3831,18 +3835,6 @@ button:-moz-focusring,
 
 .detail-drawer .detail-form .arco-form-item {
   margin-bottom: var(--dense-gap-field-row) !important;
-}
-
-.detail-drawer .arco-select-view-single.arco-select-size-small {
-  line-height: calc(var(--dense-control-h-detail) - 2px) !important;
-}
-
-.detail-drawer .arco-input-wrapper .arco-input,
-.detail-drawer .arco-select-view-value,
-.detail-drawer .arco-select-view-input,
-.detail-drawer .arco-input-number-input {
-  font-size: var(--dense-font-control) !important;
-  font-weight: var(--dense-weight-control);
 }
 
 /* ── PESDP 详情页头部结构：跨组件复用，禁止放在 scoped 中 ───────────── */
@@ -4393,6 +4385,7 @@ button:-moz-focusring,
 .detail-form .arco-form-item-content>.arco-select,
 .detail-form .arco-form-item-content>.arco-input-number,
 .detail-form .arco-form-item-content>.arco-picker,
+.detail-form .arco-form-item-content>.arco-picker-range,
 .detail-form .arco-form-item-content>.arco-textarea-wrapper {
   width: 100%;
 }
@@ -4643,15 +4636,6 @@ button:-moz-focusring,
 
 .query-filter-drawer .detail-form .arco-form-item {
   margin-bottom: 0;
-}
-
-.query-filter-drawer .detail-form .arco-form-item-label-col {
-  margin-bottom: 5px !important;
-}
-
-.query-filter-drawer .detail-form .arco-form-item-label-col>.arco-form-item-label {
-  line-height: 16px !important;
-  color: var(--color-text-2);
 }
 
 .query-filter-drawer .detail-drawer-footer {
@@ -4990,32 +4974,8 @@ button:-moz-focusring,
   margin-bottom: var(--dense-gap-field-row);
 }
 
-.detail-form .arco-form-item-label-col>.arco-form-item-label,
-.detail-form .arco-form-item-label>label {
-  font-size: var(--dense-font-field);
-  font-weight: var(--dense-weight-field);
-  color: var(--color-text-2);
-}
-
 .detail-form .arco-form-item-content {
   min-height: 0;
-}
-
-.detail-form .arco-input,
-.detail-form .arco-textarea,
-.detail-form .arco-select-view-value,
-.detail-form .arco-select-view-input,
-.detail-form .arco-input-number-input {
-  font-size: var(--dense-font-control) !important;
-  font-weight: var(--dense-weight-control);
-}
-
-.detail-form .arco-input::placeholder,
-.detail-form .arco-textarea::placeholder,
-.detail-form .arco-select-view-input::placeholder {
-  font-size: var(--dense-font-control) !important;
-  font-weight: var(--dense-weight-placeholder);
-  color: var(--color-text-3) !important;
 }
 
 /* 详情表单：组合控件（港码+港名、船名/航次、字段+复制） */
@@ -5069,19 +5029,6 @@ button:-moz-focusring,
 
 .detail-form .detail-combo .arco-input-wrapper:focus-within {
   z-index: 2;
-}
-
-.detail-form .arco-input-wrapper.arco-input-size-small:not(.arco-input-disabled):hover,
-.detail-form .arco-select-view-single.arco-select-size-small:not(.arco-select-view-disabled):hover,
-.detail-form .arco-picker-size-small:not(.arco-picker-disabled):hover {
-  border-color: var(--dense-primary-3) !important;
-}
-
-.detail-form .arco-input-wrapper.arco-input-size-small:focus-within,
-.detail-form .arco-select-view-single.arco-select-size-small.arco-select-view-focus,
-.detail-form .arco-picker-size-small.arco-picker-focused {
-  border-color: var(--dense-primary-4) !important;
-  box-shadow: 0 0 0 2px var(--dense-primary-1) !important;
 }
 
 /* 详情页服务项 / 货物类型：checkbox chip，多选勾选语义 */
@@ -5360,19 +5307,19 @@ button:-moz-focusring,
 .staff-add-inline .arco-select-view-single,
 .staff-add-inline .arco-input-wrapper {
   width: 100%;
-  height: var(--dense-control-h-detail) !important;
-  min-height: var(--dense-control-h-detail) !important;
+  height: var(--dense-control-h-form) !important;
+  min-height: var(--dense-control-h-form) !important;
 }
 
 .staff-add-inline .arco-select-view-value,
 .staff-add-inline .arco-select-view-input,
 .staff-add-inline .arco-input {
-  height: calc(var(--dense-control-h-detail) - 2px) !important;
+  height: var(--dense-control-lh-form) !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   font-size: var(--dense-font-control) !important;
   font-weight: var(--dense-weight-control);
-  line-height: calc(var(--dense-control-h-detail) - 2px) !important;
+  line-height: var(--dense-control-lh-form) !important;
 }
 
 .form-subgroup-label {
@@ -6460,13 +6407,25 @@ button:-moz-focusring,
 }
 
 .arco-input-wrapper.arco-input-size-small {
-  height: 24px !important;
+  height: var(--dense-control-h-form) !important;
   border-radius: var(--dense-radius) !important;
 }
 
-.arco-select-view-single.arco-select-size-small {
-  height: 24px !important;
+.arco-select-view-single.arco-select-size-small,
+.arco-select-view-single.arco-select-view-size-small {
+  height: var(--dense-control-h-form) !important;
   border-radius: var(--dense-radius) !important;
+}
+
+/* Arco 有值态 select 默认 min-height + padding，与空态不一致 — 全局归一 */
+.arco-select-view-single.arco-select-view-size-small .arco-select-view-value,
+.arco-select-view-single.arco-select-view-size-small .arco-select-view-input,
+.arco-select-view-single.arco-select-size-small .arco-select-view-value,
+.arco-select-view-single.arco-select-size-small .arco-select-view-input {
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  line-height: var(--dense-control-lh-form) !important;
 }
 
 .arco-input-size-small .arco-input,
@@ -7384,38 +7343,6 @@ button:-moz-focusring,
   border-radius: var(--dense-radius);
   flex-shrink: 0;
   flex-wrap: nowrap;
-}
-
-.filter-inline .arco-input-wrapper,
-.filter-inline .arco-select-view-single {
-  height: 32px !important;
-  min-height: 32px !important;
-  border: 1px solid var(--color-border-2) !important;
-  border-radius: 6px !important;
-  background: var(--color-bg-card);
-  font-size: var(--dense-font-control) !important;
-  flex-shrink: 0;
-}
-
-.filter-inline .arco-input,
-.filter-inline .arco-select-view-value,
-.filter-inline .arco-select-view-input {
-  font-size: var(--dense-font-control) !important;
-  font-weight: var(--dense-weight-control);
-  line-height: 30px !important;
-}
-
-.filter-inline .arco-input::placeholder,
-.filter-inline .arco-select-view-input::placeholder {
-  font-size: var(--dense-font-control) !important;
-  font-weight: var(--dense-weight-placeholder);
-  color: var(--color-text-3) !important;
-}
-
-.filter-inline .arco-input-wrapper:focus-within,
-.filter-inline .arco-select-view-single.arco-select-view-focus {
-  border-color: var(--dense-primary-6) !important;
-  box-shadow: 0 0 0 2px var(--dense-primary-2) !important;
 }
 
 .filter-inline__sep {

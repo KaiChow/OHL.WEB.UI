@@ -521,12 +521,23 @@ if (!globalCss.includes('col--ellipsis') || !globalCss.includes('.detail-mini-vx
     content: 'missing detail-mini-vxe col--ellipsis cell override',
   });
 }
-if (!globalCss.includes('.detail-drawer .arco-picker-size-small')) {
+if (!globalCss.includes('§ Form Field Contract') || !globalCss.includes('--dense-control-h-form')) {
   violations.push({
-    rule: 'detail-drawer 必须覆盖 date picker 28px 控件高度',
+    rule: 'global.css 必须定义 § Form Field Contract 与 --dense-control-h-form 统一表单控件 token',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing .detail-drawer .arco-picker-size-small',
+    content: 'missing § Form Field Contract or --dense-control-h-form',
+  });
+} else if (
+  !/:is\(\.filter-field, \.filter-inline, \.detail-form, \.search-form\)[\s\S]*\.arco-picker-size-small/.test(
+    globalCss,
+  )
+) {
+  violations.push({
+    rule: 'Form Field Contract 必须覆盖 filter-field / detail-form / search-form 的 picker 控件',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing unified picker rule in § Form Field Contract',
   });
 }
 if (!globalCss.includes('--dense-vxe-surface-hover-bg') || !globalCss.includes('--dense-table-header-bg')) {

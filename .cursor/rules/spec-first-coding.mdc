@@ -14,10 +14,10 @@ alwaysApply: true
 |------|-----|
 | **新菜单 / 不确定用哪种布局** | **`domain-routing.md`** |
 | 新列表页 | `list-page.md` + **`filter-layout.md`** + `table.md` + `actions.md` |
-| 筛选区 | **`filter-layout.md`**（先数字段数 → Tier → 结构 class） |
+| 筛选区 | **`filter-layout.md`** + **`form-field.md`**（先数字段数 → Tier → 结构 class） |
 | 弹窗/抽屉 | **`modal.md`** + `overlay-dimensions.md` |
-| 详情/长表单 | `detail-form.md` |
-| 全页新建/客户端下单 | **`full-page-form.md`** + `form-rules.md` |
+| 详情/长表单 | `detail-form.md` + **`form-field.md`** |
+| 全页新建/客户端下单 | **`full-page-form.md`** + `form-rules.md` + **`form-field.md`** |
 | 主数据/字典/设置 | **`master-data.md`** |
 | 权限/角色 | **`permissions.md`** |
 | BI/看板 | **`dashboard.md`** |

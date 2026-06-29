@@ -69,41 +69,38 @@ const handleOk = () => {
     @cancel="close"
     @update:visible="emit('update:visible', $event)"
   >
-    <div class="xf-grid xf-grid--modal">
-      <div class="xf-field">
-        <label class="xf-label">通知类型</label>
-        <a-select v-model="form.type" size="small" disabled>
-          <a-option value="内部通知">内部通知</a-option>
-        </a-select>
+    <a-form class="detail-form" layout="vertical" size="small" :model="form">
+      <div class="detail-form-grid detail-form-grid--2">
+        <a-form-item label="通知类型">
+          <a-select v-model="form.type" size="small" disabled>
+            <a-option value="内部通知">内部通知</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="通知对象">
+          <a-select v-model="form.targetType" size="small">
+            <a-option value="all">全员通知</a-option>
+            <a-option value="custom">自定义通知</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="主题" required class="detail-form-grid__span2">
+          <a-input v-model="form.subject" size="small" allow-clear placeholder="请输入主题" />
+        </a-form-item>
+        <a-form-item label="内容" class="detail-form-grid__span2">
+          <a-textarea
+            v-model="form.content"
+            size="small"
+            :auto-size="{ minRows: 2, maxRows: 4 }"
+            placeholder="请输入通知内容"
+          />
+        </a-form-item>
+        <a-form-item label="生效周期">
+          <a-select v-model="form.effectivePeriod" size="small">
+            <a-option value="是">是</a-option>
+            <a-option value="否">否</a-option>
+          </a-select>
+        </a-form-item>
       </div>
-      <div class="xf-field">
-        <label class="xf-label">通知对象</label>
-        <a-select v-model="form.targetType" size="small">
-          <a-option value="all">全员通知</a-option>
-          <a-option value="custom">自定义通知</a-option>
-        </a-select>
-      </div>
-      <div class="xf-field xf-field--wide">
-        <label class="xf-label">主题 <span class="xf-req">*</span></label>
-        <a-input v-model="form.subject" size="small" allow-clear placeholder="请输入主题" />
-      </div>
-      <div class="xf-field xf-field--wide">
-        <label class="xf-label">内容</label>
-        <a-textarea
-          v-model="form.content"
-          size="small"
-          :auto-size="{ minRows: 2, maxRows: 4 }"
-          placeholder="请输入通知内容"
-        />
-      </div>
-      <div class="xf-field">
-        <label class="xf-label">生效周期</label>
-        <a-select v-model="form.effectivePeriod" size="small">
-          <a-option value="是">是</a-option>
-          <a-option value="否">否</a-option>
-        </a-select>
-      </div>
-    </div>
+    </a-form>
     <template #footer>
       <div class="modal-footer">
         <a-button size="small" @click="close">取消</a-button>
@@ -114,39 +111,9 @@ const handleOk = () => {
 </template>
 
 <style scoped>
-.xf-grid--modal {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px 16px;
-}
-.xf-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.xf-field--wide {
-  grid-column: span 2;
-}
-.xf-label {
-  font-size: var(--dense-font-field);
-  color: var(--color-text-2);
-  font-weight: 500;
-}
-.xf-req {
-  color: var(--danger-6);
-  margin-left: 2px;
-}
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-}
-@media (max-width: 1280px) {
-  .xf-grid--modal {
-    grid-template-columns: 1fr;
-  }
-  .xf-field--wide {
-    grid-column: span 1;
-  }
 }
 </style>
