@@ -447,6 +447,7 @@ fetchList();
             <template #icon><icon-plus /></template>
             新增 AB 单
           </a-button>
+          <div class="toolbar-divider" />
           <a-button size="small" type="outline" @click="handleExportSingle">单个导出入仓单</a-button>
           <a-button size="small" type="outline" @click="handleMigrate">迁移入仓单货物</a-button>
         </div>
@@ -565,6 +566,7 @@ fetchList();
               <div class="row-actions">
                 <a-tooltip content="查看">
                   <a-button
+                    size="small"
                     type="text"
                     class="row-action-btn row-action-btn--primary"
                     @click="openDetail(row)"

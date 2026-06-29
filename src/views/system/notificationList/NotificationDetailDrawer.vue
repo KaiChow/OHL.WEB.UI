@@ -106,7 +106,7 @@ const close = () => emit('update:visible', false);
                 <template #default>
                   <div class="row-actions">
                     <a-tooltip content="下载">
-                      <a-button type="text" class="row-action-btn">
+                      <a-button size="small" type="text" class="row-action-btn">
                         <icon-download />
                       </a-button>
                     </a-tooltip>

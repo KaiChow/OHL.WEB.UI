@@ -139,7 +139,12 @@ const close = () => emit('update:visible', false);
 
       <div class="detail-drawer-footer">
         <div class="detail-drawer-footer__start">
-          <a-button v-if="!record.deleted" type="text" status="danger" size="small">废弃</a-button>
+          <a-popconfirm
+            v-if="!record.deleted"
+            content="确认废弃该客户？"
+          >
+            <a-button type="text" status="danger" size="small">废弃</a-button>
+          </a-popconfirm>
         </div>
         <div class="detail-drawer-footer__end">
           <a-button size="small" type="outline">添加跟进</a-button>

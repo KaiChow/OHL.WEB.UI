@@ -349,6 +349,7 @@ fetchList();
               <div class="row-actions">
                 <a-tooltip v-if="row.status === 'draft' || row.status === 'pending'" content="编辑">
                   <a-button
+                    size="small"
                     type="text"
                     class="row-action-btn row-action-btn--primary"
                     @click="openEdit(row)"
@@ -358,6 +359,7 @@ fetchList();
                 </a-tooltip>
                 <a-tooltip v-else-if="row.status === 'published' || row.status === 'expired'" content="查看">
                   <a-button
+                    size="small"
                     type="text"
                     class="row-action-btn row-action-btn--primary"
                     @click="openView(row)"
@@ -366,7 +368,12 @@ fetchList();
                   </a-button>
                 </a-tooltip>
                 <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--row">
-                  <a-button type="text" class="row-action-btn row-action-btn--more" title="更多操作">
+                  <a-button
+                    size="small"
+                    type="text"
+                    class="row-action-btn row-action-btn--more"
+                    title="更多操作"
+                  >
                     <icon-more />
                   </a-button>
                   <template #content>

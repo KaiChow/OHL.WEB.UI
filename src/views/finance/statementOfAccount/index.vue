@@ -400,6 +400,7 @@ fetchList();
               <div class="row-actions">
                 <a-tooltip content="查看">
                   <a-button
+                    size="small"
                     type="text"
                     class="row-action-btn row-action-btn--primary"
                     @click="openDetail(row)"

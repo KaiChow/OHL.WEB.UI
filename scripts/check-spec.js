@@ -368,6 +368,43 @@ if (!mainTs.includes("@icon-park/vue-next/styles/index.css")) {
   });
 }
 
+// 详情 footer 左侧危险动作必须走确认流，不能裸露 text+danger。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('detail-drawer-footer__start')) continue;
+  const footerStartBlocks = content.match(/<div\b[^>]*class=(["'])[^"']*\bdetail-drawer-footer__start\b[^"']*\1[^>]*>[\s\S]*?<\/div>/g) || [];
+  for (const block of footerStartBlocks) {
+    if (!/status="danger"/.test(block)) continue;
+    if (/<a-popconfirm\b|Modal\.confirm/.test(block)) continue;
+    violations.push({
+      rule: '详情 footer 左侧危险动作必须带确认（a-popconfirm 或 Modal.confirm）',
+      file: relPath,
+      line: getLineNumber(content, content.indexOf(block)),
+      content: block.split('\n').slice(0, 4).join(' ').trim().slice(0, 160),
+    });
+  }
+}
+
+// 行操作按钮必须显式 size="small"，避免依赖组件默认值。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  const buttonPattern = /<a-button\b[^>]*class=(["'])[^"']*\brow-action-btn\b[^"']*\1[^>]*>/g;
+  for (const match of content.matchAll(buttonPattern)) {
+    const tag = match[0];
+    if (/\bsize=(["'])small\1/.test(tag)) continue;
+    violations.push({
+      rule: 'row-action-btn 必须显式声明 size="small"',
+      file: relPath,
+      line: getLineNumber(content, match.index),
+      content: tag.trim().slice(0, 160),
+    });
+  }
+}
+
 if (
   !/\.arco-form-size-small\s+\.arco-form-item-label-col\s*>\s*\.arco-form-item-label[\s\S]*--dense-font-field/.test(globalCss)
 ) {

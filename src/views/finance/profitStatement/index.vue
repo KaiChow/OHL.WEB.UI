@@ -463,7 +463,12 @@ fetchList();
             <template #default="{ row }">
               <div class="row-actions">
                 <a-tooltip content="详情">
-                  <a-button type="text" class="row-action-btn row-action-btn--primary" @click="openDetail(row)">
+                  <a-button
+                    size="small"
+                    type="text"
+                    class="row-action-btn row-action-btn--primary"
+                    @click="openDetail(row)"
+                  >
                     <icon-eye />
                   </a-button>
                 </a-tooltip>
