@@ -121,7 +121,7 @@ const clearAdvancedFilters = () => {
   query.atdRange = [];
   query.ataRange = [];
   query.sysDueDateRange = [];
-  query.excludeBranch = false;
+  query.excludeBranch = true;
 };
 
 const applyAdvancedFilters = () => {
@@ -150,7 +150,7 @@ fetchList();
 
 <template>
   <div class="page-root page-root--dense">
-    <!-- 专项重型工作台：12 可见 + 低频 8 项进抽屉（非全部进抽屉） -->
+    <!-- S3：12 常驻 + 8 项抽屉（财务重型工作台） -->
     <div class="zone-l2-filter-card zone-card filter-card filter-card--two-row">
       <div class="filter-card__matrix">
         <div class="filter-grid">

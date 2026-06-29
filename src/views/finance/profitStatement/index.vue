@@ -4,13 +4,13 @@ import { Message } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
   IconSearch,
-  IconFilter,
   IconRefresh,
   IconSettings,
   IconDownload,
   IconDown,
   IconEye,
   IconCopy,
+  IconUp,
 } from '@arco-design/web-vue/es/icon';
 import ProfitDetailDrawer from './ProfitDetailDrawer.vue';
 import { mockProfitRows } from './mockData';
@@ -31,9 +31,20 @@ const defaultQuery = (): ProfitQuery => ({
   placeOfReceipt: undefined,
 });
 
+const COLLAPSED_FIELD_COUNT = 4;
+const FILTER_EXPAND_STORAGE_KEY = 'ohl-filter-expanded:finance-profit-statement';
+
+const readFilterExpanded = () => {
+  try {
+    return localStorage.getItem(FILTER_EXPAND_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
 const query = reactive<ProfitQuery>(defaultQuery());
 const appliedQuery = ref<ProfitQuery>(defaultQuery());
-const advancedFilterVisible = ref(false);
+const filterExpanded = ref(readFilterExpanded());
 const loading = ref(false);
 const allRows = ref<ProfitRecord[]>([...mockProfitRows]);
 const tableRef = ref<VxeTableInstance>();
@@ -80,6 +91,24 @@ const pagedRows = computed(() => {
 
 const selectedCount = computed(() => selectedIds.value.length);
 
+const collapsedActiveCount = computed(() => {
+  let n = 0;
+  if (query.containerNo.trim()) n += 1;
+  if (query.fobCs) n += 1;
+  if (query.docCs) n += 1;
+  if (query.placeOfReceipt.trim()) n += 1;
+  return n;
+});
+
+const toggleFilterExpanded = () => {
+  filterExpanded.value = !filterExpanded.value;
+  try {
+    localStorage.setItem(FILTER_EXPAND_STORAGE_KEY, filterExpanded.value ? '1' : '0');
+  } catch {
+    /* ignore */
+  }
+};
+
 const syncPageTotal = () => {
   page.total = filteredRows.value.length;
   const maxPage = Math.max(1, Math.ceil(page.total / page.size) || 1);
@@ -109,22 +138,6 @@ const handleReset = () => {
   appliedQuery.value = defaultQuery();
   page.current = 1;
   fetchList();
-};
-
-const clearAdvancedFilters = () => {
-  query.etdRange = [];
-  query.etaRange = [];
-  query.orderStatus = undefined;
-  query.businessType = undefined;
-  query.containerNo = '';
-  query.fobCs = undefined;
-  query.docCs = undefined;
-  query.placeOfReceipt = undefined;
-};
-
-const applyAdvancedFilters = () => {
-  advancedFilterVisible.value = false;
-  handleSearch();
 };
 
 const onCheckboxChange = ({ records }: { records: ProfitRecord[] }) => {
@@ -168,45 +181,124 @@ fetchList();
 
 <template>
   <div class="page-root page-root--dense">
-    <!-- Tier 2：核心行 4 字段 + 更多筛选抽屉（共 14 项条件） -->
-    <div class="zone-l2-filter-card zone-card filter-card">
-      <div class="filter-card__slim-row">
-        <div class="filter-field filter-field--span2">
-          <label class="filter-field__label">单号检索</label>
-          <div class="filter-combo arco-input-group">
-            <a-select v-model="query.noType" size="small" class="filter-combo__select filter-combo--keyword">
-              <a-option value="orderNo">订单编号</a-option>
-              <a-option value="mbl">MBL 主单号</a-option>
-              <a-option value="containerNo">柜号</a-option>
-            </a-select>
-            <a-input
-              v-model="query.keyword"
-              size="small"
-              allow-clear
-              placeholder="请输入单号"
-              @press-enter="handleSearch"
-            />
+    <!-- S2：7 常驻 + 4 项页内展开（共 11 个查询维度） -->
+    <div class="zone-l2-filter-card zone-card filter-card filter-card--s2-expand">
+      <div class="filter-card__main">
+        <div class="filter-card__fields">
+          <div class="filter-grid">
+            <div class="filter-field filter-field--span2">
+              <label class="filter-field__label">单号检索</label>
+              <div class="filter-combo arco-input-group">
+                <a-select v-model="query.noType" size="small" class="filter-combo__select filter-combo--keyword">
+                  <a-option value="orderNo">订单编号</a-option>
+                  <a-option value="mbl">MBL 主单号</a-option>
+                  <a-option value="containerNo">柜号</a-option>
+                </a-select>
+                <a-input
+                  v-model="query.keyword"
+                  size="small"
+                  allow-clear
+                  placeholder="请输入单号"
+                  @press-enter="handleSearch"
+                />
+              </div>
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">客户</label>
+              <a-input
+                v-model="query.customer"
+                size="small"
+                allow-clear
+                placeholder="请输入客户"
+                @press-enter="handleSearch"
+              />
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">所属公司</label>
+              <a-select v-model="query.company" size="small" allow-clear placeholder="请选择">
+                <a-option value="深圳点达">深圳点达</a-option>
+                <a-option value="上海分公司">上海分公司</a-option>
+                <a-option value="宁波办事处">宁波办事处</a-option>
+              </a-select>
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">ETD</label>
+              <a-range-picker
+                v-model="query.etdRange"
+                size="small"
+                style="width: 100%"
+                value-format="YYYY-MM-DD"
+              />
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">ETA</label>
+              <a-range-picker
+                v-model="query.etaRange"
+                size="small"
+                style="width: 100%"
+                value-format="YYYY-MM-DD"
+              />
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">订单状态</label>
+              <a-select v-model="query.orderStatus" size="small" allow-clear placeholder="请选择">
+                <a-option value="wait">待确认</a-option>
+                <a-option value="op">操作中</a-option>
+                <a-option value="rel">已放舱</a-option>
+                <a-option value="acc">已完成</a-option>
+              </a-select>
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">业务类型</label>
+              <a-select v-model="query.businessType" size="small" allow-clear placeholder="请选择">
+                <a-option value="海运出口">海运出口</a-option>
+                <a-option value="海运进口">海运进口</a-option>
+                <a-option value="空运出口">空运出口</a-option>
+              </a-select>
+            </div>
+          </div>
+          <div class="filter-card__advanced" :class="{ 'filter-card__advanced--open': filterExpanded }">
+            <div class="filter-card__advanced-inner">
+              <div class="filter-grid filter-grid--advanced">
+                <div class="filter-field">
+                  <label class="filter-field__label">柜号</label>
+                  <a-input
+                    v-model="query.containerNo"
+                    size="small"
+                    allow-clear
+                    placeholder="请输入柜号"
+                    @press-enter="handleSearch"
+                  />
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">FOB 客服</label>
+                  <a-select v-model="query.fobCs" size="small" allow-clear placeholder="请选择">
+                    <a-option value="zhangsan">zhangsan</a-option>
+                    <a-option value="lisi">lisi</a-option>
+                  </a-select>
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">单证客服</label>
+                  <a-select v-model="query.docCs" size="small" allow-clear placeholder="请选择">
+                    <a-option value="wangwu">wangwu</a-option>
+                    <a-option value="admin">admin</a-option>
+                  </a-select>
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">收货地</label>
+                  <a-input
+                    v-model="query.placeOfReceipt"
+                    size="small"
+                    allow-clear
+                    placeholder="请输入"
+                    @press-enter="handleSearch"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="filter-field">
-          <label class="filter-field__label">客户</label>
-          <a-input
-            v-model="query.customer"
-            size="small"
-            allow-clear
-            placeholder="请输入客户"
-            @press-enter="handleSearch"
-          />
-        </div>
-        <div class="filter-field">
-          <label class="filter-field__label">所属公司</label>
-          <a-select v-model="query.company" size="small" allow-clear placeholder="请选择">
-            <a-option value="深圳点达">深圳点达</a-option>
-            <a-option value="上海分公司">上海分公司</a-option>
-            <a-option value="宁波办事处">宁波办事处</a-option>
-          </a-select>
-        </div>
-        <div class="filter-card__inline-actions">
+        <div class="filter-card__actions-panel">
           <a-button
             size="small"
             type="primary"
@@ -220,16 +312,20 @@ fetchList();
           <a-button size="small" type="text" class="reset-btn" title="重置" @click="handleReset">
             重置
           </a-button>
-          <a-button
-            size="small"
-            type="text"
-            class="reset-btn"
-            title="更多筛选"
-            @click="advancedFilterVisible = true"
+          <button
+            type="button"
+            class="filter-expand-link filter-expand-link--panel"
+            :class="{ 'is-open': filterExpanded }"
+            :title="filterExpanded ? '收起筛选' : `展开筛选(+${COLLAPSED_FIELD_COUNT})`"
+            @click="toggleFilterExpanded"
           >
-            <template #icon><icon-filter /></template>
-            筛选
-          </a-button>
+            <icon-down v-if="!filterExpanded" />
+            <icon-up v-else />
+            <span class="filter-expand-link__text">
+              {{ filterExpanded ? '收起' : `展开(+${COLLAPSED_FIELD_COUNT})` }}
+            </span>
+            <a-badge v-if="!filterExpanded && collapsedActiveCount > 0" :count="collapsedActiveCount" />
+          </button>
         </div>
       </div>
     </div>
@@ -377,89 +473,6 @@ fetchList();
         </vxe-table>
       </div>
     </div>
-
-    <a-drawer
-      v-model:visible="advancedFilterVisible"
-      title="利润表筛选"
-      :width="640"
-      :footer="true"
-      class="query-filter-drawer"
-      :mask-closable="false"
-    >
-      <div class="query-filter-drawer__shell">
-        <div class="query-filter-drawer__body">
-          <a-form class="detail-form" layout="vertical" size="small" :model="query">
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">航线 / 时间</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="ETD 范围">
-                  <a-range-picker v-model="query.etdRange" size="small" style="width: 100%" value-format="YYYY-MM-DD" />
-                </a-form-item>
-                <a-form-item label="ETA 范围">
-                  <a-range-picker v-model="query.etaRange" size="small" style="width: 100%" value-format="YYYY-MM-DD" />
-                </a-form-item>
-              </div>
-            </div>
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">订单信息</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="订单状态">
-                  <a-select v-model="query.orderStatus" size="small" allow-clear placeholder="请选择">
-                    <a-option value="wait">待确认</a-option>
-                    <a-option value="op">操作中</a-option>
-                    <a-option value="rel">已放舱</a-option>
-                    <a-option value="acc">已完成</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="业务类型">
-                  <a-select v-model="query.businessType" size="small" allow-clear placeholder="请选择">
-                    <a-option value="海运出口">海运出口</a-option>
-                    <a-option value="海运进口">海运进口</a-option>
-                    <a-option value="空运出口">空运出口</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="柜号">
-                  <a-input v-model="query.containerNo" size="small" allow-clear placeholder="请输入柜号" />
-                </a-form-item>
-              </div>
-            </div>
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">人员 / 路线</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="FOB 客服">
-                  <a-select v-model="query.fobCs" size="small" allow-clear placeholder="请选择">
-                    <a-option value="zhangsan">zhangsan</a-option>
-                    <a-option value="lisi">lisi</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="单证客服">
-                  <a-select v-model="query.docCs" size="small" allow-clear placeholder="请选择">
-                    <a-option value="wangwu">wangwu</a-option>
-                    <a-option value="admin">admin</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="收货地">
-                  <a-input v-model="query.placeOfReceipt" size="small" allow-clear placeholder="请输入" />
-                </a-form-item>
-              </div>
-            </div>
-          </a-form>
-        </div>
-      </div>
-      <template #footer>
-        <div class="detail-drawer-footer">
-          <div class="detail-drawer-footer__start">
-            <a-button size="small" type="text" class="reset-btn" @click="clearAdvancedFilters">
-              清空更多筛选
-            </a-button>
-          </div>
-          <div class="detail-drawer-footer__end">
-            <a-button size="small" @click="advancedFilterVisible = false">取消</a-button>
-            <a-button size="small" type="primary" @click="applyAdvancedFilters">应用筛选</a-button>
-          </div>
-        </div>
-      </template>
-    </a-drawer>
 
     <profit-detail-drawer v-model:visible="detailVisible" :record="currentRow" />
   </div>

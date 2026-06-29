@@ -154,7 +154,7 @@ fetchList();
 
 <template>
   <div class="page-root page-root--dense">
-    <!-- L2 筛选区：Tier 1，7 字段 — filter-card--two-row + 4 列 filter-grid -->
+    <!-- S1：7 字段全平铺，无展开/抽屉 -->
     <div class="zone-l2-filter-card zone-card filter-card filter-card--two-row">
       <div class="filter-card__matrix">
         <div class="filter-grid">

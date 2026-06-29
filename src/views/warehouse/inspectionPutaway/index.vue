@@ -101,6 +101,10 @@ const filteredRows = computed(() => {
     if (q.photoUploaded === 'no' && row.photoUploaded) return false;
     if (q.putawayStartDate && row.putawayDate < q.putawayStartDate) return false;
     if (q.putawayEndDate && row.putawayDate > `${q.putawayEndDate} 23:59:59`) return false;
+    if (q.expressSubNo && (!row.expressNo || !row.expressNo.includes(q.expressSubNo))) return false;
+    if (q.expressMainNo && (!row.expressNo || !row.expressNo.includes(q.expressMainNo))) return false;
+    if (q.unboxInspect === 'yes' && row.statusTag !== 'unboxInspect') return false;
+    if (q.unboxInspect === 'no' && row.statusTag === 'unboxInspect') return false;
     return true;
   });
 });
@@ -114,13 +118,13 @@ const selectedCount = computed(() => selectedIds.value.length);
 
 const collapsedActiveCount = computed(() => {
   let n = 0;
+  if (query.stockoutStatus) n += 1;
   if (query.packingMethod) n += 1;
   if (query.stockoutFeeNotSubmitted) n += 1;
   if (query.inventoryMatch) n += 1;
   if (query.expressCompany) n += 1;
   if (query.expressSubNo.trim()) n += 1;
   if (query.expressMainNo.trim()) n += 1;
-  if (query.unboxInspect) n += 1;
   return n;
 });
 
@@ -230,10 +234,11 @@ fetchList();
       </div>
     </div>
 
-    <!-- S2：12 常驻 + 7 字段页内展开收起（filter-layout.md § Three Query UI Scenarios） -->
-    <div class="zone-l2-filter-card zone-card filter-card filter-card--two-row">
-      <div class="filter-card__matrix">
-        <div class="filter-grid filter-grid--6col">
+    <!-- S2：12 常驻 + 7 字段页内展开（filter-card__main + 右侧固定操作列） -->
+    <div class="zone-l2-filter-card zone-card filter-card filter-card--s2-expand">
+      <div class="filter-card__main">
+        <div class="filter-card__fields">
+          <div class="filter-grid filter-grid--6col">
           <div class="filter-field">
             <label class="filter-field__label">上架状态</label>
             <a-select v-model="query.putawayStatus" size="small" allow-clear placeholder="请选择">
@@ -326,48 +331,25 @@ fetchList();
             </a-select>
           </div>
           <div class="filter-field">
-            <label class="filter-field__label">缺货状态</label>
-            <a-select v-model="query.stockoutStatus" size="small" allow-clear placeholder="请选择">
-              <a-option value="none">无缺货</a-option>
-              <a-option value="partial">部分缺货</a-option>
+            <label class="filter-field__label">开箱查验</label>
+            <a-select v-model="query.unboxInspect" size="small" allow-clear placeholder="请选择">
+              <a-option value="yes">是</a-option>
+              <a-option value="no">否</a-option>
             </a-select>
           </div>
         </div>
-        <div class="filter-card__inline-actions filter-card__inline-actions--matrix">
-          <a-button
-            size="small"
-            type="primary"
-            class="filter-card__query-btn"
-            title="查询"
-            @click="handleSearch"
-          >
-            <template #icon><icon-search /></template>
-            查询
-          </a-button>
-          <a-button size="small" type="text" class="reset-btn" title="重置" @click="handleReset">
-            重置
-          </a-button>
-          <button
-            type="button"
-            class="filter-expand-link filter-expand-link--panel"
-            :class="{ 'is-open': filterExpanded }"
-            :title="filterExpanded ? '收起筛选' : `展开筛选(+${COLLAPSED_FIELD_COUNT})`"
-            @click="toggleFilterExpanded"
-          >
-            <icon-down v-if="!filterExpanded" />
-            <icon-up v-else />
-            <span class="filter-expand-link__text">
-              {{ filterExpanded ? '收起' : `展开(+${COLLAPSED_FIELD_COUNT})` }}
-            </span>
-            <a-badge v-if="!filterExpanded && collapsedActiveCount > 0" :count="collapsedActiveCount" />
-          </button>
-        </div>
-      </div>
-      <div class="filter-card__advanced" :class="{ 'filter-card__advanced--open': filterExpanded }">
-        <div class="filter-card__advanced-inner">
-          <div class="filter-grid filter-grid--6col filter-grid--advanced">
-          <div class="filter-field">
-            <label class="filter-field__label">包装方式</label>
+        <div class="filter-card__advanced" :class="{ 'filter-card__advanced--open': filterExpanded }">
+          <div class="filter-card__advanced-inner">
+            <div class="filter-grid filter-grid--6col filter-grid--advanced">
+              <div class="filter-field">
+                <label class="filter-field__label">缺货状态</label>
+                <a-select v-model="query.stockoutStatus" size="small" allow-clear placeholder="请选择">
+                  <a-option value="none">无缺货</a-option>
+                  <a-option value="partial">部分缺货</a-option>
+                </a-select>
+              </div>
+              <div class="filter-field">
+                <label class="filter-field__label">包装方式</label>
             <a-select v-model="query.packingMethod" size="small" allow-clear placeholder="请选择">
               <a-option value="carton">纸箱</a-option>
               <a-option value="pallet">托盘</a-option>
@@ -414,14 +396,38 @@ fetchList();
               @press-enter="handleSearch"
             />
           </div>
-          <div class="filter-field">
-            <label class="filter-field__label">开箱查验</label>
-            <a-select v-model="query.unboxInspect" size="small" allow-clear placeholder="请选择">
-              <a-option value="yes">是</a-option>
-              <a-option value="no">否</a-option>
-            </a-select>
+            </div>
           </div>
-          </div>
+        </div>
+        </div>
+        <div class="filter-card__actions-panel">
+          <a-button
+            size="small"
+            type="primary"
+            class="filter-card__query-btn"
+            title="查询"
+            @click="handleSearch"
+          >
+            <template #icon><icon-search /></template>
+            查询
+          </a-button>
+          <a-button size="small" type="text" class="reset-btn" title="重置" @click="handleReset">
+            重置
+          </a-button>
+          <button
+            type="button"
+            class="filter-expand-link filter-expand-link--panel"
+            :class="{ 'is-open': filterExpanded }"
+            :title="filterExpanded ? '收起筛选' : `展开筛选(+${COLLAPSED_FIELD_COUNT})`"
+            @click="toggleFilterExpanded"
+          >
+            <icon-down v-if="!filterExpanded" />
+            <icon-up v-else />
+            <span class="filter-expand-link__text">
+              {{ filterExpanded ? '收起' : `展开(+${COLLAPSED_FIELD_COUNT})` }}
+            </span>
+            <a-badge v-if="!filterExpanded && collapsedActiveCount > 0" :count="collapsedActiveCount" />
+          </button>
         </div>
       </div>
     </div>

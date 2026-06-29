@@ -11,6 +11,15 @@ const router = useRouter();
 const tabs = ref<AppTabItem[]>([...initialTabs]);
 const menuKeyword = ref('');
 const openKeys = ref(appMenus.map((g) => g.key));
+const selectedMenuKeys = ref<string[]>([]);
+
+const isSameKeys = (a: string[], b: string[]) =>
+  a.length === b.length && a.every((k, i) => k === b[i]);
+
+const setOpenKeys = (keys: string[]) => {
+  if (isSameKeys(openKeys.value, keys)) return;
+  openKeys.value = keys;
+};
 
 const menuKeyRouteMap = computed(() => {
   const map = new Map<string, string>();
@@ -47,14 +56,24 @@ const filteredMenus = computed(() => {
     .filter((group) => (group.children?.length ?? 0) > 0);
 });
 
-watch(filteredMenus, (menus) => {
-  openKeys.value = menus.map((g) => g.key);
+watch(menuKeyword, () => {
+  setOpenKeys(filteredMenus.value.map((g) => g.key));
 });
 
-const selectedMenuKeys = computed(() => {
-  const key = String(route.meta.menuKey || '');
-  return key ? [key] : [];
-});
+watch(
+  () => route.meta.menuKey,
+  (menuKey) => {
+    const key = menuKey ? String(menuKey) : '';
+    const next = key ? [key] : [];
+    if (isSameKeys(selectedMenuKeys.value, next)) return;
+    selectedMenuKeys.value = next;
+  },
+  { immediate: true },
+);
+
+const onOpenKeysChange = (keys: string[]) => {
+  setOpenKeys(keys);
+};
 
 const activeTabKey = computed(() => {
   const matchedTab = tabs.value.find((tab) => tab.routeName === route.name);
@@ -120,8 +139,9 @@ const closeTab = (tab: AppTabItem, event: MouseEvent) => {
       <a-menu
         class="side-arco-menu"
         :selected-keys="selectedMenuKeys"
-        v-model:open-keys="openKeys"
+        :open-keys="openKeys"
         auto-open-selected
+        @update:open-keys="onOpenKeysChange"
         @menu-item-click="onMenuItemClick"
       >
         <a-sub-menu v-for="group in filteredMenus" :key="group.key">

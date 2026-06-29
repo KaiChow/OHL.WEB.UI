@@ -56,9 +56,10 @@ For freight list pages, this usually means:
 
 #### S2 — Default visible + page expand/collapse
 
-- 常驻区：`filter-card--two-row` → `filter-card__matrix` → `filter-grid`（4 列；仓储可用 `filter-grid--6col`）。
-- 收起区：同级 `filter-card__advanced` + `filter-card__advanced--open` → `filter-card__advanced-inner` → `filter-grid filter-grid--advanced`（**禁止**在 advanced 内再用 `filter-card__slim-row`）。
-- 操作列 `filter-card__inline-actions--matrix` 自上而下固定：
+- 结构：`filter-card--s2-expand` → `filter-card__main` → **`filter-card__fields`**（常驻 grid + `filter-card__advanced`）+ **`filter-card__actions-panel`**（右侧贯穿，查询/重置置顶、展开链贴底）。
+- 常驻区：`filter-grid`（4 列；仓储可用 `filter-grid--6col`）。
+- 收起区：放在 **`filter-card__fields` 内**、常驻 grid 之后；`filter-card__advanced` + `filter-card__advanced--open` → `filter-card__advanced-inner` → `filter-grid filter-grid--advanced`（**禁止** advanced 与 matrix 并列导致操作列只贴前两行）。
+- **禁止** S2 使用 `filter-card__matrix` + 外部 `filter-card__advanced`（展开后字段与操作列错位）。
   1. `查询` primary
   2. `重置` text
   3. `filter-expand-link filter-expand-link--panel`：`icon-down` + `展开(+N)` / `icon-up` + `收起`；N = 收起区字段数
@@ -67,12 +68,21 @@ For freight list pages, this usually means:
 - 展开/收起**不改变**查询/重置位置；收起后表格首行仍应在 1440×900 首屏内。
 
 ```vue
-<div class="zone-l2-filter-card zone-card filter-card filter-card--two-row">
-  <div class="filter-card__matrix">
-    <div class="filter-grid filter-grid--6col">
-      <!-- 常驻高频字段 -->
+<div class="zone-l2-filter-card zone-card filter-card filter-card--s2-expand">
+  <div class="filter-card__main">
+    <div class="filter-card__fields">
+      <div class="filter-grid filter-grid--6col">
+        <!-- 常驻高频字段 -->
+      </div>
+      <div class="filter-card__advanced" :class="{ 'filter-card__advanced--open': filterExpanded }">
+        <div class="filter-card__advanced-inner">
+          <div class="filter-grid filter-grid--6col filter-grid--advanced">
+            <!-- 收起区字段 -->
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="filter-card__inline-actions filter-card__inline-actions--matrix">
+    <div class="filter-card__actions-panel">
       <a-button size="small" type="primary" class="filter-card__query-btn" @click="handleSearch">
         <template #icon><icon-search /></template>查询
       </a-button>
@@ -89,13 +99,6 @@ For freight list pages, this usually means:
         </span>
         <a-badge v-if="!filterExpanded && collapsedActiveCount > 0" :count="collapsedActiveCount" />
       </button>
-    </div>
-  </div>
-  <div class="filter-card__advanced" :class="{ 'filter-card__advanced--open': filterExpanded }">
-    <div class="filter-card__advanced-inner">
-      <div class="filter-grid filter-grid--6col filter-grid--advanced">
-        <!-- 收起区字段 -->
-      </div>
     </div>
   </div>
 </div>

@@ -974,6 +974,41 @@ button:-moz-focusring,
   background: var(--color-bg-card);
 }
 
+/* S2 页内展开：字段区 + 右侧贯穿操作列（filter-layout.md § S2） */
+.filter-card--s2-expand .filter-card__main {
+  align-items: stretch;
+}
+
+.filter-card--s2-expand .filter-card__fields {
+  padding: 8px 0 9px 16px;
+}
+
+.filter-card--s2-expand .filter-card__fields>.filter-grid {
+  padding-right: 12px;
+}
+
+.filter-card--s2-expand .filter-card__advanced-inner {
+  padding: 8px 12px 10px 0;
+  border-top: 1px solid var(--dense-border-subtle);
+  background: transparent;
+}
+
+.filter-card--s2-expand .filter-card__actions-panel {
+  align-self: stretch;
+  margin-top: 0;
+  padding-top: 26px;
+  padding-bottom: 10px;
+  min-height: 0;
+}
+
+.filter-card--s2-expand .filter-card__actions-panel .filter-expand-link--panel {
+  margin-top: auto;
+}
+
+.filter-card--s2-expand .filter-card__actions-panel .filter-expand-link--panel .arco-icon {
+  font-size: 12px;
+}
+
 .filter-card__actions-panel {
   position: relative;
   display: flex;

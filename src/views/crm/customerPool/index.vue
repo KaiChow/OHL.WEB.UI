@@ -4,7 +4,6 @@ import { Message, Modal } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
   IconSearch,
-  IconFilter,
   IconRefresh,
   IconSettings,
   IconPlus,
@@ -14,6 +13,7 @@ import {
   IconEye,
   IconMore,
   IconCustomerService,
+  IconUp,
 } from '@arco-design/web-vue/es/icon';
 import CustomerDetailDrawer from './CustomerDetailDrawer.vue';
 import CustomerFormModal from './CustomerFormModal.vue';
@@ -37,11 +37,22 @@ const defaultQuery = (): CustomerQuery => ({
   creator: undefined,
 });
 
+const COLLAPSED_FIELD_COUNT = 8;
+const FILTER_EXPAND_STORAGE_KEY = 'ohl-filter-expanded:crm-customer-pool';
+
+const readFilterExpanded = () => {
+  try {
+    return localStorage.getItem(FILTER_EXPAND_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
 const query = reactive<CustomerQuery>(defaultQuery());
 const appliedQuery = ref<CustomerQuery>(defaultQuery());
 const cooperateSegment = ref<CooperateSegment>('uncooperated');
 const listScope = ref<ListScope>('all');
-const advancedFilterVisible = ref(false);
+const filterExpanded = ref(readFilterExpanded());
 const loading = ref(false);
 const allRows = ref<CustomerRecord[]>([...mockCustomers]);
 const tableRef = ref<VxeTableInstance>();
@@ -96,6 +107,28 @@ const pagedRows = computed(() => {
 
 const selectedCount = computed(() => selectedIds.value.length);
 
+const collapsedActiveCount = computed(() => {
+  let n = 0;
+  if (query.tagInclude.trim()) n += 1;
+  if (query.tagExclude.trim()) n += 1;
+  if (query.createdRange.length === 2) n += 1;
+  if (query.lastFollowRange.length === 2) n += 1;
+  if (query.lastShipRange.length === 2) n += 1;
+  if (query.csName) n += 1;
+  if (query.opsStaff) n += 1;
+  if (query.creator) n += 1;
+  return n;
+});
+
+const toggleFilterExpanded = () => {
+  filterExpanded.value = !filterExpanded.value;
+  try {
+    localStorage.setItem(FILTER_EXPAND_STORAGE_KEY, filterExpanded.value ? '1' : '0');
+  } catch {
+    /* ignore */
+  }
+};
+
 const syncPageTotal = () => {
   page.total = filteredRows.value.length;
   const maxPage = Math.max(1, Math.ceil(page.total / page.size) || 1);
@@ -126,25 +159,6 @@ const handleReset = () => {
   appliedQuery.value = defaultQuery();
   page.current = 1;
   fetchList();
-};
-
-const clearAdvancedFilters = () => {
-  query.tagInclude = '';
-  query.tagExclude = '';
-  query.contactKeyword = '';
-  query.contactEmail = '';
-  query.contactPhone = '';
-  query.createdRange = [];
-  query.lastFollowRange = [];
-  query.lastShipRange = [];
-  query.csName = undefined;
-  query.opsStaff = undefined;
-  query.creator = undefined;
-};
-
-const applyAdvancedFilters = () => {
-  advancedFilterVisible.value = false;
-  handleSearch();
 };
 
 const onCooperateChange = (seg: CooperateSegment) => {
@@ -264,38 +278,137 @@ fetchList();
       </button>
     </div>
 
-    <!-- L2 Tier 2 筛选：核心行 + 更多筛选抽屉 -->
-    <div class="zone-l2-filter-card zone-card filter-card">
-      <div class="filter-card__slim-row">
-        <div class="filter-field filter-field--span2">
-          <label class="filter-field__label">客户名称</label>
-          <a-input
-            v-model="query.name"
-            size="small"
-            allow-clear
-            placeholder="请输入客户名称"
-            @press-enter="handleSearch"
-          />
+    <!-- S2：6 常驻 + 8 项页内展开（共 14 个查询维度） -->
+    <div class="zone-l2-filter-card zone-card filter-card filter-card--s2-expand">
+      <div class="filter-card__main">
+        <div class="filter-card__fields">
+          <div class="filter-grid">
+            <div class="filter-field filter-field--span2">
+              <label class="filter-field__label">客户名称</label>
+              <a-input
+                v-model="query.name"
+                size="small"
+                allow-clear
+                placeholder="请输入客户名称"
+                @press-enter="handleSearch"
+              />
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">客户类型</label>
+              <a-select v-model="query.customerType" size="small" allow-clear placeholder="请选择">
+                <a-option value="直客">直客</a-option>
+                <a-option value="同行">同行</a-option>
+                <a-option value="海外代理">海外代理</a-option>
+              </a-select>
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">国家</label>
+              <a-select v-model="query.country" size="small" allow-clear placeholder="请选择">
+                <a-option value="中国">中国</a-option>
+                <a-option value="德国">德国</a-option>
+                <a-option value="美国">美国</a-option>
+                <a-option value="泰国">泰国</a-option>
+                <a-option value="荷兰">荷兰</a-option>
+              </a-select>
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">联系人</label>
+              <a-input
+                v-model="query.contactKeyword"
+                size="small"
+                allow-clear
+                placeholder="联系人姓名"
+                @press-enter="handleSearch"
+              />
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">联系人邮箱</label>
+              <a-input
+                v-model="query.contactEmail"
+                size="small"
+                allow-clear
+                placeholder="邮箱关键词"
+                @press-enter="handleSearch"
+              />
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">联系人电话</label>
+              <a-input
+                v-model="query.contactPhone"
+                size="small"
+                allow-clear
+                placeholder="电话关键词"
+                @press-enter="handleSearch"
+              />
+            </div>
+          </div>
+          <div class="filter-card__advanced" :class="{ 'filter-card__advanced--open': filterExpanded }">
+            <div class="filter-card__advanced-inner">
+              <div class="filter-grid filter-grid--advanced">
+                <div class="filter-field">
+                  <label class="filter-field__label">含有部分标签</label>
+                  <a-input v-model="query.tagInclude" size="small" allow-clear placeholder="标签关键词" />
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">排除含有部分标签</label>
+                  <a-input v-model="query.tagExclude" size="small" allow-clear placeholder="排除标签关键词" />
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">创建时间</label>
+                  <a-range-picker
+                    v-model="query.createdRange"
+                    size="small"
+                    style="width: 100%"
+                    value-format="YYYY-MM-DD"
+                  />
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">最后跟进时间</label>
+                  <a-range-picker
+                    v-model="query.lastFollowRange"
+                    size="small"
+                    style="width: 100%"
+                    value-format="YYYY-MM-DD"
+                  />
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">最后发货时间</label>
+                  <a-range-picker
+                    v-model="query.lastShipRange"
+                    size="small"
+                    style="width: 100%"
+                    value-format="YYYY-MM-DD"
+                  />
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">负责客服</label>
+                  <a-select v-model="query.csName" size="small" allow-clear placeholder="请选择">
+                    <a-option value="张三">张三</a-option>
+                    <a-option value="李四">李四</a-option>
+                    <a-option value="王五">王五</a-option>
+                  </a-select>
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">运维人员</label>
+                  <a-select v-model="query.opsStaff" size="small" allow-clear placeholder="请选择">
+                    <a-option value="李四">李四</a-option>
+                    <a-option value="王五">王五</a-option>
+                    <a-option value="赵六">赵六</a-option>
+                  </a-select>
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">创建人</label>
+                  <a-select v-model="query.creator" size="small" allow-clear placeholder="请选择">
+                    <a-option value="admin">admin</a-option>
+                    <a-option value="zhangsan">zhangsan</a-option>
+                    <a-option value="lisi">lisi</a-option>
+                  </a-select>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="filter-field">
-          <label class="filter-field__label">客户类型</label>
-          <a-select v-model="query.customerType" size="small" allow-clear placeholder="请选择">
-            <a-option value="直客">直客</a-option>
-            <a-option value="同行">同行</a-option>
-            <a-option value="海外代理">海外代理</a-option>
-          </a-select>
-        </div>
-        <div class="filter-field">
-          <label class="filter-field__label">国家</label>
-          <a-select v-model="query.country" size="small" allow-clear placeholder="请选择">
-            <a-option value="中国">中国</a-option>
-            <a-option value="德国">德国</a-option>
-            <a-option value="美国">美国</a-option>
-            <a-option value="泰国">泰国</a-option>
-            <a-option value="荷兰">荷兰</a-option>
-          </a-select>
-        </div>
-        <div class="filter-card__inline-actions">
+        <div class="filter-card__actions-panel">
           <a-button
             size="small"
             type="primary"
@@ -309,16 +422,20 @@ fetchList();
           <a-button size="small" type="text" class="reset-btn" title="重置" @click="handleReset">
             重置
           </a-button>
-          <a-button
-            size="small"
-            type="text"
-            class="reset-btn"
-            title="更多筛选"
-            @click="advancedFilterVisible = true"
+          <button
+            type="button"
+            class="filter-expand-link filter-expand-link--panel"
+            :class="{ 'is-open': filterExpanded }"
+            :title="filterExpanded ? '收起筛选' : `展开筛选(+${COLLAPSED_FIELD_COUNT})`"
+            @click="toggleFilterExpanded"
           >
-            <template #icon><icon-filter /></template>
-            筛选
-          </a-button>
+            <icon-down v-if="!filterExpanded" />
+            <icon-up v-else />
+            <span class="filter-expand-link__text">
+              {{ filterExpanded ? '收起' : `展开(+${COLLAPSED_FIELD_COUNT})` }}
+            </span>
+            <a-badge v-if="!filterExpanded && collapsedActiveCount > 0" :count="collapsedActiveCount" />
+          </button>
         </div>
       </div>
     </div>
@@ -503,111 +620,6 @@ fetchList();
         </vxe-table>
       </div>
     </div>
-
-    <!-- 更多筛选抽屉 -->
-    <a-drawer
-      v-model:visible="advancedFilterVisible"
-      title="更多筛选"
-      :width="640"
-      :footer="true"
-      class="query-filter-drawer"
-      :mask-closable="false"
-    >
-      <div class="query-filter-drawer__shell">
-        <div class="query-filter-drawer__body">
-          <a-form class="detail-form" layout="vertical" size="small" :model="query">
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">标签 / 联系人</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="含有部分标签">
-                  <a-input v-model="query.tagInclude" size="small" allow-clear placeholder="标签关键词" />
-                </a-form-item>
-                <a-form-item label="排除含有部分标签">
-                  <a-input v-model="query.tagExclude" size="small" allow-clear placeholder="排除标签关键词" />
-                </a-form-item>
-                <a-form-item label="联系人">
-                  <a-input v-model="query.contactKeyword" size="small" allow-clear placeholder="联系人姓名" />
-                </a-form-item>
-                <a-form-item label="联系人邮箱">
-                  <a-input v-model="query.contactEmail" size="small" allow-clear placeholder="邮箱关键词" />
-                </a-form-item>
-                <a-form-item label="联系人电话">
-                  <a-input v-model="query.contactPhone" size="small" allow-clear placeholder="电话关键词" />
-                </a-form-item>
-              </div>
-            </div>
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">时间范围</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="创建时间">
-                  <a-range-picker
-                    v-model="query.createdRange"
-                    size="small"
-                    style="width: 100%"
-                    value-format="YYYY-MM-DD"
-                  />
-                </a-form-item>
-                <a-form-item label="最后跟进时间">
-                  <a-range-picker
-                    v-model="query.lastFollowRange"
-                    size="small"
-                    style="width: 100%"
-                    value-format="YYYY-MM-DD"
-                  />
-                </a-form-item>
-                <a-form-item label="最后发货时间">
-                  <a-range-picker
-                    v-model="query.lastShipRange"
-                    size="small"
-                    style="width: 100%"
-                    value-format="YYYY-MM-DD"
-                  />
-                </a-form-item>
-              </div>
-            </div>
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">归属人员</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="负责客服">
-                  <a-select v-model="query.csName" size="small" allow-clear placeholder="请选择">
-                    <a-option value="张三">张三</a-option>
-                    <a-option value="李四">李四</a-option>
-                    <a-option value="王五">王五</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="运维人员">
-                  <a-select v-model="query.opsStaff" size="small" allow-clear placeholder="请选择">
-                    <a-option value="李四">李四</a-option>
-                    <a-option value="王五">王五</a-option>
-                    <a-option value="赵六">赵六</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="创建人">
-                  <a-select v-model="query.creator" size="small" allow-clear placeholder="请选择">
-                    <a-option value="admin">admin</a-option>
-                    <a-option value="zhangsan">zhangsan</a-option>
-                    <a-option value="lisi">lisi</a-option>
-                  </a-select>
-                </a-form-item>
-              </div>
-            </div>
-          </a-form>
-        </div>
-      </div>
-      <template #footer>
-        <div class="detail-drawer-footer">
-          <div class="detail-drawer-footer__start">
-            <a-button size="small" type="text" class="reset-btn" @click="clearAdvancedFilters">
-              清空更多筛选
-            </a-button>
-          </div>
-          <div class="detail-drawer-footer__end">
-            <a-button size="small" @click="advancedFilterVisible = false">取消</a-button>
-            <a-button size="small" type="primary" @click="applyAdvancedFilters">应用筛选</a-button>
-          </div>
-        </div>
-      </template>
-    </a-drawer>
 
     <customer-detail-drawer v-model:visible="detailVisible" :record="currentRow" />
     <customer-form-modal
