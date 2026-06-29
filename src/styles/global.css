@@ -5278,6 +5278,36 @@ button:-moz-focusring,
   background: linear-gradient(90deg, var(--dense-primary-1) 0, var(--color-bg-card) 36px);
 }
 
+.detail-module-summary--compact {
+  min-height: 34px;
+  padding-left: 10px;
+  align-items: center;
+}
+
+.detail-module-summary--compact::before {
+  width: 2px;
+}
+
+.detail-module-summary--compact .detail-module-summary__stats {
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+}
+
+.detail-module-summary--compact .detail-module-summary__stat {
+  flex: 0 0 auto;
+  min-height: 22px;
+  padding: 1px 9px;
+  border: 1px solid var(--dense-border-subtle);
+  border-radius: var(--dense-radius);
+  background: var(--color-bg-card);
+}
+
+.detail-module-summary--compact .detail-module-summary__stat:not(:last-child) {
+  border-right-color: var(--dense-border-subtle);
+}
+
 .detail-module__badge {
   font-size: var(--dense-font-aux);
   font-weight: 500;
@@ -5379,6 +5409,16 @@ button:-moz-focusring,
 .detail-subitem__head:hover,
 .detail-cargo-block__head:hover {
   background: var(--dense-primary-1);
+}
+
+.detail-cargo-block__head--compact {
+  min-height: 40px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.detail-cargo-block__head--compact .detail-data-stats {
+  margin-left: auto;
 }
 
 .detail-subitem__index,
@@ -5512,6 +5552,11 @@ button:-moz-focusring,
   gap: 8px;
   padding: 10px 12px 12px 24px;
   background: var(--dense-surface-rail);
+}
+
+.detail-cargo-block__body--compact {
+  gap: 6px;
+  padding: 8px 10px 10px 18px;
 }
 
 .detail-module-summary__title {
@@ -5741,6 +5786,17 @@ button:-moz-focusring,
   padding: 10px 12px;
 }
 
+.detail-child-pane--compact .detail-child-pane__head {
+  min-height: 32px;
+  padding: 5px 10px;
+}
+
+.detail-child-pane--compact .detail-form,
+.detail-child-pane--compact .detail-form-grid {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
 .detail-child-pane--lines {
   background: var(--color-bg-card);
 }
@@ -5749,6 +5805,19 @@ button:-moz-focusring,
   padding: 0;
   overflow-x: auto;
   overflow-y: visible;
+}
+
+.detail-child-pane__table--fit .detail-mini-vxe.vxe-table {
+  border-top: none;
+}
+
+.detail-child-pane__table--fit .detail-mini-vxe--fit.vxe-table .vxe-table--body-wrapper {
+  height: auto !important;
+  min-height: var(--detail-mini-row-h) !important;
+}
+
+.detail-child-pane__table--fit .detail-mini-vxe--fit.vxe-table .vxe-table--body {
+  min-height: var(--detail-mini-row-h) !important;
 }
 
 /* 详情内子表：与列表 workbench-table 共用表头/hover/边框 token；按职责选择行高 */

@@ -87,6 +87,7 @@
 - Module header left is title only; module header right is actions only.
 - Counts, totals, helper text, upload state, and progress are inside module body/summary.
 - Parent-child nested modules use one parent surface, one summary row, compact child heads, child body forms, and child-owned line tables.
+- Parent-child nested modules expose the full executable structure gate: module summary, child identity/meta, child metrics, child body, compact child pane, and child-owned line table.
 - Parent, child, and row actions are visually separated by level and use object-specific labels.
 - Repeated child items are separated by subtle dividers or child heads, not independent nested cards.
 - Empty nested line tables show an explicit empty/add state and must not collapse into a blank compressed strip.

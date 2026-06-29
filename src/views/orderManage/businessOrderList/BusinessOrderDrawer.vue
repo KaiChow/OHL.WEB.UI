@@ -30,6 +30,23 @@ interface CargoLine {
   volume: number | undefined;
 }
 
+interface CargoParty {
+  id: number;
+  expanded: boolean;
+  shipperMain: string;
+  shipperSub: string;
+  consigneeMain: string;
+  consigneeSub: string;
+  notifyMain: string;
+  notifySub: string;
+  agentMain: string;
+  agentSub: string;
+  vat: string;
+  eori: string;
+  remark: string;
+  lines: CargoLine[];
+}
+
 interface CustomsRow {
   id: number;
   declarant: string;
@@ -88,7 +105,7 @@ const scrollRoot = ref<HTMLElement>();
 
 const staffDraft = reactive({ role: '业务', name: '' });
 
-let idSeq = 10;
+let idSeq = 30;
 
 const drawerWidth = computed(() => (isFullscreen.value ? '100vw' : 'calc(100vw - 32px)'));
 
@@ -1004,7 +1021,7 @@ const handleSubmit = () => {
             </div>
           </div>
           <div class="detail-section__body">
-            <div class="detail-module-summary--inline detail-module-summary--cargo">
+            <div class="detail-module-summary--inline detail-module-summary--cargo detail-module-summary--compact">
               <div class="detail-module-summary__stats">
                 <div class="detail-module-summary__stat">
                   <span class="detail-module-summary__stat-label">总件数</span>
@@ -1024,12 +1041,40 @@ const handleSubmit = () => {
             </div>
             <div class="detail-module__sublist">
               <div class="detail-module__subitem detail-module__subitem--expanded detail-module__subitem--last">
-                <div class="detail-cargo-block__head">
+                <div class="detail-cargo-block__head detail-cargo-block__head--compact">
                   <span class="detail-cargo-block__index">1</span>
-                  <span class="detail-cargo-block__title">发货人 A</span>
+                  <div class="detail-cargo-block__meta">
+                    <span class="detail-cargo-block__title">发货人 A</span>
+                    <span class="detail-cargo-block__shipper" :title="form.shipperMain">{{ form.shipperMain }}</span>
+                    <span class="detail-cargo-block__route">
+                      <span :title="form.pol">{{ polShort }}</span>
+                      <span class="detail-cargo-block__arrow">→</span>
+                      <span :title="form.pod">{{ podShort }}</span>
+                    </span>
+                  </div>
+                  <div class="detail-data-stats">
+                    <span class="detail-data-stats__item">
+                      <span class="detail-data-stats__label">品名</span>
+                      <span class="detail-data-stats__val">{{ cargoLines.length }}</span>
+                    </span>
+                    <span class="detail-data-stats__item">
+                      <span class="detail-data-stats__label">件数</span>
+                      <span class="detail-data-stats__val">{{ cargoSummary.pieces }}</span>
+                    </span>
+                    <span class="detail-data-stats__item">
+                      <span class="detail-data-stats__label">毛重</span>
+                      <span class="detail-data-stats__val">{{ cargoSummary.weight }}</span>
+                      <span class="detail-data-stats__unit">KG</span>
+                    </span>
+                    <span class="detail-data-stats__item">
+                      <span class="detail-data-stats__label">体积</span>
+                      <span class="detail-data-stats__val">{{ cargoSummary.volume }}</span>
+                      <span class="detail-data-stats__unit">CBM</span>
+                    </span>
+                  </div>
                 </div>
-                <div class="detail-cargo-block__body">
-                  <div class="detail-child-pane">
+                <div class="detail-cargo-block__body detail-cargo-block__body--compact">
+                  <div class="detail-child-pane detail-child-pane--compact">
                     <div class="detail-child-pane__head">
                       <span class="detail-child-pane__title">收发货方</span>
                     </div>
@@ -1091,7 +1136,7 @@ const handleSubmit = () => {
                       </div>
                     </a-form>
                   </div>
-                  <div class="detail-child-pane detail-child-pane--lines">
+                  <div class="detail-child-pane detail-child-pane--compact detail-child-pane--lines">
                     <div class="detail-child-pane__head">
                       <span class="detail-child-pane__title">品名明细</span>
                       <div v-if="isEditing" class="detail-section__actions">
@@ -1101,7 +1146,7 @@ const handleSubmit = () => {
                         </a-button>
                       </div>
                     </div>
-                    <div class="detail-child-pane__table">
+                    <div class="detail-child-pane__table detail-child-pane__table--fit">
                       <vxe-table
                         v-if="isEditing"
                         class="detail-mini-vxe detail-mini-vxe--editable"
@@ -1170,7 +1215,7 @@ const handleSubmit = () => {
                       </vxe-table>
                       <vxe-table
                         v-else
-                        class="detail-mini-vxe detail-mini-vxe--readonly"
+                        class="detail-mini-vxe detail-mini-vxe--readonly detail-mini-vxe--fit"
                         border="none"
                         size="small"
                         height="auto"
@@ -1185,6 +1230,9 @@ const handleSubmit = () => {
                         <vxe-column field="unit" title="包装单位" min-width="90" />
                         <vxe-column field="weight" title="毛重 KG" min-width="90" />
                         <vxe-column field="volume" title="体积 CBM" min-width="90" />
+                        <template #empty>
+                          <div class="state-center state-center--in-table">暂无品名明细</div>
+                        </template>
                       </vxe-table>
                     </div>
                   </div>

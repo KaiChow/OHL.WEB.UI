@@ -452,6 +452,8 @@ Rules:
 - Child line data with editable rows should use the shared VXE mini table pattern, not a one-off native table, so hover, empty, fixed action, and row height stay consistent.
 - A child line empty state must explain what is missing and where the user acts, such as `暂无品名明细，点击添加品名录入该发货人名下货物`.
 - Long international party names must remain readable through truncation plus tooltip/title; do not weaken customer/shipper/consignee names to helper color.
+- Executable structure gate: repeated parent-child modules must expose `module summary -> child identity/meta -> child metrics -> child body -> child pane -> child-owned line table`. If any layer is missing, the block can pass component checks but still fails PESDP structure.
+- On wide drawers, summary and child metrics must stay compact chips near the owning identity. Do not distribute three totals across the full drawer width like a report bar.
 
 Default behavior:
 

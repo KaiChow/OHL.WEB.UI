@@ -1001,6 +1001,50 @@ for (const file of files) {
   }
 }
 
+// 父子嵌套 repeated module 不能只画大白框：必须具备 summary、child identity、child metrics、child body、child-owned table。
+// 这类结构是视觉质量门槛，仅查结构槽位，不绑定具体字段名。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('detail-module__subitem')) continue;
+  const repeatedModuleRules = [
+    {
+      className: 'detail-module-summary--inline',
+      rule: '父子嵌套 repeated module 必须有模块 summary 行，统计不能散落成宽屏报表空白',
+    },
+    {
+      className: 'detail-cargo-block__meta',
+      rule: '父子嵌套 repeated module 的 child head 必须有 identity/meta 槽位，不能只有孤立标题',
+    },
+    {
+      className: 'detail-data-stats',
+      rule: '父子嵌套 repeated module 的 child head 必须有紧凑 metrics chips，不能把子项统计铺成松散大栏',
+    },
+    {
+      className: 'detail-cargo-block__body',
+      rule: '父子嵌套 repeated module 必须有 child body 承载子项字段和明细，不能把内层卡片直接堆在父模块下',
+    },
+    {
+      className: 'detail-child-pane--compact',
+      rule: '父子嵌套 repeated module 的内部 pane 必须使用紧凑 pane，避免卡片套卡片套表格',
+    },
+    {
+      className: 'detail-child-pane__table',
+      rule: '父子嵌套 repeated module 的 line table 必须归属到 child-owned table 容器',
+    },
+  ];
+  for (const item of repeatedModuleRules) {
+    if (content.includes(item.className)) continue;
+    violations.push({
+      rule: item.rule,
+      file: relPath,
+      line: getLineNumber(content, content.indexOf('detail-module__subitem')),
+      content: `missing ${item.className}`,
+    });
+  }
+}
+
 // VXE 表格行高与结构列宽必须显式匹配设计 token：主列表 36，详情按职责分 38/34/32，序号列 52。
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
