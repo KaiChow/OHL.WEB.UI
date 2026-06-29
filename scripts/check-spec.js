@@ -254,12 +254,14 @@ if (!actionsReference.includes('生产作业台的高频可逆动作可以超过
   });
 }
 
-if (!/\.detail-form\s+\.arco-form-item-label-col\s*>\s*\.arco-form-item-label/.test(globalCss)) {
+if (
+  !/\.arco-form-item-label-col\s*>\s*\.arco-form-item-label[\s\S]*--dense-font-field/.test(globalCss)
+) {
   violations.push({
-    rule: '详情表单必须覆盖 Arco label 结构，防止默认 14px 泄漏',
+    rule: '§ Arco Form Controls 必须覆盖 form-item label，防止默认 14px 泄漏',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing .detail-form .arco-form-item-label-col > .arco-form-item-label',
+    content: 'missing .arco-form-item-label-col > .arco-form-item-label with --dense-font-field',
   });
 }
 if (!/--dense-row-h-detail-edit\s*:\s*38px/.test(globalCss)) {
@@ -521,23 +523,21 @@ if (!globalCss.includes('col--ellipsis') || !globalCss.includes('.detail-mini-vx
     content: 'missing detail-mini-vxe col--ellipsis cell override',
   });
 }
-if (!globalCss.includes('§ Form Field Contract') || !globalCss.includes('--dense-control-h-form')) {
+if (!globalCss.includes('§ Arco Form Controls') || !globalCss.includes('--dense-control-h-form')) {
   violations.push({
-    rule: 'global.css 必须定义 § Form Field Contract 与 --dense-control-h-form 统一表单控件 token',
+    rule: 'global.css 必须定义 § Arco Form Controls 与 --dense-control-h-form',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing § Form Field Contract or --dense-control-h-form',
+    content: 'missing § Arco Form Controls or --dense-control-h-form',
   });
 } else if (
-  !/:is\(\.filter-field, \.filter-inline, \.detail-form, \.search-form\)[\s\S]*\.arco-picker-size-small/.test(
-    globalCss,
-  )
+  !/\.arco-picker-size-small[\s\S]*--dense-control-h-form/.test(globalCss)
 ) {
   violations.push({
-    rule: 'Form Field Contract 必须覆盖 filter-field / detail-form / search-form 的 picker 控件',
+    rule: '§ Arco Form Controls 必须覆盖 picker 组件高度',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing unified picker rule in § Form Field Contract',
+    content: 'missing .arco-picker-size-small height in § Arco Form Controls',
   });
 }
 if (!globalCss.includes('--dense-vxe-surface-hover-bg') || !globalCss.includes('--dense-table-header-bg')) {

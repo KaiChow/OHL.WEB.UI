@@ -1,95 +1,96 @@
-# Form Field Contract — 统一表单字段规范
+# Arco Form Controls — 组件统一规范
 
-**CSS 唯一事实源：** `src/styles/global.css` → `§ Form Field Contract`
+**CSS 唯一事实源：** `src/styles/global.css` → **`§ Arco Form Controls`**
 
-列表筛选、筛选抽屉、Modal、详情、高级查询 **共用同一套** label / 控件尺寸 / 间距。禁止在页面 scoped 或各 surface 区块重复写控件高度与字号。
+规范按 **Arco 组件 + 使用场景** 组织，**不按** 列表 / 详情 / Modal / 筛选等业务模块分叉。  
+同一 `a-input` / `a-select` / `a-date-picker` 在任意页面须呈现相同尺寸与字号。
 
-## Surface（容器类名）
+## 原则
 
-| Surface | 用途 | 模板写法 |
-|---------|------|----------|
-| `.filter-field` | 列表顶栏筛选 | `<div class="filter-field"><label class="filter-field__label">…</label><a-input size="small" /></div>` |
-| `.filter-inline` | 1–3 字段紧凑筛选 | 外层 `filter-inline` + 内嵌控件 |
-| `.detail-form` | Modal / Drawer / 详情 / 筛选抽屉表单 | `<a-form class="detail-form" layout="vertical" size="small">` |
-| `.search-form` | 旧式横向搜索区（仍须遵守本 contract） | `<a-form class="search-form">` |
+1. 模板统一 `size="small"`（见 `component-size.md`）
+2. 控件外观只改 `§ Arco Form Controls`，禁止在 `filter-field` / `detail-form` / `detail-drawer` 等布局 class 下重复写 height / font-size
+3. 布局 class（`filter-field`、`detail-form-grid`）只管 **排列与栅格**，不管控件皮肤
 
-**Must:** 所有业务表单控件 `size="small"`。  
-**Must not:** 在 `src/views/**` 为 input/select/picker 单独写 height / font-size。
-
-## Token（`:root`）
+## Token
 
 | Token | 值 | 用途 |
 |-------|-----|------|
-| `--dense-control-h-form` | **28px** | 单行控件外框高度（**唯一高度源**） |
-| `--dense-control-lh-form` | 26px | 控件内文字行高（h − 2px） |
-| `--dense-font-field` | 12px / 500 | Label（F4 Field） |
-| `--dense-font-control` | 12px / 400–500 | 输入值、placeholder（F4 Control） |
-| `--dense-gap-label` | **4px** | Label → 控件间距 |
-| `--dense-gap-field-row` | 8px | `a-form-item` 行间距 |
-| `--dense-gap-field-col` | 12px | `detail-form-grid` 列间距 |
+| `--dense-control-h-form` | 28px | 单行控件外框高度 |
+| `--dense-control-lh-form` | 26px | 内文行高（h − 2px） |
+| `--dense-font-field` | 12px / 500 | 字段名 label |
+| `--dense-font-control` | 12px | 输入值 / placeholder |
+| `--dense-gap-label` | 4px | 字段名 → 控件 |
 
-别名（兼容旧引用，勿在新代码中单独改值）：
+## 组件默认态（Default）
 
-- `--dense-control-h-filter` → `var(--dense-control-h-form)`
-- `--dense-control-h-detail` → `var(--dense-control-h-form)`
+适用：**所有** `size="small"` 单行控件，与所在页面无关。
 
-## 统一尺寸
+| 组件 | Arco 类名（节选） |
+|------|-------------------|
+| Input | `.arco-input-wrapper.arco-input-size-small` |
+| Select | `.arco-select-view-single.arco-select-size-small` |
+| Date / Range | `.arco-picker-size-small` / `.arco-picker-range.arco-picker-size-small` |
+| InputNumber | `.arco-input-number.arco-input-number-size-small` |
 
-| 项 | 规范 |
-|----|------|
-| Label | F4 · 12px · 500 · `text-2` · `line-height: 1.35` |
-| Label → 控件 | `--dense-gap-label`（4px） |
-| Input / Select / Date / Number | 外框 **28px**，内文 **12px**，行高 **26px** |
-| Textarea | 12px，行高 1.45，**不参与** 28px 固定高 |
-| Placeholder | 12px，字重降级，颜色 `text-3` |
-| Hover / Focus | 全 surface 同一套 primary 边框 + focus ring |
+| 属性 | 值 |
+|------|-----|
+| 外框高度 | 28px |
+| 字号 | 12px |
+| 边框 | `var(--dense-border)` |
+| Hover / Focus | primary 边框 + focus ring |
 
-## 例外 Surface（特殊需求）
+## 字段名（Field label）
 
-| Surface | 差异 | 原因 |
-|---------|------|------|
-| `.detail-mini-vxe` | 单元格内透明边框，hover 才显形 | 表格行内编辑 |
-| `.filter-field` | 控件多一层 inset box-shadow | 列表筛选扫描区轻强调 |
-| Toolbar `a-button` | `--dense-control-h-nav` 28px · F2 13px | 按钮非表单字段 |
-| VXE 主表 | 行高 36px · F1 13px | 数据阅读，非表单 |
+| 写法 | 说明 |
+|------|------|
+| `.field-label` | 推荐通用 class |
+| `.filter-field__label` | 与 `.field-label` 同规范（布局 BEM 别名） |
+| `.arco-form-item-label > label` | `a-form layout="vertical"` 内置 label |
 
-**禁止** 为 Modal / 详情 / 筛选抽屉单独写一套控件 CSS。
+统一：12px / 500 / `text-2` / label→控件 **4px**。
 
-## 正确示例
+## 使用场景（Scenario）
+
+仅以下 **场景** 允许覆盖 Default；不得按业务模块新增场景。
+
+| 场景 | 选择器 / 条件 | 差异 |
+|------|----------------|------|
+| **Textarea 多行** | `.arco-textarea-size-small` | 不固定 28px 高；行高 1.45 |
+| **Disabled / 只读** | `.arco-*-disabled` | 灰底；文字仍 `text-1` 可读 |
+| **Form-item 列宽** | `.arco-form-item-content >` | 控件 `width: 100%` |
+| **表格行内编辑** | `.detail-mini-vxe` | 透明边框；hover/focus 才显形 |
+| **组合控件** | `.filter-combo` / `.detail-combo` | 多控件拼接圆角（布局 struct，非模块） |
+| **分页跳转等** | `.table-card-cap__pager` | 分页专用（非表单字段） |
+
+## 禁止
+
+```
+❌ 在 global.css 为 .detail-drawer / .detail-form / .filter-field 单独写控件 height、font-size
+❌ 在 src/views scoped 覆盖 .arco-input-wrapper 尺寸
+❌ 以「列表筛选」「Modal 表单」为由建立第二套控件 token
+❌ xf-grid / xf-label 自写表单控件样式
+```
+
+## 模板示例
 
 ```vue
-<!-- 列表筛选 -->
+<!-- 手写 label + 控件：任意场景相同 -->
 <div class="filter-field">
   <label class="filter-field__label">客户名称</label>
   <a-input v-model="q.name" size="small" allow-clear />
 </div>
 
-<!-- Modal / Drawer -->
+<!-- Arco Form：控件仍走同一套 Default -->
 <a-form class="detail-form" layout="vertical" size="small" :model="form">
-  <div class="detail-form-grid detail-form-grid--2">
-    <a-form-item field="name" label="客户名称">
-      <a-input v-model="form.name" size="small" />
-    </a-form-item>
-    <a-form-item field="country" label="国家">
-      <a-select v-model="form.country" size="small" allow-clear />
-    </a-form-item>
-  </div>
+  <a-form-item field="name" label="客户名称">
+    <a-input v-model="form.name" size="small" />
+  </a-form-item>
 </a-form>
-```
-
-## 禁止
-
-```
-❌ xf-grid / xf-label 自写表单（用 detail-form）
-❌ 在 filter-field / detail-form 外裸放 a-form-item 且无 surface class
-❌ 各页面 scoped 写 .arco-input-wrapper { height: … }
-❌ 筛选 32px + 表单 28px 双标准（已统一为 --dense-control-h-form）
-❌ query-filter-drawer 单独改 label margin（走 --dense-gap-label）
 ```
 
 ## 相关 Reference
 
-- 表单 Arco 写法：`form-rules.md`
-- 栅格与分区：`detail-form.md`
-- 筛选布局：`filter-layout.md`
-- Arco size 枚举：`component-size.md`
+- Arco 写法 / 校验：`form-rules.md`
+- 表单栅格布局：`detail-form.md`
+- 筛选区布局（不含控件皮肤）：`filter-layout.md`
+- `size="small"` 枚举：`component-size.md`
