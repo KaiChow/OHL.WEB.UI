@@ -18,7 +18,8 @@ import {
 import CustomerDetailDrawer from './CustomerDetailDrawer.vue';
 import CustomerFormModal from './CustomerFormModal.vue';
 import { mockCustomers } from './mockData';
-import type { CooperateSegment, CustomerQuery, CustomerRecord, ListScope } from './types';
+import type { CooperateSegment, CustomerFormValue, CustomerQuery, CustomerRecord, ListScope } from './types';
+import { buildDateStamp, downloadCsvFile, downloadTextFile, buildTimestampSuffix } from '../../../utils/mock-actions';
 
 const defaultQuery = (): CustomerQuery => ({
   name: '',
@@ -212,8 +213,34 @@ const handleBatchAction = (label: string) => {
   Message.info(`${label}：已选 ${selectedIds.value.length} 条`);
 };
 
-const handleExport = () => Message.info('导出任务已提交');
-const handleImport = () => Message.info('导入功能开发中');
+const handleExport = () => {
+  downloadCsvFile(
+    `客户池-${buildTimestampSuffix()}.csv`,
+    ['客户名称', '客户类型', '国家', '合作状态', '负责客服', '联系人', '联系人邮箱', '联系人电话', '最后跟进', '最后发货'],
+    filteredRows.value.map((row) => [
+      row.name,
+      row.customerType,
+      row.country,
+      row.cooperateStatus === 'cooperated' ? '已合作' : '未合作',
+      row.csName,
+      row.contactName,
+      row.contactEmail,
+      row.contactPhone,
+      row.lastFollowAt || '',
+      row.lastShipAt || '',
+    ]),
+  );
+  Message.success(`已导出 ${filteredRows.value.length} 条客户记录`);
+};
+
+const handleImport = () => {
+  downloadTextFile(
+    '客户导入模板.csv',
+    '\uFEFF客户名称,客户类型,国家,负责客服,联系人,联系人邮箱,联系人电话,联系人职务,备注\r\n示例客户,直客,中国,张三,王经理,wang@example.com,13800138000,采购经理,示例备注',
+    'text/csv;charset=utf-8',
+  );
+  Message.success('已下载客户导入模板');
+};
 
 const openCreate = () => {
   currentRow.value = null;
@@ -240,6 +267,48 @@ const handleDelete = (row: CustomerRecord) => {
   const target = allRows.value.find((r) => r.Id === row.Id);
   if (target) target.deleted = true;
   Message.success('已移入删除列表');
+  fetchList();
+};
+
+const handleSaveCustomer = (payload: CustomerFormValue) => {
+  if (formModalMode.value === 'edit' && currentRow.value) {
+    allRows.value = allRows.value.map((row) =>
+      row.Id === currentRow.value?.Id
+        ? {
+            ...row,
+            ...payload,
+            customerType: payload.customerType || row.customerType,
+            country: payload.country || row.country,
+            csName: payload.csName || row.csName,
+          }
+        : row,
+    );
+  } else {
+    const now = new Date();
+    const newRow: CustomerRecord = {
+      Id: String(Date.now()),
+      name: payload.name,
+      customerType: payload.customerType || '直客',
+      country: payload.country || '中国',
+      tags: [],
+      csName: payload.csName || '张三',
+      contactName: payload.contactName,
+      contactEmail: payload.contactEmail,
+      contactPhone: payload.contactPhone,
+      contactTitle: payload.contactTitle,
+      lastFollowUp: '',
+      cooperateStatus: cooperateSegment.value,
+      deleted: false,
+      createdAt: buildDateStamp(now),
+      lastFollowAt: '',
+      lastShipAt: '',
+      opsStaff: '',
+      creator: 'admin',
+      remark: payload.remark,
+    };
+    allRows.value = [newRow, ...allRows.value];
+  }
+
   fetchList();
 };
 
@@ -626,7 +695,7 @@ fetchList();
       v-model:visible="formModalVisible"
       :mode="formModalMode"
       :record="currentRow"
-      @saved="fetchList"
+      @saved="handleSaveCustomer"
     />
   </div>
 </template>

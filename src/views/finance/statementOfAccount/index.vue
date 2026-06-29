@@ -13,6 +13,8 @@ import {
 } from '@arco-design/web-vue/es/icon';
 import { mockStatementRows } from './mockData';
 import type { StatementQuery, StatementRecord } from './types';
+import StatementDetailDrawer from './StatementDetailDrawer.vue';
+import { buildTimestampSuffix, downloadCsvFile } from '../../../utils/mock-actions';
 
 const defaultQuery = (): StatementQuery => ({
   salesCompany: undefined,
@@ -42,6 +44,8 @@ const appliedQuery = ref<StatementQuery>(defaultQuery());
 const advancedFilterVisible = ref(false);
 const loading = ref(false);
 const allRows = ref<StatementRecord[]>([...mockStatementRows]);
+const detailVisible = ref(false);
+const currentRow = ref<StatementRecord | null>(null);
 
 const page = reactive({ current: 1, size: 100, total: 0 });
 
@@ -129,10 +133,30 @@ const applyAdvancedFilters = () => {
   handleSearch();
 };
 
-const handleExport = () => Message.info('导出任务已提交');
+const handleExport = () => {
+  downloadCsvFile(
+    `对账工作台-${buildTimestampSuffix()}.csv`,
+    ['类型', '签约单位', '业务员', '所在部门/组', '账单总金额(CNY)', '未核销总金额(CNY)', '逾期金额(CNY)', '预计付款日期', '预计付款金额', '预计付款币种', '备注'],
+    filteredRows.value.map((row) => [
+      row.type,
+      row.contractUnit,
+      row.salesperson,
+      row.department,
+      row.totalBillAmount,
+      row.unwrittenOffAmount,
+      row.overdueAmount,
+      row.estimatedPaymentDate,
+      row.estimatedPaymentAmount,
+      row.estimatedPaymentCurrency,
+      row.remark,
+    ]),
+  );
+  Message.success(`已导出 ${filteredRows.value.length} 条对账记录`);
+};
 
 const openDetail = (row: StatementRecord) => {
-  Message.info(`查看对账明细：${row.contractUnit}`);
+  currentRow.value = row;
+  detailVisible.value = true;
 };
 
 const onPageChange = (p: number) => {
@@ -506,6 +530,7 @@ fetchList();
         </div>
       </template>
     </a-drawer>
+    <statement-detail-drawer v-model:visible="detailVisible" :record="currentRow" />
   </div>
 </template>
 

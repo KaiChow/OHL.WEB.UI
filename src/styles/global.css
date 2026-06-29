@@ -807,7 +807,7 @@ button:-moz-focusring,
 
 .table-card-cap__pager .arco-select-view-single {
   height: 28px !important;
-  font-size: var(--dense-font-nav) !important;
+  font-size: var(--dense-font-control) !important;
   border-radius: var(--dense-radius) !important;
 }
 
@@ -1884,8 +1884,8 @@ button:-moz-focusring,
   height: 28px;
   padding: 0 10px;
   border-radius: var(--dense-radius);
-  font-size: var(--dense-font-control);
-  font-weight: var(--dense-weight-control);
+  font-size: var(--dense-font-nav);
+  font-weight: var(--dense-weight-nav);
 }
 
 .merged-bar .toolbar-group .arco-btn-outline {
@@ -1968,6 +1968,9 @@ button:-moz-focusring,
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
+  line-height: 1.35;
 }
 
 .workbench-notice--warn {
@@ -2436,13 +2439,13 @@ button:-moz-focusring,
 }
 
 .toolbar-selected-tip {
-  font-size: 12px;
+  font-size: var(--dense-font-nav);
   line-height: 1;
-  font-weight: 500;
+  font-weight: var(--dense-weight-nav);
 }
 
 .toolbar-selected-tip b {
-  font-weight: 700;
+  font-weight: var(--dense-weight-nav-active);
 }
 
 .toolbar-selection-clear.arco-btn {
@@ -4695,9 +4698,9 @@ button:-moz-focusring,
   gap: 7px;
   margin: 0 0 10px;
   color: var(--color-text-1);
-  font-size: var(--dense-font-field);
+  font-size: var(--dense-font-title);
   font-weight: var(--dense-weight-title);
-  line-height: 16px;
+  line-height: 18px;
 }
 
 .query-filter-drawer__group-head::before {
@@ -6840,7 +6843,8 @@ button:-moz-focusring,
   border-radius: 4px;
   background: var(--color-bg-card);
   color: var(--color-text-2);
-  font-size: 12px;
+  font-size: var(--dense-font-nav);
+  font-weight: var(--dense-weight-nav);
   cursor: pointer;
   user-select: none;
   transition: all .15s;
@@ -6898,7 +6902,8 @@ button:-moz-focusring,
 }
 
 .adv-field .adv-label {
-  font-size: 12px;
+  font-size: var(--dense-font-field);
+  font-weight: var(--dense-weight-field);
   color: var(--color-text-3);
   white-space: nowrap;
   flex-shrink: 0;
@@ -6960,7 +6965,8 @@ button:-moz-focusring,
 }
 
 .adv-drawer-tab-pane .adv-field-v .adv-label {
-  font-size: 12px;
+  font-size: var(--dense-font-field);
+  font-weight: var(--dense-weight-field);
   color: var(--color-text-3);
 }
 
@@ -7001,7 +7007,8 @@ button:-moz-focusring,
 .adv-nav-item {
   display: block;
   padding: 7px 14px;
-  font-size: 12px;
+  font-size: var(--dense-font-nav);
+  font-weight: var(--dense-weight-nav);
   color: var(--color-text-2);
   cursor: pointer;
   border-left: 2px solid transparent;
@@ -7031,8 +7038,8 @@ button:-moz-focusring,
 }
 
 .adv-group-title {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--dense-font-title);
+  font-weight: var(--dense-weight-title);
   color: var(--color-text-3);
   text-transform: uppercase;
   letter-spacing: .05em;

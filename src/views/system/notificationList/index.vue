@@ -13,7 +13,14 @@ import {
 import NotificationFormModal from './NotificationFormModal.vue';
 import NotificationDetailDrawer from './NotificationDetailDrawer.vue';
 import { mockNotifications } from './mockData';
-import type { NotificationQuery, NotificationRecord, NotificationStatus, NotificationStatusKey } from './types';
+import type {
+  NotificationFormValue,
+  NotificationQuery,
+  NotificationRecord,
+  NotificationStatus,
+  NotificationStatusKey,
+} from './types';
+import { buildDateTimeStamp } from '../../../utils/mock-actions';
 
 const STATUS_TABS: { key: NotificationStatus; label: string }[] = [
   { key: 'all', label: '全部' },
@@ -137,6 +144,39 @@ const handleDelete = (row: NotificationRecord) => {
 
 const handleStrategyManage = () => {
   Message.info('自定义策略管理');
+};
+
+const handleSaveNotification = (payload: NotificationFormValue) => {
+  const now = buildDateTimeStamp();
+  if (formModalMode.value === 'edit' && currentRow.value) {
+    allRows.value = allRows.value.map((row) =>
+      row.Id === currentRow.value?.Id
+        ? {
+            ...row,
+            ...payload,
+            lastEditTime: now,
+          }
+        : row,
+    );
+  } else {
+    const newRow: NotificationRecord = {
+      Id: String(Date.now()),
+      type: payload.type,
+      subject: payload.subject,
+      content: payload.content,
+      files: [],
+      status: 'draft',
+      lastPublishTime: '',
+      targetType: payload.targetType,
+      targetLabel: payload.targetType === 'all' ? '全员通知' : '自定义通知',
+      effectivePeriod: payload.effectivePeriod,
+      creator: 'admin',
+      lastEditTime: now,
+    };
+    allRows.value = [newRow, ...allRows.value];
+  }
+
+  fetchList();
 };
 
 const onPageChange = (p: number) => {
@@ -393,7 +433,7 @@ fetchList();
       v-model:visible="formModalVisible"
       :mode="formModalMode"
       :record="currentRow"
-      @saved="fetchList"
+      @saved="handleSaveNotification"
     />
     <notification-detail-drawer
       v-model:visible="detailDrawerVisible"

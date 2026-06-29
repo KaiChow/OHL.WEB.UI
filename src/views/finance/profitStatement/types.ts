@@ -39,4 +39,5 @@ export interface ProfitRecord {
   fobCs: string;
   docCs: string;
   placeOfReceipt: string;
+  invoiceMarked: boolean;
 }

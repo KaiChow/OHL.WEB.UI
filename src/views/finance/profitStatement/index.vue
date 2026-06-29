@@ -15,6 +15,7 @@ import {
 import ProfitDetailDrawer from './ProfitDetailDrawer.vue';
 import { mockProfitRows } from './mockData';
 import type { ProfitQuery, ProfitRecord } from './types';
+import { buildTimestampSuffix, copyTextToClipboard, downloadCsvFile, downloadTextFile } from '../../../utils/mock-actions';
 
 const defaultQuery = (): ProfitQuery => ({
   noType: 'orderNo',
@@ -149,17 +150,67 @@ const clearSelection = () => {
   selectedIds.value = [];
 };
 
-const handleCopySelected = () => {
+const getSelectedRows = () => allRows.value.filter((row) => selectedIds.value.includes(row.Id));
+
+const handleCopySelected = async () => {
   if (!selectedIds.value.length) {
     Message.warning('请先勾选记录');
     return;
   }
-  Message.success(`已复制 ${selectedIds.value.length} 条`);
+  const selectedOrderNos = getSelectedRows().map((row) => row.orderNo).join('\n');
+  await copyTextToClipboard(selectedOrderNos);
+  Message.success(`已复制 ${selectedIds.value.length} 个订单号`);
 };
 
-const handleExport = () => Message.info('导出任务已提交');
+const handleExport = () => {
+  downloadCsvFile(
+    `利润台账-${buildTimestampSuffix()}.csv`,
+    ['订单编号', '客户', '所属公司', '业务范围', 'MBL', '运输方式', '真实利润', '真实预估', '销售额', '币种', '订单状态', '开票状态'],
+    filteredRows.value.map((row) => [
+      row.orderNo,
+      row.customer,
+      row.company,
+      row.businessScope,
+      row.mbl,
+      row.transportMode,
+      row.realProfit,
+      row.realEstimate,
+      row.salesAmount,
+      row.currency,
+      row.orderStatus,
+      row.invoiceMarked ? '已开票' : '未开票',
+    ]),
+  );
+  Message.success(`已导出 ${filteredRows.value.length} 条利润记录`);
+};
 
-const handleGenerateBill = () => Message.info('生成代理业务账单');
+const handleGenerateBill = () => {
+  if (!selectedIds.value.length) {
+    Message.warning('请先勾选记录再生成账单');
+    return;
+  }
+  const lines = getSelectedRows().map(
+    (row) =>
+      `${row.orderNo} | ${row.customer} | ${row.currency} ${formatAmount(row.salesAmount)} | 状态：${row.orderStatus}`,
+  );
+  downloadTextFile(
+    `代理业务账单草案-${buildTimestampSuffix()}.txt`,
+    lines.join('\r\n'),
+  );
+  Message.success(`已生成 ${selectedIds.value.length} 条账单草案`);
+};
+
+const handleInvoiceMark = (invoiceMarked: boolean) => {
+  if (!selectedIds.value.length) {
+    Message.warning(`请先勾选记录再${invoiceMarked ? '标记已开发票' : '取消标记开票'}`);
+    return;
+  }
+  allRows.value = allRows.value.map((row) =>
+    selectedIds.value.includes(row.Id) ? { ...row, invoiceMarked } : row,
+  );
+  Message.success(invoiceMarked ? '已标记为已开发票' : '已取消开票标记');
+  fetchList();
+};
 
 const openDetail = (row: ProfitRecord) => {
   currentRow.value = row;
@@ -346,8 +397,8 @@ fetchList();
               <icon-down />
             </a-button>
             <template #content>
-              <a-doption @click="Message.info('标记已开发票')">标记已开发票</a-doption>
-              <a-doption @click="Message.info('取消标记开票')">取消标记开票</a-doption>
+              <a-doption @click="handleInvoiceMark(true)">标记已开发票</a-doption>
+              <a-doption @click="handleInvoiceMark(false)">取消标记开票</a-doption>
             </template>
           </a-dropdown>
           <a-button size="small" type="outline" @click="handleCopySelected">
@@ -454,6 +505,13 @@ fetchList();
             </template>
           </vxe-column>
           <vxe-column field="currency" title="币种" min-width="72" align="center" />
+          <vxe-column field="invoiceMarked" title="开票状态" min-width="84" align="center">
+            <template #default="{ row }">
+              <span class="s-pill" :data-s="row.invoiceMarked ? 'rel' : 'draft'">
+                {{ row.invoiceMarked ? '已开票' : '未开票' }}
+              </span>
+            </template>
+          </vxe-column>
           <vxe-column field="orderStatus" title="状态" min-width="84" align="center">
             <template #default="{ row }">
               <span class="s-pill" :data-s="row.orderStatusKey">{{ row.orderStatus }}</span>

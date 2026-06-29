@@ -32,3 +32,11 @@ export interface NotificationQuery {
   deptGroup: string | undefined;
   creator: string | undefined;
 }
+
+export interface NotificationFormValue {
+  type: string;
+  subject: string;
+  content: string;
+  targetType: 'all' | 'custom';
+  effectivePeriod: string;
+}

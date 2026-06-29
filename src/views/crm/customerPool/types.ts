@@ -47,3 +47,15 @@ export interface CustomerQuery {
   opsStaff: string | undefined;
   creator: string | undefined;
 }
+
+export interface CustomerFormValue {
+  name: string;
+  customerType: string | undefined;
+  country: string | undefined;
+  csName: string | undefined;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  contactTitle: string;
+  remark: string;
+}

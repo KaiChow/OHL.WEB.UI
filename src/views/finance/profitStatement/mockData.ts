@@ -25,6 +25,7 @@ export const mockProfitRows: ProfitRecord[] = [
     fobCs: 'zhangsan',
     docCs: 'wangwu',
     placeOfReceipt: '深圳',
+    invoiceMarked: false,
   },
   {
     Id: '2',
@@ -50,6 +51,7 @@ export const mockProfitRows: ProfitRecord[] = [
     fobCs: 'lisi',
     docCs: 'admin',
     placeOfReceipt: '广州',
+    invoiceMarked: true,
   },
   {
     Id: '3',
@@ -75,6 +77,7 @@ export const mockProfitRows: ProfitRecord[] = [
     fobCs: 'zhangsan',
     docCs: 'admin',
     placeOfReceipt: '上海',
+    invoiceMarked: true,
   },
   {
     Id: '4',
@@ -100,6 +103,7 @@ export const mockProfitRows: ProfitRecord[] = [
     fobCs: 'lisi',
     docCs: 'wangwu',
     placeOfReceipt: '东莞',
+    invoiceMarked: false,
   },
   {
     Id: '5',
@@ -125,5 +129,6 @@ export const mockProfitRows: ProfitRecord[] = [
     fobCs: 'zhangsan',
     docCs: 'wangwu',
     placeOfReceipt: '宁波',
+    invoiceMarked: false,
   },
 ];

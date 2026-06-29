@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
 import { Message } from '@arco-design/web-vue';
-import type { NotificationRecord } from './types';
+import type { NotificationFormValue, NotificationRecord } from './types';
 
 const props = defineProps<{
   visible: boolean;
@@ -11,7 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:visible': [value: boolean];
-  saved: [];
+  saved: [payload: NotificationFormValue];
 }>();
 
 const form = reactive({
@@ -55,7 +55,13 @@ const handleOk = () => {
     return;
   }
   Message.success(props.mode === 'create' ? '通知已创建' : '通知已保存');
-  emit('saved');
+  emit('saved', {
+    type: form.type,
+    subject: form.subject.trim(),
+    content: form.content.trim(),
+    targetType: form.targetType,
+    effectivePeriod: form.effectivePeriod,
+  });
   close();
 };
 </script>

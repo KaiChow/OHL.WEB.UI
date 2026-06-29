@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
 import { Message } from '@arco-design/web-vue';
-import type { CustomerRecord } from './types';
+import type { CustomerFormValue, CustomerRecord } from './types';
 
 const props = defineProps<{
   visible: boolean;
@@ -11,7 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:visible': [value: boolean];
-  saved: [];
+  saved: [payload: CustomerFormValue];
 }>();
 
 const submitting = ref(false);
@@ -71,7 +71,17 @@ const handleOk = () => {
   window.setTimeout(() => {
     submitting.value = false;
     Message.success(props.mode === 'create' ? '客户已创建' : '客户已更新');
-    emit('saved');
+    emit('saved', {
+      name: form.name.trim(),
+      customerType: form.customerType,
+      country: form.country,
+      csName: form.csName,
+      contactName: form.contactName.trim(),
+      contactEmail: form.contactEmail.trim(),
+      contactPhone: form.contactPhone.trim(),
+      contactTitle: form.contactTitle.trim(),
+      remark: form.remark.trim(),
+    });
     emit('update:visible', false);
   }, 300);
   return false;

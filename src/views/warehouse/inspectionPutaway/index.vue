@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
-import { Message } from '@arco-design/web-vue';
+import { Message, Modal } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
   IconSearch,
@@ -14,6 +14,7 @@ import {
 } from '@arco-design/web-vue/es/icon';
 import { mockPutawayRows } from './mockData';
 import type { PutawayQuery, PutawayRecord, PutawayStatusKey } from './types';
+import { buildTimestampSuffix, downloadCsvFile } from '../../../utils/mock-actions';
 
 const STATUS_TABS: {
   key: PutawayStatusKey;
@@ -179,11 +180,74 @@ const clearSelection = () => {
   selectedIds.value = [];
 };
 
-const handleAdd = () => Message.info('添加入仓单');
-const handleAddAb = () => Message.info('新增 AB 单');
-const handleExport = () => Message.info('导出入仓单任务已提交');
-const handleExportSingle = () => Message.info('单个导出入仓单');
-const handleMigrate = () => Message.info('迁移入仓单货物');
+const getSelectedRows = () => allRows.value.filter((row) => selectedIds.value.includes(row.Id));
+
+const handleAdd = () => Message.info('新增入仓单表单待接入，当前先保留在工作台规划中');
+const handleAddAb = () => Message.info('AB 单新建表单待接入，当前先保留在工作台规划中');
+const handleExport = () => {
+  downloadCsvFile(
+    `入仓工作台-${buildTimestampSuffix()}.csv`,
+    ['指令号', '入仓单号', '上架状态', '运输方式', '快递单号', '仓位', '上架日期', '体积', '计费重量', '计费方数', '仓库', '验收人', '出库状态', '照片是否上传'],
+    filteredRows.value.map((row) => [
+      row.instructionNo,
+      row.storageOrderNo,
+      row.putawayStatus,
+      row.transportMode,
+      row.expressNo,
+      row.binLocation,
+      row.putawayDate,
+      row.volume,
+      row.chargeableWeight,
+      row.chargeableVolume,
+      row.warehouse,
+      row.inspector,
+      row.outboundStatus,
+      row.photoUploaded ? '已上传' : '未上传',
+    ]),
+  );
+  Message.success(`已导出 ${filteredRows.value.length} 条入仓记录`);
+};
+const handleExportSingle = () => {
+  if (!selectedIds.value.length) {
+    Message.warning('请先勾选记录再执行单个导出');
+    return;
+  }
+  downloadCsvFile(
+    `入仓单明细-${buildTimestampSuffix()}.csv`,
+    ['指令号', '入仓单号', '上架状态', '仓位', '仓库'],
+    getSelectedRows().map((row) => [
+      row.instructionNo,
+      row.storageOrderNo,
+      row.putawayStatus,
+      row.binLocation,
+      row.warehouse,
+    ]),
+  );
+  Message.success(`已导出 ${selectedIds.value.length} 条选中记录`);
+};
+const handleMigrate = () => {
+  if (!selectedIds.value.length) {
+    Message.warning('请先勾选记录再迁移入仓单货物');
+    return;
+  }
+  Modal.confirm({
+    title: '迁移入仓单货物',
+    content: `确认迁移已选 ${selectedIds.value.length} 条记录到卡派处理队列？`,
+    onOk: () => {
+      allRows.value = allRows.value.map((row) =>
+        selectedIds.value.includes(row.Id)
+          ? {
+              ...row,
+              transportMode: '卡派',
+              statusTag: 'expressToTruck',
+            }
+          : row,
+      );
+      Message.success('已迁移到卡派处理队列');
+      fetchList();
+    },
+  });
+};
 
 const openDetail = (row: PutawayRecord) => {
   Message.info(`查看指令 ${row.instructionNo}`);

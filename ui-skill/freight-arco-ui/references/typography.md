@@ -160,6 +160,18 @@ Every zone has a fixed font tier. Do not deviate.
 | | Tooltip | F5 Aux | 11px | 400 | — |
 | **Page form head** | Title (`xf-head`) | F0 Overlay | 14px | 600 | `color-text-1` |
 
+### Same Component Rule
+
+The same component type must not change text size because it appears in a different business module.
+
+- `a-input` / `a-select` / `a-date-picker` / `a-input-number` / `a-textarea` values and placeholders stay F4 Control 12px in filter rows, modal forms, drawer forms, and advanced query drawers.
+- `a-form-item` labels and `.filter-field__label` stay F4 12px everywhere.
+- Read-only `.detail-field__val` stays F1 13px everywhere.
+- Buttons, tabs, segmented controls, pager triggers, and drawer footer buttons stay F2 Nav 13px everywhere.
+- Pager total/helper/meta stays F5 Aux 11px everywhere.
+
+Do not justify a second size system by saying a component is in a drawer, a detail panel, a table cap, or a specific page.
+
 **Zone rules:**
 
 - Filter + editable form: **all 12px** in one row (label / value / placeholder).

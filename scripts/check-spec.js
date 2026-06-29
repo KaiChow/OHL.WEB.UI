@@ -188,6 +188,8 @@ const actionsReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/refer
 const iconsReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/icons.md'), 'utf8');
 const featureRouting = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/feature-routing.md'), 'utf8');
 const featureDeliveryContract = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/feature-delivery-contract.md'), 'utf8');
+const typographyReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/typography.md'), 'utf8');
+const formFieldReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/form-field.md'), 'utf8');
 const skillSource = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/SKILL.md'), 'utf8');
 const specFirstCoding = readFileSync(join(ROOT, '.cursor/rules/spec-first-coding.mdc'), 'utf8');
 const adversarialReview = readFileSync(join(ROOT, '.cursor/rules/adversarial-review.mdc'), 'utf8');
@@ -288,6 +290,22 @@ if (
     content: 'missing icon scope coverage',
   });
 }
+if (!typographyReference.includes('Same Component Rule')) {
+  violations.push({
+    rule: '字体规范必须定义 Same Component Rule，禁止同类组件因所在页面不同而切换字号',
+    file: 'ui-skill/freight-arco-ui/references/typography.md',
+    line: 1,
+    content: 'missing Same Component Rule',
+  });
+}
+if (!formFieldReference.includes('Typography Contract By Role') || !formFieldReference.includes('同一 Arco 组件在任意业务场景使用同一字号层级')) {
+  violations.push({
+    rule: '表单控件规范必须定义按角色分层的字号契约，并禁止同类控件分场景分字号',
+    file: 'ui-skill/freight-arco-ui/references/form-field.md',
+    line: 1,
+    content: 'missing role-based typography contract for controls',
+  });
+}
 if (!featureRouting.includes('feature-delivery-contract.md') || !featureRouting.includes('feature_type:')) {
   violations.push({
     rule: '功能路由规范必须把行为任务路由到 feature-delivery-contract，并给出最小输出块',
@@ -365,6 +383,44 @@ if (!mainTs.includes("@icon-park/vue-next/styles/index.css")) {
     file: 'src/main.ts',
     line: 1,
     content: 'missing @icon-park/vue-next/styles/index.css import',
+  });
+}
+if (
+  !/\.arco-input-size-small \.arco-input[\s\S]*font-size:\s*var\(--dense-font-control\)/.test(globalCss) ||
+  !/\.arco-select-size-small \.arco-select-view-value[\s\S]*font-size:\s*var\(--dense-font-control\)/.test(globalCss) ||
+  !/\.arco-input::placeholder[\s\S]*font-size:\s*var\(--dense-font-control\)/.test(globalCss) ||
+  !/\.detail-field__label[\s\S]*font-size:\s*var\(--dense-font-field\)/.test(globalCss) ||
+  !/\.detail-field__val[\s\S]*font-size:\s*var\(--dense-font-data\)/.test(globalCss)
+) {
+  violations.push({
+    rule: 'global.css 必须统一定义 label=12 / editable value=12 / readonly detail value=13 的字号契约',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing core typography role contract in global.css',
+  });
+}
+if (/\.merged-bar \.toolbar-group \.arco-btn-size-small\s*\{[^}]*font-size:\s*var\(--dense-font-control\)/.test(globalCss)) {
+  violations.push({
+    rule: 'toolbar-group 按钮文字不得使用 F4 Control 12px，必须使用 F2 Nav 13px',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'toolbar-group .arco-btn-size-small uses dense-font-control',
+  });
+}
+if (/\.query-filter-drawer__group-head\s*\{[^}]*font-size:\s*var\(--dense-font-field\)/.test(globalCss)) {
+  violations.push({
+    rule: 'query-filter-drawer__group-head 属于结构标题，不得使用 F4 12px，应使用 F3 Title 13px',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'query-filter-drawer__group-head uses dense-font-field',
+  });
+}
+if (/\.adv-group-title\s*\{[^}]*font-weight:\s*700/.test(globalCss)) {
+  violations.push({
+    rule: '高级查询分组标题禁止 font-weight:700；应回到 F3 Title 600',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'adv-group-title uses font-weight: 700',
   });
 }
 
