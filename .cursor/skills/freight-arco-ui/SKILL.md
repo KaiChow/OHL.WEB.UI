@@ -19,6 +19,7 @@ Project-level **UI delivery contract** for `FE.OHL.WEB.UI`.
 | **Agent summary** | `AGENTS.md` | One-page pointer (no duplicate rules) |
 | **This skill** | `SKILL.md` + `references/` | PESDP principles + executable rules |
 | **Structure slots** | `module-patterns.md` | English slots only; no field lists |
+| **Prototype translation** | `prototype-to-ui-contract.md` | Screenshot/prototype -> business object/archetype/contracts |
 | **Feature contracts** | `feature-routing.md`, `feature-delivery-contract.md` | Action/state/permission/API/verification |
 | **Domain copy** | `domain-language.md` | Chinese labels, statuses, object examples |
 | **Component rules** | `actions.md`, `icons.md`, `table.md`, `detail-form.md`, `list-page.md` | How to implement |
@@ -73,9 +74,10 @@ Do not hide daily filters, status tabs, or reversible workflow actions merely to
 2. `references/design-principles.md`
 3. `references/module-patterns.md` + `references/domain-language.md` (new pages)
 4. For any task with behavior or request flow: `references/feature-routing.md` + `references/feature-delivery-contract.md`
-5. One topic file from the map below
-6. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
-7. **Before changing icon usage:** read `icons.md`.
+5. For any screenshot/prototype-driven task: `references/prototype-to-ui-contract.md`
+6. One topic file from the map below
+7. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
+8. **Before changing icon usage:** read `icons.md`.
 
 **Coding gate:** `.cursor/rules/spec-first-coding.mdc` — read references first; run `check-spec.js` before delivery.
 
@@ -87,6 +89,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 |------|------|
 | **Large system / which doc for which menu** | **`domain-routing.md`** |
 | **Any feature with click/submit/request/state change** | **`feature-routing.md`** + **`feature-delivery-contract.md`** |
+| **Any screenshot / 原型 / Figma / 视觉稿驱动任务** | **`prototype-to-ui-contract.md`** + `page-archetypes.md` + `module-patterns.md` |
 | Any UI task | `design-principles.md` |
 | **Any icon change** | **`icons.md`** + `actions.md` / `table.md` / `feedback.md` by surface |
 | New page / module | `module-patterns.md` → `domain-language.md` → **`domain-routing.md`** |
@@ -129,20 +132,23 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 - `detail-mini-vxe`: no `show-overflow`; header bg ≠ row hover bg; no checkbox without batch toolbar
 - Business Arco controls: `size="small"` only — see `component-size.md` (`medium` = Arco default, forbidden)
 - Any feature with click/submit/request/state change must complete the functional contract: `feature_type` + `entry_point` + `actor_roles` + `visible_when` + `enabled_when` + `api_request` + `api_response` + `success_result` + `error_result` + `refresh_scope` + `verification_cases`
+- Any screenshot/prototype-driven task must complete the prototype translation block before coding; do not code directly from visual similarity
 - UI rules must be written as AI-executable design language: scope + structure/class + token/density + state + business semantics + forbidden fallback. Vague taste rules like “更好看/更有质感/不要贴在一起” must be translated before coding.
 
 ## Working Protocol
 
 1. Fill slot mapping (`module-patterns.md` template).
-2. If the task has behavior, classify `feature_type` and complete the functional contract.
-3. Pick archetype; read topic references.
-4. Implement with `global.css` classes; scoped CSS only for page shell.
-5. Run `node scripts/check-spec.js` and build when possible.
-6. Report object mapping, feature mapping, files changed, rules applied, verification.
+2. If the task comes from a screenshot/prototype, complete the prototype translation block.
+3. If the task has behavior, classify `feature_type` and complete the functional contract.
+4. Pick archetype; read topic references.
+5. Implement with `global.css` classes; scoped CSS only for page shell.
+6. Run `node scripts/check-spec.js` and build when possible.
+7. Report object mapping, prototype mapping, feature mapping, files changed, rules applied, verification.
 
 ## Output Standard
 
 - Slot mapping + archetype (design/generation tasks)
+- Prototype translation block (screenshot/prototype-driven tasks)
 - Feature mapping + delivery contract keys (behavior tasks)
 - Files changed
 - Rules applied

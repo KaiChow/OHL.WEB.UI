@@ -11,6 +11,7 @@ ui-skill/freight-arco-ui/
 └── references/
     ├── design-principles.md   ← PESDP 原则
     ├── module-patterns.md     ← 英文槽位 / 结构（无字段表）
+    ├── prototype-to-ui-contract.md ← 截图/原型转业务对象/原型/交互契约
     ├── feature-routing.md     ← 功能类型 → 必读规范路由
     ├── feature-delivery-contract.md ← 动作/权限/API/状态/验证契约
     ├── domain-language.md     ← 中文货代用语 + 对象字段示例

@@ -19,6 +19,7 @@ Detailed rules are in:
 
 - `ui-skill/freight-arco-ui/references/design-principles.md`
 - `ui-skill/freight-arco-ui/references/module-patterns.md`
+- `ui-skill/freight-arco-ui/references/prototype-to-ui-contract.md`
 - `ui-skill/freight-arco-ui/references/feature-routing.md`
 - `ui-skill/freight-arco-ui/references/feature-delivery-contract.md`
 - `ui-skill/freight-arco-ui/references/domain-language.md`

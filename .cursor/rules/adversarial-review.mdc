@@ -18,6 +18,7 @@ alwaysApply: true
 7. 请求 / 成功失败 / 刷新范围 / 重复提交是否符合 **`feature-delivery-contract.md`**？
 8. 权限 / 数据范围 / 状态流转是否符合 **`permissions.md`** + **`feature-delivery-contract.md`**？
 9. icon 的库选择 / 作用域 / 内容形式是否符合 **`icons.md`** + **`actions.md`**？
+10. 如果任务来自截图/原型，是否先完成了 **`prototype-to-ui-contract.md`**，而不是直接按视觉抄 UI？
 
 ## 输出（有不通过项则先修再结束）
 

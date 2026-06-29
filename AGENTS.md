@@ -20,6 +20,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 | 域 | 读 |
 |----|-----|
 | 新菜单选型 | `domain-routing.md` |
+| 截图/原型转页面 | `prototype-to-ui-contract.md` + `page-archetypes.md` + `module-patterns.md` |
 | 功能实现/动作/提交流程 | `feature-routing.md` + `feature-delivery-contract.md` |
 | 图标/空态/菜单/模块标题 | `icons.md` + `actions.md` |
 | 主数据/设置 | `master-data.md` |
@@ -39,6 +40,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 - 详情子表无批量栏时禁止 checkbox 列
 - 业务对象先填槽位再画 UI，禁止硬抄订单页字段到财务/客户页
 - 有点击/提交/请求/状态流转的功能，必须先补功能契约再写交互
+- 有截图/原型输入时，必须先做原型转译，禁止按视觉相似度直接开写
 
 ## 结构类名速查
 

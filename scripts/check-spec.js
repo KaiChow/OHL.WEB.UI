@@ -186,6 +186,7 @@ const visualSystem = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/reference
 const filterLayout = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/filter-layout.md'), 'utf8');
 const actionsReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/actions.md'), 'utf8');
 const iconsReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/icons.md'), 'utf8');
+const prototypeToUiContract = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/prototype-to-ui-contract.md'), 'utf8');
 const featureRouting = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/feature-routing.md'), 'utf8');
 const featureDeliveryContract = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/feature-delivery-contract.md'), 'utf8');
 const typographyReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/typography.md'), 'utf8');
@@ -290,6 +291,18 @@ if (
     content: 'missing icon scope coverage',
   });
 }
+if (
+  !prototypeToUiContract.includes('Prototype Translation Block') ||
+  !prototypeToUiContract.includes('What A Screenshot Can And Cannot Decide') ||
+  !prototypeToUiContract.includes('Consistency Promise Rule')
+) {
+  violations.push({
+    rule: '原型转译规范必须覆盖 screenshot 边界、转译块与一致性承诺规则',
+    file: 'ui-skill/freight-arco-ui/references/prototype-to-ui-contract.md',
+    line: 1,
+    content: 'missing prototype translation contract sections',
+  });
+}
 if (!typographyReference.includes('Same Component Rule')) {
   violations.push({
     rule: '字体规范必须定义 Same Component Rule，禁止同类组件因所在页面不同而切换字号',
@@ -345,6 +358,14 @@ if (!skillSource.includes('feature-routing.md') || !skillSource.includes('featur
     content: 'missing feature references in skill source',
   });
 }
+if (!skillSource.includes('prototype-to-ui-contract.md')) {
+  violations.push({
+    rule: 'SKILL.md 必须把截图/原型任务路由到 prototype-to-ui-contract.md',
+    file: 'ui-skill/freight-arco-ui/SKILL.md',
+    line: 1,
+    content: 'missing prototype-to-ui contract in skill source',
+  });
+}
 if (!skillSource.includes('icons.md')) {
   violations.push({
     rule: 'SKILL.md 必须把 icon 任务路由到 icons.md',
@@ -361,6 +382,14 @@ if (!specFirstCoding.includes('feature-routing.md') || !specFirstCoding.includes
     content: 'missing functional pre-read gate',
   });
 }
+if (!specFirstCoding.includes('prototype-to-ui-contract.md')) {
+  violations.push({
+    rule: 'spec-first-coding.mdc 必须要求截图/原型任务先读 prototype-to-ui-contract.md',
+    file: '.cursor/rules/spec-first-coding.mdc',
+    line: 1,
+    content: 'missing prototype pre-read gate',
+  });
+}
 if (!specFirstCoding.includes('icons.md')) {
   violations.push({
     rule: 'spec-first-coding.mdc 必须要求 icon 变更先读 icons.md',
@@ -375,6 +404,14 @@ if (!adversarialReview.includes('feature-delivery-contract.md')) {
     file: '.cursor/rules/adversarial-review.mdc',
     line: 1,
     content: 'missing functional review checks',
+  });
+}
+if (!adversarialReview.includes('prototype-to-ui-contract.md')) {
+  violations.push({
+    rule: 'adversarial-review.mdc 必须审查原型任务是否先完成 prototype-to-ui 转译',
+    file: '.cursor/rules/adversarial-review.mdc',
+    line: 1,
+    content: 'missing prototype review checks',
   });
 }
 if (!adversarialReview.includes('icons.md')) {
