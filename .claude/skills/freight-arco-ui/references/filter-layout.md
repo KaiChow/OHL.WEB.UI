@@ -291,7 +291,7 @@ Drawer rules:
 
 Use `query-filter-drawer query-filter-drawer--grouped`.
 
-- Width: standard drawer width, usually `640px`.
+- Width: **`--dense-drawer-w-filter` (640px)** — see `overlay-dimensions.md` tier D1.
 - Body: repeated `query-filter-drawer__group`.
 - Interaction: clear all in footer; optional clear group inside each group head when group-level reset is implemented.
 - Field grid: 2 columns by default.
@@ -299,6 +299,8 @@ Use `query-filter-drawer query-filter-drawer--grouped`.
 ### Wide Drawer: 33-50 Fields
 
 Use `query-filter-drawer query-filter-drawer--wide`.
+
+- Width: **`--dense-drawer-w-filter-wide` (1120px)** — tier D2 in `overlay-dimensions.md`.
 
 Required structure:
 

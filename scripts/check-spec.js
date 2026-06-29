@@ -656,6 +656,25 @@ if (!globalCss.includes('.arco-popconfirm-footer .arco-btn') || !globalCss.inclu
   });
 }
 
+if (!/--dense-drawer-w-complex-max:\s*1200px/.test(globalCss)
+  || !/\.detail-drawer\.arco-drawer\s*\{[^}]*width:\s*min\(var\(--dense-drawer-w-complex-max\)/.test(globalCss)
+  || !/\.detail-drawer--standard\.arco-drawer/.test(globalCss)) {
+  violations.push({
+    rule: '抽屉宽度须在 global.css 用 token 分档（detail-drawer / detail-drawer--standard）',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing drawer width tokens or detail-drawer--standard',
+  });
+}
+
+if (!/--dense-modal-w-max:\s*860px/.test(globalCss)) {
+  violations.push({
+    rule: 'Modal 最大宽度 token --dense-modal-w-max 必须为 860px',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-modal-w-max: 860px',
+  });
+}
 if (!globalCss.includes('--dense-font-overlay') || !/\.arco-modal-title\s*\{[^}]*font-size:\s*var\(--dense-font-overlay\)/.test(globalCss)) {
   violations.push({
     rule: 'Modal 标题必须使用 F0 --dense-font-overlay（14px），且大于表单正文 12px',

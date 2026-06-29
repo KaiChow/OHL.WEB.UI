@@ -295,6 +295,21 @@ body,
   /* 别名：与 F4 相同，禁止再分档 */
   --dense-icon-action: 14px;
   /* 仅 icon-only 按钮图形，非正文字号 */
+
+  /* 浮层宽度（Modal / Drawer — 见 overlay-dimensions.md） */
+  --dense-drawer-viewport-pad: 32px;
+  --dense-drawer-filter-pad: 24px;
+  --dense-modal-w-confirm: 420px;
+  --dense-modal-w-sm: 480px;
+  --dense-modal-w-md: 560px;
+  --dense-modal-w-lg: 640px;
+  --dense-modal-w-xl: 760px;
+  --dense-modal-w-max: 860px;
+  --dense-drawer-w-filter: 640px;
+  --dense-drawer-w-filter-wide: 1120px;
+  --dense-drawer-w-standard: 720px;
+  --dense-drawer-w-complex-max: 1200px;
+
   --dense-control-h-filter: 32px;
   /* list filter: a-* size="small" */
   --dense-control-h-detail: 28px;
@@ -3384,10 +3399,20 @@ button:-moz-focusring,
   padding: 0 !important;
 }
 
-/* ── 复杂详情抽屉（§17.3 超宽型 / §17.3.9 密度字号）────────────────── */
+/* ── 复杂详情抽屉（超宽型；简单只读用 detail-drawer--standard）──────── */
 .detail-drawer.arco-drawer {
-  width: calc(100vw - 32px) !important;
-  max-width: none;
+  width: min(var(--dense-drawer-w-complex-max), calc(100vw - var(--dense-drawer-viewport-pad))) !important;
+}
+
+.detail-drawer--standard.arco-drawer,
+.detail-drawer.detail-drawer--standard.arco-drawer {
+  width: min(var(--dense-drawer-w-standard), calc(100vw - var(--dense-drawer-viewport-pad))) !important;
+}
+
+.detail-drawer--fullscreen.arco-drawer,
+.detail-drawer.detail-drawer--fullscreen.arco-drawer {
+  width: 100vw !important;
+  max-width: 100vw !important;
 }
 
 /* 复杂详情抽屉：关闭/标题在 dds-head 内，禁止再用 Arco 默认 header（会空一行仅 X） */
@@ -4479,13 +4504,13 @@ button:-moz-focusring,
 }
 
 .query-filter-drawer.arco-drawer {
-  width: min(640px, calc(100vw - 24px)) !important;
+  width: min(var(--dense-drawer-w-filter), calc(100vw - var(--dense-drawer-filter-pad))) !important;
 }
 
 .query-filter-drawer--wide.arco-drawer,
 .arco-drawer.query-filter-drawer--wide,
 .arco-drawer:has(.business-query-shell) {
-  width: min(1120px, calc(100vw - 24px)) !important;
+  width: min(var(--dense-drawer-w-filter-wide), calc(100vw - var(--dense-drawer-filter-pad))) !important;
 }
 
 .query-filter-drawer .arco-drawer-header {

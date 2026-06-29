@@ -93,8 +93,9 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 | Detail / form structure | `detail-form.md` + `actions.md` |
 | **Arco form 写法（校验/提交/combo）** | **`form-rules.md`** |
 | File upload / attachments | `upload.md` |
-| Modal / dialog / confirm | `modal.md` |
+| Modal / dialog / confirm | `modal.md` + **`overlay-dimensions.md`** |
 | Typography / i18n | `typography.md` |
+| **Modal & drawer width** | **`overlay-dimensions.md`** |
 | **Arco `size` (mini/small/medium/large)** | **`component-size.md`** |
 | Color / hierarchy / “too gray” | `visual-system.md` |
 | Buttons / toolbar / row actions | `actions.md` |

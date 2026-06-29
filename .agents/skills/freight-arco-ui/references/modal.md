@@ -6,8 +6,8 @@ Choose the container based on the operation, not convenience.
 
 | Container | Use when | Width |
 |-----------|----------|-------|
-| `a-modal` | Focused single action, short form (≤ 8 fields), confirmation, status change | 480–680px |
-| `a-drawer` | Long multi-section form, order detail with nested tables, audit trail | `calc(100vw - 32px)` or `min(1200px, 90vw)` |
+| `a-modal` | Focused single action, short form (≤ 8 fields), confirmation | See **`overlay-dimensions.md`** (420–860px tiers) |
+| `a-drawer` | Long multi-section form, detail with nested tables, advanced filters | See **`overlay-dimensions.md`** (D1–D4 tiers) |
 | Inline expand | Filter expansion, inline table row edit | No overlay |
 
 Do not use a modal for frequent advanced search — it interrupts the scan-and-adjust workflow.
@@ -16,14 +16,15 @@ Do not force a complex multi-section detail into a modal. If the content needs t
 
 ## Modal Dimensions
 
-| Content type | Width |
-|-------------|-------|
-| Confirmation / single field | 420px |
-| Short form (≤ 6 fields) | 520px |
-| Medium form (7–12 fields) | 640px |
-| Form with a mini table | 760–860px |
+Full tier table and token names: **`overlay-dimensions.md`**.
 
-Set width explicitly on every `<a-modal>`. Do not rely on Arco's default 520px when the content is wider or narrower.
+| Content type | Width token |
+|-------------|-------------|
+| Confirmation / single field | `--dense-modal-w-confirm` (420px) |
+| Short form (≤ 6 fields) | `--dense-modal-w-md` (560px) or `--dense-modal-w-lg` (640px) |
+| Form with a mini table | `--dense-modal-w-xl`–`--dense-modal-w-max` (760–860px) |
+
+Set `:width` explicitly on every `<a-modal>` to a token value. **Hard max 860px.**
 
 ## Modal Structure
 
@@ -95,6 +96,7 @@ Modal.confirm({
 ```
 
 Rules:
+
 - `title` names the business action, not "确认操作".
 - `content` describes the consequence, especially for irreversible operations.
 - `okText` repeats the action verb: "确认废弃", "确认删除", "确认提交".

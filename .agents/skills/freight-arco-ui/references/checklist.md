@@ -155,7 +155,9 @@
 - Status colors are consistent and only used for semantic state.
 - Primary identity, key state, owner/person, business context, and object-owned key facts do not use disabled/empty `color-text-4`.
 - Detail header fact labels are readable metadata and values are stronger than labels.
-- Complex detail drawers explicitly set a wide drawer width; they do not rely on global CSS alone and must not collapse into a narrow right rail.
+- Drawer/modal width matches `overlay-dimensions.md` tier (no arbitrary 900/1080).
+- Complex detail drawers use `class="detail-drawer"` (D4, max 1200px); read-only simple detail uses `detail-drawer--standard` (720px).
+- Filter drawers use `query-filter-drawer` (640px) or `--wide` (1120px).
 - Staff/party display shows role + name clearly; company/context is auxiliary but readable.
 - No `font-weight: 700/800`; no business text over 13px unless true page/detail hero.
 - No decorative large gradients, large-radius consumer SaaS styling, or attention-heavy panels.

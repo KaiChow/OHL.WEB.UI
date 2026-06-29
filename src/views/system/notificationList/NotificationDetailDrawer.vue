@@ -25,8 +25,8 @@ const close = () => emit('update:visible', false);
 <template>
   <a-drawer
     :visible="visible"
-    class="detail-drawer"
-    :width="900"
+    class="detail-drawer detail-drawer--standard"
+    :width="720"
     :footer="false"
     :mask-closable="false"
     title="通知详情"

@@ -240,7 +240,7 @@ grep -n "\.类名" src/styles/global.css
 ## 详情抽屉骨架（直接复用）
 
 ```vue
-<a-drawer class="detail-drawer" :width="900" v-model:visible="visible">
+<a-drawer class="detail-drawer detail-drawer--standard" :width="720" v-model:visible="visible">
   <div class="detail-drawer-body">
     <div class="detail-drawer-status">
       <div class="detail-drawer-status__no">
@@ -577,7 +577,8 @@ import '@uppy/dashboard/dist/style.min.css'
 
 - 最小宽度 **1280px**，推荐设计宽度 **1440px**
 - 自写的 `xf-grid` / `db-content` 必须加 `@media (max-width:1280px)` 降列
-- 抽屉宽度不超过 `min(1200px, 90vw)`
+- 抽屉宽度按 `overlay-dimensions.md` 分档：`detail-drawer--standard` 720px；复杂详情 `min(1200px, 100vw-32px)`；禁止随意 900/1080
+- Modal 宽度用 token 档位（420–860），`:width` ≤ 860
 - 表格无双层滚动条（`table-wrap` 外层禁止 `overflow:auto`）
 
 ---

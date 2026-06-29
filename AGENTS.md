@@ -37,7 +37,8 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 | 筛选 | `filter-card` / `filter-field`（禁 `search-bar`） |
 | 工具栏 | `toolbar` / `toolbar-group` / `toolbar-aside` |
 | 表格容器 | `table-wrap` |
-| 详情抽屉 | `detail-drawer` + `detail-section` + `detail-drawer-footer` |
+| 详情抽屉 | `detail-drawer`（复杂）/ `detail-drawer--standard`（只读）+ `detail-section` |
+| 浮层宽度 | `overlay-dimensions.md`（Modal 420–860；Drawer D1–D4） |
 | 子表容器 | `detail-section__body--table` + `detail-mini-vxe` |
 
 按钮五类型 × 四状态、表格 hover/表头分层、详情 footer 分区：见 `references/actions.md` 与 `references/table.md`。

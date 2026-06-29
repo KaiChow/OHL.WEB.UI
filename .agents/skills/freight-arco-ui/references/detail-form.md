@@ -4,11 +4,15 @@
 
 Use `class="detail-drawer"` and `:footer="false"` for complex drawers.
 
-Complex order/detail drawers must pass an explicit wide width such as
-`width="calc(100vw - 32px)"` or a validated `min(1200px, 90vw)` equivalent.
-Do not rely only on the global `.detail-drawer` selector for width because
-Arco Drawer may apply component/inline width after CSS. A complex detail that
-renders as a narrow right rail fails the detail-form contract.
+Drawer width tiers (D3 standard / D4 complex / fullscreen): **`overlay-dimensions.md`**.
+
+| Detail type | Class | Width |
+|-------------|-------|-------|
+| Read-only, few sections | `detail-drawer detail-drawer--standard` | `min(720px, 100vw - 32px)` via CSS |
+| Multi-tab, mini tables, footer workflow | `detail-drawer` | `min(1200px, 100vw - 32px)` via CSS |
+| Order console fullscreen | `detail-drawer detail-drawer--fullscreen` | `100vw` via CSS |
+
+`:width` on classified drawers documents the tier; **`global.css` wins** with `!important`. Pick class first, then set matching `:width` for readability.
 
 Recommended complex detail order:
 
