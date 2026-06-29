@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import { Message, Modal } from '@arco-design/web-vue';
+import BusinessOrderDrawer from './BusinessOrderDrawer.vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
   IconCopy,
@@ -62,6 +63,9 @@ type VxeTableWithCustom = VxeTableInstance & {
 };
 
 const xTable = ref<VxeTableWithCustom>();
+const orderDrawerVisible = ref(false);
+const orderDrawerMode = ref<'create' | 'edit'>('create');
+const orderDrawerBusinessNo = ref('');
 const queryEditorRef = ref<HTMLElement>();
 const advancedVisible = ref(false);
 const activeGroupKey = ref('identifiers');
@@ -392,6 +396,18 @@ const handleDanger = (label: string) => {
     onOk: () => Message.success('操作已提交'),
   });
 };
+
+const openCreateOrder = () => {
+  orderDrawerMode.value = 'create';
+  orderDrawerBusinessNo.value = '';
+  orderDrawerVisible.value = true;
+};
+
+const openOrderDetail = (row: BusinessOrderRow) => {
+  orderDrawerMode.value = 'edit';
+  orderDrawerBusinessNo.value = row.businessNo;
+  orderDrawerVisible.value = true;
+};
 </script>
 
 <template>
@@ -453,7 +469,7 @@ const handleDanger = (label: string) => {
     <div class="zone-l3-action zone-card zone-card--stack">
       <div class="merged-bar">
         <div class="toolbar-group">
-          <a-button size="small" type="primary">
+          <a-button size="small" type="primary" @click="openCreateOrder">
             <template #icon><icon-plus /></template>
             创建业务单
           </a-button>
@@ -563,7 +579,7 @@ const handleDanger = (label: string) => {
           <vxe-column field="orderNo" title="订单编号" min-width="150" sortable fixed="left">
             <template #default="{ row }">
               <div class="cell-two-line">
-                <a class="link-text link-text--strong c2-main">{{ row.orderNo }}</a>
+                <a class="link-text link-text--strong c2-main" @click.prevent="openOrderDetail(row)">{{ row.orderNo }}</a>
               </div>
             </template>
           </vxe-column>
@@ -749,5 +765,11 @@ const handleDanger = (label: string) => {
         </div>
       </template>
     </a-drawer>
+
+    <BusinessOrderDrawer
+      v-model:visible="orderDrawerVisible"
+      :mode="orderDrawerMode"
+      :business-no="orderDrawerBusinessNo"
+    />
   </div>
 </template>
