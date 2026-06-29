@@ -9,7 +9,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 ## 三条铁律
 
 1. **样式** — 先读 `src/styles/global.css`，复用类名，禁止自写等效 CSS。
-2. **Skill** — 页面/布局/表格/按钮/质感问题先读 `$freight-arco-ui`（`ui-skill/freight-arco-ui/`），按任务读 `references/` 对应文件。
+2. **Skill** — 页面/布局/表格/按钮/质感/功能流程先读 `$freight-arco-ui`（`ui-skill/freight-arco-ui/`），按任务读 `references/` 对应文件。
 3. **编码门禁** — 写前 `spec-first-coding.mdc`；交付前 `adversarial-review.mdc` + `check-spec.js`。
 
 ## Skill 读什么
@@ -20,13 +20,12 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 | 域 | 读 |
 |----|-----|
 | 新菜单选型 | `domain-routing.md` |
+| 功能实现/动作/提交流程 | `feature-routing.md` + `feature-delivery-contract.md` |
 | 主数据/设置 | `master-data.md` |
-| 权限 | `permissions.md` |
+| 权限/显隐/数据范围 | `permissions.md` + `feature-delivery-contract.md` |
 | BI/看板 | `dashboard.md` |
 | 全页表单/客户端下单 | `full-page-form.md` |
 | 空态/反馈 | `feedback.md` |
-
-`references/legacy-design-manual.md` 仅历史归档，新任务勿全读。
 
 ## 不可协商（摘要）
 
@@ -37,6 +36,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 - 列表主表 `workbench-table`；详情子表 `detail-mini-vxe`，禁止 `show-overflow`
 - 详情子表无批量栏时禁止 checkbox 列
 - 业务对象先填槽位再画 UI，禁止硬抄订单页字段到财务/客户页
+- 有点击/提交/请求/状态流转的功能，必须先补功能契约再写交互
 
 ## 结构类名速查
 

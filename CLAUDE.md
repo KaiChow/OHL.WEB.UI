@@ -8,6 +8,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 |------|------|------|
 | 样式 | `src/styles/global.css` | Token、布局类 — **禁止页面自写等效 CSS** |
 | UI Skill | `ui-skill/freight-arco-ui/SKILL.md` | PESDP 交付合同、reference 索引 |
+| 功能契约 | `references/feature-routing.md` + `references/feature-delivery-contract.md` | 动作/权限/API/状态/验证 |
 | 编码门禁 | `.cursor/rules/spec-first-coding.mdc` | 先决策 Tier / 结构 / Modal·Drawer，再写代码 |
 | 自动检查 | `node scripts/check-spec.js` | 规范扫描 |
 
@@ -22,11 +23,12 @@ Professional · Efficient · Structured · Dense · Premium — 效率 > 信息 
 ## 工作流（6 步）
 
 1. `business_object` + `user_job` → [`module-patterns.md`](ui-skill/freight-arco-ui/references/module-patterns.md)（英文槽位）
-2. 页面原型 → [`page-archetypes.md`](ui-skill/freight-arco-ui/references/page-archetypes.md)
-3. 中文标签/状态/字段 → [`domain-language.md`](ui-skill/freight-arco-ui/references/domain-language.md)
-4. `global.css` + 任务 reference（list / detail / table / actions / visual-system）
-5. 复用类名；scoped 仅页面骨架
-6. `check-spec.js` + 浏览器抽查
+2. 有点击/提交/请求/状态变化 → [`feature-routing.md`](ui-skill/freight-arco-ui/references/feature-routing.md) + [`feature-delivery-contract.md`](ui-skill/freight-arco-ui/references/feature-delivery-contract.md)
+3. 页面原型 → [`page-archetypes.md`](ui-skill/freight-arco-ui/references/page-archetypes.md)
+4. 中文标签/状态/字段 → [`domain-language.md`](ui-skill/freight-arco-ui/references/domain-language.md)
+5. `global.css` + 任务 reference（list / detail / table / actions / visual-system）
+6. 复用类名；scoped 仅页面骨架
+7. `check-spec.js` + 浏览器抽查
 
 ## 不可协商（10 条）
 
@@ -40,6 +42,7 @@ Professional · Efficient · Structured · Dense · Premium — 效率 > 信息 
 8. 删除/废弃=`danger` + 确认
 9. 禁止 hex、硬编码 14–16px 业务字（14px 仅 `--dense-font-overlay` 浮层标题）、`font-weight:700`、废弃类名
 10. 禁止把订单字段硬抄到无关模块
+11. 有行为的功能必须定义 `visible_when` / `enabled_when` / `api_request` / `success_result` / `error_result` / `refresh_scope`
 
 ## Reference 索引
 
@@ -54,4 +57,4 @@ Vue DOM 骨架见 **`.cursor/rules/ui-spec.mdc`**；筛选 Tier / 双行结构 /
 
 ## 历史文档
 
-`legacy-design-manual.md` 仅归档查阅，新需求以 skill + `global.css` 为准。
+功能实现也以 skill 的 feature contract 为准，不再依赖历史说明文档。

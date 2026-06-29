@@ -14,6 +14,9 @@ alwaysApply: true
 3. 列表 zone / 表格 / 分页是否符合 **`list-page.md`** + **`table.md`**？
 4. 按钮层级是否符合 **`actions.md`**（每作用域 1× primary）？
 5. 类名是否 grep **`global.css`**？有无自写等效 CSS？
+6. 动作显隐 / 可点 / 只读 / 确认是否符合 **`feature-delivery-contract.md`**？
+7. 请求 / 成功失败 / 刷新范围 / 重复提交是否符合 **`feature-delivery-contract.md`**？
+8. 权限 / 数据范围 / 状态流转是否符合 **`permissions.md`** + **`feature-delivery-contract.md`**？
 
 ## 输出（有不通过项则先修再结束）
 

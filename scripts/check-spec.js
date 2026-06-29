@@ -180,6 +180,11 @@ const checklist = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/c
 const visualSystem = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/visual-system.md'), 'utf8');
 const filterLayout = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/filter-layout.md'), 'utf8');
 const actionsReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/actions.md'), 'utf8');
+const featureRouting = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/feature-routing.md'), 'utf8');
+const featureDeliveryContract = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/feature-delivery-contract.md'), 'utf8');
+const skillSource = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/SKILL.md'), 'utf8');
+const specFirstCoding = readFileSync(join(ROOT, '.cursor/rules/spec-first-coding.mdc'), 'utf8');
+const adversarialReview = readFileSync(join(ROOT, '.cursor/rules/adversarial-review.mdc'), 'utf8');
 
 if (!modulePatterns.includes('Specification Granularity Rule')) {
   violations.push({
@@ -211,6 +216,14 @@ if (!checklist.includes('Operational Workbench Gate')) {
     file: 'ui-skill/freight-arco-ui/references/checklist.md',
     line: 1,
     content: 'missing Operational Workbench Gate',
+  });
+}
+if (!checklist.includes('Functional Delivery Gate')) {
+  violations.push({
+    rule: '交付清单必须包含 Functional Delivery Gate，约束功能的动作、权限、接口、状态与验证',
+    file: 'ui-skill/freight-arco-ui/references/checklist.md',
+    line: 1,
+    content: 'missing Functional Delivery Gate',
   });
 }
 if (!visualSystem.includes('Deep-Sea Neutral Color Contract')) {
@@ -251,6 +264,53 @@ if (!actionsReference.includes('生产作业台的高频可逆动作可以超过
     file: 'ui-skill/freight-arco-ui/references/actions.md',
     line: 1,
     content: 'missing operational workbench visible action rule',
+  });
+}
+if (!featureRouting.includes('feature-delivery-contract.md') || !featureRouting.includes('feature_type:')) {
+  violations.push({
+    rule: '功能路由规范必须把行为任务路由到 feature-delivery-contract，并给出最小输出块',
+    file: 'ui-skill/freight-arco-ui/references/feature-routing.md',
+    line: 1,
+    content: 'missing route to feature-delivery-contract or feature output block',
+  });
+}
+if (
+  !featureDeliveryContract.includes('visible_when') ||
+  !featureDeliveryContract.includes('enabled_when') ||
+  !featureDeliveryContract.includes('api_request') ||
+  !featureDeliveryContract.includes('api_response') ||
+  !featureDeliveryContract.includes('refresh_scope') ||
+  !featureDeliveryContract.includes('verification_cases')
+) {
+  violations.push({
+    rule: '功能交付契约必须覆盖显隐、可点、接口、刷新与验证关键键位',
+    file: 'ui-skill/freight-arco-ui/references/feature-delivery-contract.md',
+    line: 1,
+    content: 'missing required functional contract keys',
+  });
+}
+if (!skillSource.includes('feature-routing.md') || !skillSource.includes('feature-delivery-contract.md')) {
+  violations.push({
+    rule: 'SKILL.md 必须把功能任务路由到 feature-routing 与 feature-delivery-contract',
+    file: 'ui-skill/freight-arco-ui/SKILL.md',
+    line: 1,
+    content: 'missing feature references in skill source',
+  });
+}
+if (!specFirstCoding.includes('feature-routing.md') || !specFirstCoding.includes('feature-delivery-contract.md')) {
+  violations.push({
+    rule: 'spec-first-coding.mdc 必须要求功能任务先读 feature-routing 与 feature-delivery-contract',
+    file: '.cursor/rules/spec-first-coding.mdc',
+    line: 1,
+    content: 'missing functional pre-read gate',
+  });
+}
+if (!adversarialReview.includes('feature-delivery-contract.md')) {
+  violations.push({
+    rule: 'adversarial-review.mdc 必须审查功能契约，而不只审查 UI 结构',
+    file: '.cursor/rules/adversarial-review.mdc',
+    line: 1,
+    content: 'missing functional review checks',
   });
 }
 
@@ -792,7 +852,7 @@ function collectReferenceFiles(dir) {
   const results = [];
   try {
     for (const name of readdirSync(abs)) {
-      if (name === 'legacy-design-manual.md' || name === 'domain-language.md') continue;
+      if (name === 'domain-language.md') continue;
       const full = join(abs, name);
       const stat = statSync(full);
       if (stat.isDirectory()) {

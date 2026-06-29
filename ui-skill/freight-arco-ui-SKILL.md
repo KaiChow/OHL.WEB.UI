@@ -19,6 +19,8 @@ Detailed rules are in:
 
 - `ui-skill/freight-arco-ui/references/design-principles.md`
 - `ui-skill/freight-arco-ui/references/module-patterns.md`
+- `ui-skill/freight-arco-ui/references/feature-routing.md`
+- `ui-skill/freight-arco-ui/references/feature-delivery-contract.md`
 - `ui-skill/freight-arco-ui/references/domain-language.md`
 - `ui-skill/freight-arco-ui/references/page-archetypes.md`
 - `ui-skill/freight-arco-ui/references/ai-generation-contract.md`
@@ -28,7 +30,3 @@ Detailed rules are in:
 - `ui-skill/freight-arco-ui/references/actions.md`
 - `ui-skill/freight-arco-ui/references/table.md`
 - `ui-skill/freight-arco-ui/references/checklist.md`
-
-The old long-form manual is preserved at:
-
-`ui-skill/freight-arco-ui/references/legacy-design-manual.md`

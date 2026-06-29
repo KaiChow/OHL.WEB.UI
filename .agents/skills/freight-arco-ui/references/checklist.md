@@ -52,6 +52,18 @@
 - Shared classes are used as structural slots, not as fixed business content.
 - Global CSS class names describe structure or role, such as identity band, key fact, line module, document checklist, or action menu; they do not encode one page's business field unless that field is a real reusable domain object.
 
+## Functional Delivery Gate
+
+- Any feature with click, submit, request, or state change is classified by `feature_type` and `entry_point`.
+- `actor_roles`, `visible_when`, `enabled_when`, and `readonly_when` are explicit when role/state matters.
+- `preconditions` and `confirm_when` are defined separately; destructive and irreversible actions do not rely on implied caution.
+- Input fields define `required_when`, validation, derived/writeback behavior, and failure preservation when applicable.
+- Request-backed features define `api_request`, `api_response`, loading lock, duplicate-submit handling, and `refresh_scope`.
+- Success and failure flows are distinct: close/stay-open/refresh/message/retry behavior is explicit.
+- State-changing features define `from_state`, `action`, `to_state`, and blocked/failure paths.
+- Batch features define selected scope, empty-selection behavior, partial-failure handling, and post-success refresh behavior.
+- Verification includes success, business rejection, permission rejection or hidden/disabled state, network failure, duplicate click, and refresh result.
+
 ## Layout
 
 - Uses `page-root page-root--dense` for operational pages.

@@ -26,13 +26,15 @@ Before generating UI:
 3. `references/design-principles.md`
 4. `references/domain-language.md`
 5. `references/page-archetypes.md`
-6. The task-specific reference: list/detail/table/actions/visual/checklist.
+6. For any interactive feature: `references/feature-routing.md` + `references/feature-delivery-contract.md`
+7. The task-specific reference: list/detail/table/actions/visual/checklist.
 
 ## Generation Workflow
 
 1. Classify page archetype.
 2. Identify primary business object and user role.
-3. Complete the module mapping from `module-patterns.md`:
+3. If the task has behavior, complete the functional contract from `feature-delivery-contract.md`.
+4. Complete the module mapping from `module-patterns.md`:
    - Business object.
    - User job.
    - Primary identity.
@@ -41,16 +43,16 @@ Before generating UI:
    - Repeated modules.
    - Primary action.
    - Grouped actions.
-4. Define information hierarchy:
+5. Define information hierarchy:
    - Primary identity.
    - Key status/node.
    - Main working data.
    - Auxiliary metadata.
-5. Choose existing layout classes from `global.css`.
-6. Implement components in module files, not one huge page file.
-7. Use mock data only when backend integration is not requested.
-8. Verify with `npx vite build`.
-9. Visually inspect the route when a dev server is available.
+6. Choose existing layout classes from `global.css`.
+7. Implement components in module files, not one huge page file.
+8. Use mock data only when backend integration is not requested.
+9. Verify with `npx vite build`.
+10. Visually inspect the route when a dev server is available.
 
 ## Executable Design Language Contract
 
@@ -106,6 +108,13 @@ Bad rule example:
 
 ```text
 Dropdown should look more premium and not ugly.
+```
+
+For functional behavior, equally vague rules are forbidden:
+
+```text
+Bad: Save button should work correctly.
+Good: Define visible_when, enabled_when, required_when, api_request, success_result, error_result, and refresh_scope.
 ```
 
 ## Structure Requirements
@@ -195,6 +204,7 @@ If any dimension is below acceptable level, revise structure before styling.
 - Text buttons for row operations without icons/tooltips.
 - Generated pages that look consistent visually but show the wrong business concepts.
 - Finance/customer/warehouse/config pages that inherit shipment-specific fields without a reason.
+- Mutation features that have no explicit visibility, enablement, refresh, or failure-preservation contract.
 
 ## Final Response Requirements
 

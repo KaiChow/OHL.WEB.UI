@@ -1,4 +1,4 @@
 interface:
   display_name: "Freight Arco UI"
-  short_description: "PESDP skill for premium dense freight SaaS UI"
-  default_prompt: "Use $freight-arco-ui to design, review, or implement FE.OHL.WEB.UI freight SaaS pages with Vue 3, Arco Design Vue, VXE Table, and PESDP Design System 2.0."
+  short_description: "PESDP skill for freight SaaS UI and feature delivery contracts"
+  default_prompt: "Use $freight-arco-ui to design, review, or implement FE.OHL.WEB.UI freight SaaS pages and frontend feature behavior with Vue 3, Arco Design Vue, VXE Table, PESDP Design System 2.0, and the project feature-delivery contracts."
