@@ -2,6 +2,13 @@ import type { AppMenuItem } from '../types/navigation';
 
 export const appMenus: AppMenuItem[] = [
   {
+    key: 'warehouse',
+    title: '仓库',
+    children: [
+      { key: 'inspection-putaway', title: '验收上架', routeName: 'InspectionPutaway' },
+    ],
+  },
+  {
     key: 'domestic-finance',
     title: '国内财务',
     children: [

@@ -884,15 +884,26 @@ for (const file of files) {
   }
 }
 
-// 高频列表默认采用核心查询条；旧式内联展开筛选区容易形成灰色表单墙。两行高频查询必须使用 two-row 专用结构。
+// S2 页内展开：须 filter-expand-link--panel + filter-grid--advanced；禁止 advanced-inner 内 slim-row。
+// S3 或旧式灰墙：无 expand link 的 filter-card__advanced 仍禁止。
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
   const content = readFileSync(file, 'utf8');
   if (!content.includes('zone-l2-filter-card')) continue;
+  if (!content.includes('class="filter-card__advanced"')) continue;
+
+  const isS2Expand =
+    content.includes('filter-expand-link--panel') &&
+    /filter-grid--advanced/.test(content) &&
+    !/filter-card__advanced-inner[\s\S]*?filter-card__slim-row/.test(content);
+
+  if (isS2Expand) continue;
+
   for (const match of content.matchAll(/class="filter-card__advanced"/g)) {
     violations.push({
-      rule: '列表查询区禁止旧式 filter-card__advanced 展开灰墙；两行高频查询用 filter-card--two-row，低频条件进 query-filter-drawer',
+      rule:
+        '列表查询区禁止旧式 filter-card__advanced 灰墙；S2 须 filter-expand-link--panel + filter-grid--advanced；S3 用 query-filter-drawer',
       file: relPath,
       line: getLineNumber(content, match.index),
       content: content.slice(match.index, content.indexOf('\n', match.index)).trim().slice(0, 140),

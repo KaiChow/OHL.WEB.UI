@@ -1468,8 +1468,8 @@ button:-moz-focusring,
 }
 
 .filter-card__advanced--open {
-  max-height: 340px;
-  /* slim-row × N + advanced-inner padding */
+  max-height: 420px;
+  /* slim-row × N + advanced-inner padding; S2 收起区最多 2–3 行 */
   opacity: 1;
 }
 

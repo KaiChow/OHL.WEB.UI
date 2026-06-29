@@ -117,8 +117,8 @@ List-page rules that stay in this file:
 - Put active query state in the controls, transport/status tabs, and selected values; do not add a separate selected-filter strip.
 - Text inputs trigger by Enter or Query button; selects and chips may auto-search when safe.
 - Query and reset actions stay in a stable location in the visible query row or `inline-actions--matrix`.
-- The filter drawer owns secondary conditions and its own clear/apply footer. Do not use an inline expanded panel for normal business list pages.
-- Two visible rows (6–10 daily fields): `filter-card--two-row` + `filter-card__matrix` + `filter-grid` + `inline-actions--matrix` — see `filter-layout.md`. Not a substitute for Tier 2 drawer when secondary filters dominate.
+- **S2** pages use `filter-card__advanced` + `filter-expand-link` (see `filter-layout.md` § Three Query UI Scenarios). **S3** pages use `query-filter-drawer` — do not use both expand and drawer on the same page.
+- Two visible rows (6–10 daily fields, S1): `filter-card--two-row` + `filter-card__matrix` + `filter-grid` + `inline-actions--matrix` — see `filter-layout.md`.
 - 30+/40+ filters use grouped/wide drawer patterns. 50+ filters use a saved query workspace, not a larger drawer.
 - Query actions must be internationalization-safe. Do not size them by Chinese labels; use min/max or `clamp()`, allow 1.3-2x text expansion, and give secondary actions tooltip/title/aria labels when text may ellipsize.
 - If secondary query actions cannot fit translated text, use icon + accessible label or move the actions to a horizontal command row. Do not silently clip action meaning.

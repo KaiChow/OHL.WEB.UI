@@ -44,18 +44,6 @@ One design system serves all domains. Domains differ by **object + job + archety
 - Do not use `a-table` in any domain.
 - Do not invent a new layout class when `md-layout`, `perm-layout`, `db-wrap`, or `xf-wrap` already fits.
 
-## Gold Standard Pages (implement / mirror)
-
-| Domain | Target reference in repo |
-|--------|--------------------------|
-| Operations | `src/views/orderManage/businessOrderList/` |
-| Finance list | `src/views/finance/profitStatement/` |
-| Platform notice | `src/views/system/notificationList/` |
-| Master data | *(to add — follow `master-data.md`)* |
-| Permissions | *(to add — follow `permissions.md`)* |
-| BI | *(to add — follow `dashboard.md`)* |
-| Client order form | *(to add — follow `full-page-form.md`)* |
-
 ## Read Order For New Menu
 
 1. This file → pick archetype + references.

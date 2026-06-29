@@ -27,19 +27,99 @@ For freight list pages, this usually means:
 - two to three route or party filters if they are daily scan keys: 客户, 起运港, 目的港, 船公司 / 航司
 - query, reset, and filter entry in a stable right-side position
 
+## Three Query UI Scenarios (S1 / S2 / S3)
+
+**Every list page picks exactly one scenario** from field count + usage frequency. Do not mix surfaces (no drawer + full flat wall; no drawer when S2 fits).
+
+| Scenario | 字段总数（主规则） | 默认可见 | 次要条件去向 | 典型页面 |
+|----------|-------------------|----------|--------------|----------|
+| **S1 完全平铺** | **1–8**（全部日常高频） | 全部字段 inline | 无收起、无抽屉 | 通知列表、字典维护 |
+| **S2 页内展开** | **9–16**；专项重型工作台可至 **20**（见下） | 1–2 行核心高频（通常 6–12 个） | `filter-card__advanced` 收起区，操作列 `展开(+N)` / `收起` | 运单列表、验收上架 |
+| **S3 抽屉** | **≥17**（重型工作台 ≥21 或低频字段多） | 1 行或 2 行核心（3–8 个） | `query-filter-drawer`，操作列「筛选」按钮 | 对账单、利润表、复杂订单 |
+
+### How to choose S2 vs S3 at the boundary
+
+1. Count fields that operators can apply as filters (combo = 1; date range = 1).
+2. Mark each field **Locate / Narrow / Investigate** (see Query Goals table).
+3. **S1** — all fields are Locate or daily Narrow.
+4. **S2** — total 9–16, or **17–20 on 专项重型工作台** when every non-default field is still **Narrow** (used at least several times per week, not Investigate).
+5. **S3** — total ≥17 with any **Investigate** field, or ≥21 regardless, or non-default fields are rarely used.
+
+专项重型工作台（财务核销、仓储验收、操作稽核）：默认可见行可增至 **2 行（6–12 字段）**；S2 收起区最多 **2–3 行**，禁止 4 行全平铺。
+
+### Scenario contracts (DOM + interaction)
+
+#### S1 — Full inline
+
+- `filter-card__slim-row`（≤5 字段）或 `filter-card--two-row` + `filter-grid`（6–8 字段）。
+- 操作列：`查询` primary + `重置` text。**无**展开链、**无**筛选抽屉。
+
+#### S2 — Default visible + page expand/collapse
+
+- 常驻区：`filter-card--two-row` → `filter-card__matrix` → `filter-grid`（4 列；仓储可用 `filter-grid--6col`）。
+- 收起区：同级 `filter-card__advanced` + `filter-card__advanced--open` → `filter-card__advanced-inner` → `filter-grid filter-grid--advanced`（**禁止**在 advanced 内再用 `filter-card__slim-row`）。
+- 操作列 `filter-card__inline-actions--matrix` 自上而下固定：
+  1. `查询` primary
+  2. `重置` text
+  3. `filter-expand-link filter-expand-link--panel`：`icon-down` + `展开(+N)` / `icon-up` + `收起`；N = 收起区字段数
+- 收起区有激活值时：`a-badge` 显示激活数量（禁止底部「已筛选」横条）。
+- `localStorage` 记忆展开态；**不**记忆筛选值。
+- 展开/收起**不改变**查询/重置位置；收起后表格首行仍应在 1440×900 首屏内。
+
+```vue
+<div class="zone-l2-filter-card zone-card filter-card filter-card--two-row">
+  <div class="filter-card__matrix">
+    <div class="filter-grid filter-grid--6col">
+      <!-- 常驻高频字段 -->
+    </div>
+    <div class="filter-card__inline-actions filter-card__inline-actions--matrix">
+      <a-button size="small" type="primary" class="filter-card__query-btn" @click="handleSearch">
+        <template #icon><icon-search /></template>查询
+      </a-button>
+      <a-button size="small" type="text" class="reset-btn" @click="handleReset">重置</a-button>
+      <button
+        type="button"
+        class="filter-expand-link filter-expand-link--panel"
+        :class="{ 'is-open': filterExpanded }"
+        @click="toggleFilterExpanded"
+      >
+        <icon-down v-if="!filterExpanded" /><icon-up v-else />
+        <span class="filter-expand-link__text">
+          {{ filterExpanded ? '收起' : `展开(+${collapsedFieldCount})` }}
+        </span>
+        <a-badge v-if="!filterExpanded && collapsedActiveCount > 0" :count="collapsedActiveCount" />
+      </button>
+    </div>
+  </div>
+  <div class="filter-card__advanced" :class="{ 'filter-card__advanced--open': filterExpanded }">
+    <div class="filter-card__advanced-inner">
+      <div class="filter-grid filter-grid--6col filter-grid--advanced">
+        <!-- 收起区字段 -->
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+#### S3 — Default visible + filter drawer
+
+- 常驻 1 行 `filter-card__slim-row` 或 2 行 `filter-card--two-row`（核心 3–12 字段，按频率选取）。
+- 操作列第三项：`筛选` text + `icon-filter` → `query-filter-drawer`（见 **More Filter Drawer**）。
+- 抽屉内分组编辑；页脚「清空更多筛选 / 取消 / 应用筛选」。
+- **禁止**把 S3 低频字段平铺成 3–4 行可见墙；**禁止**用 S2 展开替代 S3 当 Investigate 字段 ≥9 个。
+
 ## Query Count Decision Matrix
 
 Do not decide drawer usage by "one row vs two rows" alone. Decide by field count, field frequency, and whether the user needs repeated scan-adjust work.
 
-| Total query fields | Visible area | Advanced surface | Use this when | Forbidden fallback |
-|--------------------|--------------|------------------|---------------|--------------------|
-| `1-3` | `filter-inline` or compact `filter-card__slim-row` | none | one keyword/identifier dominates | opening a drawer just for two secondary fields |
-| `4-8` | one `filter-card__slim-row`, or `filter-card--two-row` + `filter-grid` when 6-10 daily fields | none (Tier 1) | all fields are daily high-frequency | drawer for Tier-1 fields; stacked slim-rows |
-| `9-16` | one core row, 3-5 fields visible | `query-filter-drawer` grouped by business meaning | a few secondary filters are useful but not first-scan keys | inline gray form wall |
-| `17-24` | one core row | `query-filter-drawer query-filter-drawer--grouped` | advanced filters span 4-6 business groups | two-line visible query unless all visible fields are daily high-frequency |
-| `25-32` | one core row + optional saved preset entry | `query-filter-drawer query-filter-drawer--wide` with grouped sections | many advanced filters, but still usable as a drawer | flat drawer with no grouping |
-| `33-50` | core row + saved filters / recent filters entry | `query-filter-drawer--wide` with group navigation and sticky footer | power users need many occasional fields | one long 50-field drawer without navigation |
-| `50+` | quick search + saved query workspace entry | saved query workspace / advanced query page or tab | reusable query schemes, cross-module conditions, or admin-level search | showing all fields at once in a drawer or page wall |
+| Total query fields | Scenario | Visible area | Secondary surface | Use this when | Forbidden fallback |
+|--------------------|----------|--------------|-------------------|---------------|--------------------|
+| `1-8` | **S1** | all inline | none | every field is daily high-frequency | drawer or expand for Tier-1 fields |
+| `9-16` | **S2** | 1-2 core rows (6-12 fields) | `filter-card__advanced` + expand link | non-default fields are Narrow, same session | flat 3-4 row wall; drawer when S2 fits |
+| `17-20` | **S2*** or **S3** | core rows per heavy-workbench rule | expand *or* drawer per boundary rules above | *heavy workbench + all Narrow | flat wall; wrong surface for Investigate fields |
+| `21-32` | **S3** | one core row (3-8 fields) | `query-filter-drawer` grouped | advanced filters span 4-6 business groups | two-line visible query wall |
+| `33-50` | **S3 wide** | core row + optional preset entry | `query-filter-drawer--wide` + nav | power users need many occasional fields | flat drawer without grouping |
+| `50+` | **workspace** | quick search + saved query entry | saved query workspace / advanced tab | reusable schemes, cross-module search | all fields in drawer or page wall |
 
 ### Visible Row Count Decision（核心判断规则）
 
@@ -47,12 +127,12 @@ Do not decide drawer usage by "one row vs two rows" alone. Decide by field count
 
 > **这些字段，目标用户在日常工作中多久用一次？**
 
-| 用户角色 & 使用场景 | 可见行数 | 说明 |
-|---|---|---|
-| 普通列表浏览（采购/销售一般列表） | 1 行（3-5 字段） | 多数用户只用 1-2 个条件，其余字段属于偶发 |
-| 中等频率列表（运单列表、舱位列表） | 1-2 行（5-10 字段） | 日常高频字段可见，其余进抽屉 |
-| **专项重型工作台**（财务核销、操作稽核、对账中心） | **3-4 行（10-16 字段）** | 操作员全天在此页工作，每个可见字段每天都会用到 |
-| 全量高级搜索 | 抽屉/独立搜索页 | 字段多、用户多样，不适合全部平铺 |
+| 用户角色 & 使用场景 | 默认可见 | Scenario | 说明 |
+|---|---|---|---|
+| 普通列表浏览 | 1 行（3-5 字段） | **S1** | 字段少，全部平铺 |
+| 中等频率列表 | 1-2 行（6-12 字段） | **S2** | 核心常驻，其余页内展开 |
+| **专项重型工作台** | 2 行（6-12 字段）常驻 + 收起区 | **S2** 或 **S3** | 按字段总数与 Narrow/Investigate 分层；禁止 4 行全平铺 |
+| 复杂财务 / 报表 | 1 行核心（3-8 字段） | **S3** | 其余进分组抽屉 |
 
 **判断是否可增加可见行：**
 
@@ -222,9 +302,10 @@ Rules:
 
 - One query command area (`inline-actions--matrix`) for both rows.
 - Do not use two visible rows for low-frequency filters.
-- Above 10 visible fields, use Tier 2+ drawer — not more visible rows.
+- Total **9–16** fields → **S2** (expand), not drawer, unless Investigate fields dominate.
+- Total **≥17** → **S3** (drawer) unless heavy-workbench S2 exception applies (see **Three Query UI Scenarios**).
 
-## More Filter Drawer
+## More Filter Drawer (S3)
 
 Use a drawer when filters are not daily first-scan keys, even if the total field count is only 9-16.
 
@@ -396,22 +477,12 @@ Drawer:
 
 - 来源, 信用, 最近跟进, 国家/地区, 标签
 
-## When Inline Expansion Is Allowed
-
-Inline expansion is now an exception. Use the right-side filter drawer by default for low-frequency conditions.
-
-Inline expansion is allowed only when all conditions are true:
-
-- The expanded area adds at most one compact row.
-- It uses `filter-grid filter-grid--advanced`, not `filter-card__slim-row`.
-- It does not push the table below the first viewport at 1280px height.
-- The extra filters are closely related to the visible query row.
-
-If any condition fails, use the drawer.
-
 ## Prohibited
 
-- Showing 7+ fields as a flat visible query wall.
+- **S1** 页面使用抽屉或展开收起。
+- **S2** 页面把低频 Investigate 字段塞进收起区超过 3 行，或总数应走 **S3** 却不用抽屉。
+- **S3** 页面把 10+ 低频字段平铺成 3–4 行可见墙。
+- 四行及以上字段**全部默认展开**、无展开链也无抽屉。
 - Using `filter-card__advanced-inner` with `filter-card__slim-row`.
 - Using `filter-card__actions-panel` as a vertical command column on list pages.
 - Using a modal for frequent filters.

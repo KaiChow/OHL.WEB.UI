@@ -84,6 +84,43 @@ if (!selectedCount) {
 
 Toolbar shows `bulk-hint` — `已选 N 条` when `selectedCount > 0`.
 
+## Workbench Inline Notices（工具栏常驻提示）
+
+List/workbench `merged-bar` 内数据异常、操作说明等**常驻**提示，使用 `global.css` 的 `workbench-notice`，禁止裸 `span` + `style`。
+
+| 语义 | Class | 用途 |
+|------|-------|------|
+| 警告 / 数据异常 | `workbench-notice workbench-notice--warn` | 缺 ATD、金额无法折算、权限受限等 |
+| 操作说明 / 轻提示 | `workbench-notice workbench-notice--info` | 双击置顶、列操作说明等 |
+
+结构（图标 + 文案，`title` 放完整句）：
+
+```vue
+<div class="merged-bar">
+  <div class="toolbar-group">…业务按钮…</div>
+  <div v-if="showWarn" class="bar-sep" />
+  <div v-if="showWarn" class="workbench-notice-group">
+    <div class="workbench-notice workbench-notice--warn" title="完整说明">
+      <icon-exclamation-circle-fill class="workbench-notice__icon" />
+      <span class="workbench-notice__text">存在订单无 ATD 时间，无法计算折合金额，请先维护数据</span>
+    </div>
+  </div>
+  <div class="toolbar-aside">
+    <div class="workbench-notice workbench-notice--info" title="双击 ★ 可置顶">
+      <icon-info-circle class="workbench-notice__icon" />
+      <span class="workbench-notice__text">双击 ★ 可置顶</span>
+    </div>
+  </div>
+</div>
+```
+
+Rules:
+
+- 警告放 `workbench-notice-group`（`bar-sep` 后与按钮区分）；说明类放 `toolbar-aside` 右对齐。
+- 文案 F5 `var(--dense-font-aux)`；过长 `ellipsis`，完整句放 `title`。
+- 瞬时操作结果仍用 `Message` / `Notification`，不用 `workbench-notice`。
+- 禁止 `a-alert banner` 占满工具栏行高；禁止 `status="warning"` 按钮代替提示。
+
 ## Forbidden
 
 - `alert()` / `window.confirm()`

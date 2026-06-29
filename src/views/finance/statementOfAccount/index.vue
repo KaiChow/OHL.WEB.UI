@@ -114,14 +114,7 @@ const handleReset = () => {
 };
 
 const clearAdvancedFilters = () => {
-  query.salesCompany = undefined;
-  query.paymentType = undefined;
-  query.businessType = undefined;
-  query.etdRange = [];
-  query.etaRange = [];
-  query.salesperson = undefined;
   query.cs = undefined;
-  query.includeCollectionFee = 'yes';
   query.operator = undefined;
   query.companyType = undefined;
   query.dueDateRange = [];
@@ -157,54 +150,114 @@ fetchList();
 
 <template>
   <div class="page-root page-root--dense">
-    <!-- Tier 2 财务：核心行 4 字段 + 更多筛选抽屉（filter-layout.md § Finance） -->
-    <div class="zone-l2-filter-card zone-card filter-card">
-      <div class="filter-card__slim-row">
-        <div class="filter-field filter-field--span2">
-          <label class="filter-field__label">客户</label>
-          <div class="filter-combo arco-input-group">
-            <a-select v-model="query.customerMode" size="small" class="filter-combo__select filter-combo--keyword">
-              <a-option value="include">包含</a-option>
-              <a-option value="exclude">排除</a-option>
+    <!-- 专项重型工作台：12 可见 + 低频 8 项进抽屉（非全部进抽屉） -->
+    <div class="zone-l2-filter-card zone-card filter-card filter-card--two-row">
+      <div class="filter-card__matrix">
+        <div class="filter-grid">
+          <div class="filter-field">
+            <label class="filter-field__label">销售公司</label>
+            <a-select v-model="query.salesCompany" size="small" allow-clear placeholder="请选择">
+              <a-option value="深圳点达">深圳点达</a-option>
+              <a-option value="上海分公司">上海分公司</a-option>
+              <a-option value="宁波办事处">宁波办事处</a-option>
             </a-select>
-            <a-select
-              v-model="query.customer"
+          </div>
+          <div class="filter-field">
+            <label class="filter-field__label">账单公司</label>
+            <a-select v-model="query.billCompany" size="small" allow-clear placeholder="请选择">
+              <a-option value="深圳点达">深圳点达</a-option>
+              <a-option value="上海分公司">上海分公司</a-option>
+            </a-select>
+          </div>
+          <div class="filter-field">
+            <label class="filter-field__label">ETD</label>
+            <a-range-picker
+              v-model="query.etdRange"
               size="small"
-              class="filter-combo__fill"
-              allow-search
-              allow-clear
-              placeholder="请选择客户"
-            >
-              <a-option value="深圳某某贸易">深圳某某贸易有限公司</a-option>
-              <a-option value="广州华南物流">广州华南物流有限公司</a-option>
-              <a-option value="宁波港务">宁波港务进出口</a-option>
+              style="width: 100%"
+              value-format="YYYY-MM-DD"
+            />
+          </div>
+          <div class="filter-field">
+            <label class="filter-field__label">ETA</label>
+            <a-range-picker
+              v-model="query.etaRange"
+              size="small"
+              style="width: 100%"
+              value-format="YYYY-MM-DD"
+            />
+          </div>
+
+          <div class="filter-field">
+            <label class="filter-field__label">收付款类型</label>
+            <a-select v-model="query.paymentType" size="small" allow-clear placeholder="请选择">
+              <a-option value="receivable">应收</a-option>
+              <a-option value="payable">应付</a-option>
+            </a-select>
+          </div>
+          <div class="filter-field">
+            <label class="filter-field__label">业务类型</label>
+            <a-select v-model="query.businessType" size="small" allow-clear placeholder="请选择">
+              <a-option value="海运出口">海运出口</a-option>
+              <a-option value="海运进口">海运进口</a-option>
+              <a-option value="空运出口">空运出口</a-option>
+            </a-select>
+          </div>
+          <div class="filter-field filter-field--span2">
+            <label class="filter-field__label">客户</label>
+            <div class="filter-combo arco-input-group">
+              <a-select v-model="query.customerMode" size="small" class="filter-combo__select filter-combo--keyword">
+                <a-option value="include">包含</a-option>
+                <a-option value="exclude">排除</a-option>
+              </a-select>
+              <a-select
+                v-model="query.customer"
+                size="small"
+                class="filter-combo__fill"
+                allow-search
+                allow-clear
+                placeholder="请选择客户"
+              >
+                <a-option value="深圳某某贸易">深圳某某贸易有限公司</a-option>
+                <a-option value="广州华南物流">广州华南物流有限公司</a-option>
+                <a-option value="宁波港务">宁波港务进出口</a-option>
+              </a-select>
+            </div>
+          </div>
+
+          <div class="filter-field">
+            <label class="filter-field__label">应收账费</label>
+            <a-select v-model="query.receivableFee" size="small" allow-clear placeholder="请选择">
+              <a-option value="unsettled">未结清</a-option>
+              <a-option value="settled">已结清</a-option>
+              <a-option value="all">全部</a-option>
+            </a-select>
+          </div>
+          <div class="filter-field">
+            <label class="filter-field__label">核销状态</label>
+            <a-select v-model="query.writeOffStatus" size="small" allow-clear placeholder="请选择">
+              <a-option value="none">未核销</a-option>
+              <a-option value="partial">部分核销</a-option>
+              <a-option value="full">已核销</a-option>
+            </a-select>
+          </div>
+          <div class="filter-field">
+            <label class="filter-field__label">业务员</label>
+            <a-select v-model="query.salesperson" size="small" allow-search allow-clear placeholder="请选择">
+              <a-option value="张三">张三</a-option>
+              <a-option value="李四">李四</a-option>
+              <a-option value="王五">王五</a-option>
+            </a-select>
+          </div>
+          <div class="filter-field">
+            <label class="filter-field__label">是否含代收费用</label>
+            <a-select v-model="query.includeCollectionFee" size="small" allow-clear placeholder="请选择">
+              <a-option value="yes">是</a-option>
+              <a-option value="no">否</a-option>
             </a-select>
           </div>
         </div>
-        <div class="filter-field">
-          <label class="filter-field__label">账单公司</label>
-          <a-select v-model="query.billCompany" size="small" allow-clear placeholder="请选择">
-            <a-option value="深圳点达">深圳点达</a-option>
-            <a-option value="上海分公司">上海分公司</a-option>
-          </a-select>
-        </div>
-        <div class="filter-field">
-          <label class="filter-field__label">应收账费</label>
-          <a-select v-model="query.receivableFee" size="small" allow-clear placeholder="请选择">
-            <a-option value="unsettled">未结清</a-option>
-            <a-option value="settled">已结清</a-option>
-            <a-option value="all">全部</a-option>
-          </a-select>
-        </div>
-        <div class="filter-field">
-          <label class="filter-field__label">核销状态</label>
-          <a-select v-model="query.writeOffStatus" size="small" allow-clear placeholder="请选择">
-            <a-option value="none">未核销</a-option>
-            <a-option value="partial">部分核销</a-option>
-            <a-option value="full">已核销</a-option>
-          </a-select>
-        </div>
-        <div class="filter-card__inline-actions">
+        <div class="filter-card__inline-actions filter-card__inline-actions--matrix">
           <a-button
             size="small"
             type="primary"
@@ -373,32 +426,18 @@ fetchList();
         <div class="query-filter-drawer__body">
           <a-form class="detail-form" layout="vertical" size="small" :model="query">
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">公司 / 业务</div>
+              <div class="query-filter-drawer__group-head">组织 / 人员</div>
               <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="销售公司">
-                  <a-select v-model="query.salesCompany" size="small" allow-clear placeholder="请选择">
-                    <a-option value="深圳点达">深圳点达</a-option>
-                    <a-option value="上海分公司">上海分公司</a-option>
-                    <a-option value="宁波办事处">宁波办事处</a-option>
+                <a-form-item label="客服">
+                  <a-select v-model="query.cs" size="small" allow-clear placeholder="请选择">
+                    <a-option value="zhangsan">zhangsan</a-option>
+                    <a-option value="lisi">lisi</a-option>
                   </a-select>
                 </a-form-item>
-                <a-form-item label="收付款类型">
-                  <a-select v-model="query.paymentType" size="small" allow-clear placeholder="请选择">
-                    <a-option value="receivable">应收</a-option>
-                    <a-option value="payable">应付</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="业务类型">
-                  <a-select v-model="query.businessType" size="small" allow-clear placeholder="请选择">
-                    <a-option value="海运出口">海运出口</a-option>
-                    <a-option value="海运进口">海运进口</a-option>
-                    <a-option value="空运出口">空运出口</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="是否含代收费用">
-                  <a-select v-model="query.includeCollectionFee" size="small" allow-clear placeholder="请选择">
-                    <a-option value="yes">是</a-option>
-                    <a-option value="no">否</a-option>
+                <a-form-item label="运营">
+                  <a-select v-model="query.operator" size="small" allow-clear placeholder="请选择">
+                    <a-option value="ops1">运营一组</a-option>
+                    <a-option value="ops2">运营二组</a-option>
                   </a-select>
                 </a-form-item>
                 <a-form-item label="公司类型">
@@ -413,49 +452,8 @@ fetchList();
               </div>
             </div>
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">人员</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="业务员">
-                  <a-select v-model="query.salesperson" size="small" allow-search allow-clear placeholder="请选择">
-                    <a-option value="张三">张三</a-option>
-                    <a-option value="李四">李四</a-option>
-                    <a-option value="王五">王五</a-option>
-                    <a-option value="赵六">赵六</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="客服">
-                  <a-select v-model="query.cs" size="small" allow-clear placeholder="请选择">
-                    <a-option value="zhangsan">zhangsan</a-option>
-                    <a-option value="lisi">lisi</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="运营">
-                  <a-select v-model="query.operator" size="small" allow-clear placeholder="请选择">
-                    <a-option value="ops1">运营一组</a-option>
-                    <a-option value="ops2">运营二组</a-option>
-                  </a-select>
-                </a-form-item>
-              </div>
-            </div>
-            <div class="query-filter-drawer__group">
               <div class="query-filter-drawer__group-head">时间范围</div>
               <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="ETD">
-                  <a-range-picker
-                    v-model="query.etdRange"
-                    size="small"
-                    style="width: 100%"
-                    value-format="YYYY-MM-DD"
-                  />
-                </a-form-item>
-                <a-form-item label="ETA">
-                  <a-range-picker
-                    v-model="query.etaRange"
-                    size="small"
-                    style="width: 100%"
-                    value-format="YYYY-MM-DD"
-                  />
-                </a-form-item>
                 <a-form-item label="Due Date">
                   <a-range-picker
                     v-model="query.dueDateRange"
