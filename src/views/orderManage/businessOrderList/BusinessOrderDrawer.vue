@@ -201,17 +201,62 @@ const staffRows = ref<StaffRow[]>([
   { id: 5, role: '单证客服', name: 'Kate' },
 ]);
 
-const cargoLines = ref<CargoLine[]>([
+const cargoParties = ref<CargoParty[]>([
   {
     id: 1,
-    nameCn: '办公椅',
-    nameEn: 'OFFICE CHAIR',
-    mark: 'SB-YWS-2023-001',
-    hsCode: '9401300000',
-    pieces: 200,
-    unit: 'CTNS',
-    weight: 2300,
-    volume: 20,
+    expanded: true,
+    shipperMain: 'SEA FREIGHT LOGISTICS CO., LTD',
+    shipperSub: 'ANJI FURNITURE MANUFACTURING',
+    consigneeMain: 'AMAZON EU SARL UK BRANCH',
+    consigneeSub: 'AMAZON FULFILLMENT CENTRE',
+    notifyMain: 'SAME AS CONSIGNEE',
+    notifySub: 'SAME AS CONSIGNEE',
+    agentMain: '',
+    agentSub: '',
+    vat: '',
+    eori: '',
+    remark: '',
+    lines: [
+      {
+        id: 1,
+        nameCn: '办公椅',
+        nameEn: 'OFFICE CHAIR',
+        mark: 'SB-YWS-2023-001',
+        hsCode: '9401300000',
+        pieces: 200,
+        unit: 'CTNS',
+        weight: 2300,
+        volume: 20,
+      },
+    ],
+  },
+  {
+    id: 2,
+    expanded: false,
+    shipperMain: 'NINGBO EAST SUPPLY CHAIN CO., LTD',
+    shipperSub: 'YIWU HOMEWARE FACTORY',
+    consigneeMain: 'AMAZON EU SARL UK BRANCH',
+    consigneeSub: 'UK FULFILLMENT CENTRE',
+    notifyMain: 'SAME AS CONSIGNEE',
+    notifySub: '',
+    agentMain: 'PTP UK AGENT',
+    agentSub: '',
+    vat: '',
+    eori: '',
+    remark: '',
+    lines: [
+      {
+        id: 2,
+        nameCn: '置物架',
+        nameEn: 'STORAGE RACK',
+        mark: 'NB-RACK-2601',
+        hsCode: '9403200000',
+        pieces: 120,
+        unit: 'CTNS',
+        weight: 860,
+        volume: 8.6,
+      },
+    ],
   },
 ]);
 
@@ -293,12 +338,20 @@ const portShort = (port: string) => {
 const polShort = computed(() => portShort(form.pol));
 const podShort = computed(() => portShort(form.pod));
 
-const cargoSummary = computed(() => {
-  const pieces = cargoLines.value.reduce((s, r) => s + (r.pieces || 0), 0);
-  const weight = cargoLines.value.reduce((s, r) => s + (r.weight || 0), 0);
-  const volume = cargoLines.value.reduce((s, r) => s + (r.volume || 0), 0);
-  return { pieces, weight, volume };
+const summarizeCargoLines = (rows: CargoLine[]) => ({
+  pieces: rows.reduce((s, r) => s + (r.pieces || 0), 0),
+  weight: rows.reduce((s, r) => s + (r.weight || 0), 0),
+  volume: rows.reduce((s, r) => s + (r.volume || 0), 0),
 });
+
+const cargoSummary = computed(() => {
+  const rows = cargoParties.value.flatMap((party) => party.lines);
+  return summarizeCargoLines(rows);
+});
+
+const cargoPartySummary = (party: CargoParty) => summarizeCargoLines(party.lines);
+
+const cargoPartyLabel = (index: number) => `发货人 ${String.fromCharCode(65 + index)}`;
 
 const blSummary = computed(() => {
   const pieces = blRows.value.reduce((s, r) => s + (r.pieces || 0), 0);
@@ -323,7 +376,7 @@ watch(
       return;
     }
     if (props.businessNo) form.businessNo = props.businessNo;
-    isEditing.value = props.mode === 'create';
+    isEditing.value = true;
     isDirty.value = false;
     editingBlRowId.value = null;
     activeSection.value = 'sec-core';
@@ -331,7 +384,7 @@ watch(
 );
 
 watch(
-  [form, staffRows, cargoLines, customsRows, blRows, clearanceRows, serviceItems],
+  [form, staffRows, cargoParties, customsRows, blRows, clearanceRows, serviceItems],
   () => {
     if (props.visible) isDirty.value = true;
   },
@@ -351,11 +404,6 @@ const closeDrawer = () => {
     return;
   }
   emit('update:visible', false);
-};
-
-const toggleEditing = () => {
-  isEditing.value = !isEditing.value;
-  if (!isEditing.value) editingBlRowId.value = null;
 };
 
 const scrollToSection = (key: string) => {
@@ -395,8 +443,40 @@ const removeStaff = (id: number) => {
   staffRows.value = staffRows.value.filter((r) => r.id !== id);
 };
 
-const addCargoLine = () => {
-  cargoLines.value.push({
+const toggleCargoParty = (party: CargoParty) => {
+  party.expanded = !party.expanded;
+};
+
+const addCargoParty = () => {
+  cargoParties.value.push({
+    id: ++idSeq,
+    expanded: true,
+    shipperMain: '',
+    shipperSub: '',
+    consigneeMain: form.consigneeMain,
+    consigneeSub: form.consigneeSub,
+    notifyMain: 'SAME AS CONSIGNEE',
+    notifySub: '',
+    agentMain: '',
+    agentSub: '',
+    vat: '',
+    eori: '',
+    remark: '',
+    lines: [],
+  });
+};
+
+const removeCargoParty = (id: number) => {
+  if (cargoParties.value.length <= 1) {
+    Message.warning('至少保留一位发货人');
+    return;
+  }
+  cargoParties.value = cargoParties.value.filter((party) => party.id !== id);
+};
+
+const addCargoLine = (party: CargoParty) => {
+  party.expanded = true;
+  party.lines.push({
     id: ++idSeq,
     nameCn: '',
     nameEn: '',
@@ -409,8 +489,8 @@ const addCargoLine = () => {
   });
 };
 
-const removeCargoLine = (id: number) => {
-  cargoLines.value = cargoLines.value.filter((r) => r.id !== id);
+const removeCargoLine = (party: CargoParty, id: number) => {
+  party.lines = party.lines.filter((r) => r.id !== id);
 };
 
 const addCustomsRow = () => {
@@ -536,14 +616,10 @@ const handleSubmit = () => {
           <div class="dds-head__identity">
             <span class="link-text link-text--strong">海运业务单</span>
             <span class="s-pill" data-s="draft">{{ mode === 'create' ? '新建' : '编辑' }}</span>
-            <span class="dds-head__meta dds-head__meta--customer mono">{{ form.businessNo }}</span>
+            <span class="dds-head__meta mono">{{ form.businessNo }}</span>
           </div>
         </div>
         <div class="dds-head__actions">
-          <a-button v-if="mode === 'edit'" size="small" type="text" @click="toggleEditing">
-            <template #icon><icon-edit /></template>
-            {{ isEditing ? '查看' : '编辑' }}
-          </a-button>
           <a-tooltip :content="isFullscreen ? '退出全屏' : '全屏'">
             <a-button size="small" type="text" @click="isFullscreen = !isFullscreen">
               <template #icon>
@@ -583,14 +659,11 @@ const handleSubmit = () => {
             <div class="dds-hero-fact__label">贸易条款</div>
             <div class="dds-hero-fact__value">{{ form.tradeTerms }}</div>
           </div>
-          <div class="dds-hero-fact dds-hero-fact--customer">
+          <div class="dds-hero-fact dds-hero-fact--trailing">
             <div class="dds-hero-fact__label">客户</div>
             <div class="dds-hero-fact__value" :title="form.customer">{{ form.customer }}</div>
           </div>
         </div>
-      </div>
-
-      <div class="dds-milestone-bar">
         <div class="dds-milestone">
           <span class="dds-milestone__item" data-state="done">下单</span>
           <span class="dds-milestone__item" data-state="current">填单</span>
@@ -600,7 +673,7 @@ const handleSubmit = () => {
         </div>
       </div>
 
-      <div class="bo-drawer-nav zone-card">
+      <div class="bo-drawer-nav bo-drawer-nav--compact zone-card">
         <div class="stat-tab-group">
           <button
             v-for="item in sectionNav"
@@ -760,19 +833,11 @@ const handleSubmit = () => {
             </div>
           </div>
           <div class="detail-section__body">
-            <div class="detail-field">
-              <div class="detail-field__label">归属公司</div>
-              <div class="detail-field__val">{{ form.ownerCompany }}</div>
-            </div>
-            <template v-if="!isEditing">
-              <div class="staff-list">
-                <div v-for="row in staffRows" :key="row.id" class="staff-card">
-                  <span class="staff-card__role">{{ row.role }}</span>
-                  <span class="staff-card__name">{{ row.name }}</span>
-                </div>
+            <div class="staff-compact-row">
+              <div class="staff-owner">
+                <span class="staff-owner__label">归属公司</span>
+                <span class="staff-owner__value" :title="form.ownerCompany">{{ form.ownerCompany }}</span>
               </div>
-            </template>
-            <template v-else>
               <div class="staff-inline">
                 <span v-for="row in staffRows" :key="row.id" class="staff-chip">
                   <span class="staff-chip__role">{{ row.role }}</span>
@@ -782,19 +847,13 @@ const handleSubmit = () => {
                   </a-popconfirm>
                 </span>
               </div>
-              <a-form class="detail-form" layout="vertical" size="small" :model="staffDraft">
-                <div class="detail-form-grid detail-form-grid--4 detail-form-grid--compact">
-                  <a-form-item label="角色">
-                    <a-select v-model="staffDraft.role" size="small" allow-clear>
-                      <a-option v-for="r in roleOptions" :key="r" :value="r">{{ r }}</a-option>
-                    </a-select>
-                  </a-form-item>
-                  <a-form-item label="姓名">
-                    <a-input v-model="staffDraft.name" size="small" allow-clear placeholder="请输入姓名" />
-                  </a-form-item>
-                </div>
-              </a-form>
-            </template>
+              <div class="staff-add-inline">
+                <a-select v-model="staffDraft.role" size="small" allow-clear>
+                  <a-option v-for="r in roleOptions" :key="r" :value="r">{{ r }}</a-option>
+                </a-select>
+                <a-input v-model="staffDraft.name" size="small" allow-clear placeholder="姓名" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1014,7 +1073,11 @@ const handleSubmit = () => {
           <div class="detail-section__head">
             <div class="detail-section__title">货物信息</div>
             <div v-if="isEditing" class="detail-section__actions">
-              <a-button size="small" type="outline">
+              <a-button size="small" type="outline" @click="addCargoParty">
+                <template #icon><icon-plus /></template>
+                添加发货人
+              </a-button>
+              <a-button size="small" type="text">
                 <template #icon><icon-copy /></template>
                 复制分单数据
               </a-button>
@@ -1040,12 +1103,21 @@ const handleSubmit = () => {
               </div>
             </div>
             <div class="detail-module__sublist">
-              <div class="detail-module__subitem detail-module__subitem--expanded detail-module__subitem--last">
-                <div class="detail-cargo-block__head detail-cargo-block__head--compact">
-                  <span class="detail-cargo-block__index">1</span>
+              <div
+                v-for="(party, partyIndex) in cargoParties"
+                :key="party.id"
+                class="detail-module__subitem"
+                :class="{
+                  'detail-module__subitem--expanded': party.expanded,
+                  'detail-module__subitem--collapsed': !party.expanded,
+                  'detail-module__subitem--last': partyIndex === cargoParties.length - 1,
+                }"
+              >
+                <div class="detail-cargo-block__head detail-cargo-block__head--compact" @click="toggleCargoParty(party)">
+                  <span class="detail-cargo-block__index">{{ partyIndex + 1 }}</span>
                   <div class="detail-cargo-block__meta">
-                    <span class="detail-cargo-block__title">发货人 A</span>
-                    <span class="detail-cargo-block__shipper" :title="form.shipperMain">{{ form.shipperMain }}</span>
+                    <span class="detail-cargo-block__title">{{ cargoPartyLabel(partyIndex) }}</span>
+                    <span class="detail-cargo-block__shipper" :title="party.shipperMain">{{ displayVal(party.shipperMain, '未填写发货人') }}</span>
                     <span class="detail-cargo-block__route">
                       <span :title="form.pol">{{ polShort }}</span>
                       <span class="detail-cargo-block__arrow">→</span>
@@ -1055,25 +1127,34 @@ const handleSubmit = () => {
                   <div class="detail-data-stats">
                     <span class="detail-data-stats__item">
                       <span class="detail-data-stats__label">品名</span>
-                      <span class="detail-data-stats__val">{{ cargoLines.length }}</span>
+                      <span class="detail-data-stats__val">{{ party.lines.length }}</span>
                     </span>
                     <span class="detail-data-stats__item">
                       <span class="detail-data-stats__label">件数</span>
-                      <span class="detail-data-stats__val">{{ cargoSummary.pieces }}</span>
+                      <span class="detail-data-stats__val">{{ cargoPartySummary(party).pieces }}</span>
                     </span>
                     <span class="detail-data-stats__item">
                       <span class="detail-data-stats__label">毛重</span>
-                      <span class="detail-data-stats__val">{{ cargoSummary.weight }}</span>
+                      <span class="detail-data-stats__val">{{ cargoPartySummary(party).weight }}</span>
                       <span class="detail-data-stats__unit">KG</span>
                     </span>
                     <span class="detail-data-stats__item">
                       <span class="detail-data-stats__label">体积</span>
-                      <span class="detail-data-stats__val">{{ cargoSummary.volume }}</span>
+                      <span class="detail-data-stats__val">{{ cargoPartySummary(party).volume }}</span>
                       <span class="detail-data-stats__unit">CBM</span>
                     </span>
                   </div>
+                  <div v-if="isEditing" class="detail-subitem__actions" @click.stop>
+                    <a-popconfirm content="确认删除该发货人及其品名明细？" @ok="removeCargoParty(party.id)">
+                      <a-tooltip content="删除发货人">
+                        <a-button size="small" type="text" class="row-action-btn" status="danger">
+                          <template #icon><icon-delete /></template>
+                        </a-button>
+                      </a-tooltip>
+                    </a-popconfirm>
+                  </div>
                 </div>
-                <div class="detail-cargo-block__body detail-cargo-block__body--compact">
+                <div v-if="party.expanded" class="detail-cargo-block__body detail-cargo-block__body--compact">
                   <div class="detail-child-pane detail-child-pane--compact">
                     <div class="detail-child-pane__head">
                       <span class="detail-child-pane__title">收发货方</span>
@@ -1082,56 +1163,56 @@ const handleSubmit = () => {
                       <div class="detail-form-grid detail-form-grid--2">
                         <div class="detail-field">
                           <div class="detail-field__label">发货人</div>
-                          <div class="detail-field__val">{{ form.shipperMain }}<br>{{ form.shipperSub }}</div>
+                          <div class="detail-field__val">{{ displayVal(party.shipperMain) }}<br>{{ displayVal(party.shipperSub) }}</div>
                         </div>
                         <div class="detail-field">
                           <div class="detail-field__label">收货人</div>
-                          <div class="detail-field__val">{{ form.consigneeMain }}<br>{{ form.consigneeSub }}</div>
+                          <div class="detail-field__val">{{ displayVal(party.consigneeMain) }}<br>{{ displayVal(party.consigneeSub) }}</div>
                         </div>
                         <div class="detail-field">
                           <div class="detail-field__label">通知人</div>
-                          <div class="detail-field__val">{{ form.notifyMain }}</div>
+                          <div class="detail-field__val">{{ displayVal(party.notifyMain) }}</div>
                         </div>
                         <div class="detail-field">
                           <div class="detail-field__label">海外代理</div>
-                          <div class="detail-field__val">{{ displayVal(form.agentMain) }}</div>
+                          <div class="detail-field__val">{{ displayVal(party.agentMain) }}</div>
                         </div>
                       </div>
                     </template>
-                    <a-form v-else class="detail-form" layout="vertical" size="small" :model="form">
+                    <a-form v-else class="detail-form" layout="vertical" size="small" :model="party">
                       <div class="detail-form-grid detail-form-grid--2">
                         <a-form-item label="发货人" required>
                           <div class="detail-combo">
-                            <a-input v-model="form.shipperMain" size="small" allow-clear />
-                            <a-input v-model="form.shipperSub" size="small" allow-clear />
+                            <a-input v-model="party.shipperMain" size="small" allow-clear />
+                            <a-input v-model="party.shipperSub" size="small" allow-clear />
                           </div>
                         </a-form-item>
                         <a-form-item label="收货人" required>
                           <div class="detail-combo">
-                            <a-input v-model="form.consigneeMain" size="small" allow-clear />
-                            <a-input v-model="form.consigneeSub" size="small" allow-clear />
+                            <a-input v-model="party.consigneeMain" size="small" allow-clear />
+                            <a-input v-model="party.consigneeSub" size="small" allow-clear />
                           </div>
                         </a-form-item>
                         <a-form-item label="通知人" required>
                           <div class="detail-combo">
-                            <a-input v-model="form.notifyMain" size="small" allow-clear />
-                            <a-input v-model="form.notifySub" size="small" allow-clear />
+                            <a-input v-model="party.notifyMain" size="small" allow-clear />
+                            <a-input v-model="party.notifySub" size="small" allow-clear />
                           </div>
                         </a-form-item>
                         <a-form-item label="海外代理" required>
                           <div class="detail-combo">
-                            <a-input v-model="form.agentMain" size="small" allow-clear placeholder="请选择海外代理" />
-                            <a-input v-model="form.agentSub" size="small" allow-clear placeholder="请填写具体信息" />
+                            <a-input v-model="party.agentMain" size="small" allow-clear placeholder="请选择海外代理" />
+                            <a-input v-model="party.agentSub" size="small" allow-clear placeholder="请填写具体信息" />
                           </div>
                         </a-form-item>
                         <a-form-item label="VAT">
-                          <a-input v-model="form.vat" size="small" allow-clear />
+                          <a-input v-model="party.vat" size="small" allow-clear />
                         </a-form-item>
                         <a-form-item label="EORI">
-                          <a-input v-model="form.eori" size="small" allow-clear />
+                          <a-input v-model="party.eori" size="small" allow-clear />
                         </a-form-item>
                         <a-form-item label="备注" class="detail-form-grid__span2">
-                          <a-textarea v-model="form.cargoRemark" size="small" :auto-size="{ minRows: 2, maxRows: 4 }" />
+                          <a-textarea v-model="party.remark" size="small" :auto-size="{ minRows: 2, maxRows: 4 }" />
                         </a-form-item>
                       </div>
                     </a-form>
@@ -1140,7 +1221,7 @@ const handleSubmit = () => {
                     <div class="detail-child-pane__head">
                       <span class="detail-child-pane__title">品名明细</span>
                       <div v-if="isEditing" class="detail-section__actions">
-                        <a-button size="small" type="outline" @click="addCargoLine">
+                        <a-button size="small" type="outline" @click="addCargoLine(party)">
                           <template #icon><icon-plus /></template>
                           添加品名
                         </a-button>
@@ -1153,7 +1234,7 @@ const handleSubmit = () => {
                         border="none"
                         size="small"
                         height="auto"
-                        :data="cargoLines"
+                        :data="party.lines"
                         :row-config="{ height: 38, isHover: true, keyField: 'id' }"
                       >
                         <vxe-column field="nameCn" title="中文品名" min-width="100">
@@ -1202,7 +1283,7 @@ const handleSubmit = () => {
                         <vxe-column title="操作" width="60" fixed="right" align="center">
                           <template #default="{ row }">
                             <div class="row-actions">
-                              <a-popconfirm content="确认删除该品名？" @ok="removeCargoLine(row.id)">
+                              <a-popconfirm content="确认删除该品名？" @ok="removeCargoLine(party, row.id)">
                                 <a-tooltip content="删除">
                                   <a-button type="text" class="row-action-btn" status="danger">
                                     <icon-delete />
@@ -1219,7 +1300,7 @@ const handleSubmit = () => {
                         border="none"
                         size="small"
                         height="auto"
-                        :data="cargoLines"
+                        :data="party.lines"
                         :row-config="{ height: 34, isHover: true, keyField: 'id' }"
                       >
                         <vxe-column field="nameCn" title="中文品名" min-width="100" />
@@ -1340,7 +1421,29 @@ const handleSubmit = () => {
         <!-- 提单明细：默认只读，行内编辑 -->
         <div id="sec-bl" class="detail-section">
           <div class="detail-section__head">
-            <div class="detail-section__title">提单明细</div>
+            <div class="detail-section__title-group">
+              <div class="detail-section__title">提单明细</div>
+              <div class="detail-data-stats">
+                <span class="detail-data-stats__item">
+                  <span class="detail-data-stats__label">件数</span>
+                  <span class="detail-data-stats__val">{{ blSummary.pieces }}</span>
+                </span>
+                <span class="detail-data-stats__item">
+                  <span class="detail-data-stats__label">包装</span>
+                  <span class="detail-data-stats__val">{{ blSummary.packs }}</span>
+                </span>
+                <span class="detail-data-stats__item">
+                  <span class="detail-data-stats__label">毛重</span>
+                  <span class="detail-data-stats__val">{{ blSummary.weight.toFixed(2) }}</span>
+                  <span class="detail-data-stats__unit">KG</span>
+                </span>
+                <span class="detail-data-stats__item">
+                  <span class="detail-data-stats__label">体积</span>
+                  <span class="detail-data-stats__val">{{ blSummary.volume.toFixed(2) }}</span>
+                  <span class="detail-data-stats__unit">CBM</span>
+                </span>
+              </div>
+            </div>
             <div v-if="isEditing" class="detail-section__actions">
               <a-button size="small" type="outline" @click="addBlRow">
                 <template #icon><icon-plus /></template>
@@ -1348,30 +1451,7 @@ const handleSubmit = () => {
               </a-button>
             </div>
           </div>
-          <div class="detail-section__body">
-            <div class="detail-module-summary--inline">
-              <div class="detail-module-summary__stats">
-                <div class="detail-module-summary__stat">
-                  <span class="detail-module-summary__stat-label">件数</span>
-                  <span class="detail-module-summary__stat-value">{{ blSummary.pieces }}</span>
-                </div>
-                <div class="detail-module-summary__stat">
-                  <span class="detail-module-summary__stat-label">包装</span>
-                  <span class="detail-module-summary__stat-value">{{ blSummary.packs }}</span>
-                </div>
-                <div class="detail-module-summary__stat">
-                  <span class="detail-module-summary__stat-label">毛重</span>
-                  <span class="detail-module-summary__stat-value">{{ blSummary.weight.toFixed(2) }}</span>
-                  <span class="detail-module-summary__stat-unit">KG</span>
-                </div>
-                <div class="detail-module-summary__stat">
-                  <span class="detail-module-summary__stat-label">体积</span>
-                  <span class="detail-module-summary__stat-value">{{ blSummary.volume.toFixed(2) }}</span>
-                  <span class="detail-module-summary__stat-unit">CBM</span>
-                </div>
-              </div>
-            </div>
-            <div class="detail-section__body--table">
+          <div class="detail-section__body detail-section__body--table">
               <vxe-table
                 v-if="isEditing"
                 class="detail-mini-vxe detail-mini-vxe--editable"
@@ -1724,7 +1804,6 @@ const handleSubmit = () => {
                   <div class="state-center state-center--in-table">暂无数据</div>
                 </template>
               </vxe-table>
-            </div>
           </div>
         </div>
       </div>
@@ -1746,12 +1825,34 @@ const handleSubmit = () => {
 <style scoped>
 .bo-drawer-nav {
   flex-shrink: 0;
-  padding: 6px 12px;
+  padding: 3px 12px;
   border-bottom: 1px solid var(--dense-border-subtle);
+  background: var(--color-bg-card);
+}
+
+.bo-drawer-nav--compact {
+  padding: 2px 12px;
 }
 
 .bo-drawer-nav .stat-tab-group {
+  gap: 2px;
   flex-wrap: nowrap;
   overflow-x: auto;
+}
+
+.bo-drawer-nav--compact .stat-tab {
+  height: 22px;
+  min-height: 22px;
+  padding: 0 9px;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  line-height: 22px;
+}
+
+.bo-drawer-nav--compact .stat-tab--active {
+  border-color: var(--dense-primary-3);
+  background: var(--dense-primary-1);
+  box-shadow: inset 0 0 0 1px var(--dense-primary-2);
 }
 </style>

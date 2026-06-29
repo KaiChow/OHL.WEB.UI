@@ -432,6 +432,16 @@ if (/rgba\(143,\s*184,\s*255/.test(globalCss)) {
     content: 'remove hard-coded blue table column border',
   });
 }
+const moduleScopedClassPattern = /\.[\w-]+--(?:order|finance|sale|business|shipment|customs|warehouse)(?:-|$|[\s,{.:#[])/g;
+for (const match of globalCss.matchAll(moduleScopedClassPattern)) {
+  const line = globalCss.slice(0, match.index).split('\n').length;
+  violations.push({
+    rule: 'global.css 禁止业务模块前缀修饰符（如 --order-*），应合并到结构槽位类（如 --compact / --trailing）',
+    file: 'src/styles/global.css',
+    line,
+    content: match[0].trim().slice(0, 120),
+  });
+}
 if (!/--dense-page-bottom-space\s*:\s*(?:8|9|10|11|12)px/.test(globalCss)) {
   violations.push({
     rule: '列表页必须定义 --dense-page-bottom-space: 8-12px，表格不能贴到视口底部',
