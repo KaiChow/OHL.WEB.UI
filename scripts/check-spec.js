@@ -1533,7 +1533,7 @@ for (const file of files) {
         : firstLine.includes('detail-mini-vxe--summary')
           ? { height: 32, rule: 'detail-mini-vxe--summary 必须显式设置 row-config.height = 32，摘要小表保持紧凑' }
           : null;
-    if (detailDensity && !new RegExp(`row-config=(["'])\\{[^"']*height:\\s*${detailDensity.height}`).test(firstLine)) {
+    if (detailDensity && !new RegExp(`:?row-config=(["'])\\{[\\s\\S]*?height:\\s*${detailDensity.height}[\\s\\S]*?\\1`).test(firstLine)) {
       violations.push({
         rule: detailDensity.rule,
         file: relPath,
