@@ -93,6 +93,7 @@ The visible query row uses `filter-card__inline-actions`: one primary query butt
 ```
 
 Rules:
+
 - All three controls: `height: var(--dense-control-h-filter)` (32px), `font-size: 12px`. Do not use `height: auto` or `min-height: 24px` on reset or expand — they must match query button height.
 - Query: `type="primary"` + icon + `class="filter-card__query-btn"`.
 - Reset: `type="text"` + `class="reset-btn"` (transparent bg, `color-text-2`, hover tints primary-1).

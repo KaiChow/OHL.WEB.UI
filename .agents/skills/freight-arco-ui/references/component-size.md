@@ -27,7 +27,8 @@ This project uses **one business density**. Map Arco `size` in templates; map re
 | VXE main list table | `size="small"` + `class="compact"` | `--dense-row-h` | 36px row | F1 13px cells |
 | VXE detail mini table | `size="small"` + `detail-mini-vxe` | row-config `height` | 38px row | F1 13px / F4 in cells |
 | Overlay confirm buttons | *(Arco mini internally)* | override in `global.css` | 28px | F2 Nav 13px |
-| Overlay dropdown options | *(portal)* | match trigger | 28px row | F4 Control 12px |
+| Overlay modal/popover title | *(portal)* | `.arco-modal-title` | — | F0 Overlay **14px** |
+| Overlay modal body / dropdown options | *(portal)* | match trigger | 28px row | F4 Control 12px |
 
 Heights are **not** Arco's stock small/medium table — they are project overrides. Always pair template `size="small"` with the correct surface class (`filter-field`, `detail-form`, `detail-drawer`, `detail-mini-vxe`).
 

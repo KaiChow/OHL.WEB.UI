@@ -318,9 +318,9 @@ if (!/\.filter-card__slim-row\s+\.filter-field\s*\{[\s\S]*?gap\s*:\s*5px/.test(g
     content: 'missing .filter-card__slim-row .filter-field { gap: 5px }',
   });
 }
-if (!/\.filter-field \.filter-combo > \* \+ \*\s*\{[\s\S]*?margin-left:\s*-1px/.test(globalCss)
-  || !/\.filter-field \.filter-combo > \*:not\(:last-child\)[\s\S]*?border-top-right-radius:\s*0/.test(globalCss)
-  || !/\.filter-field \.filter-combo > \*:not\(:first-child\)[\s\S]*?border-top-left-radius:\s*0/.test(globalCss)) {
+if (!/\.filter-field \.filter-combo\s*>\s*\*\s*\+\s*\*\s*\{[\s\S]*?margin-left:\s*-1px/.test(globalCss)
+  || !/\.filter-field \.filter-combo\s*>\s*\*:not\(:last-child\)[\s\S]*?border-top-right-radius:\s*0/.test(globalCss)
+  || !/\.filter-field \.filter-combo\s*>\s*\*:not\(:first-child\)[\s\S]*?border-top-left-radius:\s*0/.test(globalCss)) {
   violations.push({
     rule: 'filter-combo 必须是连接控件：相邻控件共享边框，连接处内侧圆角为 0',
     file: 'src/styles/global.css',
@@ -653,6 +653,24 @@ if (!globalCss.includes('.arco-popconfirm-footer .arco-btn') || !globalCss.inclu
     file: 'src/styles/global.css',
     line: 1,
     content: 'missing overlay typography overrides',
+  });
+}
+
+if (!globalCss.includes('--dense-font-overlay') || !/\.arco-modal-title\s*\{[^}]*font-size:\s*var\(--dense-font-overlay\)/.test(globalCss)) {
+  violations.push({
+    rule: 'Modal 标题必须使用 F0 --dense-font-overlay（14px），且大于表单正文 12px',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing .arco-modal-title { font-size: var(--dense-font-overlay) }',
+  });
+}
+
+if (!/--dense-font-title:\s*13px/.test(globalCss)) {
+  violations.push({
+    rule: '结构标题 F3 --dense-font-title 必须为 13px（与表格数据同字号，靠字重区分）',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing --dense-font-title: 13px',
   });
 }
 

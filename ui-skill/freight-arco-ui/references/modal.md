@@ -95,6 +95,7 @@ Modal.confirm({
 ```
 
 Rules:
+
 - `title` names the business action, not "确认操作".
 - `content` describes the consequence, especially for irreversible operations.
 - `okText` repeats the action verb: "确认废弃", "确认删除", "确认提交".
@@ -134,8 +135,9 @@ Modal.confirm({
 
 ## Modal Typography
 
-- Modal title: F1 16px / weight 500 (Arco default — do not override).
-- Form labels inside modal: F4 12px / `color-text-2` / weight 500 (inherits from `detail-form`).
-- Body text / description: F1 13px / `color-text-1`.
-- Footer buttons: F2 13px (Arco `size="small"` default).
-- Do not use 14px or 16px inside modal form fields.
+- Modal title: F0 `--dense-font-overlay` **14px / 600** — overridden in `global.css` (`.arco-modal-title`). Must be larger than form body.
+- Form inside modal: `a-form` + `class="detail-form"` + `size="small"` on all controls.
+- Form labels: F4 12px / `color-text-2` / weight 500.
+- Form values / placeholders: F4 Control 12px (same size; color/weight differ).
+- Footer buttons: F2 Nav 13px.
+- Do not hardcode 14px in modal content fields; 14px is reserved for F0 chrome title only.

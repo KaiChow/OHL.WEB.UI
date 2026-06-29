@@ -192,7 +192,7 @@ grep -n "\.类名" src/styles/global.css
   <div class="page-root page-root--dense xf-wrap">
     <div class="xf-head zone-card">
       <a-breadcrumb style="font-size:var(--dense-font-aux);margin-bottom:4px">...</a-breadcrumb>
-      <div style="font-size:var(--dense-font-title);font-weight:600;color:var(--color-text-1)">新建业务单</div>
+      <div style="font-size:var(--dense-font-overlay);font-weight:600;color:var(--color-text-1)">新建业务单</div>
     </div>
     <div class="xf-body">
       <div class="detail-section">
@@ -324,7 +324,7 @@ grep -n "\.类名" src/styles/global.css
 | `detail-mini-vxe` 加 `show-overflow` | 详情子表禁用；列表主表仍用 `show-overflow="title"` |
 | 详情子表外包 `overflow:hidden` | `detail-section__body--table` |
 | `style="padding:0"` 代替子表容器类 | `detail-section__body--table` |
-| `font-size: 14px / 16px` 硬编码 | `var(--dense-font-data)` 等 Token |
+| `font-size: 14px / 15px / 16px` 硬编码 | `var(--dense-font-overlay)` 等 Token（14px 仅 F0 浮层标题） |
 | `font-weight: 700` | 最大 600 |
 | 整行铺状态背景色 | 只在 `.s-pill[data-s]` 体现 |
 | 抽屉不加 `class="detail-drawer"` | 必须加，否则 Arco 默认标题不被覆盖 |
@@ -339,16 +339,20 @@ grep -n "\.类名" src/styles/global.css
 
 ---
 
-## 字体 Token
+## 字体 Token（F0–F6）
 
 | 场景 | Token |
 |------|-------|
-| 表格值、输入值、单号 | `--dense-font-data`（13px/500） |
+| Modal/Popover 标题、全页表单页头 | `--dense-font-overlay`（**14px/600**） |
+| 表格值、只读详情值、单号 | `--dense-font-data`（13px/400–500） |
 | 按钮、Tab、chip | `--dense-font-nav`（13px/500） |
-| 表头、分区标题 | `--dense-font-title`（12px/600） |
+| 表头、分区标题 | `--dense-font-title`（**13px/600**，与表格同字号靠字重区分） |
 | 筛选标签、form label | `--dense-font-field`（12px/500） |
-| placeholder、副信息 | `--dense-font-aux`（11px/400） |
-| 序号、badge | `--dense-font-micro`（10px/400） |
+| 可编辑输入值、placeholder | `--dense-font-control`（12px，与 label 同字号） |
+| 分页、副信息 | `--dense-font-aux`（11px/400） |
+| 序号、badge、pill | `--dense-font-micro`（10px） |
+
+**层级：** 浮层标题 14px > 数据/结构 13px > 表单 12px > 辅助 11px。同一表单行内禁止 12/13/14 混搭。
 
 ---
 
@@ -588,7 +592,7 @@ import '@uppy/dashboard/dist/style.min.css'
 □ 抽屉：有 class="detail-drawer"，detail-section 分区
 □ 状态：全用 s-pill[data-s]，无行背景色
 □ 颜色：无 hex，全用 CSS 变量
-□ 字体：无 14px/16px，无 font-weight:700
+□ 字体：无硬编码 14/15/16px（14px 仅 `--dense-font-overlay`）；无 font-weight:700
 □ 废弃类：无 freight-table、无 stab-count、无 search-bar
 □ scoped：无重写 global.css 已有类
 ```

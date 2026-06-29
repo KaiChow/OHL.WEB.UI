@@ -38,7 +38,7 @@ Professional · Efficient · Structured · Dense · Premium — 效率 > 信息 
 6. 每作用域 1× `primary` → [`actions.md`](ui-skill/freight-arco-ui/references/actions.md)
 7. 重置/刷新=`text`；模块主操作=`outline`；页头/吸底=`secondary`
 8. 删除/废弃=`danger` + 确认
-9. 禁止 hex、14–16px 业务字、`font-weight:700`、废弃类名
+9. 禁止 hex、硬编码 14–16px 业务字（14px 仅 `--dense-font-overlay` 浮层标题）、`font-weight:700`、废弃类名
 10. 禁止把订单字段硬抄到无关模块
 
 ## Reference 索引

@@ -260,16 +260,19 @@ body,
   --dense-col-w-checkbox: 40px;
   --dense-col-w-seq: 52px;
 
-  /* 字号 + 字重（按页面功能分级 F1-F6，列表/详情共用） */
+  /* 字号 + 字重（F0–F6 阶梯，列表/详情共用；见 typography.md） */
+  --dense-font-overlay: 14px;
+  /* F0 浮层/页头标题：Modal、Popover 标题、全页表单页头 */
+  --dense-weight-overlay: 600;
   --dense-font-data: 13px;
-  /* F1 数据正文：表格单元格、核心链接单号 */
+  /* F1 数据正文：表格单元格、只读详情值、核心链接单号 */
   --dense-weight-data: 400;
   --dense-font-nav: 13px;
   /* F2 导航交互：Tab、chip、按钮 */
   --dense-weight-nav: 500;
   --dense-weight-nav-active: 600;
-  --dense-font-title: 12px;
-  /* F3 结构标题：VXE 表头、分区标题、抽屉标题 */
+  --dense-font-title: 13px;
+  /* F3 结构标题：VXE 表头、分区标题（与 F1 同字号，靠字重/颜色区分） */
   --dense-weight-title: 600;
   --dense-font-field: 12px;
   /* F4 字段标签：filter 顶标 + detail form label（统一） */
@@ -286,6 +289,8 @@ body,
   --dense-weight-micro: 400;
   --dense-font-label: var(--dense-font-title);
   /* 别名：结构标题 F3 */
+  --dense-font-page-head: var(--dense-font-overlay);
+  /* 别名：全页表单/详情页头 F0 */
   --dense-font-filter-label: var(--dense-font-field);
   /* 别名：与 F4 相同，禁止再分档 */
   --dense-icon-action: 14px;
@@ -4936,8 +4941,8 @@ button:-moz-focusring,
 }
 
 .detail-field__val {
-  font-size: var(--dense-font-control);
-  font-weight: var(--dense-weight-control);
+  font-size: var(--dense-font-data);
+  font-weight: var(--dense-weight-data);
   color: var(--color-text-1);
   line-height: 1.5;
   word-break: break-word;
@@ -6345,9 +6350,9 @@ button:-moz-focusring,
 .arco-popconfirm-content,
 .arco-popover-content,
 .arco-popover-title {
-  font-size: var(--dense-font-control) !important;
-  font-weight: var(--dense-weight-control) !important;
-  line-height: 1.45 !important;
+  font-size: var(--dense-font-overlay) !important;
+  font-weight: var(--dense-weight-overlay) !important;
+  line-height: 1.4 !important;
   color: var(--color-text-1) !important;
 }
 
@@ -6365,9 +6370,10 @@ button:-moz-focusring,
 }
 
 .arco-modal-title {
-  font-size: var(--dense-font-title) !important;
-  font-weight: var(--dense-weight-title) !important;
+  font-size: var(--dense-font-overlay) !important;
+  font-weight: var(--dense-weight-overlay) !important;
   line-height: 1.4 !important;
+  color: var(--color-text-1) !important;
 }
 
 .arco-modal-body {

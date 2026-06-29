@@ -6,6 +6,28 @@ Typography must support a dense international freight SaaS system used for long 
 
 The type system must be readable for Chinese, English, codes, dates, amounts, ports, vessel/voyage, HBL/MBL, container numbers, and multilingual customer names.
 
+## Design Principles
+
+Professional dense B2B UI uses a **fixed typographic ladder**, not ad-hoc sizes per page.
+
+1. **Monotonic scale** — only these steps: 10 → 11 → 12 → 13 → 14. No 12/13/14 mixing inside one control row.
+2. **Chrome above content** — overlay titles (Modal / Popover) and page-form heads must be **visually above** the form body they contain. Never make chrome title smaller than body text.
+3. **Same size, different role** — section titles and table headers share **13px** with table data; distinguish with weight (600) and color (`color-text-2`), not a smaller font.
+4. **Form zone unity** — filter + editable form: label, value, and placeholder are all **12px**; hierarchy uses color and weight only.
+5. **Data zone readability** — table cells and read-only detail values use **13px**; one step above form labels.
+6. **Token only** — pages use `var(--dense-font-*)`; `global.css` is the implementation source.
+
+```
+F0 Overlay chrome   14px / 600   Modal title, Popover title, page form head
+F1 Data             13px / 400-500   Table body, read-only detail values, key links
+F2 Nav              13px / 500-600   Buttons, tabs, chips
+F3 Structure title  13px / 600   Section title, VXE column header
+F4 Form label       12px / 500   Filter label, form label
+F4 Control          12px / 400-500   Input/select/textarea value + placeholder
+F5 Aux              11px / 400   Pagination, meta, helper
+F6 Micro            10px / 500   Badge, pill, seq
+```
+
 ## Font Family
 
 Use a system-first font stack. Do not introduce web fonts unless the product explicitly ships them.
@@ -38,184 +60,169 @@ font-family:
   monospace;
 ```
 
-## Size Scale
+## Size Scale (F0–F6)
 
-Use the global F1-F6 tokens. Do not hard-code page-specific font sizes.
+Use the global tokens. Do not hard-code page-specific font sizes.
 
 | Level | Token | Size | Weight | Use |
 |-------|-------|------|--------|-----|
-| F1 | `--dense-font-data` | 13px | 400/500 | Table cells, core links, business identifiers |
+| F0 | `--dense-font-overlay` | 14px | 600 | Modal title, Popover title, full-page form head (`xf-head`) |
+| F1 | `--dense-font-data` | 13px | 400/500 | Table cells, read-only `.detail-field__val`, core links, business identifiers |
 | F2 | `--dense-font-nav` | 13px | 500/600 active | Buttons, tabs, chips, segmented controls |
-| F3 | `--dense-font-title` | 12px | 600 | Section titles, VXE headers, drawer titles, compact group headings |
-| F4 | `--dense-font-field` | 12px | 500 | Form labels, filter labels, field names |
-| F4 Control | `--dense-font-control` | 12px | 400/500 | Form/filter input values, select values, textarea values, placeholders |
-| F5 | `--dense-font-aux` | 11px | 400/500 | Helper text, metadata, summary labels |
-| F6 | `--dense-font-micro` | 10px | 400/500 | Badges, units, sequence micro text |
+| F3 | `--dense-font-title` | 13px | 600 | Section titles (`detail-section__title`), VXE column headers, subgroup headings |
+| F4 | `--dense-font-field` | 12px | 500 | Form labels, filter labels (`filter-field__label`) |
+| F4 Control | `--dense-font-control` | 12px | 400/500 | Editable input/select/textarea values and placeholders |
+| F5 | `--dense-font-aux` | 11px | 400/500 | Helper text, metadata, pagination summary |
+| F6 | `--dense-font-micro` | 10px | 400/500 | Badges, units, sequence micro text, `.s-pill` |
+
+Aliases:
+
+- `--dense-font-page-head` → `--dense-font-overlay` (F0)
+- `--dense-font-label` → `--dense-font-title` (F3)
 
 Exceptions:
 
-- A true page/detail hero may use one local hero token, max 18px/600, only when it is visually separated from normal fact rows.
-- In a dense `dds-hero` key-facts row, all fact values use F1 13px. The primary route may be stronger by weight and placement, but should not jump to a larger size inside the same fact group.
-- Brand/logo shell may use larger or heavier text, but never copy shell typography into business modules.
-- Icons use icon size tokens, not text size tokens.
+- A true page/detail hero may use one local hero token, max **16px/600**, only when visually separated from normal fact rows.
+- In a dense `dds-hero` key-facts row, all fact values use F1 13px. Stronger lead facts use weight/placement, not a larger size inside the same row.
+- Brand/logo shell may use larger text; never copy shell typography into business modules.
+- Icons use `--dense-icon-action` (14px graphic), not text tokens.
 
 ## Weight Rules
 
 - Business UI maximum weight is 600.
 - Dense table body values default to 400.
-- Use 500 only for primary identifiers, links, numeric totals, selected options, and next-decision values.
+- Use 500 for primary identifiers, links, numeric totals, selected options, and next-decision values.
 - Labels default to 500.
 - Helper text defaults to 400.
-- Do not use `font-weight: 700/800` inside business modules, tables, forms, drawers, filters, or toolbars.
-- Do not use font weight alone to indicate status, risk, or exception. Use semantic status components.
-- In main workbench tables, avoid making every cell `color-text-1 + 500`; it creates a black sheet. Default cells use `color-text-2 + 400`, while primary object codes, customer/party names, route, and key quantities can use stronger roles.
-- If a page feels like colors are "disabled" or "black only", first check selected-state styling and table body default weight before adding more primary color.
+- Do not use `font-weight: 700/800` inside business modules.
+- Do not use font weight alone to indicate status; use semantic status components.
+- In main workbench tables, default cells use `color-text-2 + 400`; primary object codes and key quantities may use 500.
 
 ## International Text Expansion
 
-Design for 1.3-2x text expansion compared with Chinese.
+Design for 1.3–2× text expansion compared with Chinese.
 
 - Do not fixed-width buttons by Chinese label length.
-- Do not truncate business-critical labels such as paired identifiers, parties, destinations, document types, or next-decision fields.
+- Do not truncate business-critical labels.
 - Use vertical form labels for dense multilingual forms.
 - Use `min-width` plus ellipsis/title for table columns.
-- Do not use negative letter spacing.
-- Do not scale font size by viewport width.
-- Do not rely on icon-only meaning unless tooltip or accessible label exists.
-- Dense action areas such as filter command panels must survive translated action text. Use flexible widths, ellipsis with `title`/tooltip, or icon + accessible label; never depend on two-character Chinese labels fitting a fixed button.
+- Do not use negative letter spacing or viewport-based font scaling.
 
 ## Codes, Numbers, Dates
 
-Use mono or tabular numeric behavior for values users compare.
-
 | Value | Rule |
 |-------|------|
-| Order no, HBL, MBL, SO, PO, container no | Use `.mono` or mono stack; keep full value available with tooltip/title |
-| Amount, qty, weight, volume | Use `font-variant-numeric: tabular-nums`; right align in tables |
-| Dates/times | Use tabular numbers; keep one display format per page |
-| Port/country codes | Uppercase is allowed when it matches business data |
-| Long customer/company names | Normal sans font; ellipsis with title; do not mono |
+| Order no, HBL, MBL, SO, PO, container no | `.mono` or mono stack; full value in tooltip/title |
+| Amount, qty, weight, volume | `font-variant-numeric: tabular-nums`; right align in tables |
+| Dates/times | Tabular numbers; one display format per page |
+| Long customer/company names | Normal sans; ellipsis with title |
 
 ## Detail Header Typography
 
-Detail header facts must not all look like code.
-
-- Use mono only for technical identifiers, document numbers, container numbers, and similar code-like values.
-- Locations, parties, carriers, warehouses, and other named business values are not technical codes by default. In dense key-facts rows, use normal sans F1 13px with stronger weight/placement instead of larger font size.
-- Dates in hero facts use tabular numeric behavior, not necessarily mono.
-- Party, organization, carrier, vehicle/vessel, warehouse, and other business names use normal sans font.
-- Hero fact labels use F5/meta color; hero fact values use F1/core value color.
-- Within the same `dds-hero` fact row, all key-fact values must share the same value size.
-- Only the lead fact or primary object identity may be stronger than normal F1, and the difference should come from position, weight, or grouping.
-
-## Attachment Typography
-
-Attachment modules need a clear reading order:
-
-1. Document type name: F1/F3 strength, core text color.
-2. Required/single/multiple/status markers: F5/F6 auxiliary or semantic tag.
-3. File name: primary link color and F1 data weight.
-4. Size/uploader/upload time: F5 auxiliary color.
-5. Empty file reason: F5 auxiliary; required-missing reason may use warning semantic color.
-
-Do not make document type, file name, upload state, and helper text the same visual weight.
+- Mono only for technical identifiers and document numbers.
+- Hero fact labels: F5 / `color-text-3`.
+- Hero fact values: F1 13px / `color-text-1`.
+- All key-fact values in one `dds-hero` row share the same size.
 
 ## Line Height
 
-- Dense table cell: 1.35-1.45.
-- Form input value: match control height; avoid vertical clipping.
+- Dense table cell: 1.35–1.45.
+- Form input value: match control height.
 - Textarea: 1.45.
-- Helper text: 1.4.
-- Section title: 1.4.
+- Overlay title (F0): 1.4.
+- Section title (F3): 1.4.
 
 ## Zone Typography Map
 
-Every zone on a list or detail page has a fixed font tier. Do not deviate.
+Every zone has a fixed font tier. Do not deviate.
 
 | Zone | Element | Token | Size | Weight | Color |
 |------|---------|-------|------|--------|-------|
-| **Filter (zone-l2)** | Field label (`filter-field__label`) | F4 `--dense-font-field` | 12px | 500 | `color-text-2` |
-| | Input / select value | F4 Control `--dense-font-control` | 12px | 500 | `color-text-1` |
-| | Placeholder | F4 Control `--dense-font-control` | 12px | 400 | `color-text-3` |
-| | Query button (`arco-btn-size-small`) | F2 `--dense-font-nav` | **13px** | 500 | — |
-| | Reset / expand link (same panel) | F2 `--dense-font-nav` | **13px** | 500 | `color-text-2/3` |
-| **Toolbar (zone-l3 top)** | Scope stab tab (`.stab`) | F2 `--dense-font-nav` | 13px | 500/600 active | `color-text-2` |
-| | Action buttons (`a-button size="small"`) | F2 `--dense-font-nav` | 13px | 500 | — |
-| **Status bar (zone-l3 bottom)** | Status stab tab (`.stab`) | F2 `--dense-font-nav` | 13px | 500 | `color-text-2` |
-| | Badge count (`.stab-badge`) | F6 `--dense-font-micro` | **10px** | 600 | `color-text-3` / semantic |
-| **Table (zone-l4)** | Cell data | F1 `--dense-font-data` | 13px | 400 | `color-text-2` |
-| | Primary identifiers (单号/客户/路线) | F1 `--dense-font-data` | 13px | 500 | `color-text-1` |
-| | Column header | F3 `--dense-font-title` | 12px | 600 | `color-text-2` |
-| | Status pill (`.s-pill`) | F6 `--dense-font-micro` | 10px | 500 | semantic |
-| | Row action icon | icon token 14px | — | — | `color-text-3` |
-| **Pagination / table cap** | Page number, total | F5 `--dense-font-aux` | 11px | 400 | `color-text-3` |
-| **Detail drawer head** | Section title | F3 `--dense-font-title` | 12px | 600 | `color-text-1` |
-| | Hero fact value | F1 `--dense-font-data` | 13px | 500 | `color-text-1` |
-| | Hero fact label | F5 `--dense-font-aux` | 11px | 400 | `color-text-3` |
-| **Detail form** | Field label (`a-form-item label`) | F4 `--dense-font-field` | 12px | 500 | `color-text-2` |
-| | Control value (input/select) | F4 Control `--dense-font-control` | 12px | 500 | `color-text-1` |
-| | Placeholder | F4 Control `--dense-font-control` | 12px | 400 | `color-text-3` |
-| **Overlay / portal** | Popconfirm / modal body | F4 Control | 12px | 500 | `color-text-1` |
-| | Select / dropdown options | F4 Control | 12px | 500 | `color-text-1` |
+| **Filter (zone-l2)** | Field label | F4 `--dense-font-field` | 12px | 500 | `color-text-2` |
+| | Input / select value | F4 Control | 12px | 500 | `color-text-1` |
+| | Placeholder | F4 Control | 12px | 400 | `color-text-3` |
+| | Query / reset buttons | F2 Nav | 13px | 500 | — |
+| **Toolbar / status (zone-l3)** | Tab, action button | F2 Nav | 13px | 500/600 | — |
+| | Badge (`.stab-badge`) | F6 Micro | 10px | 600 | semantic |
+| **Table (zone-l4)** | Cell data | F1 Data | 13px | 400 | `color-text-2` |
+| | Primary identifiers | F1 Data | 13px | 500 | `color-text-1` |
+| | Column header | F3 Title | 13px | 600 | `color-text-2` |
+| | Status pill | F6 Micro | 10px | 500 | semantic |
+| **Pagination** | Summary, page info | F5 Aux | 11px | 400 | `color-text-3` |
+| **Detail read-only** | Field label (`.detail-field__label`) | F4 Field | 12px | 500 | `color-text-3` |
+| | Field value (`.detail-field__val`) | F1 Data | 13px | 400/500 | `color-text-1` |
+| | Section title | F3 Title | 13px | 600 | `color-text-1` |
+| **Detail editable form** | Label + control + placeholder | F4 / F4 Control | 12px | 500 / 400 | per role |
+| **Overlay** | Modal / Popover title | F0 Overlay | **14px** | 600 | `color-text-1` |
+| | Modal / Popconfirm body | F4 Control | 12px | 500 | `color-text-1` |
+| | Dropdown options | F4 Control | 12px | 500 | `color-text-1` |
 | | Footer buttons | F2 Nav | 13px | 500 | — |
 | | Tooltip | F5 Aux | 11px | 400 | — |
+| **Page form head** | Title (`xf-head`) | F0 Overlay | 14px | 600 | `color-text-1` |
 
-**Key rule:** Filter area (zone-l2) consistently uses **12px**. Toolbar + status (zone-l3) consistently use **13px**. Table cells use **13px**. These zones live adjacent on the same page — the 1px difference is intentional: 12px for structural metadata (labels, field names), 13px for interactive navigation and data.
+**Zone rules:**
 
-Do not mix 12px and 13px within the same zone row.
+- Filter + editable form: **all 12px** in one row (label / value / placeholder).
+- Toolbar + table data + nav: **13px**.
+- Overlay chrome title: **14px** — always ≥ body inside the same surface.
+- Do not mix 12px and 13px within the same form control row.
 
 ## Form And Filter Typography
 
-Form fields have three different text roles. In this project, they use one size and differ by color/weight.
+| Role | Token | Color | Weight |
+|------|-------|-------|--------|
+| Field label | F4 12px | `color-text-2` | 500 |
+| Entered/selected value | F4 Control 12px | `color-text-1` | 500 |
+| Placeholder | F4 Control 12px | `color-text-3` | 400 |
 
-Reason: list filters and detail forms are high-frequency work surfaces. Mixing label 12px, value 13px, and placeholder 11px creates uneven rows, weak internationalization, and visual noise.
-
-| Role | Token | Color | Weight | Rule |
-|------|-------|-------|--------|------|
-| Field label | F4 `--dense-font-field` 12px | `color-text-2` | 500 | Stable field name, same in list filters and detail forms |
-| Entered/selected value | F4 Control `--dense-font-control` 12px | `color-text-1` | 500 | User's actual query/form value, must be easiest to read inside the control |
-| Placeholder/hint | F4 Control `--dense-font-control` 12px | `color-text-3` | 400 | Input guidance only, lower priority than real values |
-
-Rules:
-
-- Filter labels, detail form labels, input values, select values, textarea values, and placeholders use 12px.
-- Placeholder must never look like entered data; keep the same size but use `color-text-3` and weight 400.
-- Real values use `color-text-1` and weight 500 when they are editable or decision-critical.
-- Filter labels and detail form labels share F4. Do not make list labels 11px and detail labels 12px.
-- Table data remains F1 13px. Do not apply table typography to form controls.
-- Placeholder copy must be specific to the field: `请输入业务员`, `请选择装箱方式`, `业务单号 / HBL / MBL`.
-- Avoid vague placeholder copy such as `请输入`, `请选择`, `模糊搜索`, unless the label already makes the exact target obvious and space is constrained.
-- For internationalization, keep labels visible and let placeholders be short examples, not the only explanation of the field.
+Editable forms and filters share F4. Read-only detail grids use F4 label + **F1 value** (label one step below value — standard professional pattern).
 
 ## Overlay And Popup Typography
 
-Arco renders many surfaces in a **portal** (popconfirm, modal, select dropdown, dropdown menu, cascader, date panel, message). They do not inherit page-scoped form CSS. They must be normalized in `global.css`.
+Arco portals do not inherit page-scoped CSS. Normalize in `global.css`:
 
-| Surface | Body / options | Actions |
-|---------|----------------|---------|
-| Popconfirm / Modal body | F4 Control 12px | Footer buttons F2 Nav 13px |
-| Select / Dropdown / Cascader options | F4 Control 12px (same as trigger) | — |
-| Tooltip | F5 Aux 11px | — |
-| Message / Notification | F4 Control 12px | — |
+| Surface | Typography |
+|---------|------------|
+| `.arco-modal-title`, `.arco-popover-title` | F0 Overlay 14px / 600 |
+| `.arco-modal-body`, popconfirm content | F4 Control 12px |
+| Select / dropdown / cascader options | F4 Control 12px (same as trigger) |
+| Modal / popconfirm footer buttons | F2 Nav 13px |
+| Tooltip | F5 Aux 11px |
 
 Rules:
 
-- Select trigger value and dropdown option text must be the **same** size and weight (`--dense-font-control` + `--dense-weight-control`).
-- Popconfirm question text and its Cancel/OK buttons must not differ by more than one typography level; buttons use Nav 13px, never `btn-size-mini` 10px.
-- `global.css` must override `.arco-popconfirm-footer`, `.arco-select-dropdown .arco-select-option`, and `.arco-modal-footer` centrally. Do not fix per page in scoped CSS.
-- F6 10px is for badges/units/seq only — not for buttons or dropdown options.
+- Modal title must be **larger than** modal form body (14px vs 12px).
+- Select trigger and dropdown option must match size and weight.
+- `global.css` overrides `.arco-modal-title`, `.arco-modal-body`, `.arco-select-dropdown`, `.arco-modal-footer`. Do not fix per page in scoped CSS.
+- F6 10px is for badges only — not buttons or dropdown options.
 
-Arco `size` prop: see `component-size.md`. Business UI uses `size="small"` only; omitting `size` equals forbidden `medium`.
+Arco `size` prop: see `component-size.md`. Business UI uses `size="small"` only.
+
+## Implementation Checklist
+
+Modal / drawer form:
+
+```vue
+<a-modal title="新建通知">
+  <a-form class="detail-form" layout="vertical" size="small">
+    <a-form-item label="主题">
+      <a-input size="small" />
+    </a-form-item>
+  </a-form>
+</a-modal>
+```
+
+- `class="detail-form"` on `<a-form>` — binds F4 label + control tokens.
+- `size="small"` on every Arco control — prevents Arco medium 14px leak.
+- Do not use raw `<label class="xf-label">` in new modals; use `a-form-item`.
 
 ## Hard Bans
 
-- No arbitrary `14px`, `15px`, `16px` business text to create emphasis.
+- No hardcoded `14px` / `15px` / `16px` in `src/views/**` — use tokens. **14px is allowed only via `--dense-font-overlay` (F0) in `global.css`.**
 - No `font-weight: 700/800` in business UI.
-- No custom page font stack that bypasses the global stack.
-- No truncating form labels by default.
-- No Arco default 14px form label leaking into detail/list forms.
-- No form/filter label-value-placeholder size drift such as 12/13/11.
-- No placeholder using the same weight/color as an entered value.
-- Overlay surfaces (popconfirm, modal, select/dropdown/cascader panels, message) must use the same tokens as their triggers: body/options F4 Control 12px, action buttons F2 Nav 13px. Do not let Arco default 14px or `btn-size-mini` 10px leak into overlays.
-- No all-caps UI labels unless the business data itself is a code.
-- No letter spacing below `0`.
+- No Arco default medium (14px) leaking into forms — always `size="small"` + `detail-form`.
+- No form/filter label-value-placeholder drift (12/13/11 in one row).
+- No overlay title smaller than overlay body (title F0 14px, body F4 12px).
+- No table header smaller than table body (both F3/F1 at 13px; header is 600).
+- No placeholder with same weight/color as entered value.
+- No all-caps UI labels unless the data itself is a code.
