@@ -186,6 +186,7 @@ const visualSystem = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/reference
 const filterLayout = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/filter-layout.md'), 'utf8');
 const actionsReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/actions.md'), 'utf8');
 const iconsReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/icons.md'), 'utf8');
+const artifactIntakeTemplate = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/artifact-intake-template.md'), 'utf8');
 const prototypeToUiContract = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/prototype-to-ui-contract.md'), 'utf8');
 const featureRouting = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/feature-routing.md'), 'utf8');
 const featureDeliveryContract = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/feature-delivery-contract.md'), 'utf8');
@@ -292,6 +293,18 @@ if (
   });
 }
 if (
+  !artifactIntakeTemplate.includes('Minimum Required Input') ||
+  !artifactIntakeTemplate.includes('Delivery Expectation Levels') ||
+  !artifactIntakeTemplate.includes('Fast Intake Questionnaire')
+) {
+  violations.push({
+    rule: '原型输入模板必须覆盖最小输入字段、交付级别和快速问询顺序',
+    file: 'ui-skill/freight-arco-ui/references/artifact-intake-template.md',
+    line: 1,
+    content: 'missing artifact intake template sections',
+  });
+}
+if (
   !prototypeToUiContract.includes('Prototype Translation Block') ||
   !prototypeToUiContract.includes('What A Screenshot Can And Cannot Decide') ||
   !prototypeToUiContract.includes('Consistency Promise Rule')
@@ -358,6 +371,14 @@ if (!skillSource.includes('feature-routing.md') || !skillSource.includes('featur
     content: 'missing feature references in skill source',
   });
 }
+if (!skillSource.includes('artifact-intake-template.md')) {
+  violations.push({
+    rule: 'SKILL.md 必须把截图/原型任务路由到 artifact-intake-template.md',
+    file: 'ui-skill/freight-arco-ui/SKILL.md',
+    line: 1,
+    content: 'missing artifact intake template in skill source',
+  });
+}
 if (!skillSource.includes('prototype-to-ui-contract.md')) {
   violations.push({
     rule: 'SKILL.md 必须把截图/原型任务路由到 prototype-to-ui-contract.md',
@@ -382,6 +403,14 @@ if (!specFirstCoding.includes('feature-routing.md') || !specFirstCoding.includes
     content: 'missing functional pre-read gate',
   });
 }
+if (!specFirstCoding.includes('artifact-intake-template.md')) {
+  violations.push({
+    rule: 'spec-first-coding.mdc 必须要求截图/原型任务先读 artifact-intake-template.md',
+    file: '.cursor/rules/spec-first-coding.mdc',
+    line: 1,
+    content: 'missing artifact intake pre-read gate',
+  });
+}
 if (!specFirstCoding.includes('prototype-to-ui-contract.md')) {
   violations.push({
     rule: 'spec-first-coding.mdc 必须要求截图/原型任务先读 prototype-to-ui-contract.md',
@@ -404,6 +433,14 @@ if (!adversarialReview.includes('feature-delivery-contract.md')) {
     file: '.cursor/rules/adversarial-review.mdc',
     line: 1,
     content: 'missing functional review checks',
+  });
+}
+if (!adversarialReview.includes('artifact-intake-template.md')) {
+  violations.push({
+    rule: 'adversarial-review.mdc 必须审查截图/原型任务是否先满足 artifact intake 模板',
+    file: '.cursor/rules/adversarial-review.mdc',
+    line: 1,
+    content: 'missing artifact intake review checks',
   });
 }
 if (!adversarialReview.includes('prototype-to-ui-contract.md')) {

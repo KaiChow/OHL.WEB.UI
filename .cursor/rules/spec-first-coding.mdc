@@ -14,7 +14,7 @@ alwaysApply: true
 |------|-----|
 | **新菜单 / 不确定用哪种布局** | **`domain-routing.md`** |
 | **任何有点击/提交/请求/状态流转的功能** | **`feature-routing.md`** + **`feature-delivery-contract.md`** |
-| **任何截图 / 原型 / Figma / 视觉稿驱动任务** | **`prototype-to-ui-contract.md`** + `page-archetypes.md` + `module-patterns.md` |
+| **任何截图 / 原型 / Figma / 视觉稿驱动任务** | **`artifact-intake-template.md`** + **`prototype-to-ui-contract.md`** + `page-archetypes.md` + `module-patterns.md` |
 | **任何 icon 变更（按钮/行操作/模块标题/空态/菜单）** | **`icons.md`** + `actions.md` / `table.md` / `feedback.md` |
 | 新列表页 | `list-page.md` + **`filter-layout.md`** + `table.md` + `actions.md` |
 | 筛选区 | **`filter-layout.md`**（布局 Tier；控件皮肤 → **`form-field.md`**） |
@@ -37,7 +37,8 @@ alwaysApply: true
 3. **Overlay**：字段数 + 是否含子表/多分区 → 查 `modal.md` 容器表
 4. **功能行为**：先补 `feature_type / actor_roles / visible_when / enabled_when / api_request / success_result / error_result / refresh_scope`
 5. **图标**：先判定当前 surface 用 Arco 还是 IconPark；无精确隐喻则不用 icon
-6. **原型转译**：先补 `business_object / user_job / page_archetype / visible_actions / uncertain_actions / feature_contracts_required`
+6. **输入标准化**：先补 `artifact_type / business_object / user_job / visible_actions / explicit_behavior / uncertain_behavior / delivery_expectation`
+7. **原型转译**：再补 `business_object / user_job / page_archetype / visible_actions / uncertain_actions / feature_contracts_required`
 
 ## 2. 写代码
 
@@ -45,7 +46,7 @@ alwaysApply: true
 - 禁止自写等效布局 CSS
 - 用户要求「只按 skill」时，禁止参考其他 `src/views/**` 页面
 - 行为代码禁止把权限、状态、刷新、副作用只埋在 handler 里而不先写契约
-- 原型/截图任务禁止只按视觉相似度直接开写，必须先完成原型转译块
+- 原型/截图任务禁止只按视觉相似度直接开写，必须先完成输入模板和原型转译块
 
 ## 3. 交付前
 

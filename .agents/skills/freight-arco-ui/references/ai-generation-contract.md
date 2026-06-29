@@ -26,17 +26,18 @@ Before generating UI:
 3. `references/design-principles.md`
 4. `references/domain-language.md`
 5. `references/page-archetypes.md`
-6. For any screenshot/prototype input: `references/prototype-to-ui-contract.md`
+6. For any screenshot/prototype input: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
 7. For any interactive feature: `references/feature-routing.md` + `references/feature-delivery-contract.md`
 8. The task-specific reference: list/detail/table/actions/visual/checklist.
 
 ## Generation Workflow
 
-1. If the task starts from a screenshot/prototype, complete the prototype translation block from `prototype-to-ui-contract.md`.
-2. Classify page archetype.
-3. Identify primary business object and user role.
-4. If the task has behavior, complete the functional contract from `feature-delivery-contract.md`.
-5. Complete the module mapping from `module-patterns.md`:
+1. If the task starts from a screenshot/prototype, complete the intake template from `artifact-intake-template.md`.
+2. If the task starts from a screenshot/prototype, complete the prototype translation block from `prototype-to-ui-contract.md`.
+3. Classify page archetype.
+4. Identify primary business object and user role.
+5. If the task has behavior, complete the functional contract from `feature-delivery-contract.md`.
+6. Complete the module mapping from `module-patterns.md`:
    - Business object.
    - User job.
    - Primary identity.
@@ -45,16 +46,16 @@ Before generating UI:
    - Repeated modules.
    - Primary action.
    - Grouped actions.
-6. Define information hierarchy:
+7. Define information hierarchy:
    - Primary identity.
    - Key status/node.
    - Main working data.
    - Auxiliary metadata.
-7. Choose existing layout classes from `global.css`.
-8. Implement components in module files, not one huge page file.
-9. Use mock data only when backend integration is not requested.
-10. Verify with `npx vite build`.
-11. Visually inspect the route when a dev server is available.
+8. Choose existing layout classes from `global.css`.
+9. Implement components in module files, not one huge page file.
+10. Use mock data only when backend integration is not requested.
+11. Verify with `npx vite build`.
+12. Visually inspect the route when a dev server is available.
 
 ## Executable Design Language Contract
 

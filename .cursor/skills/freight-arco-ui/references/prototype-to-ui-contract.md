@@ -23,6 +23,8 @@ Before writing code from a prototype or screenshot, translate the visual artifac
 
 Do not code directly from visual similarity alone.
 
+Use `artifact-intake-template.md` first when the artifact arrives with incomplete business context.
+
 ## What A Screenshot Can And Cannot Decide
 
 ### A screenshot can decide
@@ -47,13 +49,14 @@ If these are not explicit, resolve them through `module-patterns.md`, `page-arch
 
 ## Translation Order
 
-1. Identify the **business object** shown by the prototype.
-2. Identify the **user job**: scan / create / audit / reconcile / operate / configure / analyze.
-3. Classify the **page archetype**.
-4. Map visual regions to **slots**, not field names.
-5. Extract every visible action and classify it by `feature_type`.
-6. Decide which parts are visual facts and which parts still require functional contracts.
-7. Only then implement the page.
+1. Complete the intake fields from `artifact-intake-template.md`.
+2. Identify the **business object** shown by the prototype.
+3. Identify the **user job**: scan / create / audit / reconcile / operate / configure / analyze.
+4. Classify the **page archetype**.
+5. Map visual regions to **slots**, not field names.
+6. Extract every visible action and classify it by `feature_type`.
+7. Decide which parts are visual facts and which parts still require functional contracts.
+8. Only then implement the page.
 
 ## Prototype Translation Block
 
@@ -183,3 +186,5 @@ Before delivery from a prototype-driven task, answer:
 5. If the same screenshot were implemented again next week, would the same contracts lead to the same result?
 
 If the answer to 5 is no, the prototype translation is incomplete.
+
+6. Was the artifact intake template complete enough for the delivery expectation level that was promised?
