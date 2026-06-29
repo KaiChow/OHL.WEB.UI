@@ -96,7 +96,7 @@ const collapsedActiveCount = computed(() => {
   if (query.containerNo.trim()) n += 1;
   if (query.fobCs) n += 1;
   if (query.docCs) n += 1;
-  if (query.placeOfReceipt.trim()) n += 1;
+  if (query.placeOfReceipt?.trim()) n += 1;
   return n;
 });
 

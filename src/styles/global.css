@@ -139,12 +139,30 @@ body,
   border-bottom: 1px solid var(--color-border-1);
   flex-shrink: 0;
   padding: 0 12px;
+  min-width: 0;
+  gap: 8px;
 }
 
 .tabnav-menu {
   display: flex;
   align-items: center;
   height: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-fill-3) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabnav-menu::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tabnav-menu::-webkit-scrollbar-thumb {
+  background: var(--color-fill-3);
+  border-radius: 4px;
 }
 
 .tabnav-item {
@@ -211,6 +229,7 @@ body,
   gap: 12px;
   font-size: 12px;
   color: var(--color-text-3);
+  flex-shrink: 0;
 }
 
 .tabnav-actions button {
@@ -615,11 +634,20 @@ button:-moz-focusring,
   gap: var(--dense-gap-zone);
 }
 
+/* flex 子项默认 min-width:auto 会被子内容撑宽，导致整页裁切且组内无法滚动 */
+.page-root>.zone-card,
+.page-root>.zone-l2-filter-card,
+.page-root>.zone-l3-action,
+.page-root>.zone-l4-table-card {
+  min-width: 0;
+}
+
 .zone-card {
   background: var(--color-bg-card);
   border-radius: var(--dense-radius);
   overflow: hidden;
   box-shadow: var(--dense-shadow-card), var(--dense-shadow-inset-top);
+  min-width: 0;
 }
 
 .zone-l4-table-card {
@@ -649,6 +677,7 @@ button:-moz-focusring,
   flex-shrink: 0;
   border: 1px solid var(--dense-card-border);
   border-top: 2px solid var(--dense-zone-top-border);
+  min-width: 0;
 }
 
 /* L3 状态 + 批量操作 */
@@ -659,6 +688,7 @@ button:-moz-focusring,
   border: 1px solid var(--dense-card-border);
   border-top: 2px solid var(--dense-zone-top-border);
   overflow: hidden;
+  min-width: 0;
 }
 
 .page-root--dense>.zone-l3-action.zone-card {
@@ -950,6 +980,7 @@ button:-moz-focusring,
 .filter-card {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .filter-card__head {
@@ -965,6 +996,7 @@ button:-moz-focusring,
   flex-direction: row;
   align-items: flex-start;
   min-height: 0;
+  min-width: 0;
   background: var(--color-bg-card);
 }
 
@@ -1777,6 +1809,8 @@ button:-moz-focusring,
   gap: 0;
   overflow: hidden;
   flex-shrink: 0;
+  width: 100%;
+  min-width: 0;
 }
 
 .scope-status-bar__scope {
@@ -1795,17 +1829,34 @@ button:-moz-focusring,
 }
 
 .scope-status-bar__status {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
-  scrollbar-width: none;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-fill-3) transparent;
+  -webkit-overflow-scrolling: touch;
 }
 
 .scope-status-bar__status::-webkit-scrollbar {
-  display: none;
+  height: 4px;
+}
+
+.scope-status-bar__status::-webkit-scrollbar-thumb {
+  background: var(--color-fill-3);
+  border-radius: 4px;
+}
+
+/* 状态组内容宽于容器时由 __status 横向滚动（子级不收缩、不二次裁切） */
+.scope-status-bar__status>.stat-tab-group {
+  display: inline-flex;
+  vertical-align: top;
+  width: max-content;
+  max-width: none;
+  flex: none;
+  overflow: visible;
 }
 
 /* ── merged-bar ── 工具栏 + Tab 合并单行 48px ─────────────────────────
@@ -1947,19 +1998,28 @@ button:-moz-focusring,
   flex-shrink: 0;
 }
 
-/* stat-tab 状态组（弹性，可横向滚动） */
+/* stat-tab 状态组（merged-bar 内整行滚动；scope-status-bar 内由 __status 滚动） */
 .stat-tab-group {
   display: flex;
   align-items: center;
   gap: 2px;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
-  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-fill-3) transparent;
+  -webkit-overflow-scrolling: touch;
 }
 
 .stat-tab-group::-webkit-scrollbar {
-  display: none;
+  height: 4px;
+}
+
+.stat-tab-group::-webkit-scrollbar-thumb {
+  background: var(--color-fill-3);
+  border-radius: 4px;
 }
 
 /* 右侧工具区 */
@@ -1988,6 +2048,21 @@ button:-moz-focusring,
 
   .filter-card__inline-actions {
     padding-left: 8px;
+  }
+
+  .scope-status-bar__status,
+  .scope-status-bar .stat-tab-group {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .filter-grid--6col {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .filter-grid--5col {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .merged-bar {
@@ -2065,6 +2140,80 @@ button:-moz-focusring,
 
   .merged-bar .toolbar-aside {
     margin-left: 6px;
+  }
+
+  .scope-status-bar {
+    height: auto;
+    min-height: var(--dense-bar-h);
+    flex-wrap: wrap;
+    row-gap: 6px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    overflow: visible;
+  }
+
+  .scope-status-bar__scope {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .scope-status-bar__scope::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scope-status-bar__status {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 100%;
+    padding-top: 2px;
+    border-top: 1px solid var(--dense-border-subtle);
+  }
+
+  .scope-status-bar__scope+.scope-status-bar__divider+.scope-status-bar__status {
+    border-top: 1px solid var(--dense-border-subtle);
+  }
+
+  .scope-status-bar>.scope-status-bar__status:only-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .filter-grid--6col {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .filter-grid--5col {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .filter-card--s2-expand .filter-card__main {
+    flex-wrap: wrap;
+  }
+
+  .filter-card--s2-expand .filter-card__actions-panel {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    margin-top: 0;
+    padding: 0 12px 10px 16px;
+    gap: 8px;
+    border-top: 1px solid var(--dense-border-subtle);
+  }
+
+  .filter-card--s2-expand .filter-card__actions-panel::before {
+    display: none;
+  }
+
+  .filter-card--s2-expand .filter-card__actions-panel .filter-expand-link--panel {
+    margin-top: 0;
+    margin-left: auto;
   }
 }
 

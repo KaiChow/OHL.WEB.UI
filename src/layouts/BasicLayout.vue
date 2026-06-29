@@ -21,6 +21,19 @@ const setOpenKeys = (keys: string[]) => {
   openKeys.value = keys;
 };
 
+const getParentGroupKey = (itemKey: string) => {
+  for (const group of appMenus) {
+    if (group.children?.some((item) => item.key === itemKey)) return group.key;
+  }
+  return undefined;
+};
+
+const ensureParentMenuOpen = (itemKey: string) => {
+  const parentKey = getParentGroupKey(itemKey);
+  if (!parentKey || openKeys.value.includes(parentKey)) return;
+  setOpenKeys([...openKeys.value, parentKey]);
+};
+
 const menuKeyRouteMap = computed(() => {
   const map = new Map<string, string>();
   for (const group of appMenus) {
@@ -65,8 +78,10 @@ watch(
   (menuKey) => {
     const key = menuKey ? String(menuKey) : '';
     const next = key ? [key] : [];
-    if (isSameKeys(selectedMenuKeys.value, next)) return;
-    selectedMenuKeys.value = next;
+    if (!isSameKeys(selectedMenuKeys.value, next)) {
+      selectedMenuKeys.value = next;
+    }
+    if (key) ensureParentMenuOpen(key);
   },
   { immediate: true },
 );
@@ -140,7 +155,6 @@ const closeTab = (tab: AppTabItem, event: MouseEvent) => {
         class="side-arco-menu"
         :selected-keys="selectedMenuKeys"
         :open-keys="openKeys"
-        auto-open-selected
         @update:open-keys="onOpenKeysChange"
         @menu-item-click="onMenuItemClick"
       >
