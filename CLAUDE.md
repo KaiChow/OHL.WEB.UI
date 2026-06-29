@@ -9,6 +9,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 | 样式 | `src/styles/global.css` | Token、布局类 — **禁止页面自写等效 CSS** |
 | UI Skill | `ui-skill/freight-arco-ui/SKILL.md` | PESDP 交付合同、reference 索引 |
 | 功能契约 | `references/feature-routing.md` + `references/feature-delivery-contract.md` | 动作/权限/API/状态/验证 |
+| 图标规范 | `references/icons.md` | Arco / IconPark 分工与场景约束 |
 | 编码门禁 | `.cursor/rules/spec-first-coding.mdc` | 先决策 Tier / 结构 / Modal·Drawer，再写代码 |
 | 自动检查 | `node scripts/check-spec.js` | 规范扫描 |
 
@@ -43,6 +44,7 @@ Professional · Efficient · Structured · Dense · Premium — 效率 > 信息 
 9. 禁止 hex、硬编码 14–16px 业务字（14px 仅 `--dense-font-overlay` 浮层标题）、`font-weight:700`、废弃类名
 10. 禁止把订单字段硬抄到无关模块
 11. 有行为的功能必须定义 `visible_when` / `enabled_when` / `api_request` / `success_result` / `error_result` / `refresh_scope`
+12. 通用动作图标用 Arco；业务语义/菜单/空态/模块标题图标用 IconPark；无精确隐喻则纯文字
 
 ## Reference 索引
 

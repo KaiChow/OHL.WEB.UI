@@ -14,6 +14,7 @@ ui-skill/freight-arco-ui/
     ├── feature-routing.md     ← 功能类型 → 必读规范路由
     ├── feature-delivery-contract.md ← 动作/权限/API/状态/验证契约
     ├── domain-language.md     ← 中文货代用语 + 对象字段示例
+    ├── icons.md               ← Arco / IconPark 图标分工与场景约束
     ├── actions.md · table.md · detail-form.md · list-page.md  ← 可执行细则
     └── checklist.md           ← 交付自查
 AGENTS.md               ← 一页摘要，指向 skill

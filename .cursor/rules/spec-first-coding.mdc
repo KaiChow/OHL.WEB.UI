@@ -14,6 +14,7 @@ alwaysApply: true
 |------|-----|
 | **新菜单 / 不确定用哪种布局** | **`domain-routing.md`** |
 | **任何有点击/提交/请求/状态流转的功能** | **`feature-routing.md`** + **`feature-delivery-contract.md`** |
+| **任何 icon 变更（按钮/行操作/模块标题/空态/菜单）** | **`icons.md`** + `actions.md` / `table.md` / `feedback.md` |
 | 新列表页 | `list-page.md` + **`filter-layout.md`** + `table.md` + `actions.md` |
 | 筛选区 | **`filter-layout.md`**（布局 Tier；控件皮肤 → **`form-field.md`**） |
 | 弹窗/抽屉 | **`modal.md`** + `overlay-dimensions.md` + **`form-field.md`**（控件） |
@@ -34,6 +35,7 @@ alwaysApply: true
 2. **筛选 DOM**：按 Tier 选用 skill 给出的结构组合（如双行见 `filter-card--two-row` 示例），**禁止自拼未在 reference 出现的结构**
 3. **Overlay**：字段数 + 是否含子表/多分区 → 查 `modal.md` 容器表
 4. **功能行为**：先补 `feature_type / actor_roles / visible_when / enabled_when / api_request / success_result / error_result / refresh_scope`
+5. **图标**：先判定当前 surface 用 Arco 还是 IconPark；无精确隐喻则不用 icon
 
 ## 2. 写代码
 

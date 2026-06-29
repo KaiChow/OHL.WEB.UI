@@ -124,6 +124,11 @@ const RULES = [
     pattern: /row-action-menu__divider/,
     fileFilter: /\.vue$/,
   },
+  {
+    desc: 'IconPark 图标禁止使用 filled/two-tone/multi-color 主题，统一 outline',
+    pattern: /\btheme="(filled|two-tone|multi-color)"/,
+    fileFilter: /\.vue$/,
+  },
 ];
 
 // ─── 文件扫描 ─────────────────────────────────────────────────────────────────
@@ -180,11 +185,13 @@ const checklist = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/c
 const visualSystem = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/visual-system.md'), 'utf8');
 const filterLayout = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/filter-layout.md'), 'utf8');
 const actionsReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/actions.md'), 'utf8');
+const iconsReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/icons.md'), 'utf8');
 const featureRouting = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/feature-routing.md'), 'utf8');
 const featureDeliveryContract = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/feature-delivery-contract.md'), 'utf8');
 const skillSource = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/SKILL.md'), 'utf8');
 const specFirstCoding = readFileSync(join(ROOT, '.cursor/rules/spec-first-coding.mdc'), 'utf8');
 const adversarialReview = readFileSync(join(ROOT, '.cursor/rules/adversarial-review.mdc'), 'utf8');
+const mainTs = readFileSync(join(ROOT, 'src/main.ts'), 'utf8');
 
 if (!modulePatterns.includes('Specification Granularity Rule')) {
   violations.push({
@@ -266,6 +273,21 @@ if (!actionsReference.includes('生产作业台的高频可逆动作可以超过
     content: 'missing operational workbench visible action rule',
   });
 }
+if (
+  !iconsReference.includes('双图标库') ||
+  !iconsReference.includes('Library Split') ||
+  !iconsReference.includes('Toolbar And Button Icons') ||
+  !iconsReference.includes('Module Title Icons') ||
+  !iconsReference.includes('Empty States') ||
+  !iconsReference.includes('Navigation/Menu Icons')
+) {
+  violations.push({
+    rule: '图标规范必须定义 Arco/IconPark 分工，并覆盖按钮、模块标题、空态、导航等主要场景',
+    file: 'ui-skill/freight-arco-ui/references/icons.md',
+    line: 1,
+    content: 'missing icon scope coverage',
+  });
+}
 if (!featureRouting.includes('feature-delivery-contract.md') || !featureRouting.includes('feature_type:')) {
   violations.push({
     rule: '功能路由规范必须把行为任务路由到 feature-delivery-contract，并给出最小输出块',
@@ -297,6 +319,14 @@ if (!skillSource.includes('feature-routing.md') || !skillSource.includes('featur
     content: 'missing feature references in skill source',
   });
 }
+if (!skillSource.includes('icons.md')) {
+  violations.push({
+    rule: 'SKILL.md 必须把 icon 任务路由到 icons.md',
+    file: 'ui-skill/freight-arco-ui/SKILL.md',
+    line: 1,
+    content: 'missing icons reference in skill source',
+  });
+}
 if (!specFirstCoding.includes('feature-routing.md') || !specFirstCoding.includes('feature-delivery-contract.md')) {
   violations.push({
     rule: 'spec-first-coding.mdc 必须要求功能任务先读 feature-routing 与 feature-delivery-contract',
@@ -305,12 +335,36 @@ if (!specFirstCoding.includes('feature-routing.md') || !specFirstCoding.includes
     content: 'missing functional pre-read gate',
   });
 }
+if (!specFirstCoding.includes('icons.md')) {
+  violations.push({
+    rule: 'spec-first-coding.mdc 必须要求 icon 变更先读 icons.md',
+    file: '.cursor/rules/spec-first-coding.mdc',
+    line: 1,
+    content: 'missing icon pre-read gate',
+  });
+}
 if (!adversarialReview.includes('feature-delivery-contract.md')) {
   violations.push({
     rule: 'adversarial-review.mdc 必须审查功能契约，而不只审查 UI 结构',
     file: '.cursor/rules/adversarial-review.mdc',
     line: 1,
     content: 'missing functional review checks',
+  });
+}
+if (!adversarialReview.includes('icons.md')) {
+  violations.push({
+    rule: 'adversarial-review.mdc 必须审查图标作用域与库选择',
+    file: '.cursor/rules/adversarial-review.mdc',
+    line: 1,
+    content: 'missing icon review checks',
+  });
+}
+if (!mainTs.includes("@icon-park/vue-next/styles/index.css")) {
+  violations.push({
+    rule: '引入 IconPark 后，src/main.ts 必须全局引入 @icon-park/vue-next 样式',
+    file: 'src/main.ts',
+    line: 1,
+    content: 'missing @icon-park/vue-next/styles/index.css import',
   });
 }
 

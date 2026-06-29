@@ -21,7 +21,7 @@ Project-level **UI delivery contract** for `FE.OHL.WEB.UI`.
 | **Structure slots** | `module-patterns.md` | English slots only; no field lists |
 | **Feature contracts** | `feature-routing.md`, `feature-delivery-contract.md` | Action/state/permission/API/verification |
 | **Domain copy** | `domain-language.md` | Chinese labels, statuses, object examples |
-| **Component rules** | `actions.md`, `table.md`, `detail-form.md`, `list-page.md` | How to implement |
+| **Component rules** | `actions.md`, `icons.md`, `table.md`, `detail-form.md`, `list-page.md` | How to implement |
 | **QA** | `checklist.md`, `scripts/check-spec.js` | Pre-ship checks |
 
 **Rule:** Structure in English slots → labels from `domain-language.md` → CSS from `global.css` → details in topic references. Do not duplicate long rule blocks across `AGENTS.md` / `CLAUDE.md` / skill.
@@ -75,6 +75,7 @@ Do not hide daily filters, status tabs, or reversible workflow actions merely to
 4. For any task with behavior or request flow: `references/feature-routing.md` + `references/feature-delivery-contract.md`
 5. One topic file from the map below
 6. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
+7. **Before changing icon usage:** read `icons.md`.
 
 **Coding gate:** `.cursor/rules/spec-first-coding.mdc` — read references first; run `check-spec.js` before delivery.
 
@@ -87,6 +88,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 | **Large system / which doc for which menu** | **`domain-routing.md`** |
 | **Any feature with click/submit/request/state change** | **`feature-routing.md`** + **`feature-delivery-contract.md`** |
 | Any UI task | `design-principles.md` |
+| **Any icon change** | **`icons.md`** + `actions.md` / `table.md` / `feedback.md` by surface |
 | New page / module | `module-patterns.md` → `domain-language.md` → **`domain-routing.md`** |
 | Page type choice | `page-archetypes.md` |
 | AI page generation | `ai-generation-contract.md` |
@@ -107,6 +109,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 | File upload / attachments | `upload.md` |
 | Modal / dialog / confirm | `modal.md` + **`overlay-dimensions.md`** |
 | Typography / i18n | `typography.md` |
+| **按钮 icon / 行 icon / 模块标题 icon / 空态 icon / 菜单 icon** | **`icons.md`** |
 | **Modal & drawer width** | **`overlay-dimensions.md`** |
 | **Arco `size` (mini/small/medium/large)** | **`component-size.md`** |
 | Color / hierarchy / “too gray” | `visual-system.md` |
@@ -122,6 +125,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 - Map business object + user job before layout; no copying order fields to unrelated modules
 - Structural classes (`dds-head`, `detail-section`, `table-card-cap`) are slots — content follows the object
 - One `primary` per scope; row actions icon + tooltip; danger → confirm
+- Generic action icons use Arco; business-semantic identity/menu/empty-state icons use IconPark; no forced icons when the metaphor is weak
 - `detail-mini-vxe`: no `show-overflow`; header bg ≠ row hover bg; no checkbox without batch toolbar
 - Business Arco controls: `size="small"` only — see `component-size.md` (`medium` = Arco default, forbidden)
 - Any feature with click/submit/request/state change must complete the functional contract: `feature_type` + `entry_point` + `actor_roles` + `visible_when` + `enabled_when` + `api_request` + `api_response` + `success_result` + `error_result` + `refresh_scope` + `verification_cases`

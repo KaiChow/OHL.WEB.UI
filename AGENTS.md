@@ -21,6 +21,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 |----|-----|
 | 新菜单选型 | `domain-routing.md` |
 | 功能实现/动作/提交流程 | `feature-routing.md` + `feature-delivery-contract.md` |
+| 图标/空态/菜单/模块标题 | `icons.md` + `actions.md` |
 | 主数据/设置 | `master-data.md` |
 | 权限/显隐/数据范围 | `permissions.md` + `feature-delivery-contract.md` |
 | BI/看板 | `dashboard.md` |
@@ -32,6 +33,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 - 表格一律 `vxe-table`，禁止 `a-table`
 - 上传用 Uppy，禁止 `a-upload`
 - 状态只用 `s-pill[data-s]`，禁止行铺色
+- 通用动作 icon 用 Arco；业务语义/菜单/空态/模块标题 icon 才用 IconPark；无精确隐喻则不用 icon
 - 每作用域仅 1 个 `type="primary"`
 - 列表主表 `workbench-table`；详情子表 `detail-mini-vxe`，禁止 `show-overflow`
 - 详情子表无批量栏时禁止 checkbox 列

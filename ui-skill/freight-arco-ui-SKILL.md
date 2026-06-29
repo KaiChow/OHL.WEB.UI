@@ -22,6 +22,7 @@ Detailed rules are in:
 - `ui-skill/freight-arco-ui/references/feature-routing.md`
 - `ui-skill/freight-arco-ui/references/feature-delivery-contract.md`
 - `ui-skill/freight-arco-ui/references/domain-language.md`
+- `ui-skill/freight-arco-ui/references/icons.md`
 - `ui-skill/freight-arco-ui/references/page-archetypes.md`
 - `ui-skill/freight-arco-ui/references/ai-generation-contract.md`
 - `ui-skill/freight-arco-ui/references/list-page.md`
