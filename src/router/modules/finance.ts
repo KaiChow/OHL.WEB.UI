@@ -7,4 +7,10 @@ export const financeRoutes: RouteRecordRaw[] = [
     component: () => import('../../views/finance/profitStatement/index.vue'),
     meta: { menuKey: 'profit-statement', title: '利润表' },
   },
+  {
+    path: 'finance/statement-of-account',
+    name: 'StatementOfAccount',
+    component: () => import('../../views/finance/statementOfAccount/index.vue'),
+    meta: { menuKey: 'statement-of-account', title: '对账单' },
+  },
 ];

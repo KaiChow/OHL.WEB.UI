@@ -1845,6 +1845,65 @@ button:-moz-focusring,
   flex-shrink: 0;
 }
 
+/* ── workbench-notice ── 工具栏内联提示/警告（merged-bar 内，高度 28px）────
+   数据异常、操作说明等常驻提醒；禁止裸 span + inline style
+   ──────────────────────────────────────────────────────────────────── */
+.merged-bar .workbench-notice-group {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.workbench-notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--dense-radius);
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-aux);
+  line-height: 1.35;
+  flex-shrink: 1;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.workbench-notice__icon {
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.workbench-notice__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.workbench-notice--warn {
+  color: var(--dense-warning-7);
+  background: var(--dense-warning-1);
+  border: 1px solid var(--dense-warning-3);
+}
+
+.workbench-notice--warn .workbench-notice__icon {
+  color: var(--dense-warning-6);
+}
+
+.workbench-notice--info {
+  color: var(--color-text-2);
+  background: var(--dense-primary-1);
+  border: 1px solid var(--dense-primary-3);
+}
+
+.workbench-notice--info .workbench-notice__icon {
+  color: var(--dense-primary-6);
+}
+
 /* scope / cargo stab 组 */
 .stab-group {
   display: flex;
@@ -6192,17 +6251,22 @@ button:-moz-focusring,
 
 .arco-select-dropdown .arco-select-option,
 .arco-select-dropdown .arco-select-option-content,
-.arco-select-dropdown-list .arco-select-option {
+.arco-select-dropdown-list .arco-select-option,
+.arco-select-dropdown-size-small .arco-select-option,
+.arco-select-dropdown-size-small .arco-select-option-content {
   font-size: var(--dense-font-control) !important;
   font-weight: var(--dense-weight-control) !important;
-  line-height: calc(var(--dense-control-h-detail) - 2px) !important;
-  min-height: var(--dense-control-h-detail) !important;
+  line-height: var(--dense-control-lh-form) !important;
+  min-height: var(--dense-control-h-form) !important;
   color: var(--color-text-1) !important;
 }
 
 .arco-select-dropdown .arco-select-option-content {
   display: flex;
   align-items: center;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
 }
 
 .arco-dropdown-list .arco-dropdown-option,
@@ -6247,10 +6311,10 @@ button:-moz-focusring,
 /* A · Field label（字段名）— 须覆盖 Arco .arco-form-size-small label 14px 默认 */
 .field-label,
 .filter-field__label,
-.arco-form-size-small .arco-form-item-label-col > .arco-form-item-label,
-.arco-form-size-mini .arco-form-item-label-col > .arco-form-item-label,
-.arco-form-item-label-col > .arco-form-item-label,
-.arco-form-item-label > label {
+.arco-form-size-small .arco-form-item-label-col>.arco-form-item-label,
+.arco-form-size-mini .arco-form-item-label-col>.arco-form-item-label,
+.arco-form-item-label-col>.arco-form-item-label,
+.arco-form-item-label>label {
   font-size: var(--dense-font-field) !important;
   font-weight: var(--dense-weight-field);
   color: var(--color-text-2);
@@ -6293,14 +6357,34 @@ button:-moz-focusring,
   line-height: var(--dense-control-lh-form) !important;
 }
 
+/* Select 触发器：Arco 常把 size 只挂在 view 上，须与下拉项同 token */
+.arco-select-view-single.arco-select-view-size-small,
+.arco-select-view-single.arco-select-size-small,
+.arco-select-view-multiple.arco-select-view-size-small,
+.arco-select-view-multiple.arco-select-size-small {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control);
+}
+
 .arco-select-view-single.arco-select-view-size-small .arco-select-view-value,
 .arco-select-view-single.arco-select-view-size-small .arco-select-view-input,
 .arco-select-view-single.arco-select-size-small .arco-select-view-value,
-.arco-select-view-single.arco-select-size-small .arco-select-view-input {
+.arco-select-view-single.arco-select-size-small .arco-select-view-input,
+.arco-select-view-multiple.arco-select-view-size-small .arco-select-view-input,
+.arco-select-view-multiple.arco-select-size-small .arco-select-view-input {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control);
   min-height: 0 !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   line-height: var(--dense-control-lh-form) !important;
+}
+
+.arco-select-view-multiple.arco-select-view-size-small .arco-select-view-tag,
+.arco-select-view-multiple.arco-select-size-small .arco-select-view-tag {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control);
+  line-height: calc(var(--dense-control-lh-form) - 2px) !important;
 }
 
 .arco-input::placeholder,

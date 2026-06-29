@@ -6,6 +6,7 @@ export const appMenus: AppMenuItem[] = [
     title: '国内财务',
     children: [
       { key: 'profit-statement', title: '利润表', routeName: 'ProfitStatement' },
+      { key: 'statement-of-account', title: '对账单', routeName: 'StatementOfAccount' },
     ],
   },
   {
