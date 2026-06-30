@@ -8,9 +8,8 @@ import {
   IconSettings,
   IconDownload,
   IconDown,
+  IconUp,
   IconEye,
-  IconFilter,
-  IconImport,
   IconPrinter,
   IconSend,
 } from '@arco-design/web-vue/es/icon';
@@ -47,7 +46,7 @@ const appliedQuery = ref<ShipmentOrderQuery>(defaultQuery());
 const activeScope = ref<ShipmentScopeKey>('all');
 const activeCargoScope = ref<ShipmentCargoScopeKey>('all');
 const activeStatus = ref<ShipmentStatusKey>('all');
-const advancedFilterVisible = ref(false);
+const filterExpanded = ref(false);
 const loading = ref(false);
 const actionLoading = ref('');
 const tableRef = ref<VxeTableInstance>();
@@ -129,6 +128,20 @@ const statusCounts = computed(() => ({
   departed: allRows.value.filter((row) => row.orderStatus === '已开船').length,
   abandoned: allRows.value.filter((row) => row.deleted).length,
 }));
+const cargoCounts = computed(() => ({
+  all: allRows.value.length,
+  fcl: allRows.value.filter((row) => row.cargoScope === 'fcl').length,
+  lcl: allRows.value.filter((row) => row.cargoScope === 'lcl').length,
+}));
+const collapsedFieldCount = 4;
+const collapsedActiveCount = computed(() => {
+  let count = 0;
+  if (query.quickTag) count += 1;
+  if (query.hblNo) count += 1;
+  if (query.mblNo) count += 1;
+  if (query.pushBeforeVessel) count += 1;
+  return count;
+});
 
 const selectedRows = computed(() => allRows.value.filter((row) => selectedIds.value.includes(row.id)));
 
@@ -159,16 +172,8 @@ const handleReset = () => {
   fetchList();
 };
 
-const clearAdvancedFilters = () => {
-  query.quickTag = undefined;
-  query.hblNo = '';
-  query.mblNo = '';
-  query.pushBeforeVessel = undefined;
-};
-
-const applyAdvancedFilters = () => {
-  advancedFilterVisible.value = false;
-  handleSearch();
+const toggleFilterExpanded = () => {
+  filterExpanded.value = !filterExpanded.value;
 };
 
 const openDetail = (row: ShipmentWorkbenchRow) => {
@@ -288,62 +293,109 @@ fetchList();
 
 <template>
   <div class="page-root page-root--dense">
-    <div class="zone-l2-filter-card zone-card filter-card filter-card--two-row">
-      <div class="filter-card__matrix">
-        <div class="filter-grid">
-          <div class="filter-field filter-field--span2">
-            <label class="filter-field__label">单号检索</label>
-            <div class="filter-combo arco-input-group">
-              <a-select v-model="query.identifierType" size="small" class="filter-combo__select filter-combo--keyword">
-                <a-option value="orderNo">订单编号</a-option>
-                <a-option value="suborderNo">境外单号</a-option>
-                <a-option value="hblNo">HBL 单号</a-option>
-                <a-option value="mblNo">MBL 主单号</a-option>
+    <div class="zone-l2-filter-card zone-card filter-card filter-card--s2-expand">
+      <div class="filter-card__main">
+        <div class="filter-card__fields">
+          <div class="filter-grid">
+            <div class="filter-field filter-field--span2">
+              <label class="filter-field__label">单号检索</label>
+              <div class="filter-combo arco-input-group">
+                <a-select v-model="query.identifierType" size="small" class="filter-combo__select filter-combo--keyword">
+                  <a-option value="orderNo">订单编号</a-option>
+                  <a-option value="suborderNo">境外单号</a-option>
+                  <a-option value="hblNo">HBL 单号</a-option>
+                  <a-option value="mblNo">MBL 主单号</a-option>
+                </a-select>
+                <a-input
+                  v-model="query.keyword"
+                  size="small"
+                  allow-clear
+                  placeholder="请输入订单编号 / 境外单号 / HBL / MBL"
+                  @press-enter="handleSearch"
+                />
+              </div>
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">客户</label>
+              <a-input v-model="query.customer" size="small" allow-clear placeholder="请输入客户" @press-enter="handleSearch" />
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">起运港</label>
+              <a-input v-model="query.departurePort" size="small" allow-clear placeholder="请输入起运港" @press-enter="handleSearch" />
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">业务类型</label>
+              <a-select v-model="query.businessType" size="small" allow-clear placeholder="请选择业务类型">
+                <a-option value="FBA">FBA</a-option>
+                <a-option value="海运拼箱">海运拼箱</a-option>
               </a-select>
-              <a-input v-model="query.keyword" size="small" allow-clear placeholder="请输入" @press-enter="handleSearch" />
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">业务员</label>
+              <a-input v-model="query.salesperson" size="small" allow-clear placeholder="请输入业务员" @press-enter="handleSearch" />
+            </div>
+            <div class="filter-field">
+              <label class="filter-field__label">操作员</label>
+              <a-input v-model="query.operator" size="small" allow-clear placeholder="请输入操作员" @press-enter="handleSearch" />
             </div>
           </div>
-          <div class="filter-field">
-            <label class="filter-field__label">客户</label>
-            <a-input v-model="query.customer" size="small" allow-clear placeholder="请输入客户" />
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">起运港</label>
-            <a-input v-model="query.departurePort" size="small" allow-clear placeholder="请输入起运港" />
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">业务类型</label>
-            <a-select v-model="query.businessType" size="small" allow-clear placeholder="请选择业务类型">
-              <a-option value="FBA">FBA</a-option>
-              <a-option value="海运拼箱">海运拼箱</a-option>
-            </a-select>
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">业务员</label>
-            <a-input v-model="query.salesperson" size="small" allow-clear placeholder="请输入业务员" />
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">操作员</label>
-            <a-input v-model="query.operator" size="small" allow-clear placeholder="请输入操作员" />
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">装箱方式</label>
-            <a-select v-model="query.packageMode" size="small" allow-clear placeholder="请选择装箱方式">
-              <a-option value="LCL GROUP（自拼）">LCL GROUP（自拼）</a-option>
-              <a-option value="LCL">LCL</a-option>
-            </a-select>
+          <div class="filter-card__advanced" :class="{ 'filter-card__advanced--open': filterExpanded }">
+            <div class="filter-card__advanced-inner">
+              <div class="filter-grid filter-grid--advanced">
+                <div class="filter-field">
+                  <label class="filter-field__label">装箱方式</label>
+                  <a-select v-model="query.packageMode" size="small" allow-clear placeholder="请选择装箱方式">
+                    <a-option value="LCL GROUP（自拼）">LCL GROUP（自拼）</a-option>
+                    <a-option value="LCL">LCL</a-option>
+                  </a-select>
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">快捷标签</label>
+                  <a-select v-model="query.quickTag" size="small" allow-clear placeholder="请选择快捷标签">
+                    <a-option value="全部">全部</a-option>
+                    <a-option value="整柜">整柜</a-option>
+                    <a-option value="散货">散货</a-option>
+                  </a-select>
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">HBL 单号</label>
+                  <a-input v-model="query.hblNo" size="small" allow-clear placeholder="请输入 HBL 单号" @press-enter="handleSearch" />
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">MBL 主单号</label>
+                  <a-input v-model="query.mblNo" size="small" allow-clear placeholder="请输入 MBL 主单号" @press-enter="handleSearch" />
+                </div>
+                <div class="filter-field">
+                  <label class="filter-field__label">是否发送船前</label>
+                  <a-select v-model="query.pushBeforeVessel" size="small" allow-clear placeholder="请选择">
+                    <a-option value="yes">已发</a-option>
+                    <a-option value="no">未发</a-option>
+                  </a-select>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="filter-card__inline-actions filter-card__inline-actions--matrix">
+        <div class="filter-card__actions-panel">
           <a-button size="small" type="primary" class="filter-card__query-btn" @click="handleSearch">
             <template #icon><icon-search /></template>
             查询
           </a-button>
           <a-button size="small" type="text" class="reset-btn" @click="handleReset">重置</a-button>
-          <a-button size="small" type="text" class="reset-btn" title="更多筛选" @click="advancedFilterVisible = true">
-            <template #icon><icon-filter /></template>
-            筛选
-          </a-button>
+          <button
+            type="button"
+            class="filter-expand-link filter-expand-link--panel"
+            :class="{ 'is-open': filterExpanded }"
+            :title="filterExpanded ? '收起筛选' : `展开筛选(+${collapsedFieldCount})`"
+            @click="toggleFilterExpanded"
+          >
+            <icon-down v-if="!filterExpanded" />
+            <icon-up v-else />
+            <span class="filter-expand-link__text">
+              {{ filterExpanded ? '收起' : `展开(+${collapsedFieldCount})` }}
+            </span>
+            <a-badge v-if="!filterExpanded && collapsedActiveCount > 0" :count="collapsedActiveCount" />
+          </button>
         </div>
       </div>
     </div>
@@ -373,9 +425,9 @@ fetchList();
           </a-button>
           <div class="toolbar-divider" />
           <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-            <a-button size="small" type="outline">
+            <a-button size="small">
               <template #icon><icon-download /></template>
-              输出<icon-down />
+              导出<icon-down />
             </a-button>
             <template #content>
               <a-doption @click="handleExportCurrent">导出当前结果</a-doption>
@@ -383,7 +435,7 @@ fetchList();
             </template>
           </a-dropdown>
           <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-            <a-button size="small" type="outline" :disabled="!selectedCount">批量操作<icon-down /></a-button>
+            <a-button size="small" :disabled="!selectedCount">批量操作<icon-down /></a-button>
             <template #content>
               <a-doption @click="confirmBatchAction('批量放舱', '放舱后将刷新当前业务单列表，请确认已核对所选业务单。')">
                 批量放舱
@@ -396,12 +448,17 @@ fetchList();
           <div class="toolbar-divider" />
           <a-button
             size="small"
+            type="text"
             :loading="actionLoading === '关单导入'"
             @click="handleImportClosing"
           >
-            <template #icon><icon-import /></template>
             关单导入
           </a-button>
+        </div>
+        <div class="toolbar-aside">
+          <div v-if="selectedCount > 0" class="toolbar-selection-context">
+            <span class="toolbar-selected-tip">已选 <b>{{ selectedCount }}</b> 条</span>
+          </div>
         </div>
       </div>
       <div class="scope-status-bar">
@@ -410,22 +467,9 @@ fetchList();
             v-for="tab in scopeTabs"
             :key="tab.key"
             type="button"
-            class="stab stab--scope"
-            :class="{ 'stab--active': activeScope === tab.key }"
+            class="seg-btn"
+            :class="{ 'seg-btn--active': activeScope === tab.key }"
             @click="activeScope = tab.key; fetchList()"
-          >
-            {{ tab.label }}
-          </button>
-        </div>
-        <div class="scope-status-bar__divider" />
-        <div class="scope-status-bar__scope">
-          <button
-            v-for="tab in cargoTabs"
-            :key="tab.key"
-            type="button"
-            class="stab stab--cargo"
-            :class="{ 'stab--active': activeCargoScope === tab.key }"
-            @click="activeCargoScope = tab.key; fetchList()"
           >
             {{ tab.label }}
           </button>
@@ -433,17 +477,29 @@ fetchList();
         <div class="scope-status-bar__divider" />
         <div class="scope-status-bar__status">
           <div class="stat-tab-group">
-          <button
-            v-for="tab in statusTabs"
-            :key="tab.key"
-            type="button"
-            class="stat-tab"
-            :class="{ 'stat-tab--active': activeStatus === tab.key }"
-            @click="activeStatus = tab.key; fetchList()"
-          >
-            <span class="stat-tab__name">{{ tab.label }}</span>
-            <span class="stat-tab__count">{{ statusCounts[tab.key] ?? 0 }}</span>
-          </button>
+            <button
+              v-for="tab in cargoTabs"
+              :key="tab.key"
+              type="button"
+              class="stat-tab"
+              :class="{ 'stat-tab--active': activeCargoScope === tab.key }"
+              @click="activeCargoScope = tab.key; fetchList()"
+            >
+              <span class="stat-tab__name">{{ tab.label }}</span>
+              <span class="stat-tab__count">{{ cargoCounts[tab.key] ?? 0 }}</span>
+            </button>
+            <div class="scope-status-bar__divider" />
+            <button
+              v-for="tab in statusTabs"
+              :key="tab.key"
+              type="button"
+              class="stat-tab"
+              :class="{ 'stat-tab--active': activeStatus === tab.key }"
+              @click="activeStatus = tab.key; fetchList()"
+            >
+              <span class="stat-tab__name">{{ tab.label }}</span>
+              <span class="stat-tab__count">{{ statusCounts[tab.key] ?? 0 }}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -503,7 +559,6 @@ fetchList();
           @cell-dblclick="({ row }) => openDetail(row)"
         >
           <vxe-column type="checkbox" width="40" fixed="left" />
-          <vxe-column type="seq" title="序号" width="52" align="center" />
           <vxe-column field="orderNo" title="订单编号" min-width="150" fixed="left">
             <template #default="{ row }">
               <span class="link-text link-text--strong mono" @click="openDetail(row)">{{ row.orderNo }}</span>
@@ -589,61 +644,5 @@ fetchList();
       v-model:visible="detailVisible"
       :record="currentDetail"
     />
-
-    <a-drawer
-      v-model:visible="advancedFilterVisible"
-      title="业务单筛选"
-      :width="640"
-      :footer="true"
-      class="query-filter-drawer"
-      :mask-closable="false"
-    >
-      <div class="query-filter-drawer__shell">
-        <div class="query-filter-drawer__body">
-          <a-form class="detail-form" layout="vertical" size="small" :model="query">
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">单号与标签</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="快捷标签">
-                  <a-select v-model="query.quickTag" size="small" allow-clear placeholder="请选择快捷标签">
-                    <a-option value="全部">全部</a-option>
-                    <a-option value="整柜">整柜</a-option>
-                    <a-option value="散货">散货</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="HBL 单号">
-                  <a-input v-model="query.hblNo" size="small" allow-clear placeholder="请输入 HBL 单号" />
-                </a-form-item>
-                <a-form-item label="MBL 主单号">
-                  <a-input v-model="query.mblNo" size="small" allow-clear placeholder="请输入 MBL 主单号" />
-                </a-form-item>
-              </div>
-            </div>
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">流程条件</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="是否发送船前">
-                  <a-select v-model="query.pushBeforeVessel" size="small" allow-clear placeholder="请选择">
-                    <a-option value="yes">已发</a-option>
-                    <a-option value="no">未发</a-option>
-                  </a-select>
-                </a-form-item>
-              </div>
-            </div>
-          </a-form>
-        </div>
-      </div>
-      <template #footer>
-        <div class="detail-drawer-footer">
-          <div class="detail-drawer-footer__start">
-            <a-button size="small" type="text" class="reset-btn" @click="clearAdvancedFilters">清空更多筛选</a-button>
-          </div>
-          <div class="detail-drawer-footer__end">
-            <a-button size="small" @click="advancedFilterVisible = false">取消</a-button>
-            <a-button size="small" type="primary" @click="applyAdvancedFilters">应用筛选</a-button>
-          </div>
-        </div>
-      </template>
-    </a-drawer>
   </div>
 </template>
