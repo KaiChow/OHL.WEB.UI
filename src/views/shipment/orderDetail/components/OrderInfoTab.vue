@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, toRaw, watch } from 'vue';
 import { Message, Modal } from '@arco-design/web-vue';
 import {
   IconCopy,
@@ -24,11 +24,23 @@ const props = defineProps<{
 const basicFormModel = {};
 const cargoFormModel = {};
 
-const cargoBlocks = ref<CargoPartyBlock[]>(structuredClone(props.record.cargoBlocks));
-const cabinetRows = ref<CabinetRow[]>(structuredClone(props.record.cabinetRows));
-const customsRows = ref<CustomsRow[]>(structuredClone(props.record.customsRows));
-const warehouseRows = ref<WarehouseRow[]>(structuredClone(props.record.warehouseRows));
-const expandedCargoIds = ref<string[]>(cargoBlocks.value.map((item) => item.id));
+const cloneRows = <T>(rows: T[]): T[] => JSON.parse(JSON.stringify(toRaw(rows))) as T[];
+
+const cargoBlocks = ref<CargoPartyBlock[]>([]);
+const cabinetRows = ref<CabinetRow[]>([]);
+const customsRows = ref<CustomsRow[]>([]);
+const warehouseRows = ref<WarehouseRow[]>([]);
+const expandedCargoIds = ref<string[]>([]);
+
+const resetRecordRows = (record: ShipmentOrderDetailRecord) => {
+  cargoBlocks.value = cloneRows(record.cargoBlocks);
+  cabinetRows.value = cloneRows(record.cabinetRows);
+  customsRows.value = cloneRows(record.customsRows);
+  warehouseRows.value = cloneRows(record.warehouseRows);
+  expandedCargoIds.value = cargoBlocks.value.map((item) => item.id);
+};
+
+watch(() => props.record, resetRecordRows, { immediate: true });
 
 const flowTabs = computed(() => props.record.flowTabs);
 

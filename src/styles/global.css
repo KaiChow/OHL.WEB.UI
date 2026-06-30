@@ -2316,6 +2316,65 @@ button:-moz-focusring,
     0 0 0 2px var(--dense-primary-1);
 }
 
+.stab--scope {
+  position: relative;
+  height: 28px;
+  padding: 0 8px;
+  border-color: transparent;
+  border-radius: 4px;
+  background: transparent;
+}
+
+.stab--scope:hover {
+  background: var(--color-fill-1);
+  border-color: transparent;
+  color: var(--color-text-1);
+}
+
+.stab--scope.stab--active {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--dense-primary-7) !important;
+  box-shadow: none;
+}
+
+.stab--scope.stab--active::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--dense-primary-6);
+}
+
+.stab--scope.stab--active:focus,
+.stab--scope.stab--active:focus-visible {
+  box-shadow: 0 0 0 2px var(--dense-primary-1);
+}
+
+.stab--cargo {
+  height: 26px;
+  padding: 0 9px;
+  border-color: transparent;
+  background: var(--color-fill-1);
+  color: var(--color-text-2);
+}
+
+.stab--cargo:hover {
+  background: var(--dense-primary-1);
+  border-color: var(--dense-primary-2);
+  color: var(--dense-primary-7);
+}
+
+.stab--cargo.stab--active {
+  background: var(--color-bg-card) !important;
+  border-color: var(--dense-primary-3) !important;
+  color: var(--dense-primary-7) !important;
+  box-shadow: inset 0 0 0 1px var(--dense-primary-2);
+}
+
 .stab-badge {
   display: inline-flex;
   align-items: center;
@@ -2471,9 +2530,16 @@ button:-moz-focusring,
 }
 
 .toolbar .arco-btn-outline:not(.arco-btn-disabled) {
-  color: var(--color-text-2) !important;
-  border-color: var(--dense-border-subtle) !important;
+  color: var(--dense-primary-7) !important;
+  border-color: var(--dense-primary-3) !important;
   background: var(--color-bg-card) !important;
+}
+
+.toolbar .arco-btn-outline.arco-btn-disabled {
+  color: var(--color-text-4) !important;
+  border-color: var(--dense-border-subtle) !important;
+  background: var(--color-fill-1) !important;
+  opacity: 0.72;
 }
 
 .toolbar .arco-btn-outline:not(.arco-btn-disabled):hover {

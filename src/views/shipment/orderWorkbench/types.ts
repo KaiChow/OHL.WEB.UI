@@ -15,7 +15,7 @@ export interface ShipmentOrderQuery {
 
 export type ShipmentScopeKey = 'all' | 'personal' | 'permission';
 export type ShipmentCargoScopeKey = 'all' | 'fcl' | 'lcl';
-export type ShipmentStatusKey = 'all' | 'pending' | 'operating' | 'completed' | 'abandoned';
+export type ShipmentStatusKey = 'all' | 'released' | 'received' | 'departed' | 'abandoned';
 
 export interface ShipmentWorkbenchRow {
   id: string;

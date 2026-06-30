@@ -9,7 +9,7 @@ const router = useRouter();
 const shipmentOrderRecord = computed(() => getShipmentOrderMock(typeof route.query.orderNo === 'string' ? route.query.orderNo : undefined));
 
 const goBackToList = () => {
-  router.push({ name: 'ShipmentOrderWorkbenchPreview' });
+  router.push({ name: 'ShipmentOrderWorkbench' });
 };
 </script>
 
