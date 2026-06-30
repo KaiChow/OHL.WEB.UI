@@ -5,7 +5,7 @@ export const appMenus: AppMenuItem[] = [
     key: 'shipment',
     title: '业务单',
     children: [
-      { key: 'shipment-order-workbench', title: '业务单工作台', routeName: 'ShipmentOrderWorkbench' },
+      { key: 'shipment-order-workbench', title: '海运出口订单', routeName: 'ShipmentOrderWorkbench' },
     ],
   },
   {

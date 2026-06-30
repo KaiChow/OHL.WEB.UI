@@ -85,7 +85,7 @@ Rules:
 - Do not apply editable density to read-only documents, attachments, logs, or status-only rows. Density is chosen by the row job, not by the surrounding drawer.
 - Do not push main list rows below 34px; checkbox, status pill, icon actions, and text line-height begin to clip.
 - If row content requires more than 36px, first reduce column complexity or move secondary information to detail, then consider `standard`.
-- Row height must be paired with readable typography: body F1 13px, header F3 13px.
+- Row height must be paired with readable typography: body F1 12px, header F3 12px / 600.
 
 ## Border Policy
 

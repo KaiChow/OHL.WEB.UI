@@ -132,7 +132,7 @@ List-page rules that stay in this file:
 - Entered/selected value: F4 Control 12px/500, `color-text-1`.
 - Placeholder: F4 Control 12px/400, `color-text-3`.
 - Size must stay consistent across label, value, and placeholder. Use color and weight, not mixed font sizes, to separate field name, real query value, and guidance.
-- Do not let Arco default 14px form text or a 13px table-data token leak into the search form.
+- Do not let Arco default 14px form text leak into the search form.
 - Placeholder copy must explain accepted input, not replace the label.
 
 ## Toolbar

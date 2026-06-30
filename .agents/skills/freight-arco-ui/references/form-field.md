@@ -11,7 +11,7 @@
 2. 控件外观只改 `§ Arco Form Controls`，禁止在 `filter-field` / `detail-form` / `detail-drawer` 等布局 class 下重复写 height / font-size
 3. 布局 class（`filter-field`、`detail-form-grid`）只管 **排列与栅格**，不管控件皮肤
 4. **同一 Arco 组件在任意业务场景使用同一字号层级**：`a-input` / `a-select` / `a-date-picker` / `a-input-number` / `a-textarea` 的值与 placeholder 一律 F4 Control 12px；不得因为它出现在列表筛选、弹窗表单、详情编辑或查询抽屉里就切换成另一档字号
-5. **同一信息角色使用同一字号层级**：字段 label 一律 F4 12px；可编辑值/placeholder 一律 F4 Control 12px；只读详情值一律 F1 13px；导航与按钮文字一律 F2 13px
+5. **同一信息角色使用同一字号层级**：业务内容（label、字段值、表格单元格、链接）一律 **12px**；导航与按钮文字一律 F2 **13px**
 
 ## Token
 
@@ -75,7 +75,8 @@
 | Field label | `--dense-font-field` | 12px |
 | Editable control value | `--dense-font-control` | 12px |
 | Editable control placeholder | `--dense-font-control` | 12px |
-| Read-only detail value | `--dense-font-data` | 13px |
+| Read-only detail value (`.detail-field__val`) | `--dense-font-control` | 12px |
+| Table cell / link text | `--dense-font-data` | 12px |
 | Button / tab / pager trigger | `--dense-font-nav` | 13px |
 | Pager summary / helper / weak meta | `--dense-font-aux` | 11px |
 

@@ -468,14 +468,14 @@ if (!mainTs.includes("@icon-park/vue-next/styles/index.css")) {
   });
 }
 if (
-  !/\.arco-input-size-small \.arco-input[\s\S]*font-size:\s*var\(--dense-font-control\)/.test(globalCss) ||
+  !/\.arco-input-wrapper \.arco-input\.arco-input-size-small[\s\S]*font-size:\s*var\(--dense-font-control\)/.test(globalCss) ||
   !/\.arco-select-size-small \.arco-select-view-value[\s\S]*font-size:\s*var\(--dense-font-control\)/.test(globalCss) ||
   !/\.arco-input::placeholder[\s\S]*font-size:\s*var\(--dense-font-control\)/.test(globalCss) ||
   !/\.detail-field__label[\s\S]*font-size:\s*var\(--dense-font-field\)/.test(globalCss) ||
-  !/\.detail-field__val[\s\S]*font-size:\s*var\(--dense-font-data\)/.test(globalCss)
+  !/\.detail-field__val[\s\S]*font-size:\s*var\(--dense-font-control\)/.test(globalCss)
 ) {
   violations.push({
-    rule: 'global.css 必须统一定义 label=12 / editable value=12 / readonly detail value=13 的字号契约',
+    rule: 'global.css 必须统一定义 label=12 / 数据与字段值=12 / nav=13 的字号契约',
     file: 'src/styles/global.css',
     line: 1,
     content: 'missing core typography role contract in global.css',
@@ -491,7 +491,7 @@ if (/\.merged-bar \.toolbar-group \.arco-btn-size-small\s*\{[^}]*font-size:\s*va
 }
 if (/\.query-filter-drawer__group-head\s*\{[^}]*font-size:\s*var\(--dense-font-field\)/.test(globalCss)) {
   violations.push({
-    rule: 'query-filter-drawer__group-head 属于结构标题，不得使用 F4 12px，应使用 F3 Title 13px',
+    rule: 'query-filter-drawer__group-head 属于结构标题，须用 F3 Title token + weight 600，不得仅用 F4 field token',
     file: 'src/styles/global.css',
     line: 1,
     content: 'query-filter-drawer__group-head uses dense-font-field',
@@ -1025,12 +1025,12 @@ if (!globalCss.includes('--dense-font-overlay') || !/\.arco-modal-title\s*\{[^}]
   });
 }
 
-if (!/--dense-font-title:\s*13px/.test(globalCss)) {
+if (!/--dense-font-title:\s*var\(--dense-font-field\)/.test(globalCss)) {
   violations.push({
-    rule: '结构标题 F3 --dense-font-title 必须为 13px（与表格数据同字号，靠字重区分）',
+    rule: '结构标题 F3 --dense-font-title 必须与 F4 同 12px（alias --dense-font-field），靠字重 600 区分',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing --dense-font-title: 13px',
+    content: 'missing --dense-font-title: var(--dense-font-field)',
   });
 }
 

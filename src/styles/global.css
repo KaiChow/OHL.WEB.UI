@@ -249,7 +249,15 @@ body,
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background: var(--dense-page-bg, var(--color-bg-body));
+}
+
+.content>.page-root {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
 }
 
 /* =================================================================
@@ -283,15 +291,15 @@ body,
   --dense-font-overlay: 14px;
   /* F0 浮层/页头标题：Modal、Popover 标题、全页表单页头 */
   --dense-weight-overlay: 600;
-  --dense-font-data: 13px;
-  /* F1 数据正文：表格单元格、只读详情值、核心链接单号 */
+  --dense-font-data: var(--dense-font-field);
+  /* F1 数据正文：表格单元格、链接单号（与 F4 Control 同 12px，靠字重/颜色区分） */
   --dense-weight-data: 400;
   --dense-font-nav: 13px;
-  /* F2 导航交互：Tab、chip、按钮 */
+  /* F2 导航交互：Tab、chip、按钮（唯一 13px 正文档） */
   --dense-weight-nav: 500;
   --dense-weight-nav-active: 600;
-  --dense-font-title: 13px;
-  /* F3 结构标题：VXE 表头、分区标题（与 F1 同字号，靠字重/颜色区分） */
+  --dense-font-title: var(--dense-font-field);
+  /* F3 结构标题：VXE 表头、分区标题（12px/600，与数据同字号） */
   --dense-weight-title: 600;
   --dense-font-field: 12px;
   /* F4 字段标签：filter 顶标 + detail form label（统一） */
@@ -624,6 +632,7 @@ button:-moz-focusring,
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   background: var(--dense-page-bg);
   gap: 0;
   overflow: hidden;
@@ -5093,6 +5102,21 @@ button:-moz-focusring,
   min-width: 0;
 }
 
+/* detail-form 栅格内裸 val：与同行控件同高同字号（F4 Control 12px） */
+.detail-form-grid>.detail-field .detail-field__val {
+  min-height: var(--dense-control-h-form);
+  display: flex;
+  align-items: center;
+  font-size: var(--dense-font-control);
+  font-weight: var(--dense-weight-control);
+  line-height: var(--dense-control-lh-form);
+}
+
+.detail-form-grid>.detail-field .detail-field__label {
+  color: var(--color-text-2);
+  margin-bottom: var(--dense-gap-label);
+}
+
 .detail-field__label {
   font-size: var(--dense-font-field);
   font-weight: var(--dense-weight-field);
@@ -5102,10 +5126,10 @@ button:-moz-focusring,
 }
 
 .detail-field__val {
-  font-size: var(--dense-font-data);
-  font-weight: var(--dense-weight-data);
+  font-size: var(--dense-font-control);
+  font-weight: var(--dense-weight-control);
   color: var(--color-text-1);
-  line-height: 1.5;
+  line-height: var(--dense-control-lh-form);
   word-break: break-word;
 }
 
@@ -6208,7 +6232,7 @@ button:-moz-focusring,
   overflow: visible !important;
 }
 
-.detail-mini-vxe.vxe-table .arco-input-wrapper.arco-input-size-small,
+.detail-mini-vxe.vxe-table .arco-input-wrapper:has(.arco-input.arco-input-size-small),
 .detail-mini-vxe.vxe-table .arco-input-number.arco-input-number-size-small,
 .detail-mini-vxe.vxe-table .arco-select-view-single.arco-select-size-small,
 .detail-mini-vxe.vxe-table .arco-picker-size-small {
@@ -6220,8 +6244,8 @@ button:-moz-focusring,
   box-shadow: none !important;
 }
 
-.detail-mini-vxe.vxe-table .arco-input-wrapper.arco-input-size-small:hover,
-.detail-mini-vxe.vxe-table .arco-input-wrapper.arco-input-size-small:focus-within,
+.detail-mini-vxe.vxe-table .arco-input-wrapper:has(.arco-input.arco-input-size-small):hover,
+.detail-mini-vxe.vxe-table .arco-input-wrapper:has(.arco-input.arco-input-size-small):focus-within,
 .detail-mini-vxe.vxe-table .arco-input-number.arco-input-number-size-small:hover,
 .detail-mini-vxe.vxe-table .arco-input-number.arco-input-number-size-small:focus-within,
 .detail-mini-vxe.vxe-table .arco-select-view-single.arco-select-size-small:hover,
@@ -6232,7 +6256,7 @@ button:-moz-focusring,
   background: var(--color-bg-card) !important;
 }
 
-.detail-mini-vxe.vxe-table .arco-input-size-small .arco-input,
+.detail-mini-vxe.vxe-table .arco-input-wrapper .arco-input.arco-input-size-small,
 .detail-mini-vxe.vxe-table .arco-input-number-size-small .arco-input-number-input,
 .detail-mini-vxe.vxe-table .arco-select-size-small .arco-select-view-value,
 .detail-mini-vxe.vxe-table .arco-select-size-small .arco-select-view-input,
@@ -6248,11 +6272,11 @@ button:-moz-focusring,
   min-height: calc(var(--dense-control-h-detail) - 2px) !important;
 }
 
-.detail-mini-vxe--readonly.vxe-table .arco-input-wrapper.arco-input-size-small,
+.detail-mini-vxe--readonly.vxe-table .arco-input-wrapper:has(.arco-input.arco-input-size-small),
 .detail-mini-vxe--readonly.vxe-table .arco-input-number.arco-input-number-size-small,
 .detail-mini-vxe--readonly.vxe-table .arco-select-view-single.arco-select-size-small,
 .detail-mini-vxe--readonly.vxe-table .arco-picker-size-small,
-.detail-mini-vxe--summary.vxe-table .arco-input-wrapper.arco-input-size-small,
+.detail-mini-vxe--summary.vxe-table .arco-input-wrapper:has(.arco-input.arco-input-size-small),
 .detail-mini-vxe--summary.vxe-table .arco-input-number.arco-input-number-size-small,
 .detail-mini-vxe--summary.vxe-table .arco-select-view-single.arco-select-size-small,
 .detail-mini-vxe--summary.vxe-table .arco-picker-size-small {
@@ -6506,7 +6530,8 @@ button:-moz-focusring,
 .arco-select-dropdown .arco-select-option-content,
 .arco-select-dropdown-list .arco-select-option,
 .arco-select-dropdown-size-small .arco-select-option,
-.arco-select-dropdown-size-small .arco-select-option-content {
+.arco-select-dropdown-size-small .arco-select-option-content,
+.arco-select-dropdown .arco-select-option .arco-select-option-content {
   font-size: var(--dense-font-control) !important;
   font-weight: var(--dense-weight-control) !important;
   line-height: var(--dense-control-lh-form) !important;
@@ -6580,8 +6605,9 @@ button:-moz-focusring,
   padding-bottom: 0;
 }
 
-/* B · Default — 单行可编辑控件 shell */
-.arco-input-wrapper.arco-input-size-small,
+/* B · Default — 单行可编辑控件 shell
+   Arco Input：size 类只在 <input>（.arco-input.arco-input-size-small），不在 wrapper 上 */
+.arco-input-wrapper:has(.arco-input.arco-input-size-small),
 .arco-select-view-single.arco-select-size-small,
 .arco-select-view-single.arco-select-view-size-small,
 .arco-input-number.arco-input-number-size-small,
@@ -6595,10 +6621,33 @@ button:-moz-focusring,
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-/* B · Default — 内文 / 行高（含 select 空/有值对齐） */
-.arco-input-size-small .arco-input,
+/* B · Default — Input 内文（镜像 Arco：.arco-input-wrapper .arco-input.arco-input-size-small → 14px） */
+.arco-input-wrapper .arco-input.arco-input-size-small {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control) !important;
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  line-height: var(--dense-control-lh-form) !important;
+}
+
+/* B · Default — Select 触发器内文（须压过 Arco size-small 的 14px + min-height:26px） */
+.arco-select-view-single.arco-select-view-size-small .arco-select-view-value,
+.arco-select-view-single.arco-select-view-size-small .arco-select-view-input,
+.arco-select-view-single.arco-select-size-small .arco-select-view-value,
+.arco-select-view-single.arco-select-size-small .arco-select-view-input,
 .arco-select-size-small .arco-select-view-value,
 .arco-select-size-small .arco-select-view-input,
+.arco-select-view-multiple.arco-select-view-size-small .arco-select-view-input,
+.arco-select-view-multiple.arco-select-size-small .arco-select-view-input {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control) !important;
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  line-height: var(--dense-control-lh-form) !important;
+}
+
 .arco-input-number-size-small .arco-input-number-input,
 .arco-picker-size-small input,
 .arco-picker-range.arco-picker-size-small input {
@@ -6610,27 +6659,23 @@ button:-moz-focusring,
   line-height: var(--dense-control-lh-form) !important;
 }
 
-/* Select 触发器：Arco 常把 size 只挂在 view 上，须与下拉项同 token */
+/* DatePicker 展示区（非裸 input 时仍走 F4 Control） */
+.arco-picker-size-small .arco-picker-input,
+.arco-picker-range.arco-picker-size-small .arco-picker-input,
+.arco-picker-size-small .arco-picker-start-time,
+.arco-picker-size-small .arco-picker-end-time {
+  font-size: var(--dense-font-control) !important;
+  font-weight: var(--dense-weight-control);
+  line-height: var(--dense-control-lh-form) !important;
+}
+
+/* Select 触发器 shell + 下拉项：与 Input 同 token（F4 Control 12px） */
 .arco-select-view-single.arco-select-view-size-small,
 .arco-select-view-single.arco-select-size-small,
 .arco-select-view-multiple.arco-select-view-size-small,
 .arco-select-view-multiple.arco-select-size-small {
   font-size: var(--dense-font-control) !important;
   font-weight: var(--dense-weight-control);
-}
-
-.arco-select-view-single.arco-select-view-size-small .arco-select-view-value,
-.arco-select-view-single.arco-select-view-size-small .arco-select-view-input,
-.arco-select-view-single.arco-select-size-small .arco-select-view-value,
-.arco-select-view-single.arco-select-size-small .arco-select-view-input,
-.arco-select-view-multiple.arco-select-view-size-small .arco-select-view-input,
-.arco-select-view-multiple.arco-select-size-small .arco-select-view-input {
-  font-size: var(--dense-font-control) !important;
-  font-weight: var(--dense-weight-control);
-  min-height: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  line-height: var(--dense-control-lh-form) !important;
 }
 
 .arco-select-view-multiple.arco-select-view-size-small .arco-select-view-tag,

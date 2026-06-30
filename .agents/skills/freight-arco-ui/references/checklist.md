@@ -142,7 +142,7 @@
 - Placeholder text is guidance only and differs from entered values by `color-text-3` and weight 400, not by a smaller font size.
 - No list/detail form uses mixed label/value/placeholder sizes such as 12/13/11 or leaked Arco 14px labels.
 - The same Arco control keeps the same text tier across list filter, modal form, drawer form, and advanced query drawer; no per-surface font-size fork for the same control.
-- The same information role keeps the same text tier across the app: label=12, editable value/placeholder=12, readonly detail value=13, nav/button/pager trigger=13, helper/meta=11.
+- The same information role keeps the same text tier across the app: business content=12 (label, field value, table cell, link), nav/button/pager trigger=13, helper/meta=11.
 - Hard-coded 10/11/12/13 values are either tokenized or explicitly justified as shell/brand/icon/micro exceptions; business modules do not accumulate silent hardcoded sizes.
 - Typography review can be traced back to the `Component Typography Map`; if a reviewer cannot map a component to a token tier, the rule is incomplete.
 - Codes and identifiers use mono or tabular numeric styling where comparison matters.

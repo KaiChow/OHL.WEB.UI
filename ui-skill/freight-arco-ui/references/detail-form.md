@@ -43,7 +43,7 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 
 - Values in the same `dds-hero` fact row must use one value size. Do not render the lead fact larger than neighboring facts inside the same compact row.
 - The lead fact can be stronger through placement, grouping, and 600 weight, but not through an oversized font inside the same compact fact row.
-- Fact labels use F5/meta color; fact values use F1 13px/core text color.
+- Fact labels use F5/meta color; fact values use F1 12px / core text color.
 - Use a larger hero token only when the lead fact or object identity is in a separate hero title area, not mixed with ordinary facts.
 
 ### Detail Head Business Emphasis
@@ -294,7 +294,7 @@ Do not put read-only fields in a separate grid below the editable grid unless th
 - Use vertical labels for dense enterprise forms.
 - Detail form labels, input values, select values, textarea values, placeholders, and read-only field values use the shared F4 Control 12px layer.
 - Use color and weight for hierarchy: labels use `color-text-2`/500, real values use `color-text-1`/500, placeholders use `color-text-3`/400.
-- Do not allow Arco default 14px labels or 13px table-data typography inside editable/detail form fields.
+- Do not allow Arco default 14px labels or a second business-content size inside editable/detail form fields.
 - Use 4-column grid on wide screens, reduce at 1280px.
 - Long labels should not truncate important meaning:
   - Prefer label width/vertical label.
