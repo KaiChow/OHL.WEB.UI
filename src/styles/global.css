@@ -590,36 +590,36 @@ button:-moz-focusring,
   outline: none !important;
 }
 
-.arco-btn:focus,
-.arco-btn:focus-visible {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal, .arco-popconfirm, .arco-popover, .action-menu, .row-action-menu) .arco-btn:focus,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal, .arco-popconfirm, .arco-popover, .action-menu, .row-action-menu) .arco-btn:focus-visible {
   outline: none !important;
   box-shadow: none !important;
 }
 
-.arco-btn-primary:focus-visible,
-.arco-btn-outline:focus-visible,
-.arco-btn-dashed:focus-visible {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal, .arco-popconfirm, .arco-popover, .action-menu, .row-action-menu) .arco-btn-primary:focus-visible,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal, .arco-popconfirm, .arco-popover, .action-menu, .row-action-menu) .arco-btn-outline:focus-visible,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal, .arco-popconfirm, .arco-popover, .action-menu, .row-action-menu) .arco-btn-dashed:focus-visible {
   box-shadow: 0 0 0 2px var(--dense-primary-2) !important;
 }
 
-.arco-btn-text:focus-visible {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal, .arco-popconfirm, .arco-popover, .action-menu, .row-action-menu) .arco-btn-text:focus-visible {
   box-shadow: 0 0 0 2px var(--dense-primary-1) !important;
 }
 
-.arco-btn-primary:not(.arco-btn-disabled) {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal, .arco-popconfirm, .arco-popover, .action-menu, .row-action-menu) .arco-btn-primary:not(.arco-btn-disabled) {
   background-color: var(--dense-primary-6) !important;
   border-color: var(--dense-primary-6) !important;
   color: #fff !important;
 }
 
-.arco-btn-primary:not(.arco-btn-disabled):hover,
-.arco-btn-primary:not(.arco-btn-disabled):focus {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal, .arco-popconfirm, .arco-popover, .action-menu, .row-action-menu) .arco-btn-primary:not(.arco-btn-disabled):hover,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal, .arco-popconfirm, .arco-popover, .action-menu, .row-action-menu) .arco-btn-primary:not(.arco-btn-disabled):focus {
   background-color: var(--dense-primary-7) !important;
   border-color: var(--dense-primary-7) !important;
   color: #fff !important;
 }
 
-.arco-btn-primary:not(.arco-btn-disabled):active {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal, .arco-popconfirm, .arco-popover, .action-menu, .row-action-menu) .arco-btn-primary:not(.arco-btn-disabled):active {
   background-color: var(--dense-primary-8) !important;
   border-color: var(--dense-primary-8) !important;
   color: #fff !important;
@@ -2678,24 +2678,30 @@ button:-moz-focusring,
    重要：plain CSS 文件，不可用 :deep()，直接用后代选择器
    ================================================================= */
 
-.vxe-table--body-wrapper,
-.vxe-table--header-wrapper,
-.vxe-table--footer-wrapper {
+.vxe-table.workbench-table .vxe-table--body-wrapper,
+.vxe-table.workbench-table .vxe-table--header-wrapper,
+.vxe-table.workbench-table .vxe-table--footer-wrapper,
+.detail-mini-vxe.vxe-table .vxe-table--body-wrapper,
+.detail-mini-vxe.vxe-table .vxe-table--header-wrapper,
+.detail-mini-vxe.vxe-table .vxe-table--footer-wrapper {
   background-image: none !important;
 }
 
 /* ── 表头 ─────────────────────────────────────────────────────── */
 /* 表头与数据区靠背景渐变分层，wrapper 不再额外加底边（避免多一条线、且强色线易误判为选中） */
-.vxe-table .vxe-table--header-wrapper {
+.vxe-table.workbench-table .vxe-table--header-wrapper,
+.detail-mini-vxe.vxe-table .vxe-table--header-wrapper {
   border-bottom: none !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.96);
 }
 
-.vxe-table .vxe-header--row {
+.vxe-table.workbench-table .vxe-header--row,
+.detail-mini-vxe.vxe-table .vxe-header--row {
   height: var(--dense-header-h) !important;
 }
 
-.vxe-table .vxe-header--column {
+.vxe-table.workbench-table .vxe-header--column,
+.detail-mini-vxe.vxe-table .vxe-header--column {
   height: var(--dense-header-h) !important;
   padding: 0 !important;
   font-size: var(--dense-font-title) !important;
@@ -2708,23 +2714,28 @@ button:-moz-focusring,
   border-bottom: 1px solid var(--dense-table-header-border) !important;
 }
 
-.vxe-table .vxe-header--column:last-child {
+.vxe-table.workbench-table .vxe-header--column:last-child,
+.detail-mini-vxe.vxe-table .vxe-header--column:last-child {
   border-right: none !important;
 }
 
-.vxe-table .vxe-cell--sort {
+.vxe-table.workbench-table .vxe-cell--sort,
+.detail-mini-vxe.vxe-table .vxe-cell--sort {
   color: var(--color-text-4) !important;
 }
 
 /* fixed 列表头：稍深一档，区分可固定列 */
-.vxe-table .vxe-header--column.col--fixed-left,
-.vxe-table .vxe-header--column.col--fixed-right {
+.vxe-table.workbench-table .vxe-header--column.col--fixed-left,
+.vxe-table.workbench-table .vxe-header--column.col--fixed-right,
+.detail-mini-vxe.vxe-table .vxe-header--column.col--fixed-left,
+.detail-mini-vxe.vxe-table .vxe-header--column.col--fixed-right {
   background: var(--dense-table-header-bg) !important;
   color: var(--color-text-1) !important;
 }
 
 /* ── 行分割线：打在 td 上（tr 上无效，HTML 表格模型限制）── */
-.vxe-table .vxe-body--column {
+.vxe-table.workbench-table .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--column {
   border-right: 1px solid var(--dense-table-col-border) !important;
   border-bottom: 1px solid var(--dense-table-row-border) !important;
   transition: background .12s, box-shadow .12s;
@@ -2734,11 +2745,13 @@ button:-moz-focusring,
   line-height: 1.4;
 }
 
-.vxe-table .vxe-body--column:last-child {
+.vxe-table.workbench-table .vxe-body--column:last-child,
+.detail-mini-vxe.vxe-table .vxe-body--column:last-child {
   border-right: none !important;
 }
 
-.vxe-table .vxe-body--row:last-child .vxe-body--column {
+.vxe-table.workbench-table .vxe-body--row:last-child .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row:last-child .vxe-body--column {
   border-bottom: none !important;
 }
 
@@ -2806,29 +2819,36 @@ button:-moz-focusring,
 /* （.vxe-body--column 已设 background: 无值，继承父级白底，无需额外声明） */
 
 /* ② 斑马纹（:stripe="true" → .row--stripe）：极浅冷灰，和白底有明显对比 */
-.vxe-table .vxe-body--row.row--stripe .vxe-body--column {
+.vxe-table.workbench-table .vxe-body--row.row--stripe .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--stripe .vxe-body--column {
   background: var(--dense-row-stripe);
 }
 
 /* ③ Hover（isHover:true → .row--hover；同时 CSS :hover 兜底）*/
-.vxe-table .vxe-body--row.row--hover .vxe-body--column,
-.vxe-table .vxe-body--row:hover .vxe-body--column {
+.vxe-table.workbench-table .vxe-body--row.row--hover .vxe-body--column,
+.vxe-table.workbench-table .vxe-body--row:hover .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--hover .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row:hover .vxe-body--column {
   background: var(--dense-vxe-surface-hover-bg) !important;
 }
 
 /* ④ 选中行（checkbox-config highlight:true → .row--checked）*/
-.vxe-table .vxe-body--row.row--checked .vxe-body--column {
+.vxe-table.workbench-table .vxe-body--row.row--checked .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--checked .vxe-body--column {
   background: var(--dense-vxe-surface-checked-bg) !important;
 }
 
 /* 选中行 hover 再加深 */
-.vxe-table .vxe-body--row.row--checked.row--hover .vxe-body--column,
-.vxe-table .vxe-body--row.row--checked:hover .vxe-body--column {
+.vxe-table.workbench-table .vxe-body--row.row--checked.row--hover .vxe-body--column,
+.vxe-table.workbench-table .vxe-body--row.row--checked:hover .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--checked.row--hover .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--checked:hover .vxe-body--column {
   background: var(--dense-vxe-surface-checked-hover-bg) !important;
 }
 
 /* ── 序号列 ─────────────────────────────────────────────────── */
-.vxe-table .vxe-cell--seq {
+.vxe-table.workbench-table .vxe-cell--seq,
+.detail-mini-vxe.vxe-table .vxe-cell--seq {
   font-size: var(--dense-font-micro);
   font-weight: var(--dense-weight-micro);
   color: var(--color-text-4);
@@ -2837,46 +2857,61 @@ button:-moz-focusring,
 
 /* ── 固定列（右侧） ─────────────────────────────────────────── */
 /* 默认：纯白遮盖滚动内容；hover/选中继承行状态颜色 */
-.vxe-table .col--fixed-right .vxe-body--column,
-.vxe-table .vxe-body--column.col--fixed-right {
+.vxe-table.workbench-table .col--fixed-right .vxe-body--column,
+.vxe-table.workbench-table .vxe-body--column.col--fixed-right,
+.detail-mini-vxe.vxe-table .col--fixed-right .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--column.col--fixed-right {
   border-left: 1px solid var(--dense-table-header-border) !important;
   background: var(--dense-table-fixed-bg);
   box-shadow: var(--dense-table-fixed-shadow);
 }
 
 /* 斑马纹固定列 */
-.vxe-table .vxe-body--row.row--stripe .col--fixed-right .vxe-body--column,
-.vxe-table .vxe-body--row.row--stripe .vxe-body--column.col--fixed-right {
+.vxe-table.workbench-table .vxe-body--row.row--stripe .col--fixed-right .vxe-body--column,
+.vxe-table.workbench-table .vxe-body--row.row--stripe .vxe-body--column.col--fixed-right,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--stripe .col--fixed-right .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--stripe .vxe-body--column.col--fixed-right {
   background: var(--color-bg-card);
 }
 
 /* hover 固定列 */
-.vxe-table .vxe-body--row.row--hover .col--fixed-right .vxe-body--column,
-.vxe-table .vxe-body--row.row--hover .vxe-body--column.col--fixed-right,
-.vxe-table .vxe-body--row:hover .col--fixed-right .vxe-body--column,
-.vxe-table .vxe-body--row:hover .vxe-body--column.col--fixed-right {
+.vxe-table.workbench-table .vxe-body--row.row--hover .col--fixed-right .vxe-body--column,
+.vxe-table.workbench-table .vxe-body--row.row--hover .vxe-body--column.col--fixed-right,
+.vxe-table.workbench-table .vxe-body--row:hover .col--fixed-right .vxe-body--column,
+.vxe-table.workbench-table .vxe-body--row:hover .vxe-body--column.col--fixed-right,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--hover .col--fixed-right .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--hover .vxe-body--column.col--fixed-right,
+.detail-mini-vxe.vxe-table .vxe-body--row:hover .col--fixed-right .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row:hover .vxe-body--column.col--fixed-right {
   background: var(--dense-vxe-surface-hover-bg) !important;
 }
 
 /* 选中 固定列 */
-.vxe-table .vxe-body--row.row--checked .col--fixed-right .vxe-body--column,
-.vxe-table .vxe-body--row.row--checked .vxe-body--column.col--fixed-right {
+.vxe-table.workbench-table .vxe-body--row.row--checked .col--fixed-right .vxe-body--column,
+.vxe-table.workbench-table .vxe-body--row.row--checked .vxe-body--column.col--fixed-right,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--checked .col--fixed-right .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--checked .vxe-body--column.col--fixed-right {
   background: var(--dense-vxe-surface-checked-bg) !important;
 }
 
 /* 选中 hover 固定列 */
-.vxe-table .vxe-body--row.row--checked.row--hover .col--fixed-right .vxe-body--column,
-.vxe-table .vxe-body--row.row--checked:hover .vxe-body--column.col--fixed-right {
+.vxe-table.workbench-table .vxe-body--row.row--checked.row--hover .col--fixed-right .vxe-body--column,
+.vxe-table.workbench-table .vxe-body--row.row--checked:hover .vxe-body--column.col--fixed-right,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--checked.row--hover .col--fixed-right .vxe-body--column,
+.detail-mini-vxe.vxe-table .vxe-body--row.row--checked:hover .vxe-body--column.col--fixed-right {
   background: var(--dense-vxe-surface-checked-hover-bg) !important;
 }
 
-.vxe-table .col--fixed-right .vxe-header--column,
-.vxe-table .vxe-header--column.col--fixed-right {
+.vxe-table.workbench-table .col--fixed-right .vxe-header--column,
+.vxe-table.workbench-table .vxe-header--column.col--fixed-right,
+.detail-mini-vxe.vxe-table .col--fixed-right .vxe-header--column,
+.detail-mini-vxe.vxe-table .vxe-header--column.col--fixed-right {
   border-left: 1px solid var(--dense-table-header-border) !important;
   box-shadow: var(--dense-table-fixed-shadow);
 }
 
-.vxe-table .row-actions {
+.vxe-table.workbench-table .row-actions,
+.detail-mini-vxe.vxe-table .row-actions {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2890,7 +2925,8 @@ button:-moz-focusring,
   box-shadow: none;
 }
 
-.vxe-table .row-action-btn.arco-btn {
+.vxe-table.workbench-table .row-action-btn.arco-btn,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn {
   width: 24px !important;
   height: 24px !important;
   min-width: 24px !important;
@@ -2903,11 +2939,16 @@ button:-moz-focusring,
   transition: color .12s, background .12s, border-color .12s !important;
 }
 
-.vxe-table .row-action-btn.arco-btn:hover,
-.vxe-table .row-action-btn.arco-btn:focus,
-.vxe-table .row-action-btn.arco-btn:focus-visible,
-.vxe-table .row-action-btn.arco-btn:active,
-.vxe-table .row-action-btn.arco-btn[aria-expanded="true"] {
+.vxe-table.workbench-table .row-action-btn.arco-btn:hover,
+.vxe-table.workbench-table .row-action-btn.arco-btn:focus,
+.vxe-table.workbench-table .row-action-btn.arco-btn:focus-visible,
+.vxe-table.workbench-table .row-action-btn.arco-btn:active,
+.vxe-table.workbench-table .row-action-btn.arco-btn[aria-expanded="true"],
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn:hover,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn:focus,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn:focus-visible,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn:active,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn[aria-expanded="true"] {
   color: var(--dense-primary) !important;
   background: var(--dense-primary-soft) !important;
   border-color: var(--dense-primary-2) !important;
@@ -2916,31 +2957,39 @@ button:-moz-focusring,
   box-shadow: none !important;
 }
 
-.vxe-table .row-action-btn.arco-btn-disabled,
-.vxe-table .btn-download-disabled.arco-btn {
+.vxe-table.workbench-table .row-action-btn.arco-btn-disabled,
+.vxe-table.workbench-table .btn-download-disabled.arco-btn,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn-disabled,
+.detail-mini-vxe.vxe-table .btn-download-disabled.arco-btn {
   color: var(--color-text-4) !important;
   border-color: var(--color-border-1) !important;
   background: var(--color-fill-1) !important;
   cursor: not-allowed !important;
 }
 
-.vxe-table .row-action-btn--primary.arco-btn:hover {
+.vxe-table.workbench-table .row-action-btn--primary.arco-btn:hover,
+.detail-mini-vxe.vxe-table .row-action-btn--primary.arco-btn:hover {
   color: #fff !important;
   background: var(--dense-primary) !important;
   border-color: var(--dense-primary) !important;
 }
 
 /* 行内删除：默认弱显，hover/focus 才强调 danger，避免满屏红图标抢视线 */
-.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn {
+.vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn {
   color: var(--color-text-3) !important;
   border-color: transparent !important;
   background: transparent !important;
 }
 
-.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:hover,
-.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:focus,
-.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:focus-visible,
-.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:active {
+.vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn:hover,
+.vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn:focus,
+.vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn:focus-visible,
+.vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn:active,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:hover,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:focus,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:focus-visible,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:active {
   color: var(--dense-danger-6) !important;
   background: var(--dense-danger-1) !important;
   border-color: var(--dense-danger-3) !important;
@@ -6473,7 +6522,7 @@ button:-moz-focusring,
    Arco size 规范：业务区只用 size="small"；禁止 medium/large；mini 仅浮层内部由 CSS 归一
    详见 ui-skill/.../references/component-size.md
    ================================================================= */
-.arco-btn-size-small {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal, .arco-popconfirm, .arco-popover) .arco-btn-size-small {
   height: var(--dense-control-h-nav) !important;
   font-size: var(--dense-font-nav) !important;
   font-weight: var(--dense-weight-nav) !important;
@@ -6481,7 +6530,7 @@ button:-moz-focusring,
   border-radius: var(--dense-radius) !important;
 }
 
-.arco-btn-size-mini {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal, .arco-popconfirm, .arco-popover) .arco-btn-size-mini {
   height: 24px !important;
   font-size: var(--dense-font-control) !important;
   font-weight: var(--dense-weight-nav) !important;
@@ -6589,10 +6638,10 @@ button:-moz-focusring,
 /* A · Field label（字段名）— 须覆盖 Arco .arco-form-size-small label 14px 默认 */
 .field-label,
 .filter-field__label,
-.arco-form-size-small .arco-form-item-label-col>.arco-form-item-label,
-.arco-form-size-mini .arco-form-item-label-col>.arco-form-item-label,
-.arco-form-item-label-col>.arco-form-item-label,
-.arco-form-item-label>label {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-form-size-small .arco-form-item-label-col>.arco-form-item-label,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-form-size-mini .arco-form-item-label-col>.arco-form-item-label,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-form-item-label-col>.arco-form-item-label,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-form-item-label>label {
   font-size: var(--dense-font-field) !important;
   font-weight: var(--dense-weight-field);
   color: var(--color-text-2);
@@ -6600,19 +6649,19 @@ button:-moz-focusring,
   letter-spacing: 0;
 }
 
-.arco-form-item-layout-vertical>.arco-form-item-label-col {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-form-item-layout-vertical>.arco-form-item-label-col {
   margin-bottom: var(--dense-gap-label) !important;
   padding-bottom: 0;
 }
 
 /* B · Default — 单行可编辑控件 shell
    Arco Input：size 类只在 <input>（.arco-input.arco-input-size-small），不在 wrapper 上 */
-.arco-input-wrapper:has(.arco-input.arco-input-size-small),
-.arco-select-view-single.arco-select-size-small,
-.arco-select-view-single.arco-select-view-size-small,
-.arco-input-number.arco-input-number-size-small,
-.arco-picker-size-small,
-.arco-picker-range.arco-picker-size-small {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-input-wrapper:has(.arco-input.arco-input-size-small),
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-select-view-single.arco-select-size-small,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-select-view-single.arco-select-view-size-small,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-input-number.arco-input-number-size-small,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-picker-size-small,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-picker-range.arco-picker-size-small {
   height: var(--dense-control-h-form) !important;
   min-height: var(--dense-control-h-form) !important;
   border-radius: var(--dense-radius) !important;
@@ -6622,7 +6671,7 @@ button:-moz-focusring,
 }
 
 /* B · Default — Input 内文（镜像 Arco：.arco-input-wrapper .arco-input.arco-input-size-small → 14px） */
-.arco-input-wrapper .arco-input.arco-input-size-small {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-input-wrapper .arco-input.arco-input-size-small {
   font-size: var(--dense-font-control) !important;
   font-weight: var(--dense-weight-control) !important;
   min-height: 0 !important;
@@ -6632,14 +6681,14 @@ button:-moz-focusring,
 }
 
 /* B · Default — Select 触发器内文（须压过 Arco size-small 的 14px + min-height:26px） */
-.arco-select-view-single.arco-select-view-size-small .arco-select-view-value,
-.arco-select-view-single.arco-select-view-size-small .arco-select-view-input,
-.arco-select-view-single.arco-select-size-small .arco-select-view-value,
-.arco-select-view-single.arco-select-size-small .arco-select-view-input,
-.arco-select-size-small .arco-select-view-value,
-.arco-select-size-small .arco-select-view-input,
-.arco-select-view-multiple.arco-select-view-size-small .arco-select-view-input,
-.arco-select-view-multiple.arco-select-size-small .arco-select-view-input {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-select-view-single.arco-select-view-size-small .arco-select-view-value,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-select-view-single.arco-select-view-size-small .arco-select-view-input,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-select-view-single.arco-select-size-small .arco-select-view-value,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-select-view-single.arco-select-size-small .arco-select-view-input,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-select-size-small .arco-select-view-value,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-select-size-small .arco-select-view-input,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-select-view-multiple.arco-select-view-size-small .arco-select-view-input,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-select-view-multiple.arco-select-size-small .arco-select-view-input {
   font-size: var(--dense-font-control) !important;
   font-weight: var(--dense-weight-control) !important;
   min-height: 0 !important;
@@ -6648,9 +6697,9 @@ button:-moz-focusring,
   line-height: var(--dense-control-lh-form) !important;
 }
 
-.arco-input-number-size-small .arco-input-number-input,
-.arco-picker-size-small input,
-.arco-picker-range.arco-picker-size-small input {
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-input-number-size-small .arco-input-number-input,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-picker-size-small input,
+:where(.page-root, .detail-drawer, .query-filter-drawer, .arco-modal) .arco-picker-range.arco-picker-size-small input {
   font-size: var(--dense-font-control) !important;
   font-weight: var(--dense-weight-control);
   min-height: 0 !important;

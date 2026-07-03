@@ -9,8 +9,8 @@ import {
   IconRefresh,
   IconPlus,
   IconDownload,
+  IconDown,
   IconEye,
-  IconEdit,
   IconMore,
   IconSettings,
 } from '@arco-design/web-vue/es/icon';
@@ -29,18 +29,12 @@ import { getShipmentOrderMock } from '../orderDetail/mockData';
 const router = useRouter();
 
 const STATUS_TABS: { key: ShipmentStatusKey; label: string; tone?: 'danger' | 'warn' }[] = [
-  { key: 'all', label: '全部订单' },
+  { key: 'all', label: '全部' },
   { key: 'waitBooking', label: '待订舱' },
   { key: 'waitRelease', label: '待放舱' },
-  { key: 'waitTruck', label: '待拖车' },
   { key: 'waitCustoms', label: '待报关' },
-  { key: 'waitLoading', label: '待装柜' },
   { key: 'sailed', label: '已开船' },
-  { key: 'waitSi', label: '待补料' },
-  { key: 'waitBlConfirm', label: '待提单确认' },
-  { key: 'feeUnconfirmed', label: '费用未确认', tone: 'warn' },
-  { key: 'fileMissing', label: '文件缺失', tone: 'warn' },
-  { key: 'exception', label: '异常订单', tone: 'danger' },
+  { key: 'exception', label: '异常', tone: 'danger' },
 ];
 
 const defaultQuery = (): ShipmentOrderQuery => ({
@@ -98,22 +92,39 @@ const filteredRows = computed(() => {
   const q = appliedQuery.value;
   return allRows.value.filter((row) => {
     if (activeStatusTab.value !== 'all' && !row.quickStatus.includes(activeStatusTab.value)) return false;
-    if (!matchText(row.orderNo, q.orderNo)) return false;
+    if (q.orderNo.trim() && ![row.orderNo, row.blNo, row.bookingNo].some((value) => matchText(value, q.orderNo))) return false;
     if (!matchText(row.customerName, q.customerName)) return false;
-    if (!matchText(row.vesselVoyage, q.vesselVoyage)) return false;
-    if (!matchText(row.blNo, q.blNo)) return false;
     if (!matchText(row.pol, q.pol)) return false;
     if (!matchText(row.pod, q.pod)) return false;
+    if (!matchText(row.vesselVoyage, q.vesselVoyage)) return false;
+    if (!matchText(row.blNo, q.blNo)) return false;
+    if (q.bookingNo && !matchText(row.bookingNo, q.bookingNo)) return false;
     if (q.orderStatus && row.orderStatus !== q.orderStatus) return false;
     if (q.operator && row.operator !== q.operator) return false;
     if (q.businessType && row.businessType !== q.businessType) return false;
     if (q.hasException === 'yes' && row.exceptionStatus !== 'open') return false;
     if (q.hasException === 'no' && row.exceptionStatus === 'open') return false;
-    if (q.bookingNo && !matchText(row.bookingNo, q.bookingNo)) return false;
+    if (q.etdRange.length === 2) {
+      const [start, end] = q.etdRange;
+      if ((start && row.etd < start) || (end && row.etd > end)) return false;
+    }
+    if (q.closingRange.length === 2) {
+      const [start, end] = q.closingRange;
+      const closingDate = row.closingTime.slice(0, 10);
+      if ((start && closingDate < start) || (end && closingDate > end)) return false;
+    }
     if (q.fileStatus === 'missing' && row.fileStatus !== 'missing') return false;
+    if (q.fileStatus === 'complete' && row.fileStatus !== 'complete') return false;
     if (q.feeStatus === 'pending' && row.feeStatus !== 'pending') return false;
     if (q.feeStatus === 'none' && row.feeStatus !== 'none') return false;
+    if (q.feeStatus === 'confirmed' && row.feeStatus !== 'confirmed') return false;
+    if (q.updatedRange.length === 2) {
+      const [start, end] = q.updatedRange;
+      const updatedDate = row.updatedAt.slice(0, 10);
+      if ((start && updatedDate < start) || (end && updatedDate > end)) return false;
+    }
     if (q.isOverdue === 'yes' && !row.isOverdue) return false;
+    if (q.isOverdue === 'no' && row.isOverdue) return false;
     return true;
   });
 });
@@ -154,23 +165,19 @@ const handleReset = () => {
 };
 
 const clearAdvancedFilters = () => {
+  query.vesselVoyage = '';
+  query.blNo = '';
   query.bookingNo = '';
-  query.containerNo = '';
-  query.containerType = undefined;
-  query.carrier = undefined;
-  query.overseasAgent = undefined;
-  query.customsMode = undefined;
-  query.truckSupplier = undefined;
-  query.warehouse = undefined;
-  query.tradeTerm = undefined;
-  query.paymentMethod = undefined;
+  query.orderStatus = undefined;
+  query.operator = undefined;
+  query.businessType = undefined;
+  query.etdRange = [];
+  query.closingRange = [];
+  query.hasException = undefined;
   query.fileStatus = undefined;
   query.feeStatus = undefined;
-  query.createdRange = [];
   query.updatedRange = [];
   query.isOverdue = undefined;
-  query.hasUnreadMsg = undefined;
-  query.hasPendingApproval = undefined;
 };
 
 const applyAdvancedFilters = () => {
@@ -246,6 +253,14 @@ const handleBatchNotify = () => {
   Message.success(`已向 ${selectedCount.value} 票订单发送通知（模拟）`);
 };
 
+const handleBatchAction = (label: string) => {
+  if (!selectedCount.value) {
+    Message.warning('请先选择订单');
+    return;
+  }
+  Message.success(`${label}已提交（模拟）`);
+};
+
 const fetchList = async () => {
   loading.value = true;
   await new Promise((r) => setTimeout(r, 300));
@@ -258,77 +273,31 @@ page.total = filteredRows.value.length;
 
 <template>
   <div class="page-root page-root--dense">
-    <!-- S3：2 行核心筛选 + 更多筛选抽屉 -->
-    <div class="zone-l2-filter-card zone-card filter-card filter-card--two-row">
-      <div class="filter-card__matrix">
-        <div class="filter-grid filter-grid--6col">
-          <div class="filter-field">
-            <label class="filter-field__label">订单号</label>
-            <a-input v-model="query.orderNo" size="small" allow-clear placeholder="业务单号" @press-enter="handleSearch" />
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">客户名称</label>
-            <a-input v-model="query.customerName" size="small" allow-clear placeholder="委托客户" @press-enter="handleSearch" />
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">船名航次</label>
-            <a-input v-model="query.vesselVoyage" size="small" allow-clear placeholder="Vessel / Voyage" @press-enter="handleSearch" />
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">提单号</label>
-            <a-input v-model="query.blNo" size="small" allow-clear placeholder="MBL / HBL" @press-enter="handleSearch" />
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">起运港</label>
-            <a-input v-model="query.pol" size="small" allow-clear placeholder="POL" @press-enter="handleSearch" />
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">目的港</label>
-            <a-input v-model="query.pod" size="small" allow-clear placeholder="POD" @press-enter="handleSearch" />
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">订单状态</label>
-            <a-select v-model="query.orderStatus" size="small" allow-clear placeholder="请选择">
-              <a-option value="waitBooking">待订舱</a-option>
-              <a-option value="released">已放舱</a-option>
-              <a-option value="customs">报关中</a-option>
-              <a-option value="sailed">已开船</a-option>
-              <a-option value="completed">已完成</a-option>
-            </a-select>
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">操作人员</label>
-            <a-select v-model="query.operator" size="small" allow-clear placeholder="请选择">
-              <a-option value="张操作">张操作</a-option>
-              <a-option value="李操作">李操作</a-option>
-              <a-option value="王操作">王操作</a-option>
-              <a-option value="赵操作">赵操作</a-option>
-            </a-select>
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">业务类型</label>
-            <a-select v-model="query.businessType" size="small" allow-clear placeholder="请选择">
-              <a-option value="FCL">FCL</a-option>
-              <a-option value="LCL">LCL</a-option>
-            </a-select>
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">开船日期</label>
-            <a-range-picker v-model="query.etdRange" size="small" style="width:100%" />
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">截关日期</label>
-            <a-range-picker v-model="query.closingRange" size="small" style="width:100%" />
-          </div>
-          <div class="filter-field">
-            <label class="filter-field__label">是否异常</label>
-            <a-select v-model="query.hasException" size="small" allow-clear placeholder="请选择">
-              <a-option value="yes">是</a-option>
-              <a-option value="no">否</a-option>
-            </a-select>
-          </div>
+    <div class="zone-l2-filter-card zone-card filter-card">
+      <div class="filter-card__slim-row">
+        <div class="filter-field filter-field--span2">
+          <label class="filter-field__label">单号检索</label>
+          <a-input
+            v-model="query.orderNo"
+            size="small"
+            allow-clear
+            placeholder="请输入订单号 / 提单号 / 订舱号"
+            @press-enter="handleSearch"
+          />
         </div>
-        <div class="filter-card__inline-actions filter-card__inline-actions--matrix">
+        <div class="filter-field">
+          <label class="filter-field__label">客户名称</label>
+          <a-input v-model="query.customerName" size="small" allow-clear placeholder="请输入客户名称" @press-enter="handleSearch" />
+        </div>
+        <div class="filter-field">
+          <label class="filter-field__label">起运港</label>
+          <a-input v-model="query.pol" size="small" allow-clear placeholder="请输入起运港" @press-enter="handleSearch" />
+        </div>
+        <div class="filter-field">
+          <label class="filter-field__label">目的港</label>
+          <a-input v-model="query.pod" size="small" allow-clear placeholder="请输入目的港" @press-enter="handleSearch" />
+        </div>
+        <div class="filter-card__inline-actions">
           <a-button size="small" type="primary" class="filter-card__query-btn" @click="handleSearch">
             <template #icon><icon-search /></template>
             查询
@@ -342,29 +311,35 @@ page.total = filteredRows.value.length;
       </div>
     </div>
 
-    <!-- 工具栏 -->
-    <div class="toolbar toolbar--dense">
-      <div class="toolbar-group">
-        <a-button size="small" type="primary">
-          <template #icon><icon-plus /></template>
-          新增订单
-        </a-button>
-        <a-button size="small" type="outline">
-          <template #icon><icon-download /></template>
-          批量导入
-        </a-button>
-        <a-button size="small" type="outline" @click="handleExport">导出</a-button>
-      </div>
-      <div class="toolbar-divider" />
-      <div class="toolbar-group toolbar-group--grow">
-        <a-button size="small" type="outline" :disabled="!selectedCount">批量分配</a-button>
-        <a-button size="small" type="outline" :disabled="!selectedCount">批量改状态</a-button>
-        <a-button size="small" type="outline" :disabled="!selectedCount" @click="handleBatchNotify">批量通知</a-button>
-      </div>
-    </div>
-
-    <!-- 状态快捷筛选 -->
     <div class="zone-l3-action zone-card zone-card--stack">
+      <div class="toolbar toolbar--dense">
+        <div class="toolbar-group">
+          <a-button size="small" type="primary">
+            <template #icon><icon-plus /></template>
+            新增订单
+          </a-button>
+          <div class="toolbar-divider" />
+          <a-button size="small" type="outline">
+            <template #icon><icon-download /></template>
+            批量导入
+          </a-button>
+          <div class="toolbar-divider" />
+          <a-button size="small" @click="handleExport">
+            <template #icon><icon-download /></template>
+            导出
+          </a-button>
+          <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+            <a-button size="small" :disabled="!selectedCount">
+              批量操作<icon-down />
+            </a-button>
+            <template #content>
+              <a-doption @click="handleBatchAction('批量分配')">批量分配</a-doption>
+              <a-doption @click="handleBatchAction('批量改状态')">批量改状态</a-doption>
+              <a-doption @click="handleBatchNotify">批量通知</a-doption>
+            </template>
+          </a-dropdown>
+        </div>
+      </div>
       <div class="scope-status-bar">
         <div class="scope-status-bar__status">
           <div class="stat-tab-group">
@@ -429,9 +404,9 @@ page.total = filteredRows.value.length;
         <vxe-table
           ref="tableRef"
           class="compact workbench-table"
-          border="none"
           size="small"
           height="100%"
+          border="full"
           show-overflow="title"
           :loading="loading"
           :data="pagedRows"
@@ -503,12 +478,10 @@ page.total = filteredRows.value.length;
                 <a-tooltip content="详情">
                   <a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="openDetailDrawer(row)"><icon-eye /></a-button>
                 </a-tooltip>
-                <a-tooltip content="编辑">
-                  <a-button size="small" type="text" class="row-action-btn" @click="openFullDetail(row.orderNo)"><icon-edit /></a-button>
-                </a-tooltip>
                 <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--row">
                   <a-button size="small" type="text" class="row-action-btn row-action-btn--more" title="更多操作"><icon-more /></a-button>
                   <template #content>
+                    <a-doption @click="openFullDetail(row.orderNo)">编辑</a-doption>
                     <a-doption @click="openStatusModal(row)">修改状态</a-doption>
                     <a-doption>分配操作员</a-doption>
                     <a-doption>生成费用</a-doption>
@@ -539,48 +512,71 @@ page.total = filteredRows.value.length;
         <div class="query-filter-drawer__body">
           <a-form class="detail-form" layout="vertical" size="small" :model="query">
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">单号 / 箱信息</div>
+              <div class="query-filter-drawer__group-head">业务识别</div>
               <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="订舱号"><a-input v-model="query.bookingNo" size="small" allow-clear /></a-form-item>
-                <a-form-item label="箱号"><a-input v-model="query.containerNo" size="small" allow-clear /></a-form-item>
-                <a-form-item label="柜型">
-                  <a-select v-model="query.containerType" size="small" allow-clear placeholder="请选择">
-                    <a-option value="20GP">20GP</a-option>
-                    <a-option value="40HQ">40HQ</a-option>
+                <a-form-item label="船名航次">
+                  <a-input v-model="query.vesselVoyage" size="small" allow-clear placeholder="请输入船名 / 航次" />
+                </a-form-item>
+                <a-form-item label="提单号">
+                  <a-input v-model="query.blNo" size="small" allow-clear placeholder="请输入 MBL / HBL" />
+                </a-form-item>
+                <a-form-item label="订舱号">
+                  <a-input v-model="query.bookingNo" size="small" allow-clear placeholder="请输入订舱号" />
+                </a-form-item>
+              </div>
+            </div>
+            <div class="query-filter-drawer__group">
+              <div class="query-filter-drawer__group-head">业务归属</div>
+              <div class="detail-form-grid detail-form-grid--2">
+                <a-form-item label="订单状态">
+                  <a-select v-model="query.orderStatus" size="small" allow-clear placeholder="请选择">
+                    <a-option value="waitBooking">待订舱</a-option>
+                    <a-option value="released">已放舱</a-option>
+                    <a-option value="waitCustoms">待报关</a-option>
+                    <a-option value="customs">报关中</a-option>
+                    <a-option value="sailed">已开船</a-option>
+                    <a-option value="completed">已完成</a-option>
+                  </a-select>
+                </a-form-item>
+                <a-form-item label="操作人员">
+                  <a-select v-model="query.operator" size="small" allow-clear placeholder="请选择">
+                    <a-option value="张操作">张操作</a-option>
+                    <a-option value="李操作">李操作</a-option>
+                    <a-option value="王操作">王操作</a-option>
+                    <a-option value="赵操作">赵操作</a-option>
+                  </a-select>
+                </a-form-item>
+                <a-form-item label="业务类型">
+                  <a-select v-model="query.businessType" size="small" allow-clear placeholder="请选择">
+                    <a-option value="FCL">FCL</a-option>
+                    <a-option value="LCL">LCL</a-option>
+                  </a-select>
+                </a-form-item>
+                <a-form-item label="是否异常">
+                  <a-select v-model="query.hasException" size="small" allow-clear placeholder="请选择">
+                    <a-option value="yes">是</a-option>
+                    <a-option value="no">否</a-option>
                   </a-select>
                 </a-form-item>
               </div>
             </div>
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">航线 / 供应商</div>
+              <div class="query-filter-drawer__group-head">业务时间</div>
               <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="船公司">
-                  <a-select v-model="query.carrier" size="small" allow-clear placeholder="请选择">
-                    <a-option value="COSCO">COSCO</a-option>
-                    <a-option value="MSC">MSC</a-option>
-                  </a-select>
+                <a-form-item label="开船日期">
+                  <a-range-picker v-model="query.etdRange" size="small" style="width:100%" />
                 </a-form-item>
-                <a-form-item label="海外代理"><a-input v-model="query.overseasAgent" size="small" allow-clear /></a-form-item>
-                <a-form-item label="报关方式">
-                  <a-select v-model="query.customsMode" size="small" allow-clear placeholder="请选择">
-                    <a-option value="一般贸易">一般贸易</a-option>
-                    <a-option value="跨境电商">跨境电商</a-option>
-                  </a-select>
+                <a-form-item label="截关日期">
+                  <a-range-picker v-model="query.closingRange" size="small" style="width:100%" />
                 </a-form-item>
-                <a-form-item label="拖车供应商"><a-input v-model="query.truckSupplier" size="small" allow-clear /></a-form-item>
-                <a-form-item label="仓库"><a-input v-model="query.warehouse" size="small" allow-clear /></a-form-item>
+                <a-form-item label="更新时间">
+                  <a-range-picker v-model="query.updatedRange" size="small" style="width:100%" />
+                </a-form-item>
               </div>
             </div>
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">商务 / 状态</div>
+              <div class="query-filter-drawer__group-head">风险与文件</div>
               <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="贸易条款">
-                  <a-select v-model="query.tradeTerm" size="small" allow-clear placeholder="请选择">
-                    <a-option value="FOB">FOB</a-option>
-                    <a-option value="CIF">CIF</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="付款方式"><a-input v-model="query.paymentMethod" size="small" allow-clear /></a-form-item>
                 <a-form-item label="文件状态">
                   <a-select v-model="query.fileStatus" size="small" allow-clear placeholder="请选择">
                     <a-option value="missing">缺失</a-option>
@@ -591,6 +587,7 @@ page.total = filteredRows.value.length;
                   <a-select v-model="query.feeStatus" size="small" allow-clear placeholder="请选择">
                     <a-option value="none">未生成</a-option>
                     <a-option value="pending">待确认</a-option>
+                    <a-option value="confirmed">已确认</a-option>
                   </a-select>
                 </a-form-item>
                 <a-form-item label="是否超期">
@@ -599,19 +596,6 @@ page.total = filteredRows.value.length;
                     <a-option value="no">否</a-option>
                   </a-select>
                 </a-form-item>
-                <a-form-item label="待审批">
-                  <a-select v-model="query.hasPendingApproval" size="small" allow-clear placeholder="请选择">
-                    <a-option value="yes">是</a-option>
-                    <a-option value="no">否</a-option>
-                  </a-select>
-                </a-form-item>
-              </div>
-            </div>
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">时间范围</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="创建时间"><a-range-picker v-model="query.createdRange" size="small" style="width:100%" /></a-form-item>
-                <a-form-item label="更新时间"><a-range-picker v-model="query.updatedRange" size="small" style="width:100%" /></a-form-item>
               </div>
             </div>
           </a-form>
