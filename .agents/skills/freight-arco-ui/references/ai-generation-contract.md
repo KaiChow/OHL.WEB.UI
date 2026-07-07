@@ -26,18 +26,20 @@ Before generating UI:
 3. `references/design-principles.md`
 4. `references/domain-language.md`
 5. `references/page-archetypes.md`
-6. For any screenshot/prototype input: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
-7. For any interactive feature: `references/feature-routing.md` + `references/feature-delivery-contract.md`
-8. The task-specific reference: list/detail/table/actions/visual/checklist.
+6. For any redesign / rewrite / layout-polish task: `references/redesign-calibration.md`
+7. For any screenshot/prototype input: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
+8. For any interactive feature: `references/feature-routing.md` + `references/feature-delivery-contract.md`
+9. The task-specific reference: list/detail/table/actions/visual/checklist.
 
 ## Generation Workflow
 
 1. If the task starts from a screenshot/prototype, complete the intake template from `artifact-intake-template.md`.
 2. If the task starts from a screenshot/prototype, complete the prototype translation block from `prototype-to-ui-contract.md`.
-3. Classify page archetype.
-4. Identify primary business object and user role.
-5. If the task has behavior, complete the functional contract from `feature-delivery-contract.md`.
-6. Complete the module mapping from `module-patterns.md`:
+3. If the task is redesign/rewrite/polish, classify it as `polish-only`, `surface-regrouping`, or `skeleton-rewrite` using `redesign-calibration.md`.
+4. Classify page archetype.
+5. Identify primary business object and user role.
+6. If the task has behavior, complete the functional contract from `feature-delivery-contract.md`.
+7. Complete the module mapping from `module-patterns.md`:
    - Business object.
    - User job.
    - Primary identity.
@@ -46,16 +48,17 @@ Before generating UI:
    - Repeated modules.
    - Primary action.
    - Grouped actions.
-7. Define information hierarchy:
+8. Define information hierarchy:
    - Primary identity.
    - Key status/node.
    - Main working data.
    - Auxiliary metadata.
-8. Choose existing layout classes from `global.css`.
-9. Implement components in module files, not one huge page file.
-10. Use mock data only when backend integration is not requested.
-11. Verify with `npx vite build`.
-12. Visually inspect the route when a dev server is available.
+9. Choose existing layout classes from `global.css`.
+10. When the task is redesign and the old skeleton is weak, regroup surfaces or rewrite the page skeleton before tuning component chrome.
+11. Implement components in module files, not one huge page file.
+12. Use mock data only when backend integration is not requested.
+13. Verify with `npx vite build`.
+14. Visually inspect the route when a dev server is available.
 
 ## Executable Design Language Contract
 
@@ -158,6 +161,8 @@ src/views/<domain>/<module>/
 - Do not create an independent color palette.
 - Do not add large decorative gradients, oversized cards, marketing hero areas, or consumer SaaS styling.
 - Do not sacrifice information density for aesthetics.
+- For redesign tasks, default to hierarchy and skeleton changes before local color or border tuning.
+- For redesign tasks, AI may replace weak flat toolbars/status strips/filter walls with stronger workbench structures from `redesign-calibration.md` when workflow efficiency improves.
 - Prioritize usability over visual novelty.
 - Every design decision should improve reading speed, reduce errors, minimize clicks, or improve workflow efficiency.
 - Use VXE Table for data grids.

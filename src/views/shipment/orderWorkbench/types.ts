@@ -32,36 +32,28 @@ export type OrderStatusKey =
   | 'completed'
   | 'cancelled';
 
+export type ShipmentKeywordType = 'orderNo' | 'blNo' | 'bookingNo';
+
 export interface ShipmentOrderQuery {
-  orderNo: string;
+  keywordType: ShipmentKeywordType;
+  keyword: string;
   customerName: string;
-  vesselVoyage: string;
-  blNo: string;
   pol: string;
   pod: string;
+  carrier: string | undefined;
+  vesselVoyage: string;
+  blNo: string;
+  bookingNo: string;
   orderStatus: string | undefined;
   operator: string | undefined;
   businessType: string | undefined;
   etdRange: string[];
   closingRange: string[];
   hasException: string | undefined;
-  bookingNo: string;
-  containerNo: string;
-  containerType: string | undefined;
-  carrier: string | undefined;
-  overseasAgent: string | undefined;
-  customsMode: string | undefined;
-  truckSupplier: string | undefined;
-  warehouse: string | undefined;
-  tradeTerm: string | undefined;
-  paymentMethod: string | undefined;
   fileStatus: string | undefined;
   feeStatus: string | undefined;
-  createdRange: string[];
   updatedRange: string[];
   isOverdue: string | undefined;
-  hasUnreadMsg: string | undefined;
-  hasPendingApproval: string | undefined;
 }
 
 export interface ShipmentWorkbenchRow {
@@ -72,6 +64,7 @@ export interface ShipmentWorkbenchRow {
   orderStatus: OrderStatusKey;
   orderStatusLabel: string;
   statusPill: string;
+  carrier: string;
   vesselVoyage: string;
   pol: string;
   pod: string;
@@ -99,7 +92,5 @@ export interface StatusTabStat {
   key: ShipmentStatusKey;
   label: string;
   count: number;
-  todayNew: number;
-  overdue: number;
   tone?: 'danger' | 'warn';
 }

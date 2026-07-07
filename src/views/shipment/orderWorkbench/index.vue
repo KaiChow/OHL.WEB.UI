@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { Message, Modal } from '@arco-design/web-vue';
+import { Message } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
   IconSearch,
@@ -11,6 +11,8 @@ import {
   IconDownload,
   IconDown,
   IconEye,
+  IconExclamationCircle,
+  IconInfoCircle,
   IconMore,
   IconSettings,
 } from '@arco-design/web-vue/es/icon';
@@ -18,6 +20,7 @@ import { downloadCsvFile } from '../../../utils/mock-actions';
 import ShipmentOrderDetailDrawer from '../orderDetail/ShipmentOrderDetailDrawer.vue';
 import { shipmentWorkbenchRows } from './mockData';
 import type {
+  ShipmentKeywordType,
   ShipmentOrderQuery,
   ShipmentStatusKey,
   ShipmentWorkbenchRow,
@@ -26,51 +29,70 @@ import type {
 import type { ShipmentOrderDetailRecord } from '../orderDetail/types';
 import { getShipmentOrderMock } from '../orderDetail/mockData';
 
+type QueueKey = 'all' | 'mine' | 'todayNew' | 'overdue' | 'exception';
+
+interface QueueStat {
+  key: QueueKey;
+  label: string;
+  hint: string;
+  count: number;
+  tone?: 'warn' | 'danger' | 'primary' | 'success';
+}
+
 const router = useRouter();
+
+const CURRENT_OPERATOR = '张操作';
+
+const KEYWORD_OPTIONS: { label: string; value: ShipmentKeywordType }[] = [
+  { label: '业务单号', value: 'orderNo' },
+  { label: '提单号', value: 'blNo' },
+  { label: '订舱号', value: 'bookingNo' },
+];
 
 const STATUS_TABS: { key: ShipmentStatusKey; label: string; tone?: 'danger' | 'warn' }[] = [
   { key: 'all', label: '全部' },
   { key: 'waitBooking', label: '待订舱' },
   { key: 'waitRelease', label: '待放舱' },
+  { key: 'waitTruck', label: '待拖车' },
   { key: 'waitCustoms', label: '待报关' },
   { key: 'sailed', label: '已开船' },
+  { key: 'fileMissing', label: '缺文件', tone: 'warn' },
+  { key: 'feeUnconfirmed', label: '待费用', tone: 'warn' },
   { key: 'exception', label: '异常', tone: 'danger' },
 ];
 
 const defaultQuery = (): ShipmentOrderQuery => ({
-  orderNo: '',
+  keywordType: 'orderNo',
+  keyword: '',
   customerName: '',
-  vesselVoyage: '',
-  blNo: '',
   pol: '',
   pod: '',
+  carrier: undefined,
+  vesselVoyage: '',
+  blNo: '',
+  bookingNo: '',
   orderStatus: undefined,
   operator: undefined,
   businessType: undefined,
   etdRange: [],
   closingRange: [],
   hasException: undefined,
-  bookingNo: '',
-  containerNo: '',
-  containerType: undefined,
-  carrier: undefined,
-  overseasAgent: undefined,
-  customsMode: undefined,
-  truckSupplier: undefined,
-  warehouse: undefined,
-  tradeTerm: undefined,
-  paymentMethod: undefined,
   fileStatus: undefined,
   feeStatus: undefined,
-  createdRange: [],
   updatedRange: [],
   isOverdue: undefined,
-  hasUnreadMsg: undefined,
-  hasPendingApproval: undefined,
+});
+
+const cloneQuery = (source: ShipmentOrderQuery): ShipmentOrderQuery => ({
+  ...source,
+  etdRange: [...source.etdRange],
+  closingRange: [...source.closingRange],
+  updatedRange: [...source.updatedRange],
 });
 
 const query = reactive<ShipmentOrderQuery>(defaultQuery());
-const appliedQuery = ref<ShipmentOrderQuery>(defaultQuery());
+const appliedQuery = ref<ShipmentOrderQuery>(cloneQuery(defaultQuery()));
+const activeQueue = ref<QueueKey>('all');
 const activeStatusTab = ref<ShipmentStatusKey>('all');
 const advancedFilterVisible = ref(false);
 const loading = ref(false);
@@ -83,51 +105,95 @@ const statusModalVisible = ref(false);
 const statusForm = reactive({ targetStatus: undefined as string | undefined, reason: '', notify: true, createNode: true });
 const statusTargetRow = ref<ShipmentWorkbenchRow | null>(null);
 
-const page = reactive({ current: 1, size: 100, total: 0 });
+const page = reactive({ current: 1, size: 50 });
+
+const operatorOptions = Array.from(new Set(shipmentWorkbenchRows.map((row) => row.operator)));
+const carrierOptions = Array.from(new Set(shipmentWorkbenchRows.map((row) => row.carrier)));
 
 const matchText = (value: string, keyword: string) =>
   !keyword.trim() || value.toLowerCase().includes(keyword.trim().toLowerCase());
 
-const filteredRows = computed(() => {
+const getRowsByQueue = (rows: ShipmentWorkbenchRow[], queue: QueueKey) => {
+  switch (queue) {
+    case 'mine':
+      return rows.filter((row) => row.operator === CURRENT_OPERATOR);
+    case 'todayNew':
+      return rows.filter((row) => row.todayNew);
+    case 'overdue':
+      return rows.filter((row) => row.isOverdue);
+    case 'exception':
+      return rows.filter((row) => row.exceptionStatus === 'open');
+    case 'all':
+    default:
+      return rows;
+  }
+};
+
+const matchKeyword = (row: ShipmentWorkbenchRow, q: ShipmentOrderQuery) => {
+  if (!q.keyword.trim()) return true;
+  const keyword = q.keyword.trim();
+
+  switch (q.keywordType) {
+    case 'blNo':
+      return matchText(row.blNo, keyword);
+    case 'bookingNo':
+      return matchText(row.bookingNo, keyword);
+    case 'orderNo':
+    default:
+      return [row.orderNo, row.blNo, row.bookingNo].some((value) => matchText(value, keyword));
+  }
+};
+
+const matchRange = (value: string, range: string[], dateOnly = false) => {
+  if (range.length !== 2) return true;
+  const [start, end] = range;
+  const compared = dateOnly ? value.slice(0, 10) : value;
+  if (start && compared < start) return false;
+  if (end && compared > end) return false;
+  return true;
+};
+
+const queryBaseRows = computed(() => {
   const q = appliedQuery.value;
+
   return allRows.value.filter((row) => {
-    if (activeStatusTab.value !== 'all' && !row.quickStatus.includes(activeStatusTab.value)) return false;
-    if (q.orderNo.trim() && ![row.orderNo, row.blNo, row.bookingNo].some((value) => matchText(value, q.orderNo))) return false;
+    if (!matchKeyword(row, q)) return false;
     if (!matchText(row.customerName, q.customerName)) return false;
     if (!matchText(row.pol, q.pol)) return false;
     if (!matchText(row.pod, q.pod)) return false;
+    if (q.carrier && row.carrier !== q.carrier) return false;
     if (!matchText(row.vesselVoyage, q.vesselVoyage)) return false;
     if (!matchText(row.blNo, q.blNo)) return false;
-    if (q.bookingNo && !matchText(row.bookingNo, q.bookingNo)) return false;
+    if (!matchText(row.bookingNo, q.bookingNo)) return false;
     if (q.orderStatus && row.orderStatus !== q.orderStatus) return false;
     if (q.operator && row.operator !== q.operator) return false;
     if (q.businessType && row.businessType !== q.businessType) return false;
     if (q.hasException === 'yes' && row.exceptionStatus !== 'open') return false;
     if (q.hasException === 'no' && row.exceptionStatus === 'open') return false;
-    if (q.etdRange.length === 2) {
-      const [start, end] = q.etdRange;
-      if ((start && row.etd < start) || (end && row.etd > end)) return false;
-    }
-    if (q.closingRange.length === 2) {
-      const [start, end] = q.closingRange;
-      const closingDate = row.closingTime.slice(0, 10);
-      if ((start && closingDate < start) || (end && closingDate > end)) return false;
-    }
-    if (q.fileStatus === 'missing' && row.fileStatus !== 'missing') return false;
-    if (q.fileStatus === 'complete' && row.fileStatus !== 'complete') return false;
-    if (q.feeStatus === 'pending' && row.feeStatus !== 'pending') return false;
-    if (q.feeStatus === 'none' && row.feeStatus !== 'none') return false;
-    if (q.feeStatus === 'confirmed' && row.feeStatus !== 'confirmed') return false;
-    if (q.updatedRange.length === 2) {
-      const [start, end] = q.updatedRange;
-      const updatedDate = row.updatedAt.slice(0, 10);
-      if ((start && updatedDate < start) || (end && updatedDate > end)) return false;
-    }
+    if (!matchRange(row.etd, q.etdRange, true)) return false;
+    if (!matchRange(row.closingTime, q.closingRange, true)) return false;
+    if (q.fileStatus && row.fileStatus !== q.fileStatus) return false;
+    if (q.feeStatus && row.feeStatus !== q.feeStatus) return false;
+    if (!matchRange(row.updatedAt, q.updatedRange, true)) return false;
     if (q.isOverdue === 'yes' && !row.isOverdue) return false;
     if (q.isOverdue === 'no' && row.isOverdue) return false;
     return true;
   });
 });
+
+const queueStats = computed<QueueStat[]>(() => [
+  { key: 'all', label: '全部在手', hint: '当前工作集', count: queryBaseRows.value.length, tone: 'primary' },
+  { key: 'todayNew', label: '今日新单', hint: '待接续处理', count: getRowsByQueue(queryBaseRows.value, 'todayNew').length },
+  { key: 'mine', label: '我的跟进', hint: '个人作业盘', count: getRowsByQueue(queryBaseRows.value, 'mine').length, tone: 'success' },
+  { key: 'overdue', label: '超期关注', hint: '节点已超时', count: getRowsByQueue(queryBaseRows.value, 'overdue').length, tone: 'warn' },
+  { key: 'exception', label: '异常优先', hint: '阻塞待清理', count: getRowsByQueue(queryBaseRows.value, 'exception').length, tone: 'danger' },
+]);
+
+const queueRows = computed(() => getRowsByQueue(queryBaseRows.value, activeQueue.value));
+
+const filteredRows = computed(() =>
+  queueRows.value.filter((row) => activeStatusTab.value === 'all' || row.quickStatus.includes(activeStatusTab.value)),
+);
 
 const pagedRows = computed(() => {
   const start = (page.current - 1) * page.size;
@@ -136,13 +202,14 @@ const pagedRows = computed(() => {
 
 const statusTabStats = computed<StatusTabStat[]>(() =>
   STATUS_TABS.map((tab) => {
-    const rows = tab.key === 'all' ? allRows.value : allRows.value.filter((r) => r.quickStatus.includes(tab.key));
+    const rows = tab.key === 'all'
+      ? queueRows.value
+      : queueRows.value.filter((row) => row.quickStatus.includes(tab.key));
+
     return {
       key: tab.key,
       label: tab.label,
       count: rows.length,
-      todayNew: rows.filter((r) => r.todayNew).length,
-      overdue: rows.filter((r) => r.isOverdue).length,
       tone: tab.tone,
     };
   }),
@@ -150,18 +217,88 @@ const statusTabStats = computed<StatusTabStat[]>(() =>
 
 const selectedCount = computed(() => selectedRows.value.length);
 
+const advancedActiveCount = computed(() => {
+  let count = 0;
+
+  if (query.vesselVoyage.trim()) count += 1;
+  if (query.blNo.trim()) count += 1;
+  if (query.bookingNo.trim()) count += 1;
+  if (query.orderStatus) count += 1;
+  if (query.operator) count += 1;
+  if (query.businessType) count += 1;
+  if (query.hasException) count += 1;
+  if (query.etdRange.length === 2) count += 1;
+  if (query.closingRange.length === 2) count += 1;
+  if (query.fileStatus) count += 1;
+  if (query.feeStatus) count += 1;
+  if (query.updatedRange.length === 2) count += 1;
+  if (query.isOverdue) count += 1;
+
+  return count;
+});
+
+const getOrderAuxText = (row: ShipmentWorkbenchRow) => {
+  const parts: string[] = [];
+
+  if (row.bookingNo) parts.push(`订舱 ${row.bookingNo}`);
+  if (row.blNo) parts.push(`提单 ${row.blNo}`);
+
+  return parts.length ? parts.join(' / ') : '待回传订舱号 / 提单号';
+};
+
+const workbenchNotice = computed(() => {
+  const overdue = getRowsByQueue(queryBaseRows.value, 'overdue').length;
+  const fileMissing = getRowsByQueue(queryBaseRows.value, 'fileMissing').length;
+  const exception = getRowsByQueue(queryBaseRows.value, 'exception').length;
+
+  if (activeQueue.value === 'exception') {
+    return {
+      tone: 'warn' as const,
+      text: `当前聚焦异常优先队列 ${queueRows.value.length} 票，建议先处理状态阻塞与节点异常。`,
+    };
+  }
+
+  if (activeQueue.value === 'overdue') {
+    return {
+      tone: 'warn' as const,
+      text: `当前聚焦超期关注 ${queueRows.value.length} 票，优先核对截关、报关与文件回传。`,
+    };
+  }
+
+  if (activeStatusTab.value === 'exception') {
+    return {
+      tone: 'warn' as const,
+      text: `当前状态筛选为异常队列 ${filteredRows.value.length} 票，请优先处理阻塞单。`,
+    };
+  }
+
+  return {
+    tone: 'info' as const,
+    text: `当前在手 ${queryBaseRows.value.length} 票，异常 ${exception} 票，超期 ${overdue} 票，缺文件 ${fileMissing} 票。`,
+  };
+});
+
+const getQueueValueClass = (tone?: QueueStat['tone']) => ({
+  'lkb-val--primary': tone === 'primary',
+  'lkb-val--success': tone === 'success',
+  'lkb-val--warn': tone === 'warn',
+  'lkb-val--danger': tone === 'danger',
+});
+
 const handleSearch = () => {
-  appliedQuery.value = { ...query, etdRange: [...query.etdRange], closingRange: [...query.closingRange], createdRange: [...query.createdRange], updatedRange: [...query.updatedRange] };
+  appliedQuery.value = cloneQuery(query);
   page.current = 1;
-  page.total = filteredRows.value.length;
+  clearSelection();
 };
 
 const handleReset = () => {
   Object.assign(query, defaultQuery());
-  appliedQuery.value = defaultQuery();
+  appliedQuery.value = cloneQuery(defaultQuery());
+  activeQueue.value = 'all';
   activeStatusTab.value = 'all';
+  advancedFilterVisible.value = false;
   page.current = 1;
-  page.total = filteredRows.value.length;
+  clearSelection();
 };
 
 const clearAdvancedFilters = () => {
@@ -185,10 +322,17 @@ const applyAdvancedFilters = () => {
   handleSearch();
 };
 
+const onQueueChange = (key: QueueKey) => {
+  activeQueue.value = key;
+  activeStatusTab.value = 'all';
+  page.current = 1;
+  clearSelection();
+};
+
 const onStatusTabClick = (key: ShipmentStatusKey) => {
   activeStatusTab.value = key;
   page.current = 1;
-  page.total = filteredRows.value.length;
+  clearSelection();
 };
 
 const onSelectionChange = () => {
@@ -198,6 +342,21 @@ const onSelectionChange = () => {
 const clearSelection = () => {
   tableRef.value?.clearCheckboxRow();
   selectedRows.value = [];
+};
+
+const onPageChange = (nextPage: number) => {
+  page.current = nextPage;
+  clearSelection();
+};
+
+const onPageSizeChange = (nextSize: number) => {
+  page.size = nextSize;
+  page.current = 1;
+  clearSelection();
+};
+
+const openColumnSettings = () => {
+  (tableRef.value as (VxeTableInstance & { openCustom?: () => void }) | undefined)?.openCustom?.();
 };
 
 const openDetailDrawer = (row: ShipmentWorkbenchRow) => {
@@ -214,6 +373,8 @@ const openStatusModal = (row: ShipmentWorkbenchRow) => {
   statusTargetRow.value = row;
   statusForm.targetStatus = undefined;
   statusForm.reason = '';
+  statusForm.notify = true;
+  statusForm.createNode = true;
   statusModalVisible.value = true;
 };
 
@@ -222,26 +383,24 @@ const confirmStatusChange = () => {
     Message.warning('请选择目标状态并填写修改原因');
     return;
   }
+
   Message.success('状态已更新');
   statusModalVisible.value = false;
 };
 
-const handleCancelOrder = (row: ShipmentWorkbenchRow) => {
-  Modal.confirm({
-    title: '作废订单',
-    content: `确认作废订单 ${row.orderNo}？此操作不可撤销。`,
-    okButtonProps: { status: 'danger' },
-    onOk: () => Message.success('订单已作废'),
-  });
+const voidOrder = (row: ShipmentWorkbenchRow) => {
+  Message.success(`订单 ${row.orderNo} 已作废`);
 };
 
 const handleExport = () => {
   const rows = selectedRows.value.length ? selectedRows.value : filteredRows.value;
+
   downloadCsvFile(
     `海运出口订单-${rows.length}条.csv`,
     ['订单号', '客户', '业务类型', '状态', 'ETD', '目的港', '操作人员'],
-    rows.map((r) => [r.orderNo, r.customerName, r.businessType, r.orderStatusLabel, r.etd, r.pod, r.operator]),
+    rows.map((row) => [row.orderNo, row.customerName, row.businessType, row.orderStatusLabel, row.etd, row.pod, row.operator]),
   );
+
   Message.success(`已导出 ${rows.length} 条`);
 };
 
@@ -250,7 +409,12 @@ const handleBatchNotify = () => {
     Message.warning('请先选择订单');
     return;
   }
+
   Message.success(`已向 ${selectedCount.value} 票订单发送通知（模拟）`);
+};
+
+const handleRowNotify = (row: ShipmentWorkbenchRow) => {
+  Message.success(`已向订单 ${row.orderNo} 发送通知（模拟）`);
 };
 
 const handleBatchAction = (label: string) => {
@@ -258,17 +422,15 @@ const handleBatchAction = (label: string) => {
     Message.warning('请先选择订单');
     return;
   }
+
   Message.success(`${label}已提交（模拟）`);
 };
 
 const fetchList = async () => {
   loading.value = true;
-  await new Promise((r) => setTimeout(r, 300));
-  page.total = filteredRows.value.length;
+  await new Promise((resolve) => setTimeout(resolve, 300));
   loading.value = false;
 };
-
-page.total = filteredRows.value.length;
 </script>
 
 <template>
@@ -277,59 +439,119 @@ page.total = filteredRows.value.length;
       <div class="filter-card__slim-row">
         <div class="filter-field filter-field--span2">
           <label class="filter-field__label">单号检索</label>
+          <div class="filter-combo arco-input-group">
+            <a-select
+              v-model="query.keywordType"
+              size="small"
+              class="filter-combo__select filter-combo--keyword"
+            >
+              <a-option v-for="option in KEYWORD_OPTIONS" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </a-option>
+            </a-select>
+            <a-input
+              v-model="query.keyword"
+              size="small"
+              allow-clear
+              placeholder="请输入业务单号 / 提单号 / 订舱号"
+              @press-enter="handleSearch"
+            />
+          </div>
+        </div>
+
+        <div class="filter-field">
+          <label class="filter-field__label">客户名称</label>
           <a-input
-            v-model="query.orderNo"
+            v-model="query.customerName"
             size="small"
             allow-clear
-            placeholder="请输入订单号 / 提单号 / 订舱号"
+            placeholder="请输入客户名称"
             @press-enter="handleSearch"
           />
         </div>
-        <div class="filter-field">
-          <label class="filter-field__label">客户名称</label>
-          <a-input v-model="query.customerName" size="small" allow-clear placeholder="请输入客户名称" @press-enter="handleSearch" />
-        </div>
+
         <div class="filter-field">
           <label class="filter-field__label">起运港</label>
-          <a-input v-model="query.pol" size="small" allow-clear placeholder="请输入起运港" @press-enter="handleSearch" />
+          <a-input
+            v-model="query.pol"
+            size="small"
+            allow-clear
+            placeholder="请输入起运港"
+            @press-enter="handleSearch"
+          />
         </div>
+
         <div class="filter-field">
           <label class="filter-field__label">目的港</label>
-          <a-input v-model="query.pod" size="small" allow-clear placeholder="请输入目的港" @press-enter="handleSearch" />
+          <a-input
+            v-model="query.pod"
+            size="small"
+            allow-clear
+            placeholder="请输入目的港"
+            @press-enter="handleSearch"
+          />
         </div>
+
+        <div class="filter-field">
+          <label class="filter-field__label">船公司</label>
+          <a-select v-model="query.carrier" size="small" allow-clear placeholder="请选择船公司">
+            <a-option v-for="carrier in carrierOptions" :key="carrier" :value="carrier">
+              {{ carrier }}
+            </a-option>
+          </a-select>
+        </div>
+
         <div class="filter-card__inline-actions">
           <a-button size="small" type="primary" class="filter-card__query-btn" @click="handleSearch">
             <template #icon><icon-search /></template>
             查询
           </a-button>
           <a-button size="small" type="text" class="reset-btn" @click="handleReset">重置</a-button>
-          <a-button size="small" type="text" class="reset-btn" @click="advancedFilterVisible = true">
-            <template #icon><icon-filter /></template>
-            筛选
-          </a-button>
+          <a-badge :count="advancedActiveCount" :offset="[-4, 4]">
+            <a-button size="small" type="text" class="reset-btn" @click="advancedFilterVisible = true">
+              <template #icon><icon-filter /></template>
+              筛选
+            </a-button>
+          </a-badge>
         </div>
       </div>
     </div>
 
     <div class="zone-l3-action zone-card zone-card--stack">
-      <div class="toolbar toolbar--dense">
+      <div class="shipment-queue-strip">
+        <button
+          v-for="queue in queueStats"
+          :key="queue.key"
+          type="button"
+          class="shipment-queue-card"
+          :class="{ 'shipment-queue-card--active': activeQueue === queue.key }"
+          @click="onQueueChange(queue.key)"
+        >
+          <span class="shipment-queue-card__label">{{ queue.label }}</span>
+          <span class="shipment-queue-card__value" :class="getQueueValueClass(queue.tone)">{{ queue.count }}</span>
+          <span class="shipment-queue-card__hint">{{ queue.hint }}</span>
+        </button>
+      </div>
+
+      <div class="merged-bar">
         <div class="toolbar-group">
           <a-button size="small" type="primary">
             <template #icon><icon-plus /></template>
             新增订单
           </a-button>
+
           <div class="toolbar-divider" />
-          <a-button size="small" type="outline">
-            <template #icon><icon-download /></template>
-            批量导入
-          </a-button>
-          <div class="toolbar-divider" />
-          <a-button size="small" @click="handleExport">
+
+          <a-button size="small" type="outline">批量导入</a-button>
+          <a-button size="small" type="outline" @click="handleExport">
             <template #icon><icon-download /></template>
             导出
           </a-button>
+
+          <div class="toolbar-divider" />
+
           <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-            <a-button size="small" :disabled="!selectedCount">
+            <a-button size="small" type="outline" :disabled="!selectedCount">
               批量操作<icon-down />
             </a-button>
             <template #content>
@@ -339,8 +561,24 @@ page.total = filteredRows.value.length;
             </template>
           </a-dropdown>
         </div>
-      </div>
-      <div class="scope-status-bar">
+
+        <div class="bar-sep" />
+
+        <div class="workbench-notice-group">
+          <div
+            class="workbench-notice"
+            :class="workbenchNotice.tone === 'warn' ? 'workbench-notice--warn' : 'workbench-notice--info'"
+          >
+            <span class="workbench-notice__icon">
+              <icon-exclamation-circle v-if="workbenchNotice.tone === 'warn'" />
+              <icon-info-circle v-else />
+            </span>
+            <span class="workbench-notice__text">{{ workbenchNotice.text }}</span>
+          </div>
+        </div>
+
+        <div class="bar-sep" />
+
         <div class="scope-status-bar__status">
           <div class="stat-tab-group">
             <button
@@ -365,7 +603,6 @@ page.total = filteredRows.value.length;
       </div>
     </div>
 
-    <!-- 表格区 -->
     <div class="zone-l4-table-card zone-card">
       <div class="table-card-cap table-card-cap--primary">
         <div class="table-card-cap__start">
@@ -385,112 +622,143 @@ page.total = filteredRows.value.length;
             :current="page.current"
             :page-size="page.size"
             :total="filteredRows.length"
-            :page-size-options="[50, 100, 200, 500]"
+            :page-size-options="[20, 50, 100, 200]"
             size="small"
             show-total
             show-page-size
             show-jumper
-            @change="(p: number) => { page.current = p; }"
-            @page-size-change="(s: number) => { page.size = s; page.current = 1; }"
+            @change="onPageChange"
+            @page-size-change="onPageSizeChange"
           />
-          <a-tooltip content="列配置">
-            <a-button size="small" type="text" class="table-card-cap__tool">
+          <a-tooltip content="列设置">
+            <a-button size="small" type="text" class="table-card-cap__tool" @click="openColumnSettings">
               <template #icon><icon-settings /></template>
             </a-button>
           </a-tooltip>
         </div>
       </div>
+
       <div class="table-wrap">
         <vxe-table
           ref="tableRef"
           class="compact workbench-table"
           size="small"
           height="100%"
-          border="full"
+          border="none"
           show-overflow="title"
           :loading="loading"
           :data="pagedRows"
+          :custom-config="{ storage: true, storageKey: 'shipment-export-orders-columns' }"
           :row-config="{ isHover: true, keyField: 'id', height: 36 }"
           :checkbox-config="{ highlight: true }"
           @checkbox-change="onSelectionChange"
           @checkbox-all="onSelectionChange"
         >
           <vxe-column type="checkbox" width="44" fixed="left" />
-          <vxe-column field="orderNo" title="订单号" min-width="160" fixed="left">
+
+          <vxe-column field="orderNo" title="业务单号" min-width="220" fixed="left">
             <template #default="{ row }">
-              <span class="link-text link-text--strong mono" @click="openDetailDrawer(row)">{{ row.orderNo }}</span>
+              <div class="cell-two-line">
+                <span class="c2-main">
+                  <span class="link-text link-text--strong mono" @click="openDetailDrawer(row)">{{ row.orderNo }}</span>
+                </span>
+                <span class="c2-sub mono">{{ getOrderAuxText(row) }}</span>
+              </div>
             </template>
           </vxe-column>
-          <vxe-column field="orderStatusLabel" title="订单状态" min-width="88" fixed="left">
+
+          <vxe-column field="orderStatusLabel" title="订单状态" min-width="92" fixed="left" align="center">
             <template #default="{ row }">
               <span class="s-pill" :data-s="row.statusPill">{{ row.orderStatusLabel }}</span>
             </template>
           </vxe-column>
-          <vxe-column field="customerName" title="客户名称" min-width="160" />
-          <vxe-column field="businessType" title="业务类型" min-width="72" align="center" />
-          <vxe-column field="vesselVoyage" title="船名航次" min-width="140" />
-          <vxe-column field="pol" title="起运港" min-width="72" />
-          <vxe-column field="pod" title="目的港" min-width="72" />
-          <vxe-column field="etd" title="开船日期" min-width="96" />
-          <vxe-column field="eta" title="到港日期" min-width="96" />
-          <vxe-column field="closingTime" title="截关时间" min-width="130" />
-          <vxe-column field="blNo" title="提单号" min-width="130">
-            <template #default="{ row }">{{ row.blNo || '—' }}</template>
+
+          <vxe-column field="customerName" title="客户信息" min-width="190">
+            <template #default="{ row }">
+              <div class="cell-two-line">
+                <span class="c2-main">{{ row.customerName }}</span>
+                <span class="c2-sub">业务类型 {{ row.businessType }}</span>
+              </div>
+            </template>
           </vxe-column>
-          <vxe-column field="bookingNo" title="订舱号" min-width="120">
-            <template #default="{ row }">{{ row.bookingNo || '—' }}</template>
+
+          <vxe-column title="航程信息" min-width="220">
+            <template #default="{ row }">
+              <div class="cell-two-line">
+                <span class="c2-main mono">{{ row.pol }} -> {{ row.pod }}</span>
+                <span class="c2-sub">{{ row.carrier }} / {{ row.vesselVoyage }}</span>
+              </div>
+            </template>
           </vxe-column>
-          <vxe-column field="containerSummary" title="柜型柜量" min-width="96" />
-          <vxe-column field="operator" title="操作人员" min-width="80" />
-          <vxe-column field="fileStatusLabel" title="文件状态" min-width="80" align="center">
+
+          <vxe-column title="节点时间" min-width="170">
+            <template #default="{ row }">
+              <div class="cell-two-line">
+                <span class="c2-main mono">ETD {{ row.etd }}</span>
+                <span class="c2-sub mono">截关 {{ row.closingTime }}</span>
+              </div>
+            </template>
+          </vxe-column>
+
+          <vxe-column field="containerSummary" title="柜型柜量" min-width="100" align="center" />
+
+          <vxe-column title="跟进信息" min-width="150">
+            <template #default="{ row }">
+              <div class="cell-two-line">
+                <span class="c2-main">{{ row.operator }}</span>
+                <span class="c2-sub mono">{{ row.updatedAt }}</span>
+              </div>
+            </template>
+          </vxe-column>
+
+          <vxe-column field="fileStatusLabel" title="文件状态" min-width="92" align="center">
             <template #default="{ row }">
               <span class="s-pill" :data-s="row.fileStatus === 'complete' ? 'acc' : row.fileStatus === 'missing' ? 'rej' : 'wait'">
                 {{ row.fileStatusLabel }}
               </span>
             </template>
           </vxe-column>
-          <vxe-column field="feeStatusLabel" title="费用状态" min-width="80" align="center">
+
+          <vxe-column field="feeStatusLabel" title="费用状态" min-width="92" align="center">
             <template #default="{ row }">
               <span class="s-pill" :data-s="row.feeStatus === 'confirmed' ? 'acc' : row.feeStatus === 'pending' ? 'wait' : 'draft'">
                 {{ row.feeStatusLabel }}
               </span>
             </template>
           </vxe-column>
-          <vxe-column field="exceptionStatusLabel" title="异常状态" min-width="80" align="center">
+
+          <vxe-column field="exceptionStatusLabel" title="异常状态" min-width="92" align="center">
             <template #default="{ row }">
               <span class="s-pill" :data-s="row.exceptionStatus === 'open' ? 'rej' : row.exceptionStatus === 'resolved' ? 'acc' : 'rel'">
-                {{ row.exceptionStatusLabel }}
+                {{ row.isOverdue && row.exceptionStatus === 'normal' ? '超期' : row.exceptionStatusLabel }}
               </span>
             </template>
           </vxe-column>
-          <vxe-column field="updatedAt" title="更新时间" min-width="130" />
-          <vxe-column title="风险" min-width="72" fixed="right" align="center">
-            <template #default="{ row }">
-              <a-tooltip v-if="row.riskFlags.length" :content="row.riskFlags.join(' / ')">
-                <span class="s-pill" data-s="wait">!</span>
-              </a-tooltip>
-              <span v-else>—</span>
-            </template>
-          </vxe-column>
+
           <vxe-column title="操作" width="88" fixed="right" align="center">
             <template #default="{ row }">
               <div class="row-actions">
                 <a-tooltip content="详情">
-                  <a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="openDetailDrawer(row)"><icon-eye /></a-button>
+                  <a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="openDetailDrawer(row)">
+                    <icon-eye />
+                  </a-button>
                 </a-tooltip>
                 <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--row">
-                  <a-button size="small" type="text" class="row-action-btn row-action-btn--more" title="更多操作"><icon-more /></a-button>
+                  <a-button size="small" type="text" class="row-action-btn row-action-btn--more" title="更多操作">
+                    <icon-more />
+                  </a-button>
                   <template #content>
                     <a-doption @click="openFullDetail(row.orderNo)">编辑</a-doption>
                     <a-doption @click="openStatusModal(row)">修改状态</a-doption>
                     <a-doption>分配操作员</a-doption>
                     <a-doption>生成费用</a-doption>
                     <a-doption>上传文件</a-doption>
-                    <a-doption @click="handleBatchNotify">发送通知</a-doption>
-                    <a-doption>标记异常</a-doption>
+                    <a-doption @click="handleRowNotify(row)">发送通知</a-doption>
                     <a-doption>查看日志</a-doption>
-                    <a-doption>复制订单</a-doption>
-                    <a-doption class="danger-opt" @click="handleCancelOrder(row)">作废订单</a-doption>
+                    <a-divider class="action-menu__divider" />
+                    <a-popconfirm content="确认作废该订单？此操作不可撤销。" @ok="voidOrder(row)">
+                      <a-doption class="danger-opt">作废订单</a-doption>
+                    </a-popconfirm>
                   </template>
                 </a-dropdown>
               </div>
@@ -500,7 +768,6 @@ page.total = filteredRows.value.length;
       </div>
     </div>
 
-    <!-- 更多筛选抽屉 -->
     <a-drawer
       v-model:visible="advancedFilterVisible"
       title="更多筛选"
@@ -512,26 +779,30 @@ page.total = filteredRows.value.length;
         <div class="query-filter-drawer__body">
           <a-form class="detail-form" layout="vertical" size="small" :model="query">
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">业务识别</div>
+              <div class="query-filter-drawer__group-head">单证识别</div>
               <div class="detail-form-grid detail-form-grid--2">
                 <a-form-item label="船名航次">
                   <a-input v-model="query.vesselVoyage" size="small" allow-clear placeholder="请输入船名 / 航次" />
                 </a-form-item>
                 <a-form-item label="提单号">
-                  <a-input v-model="query.blNo" size="small" allow-clear placeholder="请输入 MBL / HBL" />
+                  <a-input v-model="query.blNo" size="small" allow-clear placeholder="请输入提单号" />
                 </a-form-item>
                 <a-form-item label="订舱号">
                   <a-input v-model="query.bookingNo" size="small" allow-clear placeholder="请输入订舱号" />
                 </a-form-item>
               </div>
             </div>
+
             <div class="query-filter-drawer__group">
               <div class="query-filter-drawer__group-head">业务归属</div>
               <div class="detail-form-grid detail-form-grid--2">
                 <a-form-item label="订单状态">
                   <a-select v-model="query.orderStatus" size="small" allow-clear placeholder="请选择">
                     <a-option value="waitBooking">待订舱</a-option>
+                    <a-option value="booking">订舱中</a-option>
                     <a-option value="released">已放舱</a-option>
+                    <a-option value="waitTruck">待拖车</a-option>
+                    <a-option value="trucking">拖车中</a-option>
                     <a-option value="waitCustoms">待报关</a-option>
                     <a-option value="customs">报关中</a-option>
                     <a-option value="sailed">已开船</a-option>
@@ -540,10 +811,9 @@ page.total = filteredRows.value.length;
                 </a-form-item>
                 <a-form-item label="操作人员">
                   <a-select v-model="query.operator" size="small" allow-clear placeholder="请选择">
-                    <a-option value="张操作">张操作</a-option>
-                    <a-option value="李操作">李操作</a-option>
-                    <a-option value="王操作">王操作</a-option>
-                    <a-option value="赵操作">赵操作</a-option>
+                    <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
+                      {{ operator }}
+                    </a-option>
                   </a-select>
                 </a-form-item>
                 <a-form-item label="业务类型">
@@ -560,8 +830,9 @@ page.total = filteredRows.value.length;
                 </a-form-item>
               </div>
             </div>
+
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">业务时间</div>
+              <div class="query-filter-drawer__group-head">航程时间</div>
               <div class="detail-form-grid detail-form-grid--2">
                 <a-form-item label="开船日期">
                   <a-range-picker v-model="query.etdRange" size="small" style="width:100%" />
@@ -574,12 +845,14 @@ page.total = filteredRows.value.length;
                 </a-form-item>
               </div>
             </div>
+
             <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">风险与文件</div>
+              <div class="query-filter-drawer__group-head">风险与结算</div>
               <div class="detail-form-grid detail-form-grid--2">
                 <a-form-item label="文件状态">
                   <a-select v-model="query.fileStatus" size="small" allow-clear placeholder="请选择">
                     <a-option value="missing">缺失</a-option>
+                    <a-option value="pending">待确认</a-option>
                     <a-option value="complete">完整</a-option>
                   </a-select>
                 </a-form-item>
@@ -614,7 +887,6 @@ page.total = filteredRows.value.length;
       </template>
     </a-drawer>
 
-    <!-- 修改状态弹窗 -->
     <a-modal
       v-model:visible="statusModalVisible"
       title="修改订单状态"
@@ -638,7 +910,12 @@ page.total = filteredRows.value.length;
         </div>
         <div class="xf-field xf-field--wide">
           <label class="xf-label">修改原因 <span class="xf-req">*</span></label>
-          <a-textarea v-model="statusForm.reason" size="small" :auto-size="{ minRows: 2, maxRows: 4 }" placeholder="请填写修改原因" />
+          <a-textarea
+            v-model="statusForm.reason"
+            size="small"
+            :auto-size="{ minRows: 2, maxRows: 4 }"
+            placeholder="请填写修改原因"
+          />
         </div>
         <div class="xf-field">
           <a-checkbox v-model="statusForm.notify">同步通知相关人员</a-checkbox>
@@ -658,26 +935,129 @@ page.total = filteredRows.value.length;
 </template>
 
 <style scoped>
+.shipment-queue-card {
+  appearance: none;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+}
+
+.shipment-queue-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: linear-gradient(180deg, #fbfcfd 0%, #ffffff 100%);
+  border-bottom: 1px solid var(--dense-border-subtle);
+}
+
+.shipment-queue-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 18px 11px;
+  border-right: 1px solid var(--dense-border-subtle);
+  cursor: pointer;
+  transition: background .16s ease;
+}
+
+.shipment-queue-card:last-child {
+  border-right: none;
+}
+
+.shipment-queue-card:hover {
+  background: linear-gradient(180deg, var(--dense-primary-1) 0%, #ffffff 100%);
+}
+
+.shipment-queue-card--active {
+  background: linear-gradient(180deg, var(--dense-primary-1) 0%, #ffffff 100%);
+}
+
+.shipment-queue-card--active::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--dense-primary-6);
+}
+
+.shipment-queue-card__label {
+  font-size: var(--dense-font-aux);
+  font-weight: var(--dense-weight-field);
+  color: var(--color-text-3);
+  line-height: 1.2;
+}
+
+.shipment-queue-card__value {
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-1);
+}
+
+.shipment-queue-card__hint {
+  font-size: var(--dense-font-micro);
+  color: var(--color-text-4);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shipment-queue-card--active .shipment-queue-card__label {
+  color: var(--dense-primary-7);
+}
+
+.shipment-queue-card--active .shipment-queue-card__hint {
+  color: var(--color-text-3);
+}
+
+.shipment-queue-card__value.lkb-val--primary {
+  color: var(--dense-primary-6);
+}
+
+.shipment-queue-card__value.lkb-val--success {
+  color: var(--dense-success-7);
+}
+
+.shipment-queue-card__value.lkb-val--warn {
+  color: var(--dense-warning-7);
+}
+
+.shipment-queue-card__value.lkb-val--danger {
+  color: var(--dense-danger-7);
+}
+
+.xf-grid {
+  display: grid;
+}
+
 .xf-grid--modal {
   grid-template-columns: repeat(2, 1fr);
   gap: 12px 16px;
 }
-.xf-grid {
-  display: grid;
-}
+
 .xf-field {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
 .xf-field--wide {
   grid-column: span 2;
 }
+
 .xf-label {
   font-size: var(--dense-font-field);
   color: var(--color-text-2);
   font-weight: 500;
 }
+
 .xf-req {
   color: var(--danger-6);
 }

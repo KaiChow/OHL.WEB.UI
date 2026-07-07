@@ -15,6 +15,7 @@ ui-skill/freight-arco-ui/
     ├── prototype-to-ui-contract.md ← 截图/原型转业务对象/原型/交互契约
     ├── feature-routing.md     ← 功能类型 → 必读规范路由
     ├── feature-delivery-contract.md ← 动作/权限/API/状态/验证契约
+    ├── redesign-calibration.md ← 布局重写 / 质感 / 新 skill 设计改版口径
     ├── domain-language.md     ← 中文货代用语 + 对象字段示例
     ├── icons.md               ← Arco / IconPark 图标分工与场景约束
     ├── actions.md · table.md · detail-form.md · list-page.md  ← 可执行细则

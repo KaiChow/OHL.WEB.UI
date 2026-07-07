@@ -1,6 +1,6 @@
 ---
 name: freight-arco-ui
-description: Project UI and feature-delivery skill for FE.OHL.WEB.UI. Use when designing, reviewing, or implementing any Vue 3 + TypeScript + Arco Design Vue + @arco-themes/vue-gi-demo + VXE Table freight SaaS page or frontend business feature under the PESDP Design System 2.0. Covers list pages, detail drawers, long forms, tabs, toolbars, status pills, table styling, dense layout, color hierarchy, action legality, field behavior, permission visibility, API/error handling, verification, and UI规范/不好看/质感/高密度 feedback.
+description: Project UI and feature-delivery skill for FE.OHL.WEB.UI. Use when designing, reviewing, redesigning, rewriting, or implementing any Vue 3 + TypeScript + Arco Design Vue + @arco-themes/vue-gi-demo + VXE Table freight SaaS page or frontend business feature under the PESDP Design System 2.0. Covers list pages, detail drawers, long forms, tabs, toolbars, status pills, table styling, dense layout, visual hierarchy, page skeleton rewrites, layout redesign, ordinary-admin cleanup, UI taste/质感/不好看 feedback, action legality, field behavior, permission visibility, API/error handling, verification, and AI-executable design rules.
 ---
 
 # Freight Arco UI Skill
@@ -79,6 +79,7 @@ Do not hide daily filters, status tabs, or reversible workflow actions merely to
 6. One topic file from the map below
 7. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
 8. **Before changing icon usage:** read `icons.md`.
+9. **Before any redesign / 布局重写 / 质感优化 / 普通后台味反馈:** read `redesign-calibration.md`.
 
 **Coding gate:** `.cursor/rules/spec-first-coding.mdc` — read references first; run `check-spec.js` before delivery.
 
@@ -93,6 +94,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 | **Any screenshot / 原型 / Figma / 视觉稿驱动任务** | **`artifact-intake-template.md`** + **`prototype-to-ui-contract.md`** + `page-archetypes.md` + `module-patterns.md` |
 | Any UI task | `design-principles.md` |
 | **Any icon change** | **`icons.md`** + `actions.md` / `table.md` / `feedback.md` by surface |
+| **UI redesign / 布局重写 / 质感 / 普通后台味 / 新 skill 改版** | **`redesign-calibration.md`** + `visual-system.md` + archetype reference |
 | New page / module | `module-patterns.md` → `domain-language.md` → **`domain-routing.md`** |
 | Page type choice | `page-archetypes.md` |
 | AI page generation | `ai-generation-contract.md` |
@@ -132,6 +134,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 - Generic action icons use Arco; business-semantic identity/menu/empty-state icons use IconPark; no forced icons when the metaphor is weak
 - `detail-mini-vxe`: no `show-overflow`; header bg ≠ row hover bg; no checkbox without batch toolbar
 - Business Arco controls: `size="small"` only — see `component-size.md` (`medium` = Arco default, forbidden)
+- When the task is redesign, AI may regroup surfaces or rewrite the page skeleton if business workflow becomes clearer; do not default to structure-preserving polish. See `redesign-calibration.md`.
 - Any feature with click/submit/request/state change must complete the functional contract: `feature_type` + `entry_point` + `actor_roles` + `visible_when` + `enabled_when` + `api_request` + `api_response` + `success_result` + `error_result` + `refresh_scope` + `verification_cases`
 - Any screenshot/prototype-driven task must complete the artifact intake template and prototype translation block before coding
 - Any screenshot/prototype-driven task must complete the prototype translation block before coding; do not code directly from visual similarity
