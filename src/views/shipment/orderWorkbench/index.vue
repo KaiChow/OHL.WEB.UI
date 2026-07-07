@@ -11,8 +11,6 @@ import {
   IconDownload,
   IconDown,
   IconEye,
-  IconExclamationCircle,
-  IconInfoCircle,
   IconMore,
   IconSettings,
 } from '@arco-design/web-vue/es/icon';
@@ -28,16 +26,6 @@ import type {
 } from './types';
 import type { ShipmentOrderDetailRecord } from '../orderDetail/types';
 import { getShipmentOrderMock } from '../orderDetail/mockData';
-
-type QueueKey = 'all' | 'mine' | 'todayNew' | 'overdue' | 'exception';
-
-interface QueueStat {
-  key: QueueKey;
-  label: string;
-  hint: string;
-  count: number;
-  tone?: 'warn' | 'danger' | 'primary' | 'success';
-}
 
 const router = useRouter();
 
@@ -92,7 +80,6 @@ const cloneQuery = (source: ShipmentOrderQuery): ShipmentOrderQuery => ({
 
 const query = reactive<ShipmentOrderQuery>(defaultQuery());
 const appliedQuery = ref<ShipmentOrderQuery>(cloneQuery(defaultQuery()));
-const activeQueue = ref<QueueKey>('all');
 const activeStatusTab = ref<ShipmentStatusKey>('all');
 const advancedFilterVisible = ref(false);
 const loading = ref(false);
@@ -112,22 +99,6 @@ const carrierOptions = Array.from(new Set(shipmentWorkbenchRows.map((row) => row
 
 const matchText = (value: string, keyword: string) =>
   !keyword.trim() || value.toLowerCase().includes(keyword.trim().toLowerCase());
-
-const getRowsByQueue = (rows: ShipmentWorkbenchRow[], queue: QueueKey) => {
-  switch (queue) {
-    case 'mine':
-      return rows.filter((row) => row.operator === CURRENT_OPERATOR);
-    case 'todayNew':
-      return rows.filter((row) => row.todayNew);
-    case 'overdue':
-      return rows.filter((row) => row.isOverdue);
-    case 'exception':
-      return rows.filter((row) => row.exceptionStatus === 'open');
-    case 'all':
-    default:
-      return rows;
-  }
-};
 
 const matchKeyword = (row: ShipmentWorkbenchRow, q: ShipmentOrderQuery) => {
   if (!q.keyword.trim()) return true;
@@ -181,18 +152,8 @@ const queryBaseRows = computed(() => {
   });
 });
 
-const queueStats = computed<QueueStat[]>(() => [
-  { key: 'all', label: '全部在手', hint: '当前工作集', count: queryBaseRows.value.length, tone: 'primary' },
-  { key: 'todayNew', label: '今日新单', hint: '待接续处理', count: getRowsByQueue(queryBaseRows.value, 'todayNew').length },
-  { key: 'mine', label: '我的跟进', hint: '个人作业盘', count: getRowsByQueue(queryBaseRows.value, 'mine').length, tone: 'success' },
-  { key: 'overdue', label: '超期关注', hint: '节点已超时', count: getRowsByQueue(queryBaseRows.value, 'overdue').length, tone: 'warn' },
-  { key: 'exception', label: '异常优先', hint: '阻塞待清理', count: getRowsByQueue(queryBaseRows.value, 'exception').length, tone: 'danger' },
-]);
-
-const queueRows = computed(() => getRowsByQueue(queryBaseRows.value, activeQueue.value));
-
 const filteredRows = computed(() =>
-  queueRows.value.filter((row) => activeStatusTab.value === 'all' || row.quickStatus.includes(activeStatusTab.value)),
+  queryBaseRows.value.filter((row) => activeStatusTab.value === 'all' || row.quickStatus.includes(activeStatusTab.value)),
 );
 
 const pagedRows = computed(() => {
@@ -203,8 +164,8 @@ const pagedRows = computed(() => {
 const statusTabStats = computed<StatusTabStat[]>(() =>
   STATUS_TABS.map((tab) => {
     const rows = tab.key === 'all'
-      ? queueRows.value
-      : queueRows.value.filter((row) => row.quickStatus.includes(tab.key));
+      ? queryBaseRows.value
+      : queryBaseRows.value.filter((row) => row.quickStatus.includes(tab.key));
 
     return {
       key: tab.key,
@@ -289,57 +250,6 @@ const getExecutionSignals = (row: ShipmentWorkbenchRow) => {
   return signals;
 };
 
-const currentQueueSummary = computed(() => {
-  const queue = queueStats.value.find((item) => item.key === activeQueue.value);
-  const status = statusTabStats.value.find((item) => item.key === activeStatusTab.value);
-
-  return {
-    title: queue ? `${queue.label} ${queue.count} 票` : `当前工作集 ${filteredRows.value.length} 票`,
-    meta: status && activeStatusTab.value !== 'all'
-      ? `状态筛选：${status.label} / 当前命中 ${filteredRows.value.length} 票`
-      : workbenchNotice.value.text,
-  };
-});
-
-const workbenchNotice = computed(() => {
-  const overdue = getRowsByQueue(queryBaseRows.value, 'overdue').length;
-  const fileMissing = getRowsByQueue(queryBaseRows.value, 'fileMissing').length;
-  const exception = getRowsByQueue(queryBaseRows.value, 'exception').length;
-
-  if (activeQueue.value === 'exception') {
-    return {
-      tone: 'warn' as const,
-      text: `当前聚焦异常优先队列 ${queueRows.value.length} 票，建议先处理状态阻塞与节点异常。`,
-    };
-  }
-
-  if (activeQueue.value === 'overdue') {
-    return {
-      tone: 'warn' as const,
-      text: `当前聚焦超期关注 ${queueRows.value.length} 票，优先核对截关、报关与文件回传。`,
-    };
-  }
-
-  if (activeStatusTab.value === 'exception') {
-    return {
-      tone: 'warn' as const,
-      text: `当前状态筛选为异常队列 ${filteredRows.value.length} 票，请优先处理阻塞单。`,
-    };
-  }
-
-  return {
-    tone: 'info' as const,
-    text: `当前在手 ${queryBaseRows.value.length} 票，异常 ${exception} 票，超期 ${overdue} 票，缺文件 ${fileMissing} 票。`,
-  };
-});
-
-const getQueueValueClass = (tone?: QueueStat['tone']) => ({
-  'lkb-val--primary': tone === 'primary',
-  'lkb-val--success': tone === 'success',
-  'lkb-val--warn': tone === 'warn',
-  'lkb-val--danger': tone === 'danger',
-});
-
 const handleSearch = () => {
   appliedQuery.value = cloneQuery(query);
   page.current = 1;
@@ -349,7 +259,6 @@ const handleSearch = () => {
 const handleReset = () => {
   Object.assign(query, defaultQuery());
   appliedQuery.value = cloneQuery(defaultQuery());
-  activeQueue.value = 'all';
   activeStatusTab.value = 'all';
   advancedFilterVisible.value = false;
   page.current = 1;
@@ -375,13 +284,6 @@ const clearAdvancedFilters = () => {
 const applyAdvancedFilters = () => {
   advancedFilterVisible.value = false;
   handleSearch();
-};
-
-const onQueueChange = (key: QueueKey) => {
-  activeQueue.value = key;
-  activeStatusTab.value = 'all';
-  page.current = 1;
-  clearSelection();
 };
 
 const onStatusTabClick = (key: ShipmentStatusKey) => {
@@ -490,7 +392,7 @@ const fetchList = async () => {
 
 <template>
   <div class="page-root page-root--dense">
-    <div class="zone-l2-filter-card zone-card filter-card">
+    <div class="zone-l2-filter-card zone-card filter-card workbench-filter-card">
       <div class="filter-card__slim-row">
         <div class="filter-field filter-field--span2">
           <label class="filter-field__label">单号检索</label>
@@ -572,23 +474,8 @@ const fetchList = async () => {
       </div>
     </div>
 
-    <div class="zone-l3-action zone-card zone-card--stack">
-      <div class="shipment-queue-strip">
-        <button
-          v-for="queue in queueStats"
-          :key="queue.key"
-          type="button"
-          class="shipment-queue-card"
-          :class="{ 'shipment-queue-card--active': activeQueue === queue.key }"
-          @click="onQueueChange(queue.key)"
-        >
-          <span class="shipment-queue-card__label">{{ queue.label }}</span>
-          <span class="shipment-queue-card__value" :class="getQueueValueClass(queue.tone)">{{ queue.count }}</span>
-          <span class="shipment-queue-card__hint">{{ queue.hint }}</span>
-        </button>
-      </div>
-
-      <div class="merged-bar">
+    <div class="zone-l3-action zone-card zone-card--stack workbench-action-card">
+      <div class="merged-bar workbench-flow-bar">
         <div class="toolbar-group">
           <a-button size="small" type="primary">
             <template #icon><icon-plus /></template>
@@ -619,21 +506,6 @@ const fetchList = async () => {
 
         <div class="bar-sep" />
 
-        <div class="workbench-notice-group">
-          <div
-            class="workbench-notice"
-            :class="workbenchNotice.tone === 'warn' ? 'workbench-notice--warn' : 'workbench-notice--info'"
-          >
-            <span class="workbench-notice__icon">
-              <icon-exclamation-circle v-if="workbenchNotice.tone === 'warn'" />
-              <icon-info-circle v-else />
-            </span>
-            <span class="workbench-notice__text">{{ workbenchNotice.text }}</span>
-          </div>
-        </div>
-
-        <div class="bar-sep" />
-
         <div class="scope-status-bar__status">
           <div class="stat-tab-group">
             <button
@@ -658,7 +530,7 @@ const fetchList = async () => {
       </div>
     </div>
 
-    <div class="zone-l4-table-card zone-card">
+    <div class="zone-l4-table-card zone-card workbench-table-card">
       <div class="table-card-cap table-card-cap--primary">
         <div class="table-card-cap__start">
           <a-tooltip content="刷新">
@@ -666,10 +538,6 @@ const fetchList = async () => {
               <template #icon><icon-refresh /></template>
             </a-button>
           </a-tooltip>
-          <div class="table-card-cap__context">
-            <span class="table-card-cap__title">{{ currentQueueSummary.title }}</span>
-            <span class="table-card-cap__meta">{{ currentQueueSummary.meta }}</span>
-          </div>
           <div v-if="selectedCount > 0" class="toolbar-selection-context">
             <span class="toolbar-selected-tip">已选 <b>{{ selectedCount }}</b> 条</span>
             <a-button size="small" type="text" class="toolbar-selection-clear" @click="clearSelection">清空</a-button>
@@ -980,11 +848,29 @@ const fetchList = async () => {
 </template>
 
 <style scoped>
-.table-card-cap__context {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+.workbench-filter-card {
+  position: relative;
+  border-top-color: var(--dense-primary-3) !important;
+  background: linear-gradient(180deg, var(--dense-surface-head) 0%, var(--color-bg-card) 100%);
+}
+
+.workbench-filter-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(22, 93, 255, 0.24) 0%, rgba(22, 93, 255, 0.04) 36%, rgba(22, 93, 255, 0) 100%);
+  pointer-events: none;
+}
+
+.workbench-action-card {
+  border-top-color: var(--dense-primary-3) !important;
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 10px 22px rgba(19, 41, 74, 0.045),
+    0 0 0 1px rgba(213, 225, 234, 0.9) !important;
 }
 
 .workbench-object-cell {
@@ -1010,102 +896,49 @@ const fetchList = async () => {
   white-space: nowrap;
 }
 
-.shipment-queue-card {
-  appearance: none;
-  border: none;
-  background: transparent;
-  text-align: left;
-  font: inherit;
+.workbench-table-card {
+  border-top-color: var(--dense-primary-3) !important;
 }
 
-.shipment-queue-strip {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  background: linear-gradient(180deg, #fbfcfd 0%, #ffffff 100%);
-  border-bottom: 1px solid var(--dense-border-subtle);
+.workbench-flow-bar {
+  background:
+    linear-gradient(180deg, rgba(242, 247, 255, 0.88) 0%, rgba(255, 255, 255, 0.96) 36px),
+    linear-gradient(90deg, rgba(22, 93, 255, 0.045) 0%, rgba(255, 255, 255, 0) 42%);
 }
 
-.shipment-queue-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-  padding: 12px 18px 11px;
-  border-right: 1px solid var(--dense-border-subtle);
-  cursor: pointer;
-  transition: background .16s ease;
+.workbench-flow-bar :deep(.stat-tab) {
+  background: rgba(255, 255, 255, 0.86);
 }
 
-.shipment-queue-card:last-child {
-  border-right: none;
+.workbench-flow-bar :deep(.stat-tab:hover) {
+  background: var(--dense-primary-1);
 }
 
-.shipment-queue-card:hover {
-  background: linear-gradient(180deg, var(--dense-primary-1) 0%, #ffffff 100%);
+.workbench-flow-bar :deep(.stat-tab--active) {
+  background: linear-gradient(180deg, #FFFFFF 0%, var(--dense-primary-1) 100%);
 }
 
-.shipment-queue-card--active {
-  background: linear-gradient(180deg, var(--dense-primary-1) 0%, #ffffff 100%);
+.workbench-table-card :deep(.table-card-cap) {
+  background:
+    linear-gradient(180deg, var(--color-bg-card) 0%, var(--dense-surface-head) 100%);
 }
 
-.shipment-queue-card--active::after {
-  content: '';
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 0;
-  height: 3px;
-  border-radius: 3px 3px 0 0;
-  background: var(--dense-primary-6);
-}
-
-.shipment-queue-card__label {
-  font-size: var(--dense-font-aux);
-  font-weight: var(--dense-weight-field);
-  color: var(--color-text-3);
-  line-height: 1.2;
-}
-
-.shipment-queue-card__value {
-  font-size: 18px;
-  line-height: 1;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--color-text-1);
-}
-
-.shipment-queue-card__hint {
-  font-size: var(--dense-font-micro);
-  color: var(--color-text-4);
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.shipment-queue-card--active .shipment-queue-card__label {
+.workbench-table-card :deep(.table-card-cap__title) {
   color: var(--dense-primary-7);
 }
 
-.shipment-queue-card--active .shipment-queue-card__hint {
+.workbench-table-card :deep(.table-card-cap__meta) {
   color: var(--color-text-3);
 }
 
-.shipment-queue-card__value.lkb-val--primary {
-  color: var(--dense-primary-6);
+.workbench-table-card :deep(.vxe-table.workbench-table .vxe-header--column) {
+  background:
+    linear-gradient(180deg, var(--dense-surface-head) 0%, var(--color-bg-card) 100%);
 }
 
-.shipment-queue-card__value.lkb-val--success {
-  color: var(--dense-success-7);
-}
-
-.shipment-queue-card__value.lkb-val--warn {
-  color: var(--dense-warning-7);
-}
-
-.shipment-queue-card__value.lkb-val--danger {
-  color: var(--dense-danger-7);
+.workbench-table-card :deep(.vxe-table.workbench-table .vxe-body--row:hover .c2-main),
+.workbench-table-card :deep(.vxe-table.workbench-table .vxe-body--row.row--hover .c2-main) {
+  color: var(--dense-primary-7);
 }
 
 .xf-grid {

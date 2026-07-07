@@ -5,7 +5,6 @@ import App from './App.vue';
 import { router } from './router';
 
 import '@arco-design/web-vue/dist/arco.css';
-import '@arco-themes/vue-gi-demo/index.less';
 import 'vxe-table/lib/style.css';
 import '@icon-park/vue-next/styles/index.css';
 import './styles/global.css';
