@@ -30,7 +30,7 @@ All UI decisions must flow through four layers:
 1. Product Positioning: international freight forwarding SaaS, not ERP.
 2. Design Philosophy: business before UI, information first, trust, readability, consistency, operational efficiency.
 3. Visual Language: restrained Arco enterprise SaaS, neutral surfaces, white work areas, clear hierarchy, high density with low visual complexity.
-4. Implementation Rules: `global.css` tokens, Arco/VXE components, page archetypes, action rules, table rules, and `check-spec`.
+4. Implementation Rules: Arco-first → token-second → business-pattern-third → page-local-css-last; then page archetypes, action rules, table rules, and `check-spec`.
 
 If a proposal sounds visually attractive but weakens the implementation rules or business philosophy, reject it.
 
@@ -117,7 +117,7 @@ Do not create quality by:
 - Random accent colors.
 - Excessive shadows.
 
-Use Arco Design Vue and `@arco-themes/vue-gi-demo` tokens as the color source. Custom color should be exceptional and justified.
+Use Arco Design Vue default theme tokens (`@arco-design/web-vue`) as the color source. Custom color should be exceptional and justified.
 
 ## PESDP+ Operating Principles
 
@@ -127,7 +127,8 @@ PESDP is the core design model. PESDP+ adds execution principles for judging whe
 
 Maintain one design language across components, spacing, colors, icons, interactions, and behaviors.
 
-- Use `src/styles/global.css` tokens and shared structural classes before page-scoped CSS.
+- Prefer Arco props, slots, and theme tokens before shared structural classes.
+- Use `src/styles/global.css` tokens and documented archetype slots only where Arco + tokens are insufficient (`arco-first.md`).
 - Reuse Arco/VXE patterns from the skill references instead of inventing local equivalents.
 - Do not let one module introduce a new button style, table chrome, spacing rhythm, status color, or drawer behavior unless it becomes a documented shared pattern.
 
@@ -207,7 +208,9 @@ If any answer is no, revise structure before tuning colors.
 
 | Layer | File | Language |
 |-------|------|----------|
-| Style tokens | `src/styles/global.css` | CSS |
+| Framework | Arco Design Vue (`@arco-design/web-vue`) | props / CSS variables |
+| Arco-first contract | `arco-first.md` | EN |
+| Enhancement tokens / patterns | `src/styles/global.css` | CSS (thin layer) |
 | Principles | `design-principles.md` | EN |
 | Structure slots | `module-patterns.md` | EN |
 | Domain wording | `domain-language.md` | ZH examples |

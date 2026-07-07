@@ -12,6 +12,7 @@ alwaysApply: true
 
 | 任务 | 读 |
 |------|-----|
+| **所有 UI 任务（最先）** | **`arco-first.md`** |
 | **新菜单 / 不确定用哪种布局** | **`domain-routing.md`** |
 | **任何有点击/提交/请求/状态流转的功能** | **`feature-routing.md`** + **`feature-delivery-contract.md`** |
 | **任何截图 / 原型 / Figma / 视觉稿驱动任务** | **`artifact-intake-template.md`** + **`prototype-to-ui-contract.md`** + `page-archetypes.md` + `module-patterns.md` |
@@ -26,12 +27,13 @@ alwaysApply: true
 | BI/看板 | **`dashboard.md`** |
 | 空态/加载/Message | **`feedback.md`** |
 | 新模块 | `module-patterns.md` + `domain-language.md` + **`domain-routing.md`** |
-| 任意类名 | grep `src/styles/global.css` |
+| 任意共享类名 / global.css pattern | 先过 **`arco-first.md`**，再 grep `src/styles/global.css` |
 
 路径：`ui-skill/freight-arco-ui/references/`（已 sync 到 `.agents/skills/`）。
 
 ## 1. 写 template 前必须完成的决策（答案在 reference 里查，禁止凭记忆）
 
+0. **框架优先**：Arco props/slots 能否解决？→ token？→ 业务 pattern？→ 最后才 page-local CSS（**`arco-first.md`**）
 1. **筛选**：字段总数 → Tier → DOM 结构（**`filter-layout.md`** 为唯一决策源）
 2. **筛选 DOM**：按 Tier 选用 skill 给出的结构组合（如双行见 `filter-card--two-row` 示例），**禁止自拼未在 reference 出现的结构**
 3. **Overlay**：字段数 + 是否含子表/多分区 → 查 `modal.md` 容器表
@@ -42,8 +44,8 @@ alwaysApply: true
 
 ## 2. 写代码
 
-- 类名写前 grep `global.css`
-- 禁止自写等效布局 CSS
+- 先 Arco 原生结构与 props；共享类名写前过 `arco-first.md` 并 grep `global.css`
+- 禁止自写与 Arco / 已有 pattern 等效的 CSS
 - 用户要求「只按 skill」时，禁止参考其他 `src/views/**` 页面
 - 行为代码禁止把权限、状态、刷新、副作用只埋在 handler 里而不先写契约
 - 原型/截图任务禁止只按视觉相似度直接开写，必须先完成输入模板和原型转译块

@@ -1,6 +1,6 @@
 ---
 name: freight-arco-ui
-description: Project UI and feature-delivery skill for FE.OHL.WEB.UI. Use when designing, reviewing, redesigning, rewriting, or implementing any Vue 3 + TypeScript + Arco Design Vue + @arco-themes/vue-gi-demo + VXE Table freight SaaS page or frontend business feature under the PESDP Design System 2.0. Covers list pages, detail drawers, long forms, tabs, toolbars, status pills, table styling, dense layout, visual hierarchy, page skeleton rewrites, layout redesign, ordinary-admin cleanup, UI taste/质感/不好看 feedback, action legality, field behavior, permission visibility, API/error handling, verification, and AI-executable design rules.
+description: Project UI and feature-delivery skill for FE.OHL.WEB.UI. Use when designing, reviewing, redesigning, rewriting, or implementing any Vue 3 + TypeScript + Arco Design Vue + VXE Table freight SaaS page or frontend business feature under the PESDP Design System 2.0. Covers list pages, detail drawers, long forms, tabs, toolbars, status pills, table styling, dense layout, visual hierarchy, page skeleton rewrites, layout redesign, ordinary-admin cleanup, UI taste/质感/不好看 feedback, action legality, field behavior, permission visibility, API/error handling, verification, and AI-executable design rules.
 ---
 
 # Freight Arco UI Skill
@@ -11,11 +11,25 @@ Project-level **UI delivery contract** for `FE.OHL.WEB.UI`.
 
 **Synced to:** `.cursor/skills/`, `.agents/skills/`, `.claude/skills/`
 
-## Architecture (read this first)
+## Arco-First Productization (read this first)
+
+**Arco drives the page. `global.css` is a thin enhancement layer — not a second UI framework.**
+
+Execution priority (mandatory):
+
+1. **Arco-first** — props, slots, layout primitives, built-in interaction
+2. **Token-second** — Arco theme + existing `--dense-*` / semantic tokens
+3. **Business-pattern-third** — freight semantics, workbench archetype, VXE bridge
+4. **Page-local-css-last** — minimal page shell only
+
+Full rules: **`references/arco-first.md`**. Every shared custom class must state why Arco + tokens were insufficient.
+
+## Architecture
 
 | Layer | Location | Contains |
 |-------|----------|----------|
-| **Tokens & layout CSS** | `src/styles/global.css` | Classes, colors, table/button chrome |
+| **Arco foundation** | Arco Design Vue | Default owner: controls, layout, tabs, overlay, interaction states |
+| **Shared enhancement CSS** | `src/styles/global.css` | Tokens, VXE bridge, freight semantics, documented archetype slots only |
 | **Agent summary** | `AGENTS.md` | One-page pointer (no duplicate rules) |
 | **This skill** | `SKILL.md` + `references/` | PESDP principles + executable rules |
 | **Structure slots** | `module-patterns.md` | English slots only; no field lists |
@@ -26,7 +40,7 @@ Project-level **UI delivery contract** for `FE.OHL.WEB.UI`.
 | **Component rules** | `actions.md`, `icons.md`, `table.md`, `detail-form.md`, `list-page.md` | How to implement |
 | **QA** | `checklist.md`, `scripts/check-spec.js` | Pre-ship checks |
 
-**Rule:** Structure in English slots → labels from `domain-language.md` → CSS from `global.css` → details in topic references. Do not duplicate long rule blocks across `AGENTS.md` / `CLAUDE.md` / skill.
+**Rule:** Arco structure first → business slots and labels from `module-patterns.md` / `domain-language.md` → thin shared enhancement from `global.css` only where needed → details in topic references. Do not duplicate long rule blocks across `AGENTS.md` / `CLAUDE.md` / skill.
 
 ## Four-Layer Prompt Model
 
@@ -35,7 +49,7 @@ All agents should understand the project in this order:
 1. **Product Positioning** — build a professional freight operations workbench for sales, operators, and coordinators, not a decorative dashboard or traditional ERP sheet.
 2. **Design Philosophy** — business workflows, readability, consistency, trust, and operational efficiency come before decoration.
 3. **Visual Language** — restrained Arco-based enterprise SaaS: brand-neutral surfaces, white work areas, clear hierarchy, high density, low visual noise; never flat gray ERP or blue-tinted admin.
-4. **Implementation Rules** — use `global.css` tokens, Arco/VXE components, skill references, and `check-spec` rules.
+4. **Implementation Rules** — Arco-first → token-second → business-pattern-third → page-local-css-last; then skill references and `check-spec`.
 
 Do not jump from positioning directly to custom visuals. Every visual decision must pass through philosophy and implementation rules first.
 
@@ -71,7 +85,7 @@ Do not hide daily filters, status tabs, or reversible workflow actions merely to
 
 ## First Load (minimal)
 
-1. `src/styles/global.css`
+1. **`references/arco-first.md`**
 2. `references/design-principles.md`
 3. `references/module-patterns.md` + `references/domain-language.md` (new pages)
 4. For any task with behavior or request flow: `references/feature-routing.md` + `references/feature-delivery-contract.md`
@@ -80,10 +94,12 @@ Do not hide daily filters, status tabs, or reversible workflow actions merely to
 7. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
 8. **Before changing icon usage:** read `icons.md`.
 9. **Before any redesign / 布局重写 / 质感优化 / 普通后台味反馈:** read `redesign-calibration.md`.
+10. **Before any custom class or `global.css` pattern:** re-check `arco-first.md` and document why Arco + tokens are insufficient.
+11. **`src/styles/global.css`** — only after steps 1–10; grep tokens/patterns already justified, do not browse the file as the primary design catalog.
 
 **Coding gate:** `.cursor/rules/spec-first-coding.mdc` — read references first; run `check-spec.js` before delivery.
 
-Optional mirror of an existing page only when the user explicitly asks. Default: skill + `global.css`.
+Optional mirror of an existing page only when the user explicitly asks. Default: skill + Arco docs + justified `global.css` patterns.
 
 ## Reference Map
 
@@ -96,6 +112,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 | **Any icon change** | **`icons.md`** + `actions.md` / `table.md` / `feedback.md` by surface |
 | **UI redesign / 布局重写 / 质感 / 普通后台味 / 新 skill 改版** | **`redesign-calibration.md`** + `visual-system.md` + archetype reference |
 | **卖软件 / 融资演示 / 高级感 / 产品化 / 商业包装感** | **`product-grade-evaluation.md`** + `redesign-calibration.md` + `visual-system.md` |
+| **框架优先 / 减少 global.css 依赖 / Arco-first 重构** | **`arco-first.md`** + `ai-generation-contract.md` + relevant surface reference |
 | New page / module | `module-patterns.md` → `domain-language.md` → **`domain-routing.md`** |
 | Page type choice | `page-archetypes.md` |
 | AI page generation | `ai-generation-contract.md` |
@@ -126,6 +143,8 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 
 ## Non-Negotiables
 
+- Arco-first: prefer Arco built-ins, props, slots, and theme behavior before shared custom CSS
+- `global.css` is a shared enhancement layer, not a second UI framework
 - Arco + `global.css` tokens; no new color system
 - `vxe-table` only; no `a-table`
 - Freight terms from `domain-language.md`; no generic `步骤1` / `处理中`
@@ -149,7 +168,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 3. If the task comes from a screenshot/prototype, complete the prototype translation block.
 4. If the task has behavior, classify `feature_type` and complete the functional contract.
 5. Pick archetype; read topic references.
-6. Implement with `global.css` classes; scoped CSS only for page shell.
+6. Implement in priority order: Arco built-ins → tokens → documented business patterns → minimal page-local CSS. Shared classes only when `arco-first.md` justification is clear.
 7. Run `node scripts/check-spec.js` and build when possible.
 8. Report object mapping, artifact intake, prototype mapping, feature mapping, files changed, rules applied, verification.
 

@@ -97,7 +97,7 @@ Do not solve "too blue" by removing all primary anchors. The page needs enough p
 | Status | Use semantic tokens only: `warning`, `primary`, `success`, `danger`, `cyan`, `purple`, neutral. |
 | Disabled/empty | Use `color-text-4` and `color-fill-1/2`, only for low-priority information. |
 
-Use Arco Design Vue and `@arco-themes/vue-gi-demo` as the color source. Do not build an independent palette.
+Use Arco Design Vue default theme (`@arco-design/web-vue/dist/arco.css`) as the color source. Do not add third-party Arco theme packages or build an independent palette.
 
 ## Primary Usage Boundary
 
@@ -136,9 +136,9 @@ For tabs, status filters, quick chips, checkbox chips, segmented controls, and l
 
 ## Token Usage
 
-`@arco-themes/vue-gi-demo` may expose `--primary-*`, `--warning-*`, `--success-*`, and similar variables as RGB channel values depending on the import path. Page code must not depend on that raw representation.
+Arco Design Vue exposes `--primary-*`, `--warning-*`, `--success-*`, `--color-*`, and similar CSS variables. Some are RGB channel values. Page code must not depend on that raw representation.
 
-Correct in global/theme bridge CSS only:
+Correct in `global.css` theme bridge only:
 
 - `rgb(var(--primary-6))`
 - `rgba(var(--primary-6), 0.12)`

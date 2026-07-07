@@ -8,17 +8,18 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 
 ## 三条铁律
 
-1. **样式** — 先读 `src/styles/global.css`，复用类名，禁止自写等效 CSS。
-2. **Skill** — 页面/布局/表格/按钮/质感/功能流程先读 `$freight-arco-ui`（`ui-skill/freight-arco-ui/`），按任务读 `references/` 对应文件。
+1. **Arco-first** — Arco 驱动页面；执行链：Arco → token → 业务 pattern → page-local CSS（见 `references/arco-first.md`）。
+2. **Skill** — 页面/布局/表格/按钮/质感/功能流程先读 `$freight-arco-ui`，按任务读 `references/`。
 3. **编码门禁** — 写前 `spec-first-coding.mdc`；交付前 `adversarial-review.mdc` + `check-spec.js`。
 
 ## Skill 读什么
 
-完整索引 → `ui-skill/freight-arco-ui/SKILL.md` · **大系统域路由** → `references/domain-routing.md`  
+完整索引 → `ui-skill/freight-arco-ui/SKILL.md` · **框架优先** → `references/arco-first.md` · **大系统域路由** → `references/domain-routing.md`  
 编码流程 → `.cursor/rules/spec-first-coding.mdc`
 
 | 域 | 读 |
 |----|-----|
+| 框架优先 / 减 global.css 依赖 | `arco-first.md` |
 | 新菜单选型 | `domain-routing.md` |
 | 截图/原型转页面 | `artifact-intake-template.md` + `prototype-to-ui-contract.md` + `page-archetypes.md` + `module-patterns.md` |
 | 功能实现/动作/提交流程 | `feature-routing.md` + `feature-delivery-contract.md` |
@@ -31,6 +32,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 
 ## 不可协商（摘要）
 
+- **Arco-first**：能用 Arco props/结构解决就不用自定义 class；`global.css` 是增强层不是第二框架
 - 表格一律 `vxe-table`，禁止 `a-table`
 - 上传用 Uppy，禁止 `a-upload`
 - 状态只用 `s-pill[data-s]`，禁止行铺色
@@ -43,6 +45,8 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 - 有截图/原型输入时，必须先补输入模板和原型转译，禁止按视觉相似度直接开写
 
 ## 结构类名速查
+
+共享 pattern 仅在 Arco + token 不够时使用。类名 grep 验证后使用。
 
 | 场景 | 类名 |
 |------|------|

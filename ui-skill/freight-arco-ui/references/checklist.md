@@ -2,15 +2,23 @@
 
 ## Before Editing
 
-- Read `src/styles/global.css`.
-- Confirm whether existing global class already solves the need.
+- Read **`references/arco-first.md`** and apply Arco-first → token-second → business-pattern-third → page-local-css-last.
 - Read `references/design-principles.md`.
+- For any shared class or `global.css` change: confirm Arco props/tokens cannot solve it; state `why_arco_not_enough`.
+- Grep `src/styles/global.css` only for tokens/patterns already justified — do not start from the stylesheet as the design catalog.
 - Apply the four-layer model before designing: Product Positioning -> Design Philosophy -> Visual Language -> Implementation Rules.
 - Convert vague UI feedback into AI-executable design language before editing: define scope, structure/class, token/density, state behavior, business semantics, forbidden fallback, and verification where possible.
 - Read `references/module-patterns.md` for new pages or module refactors.
 - Read `references/domain-language.md`.
 - Classify the page with `references/page-archetypes.md`.
 - Read the relevant skill reference.
+
+## Arco-First Gate
+
+- Arco props, slots, and layout primitives were tried before shared custom classes.
+- `global.css` is used only for tokens, freight semantics, VXE bridge, or documented archetype slots — not as a second UI framework.
+- Every shared class used on the page has a one-line `why_arco_not_enough` if challenged in review.
+- Page-local scoped CSS is minimal shell only.
 
 ## PESDP Gate
 

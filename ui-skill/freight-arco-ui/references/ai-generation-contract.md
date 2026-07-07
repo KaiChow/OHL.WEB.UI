@@ -13,7 +13,7 @@ AI must reason through these layers in order:
 1. **Product Positioning** — next-generation international freight forwarding SaaS, not traditional ERP.
 2. **Design Philosophy** — business workflows, readability, consistency, trust, and operational efficiency before decoration.
 3. **Visual Language** — restrained Arco-based enterprise SaaS: neutral surfaces, white work areas, clear hierarchy, high density, low visual complexity.
-4. **Implementation Rules** — `global.css` tokens, Arco/VXE components, page archetypes, action rules, table rules, and `check-spec`.
+4. **Implementation Rules** — Arco-first → token-second → business-pattern-third → page-local-css-last; then skill references and `check-spec`.
 
 Do not implement a visual idea only because it resembles a modern SaaS reference. It must preserve freight workflow efficiency and pass the implementation rules.
 
@@ -21,17 +21,16 @@ Do not implement a visual idea only because it resembles a modern SaaS reference
 
 Before generating UI:
 
-1. `src/styles/global.css`
-2. `CLAUDE.md`
-3. `references/design-principles.md`
-4. `references/domain-language.md`
-5. `references/page-archetypes.md`
-6. For any redesign / rewrite / layout-polish task: `references/redesign-calibration.md`
-7. For any framework-first / low-customization task: `references/arco-first.md`
-8. For any productization / financing-demo / sellable-SaaS goal: `references/product-grade-evaluation.md`
-9. For any screenshot/prototype input: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
-10. For any interactive feature: `references/feature-routing.md` + `references/feature-delivery-contract.md`
-11. The task-specific reference: list/detail/table/actions/visual/checklist.
+1. **`references/arco-first.md`**
+2. `references/design-principles.md`
+3. `references/domain-language.md`
+4. `references/page-archetypes.md`
+5. For any redesign / rewrite / layout-polish task: `references/redesign-calibration.md`
+6. For any productization / financing-demo / sellable-SaaS goal: `references/product-grade-evaluation.md`
+7. For any screenshot/prototype input: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
+8. For any interactive feature: `references/feature-routing.md` + `references/feature-delivery-contract.md`
+9. The task-specific reference: list/detail/table/actions/visual/checklist.
+10. `src/styles/global.css` — only for tokens/patterns already justified by steps 1–9; grep, do not treat as primary catalog.
 
 ## Generation Workflow
 
@@ -57,7 +56,7 @@ Before generating UI:
    - Key status/node.
    - Main working data.
    - Auxiliary metadata.
-11. Choose Arco built-ins first; only then choose existing shared enhancement classes from `global.css`.
+11. Choose Arco built-ins first; then tokens; then existing shared business patterns from `global.css` only with a stated Arco gap.
 12. When the task is redesign and the old skeleton is weak, regroup surfaces or rewrite the page skeleton before tuning component chrome.
 13. Implement components in module files, not one huge page file.
 14. Use mock data only when backend integration is not requested.
@@ -76,7 +75,7 @@ When writing or applying a rule:
 
 1. Start from the reusable slot: `primary_identity`, `key_state`, `key_facts`, `main_working_data`, `supporting_data`, `sub_entity`, or `action_scope`.
 2. Bind the slot to a reusable surface: filter card, toolbar, table, detail identity band, form subgroup, repeated line module, attachment module, timeline, footer, dropdown menu.
-3. Pick existing structural classes and tokens from `global.css`.
+3. Pick existing structural classes and tokens only after Arco + token options are ruled out; every shared class needs a one-line `why_arco_not_enough`.
 4. Fill labels and field examples from the current business object.
 
 Business terms such as route, ETD, cargo, HBL, invoice amount, warehouse stock, or customer credit are examples of slot content. They are not reusable structure by themselves.
@@ -140,7 +139,7 @@ For large modules:
 
 - Split route, menu metadata, page container, search, toolbar, table, drawer/detail, mock data, types, and composables.
 - Do not put all UI, mock data, columns, and styles into one `.vue` file.
-- Keep page-specific scoped CSS small. Promote reusable layout/style to `src/styles/global.css` only when it is actually shared.
+- Keep page-specific scoped CSS small. Promote to `src/styles/global.css` only when a second module needs the same pattern and `arco-first.md` justification exists.
 
 Recommended module shape:
 

@@ -4,21 +4,31 @@ globs: ["src/**/*.vue", "src/**/*.ts"]
 alwaysApply: true
 ---
 
-# UI 规范：禁止自写 CSS，必须复用 global.css
+# UI 规范：Arco-first 产品化
 
-**不在此重复决策细则：** 筛选 Tier / 布局结构 → `ui-skill/freight-arco-ui/references/filter-layout.md`；Modal vs Drawer → `modal.md`；编码流程 → `.cursor/rules/spec-first-coding.mdc`。本文件仅提供 DOM 骨架示例。
+**不在此重复决策细则：** 框架优先链 → `ui-skill/freight-arco-ui/references/arco-first.md`；筛选 Tier / 布局结构 → `filter-layout.md`；Modal vs Drawer → `modal.md`；编码流程 → `.cursor/rules/spec-first-coding.mdc`。本文件仅提供 DOM 骨架示例。
 
 ## 核心原则
 
-`src/styles/global.css` 已实现完整设计系统。**优先用已有类名，禁止另写等效 CSS。**
+**Arco 驱动页面，`global.css` 只做薄增强。**
 
-使用任何类名前先 grep 验证它存在于 global.css：
+执行优先级（强制）：
+
+1. **Arco-first** — 能用 Arco props / slots / 布局原语解决，就不用自定义 class
+2. **Token-second** — 能用 Arco 主题或 `--dense-*` token 解决，就不写新 CSS
+3. **Business-pattern-third** — 仅货代语义、工作台 archetype、VXE 桥接才用共享 pattern
+4. **Page-local-css-last** — 页面壳层 CSS 最小化
+
+使用共享类名前：
+
+1. 先确认 Arco + token 不够（见 `arco-first.md`，需能一句话说明 gap）
+2. 再 grep 验证类存在于 `global.css`：
 
 ```bash
 grep -n "\.类名" src/styles/global.css
 ```
 
-无结果 = 该类不存在 = 禁止使用。
+无结果 = 该类不存在 = 禁止凭空使用。禁止自写与已有 pattern 等效的 CSS。
 
 ---
 
