@@ -56,6 +56,16 @@ const menuRouteMap = computed(() => {
   return map;
 });
 
+const currentPageTitle = computed(() =>
+  route.meta.title ? String(route.meta.title) : '工作台'
+);
+
+const currentGroupTitle = computed(() => {
+  const key = route.meta.menuKey ? String(route.meta.menuKey) : '';
+  const group = appMenus.find((item) => item.children?.some((child) => child.key === key));
+  return group?.title ?? '业务单';
+});
+
 const filteredMenus = computed(() => {
   const kw = menuKeyword.value.trim().toLowerCase();
   if (!kw) return appMenus;
@@ -140,7 +150,10 @@ const closeTab = (tab: AppTabItem, event: MouseEvent) => {
     <a-layout-sider class="app-sider" :width="248">
       <div class="side-brand">
         <span class="brand-mark brand-mark--ptp">OHL</span>
-        <strong>OHL 货代系统</strong>
+        <div class="side-brand__meta">
+          <strong class="side-brand__title">OHL Freight OS</strong>
+          <span class="side-brand__sub">International Operations Workspace</span>
+        </div>
       </div>
 
       <div class="side-search">
@@ -149,6 +162,11 @@ const closeTab = (tab: AppTabItem, event: MouseEvent) => {
             <icon-search />
           </template>
         </a-input>
+      </div>
+
+      <div class="side-rail">
+        <span class="side-rail__label">当前工作域</span>
+        <strong class="side-rail__value">{{ currentGroupTitle }} / {{ currentPageTitle }}</strong>
       </div>
 
       <a-menu
@@ -165,10 +183,20 @@ const closeTab = (tab: AppTabItem, event: MouseEvent) => {
           </a-menu-item>
         </a-sub-menu>
       </a-menu>
+
+      <div class="side-footer">
+        <span class="side-footer__meta">CN Workspace</span>
+        <span class="side-footer__meta">v0.1</span>
+      </div>
     </a-layout-sider>
 
     <a-layout class="main-layout">
       <header class="system-tabnav">
+        <div class="system-tabnav__context">
+          <span class="system-tabnav__eyebrow">{{ currentGroupTitle }}</span>
+          <strong class="system-tabnav__title">{{ currentPageTitle }}</strong>
+        </div>
+
         <nav class="tabnav-menu" aria-label="页面标签">
           <button
             v-for="tab in tabs"
@@ -191,7 +219,7 @@ const closeTab = (tab: AppTabItem, event: MouseEvent) => {
 
         <div class="tabnav-actions">
           <button type="button" @click="router.go(0)">刷新</button>
-          <span>admin</span>
+          <span class="tabnav-user"><span class="tabnav-user__dot" />admin</span>
         </div>
       </header>
 

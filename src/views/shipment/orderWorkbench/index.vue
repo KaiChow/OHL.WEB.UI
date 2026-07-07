@@ -246,6 +246,45 @@ const getOrderAuxText = (row: ShipmentWorkbenchRow) => {
   return parts.length ? parts.join(' / ') : '待回传订舱号 / 提单号';
 };
 
+const getNextActionLabel = (row: ShipmentWorkbenchRow) => {
+  if (row.exceptionStatus === 'open') return '处理异常';
+  if (row.fileStatus === 'missing') return '补齐文件';
+  if (row.orderStatus === 'waitBooking' || row.orderStatus === 'booking') return '推进订舱';
+  if (row.orderStatus === 'released' || row.orderStatus === 'waitTruck' || row.orderStatus === 'trucking') return '安排拖车';
+  if (row.orderStatus === 'waitCustoms' || row.orderStatus === 'customs') return '推进报关';
+  if (row.orderStatus === 'sailed') return '提单确认';
+  if (row.feeStatus === 'none' || row.feeStatus === 'pending') return '维护费用';
+  return '跟踪节点';
+};
+
+const getNextActionMeta = (row: ShipmentWorkbenchRow) => {
+  if (row.exceptionStatus === 'open') return row.riskFlags.join(' / ') || '存在阻塞项待关闭';
+  if (row.fileStatus === 'missing') return '缺少 SO / 报关 / 提单资料';
+  if (row.orderStatus === 'waitBooking' || row.orderStatus === 'booking') return '关注放舱与舱位回传';
+  if (row.orderStatus === 'released' || row.orderStatus === 'waitTruck' || row.orderStatus === 'trucking') return '同步装柜与进港安排';
+  if (row.orderStatus === 'waitCustoms' || row.orderStatus === 'customs') return '核对申报与放行节点';
+  if (row.orderStatus === 'sailed') return '补料 / 提单 / 到港跟踪';
+  if (row.feeStatus === 'none' || row.feeStatus === 'pending') return '应收应付待核算';
+  return '继续跟踪节点变化';
+};
+
+const getExecutionSignals = (row: ShipmentWorkbenchRow) => {
+  const signals: Array<{ label: string; tone: 'acc' | 'wait' | 'rej' | 'rel' }> = [];
+
+  if (row.fileStatus === 'missing') signals.push({ label: '缺文件', tone: 'rej' });
+  else if (row.fileStatus === 'pending') signals.push({ label: '文件待确认', tone: 'wait' });
+
+  if (row.feeStatus === 'none') signals.push({ label: '未生成费用', tone: 'wait' });
+  else if (row.feeStatus === 'pending') signals.push({ label: '费用待确认', tone: 'wait' });
+
+  if (row.exceptionStatus === 'open') signals.push({ label: '异常处理中', tone: 'rej' });
+  else if (row.isOverdue) signals.push({ label: '节点超期', tone: 'wait' });
+
+  if (!signals.length) signals.push({ label: '执行就绪', tone: 'acc' });
+
+  return signals;
+};
+
 const workbenchNotice = computed(() => {
   const overdue = getRowsByQueue(queryBaseRows.value, 'overdue').length;
   const fileMissing = getRowsByQueue(queryBaseRows.value, 'fileMissing').length;
@@ -702,6 +741,15 @@ const fetchList = async () => {
 
           <vxe-column field="containerSummary" title="柜型柜量" min-width="100" align="center" />
 
+          <vxe-column title="当前待办" min-width="170">
+            <template #default="{ row }">
+              <div class="cell-two-line">
+                <span class="c2-main">{{ getNextActionLabel(row) }}</span>
+                <span class="c2-sub">{{ getNextActionMeta(row) }}</span>
+              </div>
+            </template>
+          </vxe-column>
+
           <vxe-column title="跟进信息" min-width="150">
             <template #default="{ row }">
               <div class="cell-two-line">
@@ -711,27 +759,18 @@ const fetchList = async () => {
             </template>
           </vxe-column>
 
-          <vxe-column field="fileStatusLabel" title="文件状态" min-width="92" align="center">
+          <vxe-column title="执行缺口" min-width="164">
             <template #default="{ row }">
-              <span class="s-pill" :data-s="row.fileStatus === 'complete' ? 'acc' : row.fileStatus === 'missing' ? 'rej' : 'wait'">
-                {{ row.fileStatusLabel }}
-              </span>
-            </template>
-          </vxe-column>
-
-          <vxe-column field="feeStatusLabel" title="费用状态" min-width="92" align="center">
-            <template #default="{ row }">
-              <span class="s-pill" :data-s="row.feeStatus === 'confirmed' ? 'acc' : row.feeStatus === 'pending' ? 'wait' : 'draft'">
-                {{ row.feeStatusLabel }}
-              </span>
-            </template>
-          </vxe-column>
-
-          <vxe-column field="exceptionStatusLabel" title="异常状态" min-width="92" align="center">
-            <template #default="{ row }">
-              <span class="s-pill" :data-s="row.exceptionStatus === 'open' ? 'rej' : row.exceptionStatus === 'resolved' ? 'acc' : 'rel'">
-                {{ row.isOverdue && row.exceptionStatus === 'normal' ? '超期' : row.exceptionStatusLabel }}
-              </span>
+              <div class="cell-pill-row">
+                <span
+                  v-for="signal in getExecutionSignals(row)"
+                  :key="signal.label"
+                  class="s-pill"
+                  :data-s="signal.tone"
+                >
+                  {{ signal.label }}
+                </span>
+              </div>
             </template>
           </vxe-column>
 

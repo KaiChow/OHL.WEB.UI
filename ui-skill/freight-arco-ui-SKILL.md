@@ -28,6 +28,7 @@ Detailed rules are in:
 - `ui-skill/freight-arco-ui/references/page-archetypes.md`
 - `ui-skill/freight-arco-ui/references/ai-generation-contract.md`
 - `ui-skill/freight-arco-ui/references/redesign-calibration.md`
+- `ui-skill/freight-arco-ui/references/product-grade-evaluation.md`
 - `ui-skill/freight-arco-ui/references/list-page.md`
 - `ui-skill/freight-arco-ui/references/detail-form.md`
 - `ui-skill/freight-arco-ui/references/visual-system.md`

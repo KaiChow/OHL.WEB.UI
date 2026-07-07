@@ -95,6 +95,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 | Any UI task | `design-principles.md` |
 | **Any icon change** | **`icons.md`** + `actions.md` / `table.md` / `feedback.md` by surface |
 | **UI redesign / 布局重写 / 质感 / 普通后台味 / 新 skill 改版** | **`redesign-calibration.md`** + `visual-system.md` + archetype reference |
+| **卖软件 / 融资演示 / 高级感 / 产品化 / 商业包装感** | **`product-grade-evaluation.md`** + `redesign-calibration.md` + `visual-system.md` |
 | New page / module | `module-patterns.md` → `domain-language.md` → **`domain-routing.md`** |
 | Page type choice | `page-archetypes.md` |
 | AI page generation | `ai-generation-contract.md` |
@@ -135,6 +136,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 - `detail-mini-vxe`: no `show-overflow`; header bg ≠ row hover bg; no checkbox without batch toolbar
 - Business Arco controls: `size="small"` only — see `component-size.md` (`medium` = Arco default, forbidden)
 - When the task is redesign, AI may regroup surfaces or rewrite the page skeleton if business workflow becomes clearer; do not default to structure-preserving polish. See `redesign-calibration.md`.
+- When the task goal is productization, sellable SaaS quality, financing/demo quality, or "高级感", evaluate against `product-grade-evaluation.md`; do not stop at internal-system quality.
 - Any feature with click/submit/request/state change must complete the functional contract: `feature_type` + `entry_point` + `actor_roles` + `visible_when` + `enabled_when` + `api_request` + `api_response` + `success_result` + `error_result` + `refresh_scope` + `verification_cases`
 - Any screenshot/prototype-driven task must complete the artifact intake template and prototype translation block before coding
 - Any screenshot/prototype-driven task must complete the prototype translation block before coding; do not code directly from visual similarity

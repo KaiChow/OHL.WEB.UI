@@ -40,6 +40,18 @@
 - Daily reversible workflow actions remain directly reachable as neutral grouped actions; rare, risky, or destructive actions move to dropdown/confirm flows.
 - Modernization preserves operational affordances while removing old ERP noise: all-blue buttons, warning workflow buttons, red normal data, heavy vertical grids, gray form walls, and equal-weight bordered zones.
 
+## Product-Grade Gate
+
+- Consistency: all touched pages still feel like one product, not isolated page optimizations.
+- Professionalism: industry language and page structure match freight business habits.
+- Efficiency Feel: users can quickly search, update, and batch-handle work; no cosmetic cleanup hides workflow.
+- Order: grouping, hierarchy, and business reading order are clear without rereading.
+- Completeness: loading, empty, error, validation, permission, and destructive-action states feel designed, not omitted.
+- Credibility: the page feels stable, rigorous, and unlikely to invite misoperation.
+- Demo Value: a team can explain business flow and product value from this page during a customer/leader/investor demo.
+- Expandability: the page feels like part of a platform-ready product system, not a one-off delivered screen.
+- If the page passes internal-system quality but fails product-grade quality, do not call the redesign finished when the task goal is productization or sellable SaaS quality.
+
 ## Module Generalization Gate
 
 - Business object is explicitly identified (see `module-patterns.md` slot mapping).

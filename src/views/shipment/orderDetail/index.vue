@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Message } from '@arco-design/web-vue';
 import { IconDown, IconPlus, IconPrinter } from '@arco-design/web-vue/es/icon';
@@ -20,6 +20,43 @@ const loadRecord = (orderNo?: string) =>
 const form = reactive<ShipmentOrderDetailRecord>(loadRecord(
   typeof route.query.orderNo === 'string' ? route.query.orderNo : undefined,
 ));
+
+const milestoneItems = computed(() => {
+  const source = form.nodes.slice(0, 5);
+  const firstPendingIndex = source.findIndex((item) => item.statusKey !== 'rel');
+
+  return source.map((item, index) => ({
+    id: item.id,
+    label: item.name,
+    state: item.statusKey === 'rel'
+      ? 'done'
+      : index === firstPendingIndex
+        ? 'current'
+        : 'upcoming',
+  }));
+});
+
+const fileMissingCount = computed(() => form.files.filter((item) => item.statusKey === 'rej').length);
+const pendingRiskCount = computed(() => form.risks.filter((item) => item.status !== '已关闭').length);
+const pendingTodoCount = computed(() => form.todos.filter((item) => item.status !== '已完成').length);
+const feePendingCount = computed(() => form.receivableFees.filter((item) => item.statusKey === 'wait').length + form.payableFees.filter((item) => item.statusKey === 'wait').length);
+const currentNode = computed(() => form.nodes.find((item) => item.statusKey !== 'rel') ?? form.nodes[form.nodes.length - 1]);
+const fileStatusSummary = computed(() => fileMissingCount.value > 0 ? `缺 ${fileMissingCount.value} 份` : '已齐套');
+const riskSummary = computed(() => pendingRiskCount.value > 0 ? `${pendingRiskCount.value} 项待处理` : '无阻塞');
+const feeStatusSummary = computed(() => feePendingCount.value > 0 ? `${feePendingCount.value} 项待确认` : '已确认');
+const nextActionSummary = computed(() => currentNode.value?.name ?? '当前无待推进节点');
+const pendingFileConfirmCount = computed(() => form.files.filter((item) => item.statusKey === 'wait').length);
+const requiredFileCount = computed(() => form.files.filter((item) => item.required).length);
+const completedNodeCount = computed(() => form.nodes.filter((item) => item.statusKey === 'rel').length);
+const pendingNodeCount = computed(() => form.nodes.filter((item) => item.statusKey !== 'rel').length);
+const openExceptionCount = computed(() => form.exceptions.filter((item) => item.statusKey !== 'rel').length);
+const receivableLineCount = computed(() => form.receivableFees.length);
+const payableLineCount = computed(() => form.payableFees.length);
+const profitTone = computed(() => {
+  if (form.profitStatusKey === 'acc' || form.profitStatusKey === 'rel') return 'rel';
+  if (form.profitStatusKey === 'op') return 'op';
+  return 'wait';
+});
 
 watch(
   () => route.query.orderNo,
@@ -145,23 +182,20 @@ const addExceptionRow = () => {
 </script>
 
 <template>
-  <div class="page-root page-root--dense xf-wrap">
-    <div class="xp-head zone-card">
-      <div class="xp-head__left">
-        <a-breadcrumb style="font-size:var(--dense-font-aux);margin-bottom:6px">
-          <a-breadcrumb-item><a @click.prevent="goBack">海运出口订单</a></a-breadcrumb-item>
-          <a-breadcrumb-item>订单详情</a-breadcrumb-item>
-        </a-breadcrumb>
-        <div class="xp-head__title-row">
-          <span class="link-text link-text--strong mono">{{ form.orderNo }}</span>
-          <span class="s-pill" :data-s="form.statusPill">{{ form.orderStatusLabel }}</span>
-          <span class="xp-head__meta">{{ form.customerName }} · {{ form.businessType }}</span>
-        </div>
-        <div class="xp-head__meta">
-          {{ form.pol }} → {{ form.pod }} · ETD {{ form.etd }} · 操作 {{ form.operator }}
+  <div class="page-root page-root--dense xf-wrap shipment-detail-page">
+    <div class="dds-head zone-card">
+      <div class="dds-head__main">
+        <a-button size="small" type="text" class="dds-head__back" @click="goBack">返回列表</a-button>
+        <div class="dds-head__identity">
+          <span class="dds-order-no mono">{{ form.orderNo }}</span>
+          <span class="dds-status-badge" :data-s="form.statusPill">{{ form.orderStatusLabel }}</span>
+          <span class="dds-company">{{ form.customerName }}</span>
+          <span class="dds-head__meta dds-head__meta--owner">{{ form.businessType }}</span>
+          <span class="dds-head__meta-sep">·</span>
+          <span class="dds-head__meta dds-head__meta--owner">操作 {{ form.operator }}</span>
         </div>
       </div>
-      <div class="xp-head__actions">
+      <div class="dds-head__actions">
         <a-tooltip content="打印">
           <a-button size="small" type="text"><template #icon><icon-printer /></template></a-button>
         </a-tooltip>
@@ -181,9 +215,58 @@ const addExceptionRow = () => {
       </div>
     </div>
 
-    <div class="xp-detail-layout">
-      <div class="xp-detail-layout__main">
-        <div class="xp-tabs-card zone-card">
+    <div class="dds-hero dds-hero--compact zone-card shipment-detail-page__hero">
+      <div class="dds-hero__route">
+        <div class="dds-hero__route-main">
+          <span class="dds-hero__port">{{ form.pol }}</span>
+          <span class="dds-hero__arrow">→</span>
+          <span class="dds-hero__port">{{ form.pod }}</span>
+        </div>
+        <div class="dds-hero__sub">{{ form.carrier }} / {{ form.vessel }} {{ form.voyage }}</div>
+      </div>
+      <div class="dds-hero__facts">
+        <div class="dds-hero-fact">
+          <div class="dds-hero-fact__label">开船</div>
+          <span class="dds-hero-fact__value dds-hero-fact__value--date mono">{{ form.etd }}</span>
+        </div>
+        <div class="dds-hero-fact">
+          <div class="dds-hero-fact__label">截关</div>
+          <span class="dds-hero-fact__value dds-hero-fact__value--date mono">{{ form.closingTime }}</span>
+        </div>
+        <div class="dds-hero-fact">
+          <div class="dds-hero-fact__label">利润状态</div>
+          <span class="dds-hero-fact__value">
+            <span class="s-pill" :data-s="profitTone">{{ form.profitStatus }}</span>
+          </span>
+        </div>
+        <div class="dds-hero-fact">
+          <div class="dds-hero-fact__label">文件齐套</div>
+          <span class="dds-hero-fact__value">{{ fileStatusSummary }}</span>
+        </div>
+        <div class="dds-hero-fact">
+          <div class="dds-hero-fact__label">异常风险</div>
+          <span class="dds-hero-fact__value">{{ riskSummary }}</span>
+        </div>
+        <div class="dds-hero-fact dds-hero-fact--trailing">
+          <div class="dds-hero-fact__label">下一动作</div>
+          <span class="dds-hero-fact__value">{{ nextActionSummary }}</span>
+        </div>
+      </div>
+      <div class="dds-milestone">
+        <div
+          v-for="item in milestoneItems"
+          :key="item.id"
+          class="dds-milestone__item"
+          :data-state="item.state"
+        >
+          {{ item.label }}
+        </div>
+      </div>
+    </div>
+
+    <div class="shipment-detail-layout">
+      <div class="shipment-detail-layout__main">
+        <div class="shipment-detail-tabs zone-card">
           <a-tabs v-model:active-key="activeTab" size="small" class="xp-tabs">
             <a-tab-pane key="basic" title="基本信息">
               <div class="xp-tab-body">
@@ -195,20 +278,52 @@ const addExceptionRow = () => {
               <div class="xp-tab-body">
                 <a-form class="detail-form" layout="vertical" size="small" :model="form">
                   <div class="detail-section">
-                    <div class="detail-section__head"><h4 class="detail-section__title">订舱信息</h4></div>
+                    <div class="detail-section__head">
+                      <div class="detail-section__title-group">
+                        <h4 class="detail-section__title">订舱信息</h4>
+                        <div class="detail-data-stats">
+                          <span class="detail-data-stats__item"><span class="detail-data-stats__label">订舱号</span><span class="detail-data-stats__val">{{ form.bookingNo || '待回传' }}</span></span>
+                          <span class="detail-data-stats__item"><span class="detail-data-stats__label">舱位</span><span class="detail-data-stats__val">{{ form.spaceStatus }}</span></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="detail-module-summary detail-module-summary--inline">
+                      <div class="detail-module-summary__stats">
+                        <div class="detail-module-summary__stat">
+                          <span class="detail-module-summary__stat-label">放舱时间</span>
+                          <span class="detail-module-summary__stat-value">{{ form.releaseTime }}</span>
+                        </div>
+                        <div class="detail-module-summary__stat">
+                          <span class="detail-module-summary__stat-label">截 VGM</span>
+                          <span class="detail-module-summary__stat-value">{{ form.vgmCutoff }}</span>
+                        </div>
+                        <div class="detail-module-summary__stat">
+                          <span class="detail-module-summary__stat-label">运价编号</span>
+                          <span class="detail-module-summary__stat-value">{{ form.rateNo }}</span>
+                        </div>
+                      </div>
+                    </div>
                     <div class="detail-section__body">
-                      <div class="detail-form-grid detail-form-grid--4">
-                        <a-form-item label="订舱号"><a-input v-model="form.bookingNo" size="small" allow-clear /></a-form-item>
-                        <a-form-item label="船公司"><a-input v-model="form.carrier" size="small" allow-clear /></a-form-item>
-                        <a-form-item label="订舱代理"><a-input v-model="form.bookingAgent" size="small" allow-clear /></a-form-item>
-                        <a-form-item label="合约号"><a-input v-model="form.contractNo" size="small" allow-clear /></a-form-item>
-                        <a-form-item label="运价编号"><a-input v-model="form.rateNo" size="small" allow-clear /></a-form-item>
-                        <a-form-item label="舱位状态"><a-input v-model="form.spaceStatus" size="small" allow-clear /></a-form-item>
-                        <a-form-item label="放舱时间"><a-date-picker v-model="form.releaseTime" size="small" show-time style="width:100%" /></a-form-item>
-                        <a-form-item label="截 VGM"><a-date-picker v-model="form.vgmCutoff" size="small" show-time style="width:100%" /></a-form-item>
-                        <a-form-item label="订舱备注" class="detail-form-grid__span4">
-                          <a-textarea v-model="form.bookingRemark" size="small" :auto-size="{ minRows: 2, maxRows: 4 }" />
-                        </a-form-item>
+                      <div class="form-subgroup">
+                        <div class="form-subgroup__head"><span class="form-subgroup__title">订舱主体</span></div>
+                        <div class="detail-form-grid detail-form-grid--4">
+                          <a-form-item label="订舱号"><a-input v-model="form.bookingNo" size="small" allow-clear /></a-form-item>
+                          <a-form-item label="船公司"><a-input v-model="form.carrier" size="small" allow-clear /></a-form-item>
+                          <a-form-item label="订舱代理"><a-input v-model="form.bookingAgent" size="small" allow-clear /></a-form-item>
+                          <a-form-item label="合约号"><a-input v-model="form.contractNo" size="small" allow-clear /></a-form-item>
+                        </div>
+                      </div>
+                      <div class="form-subgroup">
+                        <div class="form-subgroup__head"><span class="form-subgroup__title">节点控制</span></div>
+                        <div class="detail-form-grid detail-form-grid--4">
+                          <a-form-item label="运价编号"><a-input v-model="form.rateNo" size="small" allow-clear /></a-form-item>
+                          <a-form-item label="舱位状态"><a-input v-model="form.spaceStatus" size="small" allow-clear /></a-form-item>
+                          <a-form-item label="放舱时间"><a-date-picker v-model="form.releaseTime" size="small" show-time style="width:100%" /></a-form-item>
+                          <a-form-item label="截 VGM"><a-date-picker v-model="form.vgmCutoff" size="small" show-time style="width:100%" /></a-form-item>
+                          <a-form-item label="订舱备注" class="detail-form-grid__span4">
+                            <a-textarea v-model="form.bookingRemark" size="small" :auto-size="{ minRows: 2, maxRows: 4 }" />
+                          </a-form-item>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -326,9 +441,28 @@ const addExceptionRow = () => {
               <div class="xp-tab-body">
                 <div class="detail-section">
                   <div class="detail-section__head">
-                    <h4 class="detail-section__title">文件列表</h4>
+                    <div class="detail-section__title-group">
+                      <h4 class="detail-section__title">文件列表</h4>
+                      <div class="detail-data-stats">
+                        <span class="detail-data-stats__item"><span class="detail-data-stats__label">必传</span><span class="detail-data-stats__val">{{ requiredFileCount }}</span></span>
+                        <span class="detail-data-stats__item"><span class="detail-data-stats__label">缺失</span><span class="detail-data-stats__val">{{ fileMissingCount }}</span></span>
+                        <span class="detail-data-stats__item"><span class="detail-data-stats__label">待确认</span><span class="detail-data-stats__val">{{ pendingFileConfirmCount }}</span></span>
+                      </div>
+                    </div>
                     <div class="detail-section__actions">
                       <a-button size="small" type="outline">上传文件</a-button>
+                    </div>
+                  </div>
+                  <div class="detail-module-summary detail-module-summary--inline">
+                    <div class="detail-module-summary__stats">
+                      <div class="detail-module-summary__stat">
+                        <span class="detail-module-summary__stat-label">齐套状态</span>
+                        <span class="detail-module-summary__stat-value">{{ fileStatusSummary }}</span>
+                      </div>
+                      <div class="detail-module-summary__stat">
+                        <span class="detail-module-summary__stat-label">当前重点</span>
+                        <span class="detail-module-summary__stat-value">{{ fileMissingCount > 0 ? '先补必传资料' : '推进文件确认' }}</span>
+                      </div>
                     </div>
                   </div>
                   <div class="detail-section__body detail-section__body--table">
@@ -360,19 +494,44 @@ const addExceptionRow = () => {
             <a-tab-pane key="fees" title="费用信息">
               <div class="xp-tab-body">
                 <div class="detail-section">
-                  <div class="detail-section__head"><h4 class="detail-section__title">利润概览</h4></div>
-                  <div class="detail-section__body">
-                    <div class="detail-form-grid detail-form-grid--4">
-                      <div class="detail-field"><span class="detail-field__label">应收合计</span><span class="detail-field__val">{{ form.feeSummary.receivableTotal.toLocaleString() }}</span></div>
-                      <div class="detail-field"><span class="detail-field__label">应付合计</span><span class="detail-field__val">{{ form.feeSummary.payableTotal.toLocaleString() }}</span></div>
-                      <div class="detail-field"><span class="detail-field__label">毛利</span><span class="detail-field__val">{{ form.feeSummary.grossProfit.toLocaleString() }}</span></div>
-                      <div class="detail-field"><span class="detail-field__label">毛利率</span><span class="detail-field__val">{{ form.feeSummary.grossMargin }}%</span></div>
+                  <div class="detail-section__head">
+                    <div class="detail-section__title-group">
+                      <h4 class="detail-section__title">利润概览</h4>
+                      <div class="detail-data-stats">
+                        <span class="detail-data-stats__item"><span class="detail-data-stats__label">待确认</span><span class="detail-data-stats__val">{{ feePendingCount }}</span></span>
+                        <span class="detail-data-stats__item"><span class="detail-data-stats__label">状态</span><span class="detail-data-stats__val">{{ feeStatusSummary }}</span></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="detail-module-summary detail-module-summary--inline">
+                    <div class="detail-module-summary__stats">
+                      <div class="detail-module-summary__stat detail-module-summary__stat--qty">
+                        <span class="detail-module-summary__stat-label">应收合计</span>
+                        <span class="detail-module-summary__stat-value">{{ form.feeSummary.receivableTotal.toLocaleString() }}</span>
+                      </div>
+                      <div class="detail-module-summary__stat detail-module-summary__stat--weight">
+                        <span class="detail-module-summary__stat-label">应付合计</span>
+                        <span class="detail-module-summary__stat-value">{{ form.feeSummary.payableTotal.toLocaleString() }}</span>
+                      </div>
+                      <div class="detail-module-summary__stat">
+                        <span class="detail-module-summary__stat-label">毛利</span>
+                        <span class="detail-module-summary__stat-value">{{ form.feeSummary.grossProfit.toLocaleString() }}</span>
+                      </div>
+                      <div class="detail-module-summary__stat">
+                        <span class="detail-module-summary__stat-label">毛利率</span>
+                        <span class="detail-module-summary__stat-value">{{ form.feeSummary.grossMargin }}%</span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="detail-section">
                   <div class="detail-section__head">
-                    <h4 class="detail-section__title">应收费用</h4>
+                    <div class="detail-section__title-group">
+                      <h4 class="detail-section__title">应收费用</h4>
+                      <div class="detail-data-stats">
+                        <span class="detail-data-stats__item"><span class="detail-data-stats__label">条数</span><span class="detail-data-stats__val">{{ receivableLineCount }}</span></span>
+                      </div>
+                    </div>
                     <div class="detail-section__actions">
                       <a-button size="small" type="outline" @click="addReceivableRow"><template #icon><icon-plus /></template>新增</a-button>
                     </div>
@@ -404,7 +563,12 @@ const addExceptionRow = () => {
                 </div>
                 <div class="detail-section">
                   <div class="detail-section__head">
-                    <h4 class="detail-section__title">应付费用</h4>
+                    <div class="detail-section__title-group">
+                      <h4 class="detail-section__title">应付费用</h4>
+                      <div class="detail-data-stats">
+                        <span class="detail-data-stats__item"><span class="detail-data-stats__label">条数</span><span class="detail-data-stats__val">{{ payableLineCount }}</span></span>
+                      </div>
+                    </div>
                     <div class="detail-section__actions">
                       <a-button size="small" type="outline" @click="addPayableRow"><template #icon><icon-plus /></template>新增</a-button>
                     </div>
@@ -441,9 +605,27 @@ const addExceptionRow = () => {
               <div class="xp-tab-body">
                 <div class="detail-section">
                   <div class="detail-section__head">
-                    <h4 class="detail-section__title">物流节点</h4>
+                    <div class="detail-section__title-group">
+                      <h4 class="detail-section__title">物流节点</h4>
+                      <div class="detail-data-stats">
+                        <span class="detail-data-stats__item"><span class="detail-data-stats__label">已完成</span><span class="detail-data-stats__val">{{ completedNodeCount }}</span></span>
+                        <span class="detail-data-stats__item"><span class="detail-data-stats__label">待推进</span><span class="detail-data-stats__val">{{ pendingNodeCount }}</span></span>
+                      </div>
+                    </div>
                     <div class="detail-section__actions">
                       <a-button size="small" type="outline" @click="addNodeRow"><template #icon><icon-plus /></template>新增节点</a-button>
+                    </div>
+                  </div>
+                  <div class="detail-module-summary detail-module-summary--inline">
+                    <div class="detail-module-summary__stats">
+                      <div class="detail-module-summary__stat">
+                        <span class="detail-module-summary__stat-label">当前节点</span>
+                        <span class="detail-module-summary__stat-value">{{ currentNode?.name ?? '已完成' }}</span>
+                      </div>
+                      <div class="detail-module-summary__stat">
+                        <span class="detail-module-summary__stat-label">当前责任人</span>
+                        <span class="detail-module-summary__stat-value">{{ currentNode?.owner ?? form.operator }}</span>
+                      </div>
                     </div>
                   </div>
                   <div class="detail-section__body detail-section__body--table">
@@ -476,7 +658,13 @@ const addExceptionRow = () => {
               <div class="xp-tab-body">
                 <div class="detail-section">
                   <div class="detail-section__head">
-                    <h4 class="detail-section__title">异常列表</h4>
+                    <div class="detail-section__title-group">
+                      <h4 class="detail-section__title">异常列表</h4>
+                      <div class="detail-data-stats">
+                        <span class="detail-data-stats__item"><span class="detail-data-stats__label">待处理</span><span class="detail-data-stats__val">{{ openExceptionCount }}</span></span>
+                        <span class="detail-data-stats__item"><span class="detail-data-stats__label">页面风险</span><span class="detail-data-stats__val">{{ pendingRiskCount }}</span></span>
+                      </div>
+                    </div>
                     <div class="detail-section__actions">
                       <a-button size="small" type="outline" @click="addExceptionRow"><template #icon><icon-plus /></template>新增异常</a-button>
                     </div>
@@ -563,19 +751,52 @@ const addExceptionRow = () => {
         </div>
       </div>
 
-      <aside class="xp-detail-layout__aside zone-card">
-        <div class="detail-section">
-          <div class="detail-section__head"><h4 class="detail-section__title">风险与待办</h4></div>
-          <div class="detail-section__body xp-aside-stack">
-            <div v-for="risk in form.risks" :key="risk.id" class="workbench-notice workbench-notice--warn">
-              <span>{{ risk.message }}</span>
+      <aside class="shipment-detail-layout__aside">
+        <div class="detail-section shipment-detail-aside__section">
+          <div class="detail-section__head"><h4 class="detail-section__title">风控总览</h4></div>
+          <div class="detail-section__body shipment-aside-stack">
+            <div class="shipment-aside-metrics">
+              <div class="shipment-aside-metric">
+                <span class="shipment-aside-metric__label">待处理风险</span>
+                <strong class="shipment-aside-metric__value shipment-aside-metric__value--danger">{{ pendingRiskCount }}</strong>
+              </div>
+              <div class="shipment-aside-metric">
+                <span class="shipment-aside-metric__label">待办节点</span>
+                <strong class="shipment-aside-metric__value shipment-aside-metric__value--primary">{{ pendingTodoCount }}</strong>
+              </div>
+              <div class="shipment-aside-metric">
+                <span class="shipment-aside-metric__label">待确认费用</span>
+                <strong class="shipment-aside-metric__value shipment-aside-metric__value--warn">{{ feePendingCount }}</strong>
+              </div>
             </div>
-            <div v-for="todo in form.todos" :key="todo.id" class="xp-todo-card">
-              <a-form layout="vertical" size="small">
-                <a-form-item label="待办类型"><a-input v-model="todo.type" size="small" /></a-form-item>
-                <a-form-item label="负责人"><a-input v-model="todo.owner" size="small" /></a-form-item>
-                <a-form-item label="截止时间"><a-input v-model="todo.dueAt" size="small" /></a-form-item>
-              </a-form>
+
+            <div v-for="risk in form.risks" :key="risk.id" class="shipment-aside-card shipment-aside-card--warn">
+              <div class="shipment-aside-card__head">
+                <span class="shipment-aside-card__title">{{ risk.type }}</span>
+                <span class="s-pill" :data-s="risk.level === 'danger' ? 'rej' : 'wait'">{{ risk.status }}</span>
+              </div>
+              <div class="shipment-aside-card__body">{{ risk.message }}</div>
+              <div class="shipment-aside-card__meta">责任人 {{ risk.owner }} · 截止 {{ risk.dueAt }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section shipment-detail-aside__section">
+          <div class="detail-section__head"><h4 class="detail-section__title">当前待办</h4></div>
+          <div class="detail-section__body shipment-aside-stack">
+            <div v-for="todo in form.todos" :key="todo.id" class="shipment-aside-card">
+              <div class="shipment-aside-card__head">
+                <span class="shipment-aside-card__title">{{ todo.type }}</span>
+                <span class="s-pill" :data-s="todo.status === '进行中' ? 'op' : 'wait'">{{ todo.status }}</span>
+              </div>
+              <div class="shipment-aside-card__meta">负责人 {{ todo.owner }}</div>
+              <div class="shipment-aside-card__meta">截止 {{ todo.dueAt }}</div>
+            </div>
+
+            <div class="shipment-aside-actions">
+              <a-button size="small" type="outline" long @click="handleGenerateFee">进入费用</a-button>
+              <a-button size="small" type="outline" long @click="handleUploadFile">进入文件</a-button>
+              <a-button size="small" long @click="openStatusModal">修改状态</a-button>
             </div>
           </div>
         </div>
@@ -589,8 +810,13 @@ const addExceptionRow = () => {
         </a-popconfirm>
       </div>
       <div class="detail-drawer-footer__end">
-        <a-button size="small" @click="goBack">取消</a-button>
-        <a-button size="small" type="primary" :loading="submitting" @click="handleSave">保存</a-button>
+        <div class="detail-drawer-footer__cluster">
+          <a-button size="small" @click="handleNotify">发送通知</a-button>
+          <a-button size="small" @click="handleGenerateFee">生成费用</a-button>
+          <span class="detail-drawer-footer__sep" aria-hidden="true" />
+          <a-button size="small" @click="goBack">取消</a-button>
+          <a-button size="small" type="primary" :loading="submitting" @click="handleSave">保存</a-button>
+        </div>
       </div>
     </footer>
 
@@ -631,60 +857,42 @@ const addExceptionRow = () => {
 </template>
 
 <style scoped>
-.xp-head {
-  padding: 12px 16px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+.shipment-detail-page__hero {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
 }
-.xp-head__left {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.xp-head__title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.xp-head__meta {
-  font-size: var(--dense-font-aux);
-  color: var(--color-text-3);
-}
-.xp-head__actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-.xp-detail-layout {
+
+.shipment-detail-layout {
   flex: 1;
   min-height: 0;
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 292px;
+  gap: 10px;
   overflow: hidden;
 }
-.xp-detail-layout__main {
+
+.shipment-detail-layout__main {
   flex: 1;
   min-width: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
-.xp-detail-layout__aside {
-  width: 280px;
-  flex-shrink: 0;
+
+.shipment-detail-layout__aside {
+  min-width: 0;
   overflow-y: auto;
-  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-.xp-tabs-card {
+
+.shipment-detail-tabs {
   flex: 1;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
+
 .xp-tabs {
   height: 100%;
   display: flex;
@@ -704,6 +912,105 @@ const addExceptionRow = () => {
   flex-direction: column;
   gap: 8px;
 }
+
+.shipment-detail-aside__section {
+  margin-bottom: 0;
+}
+
+.shipment-aside-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shipment-aside-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.shipment-aside-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 10px 9px;
+  border: 1px solid var(--dense-border-subtle);
+  border-radius: var(--dense-radius);
+  background: linear-gradient(180deg, #FBFCFE 0%, #FFFFFF 100%);
+}
+
+.shipment-aside-metric__label {
+  font-size: var(--dense-font-micro);
+  color: var(--color-text-3);
+  line-height: 1.2;
+}
+
+.shipment-aside-metric__value {
+  font-size: var(--dense-font-overlay);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-1);
+}
+
+.shipment-aside-metric__value--danger {
+  color: var(--dense-danger-7);
+}
+
+.shipment-aside-metric__value--primary {
+  color: var(--dense-primary-7);
+}
+
+.shipment-aside-metric__value--warn {
+  color: var(--dense-warning-7);
+}
+
+.shipment-aside-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 11px;
+  border: 1px solid var(--dense-border-subtle);
+  border-radius: var(--dense-radius);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FBFCFE 100%);
+}
+
+.shipment-aside-card--warn {
+  border-color: var(--dense-warning-2);
+  background: linear-gradient(180deg, #FFFDF8 0%, #FFFFFF 100%);
+}
+
+.shipment-aside-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.shipment-aside-card__title {
+  font-size: var(--dense-font-field);
+  font-weight: 600;
+  color: var(--color-text-1);
+}
+
+.shipment-aside-card__body {
+  font-size: var(--dense-font-aux);
+  line-height: 1.5;
+  color: var(--color-text-2);
+}
+
+.shipment-aside-card__meta {
+  font-size: var(--dense-font-micro);
+  line-height: 1.3;
+  color: var(--color-text-3);
+}
+
+.shipment-aside-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .status-modal-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -725,22 +1032,12 @@ const addExceptionRow = () => {
 .status-modal-req {
   color: var(--danger-6);
 }
-.xp-aside-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.xp-todo-card {
-  padding: 8px;
-  border: 1px solid var(--dense-border-subtle);
-  border-radius: var(--dense-radius);
-}
 @media (max-width: 1280px) {
-  .xp-detail-layout {
-    flex-direction: column;
+  .shipment-detail-layout {
+    grid-template-columns: 1fr;
   }
-  .xp-detail-layout__aside {
-    width: 100%;
+
+  .shipment-detail-layout__aside {
     max-height: 240px;
   }
 }
