@@ -15,7 +15,8 @@ Project-level **UI delivery contract** for `FE.OHL.WEB.UI`.
 
 | Layer | Location | Contains |
 |-------|----------|----------|
-| **Tokens & layout CSS** | `src/styles/global.css` | Classes, colors, table/button chrome |
+| **Arco foundation** | Arco Design Vue | Default controls, layout primitives, tabs, overlay, interaction states |
+| **Shared enhancement CSS** | `src/styles/global.css` | Thin shell/product rhythm, VXE bridge, freight semantics, shared chrome |
 | **Agent summary** | `AGENTS.md` | One-page pointer (no duplicate rules) |
 | **This skill** | `SKILL.md` + `references/` | PESDP principles + executable rules |
 | **Structure slots** | `module-patterns.md` | English slots only; no field lists |
@@ -26,7 +27,7 @@ Project-level **UI delivery contract** for `FE.OHL.WEB.UI`.
 | **Component rules** | `actions.md`, `icons.md`, `table.md`, `detail-form.md`, `list-page.md` | How to implement |
 | **QA** | `checklist.md`, `scripts/check-spec.js` | Pre-ship checks |
 
-**Rule:** Structure in English slots → labels from `domain-language.md` → CSS from `global.css` → details in topic references. Do not duplicate long rule blocks across `AGENTS.md` / `CLAUDE.md` / skill.
+**Rule:** Arco structure first → business slots and labels from `module-patterns.md` / `domain-language.md` → thin shared enhancement from `global.css` only where needed → details in topic references. Do not duplicate long rule blocks across `AGENTS.md` / `CLAUDE.md` / skill.
 
 ## Four-Layer Prompt Model
 
@@ -80,6 +81,7 @@ Do not hide daily filters, status tabs, or reversible workflow actions merely to
 7. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
 8. **Before changing icon usage:** read `icons.md`.
 9. **Before any redesign / 布局重写 / 质感优化 / 普通后台味反馈:** read `redesign-calibration.md`.
+10. **Before deciding between framework defaults and custom CSS:** read `arco-first.md`.
 
 **Coding gate:** `.cursor/rules/spec-first-coding.mdc` — read references first; run `check-spec.js` before delivery.
 
@@ -96,6 +98,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 | **Any icon change** | **`icons.md`** + `actions.md` / `table.md` / `feedback.md` by surface |
 | **UI redesign / 布局重写 / 质感 / 普通后台味 / 新 skill 改版** | **`redesign-calibration.md`** + `visual-system.md` + archetype reference |
 | **卖软件 / 融资演示 / 高级感 / 产品化 / 商业包装感** | **`product-grade-evaluation.md`** + `redesign-calibration.md` + `visual-system.md` |
+| **框架优先 / 减少 global.css 依赖 / Arco-first 重构** | **`arco-first.md`** + `ai-generation-contract.md` + relevant surface reference |
 | New page / module | `module-patterns.md` → `domain-language.md` → **`domain-routing.md`** |
 | Page type choice | `page-archetypes.md` |
 | AI page generation | `ai-generation-contract.md` |
@@ -126,6 +129,8 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 
 ## Non-Negotiables
 
+- Arco-first: prefer Arco built-ins, props, slots, and theme behavior before shared custom CSS
+- `global.css` is a shared enhancement layer, not a second UI framework
 - Arco + `global.css` tokens; no new color system
 - `vxe-table` only; no `a-table`
 - Freight terms from `domain-language.md`; no generic `步骤1` / `处理中`
@@ -149,7 +154,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 3. If the task comes from a screenshot/prototype, complete the prototype translation block.
 4. If the task has behavior, classify `feature_type` and complete the functional contract.
 5. Pick archetype; read topic references.
-6. Implement with `global.css` classes; scoped CSS only for page shell.
+6. Implement with Arco built-ins first; use `global.css` shared classes only when the business semantics or VXE integration require them; scoped CSS only for page shell.
 7. Run `node scripts/check-spec.js` and build when possible.
 8. Report object mapping, artifact intake, prototype mapping, feature mapping, files changed, rules applied, verification.
 

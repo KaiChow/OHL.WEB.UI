@@ -27,10 +27,11 @@ Before generating UI:
 4. `references/domain-language.md`
 5. `references/page-archetypes.md`
 6. For any redesign / rewrite / layout-polish task: `references/redesign-calibration.md`
-7. For any productization / financing-demo / sellable-SaaS goal: `references/product-grade-evaluation.md`
-8. For any screenshot/prototype input: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
-9. For any interactive feature: `references/feature-routing.md` + `references/feature-delivery-contract.md`
-10. The task-specific reference: list/detail/table/actions/visual/checklist.
+7. For any framework-first / low-customization task: `references/arco-first.md`
+8. For any productization / financing-demo / sellable-SaaS goal: `references/product-grade-evaluation.md`
+9. For any screenshot/prototype input: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
+10. For any interactive feature: `references/feature-routing.md` + `references/feature-delivery-contract.md`
+11. The task-specific reference: list/detail/table/actions/visual/checklist.
 
 ## Generation Workflow
 
@@ -38,10 +39,11 @@ Before generating UI:
 2. If the task starts from a screenshot/prototype, complete the prototype translation block from `prototype-to-ui-contract.md`.
 3. If the task is redesign/rewrite/polish, classify it as `polish-only`, `surface-regrouping`, or `skeleton-rewrite` using `redesign-calibration.md`.
 4. If the task targets product-grade quality, define the desired level using `product-grade-evaluation.md`: `internal-system`, `strong-internal-product`, `customer-facing-product`, or `sellable-saas-grade`.
-5. Classify page archetype.
-6. Identify primary business object and user role.
-7. If the task has behavior, complete the functional contract from `feature-delivery-contract.md`.
-8. Complete the module mapping from `module-patterns.md`:
+5. Decide whether the page can stay `arco-only`, needs `arco-plus-shared-enhancement`, or truly needs a custom pattern using `arco-first.md`.
+6. Classify page archetype.
+7. Identify primary business object and user role.
+8. If the task has behavior, complete the functional contract from `feature-delivery-contract.md`.
+9. Complete the module mapping from `module-patterns.md`:
    - Business object.
    - User job.
    - Primary identity.
@@ -50,17 +52,17 @@ Before generating UI:
    - Repeated modules.
    - Primary action.
    - Grouped actions.
-9. Define information hierarchy:
+10. Define information hierarchy:
    - Primary identity.
    - Key status/node.
    - Main working data.
    - Auxiliary metadata.
-10. Choose existing layout classes from `global.css`.
-11. When the task is redesign and the old skeleton is weak, regroup surfaces or rewrite the page skeleton before tuning component chrome.
-12. Implement components in module files, not one huge page file.
-13. Use mock data only when backend integration is not requested.
-14. Verify with `npx vite build`.
-15. Visually inspect the route when a dev server is available.
+11. Choose Arco built-ins first; only then choose existing shared enhancement classes from `global.css`.
+12. When the task is redesign and the old skeleton is weak, regroup surfaces or rewrite the page skeleton before tuning component chrome.
+13. Implement components in module files, not one huge page file.
+14. Use mock data only when backend integration is not requested.
+15. Verify with `npx vite build`.
+16. Visually inspect the route when a dev server is available.
 
 ## Executable Design Language Contract
 
@@ -156,8 +158,10 @@ src/views/<domain>/<module>/
 
 - Use Arco components and theme tokens.
 - Always use Arco Design components whenever possible.
+- Prefer Arco props, slots, layout primitives, and existing interaction behavior before introducing shared custom wrappers.
 - Do not redesign existing Arco interaction behaviors.
 - Avoid custom controls unless a shared Arco/VXE pattern cannot satisfy the business interaction.
+- Treat `global.css` as a thin enhancement layer for shell rhythm, freight semantics, and VXE integration — not as a replacement UI framework.
 - Maintain spacing on the project 8px rhythm through existing `--dense-gap-*`, padding, and component-size tokens.
 - Prefer responsive desktop layouts; do not create page-level horizontal overflow at common desktop widths.
 - Do not create an independent color palette.
