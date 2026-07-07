@@ -166,6 +166,7 @@ const handleSubmit = async () => {
 ```
 
 规则：
+
 - `validate()` 返回 `undefined` 表示通过，返回错误对象表示失败。用 `if (errors) return` 判断。
 - 提交按钮绑定 `:loading="submitting"`，防止重复提交。
 - 成功 → `Message.success` + 关闭弹窗/抽屉。
@@ -223,6 +224,19 @@ formRef.value?.clearValidate()
 
 ## 7. 纯只读字段
 
+### 7.1 操作型详情（常驻编辑）
+
+高频操作控制台（如运单详情、订单作业台）默认 **常驻编辑态**，禁止「先点编辑再改」：
+
+- 可改字段：直接用 `a-input` / `a-select` / `a-date-picker` 等真实控件，`size="small"`。
+- 系统主键/审计字段（订单号、创建时间）：`a-form-item` 内用 **纯文本** `<span class="mono">`，禁止 `readonly` / `disabled` 输入框。
+- 页面根容器加 `detail-workbench`；分区用 `a-card`，依赖 `global.css` 白底控件与无灰头样式。
+- 吸底仅保留 **保存**（primary）+ **取消修改**（secondary，回滚未保存变更）；返回列表走页头 back。
+
+`detail-display` / `a-descriptions` 仅用于审批只读、抽屉速览、日志摘要等 **非作业编辑** 场景。
+
+### 7.2 纯展示字段
+
 只读字段（无需校验，仅展示）不进入 `a-form`，用 `detail-field`：
 
 ```vue
@@ -272,6 +286,7 @@ Modal 内的表单遵循同样规则。额外注意：
 ```
 
 - 关闭弹窗时必须 `resetFields()`，防止上次错误状态残留：
+
   ```ts
   const handleCancel = () => {
     formRef.value?.resetFields()

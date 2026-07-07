@@ -250,6 +250,14 @@ const getExecutionSignals = (row: ShipmentWorkbenchRow) => {
   return signals;
 };
 
+const getVisibleExecutionSignals = (row: ShipmentWorkbenchRow) => {
+  const signals = getExecutionSignals(row);
+  return {
+    items: signals.slice(0, 2),
+    overflow: signals.length > 2 ? signals.length - 2 : 0,
+  };
+};
+
 const handleSearch = () => {
   appliedQuery.value = cloneQuery(query);
   page.current = 1;
@@ -290,6 +298,10 @@ const onStatusTabClick = (key: ShipmentStatusKey) => {
   activeStatusTab.value = key;
   page.current = 1;
   clearSelection();
+};
+
+const onStatusTabChange = (key: string | number) => {
+  onStatusTabClick(key as ShipmentStatusKey);
 };
 
 const onSelectionChange = () => {
@@ -391,181 +403,181 @@ const fetchList = async () => {
 </script>
 
 <template>
-  <div class="page-root page-root--dense">
-    <div class="zone-l2-filter-card zone-card filter-card workbench-filter-card">
-      <div class="filter-card__slim-row">
-        <div class="filter-field filter-field--span2">
-          <label class="filter-field__label">单号检索</label>
-          <div class="filter-combo arco-input-group">
-            <a-select
-              v-model="query.keywordType"
-              size="small"
-              class="filter-combo__select filter-combo--keyword"
-            >
-              <a-option v-for="option in KEYWORD_OPTIONS" :key="option.value" :value="option.value">
-                {{ option.label }}
-              </a-option>
-            </a-select>
-            <a-input
-              v-model="query.keyword"
-              size="small"
-              allow-clear
-              placeholder="请输入业务单号 / 提单号 / 订舱号"
-              @press-enter="handleSearch"
-            />
+  <div class="workbench-page detail-workbench">
+    <a-space direction="vertical" fill :size="8">
+      <a-card size="small" :bordered="true" title="单据检索" class="workbench-page__filter">
+        <div class="filter-panel">
+          <div class="filter-panel__fields">
+            <a-form :model="query" layout="vertical" size="small">
+              <a-row :gutter="12">
+                <a-col :xs="24" :sm="24" :md="12" :lg="8">
+                  <a-form-item label="单号检索">
+                    <a-input-group>
+                      <a-select
+                        v-model="query.keywordType"
+                        size="small"
+                        :style="{ width: '112px' }"
+                      >
+                        <a-option v-for="option in KEYWORD_OPTIONS" :key="option.value" :value="option.value">
+                          {{ option.label }}
+                        </a-option>
+                      </a-select>
+                      <a-input
+                        v-model="query.keyword"
+                        size="small"
+                        allow-clear
+                        placeholder="请输入业务单号 / 提单号 / 订舱号"
+                        @press-enter="handleSearch"
+                      />
+                    </a-input-group>
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6" :lg="4">
+                  <a-form-item label="客户名称">
+                    <a-input
+                      v-model="query.customerName"
+                      size="small"
+                      allow-clear
+                      placeholder="请输入客户名称"
+                      @press-enter="handleSearch"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6" :lg="4">
+                  <a-form-item label="起运港">
+                    <a-input
+                      v-model="query.pol"
+                      size="small"
+                      allow-clear
+                      placeholder="请输入起运港"
+                      @press-enter="handleSearch"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6" :lg="4">
+                  <a-form-item label="目的港">
+                    <a-input
+                      v-model="query.pod"
+                      size="small"
+                      allow-clear
+                      placeholder="请输入目的港"
+                      @press-enter="handleSearch"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6" :lg="4">
+                  <a-form-item label="船公司">
+                    <a-select v-model="query.carrier" size="small" allow-clear placeholder="请选择船公司">
+                      <a-option v-for="carrier in carrierOptions" :key="carrier" :value="carrier">
+                        {{ carrier }}
+                      </a-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
+          </div>
+          <div class="filter-panel__actions">
+            <a-button size="small" type="primary" long @click="handleSearch">
+              <template #icon><icon-search /></template>
+              查询
+            </a-button>
+            <a-button size="small" type="text" long @click="handleReset">重置</a-button>
+            <a-badge :count="advancedActiveCount" :offset="[-4, 4]">
+              <a-button size="small" type="text" long @click="advancedFilterVisible = true">
+                <template #icon><icon-filter /></template>
+                筛选
+              </a-button>
+            </a-badge>
           </div>
         </div>
+      </a-card>
 
-        <div class="filter-field">
-          <label class="filter-field__label">客户名称</label>
-          <a-input
-            v-model="query.customerName"
-            size="small"
-            allow-clear
-            placeholder="请输入客户名称"
-            @press-enter="handleSearch"
-          />
-        </div>
-
-        <div class="filter-field">
-          <label class="filter-field__label">起运港</label>
-          <a-input
-            v-model="query.pol"
-            size="small"
-            allow-clear
-            placeholder="请输入起运港"
-            @press-enter="handleSearch"
-          />
-        </div>
-
-        <div class="filter-field">
-          <label class="filter-field__label">目的港</label>
-          <a-input
-            v-model="query.pod"
-            size="small"
-            allow-clear
-            placeholder="请输入目的港"
-            @press-enter="handleSearch"
-          />
-        </div>
-
-        <div class="filter-field">
-          <label class="filter-field__label">船公司</label>
-          <a-select v-model="query.carrier" size="small" allow-clear placeholder="请选择船公司">
-            <a-option v-for="carrier in carrierOptions" :key="carrier" :value="carrier">
-              {{ carrier }}
-            </a-option>
-          </a-select>
-        </div>
-
-        <div class="filter-card__inline-actions">
-          <a-button size="small" type="primary" class="filter-card__query-btn" @click="handleSearch">
-            <template #icon><icon-search /></template>
-            查询
-          </a-button>
-          <a-button size="small" type="text" class="reset-btn" @click="handleReset">重置</a-button>
-          <a-badge :count="advancedActiveCount" :offset="[-4, 4]">
-            <a-button size="small" type="text" class="reset-btn" @click="advancedFilterVisible = true">
-              <template #icon><icon-filter /></template>
-              筛选
+      <a-card size="small" :bordered="true" class="workbench-page__toolbar">
+        <a-space direction="vertical" fill :size="10">
+          <a-space wrap :size="8">
+            <a-button size="small" type="primary">
+              <template #icon><icon-plus /></template>
+              新增订单
             </a-button>
-          </a-badge>
-        </div>
-      </div>
-    </div>
-
-    <div class="zone-l3-action zone-card zone-card--stack workbench-action-card">
-      <div class="merged-bar workbench-flow-bar">
-        <div class="toolbar-group">
-          <a-button size="small" type="primary">
-            <template #icon><icon-plus /></template>
-            新增订单
-          </a-button>
-
-          <div class="toolbar-divider" />
-
-          <a-button size="small" type="outline">批量导入</a-button>
-          <a-button size="small" type="outline" @click="handleExport">
-            <template #icon><icon-download /></template>
-            导出
-          </a-button>
-
-          <div class="toolbar-divider" />
-
-          <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-            <a-button size="small" type="outline" :disabled="!selectedCount">
-              批量操作<icon-down />
+            <a-button size="small" type="outline">批量导入</a-button>
+            <a-button size="small" type="outline" @click="handleExport">
+              <template #icon><icon-download /></template>
+              导出
             </a-button>
-            <template #content>
-              <a-doption @click="handleBatchAction('批量分配')">批量分配</a-doption>
-              <a-doption @click="handleBatchAction('批量改状态')">批量改状态</a-doption>
-              <a-doption @click="handleBatchNotify">批量通知</a-doption>
+            <a-dropdown trigger="click">
+              <a-button size="small" type="outline" :disabled="!selectedCount">
+                批量操作<icon-down />
+              </a-button>
+              <template #content>
+                <a-doption @click="handleBatchAction('批量分配')">批量分配</a-doption>
+                <a-doption @click="handleBatchAction('批量改状态')">批量改状态</a-doption>
+                <a-doption @click="handleBatchNotify">批量通知</a-doption>
+              </template>
+            </a-dropdown>
+          </a-space>
+
+          <a-tabs
+            v-model:active-key="activeStatusTab"
+            type="line"
+            size="small"
+            class="workbench-status-tabs"
+            @change="onStatusTabChange"
+          >
+            <a-tab-pane v-for="tab in statusTabStats" :key="tab.key">
+              <template #title>
+                <span class="workbench-tab-title">
+                  {{ tab.label }}
+                  <span
+                    class="workbench-tab-count"
+                    :class="{
+                      'workbench-tab-count--warn': tab.tone === 'warn',
+                      'workbench-tab-count--danger': tab.tone === 'danger',
+                    }"
+                  >{{ tab.count }}</span>
+                </span>
+              </template>
+            </a-tab-pane>
+          </a-tabs>
+        </a-space>
+      </a-card>
+
+      <a-card class="workbench-page__table-host" size="small" :bordered="true">
+        <template #title>
+          <a-space :size="8">
+            <a-tooltip content="刷新">
+              <a-button size="small" type="text" @click="fetchList">
+                <template #icon><icon-refresh /></template>
+              </a-button>
+            </a-tooltip>
+            <template v-if="selectedCount > 0">
+              <span class="selection-tip">已选 <b>{{ selectedCount }}</b> 条</span>
+              <a-button size="small" type="text" @click="clearSelection">清空</a-button>
             </template>
-          </a-dropdown>
-        </div>
+          </a-space>
+        </template>
+        <template #extra>
+          <a-space :size="8">
+            <a-pagination
+              :current="page.current"
+              :page-size="page.size"
+              :total="filteredRows.length"
+              :page-size-options="[20, 50, 100, 200]"
+              size="small"
+              show-total
+              show-page-size
+              show-jumper
+              @change="onPageChange"
+              @page-size-change="onPageSizeChange"
+            />
+            <a-tooltip content="列设置">
+              <a-button size="small" type="text" @click="openColumnSettings">
+                <template #icon><icon-settings /></template>
+              </a-button>
+            </a-tooltip>
+          </a-space>
+        </template>
 
-        <div class="bar-sep" />
-
-        <div class="scope-status-bar__status">
-          <div class="stat-tab-group">
-            <button
-              v-for="tab in statusTabStats"
-              :key="tab.key"
-              type="button"
-              class="stat-tab"
-              :class="{ 'stat-tab--active': activeStatusTab === tab.key }"
-              @click="onStatusTabClick(tab.key)"
-            >
-              <span class="stat-tab__name">{{ tab.label }}</span>
-              <span
-                class="stat-tab__count"
-                :class="{
-                  'stat-tab__count--danger': tab.tone === 'danger',
-                  'stat-tab__count--warn': tab.tone === 'warn',
-                }"
-              >{{ tab.count }}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="zone-l4-table-card zone-card workbench-table-card">
-      <div class="table-card-cap table-card-cap--primary">
-        <div class="table-card-cap__start">
-          <a-tooltip content="刷新">
-            <a-button size="small" type="text" class="table-card-cap__tool" @click="fetchList">
-              <template #icon><icon-refresh /></template>
-            </a-button>
-          </a-tooltip>
-          <div v-if="selectedCount > 0" class="toolbar-selection-context">
-            <span class="toolbar-selected-tip">已选 <b>{{ selectedCount }}</b> 条</span>
-            <a-button size="small" type="text" class="toolbar-selection-clear" @click="clearSelection">清空</a-button>
-          </div>
-        </div>
-        <div class="table-card-cap__right">
-          <a-pagination
-            class="table-card-cap__pager"
-            :current="page.current"
-            :page-size="page.size"
-            :total="filteredRows.length"
-            :page-size-options="[20, 50, 100, 200]"
-            size="small"
-            show-total
-            show-page-size
-            show-jumper
-            @change="onPageChange"
-            @page-size-change="onPageSizeChange"
-          />
-          <a-tooltip content="列设置">
-            <a-button size="small" type="text" class="table-card-cap__tool" @click="openColumnSettings">
-              <template #icon><icon-settings /></template>
-            </a-button>
-          </a-tooltip>
-        </div>
-      </div>
-
-      <div class="table-wrap">
         <vxe-table
           ref="tableRef"
           class="compact workbench-table"
@@ -585,12 +597,12 @@ const fetchList = async () => {
 
           <vxe-column field="orderNo" title="业务对象" min-width="240" fixed="left">
             <template #default="{ row }">
-              <div class="workbench-object-cell">
-                <div class="workbench-object-cell__main">
+              <div class="cell-two-line">
+                <div class="cell-two-line__main">
                   <span class="s-pill" :data-s="row.statusPill">{{ row.orderStatusLabel }}</span>
                   <span class="link-text link-text--strong mono" @click="openDetailDrawer(row)">{{ row.orderNo }}</span>
                 </div>
-                <span class="workbench-object-cell__sub mono">{{ getOrderAuxText(row) }}</span>
+                <span class="cell-two-line__sub mono">{{ getOrderAuxText(row) }}</span>
               </div>
             </template>
           </vxe-column>
@@ -598,8 +610,8 @@ const fetchList = async () => {
           <vxe-column field="customerName" title="客户 / 归属" min-width="210">
             <template #default="{ row }">
               <div class="cell-two-line">
-                <span class="c2-main">{{ row.customerName }}</span>
-                <span class="c2-sub">{{ getOwnerMeta(row) }}</span>
+                <span class="cell-two-line__main">{{ row.customerName }}</span>
+                <span class="cell-two-line__sub">{{ getOwnerMeta(row) }}</span>
               </div>
             </template>
           </vxe-column>
@@ -607,8 +619,8 @@ const fetchList = async () => {
           <vxe-column title="航程 / 节点" min-width="230">
             <template #default="{ row }">
               <div class="cell-two-line">
-                <span class="c2-main mono">{{ row.pol }} -> {{ row.pod }}</span>
-                <span class="c2-sub">{{ row.carrier }} / {{ row.vesselVoyage }} · {{ getRouteMeta(row) }}</span>
+                <span class="cell-two-line__main mono">{{ row.pol }} -> {{ row.pod }}</span>
+                <span class="cell-two-line__sub">{{ row.carrier }} / {{ row.vesselVoyage }} · {{ getRouteMeta(row) }}</span>
               </div>
             </template>
           </vxe-column>
@@ -618,8 +630,8 @@ const fetchList = async () => {
           <vxe-column title="当前待办" min-width="170">
             <template #default="{ row }">
               <div class="cell-two-line">
-                <span class="c2-main">{{ getNextActionLabel(row) }}</span>
-                <span class="c2-sub">{{ getNextActionMeta(row) }}</span>
+                <span class="cell-two-line__main">{{ getNextActionLabel(row) }}</span>
+                <span class="cell-two-line__sub">{{ getNextActionMeta(row) }}</span>
               </div>
             </template>
           </vxe-column>
@@ -627,24 +639,28 @@ const fetchList = async () => {
           <vxe-column title="跟进信息" min-width="154">
             <template #default="{ row }">
               <div class="cell-two-line">
-                <span class="c2-main">{{ row.operator }}</span>
-                <span class="c2-sub mono">{{ row.updatedAt }}</span>
+                <span class="cell-two-line__main">{{ row.operator }}</span>
+                <span class="cell-two-line__sub mono">{{ row.updatedAt }}</span>
               </div>
             </template>
           </vxe-column>
 
           <vxe-column title="执行缺口" min-width="188">
             <template #default="{ row }">
-              <div class="cell-pill-row">
+              <a-space wrap :size="4">
                 <span
-                  v-for="signal in getExecutionSignals(row)"
+                  v-for="signal in getVisibleExecutionSignals(row).items"
                   :key="signal.label"
                   class="s-pill"
                   :data-s="signal.tone"
                 >
                   {{ signal.label }}
                 </span>
-              </div>
+                <span
+                  v-if="getVisibleExecutionSignals(row).overflow"
+                  class="workbench-signal-more"
+                >+{{ getVisibleExecutionSignals(row).overflow }}</span>
+              </a-space>
             </template>
           </vxe-column>
 
@@ -652,12 +668,12 @@ const fetchList = async () => {
             <template #default="{ row }">
               <div class="row-actions">
                 <a-tooltip content="详情">
-                  <a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="openDetailDrawer(row)">
+                  <a-button size="small" type="text" class="row-action-btn" @click="openDetailDrawer(row)">
                     <icon-eye />
                   </a-button>
                 </a-tooltip>
-                <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--row">
-                  <a-button size="small" type="text" class="row-action-btn row-action-btn--more" title="更多操作">
+                <a-dropdown trigger="click" position="br">
+                  <a-button size="small" type="text" class="row-action-btn" title="更多操作">
                     <icon-more />
                   </a-button>
                   <template #content>
@@ -668,9 +684,9 @@ const fetchList = async () => {
                     <a-doption>上传文件</a-doption>
                     <a-doption @click="handleRowNotify(row)">发送通知</a-doption>
                     <a-doption>查看日志</a-doption>
-                    <a-divider class="action-menu__divider" />
+                    <a-divider :margin="4" />
                     <a-popconfirm content="确认作废该订单？此操作不可撤销。" @ok="voidOrder(row)">
-                      <a-doption class="danger-opt">作废订单</a-doption>
+                      <a-doption>作废订单</a-doption>
                     </a-popconfirm>
                   </template>
                 </a-dropdown>
@@ -678,124 +694,135 @@ const fetchList = async () => {
             </template>
           </vxe-column>
         </vxe-table>
-      </div>
-    </div>
+      </a-card>
+    </a-space>
 
     <a-drawer
       v-model:visible="advancedFilterVisible"
       title="更多筛选"
       :width="640"
       :mask-closable="false"
-      class="query-filter-drawer"
     >
-      <div class="query-filter-drawer__shell">
-        <div class="query-filter-drawer__body">
-          <a-form class="detail-form" layout="vertical" size="small" :model="query">
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">单证识别</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="船名航次">
-                  <a-input v-model="query.vesselVoyage" size="small" allow-clear placeholder="请输入船名 / 航次" />
-                </a-form-item>
-                <a-form-item label="提单号">
-                  <a-input v-model="query.blNo" size="small" allow-clear placeholder="请输入提单号" />
-                </a-form-item>
-                <a-form-item label="订舱号">
-                  <a-input v-model="query.bookingNo" size="small" allow-clear placeholder="请输入订舱号" />
-                </a-form-item>
-              </div>
-            </div>
+      <a-form layout="vertical" size="small" :model="query">
+        <a-divider orientation="left">单证识别</a-divider>
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="船名航次">
+              <a-input v-model="query.vesselVoyage" size="small" allow-clear placeholder="请输入船名 / 航次" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="提单号">
+              <a-input v-model="query.blNo" size="small" allow-clear placeholder="请输入提单号" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="订舱号">
+              <a-input v-model="query.bookingNo" size="small" allow-clear placeholder="请输入订舱号" />
+            </a-form-item>
+          </a-col>
+        </a-row>
 
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">业务归属</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="订单状态">
-                  <a-select v-model="query.orderStatus" size="small" allow-clear placeholder="请选择">
-                    <a-option value="waitBooking">待订舱</a-option>
-                    <a-option value="booking">订舱中</a-option>
-                    <a-option value="released">已放舱</a-option>
-                    <a-option value="waitTruck">待拖车</a-option>
-                    <a-option value="trucking">拖车中</a-option>
-                    <a-option value="waitCustoms">待报关</a-option>
-                    <a-option value="customs">报关中</a-option>
-                    <a-option value="sailed">已开船</a-option>
-                    <a-option value="completed">已完成</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="操作人员">
-                  <a-select v-model="query.operator" size="small" allow-clear placeholder="请选择">
-                    <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
-                      {{ operator }}
-                    </a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="业务类型">
-                  <a-select v-model="query.businessType" size="small" allow-clear placeholder="请选择">
-                    <a-option value="FCL">FCL</a-option>
-                    <a-option value="LCL">LCL</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="是否异常">
-                  <a-select v-model="query.hasException" size="small" allow-clear placeholder="请选择">
-                    <a-option value="yes">是</a-option>
-                    <a-option value="no">否</a-option>
-                  </a-select>
-                </a-form-item>
-              </div>
-            </div>
+        <a-divider orientation="left">业务归属</a-divider>
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="订单状态">
+              <a-select v-model="query.orderStatus" size="small" allow-clear placeholder="请选择">
+                <a-option value="waitBooking">待订舱</a-option>
+                <a-option value="booking">订舱中</a-option>
+                <a-option value="released">已放舱</a-option>
+                <a-option value="waitTruck">待拖车</a-option>
+                <a-option value="trucking">拖车中</a-option>
+                <a-option value="waitCustoms">待报关</a-option>
+                <a-option value="customs">报关中</a-option>
+                <a-option value="sailed">已开船</a-option>
+                <a-option value="completed">已完成</a-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="操作人员">
+              <a-select v-model="query.operator" size="small" allow-clear placeholder="请选择">
+                <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
+                  {{ operator }}
+                </a-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="业务类型">
+              <a-select v-model="query.businessType" size="small" allow-clear placeholder="请选择">
+                <a-option value="FCL">FCL</a-option>
+                <a-option value="LCL">LCL</a-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="是否异常">
+              <a-select v-model="query.hasException" size="small" allow-clear placeholder="请选择">
+                <a-option value="yes">是</a-option>
+                <a-option value="no">否</a-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+        </a-row>
 
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">航程时间</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="开船日期">
-                  <a-range-picker v-model="query.etdRange" size="small" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="截关日期">
-                  <a-range-picker v-model="query.closingRange" size="small" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="更新时间">
-                  <a-range-picker v-model="query.updatedRange" size="small" style="width:100%" />
-                </a-form-item>
-              </div>
-            </div>
+        <a-divider orientation="left">航程时间</a-divider>
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="开船日期">
+              <a-range-picker v-model="query.etdRange" size="small" style="width: 100%" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="截关日期">
+              <a-range-picker v-model="query.closingRange" size="small" style="width: 100%" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="更新时间">
+              <a-range-picker v-model="query.updatedRange" size="small" style="width: 100%" />
+            </a-form-item>
+          </a-col>
+        </a-row>
 
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">风险与结算</div>
-              <div class="detail-form-grid detail-form-grid--2">
-                <a-form-item label="文件状态">
-                  <a-select v-model="query.fileStatus" size="small" allow-clear placeholder="请选择">
-                    <a-option value="missing">缺失</a-option>
-                    <a-option value="pending">待确认</a-option>
-                    <a-option value="complete">完整</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="费用状态">
-                  <a-select v-model="query.feeStatus" size="small" allow-clear placeholder="请选择">
-                    <a-option value="none">未生成</a-option>
-                    <a-option value="pending">待确认</a-option>
-                    <a-option value="confirmed">已确认</a-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item label="是否超期">
-                  <a-select v-model="query.isOverdue" size="small" allow-clear placeholder="请选择">
-                    <a-option value="yes">是</a-option>
-                    <a-option value="no">否</a-option>
-                  </a-select>
-                </a-form-item>
-              </div>
-            </div>
-          </a-form>
-        </div>
-      </div>
+        <a-divider orientation="left">风险与结算</a-divider>
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="文件状态">
+              <a-select v-model="query.fileStatus" size="small" allow-clear placeholder="请选择">
+                <a-option value="missing">缺失</a-option>
+                <a-option value="pending">待确认</a-option>
+                <a-option value="complete">完整</a-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="费用状态">
+              <a-select v-model="query.feeStatus" size="small" allow-clear placeholder="请选择">
+                <a-option value="none">未生成</a-option>
+                <a-option value="pending">待确认</a-option>
+                <a-option value="confirmed">已确认</a-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="是否超期">
+              <a-select v-model="query.isOverdue" size="small" allow-clear placeholder="请选择">
+                <a-option value="yes">是</a-option>
+                <a-option value="no">否</a-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+        </a-row>
+      </a-form>
       <template #footer>
-        <div class="detail-drawer-footer">
-          <div class="detail-drawer-footer__start">
-            <a-button size="small" type="text" class="reset-btn" @click="clearAdvancedFilters">清空更多筛选</a-button>
-          </div>
-          <div class="detail-drawer-footer__end">
+        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center">
+          <a-button size="small" type="text" @click="clearAdvancedFilters">清空更多筛选</a-button>
+          <a-space>
             <a-button size="small" @click="advancedFilterVisible = false">取消</a-button>
             <a-button size="small" type="primary" @click="applyAdvancedFilters">应用筛选</a-button>
-          </div>
+          </a-space>
         </div>
       </template>
     </a-drawer>
@@ -807,36 +834,45 @@ const fetchList = async () => {
       :mask-closable="false"
       @ok="confirmStatusChange"
     >
-      <div class="xf-grid xf-grid--modal">
-        <div class="xf-field">
-          <label class="xf-label">当前状态</label>
-          <span class="detail-field__val">{{ statusTargetRow?.orderStatusLabel }}</span>
-        </div>
-        <div class="xf-field">
-          <label class="xf-label">目标状态 <span class="xf-req">*</span></label>
-          <a-select v-model="statusForm.targetStatus" size="small" allow-clear placeholder="请选择">
-            <a-option value="released">已放舱</a-option>
-            <a-option value="customs">报关中</a-option>
-            <a-option value="sailed">已开船</a-option>
-            <a-option value="completed">已完成</a-option>
-          </a-select>
-        </div>
-        <div class="xf-field xf-field--wide">
-          <label class="xf-label">修改原因 <span class="xf-req">*</span></label>
-          <a-textarea
-            v-model="statusForm.reason"
-            size="small"
-            :auto-size="{ minRows: 2, maxRows: 4 }"
-            placeholder="请填写修改原因"
-          />
-        </div>
-        <div class="xf-field">
-          <a-checkbox v-model="statusForm.notify">同步通知相关人员</a-checkbox>
-        </div>
-        <div class="xf-field">
-          <a-checkbox v-model="statusForm.createNode">生成节点记录</a-checkbox>
-        </div>
-      </div>
+      <a-form :model="statusForm" layout="vertical" size="small">
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="当前状态">
+              <span>{{ statusTargetRow?.orderStatusLabel }}</span>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="目标状态" required>
+              <a-select v-model="statusForm.targetStatus" size="small" allow-clear placeholder="请选择">
+                <a-option value="released">已放舱</a-option>
+                <a-option value="customs">报关中</a-option>
+                <a-option value="sailed">已开船</a-option>
+                <a-option value="completed">已完成</a-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :span="24">
+            <a-form-item label="修改原因" required>
+              <a-textarea
+                v-model="statusForm.reason"
+                size="small"
+                :auto-size="{ minRows: 2, maxRows: 4 }"
+                placeholder="请填写修改原因"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item>
+              <a-checkbox v-model="statusForm.notify">同步通知相关人员</a-checkbox>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item>
+              <a-checkbox v-model="statusForm.createNode">生成节点记录</a-checkbox>
+            </a-form-item>
+          </a-col>
+        </a-row>
+      </a-form>
     </a-modal>
 
     <shipment-order-detail-drawer
@@ -848,46 +884,131 @@ const fetchList = async () => {
 </template>
 
 <style scoped>
-.workbench-filter-card {
-  position: relative;
-  border-top-color: var(--dense-primary-3) !important;
-  background: linear-gradient(180deg, var(--dense-surface-head) 0%, var(--color-bg-card) 100%);
-}
-
-.workbench-filter-card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(22, 93, 255, 0.24) 0%, rgba(22, 93, 255, 0.04) 36%, rgba(22, 93, 255, 0) 100%);
-  pointer-events: none;
-}
-
-.workbench-action-card {
-  border-top-color: var(--dense-primary-3) !important;
-  box-shadow:
-    0 1px 2px rgba(16, 24, 40, 0.04),
-    0 10px 22px rgba(19, 41, 74, 0.045),
-    0 0 0 1px rgba(213, 225, 234, 0.9) !important;
-}
-
-.workbench-object-cell {
+.workbench-page {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  height: 100%;
+  min-height: 0;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.workbench-page > :deep(.arco-space) {
+  flex: 1;
+  min-height: 0;
+}
+
+.filter-panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.filter-panel__fields {
+  flex: 1;
   min-width: 0;
 }
 
-.workbench-object-cell__main {
+.filter-panel__actions {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 4px;
+  width: 88px;
+  padding-top: 22px;
+}
+
+.workbench-status-tabs :deep(.arco-tabs-content) {
+  display: none;
+}
+
+.workbench-status-tabs :deep(.arco-tabs-nav) {
+  margin-bottom: 0;
+}
+
+.workbench-status-tabs :deep(.arco-tabs-nav::before) {
+  display: none;
+}
+
+.workbench-tab-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.workbench-tab-count {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--color-fill-3);
+  color: var(--color-text-2);
+  font-size: var(--dense-font-micro);
+  font-weight: var(--dense-weight-nav-active);
+  line-height: 16px;
+  text-align: center;
+}
+
+.workbench-tab-count--warn {
+  background: var(--dense-warning-1);
+  color: var(--dense-warning-7);
+}
+
+.workbench-tab-count--danger {
+  background: var(--dense-danger-1);
+  color: var(--dense-danger-7);
+}
+
+.workbench-status-tabs :deep(.arco-tabs-tab-active .workbench-tab-count) {
+  background: var(--dense-primary-1);
+  color: var(--dense-primary-7);
+}
+
+.workbench-signal-more {
+  font-size: var(--dense-font-micro);
+  color: var(--color-text-3);
+}
+
+.workbench-page__table-host {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.workbench-page__table-host :deep(.arco-card-body) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 0;
+}
+
+.selection-tip {
+  font-size: var(--dense-font-aux);
+  color: var(--color-text-3);
+}
+
+.cell-two-line {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cell-two-line__main {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-1);
+  font-size: var(--dense-font-data);
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.workbench-object-cell__sub {
+.cell-two-line__sub {
   overflow: hidden;
   color: var(--color-text-3);
   font-size: var(--dense-font-aux);
@@ -896,77 +1017,19 @@ const fetchList = async () => {
   white-space: nowrap;
 }
 
-.workbench-table-card {
-  border-top-color: var(--dense-primary-3) !important;
-}
+@media (max-width: 1280px) {
+  .filter-panel {
+    flex-direction: column;
+  }
 
-.workbench-flow-bar {
-  background:
-    linear-gradient(180deg, rgba(242, 247, 255, 0.88) 0%, rgba(255, 255, 255, 0.96) 36px),
-    linear-gradient(90deg, rgba(22, 93, 255, 0.045) 0%, rgba(255, 255, 255, 0) 42%);
-}
+  .filter-panel__actions {
+    flex-direction: row;
+    width: 100%;
+    padding-top: 0;
+  }
 
-.workbench-flow-bar :deep(.stat-tab) {
-  background: rgba(255, 255, 255, 0.86);
-}
-
-.workbench-flow-bar :deep(.stat-tab:hover) {
-  background: var(--dense-primary-1);
-}
-
-.workbench-flow-bar :deep(.stat-tab--active) {
-  background: linear-gradient(180deg, #FFFFFF 0%, var(--dense-primary-1) 100%);
-}
-
-.workbench-table-card :deep(.table-card-cap) {
-  background:
-    linear-gradient(180deg, var(--color-bg-card) 0%, var(--dense-surface-head) 100%);
-}
-
-.workbench-table-card :deep(.table-card-cap__title) {
-  color: var(--dense-primary-7);
-}
-
-.workbench-table-card :deep(.table-card-cap__meta) {
-  color: var(--color-text-3);
-}
-
-.workbench-table-card :deep(.vxe-table.workbench-table .vxe-header--column) {
-  background:
-    linear-gradient(180deg, var(--dense-surface-head) 0%, var(--color-bg-card) 100%);
-}
-
-.workbench-table-card :deep(.vxe-table.workbench-table .vxe-body--row:hover .c2-main),
-.workbench-table-card :deep(.vxe-table.workbench-table .vxe-body--row.row--hover .c2-main) {
-  color: var(--dense-primary-7);
-}
-
-.xf-grid {
-  display: grid;
-}
-
-.xf-grid--modal {
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px 16px;
-}
-
-.xf-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.xf-field--wide {
-  grid-column: span 2;
-}
-
-.xf-label {
-  font-size: var(--dense-font-field);
-  color: var(--color-text-2);
-  font-weight: 500;
-}
-
-.xf-req {
-  color: var(--danger-6);
+  .filter-panel__actions .arco-btn {
+    width: auto;
+  }
 }
 </style>

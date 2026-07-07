@@ -83,6 +83,24 @@ These are **structural slots**, not replacements for Arco controls inside them.
 - truly local visual gaps with no reuse potential
 - must stay small; promote to `global.css` only after a second module needs the same pattern
 
+## What `global.css` Contains (after Arco-first slimming)
+
+`src/styles/global.css` is intentionally small. It may only contain:
+
+| Layer | Content |
+|-------|---------|
+| Base | `html/body/#app` reset, min-width |
+| Tokens | `:root` `--dense-*` density and semantic color aliases |
+| VXE bridge | `--vxe-*` theme bridge, `.workbench-table`, `.detail-mini-vxe`, `.compact` row height |
+| Freight semantics | `.s-pill[data-s]`, `.link-text`, `.mono` |
+| Row actions | `.row-actions`, `.row-action-btn` inside VXE tables only |
+
+**Forbidden in `global.css`:** layout archetypes (`filter-card`, `page-root`, `detail-section`, `toolbar`, `zone-*`), app shell chrome, and **broad** `.arco-*` layout overrides.
+
+**Allowed in `global.css`:** `:root` Arco semantic token bridge (surface/fill/border), a compact **Arco surface bridge** for control white-surface + disabled gray, VXE row-action fixes, and `detail-display` read-only descriptions.
+
+New layout patterns belong in **Vue scoped CSS** or **Arco components**, not in `global.css`.
+
 ## What `global.css` Is NOT
 
 `global.css` must **not**:

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { IconSearch } from '@arco-design/web-vue/es/icon';
+import { IconRefresh, IconSearch } from '@arco-design/web-vue/es/icon';
 import { appMenus } from '../config/menu';
 import { initialTabs } from '../config/tabs';
 import type { AppTabItem } from '../types/navigation';
@@ -57,7 +57,7 @@ const menuRouteMap = computed(() => {
 });
 
 const currentPageTitle = computed(() =>
-  route.meta.title ? String(route.meta.title) : '工作台'
+  route.meta.title ? String(route.meta.title) : '工作台',
 );
 
 const currentGroupTitle = computed(() => {
@@ -73,7 +73,7 @@ const filteredMenus = computed(() => {
     .map((group) => ({
       ...group,
       children: group.children?.filter(
-        (item) => item.title.toLowerCase().includes(kw) || group.title.toLowerCase().includes(kw)
+        (item) => item.title.toLowerCase().includes(kw) || group.title.toLowerCase().includes(kw),
       ),
     }))
     .filter((group) => (group.children?.length ?? 0) > 0);
@@ -117,7 +117,7 @@ watch(
   (name) => {
     if (typeof name === 'string') ensureTab(name);
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const onMenuItemClick = (key: string) => {
@@ -131,46 +131,41 @@ const openTab = (routeName: string) => {
   if (route.name !== routeName) router.push({ name: routeName });
 };
 
-const closeTab = (tab: AppTabItem, event: MouseEvent) => {
-  event.stopPropagation();
+const closeTab = (tab: AppTabItem, index: number) => {
   if (!tab.closable) return;
-  const idx = tabs.value.findIndex((t) => t.key === tab.key);
-  if (idx < 0) return;
   const isActive = tab.routeName === route.name;
-  tabs.value.splice(idx, 1);
+  tabs.value.splice(index, 1);
   if (isActive && tabs.value.length) {
-    const next = tabs.value[Math.min(idx, tabs.value.length - 1)];
+    const next = tabs.value[Math.min(index, tabs.value.length - 1)];
     router.push({ name: next.routeName });
   }
 };
 </script>
 
 <template>
-  <a-layout class="app-shell">
-    <a-layout-sider class="app-sider" :width="248">
-      <div class="side-brand">
-        <span class="brand-mark brand-mark--ptp">OHL</span>
-        <div class="side-brand__meta">
-          <strong class="side-brand__title">OHL Freight OS</strong>
-          <span class="side-brand__sub">International Operations Workspace</span>
+  <a-layout class="app-layout">
+    <a-layout-sider class="app-layout__sider" :width="248" :collapsible="false">
+      <div class="app-layout__brand">
+        <a-avatar :size="28" shape="square" class="app-layout__logo">OHL</a-avatar>
+        <div class="app-layout__brand-text">
+          <div class="app-layout__brand-title">OHL Freight OS</div>
+          <div class="app-layout__brand-sub">Operations Workspace</div>
         </div>
       </div>
 
-      <div class="side-search">
+      <div class="app-layout__search">
         <a-input v-model="menuKeyword" size="small" allow-clear placeholder="搜索菜单">
-          <template #suffix>
-            <icon-search />
-          </template>
+          <template #suffix><icon-search /></template>
         </a-input>
       </div>
 
-      <div class="side-rail">
-        <span class="side-rail__label">当前工作域</span>
-        <strong class="side-rail__value">{{ currentGroupTitle }} / {{ currentPageTitle }}</strong>
-      </div>
+      <a-alert type="info" :show-icon="false" class="app-layout__context">
+        <template #title>当前工作域</template>
+        {{ currentGroupTitle }} / {{ currentPageTitle }}
+      </a-alert>
 
       <a-menu
-        class="side-arco-menu"
+        class="app-layout__menu"
         :selected-keys="selectedMenuKeys"
         :open-keys="openKeys"
         @update:open-keys="onOpenKeysChange"
@@ -184,46 +179,46 @@ const closeTab = (tab: AppTabItem, event: MouseEvent) => {
         </a-sub-menu>
       </a-menu>
 
-      <div class="side-footer">
-        <span class="side-footer__meta">CN Workspace</span>
-        <span class="side-footer__meta">v0.1</span>
+      <div class="app-layout__footer">
+        <span>CN Workspace</span>
+        <span>v0.1</span>
       </div>
     </a-layout-sider>
 
-    <a-layout class="main-layout">
-      <header class="system-tabnav">
-        <div class="system-tabnav__context">
-          <span class="system-tabnav__eyebrow">{{ currentGroupTitle }}</span>
-          <strong class="system-tabnav__title">{{ currentPageTitle }}</strong>
+    <a-layout class="app-layout__main">
+      <a-layout-header class="app-layout__header">
+        <div class="app-layout__header-context">
+          <span class="app-layout__eyebrow">{{ currentGroupTitle }}</span>
+          <strong class="app-layout__page-title">{{ currentPageTitle }}</strong>
         </div>
 
-        <nav class="tabnav-menu" aria-label="页面标签">
-          <button
+        <a-tabs
+          class="app-layout__tabs"
+          type="card-gutter"
+          size="small"
+          :active-key="activeTabKey"
+          hide-content
+          editable
+          @tab-click="(key) => { const tab = tabs.find((t) => t.key === key); if (tab) openTab(tab.routeName); }"
+          @delete="(key) => { const idx = tabs.findIndex((t) => t.key === key); if (idx >= 0) closeTab(tabs[idx], idx); }"
+        >
+          <a-tab-pane
             v-for="tab in tabs"
             :key="tab.key"
-            class="tabnav-item"
-            :class="{ 'tabnav-item--active': activeTabKey === tab.key }"
-            type="button"
-            @click="openTab(tab.routeName)"
-          >
-            {{ tab.title }}
-            <span
-              v-if="tab.closable"
-              class="tabnav-close"
-              role="button"
-              aria-label="关闭"
-              @click="closeTab(tab, $event)"
-            >×</span>
-          </button>
-        </nav>
+            :title="tab.title"
+            :closable="tab.closable"
+          />
+        </a-tabs>
 
-        <div class="tabnav-actions">
-          <button type="button" @click="router.go(0)">刷新</button>
-          <span class="tabnav-user"><span class="tabnav-user__dot" />admin</span>
-        </div>
-      </header>
+        <a-space class="app-layout__header-actions" :size="8">
+          <a-button size="small" type="text" @click="router.go(0)">
+            <template #icon><icon-refresh /></template>
+          </a-button>
+          <a-tag color="arcoblue">admin</a-tag>
+        </a-space>
+      </a-layout-header>
 
-      <a-layout-content class="content">
+      <a-layout-content class="app-layout__content">
         <router-view />
       </a-layout-content>
     </a-layout>
@@ -231,4 +226,132 @@ const closeTab = (tab: AppTabItem, event: MouseEvent) => {
 </template>
 
 <style scoped>
+.app-layout {
+  height: 100vh;
+}
+
+.app-layout__sider {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-border-2);
+}
+
+.app-layout__sider :deep(.arco-layout-sider-children) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.app-layout__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border-2);
+}
+
+.app-layout__logo {
+  background: rgb(var(--primary-6));
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.app-layout__brand-title {
+  font-size: var(--dense-font-overlay);
+  font-weight: 600;
+  color: var(--color-text-1);
+  line-height: 1.2;
+}
+
+.app-layout__brand-sub {
+  font-size: var(--dense-font-micro);
+  color: var(--color-text-3);
+  line-height: 1.2;
+}
+
+.app-layout__search {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border-2);
+}
+
+.app-layout__context {
+  margin: 10px 12px 0;
+  padding: 8px 10px;
+}
+
+.app-layout__context :deep(.arco-alert-title) {
+  font-size: var(--dense-font-micro);
+  color: var(--color-text-3);
+  margin-bottom: 2px;
+}
+
+.app-layout__menu {
+  flex: 1;
+  overflow: auto;
+  border-right: none;
+  margin-top: 8px;
+}
+
+.app-layout__footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  font-size: var(--dense-font-micro);
+  color: var(--color-text-3);
+  border-top: 1px solid var(--color-border-2);
+}
+
+.app-layout__main {
+  min-width: 0;
+  background: var(--dense-page-bg);
+}
+
+.app-layout__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 48px;
+  padding: 0 12px;
+  background: var(--color-bg-2);
+  border-bottom: 1px solid var(--color-border-2);
+}
+
+.app-layout__header-context {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  min-width: 120px;
+}
+
+.app-layout__eyebrow {
+  font-size: var(--dense-font-micro);
+  color: var(--color-text-3);
+}
+
+.app-layout__page-title {
+  font-size: var(--dense-font-nav);
+  font-weight: 600;
+  color: var(--color-text-1);
+}
+
+.app-layout__tabs {
+  flex: 1;
+  min-width: 0;
+}
+
+.app-layout__tabs :deep(.arco-tabs-nav) {
+  margin-bottom: 0;
+}
+
+.app-layout__header-actions {
+  flex-shrink: 0;
+}
+
+.app-layout__content {
+  min-height: 0;
+  overflow: hidden;
+  padding: 8px 10px var(--dense-page-bottom-space);
+}
 </style>

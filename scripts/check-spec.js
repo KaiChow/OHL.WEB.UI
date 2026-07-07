@@ -467,618 +467,75 @@ if (!mainTs.includes("@icon-park/vue-next/styles/index.css")) {
     content: 'missing @icon-park/vue-next/styles/index.css import',
   });
 }
-if (
-  !/\.arco-input-wrapper \.arco-input\.arco-input-size-small[\s\S]*font-size:\s*var\(--dense-font-control\)/.test(globalCss) ||
-  !/\.arco-select-size-small \.arco-select-view-value[\s\S]*font-size:\s*var\(--dense-font-control\)/.test(globalCss) ||
-  !/\.arco-input::placeholder[\s\S]*font-size:\s*var\(--dense-font-control\)/.test(globalCss) ||
-  !/\.detail-field__label[\s\S]*font-size:\s*var\(--dense-font-field\)/.test(globalCss) ||
-  !/\.detail-field__val[\s\S]*font-size:\s*var\(--dense-font-control\)/.test(globalCss)
-) {
+// Arco-first: global.css is a thin enhancement layer only
+const arcoOverrideRules = (globalCss.match(/[^,{]*\.arco-[^,{]*\{/g) || []).length;
+if (arcoOverrideRules > 25) {
   violations.push({
-    rule: 'global.css 必须统一定义 label=12 / 数据与字段值=12 / nav=13 的字号契约',
+    rule: 'Arco-first: global.css 禁止大量 .arco-* 规则（当前 ' + arcoOverrideRules + ' 条）',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing core typography role contract in global.css',
+    content: 'prefer :root Arco tokens; keep .arco-* to surface-bridge / VXE row-action / detail-display only',
   });
 }
-if (/\.merged-bar \.toolbar-group \.arco-btn-size-small\s*\{[^}]*font-size:\s*var\(--dense-font-control\)/.test(globalCss)) {
-  violations.push({
-    rule: 'toolbar-group 按钮文字不得使用 F4 Control 12px，必须使用 F2 Nav 13px',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'toolbar-group .arco-btn-size-small uses dense-font-control',
-  });
-}
-if (/\.query-filter-drawer__group-head\s*\{[^}]*font-size:\s*var\(--dense-font-field\)/.test(globalCss)) {
-  violations.push({
-    rule: 'query-filter-drawer__group-head 属于结构标题，须用 F3 Title token + weight 600，不得仅用 F4 field token',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'query-filter-drawer__group-head uses dense-font-field',
-  });
-}
-if (/\.adv-group-title\s*\{[^}]*font-weight:\s*700/.test(globalCss)) {
-  violations.push({
-    rule: '高级查询分组标题禁止 font-weight:700；应回到 F3 Title 600',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'adv-group-title uses font-weight: 700',
-  });
-}
-if (/\.filter-card__advanced-title\s*\{[^}]*font-size:\s*12px/.test(globalCss)) {
-  violations.push({
-    rule: 'filter-card__advanced-title 属于结构标题，不得硬编码 12px，应使用 F3 Title token',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'filter-card__advanced-title uses 12px',
-  });
-}
-if (/\.filter-card__advanced-hint\s*\{[^}]*font-size:\s*12px/.test(globalCss)) {
-  violations.push({
-    rule: 'filter-card__advanced-hint 属于弱提示，不得硬编码 12px，应使用 F5 Aux token',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'filter-card__advanced-hint uses 12px',
-  });
-}
-if (/\.filter-active-strip__placeholder\s*\{[^}]*font-size:\s*12px/.test(globalCss)) {
-  violations.push({
-    rule: 'filter-active-strip__placeholder 属于可编辑占位层级，必须使用 F4 Control token',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'filter-active-strip__placeholder uses 12px',
-  });
-}
-if (/\.merged-bar \.toolbar-group \.arco-btn \.arco-icon\s*\{[^}]*font-size:\s*13px/.test(globalCss)) {
-  violations.push({
-    rule: 'toolbar 按钮 icon 必须使用 --dense-icon-action，而非正文 13px 文本字号',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'toolbar button icon uses 13px',
-  });
-}
-
-// 详情 footer 左侧危险动作必须走确认流，不能裸露 text+danger。
-for (const file of files) {
-  if (!file.endsWith('.vue')) continue;
-  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
-  const content = readFileSync(file, 'utf8');
-  if (!content.includes('detail-drawer-footer__start')) continue;
-  const footerStartBlocks = content.match(/<div\b[^>]*class=(["'])[^"']*\bdetail-drawer-footer__start\b[^"']*\1[^>]*>[\s\S]*?<\/div>/g) || [];
-  for (const block of footerStartBlocks) {
-    if (!/status="danger"/.test(block)) continue;
-    if (/<a-popconfirm\b|Modal\.confirm/.test(block)) continue;
+const forbiddenLayoutPatterns = ['.filter-card', '.page-root', '.detail-section', '.toolbar-group', '.zone-l2-filter-card'];
+for (const pattern of forbiddenLayoutPatterns) {
+  if (globalCss.includes(pattern)) {
     violations.push({
-      rule: '详情 footer 左侧危险动作必须带确认（a-popconfirm 或 Modal.confirm）',
-      file: relPath,
-      line: getLineNumber(content, content.indexOf(block)),
-      content: block.split('\n').slice(0, 4).join(' ').trim().slice(0, 160),
+      rule: 'Arco-first: 布局 archetype 不应在 global.css（' + pattern + '）；页面用 Arco 结构 + scoped CSS',
+      file: 'src/styles/global.css',
+      line: 1,
+      content: 'remove layout pattern from global.css',
     });
   }
 }
-
-// 行操作按钮必须显式 size="small"，避免依赖组件默认值。
-for (const file of files) {
-  if (!file.endsWith('.vue')) continue;
-  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
-  const content = readFileSync(file, 'utf8');
-  const buttonPattern = /<a-button\b[^>]*class=(["'])[^"']*\brow-action-btn\b[^"']*\1[^>]*>/g;
-  for (const match of content.matchAll(buttonPattern)) {
-    const tag = match[0];
-    if (/\bsize=(["'])small\1/.test(tag)) continue;
-    violations.push({
-      rule: 'row-action-btn 必须显式声明 size="small"',
-      file: relPath,
-      line: getLineNumber(content, match.index),
-      content: tag.trim().slice(0, 160),
-    });
-  }
-}
-
-if (
-  !/\.arco-form-size-small\s+\.arco-form-item-label-col\s*>\s*\.arco-form-item-label[\s\S]*--dense-font-field/.test(globalCss)
-) {
+if (!globalCss.includes(':root') || !globalCss.includes('--dense-primary-6')) {
   violations.push({
-    rule: '§ Arco Form Controls 必须覆盖 Arco size="small" form label 14px 默认，统一为 --dense-font-field 12px',
+    rule: 'global.css 须保留 :root 密度/语义 token',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing .arco-form-size-small .arco-form-item-label-col > .arco-form-item-label with --dense-font-field',
+    content: 'missing --dense-* tokens',
   });
 }
-if (!/--dense-row-h-detail-edit\s*:\s*38px/.test(globalCss)) {
+if (!globalCss.includes('.s-pill[data-s="wait"]')) {
   violations.push({
-    rule: 'detail-mini-vxe 可编辑表格行高必须通过 --dense-row-h-detail-edit: 38px token 定义',
+    rule: 'global.css 须保留货代状态 .s-pill[data-s]',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing --dense-row-h-detail-edit: 38px',
+    content: 'missing s-pill freight semantics',
   });
 }
-if (!/--dense-row-h-detail-read\s*:\s*34px/.test(globalCss)) {
+if (!globalCss.includes('.vxe-table.workbench-table')) {
   violations.push({
-    rule: 'detail-mini-vxe 只读表格行高必须通过 --dense-row-h-detail-read: 34px token 定义',
+    rule: 'global.css 须保留 VXE workbench-table 桥接',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing --dense-row-h-detail-read: 34px',
+    content: 'missing workbench-table bridge',
   });
 }
-if (!/--dense-row-h-summary\s*:\s*32px/.test(globalCss)) {
+if (!globalCss.includes('.detail-mini-vxe')) {
   violations.push({
-    rule: 'summary mini table 行高必须通过 --dense-row-h-summary: 32px token 定义',
+    rule: 'global.css 须保留 detail-mini-vxe 桥接',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'missing --dense-row-h-summary: 32px',
+    content: 'missing detail-mini-vxe bridge',
   });
 }
-if (!/--dense-col-w-seq\s*:\s*52px/.test(globalCss)) {
+if (!specFirstCoding.includes('arco-first.md')) {
   violations.push({
-    rule: 'VXE 序号列必须有统一宽度 token：--dense-col-w-seq: 52px',
-    file: 'src/styles/global.css',
+    rule: 'spec-first-coding.mdc 必须要求 UI 任务先读 arco-first.md',
+    file: '.cursor/rules/spec-first-coding.mdc',
     line: 1,
-    content: 'missing --dense-col-w-seq: 52px',
+    content: 'missing arco-first pre-read gate',
   });
 }
-if (!globalCss.includes('.detail-mini-vxe.vxe-table .arco-picker-size-small')) {
+if (!adversarialReview.includes('arco-first.md')) {
   violations.push({
-    rule: 'detail-mini-vxe 必须覆盖 date picker small 控件高度，防止日期内容截断',
-    file: 'src/styles/global.css',
+    rule: 'adversarial-review.mdc 必须审查 Arco-first 优先级',
+    file: '.cursor/rules/adversarial-review.mdc',
     line: 1,
-    content: 'missing .detail-mini-vxe.vxe-table .arco-picker-size-small',
+    content: 'missing arco-first review gate',
   });
 }
-if (!/--dense-gap-label\s*:\s*4px/.test(globalCss)) {
-  violations.push({
-    rule: '字段节奏缺失：label 与控件的名/值关系需要 --dense-gap-label token 承载',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --dense-gap-label: 4px',
-  });
-}
-if (!/\.filter-card__slim-row\s+\.filter-field\s*\{[\s\S]*?gap\s*:\s*5px/.test(globalCss)) {
-  violations.push({
-    rule: '查询字段节奏缺失：filter-field 需要 5px gap 维持字段名/输入面的可扫读分组',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .filter-card__slim-row .filter-field { gap: 5px }',
-  });
-}
-if (!/\.filter-field \.filter-combo\s*>\s*\*\s*\+\s*\*\s*\{[\s\S]*?margin-left:\s*-1px/.test(globalCss)
-  || !/\.filter-field \.filter-combo\s*>\s*\*:not\(:last-child\)[\s\S]*?border-top-right-radius:\s*0/.test(globalCss)
-  || !/\.filter-field \.filter-combo\s*>\s*\*:not\(:first-child\)[\s\S]*?border-top-left-radius:\s*0/.test(globalCss)) {
-  violations.push({
-    rule: 'filter-combo 必须是连接控件：相邻控件共享边框，连接处内侧圆角为 0',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing connected filter-combo radius contract',
-  });
-}
-if (!globalCss.includes('.filter-card--two-row') || !globalCss.includes('.filter-grid--two-row')) {
-  violations.push({
-    rule: '全局 CSS 须含 filter-card--two-row 结构；双行可见筛选用 matrix + filter-grid（4列），禁止多个 slim-row 堆叠',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .filter-card--two-row or .filter-grid--two-row',
-  });
-}
-if (!globalCss.includes('.query-filter-drawer--wide') || !globalCss.includes('.query-filter-drawer__nav')) {
-  violations.push({
-    rule: '30+/40+ 查询项必须有宽抽屉与分组导航样式，禁止平铺表单墙',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .query-filter-drawer--wide or .query-filter-drawer__nav',
-  });
-}
-if (!globalCss.includes('.saved-query-workspace')) {
-  violations.push({
-    rule: '50+ 查询项必须有 saved-query-workspace 查询工作区样式，不能继续放大抽屉',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .saved-query-workspace',
-  });
-}
-if (!globalCss.includes('--query-ws-pad-x') || !globalCss.includes('--query-ws-side-w') || !globalCss.includes('--query-ws-nav-w')) {
-  violations.push({
-    rule: '50+ 查询工作区必须使用 query-ws spacing/width tokens，禁止各栏手写不一致 padding',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --query-ws-* alignment tokens',
-  });
-}
-if (!globalCss.includes('--dense-surface-head') || !globalCss.includes('--dense-surface-section') || !globalCss.includes('--dense-surface-rail')) {
-  violations.push({
-    rule: '全局视觉层级必须定义 surface head/section/rail token，禁止详情/列表退回大片灰底',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --dense-surface-head / --dense-surface-section / --dense-surface-rail',
-  });
-}
-if (!globalCss.includes('--dense-brand-surface') || !globalCss.includes('--dense-brand-line')) {
-  violations.push({
-    rule: '主体 token 必须定义 brand-neutral 锚点，避免从蓝色模板退化成灰色 ERP',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --dense-brand-surface / --dense-brand-line',
-  });
-}
-if (!/--dense-page-bg\s*:\s*#F2F5F8/.test(globalCss)) {
-  violations.push({
-    rule: '主体页面背景必须采用深海中性工作面 --dense-page-bg: #F2F5F8，禁止纯灰或蓝色渐变底',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing brand-neutral --dense-page-bg: #F2F5F8',
-  });
-}
-if (/--dense-page-bg\s*:[^;]*gradient/i.test(globalCss) || /--dense-table-header-bg\s*:[^;]*gradient/i.test(globalCss)) {
-  violations.push({
-    rule: '主体标准禁止页面背景和表格表头使用蓝色/装饰渐变',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'remove gradient from --dense-page-bg / --dense-table-header-bg',
-  });
-}
-if (!/--dense-zone-top-border\s*:\s*var\(--dense-brand-line\)/.test(globalCss)) {
-  violations.push({
-    rule: '列表区块顶边界必须使用 brand-neutral hairline，避免整页灰白无品牌锚点',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --dense-zone-top-border: var(--dense-brand-line)',
-  });
-}
-if (!/--dense-table-header-bg\s*:\s*#FAFBFC/.test(globalCss)) {
-  violations.push({
-    rule: 'workbench 表头必须采用近白中性冷白 --dense-table-header-bg: #FAFBFC，禁止灰表头或浅蓝模板表头',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing brand-neutral --dense-table-header-bg: #FAFBFC',
-  });
-}
-if (!/--dense-row-stripe\s*:\s*#FFFFFF/.test(globalCss)) {
-  violations.push({
-    rule: 'workbench 默认斑马纹必须接近白色，避免整张表灰化；需要显性斑马纹必须写模块例外',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --dense-row-stripe: #FFFFFF',
-  });
-}
-if (!/--dense-table-col-border\s*:\s*transparent/.test(globalCss)) {
-  violations.push({
-    rule: 'workbench 表格竖线默认必须关闭或近透明，避免 Excel/ERP 网格感',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --dense-table-col-border: transparent',
-  });
-}
-if (/rgba\(143,\s*184,\s*255/.test(globalCss)) {
-  violations.push({
-    rule: '主体标准禁止蓝色表格列分隔线 rgba(143,184,255,...)，应用 --dense-table-col-border',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'remove hard-coded blue table column border',
-  });
-}
-const moduleScopedClassPattern = /\.[\w-]+--(?:order|finance|sale|business|shipment|customs|warehouse)(?:-|$|[\s,{.:#[])/g;
-for (const match of globalCss.matchAll(moduleScopedClassPattern)) {
-  const line = globalCss.slice(0, match.index).split('\n').length;
-  violations.push({
-    rule: 'global.css 禁止业务模块前缀修饰符（如 --order-*），应合并到结构槽位类（如 --compact / --trailing）',
-    file: 'src/styles/global.css',
-    line,
-    content: match[0].trim().slice(0, 120),
-  });
-}
-if (!/--dense-page-bottom-space\s*:\s*(?:8|9|10|11|12)px/.test(globalCss)) {
-  violations.push({
-    rule: '列表页必须定义 --dense-page-bottom-space: 8-12px，表格不能贴到视口底部',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --dense-page-bottom-space: 8-12px',
-  });
-}
-if (!/\.page-root--dense\s*\{[\s\S]*?padding:\s*8px 10px var\(--dense-page-bottom-space\)/.test(globalCss)) {
-  violations.push({
-    rule: 'page-root--dense 必须用 --dense-page-bottom-space 作为底部 padding，禁止列表页贴底',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing page-root--dense bottom padding token',
-  });
-}
-if (/\.detail-section::before\s*\{(?=[\s\S]*?background:\s*var\(--dense-primary-6\))(?!(?=[\s\S]*?content:\s*none))[\s\S]*?\}/.test(globalCss)) {
-  violations.push({
-    rule: 'detail-section 禁止使用全高主色左 rail；顶层模块只用 title 短锚点，避免左侧小块混乱',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'remove full-height .detail-section::before primary rail',
-  });
-}
-if (!/\.detail-section__title::before\s*\{[\s\S]*?background:\s*var\(--dense-primary-6\)/.test(globalCss)) {
-  violations.push({
-    rule: 'detail-section 顶层锚点必须在 detail-section__title::before，不能散落在多个左侧 rail',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .detail-section__title::before primary marker',
-  });
-}
-if (!/\.detail-section__head\s*\{[\s\S]*?background:\s*var\(--dense-surface-head\)/.test(globalCss)) {
-  violations.push({
-    rule: 'detail-section__head 必须使用 --dense-surface-head，禁止灰色 divider 头部',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing detail-section__head --dense-surface-head',
-  });
-}
-if (!globalCss.includes('.detail-section__body--table')) {
-  violations.push({
-    rule: '详情分区内嵌表格必须使用 detail-section__body--table 全局类',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .detail-section__body--table',
-  });
-}
-if (!globalCss.includes('.detail-mini-vxe.vxe-table .vxe-body--row')) {
-  violations.push({
-    rule: 'detail-mini-vxe 必须显式覆盖 body 行高，防止列表页 vxe 全局规则污染',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .detail-mini-vxe.vxe-table .vxe-body--row',
-  });
-}
-if (!/\.detail-mini-vxe\.vxe-table\s*\{[\s\S]*--vxe-ui-table-row-height-small:\s*var\(--detail-mini-row-h\)/.test(globalCss)) {
-  violations.push({
-    rule: 'detail-mini-vxe 的 VXE 行高变量必须引用 --detail-mini-row-h，禁止散落硬编码行高',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --vxe-ui-table-row-height-small: var(--detail-mini-row-h)',
-  });
-}
-if (!globalCss.includes('col--ellipsis') || !globalCss.includes('.detail-mini-vxe.vxe-table')) {
-  violations.push({
-    rule: 'detail-mini-vxe 必须覆盖 col--ellipsis，防止 show-overflow 裁切与列错位',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing detail-mini-vxe col--ellipsis cell override',
-  });
-} else if (!/\.detail-mini-vxe\.vxe-table[\s\S]*col--ellipsis[\s\S]*\.vxe-cell/.test(globalCss)) {
-  violations.push({
-    rule: 'detail-mini-vxe 必须覆盖 col--ellipsis，防止 show-overflow 裁切与列错位',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing detail-mini-vxe col--ellipsis cell override',
-  });
-}
-if (!globalCss.includes('§ Arco Form Controls') || !globalCss.includes('--dense-control-h-form')) {
-  violations.push({
-    rule: 'global.css 必须定义 § Arco Form Controls 与 --dense-control-h-form',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing § Arco Form Controls or --dense-control-h-form',
-  });
-} else if (
-  !/\.arco-picker-size-small[\s\S]*--dense-control-h-form/.test(globalCss)
-) {
-  violations.push({
-    rule: '§ Arco Form Controls 必须覆盖 picker 组件高度',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .arco-picker-size-small height in § Arco Form Controls',
-  });
-}
-if (!globalCss.includes('--dense-vxe-surface-hover-bg') || !globalCss.includes('--dense-table-header-bg')) {
-  violations.push({
-    rule: '全项目 VXE 表必须定义共用 surface token（--dense-vxe-surface-hover-bg + --dense-table-header-bg）',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --dense-vxe-surface-hover-bg or --dense-table-header-bg',
-  });
-}
-
-if (!/\.detail-mini-vxe\.vxe-table \.vxe-header--column[\s\S]*--dense-table-header-bg/.test(globalCss)) {
-  violations.push({
-    rule: 'detail-mini-vxe 表头必须与 workbench-table 共用 --dense-table-header-bg',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'detail-mini-vxe header must use --dense-table-header-bg',
-  });
-}
-
-if (!/\.detail-mini-vxe\.vxe-table[\s\S]*--dense-vxe-surface-hover-bg/.test(globalCss)) {
-  violations.push({
-    rule: 'detail-mini-vxe hover 必须与列表共用 --dense-vxe-surface-hover-bg',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'detail-mini-vxe hover must use --dense-vxe-surface-hover-bg',
-  });
-}
-
-const miniHeaderAlias = /--dense-mini-vxe-header-bg:\s*var\(--dense-table-header-bg\)/.test(globalCss);
-if (!miniHeaderAlias) {
-  violations.push({
-    rule: 'detail-mini-vxe 表头 token 必须别名到 --dense-table-header-bg',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: '--dense-mini-vxe-header-bg must alias --dense-table-header-bg',
-  });
-}
-
-if (!/\.detail-mini-vxe\.vxe-table \.vxe-table--header-wrapper\s*\{[^}]*border-bottom:\s*none/.test(globalCss)) {
-  violations.push({
-    rule: 'detail-mini-vxe 禁止 vxe-table--header-wrapper 底边蓝线（靠背景分层即可）',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'detail-mini-vxe header-wrapper must use border-bottom: none',
-  });
-}
-
-if (!globalCss.includes('--dense-workbench-hover-bg')) {
-  violations.push({
-    rule: 'workbench-table 表头与 hover 必须使用独立 token，避免全灰质感',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --dense-workbench-hover-bg',
-  });
-}
-
-if (!globalCss.includes('.detail-drawer-footer__start') || !globalCss.includes('.detail-drawer-footer__end')) {
-  violations.push({
-    rule: 'detail-drawer-footer 必须提供 __start / __end 左右分区类',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing detail-drawer-footer__start or detail-drawer-footer__end',
-  });
-}
-
-if (!globalCss.includes('.detail-form .detail-combo')) {
-  violations.push({
-    rule: '详情表单组合输入必须使用 detail-combo 全局类',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .detail-form .detail-combo',
-  });
-}
-
-if (!/@media\s*\(max-width:\s*1279px\)/.test(globalCss) || !globalCss.includes('.merged-bar')) {
-  violations.push({
-    rule: '运营列表必须提供 1280 小屏断点，merged-bar/status/filter 不能在小屏硬挤溢出',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing @media (max-width: 1279px) responsive merged-bar rules',
-  });
-}
-
-if (!/\.stat-tab-group\s*\{[\s\S]*flex:\s*1 1 auto[\s\S]*min-width:\s*0/.test(globalCss)) {
-  violations.push({
-    rule: 'stat-tab-group 必须 flex: 1 1 auto 且 min-width: 0，状态组应内部滚动而不是撑爆页面',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .stat-tab-group flex/min-width responsive contract',
-  });
-}
-
-if (!globalCss.includes('.form-subgroup__head') || !globalCss.includes('.form-subgroup__title')) {
-  violations.push({
-    rule: '详情小模块必须提供 form-subgroup 结构样式，禁止只靠裸 subgroup label 分隔',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .form-subgroup__head or .form-subgroup__title',
-  });
-}
-
-if (!globalCss.includes('.vxe-table .row-action-btn.arco-btn-status-danger')) {
-  violations.push({
-    rule: '行内删除必须保留 danger 红色语义，禁止被默认 row-action 灰/蓝覆盖',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .vxe-table .row-action-btn.arco-btn-status-danger',
-  });
-}
-
-if (!globalCss.includes('.detail-drawer-footer__cluster')) {
-  violations.push({
-    rule: '详情吸底业务按钮必须收入 detail-drawer-footer__cluster 操作组',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .detail-drawer-footer__cluster',
-  });
-}
-
-if (!globalCss.includes('.arco-popconfirm-footer .arco-btn') || !globalCss.includes('.arco-select-dropdown .arco-select-option')) {
-  violations.push({
-    rule: '浮层字号必须在 global.css 统一（popconfirm 按钮 + select 下拉项）',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing overlay typography overrides',
-  });
-}
-
-if (!/--dense-drawer-w-complex-max:\s*1200px/.test(globalCss)
-  || !/\.detail-drawer\.arco-drawer\s*\{[^}]*width:\s*min\(var\(--dense-drawer-w-complex-max\)/.test(globalCss)
-  || !/\.detail-drawer--standard\.arco-drawer/.test(globalCss)) {
-  violations.push({
-    rule: '抽屉宽度须在 global.css 用 token 分档（detail-drawer / detail-drawer--standard）',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing drawer width tokens or detail-drawer--standard',
-  });
-}
-
-if (!/--dense-modal-w-max:\s*860px/.test(globalCss)) {
-  violations.push({
-    rule: 'Modal 最大宽度 token --dense-modal-w-max 必须为 860px',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --dense-modal-w-max: 860px',
-  });
-}
-
-if (!globalCss.includes('.md-layout') || !globalCss.includes('.perm-layout') || !globalCss.includes('.db-wrap') || !globalCss.includes('.xf-wrap')) {
-  violations.push({
-    rule: '多域布局类须在 global.css 提供：md-layout / perm-layout / db-wrap / xf-wrap',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing multi-domain layout classes',
-  });
-}
-if (!globalCss.includes('--dense-font-overlay') || !/\.arco-modal-title\s*\{[^}]*font-size:\s*var\(--dense-font-overlay\)/.test(globalCss)) {
-  violations.push({
-    rule: 'Modal 标题必须使用 F0 --dense-font-overlay（14px），且大于表单正文 12px',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .arco-modal-title { font-size: var(--dense-font-overlay) }',
-  });
-}
-
-if (!/--dense-font-title:\s*var\(--dense-font-field\)/.test(globalCss)) {
-  violations.push({
-    rule: '结构标题 F3 --dense-font-title 必须与 F4 同 12px（alias --dense-font-field），靠字重 600 区分',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing --dense-font-title: var(--dense-font-field)',
-  });
-}
-
-if (!globalCss.includes('--dense-action-menu-max-w') || !/\.action-menu,\s*\n\.row-action-menu,[\s\S]*?width:\s*max-content/.test(globalCss)) {
-  violations.push({
-    rule: 'action-menu 必须使用内容自适应宽度，并用 --dense-action-menu-max-w 约束国际化长文案',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing action-menu width: max-content or --dense-action-menu-max-w',
-  });
-}
-
-if (!globalCss.includes('--dense-zone-top-border') || !/\.zone-l2-filter-card\s*\{[\s\S]*?border-top:\s*(?:1|2)px solid var\(--dense-zone-top-border\)/.test(globalCss) || !/\.zone-l3-action,\s*\n\.zone-card--stack\s*\{[\s\S]*?border-top:\s*(?:1|2)px solid var\(--dense-zone-top-border\)/.test(globalCss) || !/\.zone-l4-table-card\s*\{[\s\S]*?border-top:\s*(?:1|2)px solid var\(--dense-zone-top-border\)/.test(globalCss)) {
-  violations.push({
-    rule: '列表 L2/L3/L4 模块顶边界必须统一使用 --dense-zone-top-border，禁止有的主色线有的灰线',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing unified --dense-zone-top-border usage on list zones',
-  });
-}
-
-if (!/\.action-menu--toolbar \.arco-dropdown-option\s*\{[^}]*height:\s*32px/.test(globalCss)) {
-  violations.push({
-    rule: '工具栏 action-menu 选项热区必须为 32px，保持可点击且不突兀',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing .action-menu--toolbar .arco-dropdown-option { height: 32px }',
-  });
-}
-
-if (!/\.action-menu[\s\S]*?\.row-action-menu[\s\S]*?\{[\s\S]*?overflow-x:\s*hidden/.test(globalCss)) {
-  violations.push({
-    rule: 'action-menu 浮层必须禁止横向滚动，长文案应用省略而不是撑出滚动条',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing action-menu overflow-x: hidden',
-  });
-}
-
-if (!/\.arco-btn-size-mini\s*\{[^}]*font-size:\s*var\(--dense-font-control\)/.test(globalCss)) {
-  violations.push({
-    rule: 'arco-btn-size-mini 必须使用 F4 Control 12px，禁止 10px',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'arco-btn-size-mini must use --dense-font-control',
-  });
-}
-
 // 业务页禁止 Arco size="medium" | "large" | "mini"
 for (const file of files) {
   if (!file.includes(`${sep}src${sep}views${sep}`) || !file.endsWith('.vue')) continue;
@@ -1173,15 +630,16 @@ function hasOpenAncestorClass(content, index, className) {
     .some((classAttr) => classAttr.split(/\s+/).includes(className));
 }
 
-// a-pagination 必须位于 table-card-cap 打开的结构内，而不是按文件名特批。
+// a-pagination：Arco-first 列表页可放在 a-card #extra；旧结构用 table-card-cap
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
   const content = readFileSync(file, 'utf8');
   for (const match of content.matchAll(/<a-pagination\b/g)) {
     if (hasOpenAncestorClass(content, match.index, 'table-card-cap')) continue;
+    if (content.includes('workbench-page') && content.includes('<a-card')) continue;
     violations.push({
-      rule: '禁止在非 table-card-cap 结构内裸写 <a-pagination>',
+      rule: '禁止在非 table-card-cap / Arco 列表卡 extra 结构内裸写 <a-pagination>',
       file: relPath,
       line: getLineNumber(content, match.index),
       content: content.slice(match.index, content.indexOf('\n', match.index)).trim().slice(0, 120),

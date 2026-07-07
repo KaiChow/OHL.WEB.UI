@@ -95,7 +95,8 @@ Do not solve "too blue" by removing all primary anchors. The page needs enough p
 | Active navigation | Use project primary aliases such as `--dense-primary-*`, not custom blue. |
 | Table header | Use cool brand-neutral header fill (`--dense-table-header-bg`). Do not use gray sheet headers or blue gradients for normal workbench headers. |
 | Status | Use semantic tokens only: `warning`, `primary`, `success`, `danger`, `cyan`, `purple`, neutral. |
-| Disabled/empty | Use `color-text-4` and `color-fill-1/2`, only for low-priority information. |
+| Disabled/empty | Use `color-text-4` and `--dense-control-disabled-bg`, only for true disabled or low-priority empty. |
+| Interactive control surface | `--dense-control-surface` / `--color-fill-2: #FFFFFF` | Default inputs/selects/pickers on white cards: white + hairline border. Gray fill is not the default work-surface look. |
 
 Use Arco Design Vue default theme (`@arco-design/web-vue/dist/arco.css`) as the color source. Do not add third-party Arco theme packages or build an independent palette.
 
