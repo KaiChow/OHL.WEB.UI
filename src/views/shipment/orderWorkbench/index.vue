@@ -246,6 +246,10 @@ const getOrderAuxText = (row: ShipmentWorkbenchRow) => {
   return parts.length ? parts.join(' / ') : '待回传订舱号 / 提单号';
 };
 
+const getOwnerMeta = (row: ShipmentWorkbenchRow) => `业务类型 ${row.businessType} / 操作 ${row.operator}`;
+
+const getRouteMeta = (row: ShipmentWorkbenchRow) => `ETD ${row.etd} / 截关 ${row.closingTime}`;
+
 const getNextActionLabel = (row: ShipmentWorkbenchRow) => {
   if (row.exceptionStatus === 'open') return '处理异常';
   if (row.fileStatus === 'missing') return '补齐文件';
@@ -284,6 +288,18 @@ const getExecutionSignals = (row: ShipmentWorkbenchRow) => {
 
   return signals;
 };
+
+const currentQueueSummary = computed(() => {
+  const queue = queueStats.value.find((item) => item.key === activeQueue.value);
+  const status = statusTabStats.value.find((item) => item.key === activeStatusTab.value);
+
+  return {
+    title: queue ? `${queue.label} ${queue.count} 票` : `当前工作集 ${filteredRows.value.length} 票`,
+    meta: status && activeStatusTab.value !== 'all'
+      ? `状态筛选：${status.label} / 当前命中 ${filteredRows.value.length} 票`
+      : workbenchNotice.value.text,
+  };
+});
 
 const workbenchNotice = computed(() => {
   const overdue = getRowsByQueue(queryBaseRows.value, 'overdue').length;
@@ -650,6 +666,10 @@ const fetchList = async () => {
               <template #icon><icon-refresh /></template>
             </a-button>
           </a-tooltip>
+          <div class="table-card-cap__context">
+            <span class="table-card-cap__title">{{ currentQueueSummary.title }}</span>
+            <span class="table-card-cap__meta">{{ currentQueueSummary.meta }}</span>
+          </div>
           <div v-if="selectedCount > 0" class="toolbar-selection-context">
             <span class="toolbar-selected-tip">已选 <b>{{ selectedCount }}</b> 条</span>
             <a-button size="small" type="text" class="toolbar-selection-clear" @click="clearSelection">清空</a-button>
@@ -695,46 +715,32 @@ const fetchList = async () => {
         >
           <vxe-column type="checkbox" width="44" fixed="left" />
 
-          <vxe-column field="orderNo" title="业务单号" min-width="220" fixed="left">
+          <vxe-column field="orderNo" title="业务对象" min-width="240" fixed="left">
             <template #default="{ row }">
-              <div class="cell-two-line">
-                <span class="c2-main">
+              <div class="workbench-object-cell">
+                <div class="workbench-object-cell__main">
+                  <span class="s-pill" :data-s="row.statusPill">{{ row.orderStatusLabel }}</span>
                   <span class="link-text link-text--strong mono" @click="openDetailDrawer(row)">{{ row.orderNo }}</span>
-                </span>
-                <span class="c2-sub mono">{{ getOrderAuxText(row) }}</span>
+                </div>
+                <span class="workbench-object-cell__sub mono">{{ getOrderAuxText(row) }}</span>
               </div>
             </template>
           </vxe-column>
 
-          <vxe-column field="orderStatusLabel" title="订单状态" min-width="92" fixed="left" align="center">
-            <template #default="{ row }">
-              <span class="s-pill" :data-s="row.statusPill">{{ row.orderStatusLabel }}</span>
-            </template>
-          </vxe-column>
-
-          <vxe-column field="customerName" title="客户信息" min-width="190">
+          <vxe-column field="customerName" title="客户 / 归属" min-width="210">
             <template #default="{ row }">
               <div class="cell-two-line">
                 <span class="c2-main">{{ row.customerName }}</span>
-                <span class="c2-sub">业务类型 {{ row.businessType }}</span>
+                <span class="c2-sub">{{ getOwnerMeta(row) }}</span>
               </div>
             </template>
           </vxe-column>
 
-          <vxe-column title="航程信息" min-width="220">
+          <vxe-column title="航程 / 节点" min-width="230">
             <template #default="{ row }">
               <div class="cell-two-line">
                 <span class="c2-main mono">{{ row.pol }} -> {{ row.pod }}</span>
-                <span class="c2-sub">{{ row.carrier }} / {{ row.vesselVoyage }}</span>
-              </div>
-            </template>
-          </vxe-column>
-
-          <vxe-column title="节点时间" min-width="170">
-            <template #default="{ row }">
-              <div class="cell-two-line">
-                <span class="c2-main mono">ETD {{ row.etd }}</span>
-                <span class="c2-sub mono">截关 {{ row.closingTime }}</span>
+                <span class="c2-sub">{{ row.carrier }} / {{ row.vesselVoyage }} · {{ getRouteMeta(row) }}</span>
               </div>
             </template>
           </vxe-column>
@@ -750,7 +756,7 @@ const fetchList = async () => {
             </template>
           </vxe-column>
 
-          <vxe-column title="跟进信息" min-width="150">
+          <vxe-column title="跟进信息" min-width="154">
             <template #default="{ row }">
               <div class="cell-two-line">
                 <span class="c2-main">{{ row.operator }}</span>
@@ -759,7 +765,7 @@ const fetchList = async () => {
             </template>
           </vxe-column>
 
-          <vxe-column title="执行缺口" min-width="164">
+          <vxe-column title="执行缺口" min-width="188">
             <template #default="{ row }">
               <div class="cell-pill-row">
                 <span
@@ -974,6 +980,36 @@ const fetchList = async () => {
 </template>
 
 <style scoped>
+.table-card-cap__context {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.workbench-object-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.workbench-object-cell__main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.workbench-object-cell__sub {
+  overflow: hidden;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .shipment-queue-card {
   appearance: none;
   border: none;
