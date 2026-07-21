@@ -4,7 +4,7 @@ import VXETable from 'vxe-table';
 import App from './App.vue';
 import { router } from './router';
 
-import '@arco-design/web-vue/dist/arco.css';
+import '@arco-themes/vue-gi-demo/css/arco.css';
 import 'vxe-table/lib/style.css';
 import '@icon-park/vue-next/styles/index.css';
 import './styles/global.css';

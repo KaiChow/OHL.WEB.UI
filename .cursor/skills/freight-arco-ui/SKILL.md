@@ -9,7 +9,7 @@ Project-level **UI delivery contract** for `FE.OHL.WEB.UI`.
 
 **Source of truth:** `ui-skill/freight-arco-ui/` → run `npm run sync-ui-skill` after edits.
 
-**Synced to:** `.cursor/skills/`, `.agents/skills/`, `.claude/skills/`
+**Synced to:** `.cursor/skills/`, `.agents/skills/`
 
 ## Arco-First Productization (read this first)
 
@@ -40,7 +40,7 @@ Full rules: **`references/arco-first.md`**. Every shared custom class must state
 | **Component rules** | `actions.md`, `icons.md`, `table.md`, `detail-form.md`, `list-page.md` | How to implement |
 | **QA** | `checklist.md`, `scripts/check-spec.js` | Pre-ship checks |
 
-**Rule:** Arco structure first → business slots and labels from `module-patterns.md` / `domain-language.md` → thin shared enhancement from `global.css` only where needed → details in topic references. Do not duplicate long rule blocks across `AGENTS.md` / `CLAUDE.md` / skill.
+**Rule:** Arco structure first → business slots and labels from `module-patterns.md` / `domain-language.md` → thin shared enhancement from `global.css` only where needed → details in topic references. Do not duplicate long rule blocks across `AGENTS.md` / skill.
 
 ## Four-Layer Prompt Model
 

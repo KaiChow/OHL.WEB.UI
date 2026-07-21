@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { IconRefresh, IconSearch } from '@arco-design/web-vue/es/icon';
+import { IconRefresh, IconSearch, IconUser, IconDown } from '@arco-design/web-vue/es/icon';
 import { appMenus } from '../config/menu';
-import { initialTabs } from '../config/tabs';
-import type { AppTabItem } from '../types/navigation';
 
 const route = useRoute();
 const router = useRouter();
-const tabs = ref<AppTabItem[]>([...initialTabs]);
 const menuKeyword = ref('');
 const openKeys = ref(appMenus.map((g) => g.key));
 const selectedMenuKeys = ref<string[]>([]);
@@ -100,56 +97,21 @@ const onOpenKeysChange = (keys: string[]) => {
   setOpenKeys(keys);
 };
 
-const activeTabKey = computed(() => {
-  const matchedTab = tabs.value.find((tab) => tab.routeName === route.name);
-  return matchedTab?.key || '';
-});
-
-const ensureTab = (routeName: string) => {
-  if (tabs.value.some((tab) => tab.routeName === routeName)) return;
-  const meta = menuRouteMap.value.get(routeName);
-  if (!meta) return;
-  tabs.value.push({ key: meta.key, title: meta.title, routeName, closable: true });
-};
-
-watch(
-  () => route.name,
-  (name) => {
-    if (typeof name === 'string') ensureTab(name);
-  },
-  { immediate: true },
-);
-
 const onMenuItemClick = (key: string) => {
   const routeName = menuKeyRouteMap.value.get(key);
   if (!routeName || route.name === routeName) return;
-  ensureTab(routeName);
   router.push({ name: routeName });
-};
-
-const openTab = (routeName: string) => {
-  if (route.name !== routeName) router.push({ name: routeName });
-};
-
-const closeTab = (tab: AppTabItem, index: number) => {
-  if (!tab.closable) return;
-  const isActive = tab.routeName === route.name;
-  tabs.value.splice(index, 1);
-  if (isActive && tabs.value.length) {
-    const next = tabs.value[Math.min(index, tabs.value.length - 1)];
-    router.push({ name: next.routeName });
-  }
 };
 </script>
 
 <template>
   <a-layout class="app-layout">
-    <a-layout-sider class="app-layout__sider" :width="248" :collapsible="false">
+    <a-layout-sider class="app-layout__sider" :width="220" :collapsible="false">
       <div class="app-layout__brand">
         <a-avatar :size="28" shape="square" class="app-layout__logo">OHL</a-avatar>
         <div class="app-layout__brand-text">
           <div class="app-layout__brand-title">OHL Freight OS</div>
-          <div class="app-layout__brand-sub">Operations Workspace</div>
+          <div class="app-layout__brand-sub">Freight Operations Platform</div>
         </div>
       </div>
 
@@ -158,11 +120,6 @@ const closeTab = (tab: AppTabItem, index: number) => {
           <template #suffix><icon-search /></template>
         </a-input>
       </div>
-
-      <a-alert type="info" :show-icon="false" class="app-layout__context">
-        <template #title>当前工作域</template>
-        {{ currentGroupTitle }} / {{ currentPageTitle }}
-      </a-alert>
 
       <a-menu
         class="app-layout__menu"
@@ -187,34 +144,29 @@ const closeTab = (tab: AppTabItem, index: number) => {
 
     <a-layout class="app-layout__main">
       <a-layout-header class="app-layout__header">
-        <div class="app-layout__header-context">
-          <span class="app-layout__eyebrow">{{ currentGroupTitle }}</span>
-          <strong class="app-layout__page-title">{{ currentPageTitle }}</strong>
+        <div class="app-layout__header-main">
+          <div class="app-layout__header-context">
+            <span class="app-layout__eyebrow">{{ currentGroupTitle }}</span>
+            <strong class="app-layout__page-title">{{ currentPageTitle }}</strong>
+          </div>
         </div>
 
-        <a-tabs
-          class="app-layout__tabs"
-          type="card-gutter"
-          size="small"
-          :active-key="activeTabKey"
-          hide-content
-          editable
-          @tab-click="(key) => { const tab = tabs.find((t) => t.key === key); if (tab) openTab(tab.routeName); }"
-          @delete="(key) => { const idx = tabs.findIndex((t) => t.key === key); if (idx >= 0) closeTab(tabs[idx], idx); }"
-        >
-          <a-tab-pane
-            v-for="tab in tabs"
-            :key="tab.key"
-            :title="tab.title"
-            :closable="tab.closable"
-          />
-        </a-tabs>
-
         <a-space class="app-layout__header-actions" :size="8">
-          <a-button size="small" type="text" @click="router.go(0)">
+          <a-button size="small" type="text" class="app-layout__icon-action" title="刷新" @click="router.go(0)">
             <template #icon><icon-refresh /></template>
           </a-button>
-          <a-tag color="arcoblue">admin</a-tag>
+          <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+            <a-button size="small" class="app-layout__user">
+              <template #icon><icon-user /></template>
+              admin
+              <icon-down />
+            </a-button>
+            <template #content>
+              <a-doption>个人设置</a-doption>
+              <a-doption>切换工作区</a-doption>
+              <a-doption>退出登录</a-doption>
+            </template>
+          </a-dropdown>
         </a-space>
       </a-layout-header>
 
@@ -228,12 +180,15 @@ const closeTab = (tab: AppTabItem, index: number) => {
 <style scoped>
 .app-layout {
   height: 100vh;
+  background: var(--dense-page-bg);
 }
 
 .app-layout__sider {
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--color-border-2);
+  background: var(--color-bg-card);
+  border-right: 1px solid var(--dense-card-border);
+  box-shadow: var(--dense-shadow-card);
 }
 
 .app-layout__sider :deep(.arco-layout-sider-children) {
@@ -245,21 +200,23 @@ const closeTab = (tab: AppTabItem, index: number) => {
 .app-layout__brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--color-border-2);
+  gap: 10px;
+  min-height: 54px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--dense-card-border);
 }
 
 .app-layout__logo {
-  background: rgb(var(--primary-6));
-  color: #fff;
+  background: var(--dense-primary-6);
+  color: var(--color-white);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--dense-weight-title);
+  box-shadow: 0 6px 14px var(--dense-primary-2);
 }
 
 .app-layout__brand-title {
-  font-size: var(--dense-font-overlay);
-  font-weight: 600;
+  font-size: var(--dense-font-nav);
+  font-weight: var(--dense-weight-title);
   color: var(--color-text-1);
   line-height: 1.2;
 }
@@ -271,26 +228,49 @@ const closeTab = (tab: AppTabItem, index: number) => {
 }
 
 .app-layout__search {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--color-border-2);
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--color-border-1);
 }
 
-.app-layout__context {
-  margin: 10px 12px 0;
-  padding: 8px 10px;
-}
-
-.app-layout__context :deep(.arco-alert-title) {
-  font-size: var(--dense-font-micro);
-  color: var(--color-text-3);
-  margin-bottom: 2px;
+.app-layout__search :deep(.arco-input-wrapper) {
+  background: var(--color-bg-card);
 }
 
 .app-layout__menu {
   flex: 1;
   overflow: auto;
   border-right: none;
-  margin-top: 8px;
+  padding: 8px 6px 8px;
+  margin-top: 0;
+}
+
+.app-layout__menu :deep(.arco-menu) {
+  background: transparent;
+}
+
+.app-layout__menu :deep(.arco-menu-inline-header),
+.app-layout__menu :deep(.arco-menu-item) {
+  border-radius: 6px;
+}
+
+.app-layout__menu :deep(.arco-menu-inline-header) {
+  color: var(--color-text-2);
+  font-size: var(--dense-font-nav);
+  font-weight: var(--dense-weight-title);
+  background: transparent;
+  padding-left: 12px;
+}
+
+.app-layout__menu :deep(.arco-menu-selected) {
+  background: rgba(0, 82, 255, 0.06);
+  color: var(--dense-primary-7);
+  font-weight: var(--dense-weight-title);
+  box-shadow: inset 2px 0 0 var(--dense-primary-5);
+}
+
+.app-layout__menu :deep(.arco-menu-item:hover),
+.app-layout__menu :deep(.arco-menu-inline-header:hover) {
+  background: rgba(0, 82, 255, 0.04);
 }
 
 .app-layout__footer {
@@ -299,7 +279,7 @@ const closeTab = (tab: AppTabItem, index: number) => {
   padding: 10px 14px;
   font-size: var(--dense-font-micro);
   color: var(--color-text-3);
-  border-top: 1px solid var(--color-border-2);
+  border-top: 1px solid var(--dense-card-border);
 }
 
 .app-layout__main {
@@ -312,46 +292,61 @@ const closeTab = (tab: AppTabItem, index: number) => {
   align-items: center;
   gap: 12px;
   height: 48px;
-  padding: 0 12px;
-  background: var(--color-bg-2);
-  border-bottom: 1px solid var(--color-border-2);
+  padding: 0 14px;
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--dense-card-border);
+  box-shadow: none;
+}
+
+.app-layout__header-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 
 .app-layout__header-context {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   flex-shrink: 0;
-  min-width: 120px;
+  min-width: 0;
 }
 
 .app-layout__eyebrow {
   font-size: var(--dense-font-micro);
   color: var(--color-text-3);
+  line-height: 14px;
+  white-space: nowrap;
 }
 
 .app-layout__page-title {
   font-size: var(--dense-font-nav);
-  font-weight: 600;
+  font-weight: var(--dense-weight-title);
   color: var(--color-text-1);
-}
-
-.app-layout__tabs {
-  flex: 1;
-  min-width: 0;
-}
-
-.app-layout__tabs :deep(.arco-tabs-nav) {
-  margin-bottom: 0;
+  line-height: 18px;
+  white-space: nowrap;
 }
 
 .app-layout__header-actions {
   flex-shrink: 0;
 }
 
+.app-layout__icon-action {
+  color: var(--color-text-3);
+}
+
+.app-layout__user {
+  border-color: var(--color-border-1);
+  background: var(--color-bg-card);
+  color: var(--color-text-2);
+  box-shadow: none;
+}
+
 .app-layout__content {
   min-height: 0;
   overflow: hidden;
-  padding: 8px 10px var(--dense-page-bottom-space);
+  padding: 10px 12px var(--dense-page-bottom-space);
 }
 </style>

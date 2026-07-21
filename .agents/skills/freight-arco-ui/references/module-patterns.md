@@ -186,4 +186,6 @@ primary_action:
 grouped_actions:
 ```
 
-Then implement with `global.css` classes only.
+Then implement in this order: Arco built-ins -> tokens -> documented business patterns -> minimal page-local CSS.
+
+Use `global.css` classes only when the chosen surface needs a documented freight/VXE/archetype enhancement and `arco-first.md` can explain why Arco + tokens are insufficient.

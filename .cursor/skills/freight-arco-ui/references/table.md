@@ -304,7 +304,8 @@ Workbench tables with more than 12 columns **must** define default visible colum
 <!-- vxe-table setup -->
 <vxe-table
   ref="xTable"
-  :custom-config="{ storage: true, storageKey: 'module-name-cols' }"
+  id="module-name"
+  :custom-config="{ storage: true }"
   ...
 >
   <!-- default visible -->

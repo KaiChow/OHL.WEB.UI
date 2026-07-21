@@ -16,7 +16,6 @@ const SOURCE = join(ROOT, 'ui-skill', 'freight-arco-ui');
 const TARGETS = [
   { label: 'Cursor', path: join(ROOT, '.cursor', 'skills', 'freight-arco-ui') },
   { label: 'Codex', path: join(ROOT, '.agents', 'skills', 'freight-arco-ui') },
-  { label: 'Claude Code', path: join(ROOT, '.claude', 'skills', 'freight-arco-ui') },
 ];
 
 function syncSkill() {
@@ -38,7 +37,7 @@ function syncSkill() {
   }
 
   console.log('');
-  console.log('Done. Skill synced to Cursor, Codex (.agents/skills), and Claude Code.');
+  console.log('Done. Skill synced to Cursor and Codex (.agents/skills).');
 }
 
 syncSkill();

@@ -13,6 +13,37 @@ body,
   -webkit-font-smoothing: antialiased;
 }
 
+/* Scrollbars stay quiet during scanning and appear when the user works in a scrollable surface. */
+.vxe-table--body-wrapper,
+.vxe-table--footer-wrapper {
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
+}
+
+.vxe-table--body-wrapper:hover,
+.vxe-table--footer-wrapper:hover {
+  scrollbar-color: rgba(134, 144, 156, 0.46) transparent;
+}
+
+.vxe-table--body-wrapper::-webkit-scrollbar,
+.vxe-table--footer-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.vxe-table--body-wrapper::-webkit-scrollbar-thumb,
+.vxe-table--footer-wrapper::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  background-clip: content-box;
+}
+
+.vxe-table--body-wrapper:hover::-webkit-scrollbar-thumb,
+.vxe-table--footer-wrapper:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(134, 144, 156, 0.46);
+}
+
 /* =================================================================
    Design tokens — 高密度列表页（布局 + 固定项目主题）
    项目主题色固定为 Arco Blue，不依赖运行时主题变量形态。

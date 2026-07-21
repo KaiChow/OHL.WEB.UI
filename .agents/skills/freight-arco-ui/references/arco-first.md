@@ -83,9 +83,9 @@ These are **structural slots**, not replacements for Arco controls inside them.
 - truly local visual gaps with no reuse potential
 - must stay small; promote to `global.css` only after a second module needs the same pattern
 
-## What `global.css` Contains (after Arco-first slimming)
+## What `global.css` Contains
 
-`src/styles/global.css` is intentionally small. It may only contain:
+`src/styles/global.css` is a shared enhancement layer. The target is small and explicit. It may contain:
 
 | Layer | Content |
 |-------|---------|
@@ -93,13 +93,16 @@ These are **structural slots**, not replacements for Arco controls inside them.
 | Tokens | `:root` `--dense-*` density and semantic color aliases |
 | VXE bridge | `--vxe-*` theme bridge, `.workbench-table`, `.detail-mini-vxe`, `.compact` row height |
 | Freight semantics | `.s-pill[data-s]`, `.link-text`, `.mono` |
+| Documented transition slots | Existing list/detail/filter/toolbar shell slots that are already documented and reused |
 | Row actions | `.row-actions`, `.row-action-btn` inside VXE tables only |
 
-**Forbidden in `global.css`:** layout archetypes (`filter-card`, `page-root`, `detail-section`, `toolbar`, `zone-*`), app shell chrome, and **broad** `.arco-*` layout overrides.
+**Target after slimming:** layout archetypes should move toward Arco structure plus small scoped shell CSS. Existing documented slots may remain during transition, but new global layout archetypes require a clear `why_arco_not_enough`.
+
+**Forbidden in `global.css`:** new one-off page shells, app shell chrome, page-specific business-field classes, and **broad** `.arco-*` layout overrides.
 
 **Allowed in `global.css`:** `:root` Arco semantic token bridge (surface/fill/border), a compact **Arco surface bridge** for control white-surface + disabled gray, VXE row-action fixes, and `detail-display` read-only descriptions.
 
-New layout patterns belong in **Vue scoped CSS** or **Arco components**, not in `global.css`.
+New layout patterns start as **Arco components** or **Vue scoped CSS**. Promote to `global.css` only after reuse is proven and the Arco gap is documented.
 
 ## What `global.css` Is NOT
 

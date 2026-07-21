@@ -217,4 +217,4 @@ If any answer is no, revise structure before tuning colors.
 | Component rules | `table.md`, `actions.md`, … | EN + code |
 | Acceptance | `checklist.md`, `check-spec.js` | EN |
 
-Do not duplicate long rule lists in `AGENTS.md` / `CLAUDE.md` — they link to this skill.
+Do not duplicate long rule lists in `AGENTS.md`; link to this skill instead.

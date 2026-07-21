@@ -13,7 +13,6 @@ After editing the source, run `npm run sync-ui-skill` to update:
 
 - `.cursor/skills/freight-arco-ui/` (Cursor)
 - `.agents/skills/freight-arco-ui/` (Codex, invoke with `$freight-arco-ui`)
-- `.claude/skills/freight-arco-ui/` (Claude Code, invoke with `/freight-arco-ui`)
 
 Detailed rules are in:
 

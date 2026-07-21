@@ -166,6 +166,7 @@ const handleSubmit = async () => {
 ```
 
 规则：
+
 - `validate()` 返回 `undefined` 表示通过，返回错误对象表示失败。用 `if (errors) return` 判断。
 - 提交按钮绑定 `:loading="submitting"`，防止重复提交。
 - 成功 → `Message.success` + 关闭弹窗/抽屉。
@@ -285,6 +286,7 @@ Modal 内的表单遵循同样规则。额外注意：
 ```
 
 - 关闭弹窗时必须 `resetFields()`，防止上次错误状态残留：
+
   ```ts
   const handleCancel = () => {
     formRef.value?.resetFields()

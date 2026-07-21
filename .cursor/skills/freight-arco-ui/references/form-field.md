@@ -1,6 +1,8 @@
 # Arco Form Controls — 组件统一规范
 
-**CSS 唯一事实源：** `src/styles/global.css` → **`§ Arco Form Controls`**
+**控件基础：** Arco Design Vue form controls.
+
+**共享增强源：** `src/styles/global.css` → **`§ Arco Form Controls`** only for token alignment, compact density, and Arco leakage fixes.
 
 规范按 **Arco 组件 + 使用场景** 组织，**不按** 列表 / 详情 / Modal / 筛选等业务模块分叉。  
 同一 `a-input` / `a-select` / `a-date-picker` 在任意页面须呈现相同尺寸与字号。
@@ -8,10 +10,11 @@
 ## 原则
 
 1. 模板统一 `size="small"`（见 `component-size.md`）
-2. 控件外观只改 `§ Arco Form Controls`，禁止在 `filter-field` / `detail-form` / `detail-drawer` 等布局 class 下重复写 height / font-size
-3. 布局 class（`filter-field`、`detail-form-grid`）只管 **排列与栅格**，不管控件皮肤
-4. **同一 Arco 组件在任意业务场景使用同一字号层级**：`a-input` / `a-select` / `a-date-picker` / `a-input-number` / `a-textarea` 的值与 placeholder 一律 F4 Control 12px；不得因为它出现在列表筛选、弹窗表单、详情编辑或查询抽屉里就切换成另一档字号
-5. **同一信息角色使用同一字号层级**：业务内容（label、字段值、表格单元格、链接）一律 **12px**；导航与按钮文字一律 F2 **13px**
+2. 先使用 Arco 原生控件、props、插槽与表单布局；共享 CSS 只处理项目统一密度与字体泄漏
+3. 控件外观只改 `§ Arco Form Controls`，禁止在 `filter-field` / `detail-form` / `detail-drawer` 等布局 class 下重复写 height / font-size
+4. 布局 class（`filter-field`、`detail-form-grid`）只管 **排列与栅格**，不管控件皮肤
+5. **同一 Arco 组件在任意业务场景使用同一字号层级**：`a-input` / `a-select` / `a-date-picker` / `a-input-number` / `a-textarea` 的值与 placeholder 一律 F4 Control 12px；不得因为它出现在列表筛选、弹窗表单、详情编辑或查询抽屉里就切换成另一档字号
+6. **同一信息角色使用同一字号层级**：业务内容（label、字段值、表格单元格、链接）一律 **12px**；导航与按钮文字一律 F2 **13px**
 
 ## Token
 
