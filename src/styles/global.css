@@ -131,12 +131,6 @@ body,
   --dense-control-h-filter: var(--dense-control-h-form);
   --dense-control-h-detail: var(--dense-control-h-form);
   --dense-control-h-nav: 28px;
-  --dense-action-menu-min-w: 128px;
-  --dense-action-menu-toolbar-min-w: 128px;
-  --dense-action-menu-footer-min-w: 126px;
-  --dense-action-menu-row-min-w: 116px;
-  --dense-action-menu-max-w: min(320px, calc(100vw - 24px));
-
   /* 间距：高密度靠稳定信息节奏，不靠取消字段/按钮/分区之间的可读间隔 */
   --dense-gap-zone: 8px;
   --dense-page-bottom-space: 10px;

@@ -126,7 +126,7 @@
 - Buttons follow Arco 5 types × 4 statuses per `references/actions.md` (primary/secondary/dashed/outline/text; normal/success/warning/danger).
 - Button content form follows `actions.md`: row actions and toolbar utilities are icon-only with tooltip; creation/add actions use icon + text when the icon metaphor is exact; workflow/footer/head actions are text-only; dropdown options are text-only by default.
 - Row actions are icon-only `text` + tooltip.
-- Dropdown actions use `action-menu`: toolbar menus use `action-menu--toolbar` with content-adaptive width, compact minimum width, `--dense-action-menu-max-w` upper bound, and 32px option rhythm; row `···` menus use `action-menu--row` with at least 32px options; options are text-first and must not force icons for every operation; danger groups are separated with `action-menu__divider`; menus must not create horizontal scrollbars.
+- Dropdown actions keep the GI/Arco popup skin; options are text-first, danger is the final group after an Arco Divider, and menus do not create horizontal scrollbars.
 - Dangerous actions use `text`/`danger-opt` + `a-popconfirm` or `Modal.confirm`; avoid `status="warning"` on toolbar/footer buttons.
 - Toolbar visibility follows frequency × risk classification, not a hard button count: daily reversible actions remain in the business command group; rare or destructive actions move to a separated More menu. A dropdown trigger is one operation group, not multiple visible commands.
 - Uploads and file lists have clear single/multiple behavior.

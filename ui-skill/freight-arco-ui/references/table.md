@@ -368,9 +368,9 @@ count effective actions (merge exclusive A verbs)
 - Use `a-tooltip` + `a-button type="text" class="row-action-btn"`.
 - Wrap in `row-actions` (alignment only — no border/background/capsule chrome).
 - Primary direct action: `row-action-btn row-action-btn--primary` (eye / edit).
-- More trigger: `row-action-btn row-action-btn--more` + `content-class="action-menu action-menu--row"`.
+- More trigger: icon-only `row-action-btn row-action-btn--more` with the native Arco Dropdown popup.
 - Row action icons stay visible in default state; no permanent borders on buttons.
-- Danger in `···`: `action-menu__divider` then `a-popconfirm` + `a-doption.danger-opt` — never flat `status="danger"` on list rows.
+- Danger in `···`: Arco Divider then `a-popconfirm` + `a-doption.danger-opt` — never flat `status="danger"` on list rows.
 - VXE cell focus/selection on workbench tables: use project `global.css` tokens only; no page-scoped black focus rings.
 
 ### Examples
@@ -416,14 +416,14 @@ count effective actions (merge exclusive A verbs)
           <template #icon><icon-eye /></template>
         </a-button>
       </a-tooltip>
-      <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--row">
+      <a-dropdown trigger="click" position="br">
         <a-button size="small" type="text" class="row-action-btn row-action-btn--more" title="更多操作">
           <template #icon><icon-more /></template>
         </a-button>
         <template #content>
           <a-doption @click="handleEdit(row)">编辑</a-doption>
           <a-doption @click="handlePrint(row)">打印</a-doption>
-          <a-divider class="action-menu__divider" />
+          <a-divider />
           <a-popconfirm content="确认废弃？此操作不可恢复。" @ok="handleVoid(row)">
             <a-doption class="danger-opt">废弃</a-doption>
           </a-popconfirm>

@@ -87,7 +87,7 @@ const RULES = [
     fileFilter: /\.vue$/,
   },
   {
-    desc: '下拉菜单分隔线禁止内联 style（应用 action-menu__divider）',
+    desc: '下拉菜单分隔线禁止内联 style（使用 Arco Divider 默认间距）',
     pattern: /<a-divider\b[^>]*\bstyle=/,
     fileFilter: /\.vue$/,
   },
@@ -99,11 +99,6 @@ const RULES = [
   {
     desc: 'a-dropdown 禁止使用无效 popup-class（Arco Dropdown 应使用 content-class）',
     pattern: /<a-dropdown\b[^>]*\bpopup-class=/,
-    fileFilter: /\.vue$/,
-  },
-  {
-    desc: '下拉菜单分隔线应用 action-menu__divider（row-action-menu__divider 仅兼容旧代码）',
-    pattern: /row-action-menu__divider/,
     fileFilter: /\.vue$/,
   },
   {
@@ -180,6 +175,9 @@ const specFirstCoding = readFileSync(join(ROOT, '.cursor/rules/spec-first-coding
 const adversarialReview = readFileSync(join(ROOT, '.cursor/rules/adversarial-review.mdc'), 'utf8');
 const mainTs = readFileSync(join(ROOT, 'src/main.ts'), 'utf8');
 const existingProjectModernization = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/existing-project-modernization.md'), 'utf8');
+const redesignCalibration = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/redesign-calibration.md'), 'utf8');
+const responsiveReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/responsive.md'), 'utf8');
+const agentsSummary = readFileSync(join(ROOT, 'AGENTS.md'), 'utf8');
 
 if (!/^[~^]?0\.0\.58$/.test(packageJson.dependencies?.['@arco-themes/vue-gi-demo'] || '')) {
   violations.push({
@@ -232,6 +230,26 @@ if (officialTokensInGlobal.length) {
     content: officialTokensInGlobal.slice(0, 3).join(', '),
   });
 }
+const rootBlocks = [...globalCss.matchAll(/:root\s*\{([\s\S]*?)\}/g)].map((match) => match[1]).join('\n');
+const bodyThemeAliases = globalCss.match(/(?:^|\n)body\s*\{([\s\S]*?)\}/)?.[1] || '';
+const bodyScopedThemeRefInRoot = rootBlocks.match(/--[\w-]+\s*:[^;]*var\(--(?:primary|warning|success|danger)-\d+|--color-(?:bg|fill|text|border)-\d+|--border-radius-[\w-]+)/g) || [];
+if (bodyScopedThemeRefInRoot.length) {
+  violations.push({
+    rule: 'GI 官方主题变量在 body 生效，依赖它们的 --dense-* alias 禁止声明在 :root',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: bodyScopedThemeRefInRoot.slice(0, 3).join(', '),
+  });
+}
+for (const alias of ['--dense-primary-6:', '--dense-card-border:', '--dense-radius:']) {
+  if (bodyThemeAliases.includes(alias)) continue;
+  violations.push({
+    rule: 'theme-dependent semantic aliases 必须声明在 body，确保 GI token 可计算',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: `missing body-scoped ${alias}`,
+  });
+}
 if (existsSync(join(ROOT, 'CLAUDE.md')) || existsSync(join(ROOT, '.claude'))) {
   violations.push({
     rule: '项目已停用 Claude，禁止保留 CLAUDE.md 或 .claude 目录',
@@ -246,6 +264,38 @@ if (!skillSource.includes('theme-contract.md') || !skillSource.includes('existin
     file: 'ui-skill/freight-arco-ui/SKILL.md',
     line: 1,
     content: 'missing theme/modernization routing',
+  });
+}
+if (!skillSource.includes('## Rule Ownership') || !redesignCalibration.includes('## Layout Authority')) {
+  violations.push({
+    rule: 'Skill 必须声明唯一规则所有权，跨页面布局由 redesign-calibration.md 单独负责',
+    file: 'ui-skill/freight-arco-ui/SKILL.md',
+    line: 1,
+    content: 'missing rule ownership or layout authority',
+  });
+}
+if (existsSync(join(ROOT, '.cursor/rules/ui-spec.mdc'))) {
+  violations.push({
+    rule: '禁止恢复旧 ui-spec.mdc；完整 UI 规则只维护在 canonical skill，Cursor rule 仅保留流程门禁',
+    file: '.cursor/rules/ui-spec.mdc',
+    line: 1,
+    content: 'duplicate always-on UI specification detected',
+  });
+}
+if (responsiveReference.includes('1024-1279') || responsiveReference.includes('< 1024px')) {
+  violations.push({
+    rule: '当前项目 min-width 为 1280px，responsive.md 禁止宣称未实现的 1024/mobile 支持',
+    file: 'ui-skill/freight-arco-ui/references/responsive.md',
+    line: 1,
+    content: 'unsupported smaller viewport contract detected',
+  });
+}
+if (/上传用\s*Uppy/.test(agentsSummary)) {
+  violations.push({
+    rule: 'AGENTS.md 禁止把未安装/未实现的 Uppy 写成既定项目能力',
+    file: 'AGENTS.md',
+    line: 1,
+    content: 'phantom uploader dependency detected',
   });
 }
 
@@ -534,7 +584,7 @@ if (arcoOverrideRules > 25) {
     rule: 'Arco-first: global.css 禁止大量 .arco-* 规则（当前 ' + arcoOverrideRules + ' 条）',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'prefer :root Arco tokens; keep .arco-* to surface-bridge / VXE row-action / detail-display only',
+    content: 'prefer body-scoped direct aliases; keep .arco-* to documented VXE/read-only bridges only',
   });
 }
 const forbiddenLayoutPatterns = ['.filter-card', '.page-root', '.detail-section', '.toolbar-group', '.zone-l2-filter-card'];
@@ -548,9 +598,9 @@ for (const pattern of forbiddenLayoutPatterns) {
     });
   }
 }
-if (!globalCss.includes(':root') || !globalCss.includes('--dense-primary-6')) {
+if (!rootBlocks.includes('--dense-row-h:') || !bodyThemeAliases.includes('--dense-primary-6:')) {
   violations.push({
-    rule: 'global.css 须保留 :root 密度/语义 token',
+    rule: 'global.css 须把布局密度 token 放 :root，把依赖 GI 的语义 alias 放 body',
     file: 'src/styles/global.css',
     line: 1,
     content: 'missing --dense-* tokens',
@@ -670,135 +720,6 @@ for (const file of referenceFiles) {
   }
 }
 
-function getOpenDivClassStack(content, index) {
-  const before = content.slice(0, index);
-  const stack = [];
-  for (const match of before.matchAll(/<\/div>|<div\b[^>]*>/g)) {
-    const tag = match[0];
-    if (tag.startsWith('</div')) {
-      stack.pop();
-      continue;
-    }
-    const classMatch = tag.match(/\bclass=(["'])(.*?)\1/);
-    stack.push(classMatch ? classMatch[2] : '');
-  }
-  return stack;
-}
-
-function hasOpenAncestorClass(content, index, className) {
-  return getOpenDivClassStack(content, index)
-    .some((classAttr) => classAttr.split(/\s+/).includes(className));
-}
-
-// a-pagination：Arco-first 列表页可放在 a-card #extra；旧结构用 table-card-cap
-for (const file of files) {
-  if (!file.endsWith('.vue')) continue;
-  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
-  const content = readFileSync(file, 'utf8');
-  for (const match of content.matchAll(/<a-pagination\b/g)) {
-    if (hasOpenAncestorClass(content, match.index, 'table-card-cap')) continue;
-    if (content.includes('workbench-page') && content.includes('<a-card')) continue;
-    violations.push({
-      rule: '禁止在非 table-card-cap / Arco 列表卡 extra 结构内裸写 <a-pagination>',
-      file: relPath,
-      line: getLineNumber(content, match.index),
-      content: content.slice(match.index, content.indexOf('\n', match.index)).trim().slice(0, 120),
-    });
-  }
-}
-
-// 展开筛选区必须使用 filter-grid / 分组承载低频字段，禁止继续用 slim-row 做多行平铺。
-for (const file of files) {
-  if (!file.endsWith('.vue')) continue;
-  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
-  const content = readFileSync(file, 'utf8');
-  for (const match of content.matchAll(/class="filter-card__slim-row"/g)) {
-    if (!hasOpenAncestorClass(content, match.index, 'filter-card__advanced-inner')) continue;
-    violations.push({
-      rule: '筛选展开区禁止使用 filter-card__slim-row 平铺，应用 filter-grid filter-grid--advanced 分组',
-      file: relPath,
-      line: getLineNumber(content, match.index),
-      content: content.slice(match.index, content.indexOf('\n', match.index)).trim().slice(0, 140),
-    });
-  }
-}
-
-// S2 页内展开：须 filter-expand-link--panel + filter-grid--advanced；禁止 advanced-inner 内 slim-row。
-// S3 或旧式灰墙：无 expand link 的 filter-card__advanced 仍禁止。
-for (const file of files) {
-  if (!file.endsWith('.vue')) continue;
-  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
-  const content = readFileSync(file, 'utf8');
-  if (!content.includes('zone-l2-filter-card')) continue;
-  if (!content.includes('class="filter-card__advanced"')) continue;
-
-  const isS2Expand =
-    content.includes('filter-expand-link--panel') &&
-    /filter-grid--advanced/.test(content) &&
-    !/filter-card__advanced-inner[\s\S]*?filter-card__slim-row/.test(content);
-
-  if (isS2Expand) continue;
-
-  for (const match of content.matchAll(/class="filter-card__advanced"/g)) {
-    violations.push({
-      rule:
-        '列表查询区禁止旧式 filter-card__advanced 灰墙；S2 须 filter-expand-link--panel + filter-grid--advanced；S3 用 query-filter-drawer',
-      file: relPath,
-      line: getLineNumber(content, match.index),
-      content: content.slice(match.index, content.indexOf('\n', match.index)).trim().slice(0, 140),
-    });
-  }
-}
-
-// L1 页面模式切换必须使用 segmented control，不复用 scope/status 的 .stab chip。
-for (const file of files) {
-  if (!file.endsWith('.vue')) continue;
-  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
-  const content = readFileSync(file, 'utf8');
-  if (!content.includes('zone-l1-transport')) continue;
-  const zonePattern = /<div\b[^>]*class=(["'])[^"']*\bzone-l1-transport\b[^"']*\1[^>]*>[\s\S]*?<\/div>/g;
-  for (const match of content.matchAll(zonePattern)) {
-    if (!/\bclass=(["'])[^"']*\bstab\b/.test(match[0])) continue;
-    violations.push({
-      rule: 'L1 页面模式切换应用 seg-btn，不能复用 scope/status 的 stab chip',
-      file: relPath,
-      line: getLineNumber(content, match.index),
-      content: match[0].split('\n').slice(0, 3).join(' ').trim().slice(0, 140),
-    });
-  }
-}
-
-// 查询抽屉必须是分组筛选工作面，不能退化成白底平铺表单。
-for (const file of files) {
-  if (!file.endsWith('.vue')) continue;
-  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
-  const content = readFileSync(file, 'utf8');
-  if (!content.includes('query-filter-drawer')) continue;
-  const required = [
-    'query-filter-drawer__shell',
-    'query-filter-drawer__body',
-    'query-filter-drawer__group',
-    'query-filter-drawer__group-head',
-  ];
-  for (const className of required) {
-    if (content.includes(className)) continue;
-    violations.push({
-      rule: `查询筛选抽屉缺少 ${className}，应使用分组筛选工作面`,
-      file: relPath,
-      line: getLineNumber(content, content.indexOf('query-filter-drawer')),
-      content: 'class="query-filter-drawer"',
-    });
-  }
-  if (content.includes('query-filter-drawer__summary')) {
-    violations.push({
-      rule: '查询筛选抽屉禁止说明性 summary 文案，层级应由标题、分组、字段和底部动作表达',
-      file: relPath,
-      line: getLineNumber(content, content.indexOf('query-filter-drawer__summary')),
-      content: content.slice(content.indexOf('query-filter-drawer__summary'), content.indexOf('\n', content.indexOf('query-filter-drawer__summary'))).trim().slice(0, 140),
-    });
-  }
-}
-
 // VXE 操作列必须使用 row-actions dock，避免 icon 直接漂浮在固定列背景上。
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
@@ -829,7 +750,7 @@ for (const file of files) {
       });
     }
     const directBtnCount = (block.match(/class="[^"]*\brow-action-btn\b(?![^"]*--more)[^"]*"/g) || []).length;
-    const hasMoreMenu = block.includes('row-action-btn--more') || block.includes('action-menu--row');
+    const hasMoreMenu = block.includes('row-action-btn--more') || block.includes('<a-dropdown');
     if (directBtnCount >= 3) {
       violations.push({
         rule: '列表操作列禁止 3 个及以上直出 icon；N≥3 须主操作 + ···（table.md Row Actions）',
@@ -849,52 +770,10 @@ for (const file of files) {
     if (/class="[^"]*row-action-btn[^"]*"[^>]*status="danger"/.test(block) ||
         /status="danger"[^>]*class="[^"]*row-action-btn/.test(block)) {
       violations.push({
-        rule: '列表主表操作列禁止直出 status="danger" 删除 icon；须进 action-menu--row + danger-opt',
+        rule: '列表主表操作列禁止直出 status="danger" 删除 icon；须进入行级 More 菜单并确认',
         file: relPath,
         line: getLineNumber(content, match.index),
         content: block.split('\n').slice(0, 6).join(' ').trim().slice(0, 140),
-      });
-    }
-  }
-}
-
-// 工具栏下拉菜单必须使用有效 content-class 绑定 action-menu--toolbar，不能复用行操作菜单命名。
-for (const file of files) {
-  if (!file.endsWith('.vue')) continue;
-  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
-  const content = readFileSync(file, 'utf8');
-  if (!content.includes('toolbar-group') || !content.includes('<a-dropdown')) continue;
-  const toolbarPattern = /<div\b[^>]*class=(["'])[^"']*\btoolbar-group\b[^"']*\1[^>]*>[\s\S]*?<\/div>/g;
-  for (const match of content.matchAll(toolbarPattern)) {
-    for (const dropdown of match[0].matchAll(/<a-dropdown\b[^>]*>/g)) {
-      const tag = dropdown[0];
-      if (/content-class=(["'])[^"']*\baction-menu\b[^"']*\baction-menu--toolbar\b[^"']*\1/.test(tag)) continue;
-      violations.push({
-        rule: '工具栏 dropdown 必须使用 content-class="action-menu action-menu--toolbar"，不能使用无效 popup-class',
-        file: relPath,
-        line: getLineNumber(content, match.index + dropdown.index),
-        content: tag.trim().slice(0, 140),
-      });
-    }
-  }
-}
-
-// 详情吸底 footer 的 dropdown 必须使用 footer 语义菜单，避免套用 toolbar 菜单导致弹层过宽、脱离底部操作区。
-for (const file of files) {
-  if (!file.endsWith('.vue')) continue;
-  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
-  const content = readFileSync(file, 'utf8');
-  if (!content.includes('detail-drawer-footer') || !content.includes('<a-dropdown')) continue;
-  const footerPattern = /<div\b[^>]*class=(["'])[^"']*\bdetail-drawer-footer\b[^"']*\1[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g;
-  for (const match of content.matchAll(footerPattern)) {
-    for (const dropdown of match[0].matchAll(/<a-dropdown\b[^>]*>/g)) {
-      const tag = dropdown[0];
-      if (/content-class=(["'])[^"']*\baction-menu\b[^"']*\baction-menu--footer\b[^"']*\1/.test(tag)) continue;
-      violations.push({
-        rule: '详情吸底 footer 的 dropdown 必须使用 content-class="action-menu action-menu--footer"，不能复用 toolbar 菜单样式',
-        file: relPath,
-        line: getLineNumber(content, match.index + dropdown.index),
-        content: tag.trim().slice(0, 140),
       });
     }
   }

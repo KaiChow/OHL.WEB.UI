@@ -55,7 +55,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 | 空状态添加行 | `dashed` + normal | — |
 | 重置/刷新/复制 | `text` + normal | — |
 | 行内删除（`detail-mini-vxe--editable`） | `text` + `danger` + `row-action-btn` | `a-popconfirm` |
-| 列表行删除 | `action-menu--row` + `danger-opt` | `a-popconfirm` |
+| 列表行删除 | row More menu + final `danger-opt` | `a-popconfirm` |
 | 吸底废弃 | `text` + `danger` | `Modal.confirm` |
 | 弹窗确定删除 | `primary` + `danger`（仅 confirm 弹窗内） | 已在 Modal 中 |
 | 下拉危险项 | — | `a-doption class="danger-opt"` + 二次确认 |
@@ -101,11 +101,11 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
   <div class="toolbar-divider" />
 
   <!-- 输出组：导出 + 下载 -->
-  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+  <a-dropdown trigger="click">
     <a-button size="small" type="outline">导出<icon-down /></a-button>
     <template #content>...</template>
   </a-dropdown>
-  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+  <a-dropdown trigger="click">
     <a-button size="small" type="outline">账单下载<icon-down /></a-button>
     <template #content>...</template>
   </a-dropdown>
@@ -113,11 +113,11 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
   <div class="toolbar-divider" />
 
   <!-- 对账组：对中 + 导入 -->
-  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+  <a-dropdown trigger="click">
     <a-button size="small" type="outline">对中<icon-down /></a-button>
     <template #content>...</template>
   </a-dropdown>
-  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+  <a-dropdown trigger="click">
     <a-button size="small" type="outline">上对比导入<icon-down /></a-button>
     <template #content>...</template>
   </a-dropdown>
@@ -125,7 +125,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
   <div class="toolbar-divider" />
 
   <!-- 维护组：降权为 text -->
-  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+  <a-dropdown trigger="click">
     <a-button size="small" type="text">账单修改<icon-down /></a-button>
     <template #content>...</template>
   </a-dropdown>
@@ -171,7 +171,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 | Icon-only | row actions, toolbar utilities, compact fixed-width tools | Arco/lucide icon + tooltip/accessible label; `type="text"` except documented row dock variants | icon-only for module add/save/submit or business workflow verbs |
 | Icon + text | primary creation, additive module actions, upload/import/export/download/print when the icon has a universal metaphor | icon first, text second, `size="small"`; trailing down icon only for dropdown trigger | forcing icons on every workflow action |
 | Text-only | business workflow verbs, footer workflow, drawer head actions, modal footer, dropdown options | concise object/action text; stable button type by scope | adding vague icons when no precise metaphor exists |
-| Text + trailing chevron | dropdown trigger such as `更多`, `导出`, `输出`, `流转` | text + `<icon-down />`; use `content-class="action-menu ..."` | standalone chevron without text except row `···` menu |
+| Text + trailing chevron | dropdown trigger such as `更多`, `导出`, `输出`, `流转` | text + `<icon-down />`; native Arco popup | standalone chevron without text except row `···` menu |
 
 ### Content Decision Rules
 
@@ -232,113 +232,39 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 #### 结构模型
 
-```
-左侧 toolbar-group（工作流区）
-  [主操作 primary] [高频操作A outline↓] [高频操作B outline↓] [高频操作C outline] ...
+1. Business command group: one primary action plus visible daily reversible actions.
+2. Scope/status group: queue switching used during daily processing.
+3. Data utilities: refresh, pagination, columns, density, and selected-row context stay in the table surface.
+4. More menu: low-frequency or dangerous page actions only.
 
-右侧 toolbar-aside（页面/表格工具 + 危险隔离）
-  [仅页面级低频/危险操作 ···]（当工具栏右侧确有页面级动作时才出现）
+Use Arco Space/Grid/Card slots to express these roles. Exact toolbar/cap class names are not a shared API unless grep proves an implementation.
 
-表格 table-card-cap（可选：表格上下文 + 分页）
-  左：[刷新 icon]  [已选N条 + 清空]（仅选中时）  右：[分页 show-total]  [列设置 icon]  [密度 icon]
-```
+Key rules:
 
-关键规则：
-- `primary` 锚点 ×1，是当前页面最核心的正向操作。
-- 工作流区只放**高频**（每天使用）+ **低风险**操作，类型统一为 `outline`。个数无硬限，以工具栏不折行为限（通常 1280px 下不超过 6–7 个 outline 按钮）。
-- **dropdown 按钮（带 ↓）是一个操作组，不是多个按钮**。`导出↓` 内含 Excel/PDF 两个子选项，视觉权重等同一个按钮，不应计入「按钮数量」。
-- 批量动作属于业务操作，优先跟随左侧 `toolbar-group` 的业务动作模块；不要把业务批量按钮孤立放在右侧工具区。
-- 右侧 `···` 只盛放真正的页面级低频/危险操作；如果这些动作本质是选中行批量动作，应并入左侧 `批量操作↓`。
-- 页面级刷新 = `text` icon-only，禁止 `outline`。当页面已有 `table-card-cap` 时，刷新应放在 cap 左侧第一位，贴近表头和数据区，减少用户跨到最右侧点击的成本。
-- 列设置、密度调整、表格全屏等表格工具可以放 `toolbar-aside`；当页面启用 `table-card-cap` 且 cap 内有分页或非重复上下文时，应放在 cap 分页旁边。
-- 禁止为了放列设置单独生成一条空 `table-card-cap`；这会在 toolbar 和表头之间制造无效双层横条。
-- 已选 N 条反馈优先放 `table-card-cap__start`，`v-if="selectedRows.length"`。它是表格选择上下文，不是页面工具；没有选中时 cap 左侧保持空，不重复展示总数。
-- `清空` 是工具性动作，使用 `type="text"`；它只清除选择，不改变业务数据。
-
-#### 代码结构
+- One `primary` anchor represents the page's core positive action; when no such action exists, do not invent one.
+- Daily low-risk actions remain visible and neutral. They may exceed three when the group stays on one line at 1280px.
+- A dropdown trigger is one operation group, regardless of its option count.
+- Selected-row batch actions stay with business commands, not in the utility area.
+- Refresh, column settings, density, and pagination stay beside the table. Do not create an otherwise empty cap band for one icon.
+- Selected count and Clear appear only while selection exists. Pagination owns the total count.
+- The final danger group follows an Arco Divider and requires confirmation.
 
 ```vue
-<div class="toolbar">
-  <div class="toolbar-group">
-    <!-- primary ×1：最核心正向操作 -->
-    <a-button size="small" type="primary">
-      <template #icon><icon-plus /></template>新建
-    </a-button>
-
-    <!-- 高频低风险操作：全部用 outline，dropdown 内含子操作 -->
-    <a-button size="small" type="outline" @click="handlePrint">打印</a-button>
-
-    <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-      <a-button size="small" type="outline">导出<icon-down /></a-button>
-      <template #content>
-        <a-doption>导出 Excel</a-doption>
-        <a-doption>导出 PDF</a-doption>
-      </template>
-    </a-dropdown>
-
-    <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-      <a-button size="small" type="outline">批量操作<icon-down /></a-button>
-      <template #content>
-        <a-doption>批量修改</a-doption>
-        <a-doption>关闭特殊跟踪</a-doption>
-        <a-doption>同步文件状态</a-doption>
-        <a-doption>刷新物流节点</a-doption>
-        <a-divider class="action-menu__divider" />
-        <a-doption class="danger-opt" @click="handleDanger">批量废弃</a-doption>
-      </template>
-    </a-dropdown>
-  </div>
-</div>
-
-<div class="table-card-cap table-card-cap--primary">
-  <div class="table-card-cap__start">
-    <a-tooltip content="刷新">
-      <a-button size="small" type="text" class="table-card-cap__tool" @click="fetchList">
-        <template #icon><icon-refresh /></template>
-      </a-button>
-    </a-tooltip>
-    <div v-if="selectedRows.length" class="toolbar-selection-context">
-      <span class="toolbar-selected-tip">已选 <b>{{ selectedRows.length }}</b> 条</span>
-      <a-button size="small" type="text" class="toolbar-selection-clear" @click="clearSelection">
-        清空
-      </a-button>
-    </div>
-  </div>
-
-  <div class="table-card-cap__right">
-    <a-pagination ... show-total />
-    <a-tooltip content="列设置">
-      <a-button size="small" type="text" class="table-card-cap__tool" @click="xTable?.openCustom()">
-        <template #icon><icon-settings /></template>
-      </a-button>
-    </a-tooltip>
-  </div>
-</div>
+<a-space :size="8">
+  <a-button size="small" type="primary">
+    <template #icon><icon-plus /></template>新建
+  </a-button>
+  <a-button size="small" type="outline">打印</a-button>
+  <a-dropdown trigger="click">
+    <a-button size="small" type="outline">批量操作<icon-down /></a-button>
+    <template #content>
+      <a-doption>批量修改</a-doption>
+      <a-divider />
+      <a-doption class="danger-opt">批量废弃</a-doption>
+    </template>
+  </a-dropdown>
+</a-space>
 ```
-
-当列表启用 `table-card-cap` 承载分页或非重复表格上下文时，表格级工具也可以放在 cap 内，与分页同属表格控制面：
-
-```vue
-<div class="table-card-cap">
-  <div class="table-card-cap__right">
-    <a-pagination ... />
-    <a-tooltip content="列设置">
-      <a-button size="small" type="text" class="table-card-cap__tool" @click="xTable?.openCustom()">
-        <template #icon><icon-settings /></template>
-      </a-button>
-    </a-tooltip>
-  </div>
-</div>
-```
-
-规则补充：
-- 批量业务操作放左侧 `toolbar-group` 的 `批量操作↓`，禁止放在右侧工具区伪装成页面工具。
-- 右侧 `···` 只用于页面级低频/危险操作；选中行批量操作不使用纯 `···`。
-- 危险项必须是菜单末尾，用 `action-menu__divider` 与其他选项分隔，并触发 `Modal.confirm`。
-- 页面级刷新 = `text` icon-only（禁止 `outline`）。已有 `table-card-cap` 时放 `table-card-cap__start` 第一位，优先贴近表格头部左侧。
-- 表格级列设置/密度/全屏 = `text` icon-only。默认跟随 `toolbar-aside`；已有 `table-card-cap` 承载分页/上下文时，使用 `table-card-cap__tool` 与分页相邻。
-- 总数统计由分页 `show-total` 承载；不要在 cap 左侧重复写 `共 N 条` / `当前结果 N 条`。
-- 无新建时不写 `primary`，改从 `outline` 开始。
 
 ### 5.3 详情页头
 
@@ -443,10 +369,10 @@ Button content is decided by action scope and recognition cost, not by decoratio
   <a-tooltip content="查看">
     <a-button type="text" class="row-action-btn row-action-btn--primary" @click="openDetail(row)"><icon-eye /></a-button>
   </a-tooltip>
-  <a-dropdown trigger="click" content-class="action-menu action-menu--row">
+  <a-dropdown trigger="click">
     <a-button type="text" class="row-action-btn row-action-btn--more" title="更多操作"><icon-more /></a-button>
     <template #content>
-      <a-divider class="action-menu__divider" />
+      <a-divider />
       <a-popconfirm content="确认删除？" @ok="remove(row)">
         <a-doption class="danger-opt">删除</a-doption>
       </a-popconfirm>

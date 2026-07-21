@@ -119,7 +119,7 @@ Rules:
 - row actions are icon-only + tooltip
 - primary view/edit use `icon-eye` / `icon-edit`
 - more menu uses `icon-more`
-- list delete stays inside `action-menu--row` as text danger option; do not direct-expose delete icon on workbench tables
+- list delete stays inside the row More menu as a text danger option; do not direct-expose a delete icon on workbench tables
 
 ### Module Title Icons
 
