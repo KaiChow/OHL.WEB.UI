@@ -90,7 +90,7 @@ These are **structural slots**, not replacements for Arco controls inside them.
 | Layer | Content |
 |-------|---------|
 | Base | `html/body/#app` reset, min-width |
-| Tokens | `:root` `--dense-*` density and semantic color aliases |
+| Tokens | `:root` density/dimension tokens; `body` theme-dependent aliases because GI variables are body-scoped |
 | VXE bridge | `--vxe-*` theme bridge, `.workbench-table`, `.detail-mini-vxe`, `.compact` row height |
 | Freight semantics | `.s-pill[data-s]`, `.link-text`, `.mono` |
 | Documented transition slots | Existing list/detail/filter/toolbar shell slots that are already documented and reused |
@@ -100,7 +100,7 @@ These are **structural slots**, not replacements for Arco controls inside them.
 
 **Forbidden in `global.css`:** new one-off page shells, app shell chrome, page-specific business-field classes, and **broad** `.arco-*` layout overrides.
 
-**Allowed in `global.css`:** `:root` Arco semantic token bridge (surface/fill/border), a compact **Arco surface bridge** for control white-surface + disabled gray, VXE row-action fixes, and `detail-display` read-only descriptions.
+**Allowed in `global.css`:** direct semantic aliases declared where GI variables resolve, the VXE bridge, VXE row-action fixes, and proven freight/read-only patterns. A broad Arco component reskin is not an allowed bridge.
 
 New layout patterns start as **Arco components** or **Vue scoped CSS**. Promote to `global.css` only after reuse is proven and the Arco gap is documented.
 

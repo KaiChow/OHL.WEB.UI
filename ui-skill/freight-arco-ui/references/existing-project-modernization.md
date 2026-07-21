@@ -78,18 +78,9 @@ Judge the measurement against the single layout threshold in `redesign-calibrati
 
 ### Layout Quality Gate
 
-For a table-dominant list workbench, enforce these relationships before visual polish:
+Evaluate the rendered page against `redesign-calibration.md` and record pass/fail evidence for its surface relationship, first-viewport, shell-budget, and command-surface gates. Do not copy their numeric thresholds into this audit file.
 
-- the application shell stays subordinate to the work surface; desktop sider width normally remains 192-216px and header height 44-52px unless a product constraint proves otherwise;
-- the page normally has two physical surfaces: one command surface for query/actions/status and one dominant data surface; logical rows may share a surface but cards must not nest;
-- default query + action + status height stays near the `filter-layout.md` target and must not become a form wall;
-- at 1280px, the primary command path remains compact and does not stack at the breakpoint itself;
-- the table host passes the first-viewport gate in `redesign-calibration.md`;
-- duplicate totals, risk counts, queue labels, titles, instructions, and table context each have one visible owner;
-- utility controls stay near the data they affect; primary workflow controls stay visible and do not move into More merely to make the page sparse;
-- wide desktop adds data visibility or breathing room, not larger fonts, decorative whitespace, or stretched control chrome.
-
-Count physical surfaces and measure rendered heights. A source tree that looks tidy but renders three equal-weight horizontal bands still fails this gate.
+Also record duplicate visible owners, hidden daily controls, unexpected browser-level overflow, and the number of physical surfaces. A tidy source tree does not override rendered evidence.
 
 ### 4. Visual Debt
 

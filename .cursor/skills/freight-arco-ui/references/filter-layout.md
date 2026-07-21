@@ -1,8 +1,17 @@
 # Query Filter Layout
 
+## Class-Name Status
+
+This file is authoritative for query-count scenarios, visible-field selection, and layout relationships. It does not guarantee that every class name in historical examples exists as a shared implementation.
+
+- Prefer Arco Form, Grid, Input Group, Space, Drawer, and their props first.
+- Treat example class names as local semantic hooks unless grep proves a shared definition exists.
+- The required contract is field priority, grouping, action placement, overflow behavior, and state handling; exact BEM names are not portable API.
+- Do not add a missing example class to `global.css` merely because it appears in this document.
+
 List query design is driven by the user's job, not by showing every field that exists.
 
-Core target: keep the default top work area compact so the first viewport is dominated by the VXE table. In a normal freight workbench, the query area plus toolbar/status row should stay near 112px.
+Core target: keep the default top work area compact so the first viewport is dominated by the VXE table. The cross-page command-surface budget is owned by `redesign-calibration.md`; this file only decides query layout within that budget.
 
 For production workbench pages used all day by sales/operators/coordinators, visible filters are judged by daily frequency, not by visual minimalism. A two-row query area is acceptable when every visible field is used repeatedly and the table still dominates the first viewport. The design failure to avoid is a gray 50-field form wall, not the existence of high-frequency visible filters.
 

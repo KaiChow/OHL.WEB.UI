@@ -2,7 +2,9 @@
 
 ## Rule: No `a-upload`
 
-Never use Arco's `<a-upload>` for business file upload. The project uses a shared uploader component. Using `a-upload` bypasses the shared OSS policy, progress tracking, and file-type enforcement.
+Never use Arco's `<a-upload>` directly for business file upload. Business upload must go through the project's shared uploader contract so OSS policy, progress, file type, permission, and error behavior stay consistent.
+
+Do not claim that the project uses Uppy or another library unless its dependency and shared wrapper actually exist. If no shared uploader exists, stop at the feature contract and integration boundary; do not invent a component or silently fall back to `a-upload`.
 
 ## Upload Trigger Patterns
 

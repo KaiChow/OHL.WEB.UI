@@ -91,14 +91,14 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 
 **第二层 — Divider 决定功能归属**
 
-同 type 的按钮按功能语义分组，组间插入 `toolbar-divider`（竖线分隔）：
+同 type 的按钮按功能语义分组，组间使用 Arco vertical Divider：
 
 ```vue
-<div class="toolbar-group">
+<a-space :size="8">
   <!-- 核销主操作 -->
   <a-button size="small" type="primary" @click="handleWriteOff">选择销账</a-button>
 
-  <div class="toolbar-divider" />
+  <a-divider direction="vertical" />
 
   <!-- 输出组：导出 + 下载 -->
   <a-dropdown trigger="click">
@@ -110,7 +110,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
     <template #content>...</template>
   </a-dropdown>
 
-  <div class="toolbar-divider" />
+  <a-divider direction="vertical" />
 
   <!-- 对账组：对中 + 导入 -->
   <a-dropdown trigger="click">
@@ -122,7 +122,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
     <template #content>...</template>
   </a-dropdown>
 
-  <div class="toolbar-divider" />
+  <a-divider direction="vertical" />
 
   <!-- 维护组：降权为 text -->
   <a-dropdown trigger="click">
@@ -130,7 +130,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
     <template #content>...</template>
   </a-dropdown>
   <a-button size="small" type="text" @click="handleRefreshDueDate">刷新DueDate</a-button>
-</div>
+</a-space>
 ```
 
 **第三层 — Icon 提供形状识别**
@@ -158,7 +158,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 | 详情吸底 | 保存 ×1 | — | 订舱、放舱、输出 | — | 废弃 danger |
 | 弹窗 footer | 确定 ×1 | — | 取消 | — | 删除 danger（左侧） |
 
-**同一作用域内**：primary ≤ 1；简单平铺按钮通常 ≤ 3。生产作业台的高频可逆动作可以超过 3，但必须通过 `toolbar-divider`、dropdown group、neutral type、右侧 utilities 分区控制噪音，并且不能换行。危险、低频、不可逆动作仍然收入 dropdown 或确认流。
+**同一作用域内**：primary ≤ 1；简单平铺按钮通常 ≤ 3。生产作业台的高频可逆动作可以超过 3，但必须通过 Arco Divider、dropdown group、neutral type、右侧 utilities 分区控制噪音，并且不能换行。危险、低频、不可逆动作仍然收入 dropdown 或确认流。
 
 ---
 

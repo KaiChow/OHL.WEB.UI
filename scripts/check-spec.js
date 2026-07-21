@@ -232,7 +232,7 @@ if (officialTokensInGlobal.length) {
 }
 const rootBlocks = [...globalCss.matchAll(/:root\s*\{([\s\S]*?)\}/g)].map((match) => match[1]).join('\n');
 const bodyThemeAliases = globalCss.match(/(?:^|\n)body\s*\{([\s\S]*?)\}/)?.[1] || '';
-const bodyScopedThemeRefInRoot = rootBlocks.match(/--[\w-]+\s*:[^;]*var\(--(?:primary|warning|success|danger)-\d+|--color-(?:bg|fill|text|border)-\d+|--border-radius-[\w-]+)/g) || [];
+const bodyScopedThemeRefInRoot = rootBlocks.match(/--[\w-]+\s*:[^;]*var\(--(?:(?:primary|warning|success|danger)-\d+|color-(?:bg|fill|text|border)-\d+|border-radius-[\w-]+)\)/g) || [];
 if (bodyScopedThemeRefInRoot.length) {
   violations.push({
     rule: 'GI 官方主题变量在 body 生效，依赖它们的 --dense-* alias 禁止声明在 :root',

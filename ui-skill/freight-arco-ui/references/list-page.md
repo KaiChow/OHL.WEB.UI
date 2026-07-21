@@ -167,7 +167,7 @@ Toolbar actions are chosen by workflow:
 - Use status tabs only when users actually filter by that state many times per day.
 - If sales/operators process the list by state every day, status tabs are required visible workflow controls, not optional decoration.
 - Do not create fake status tabs just to fill the layout.
-- Small-screen behavior follows `responsive.md`: below the supported 1280px desktop baseline, status groups may move to a second row and must scroll inside `stat-tab-group` rather than forcing page-level horizontal overflow.
+- At the supported 1280px baseline, status controls scroll inside their own region before adding another full-width row. Widths below 1280px are not a supported project contract; see `responsive.md`.
 
 ## Table Column Selection
 

@@ -11,7 +11,7 @@ This file is authoritative for query-count scenarios, visible-field selection, a
 
 List query design is driven by the user's job, not by showing every field that exists.
 
-Core target: keep the default top work area compact so the first viewport is dominated by the VXE table. In a normal freight workbench, the query area plus toolbar/status row should stay near 112px.
+Core target: keep the default top work area compact so the first viewport is dominated by the VXE table. The cross-page command-surface budget is owned by `redesign-calibration.md`; this file only decides query layout within that budget.
 
 For production workbench pages used all day by sales/operators/coordinators, visible filters are judged by daily frequency, not by visual minimalism. A two-row query area is acceptable when every visible field is used repeatedly and the table still dominates the first viewport. The design failure to avoid is a gray 50-field form wall, not the existence of high-frequency visible filters.
 

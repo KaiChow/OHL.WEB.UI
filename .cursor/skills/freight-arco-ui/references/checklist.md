@@ -59,8 +59,7 @@
 
 - The page is judged as a production workbench when sales/operators/coordinators use it for repeated daily office work.
 - Production workbench priority is business efficiency first, long-session visual comfort second, visual beauty third.
-- Table-dominant list pages target 70-80% first-viewport business data ownership; 75% is a target signal, not a universal rule for details, drawers, approvals, or exception pages.
-- A normal table workbench below 65% is rejected and structurally revised before visual polish.
+- Table-dominant list pages pass the first-viewport gate owned by `redesign-calibration.md`; the checklist does not redefine that threshold.
 - Daily status tabs remain visible when users process records by state.
 - Daily reversible workflow actions remain directly reachable as neutral grouped actions; rare, risky, or destructive actions move to dropdown/confirm flows.
 - Modernization preserves operational affordances while removing old ERP noise: all-blue buttons, warning workflow buttons, red normal data, heavy vertical grids, gray form walls, and equal-weight bordered zones.
@@ -103,20 +102,19 @@
 
 ## Layout
 
-- Uses `page-root page-root--dense` for operational pages.
+- Operational page root is a stable flex/grid shell; any shared root class is used only when grep proves its definition exists.
 - No page-level marketing header.
-- Search/tool/status/table layers have clear separation.
+- Search, actions/status, and data have clear ownership; logical rows do not automatically become separate cards.
 - Layout follows the project 8px rhythm through shared gap/padding tokens; spacing changes use tokens or shared classes, not page-local guesswork.
 - Table remains the largest area.
 - No double scrollbars.
 - No duplicated summary areas unless each has a distinct interaction purpose.
 - Table cap does not repeat pagination totals or status-tab counts.
-- Dense list pages keep the global viewport bottom breathing space: `page-root--dense` uses `--dense-page-bottom-space`; table cards do not visually touch the browser/app bottom edge.
+- Dense list pages keep a small viewport-bottom breathing space through the page shell; table cards do not visually touch the browser/app bottom edge.
 - Search/filter UI matches query field count tier: 0-3, 4-8, 9-16, 17-50, or 50+.
-- L1 page segments use `zone-l1-transport` + `seg-btn`; scope/status filters use `.stab` or `.stat-tab`, not the other way around.
-- List zones use one brand-neutral top-boundary token: `--dense-zone-top-border` on L1/L2/L3/L4 modules; saturated primary top borders are not used as generic module decoration.
-- Filter drawers use `query-filter-drawer__shell/body/group/group-head`; fields are grouped by business meaning, not rendered as a flat white form wall, and must not include descriptive summary/instruction copy above the groups.
-- Query field count and two-row structure: **`filter-layout.md`** (6–10 visible fields → `filter-card--two-row` + `filter-grid`; not stacked slim-rows).
+- Page-mode segments and scope/status filters use distinct Arco roles and are not visually conflated.
+- Filter drawer fields are grouped by business meaning, not rendered as a flat form wall, and do not add redundant instruction copy above the groups.
+- Query field count, scenario, and two-row relationship follow `filter-layout.md`; exact example class names are not required unless implemented.
 - 50+ query workspaces use group anchors over all condition modules; they do not hide groups behind exclusive tabs when operators need to combine identifiers, time, route, parties, and flags.
 
 ## Components
@@ -128,9 +126,9 @@
 - Buttons follow Arco 5 types × 4 statuses per `references/actions.md` (primary/secondary/dashed/outline/text; normal/success/warning/danger).
 - Button content form follows `actions.md`: row actions and toolbar utilities are icon-only with tooltip; creation/add actions use icon + text when the icon metaphor is exact; workflow/footer/head actions are text-only; dropdown options are text-only by default.
 - Row actions are icon-only `text` + tooltip.
-- Dropdown actions use `action-menu`: toolbar menus use `action-menu--toolbar` with content-adaptive width, compact minimum width, `--dense-action-menu-max-w` upper bound, and 32px option rhythm; row `···` menus use `action-menu--row` with at least 32px options; options are text-first and must not force icons for every operation; danger groups are separated with `action-menu__divider`; menus must not create horizontal scrollbars.
+- Dropdown actions keep the GI/Arco popup skin; options are text-first, danger is the final group after an Arco Divider, and menus do not create horizontal scrollbars.
 - Dangerous actions use `text`/`danger-opt` + `a-popconfirm` or `Modal.confirm`; avoid `status="warning"` on toolbar/footer buttons.
-- Toolbar visibility follows frequency × risk classification, not a hard button count: classify each action as (daily/occasional/rare) × (reversible/irreversible/destructive) before placing it. Daily + reversible → left `toolbar-group` as `outline`; rare or destructive → right `toolbar-aside` `···` menu. A dropdown button (with ↓) is one operation group, not multiple buttons, and does not inflate the visible count. The old "≤ 3 visible buttons" rule only applied to simple flat single-action buttons without dropdowns; it does not apply to operational workbenches where operators use every workflow action many times per day.
+- Toolbar visibility follows frequency × risk classification, not a hard button count: daily reversible actions remain in the business command group; rare or destructive actions move to a separated More menu. A dropdown trigger is one operation group, not multiple visible commands.
 - Uploads and file lists have clear single/multiple behavior.
 - Page/module implementation is split into route/page/components/types/mock/composables when scope is large.
 - Module header left is title only; module header right is actions only.
@@ -205,7 +203,7 @@
 - Workbench table header uses the shared GI alias (`--dense-table-header-bg`); table body uses weak horizontal separators and no dominant vertical grid lines.
 - Card hierarchy comes from grouping, gap, the effective GI surface, restrained elevation, and the shared boundary token.
 - Toolbar workflow buttons are separated by type/group/icon, not by arbitrary success/warning/purple colors. Semantic colors remain reserved for status, validation, risk, and destructive actions.
-- List modules follow `responsive.md`: no filter/toolbar/status module creates page-level horizontal scroll; below `1280px`, status groups may wrap to a second row and scroll internally.
+- List modules follow `responsive.md`: at the supported 1280px baseline, no filter/toolbar/status module creates page-level horizontal scroll; status groups scroll internally before another full-width row is added.
 - Raw theme channel tokens are not used as complete CSS colors; use `--dense-*` aliases or `rgb()/rgba(var(...))`.
 - Status colors are consistent and only used for semantic state.
 - Primary identity, key state, owner/person, business context, and object-owned key facts do not use disabled/empty `color-text-4`.
@@ -216,7 +214,7 @@
 - Master-data pages use `md-layout`; permission pages use `perm-layout`; BI uses `db-wrap`; full-page create uses `xf-wrap` + `detail-form`.
 - Empty/loading/success/error follow `feedback.md`.
 - Staff/party display shows role + name clearly; company/context is auxiliary but readable.
-- No `font-weight: 700/800`; no business text over 13px unless true page/detail hero.
+- Typography follows `typography.md` roles. Do not hard-code smaller text for density or larger text merely to create hierarchy.
 - No decorative large gradients, large-radius consumer SaaS styling, or attention-heavy panels.
 
 ## Verification

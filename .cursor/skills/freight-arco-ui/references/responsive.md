@@ -1,49 +1,54 @@
 # Responsive Operational Layout
 
-Responsive design in this project protects operational work, not marketing composition. Small screens must preserve task order, clickability, and table dominance. Do not solve limited width by removing spacing, shrinking text, or letting modules overflow.
+## Supported Baseline
 
-## Breakpoints
+FE.OHL.WEB.UI is a desktop freight operations product with a supported minimum viewport width of 1280px. The application currently enforces that baseline in `src/styles/global.css`.
 
-| Viewport | Layout contract | Primary goal |
-|----------|-----------------|--------------|
-| `>= 1440px` | one-line filter + one-line merged toolbar/status | maximum density |
-| `1280-1439px` | compact gaps; status/tab groups may horizontally scroll inside their own area | prevent right-side clipping |
-| `1024-1279px` | filter row may wrap; merged toolbar may become two rows; status group owns the second row when needed | keep actions clickable |
-| `< 1024px` | low-frequency filters stay in drawer; visible filters are 1-2 columns; toolbar buttons may horizontally scroll or move into More | protect table readability |
+Do not document 1024px, tablet, or mobile layouts as supported while the application still has `min-width: 1280px`. A portable project using this skill must declare its own supported baseline before it adopts smaller breakpoints.
 
-## List Workbench Rules
+| Viewport | Project contract | Primary goal |
+|----------|------------------|--------------|
+| `>= 1440px` | one-line visible filters and one-line workflow/status region | expose more business data |
+| `1280-1439px` | compact stable gaps; status groups may scroll inside their own region | protect commands and table width |
+| `< 1280px` | unsupported by the current project | do not claim responsive coverage |
 
-- At the supported 1280px desktop baseline, the visible filter row and primary workflow row must remain compact. Do not use `@media (max-width: 1280px)` to stack both surfaces at the exact minimum viewport.
-- Below the supported desktop baseline, the visible filter row may wrap; it must not compress label/control spacing until labels touch controls.
-- Filter fields keep a minimum readable width. Combined keyword fields get the widest allocation; lower-frequency filters move to the drawer.
-- Query/reset/filter actions stay together. On small screens they align to the end of the wrapped row instead of becoming detached buttons.
-- `merged-bar` may use two rows only below the supported desktop baseline: business actions and scope tabs first, status counts on the second row.
-- Status count groups must use `flex: 1 1 auto`, `min-width: 0`, and internal horizontal scrolling. They must not force the page or toolbar to create a browser-level horizontal scrollbar.
-- Utility icons such as refresh stay at the right edge of the toolbar row when width allows; if not, they remain icon-only and do not push status tabs out of view.
-- The table is allowed to scroll horizontally. Toolbar/filter modules should not create unexpected page-level horizontal scrollbars.
+## 1280px Workbench Rules
 
-## Button And Tab Compression
+- The visible filter row and primary workflow row remain compact. Do not use `@media (max-width: 1280px)` to stack the workflow at the exact supported baseline.
+- Filter fields keep a readable minimum width. The primary identifier/keyword field receives the largest allocation; lower-frequency filters move to the advanced drawer.
+- Query, reset, and advanced-filter entry stay together.
+- Status controls use `min-width: 0` and internal horizontal scrolling before the page gains another full-width band.
+- Utility icons stay icon-only with tooltips when width is constrained.
+- The VXE table may scroll horizontally. The shell, command surface, and card structure may not create browser-level horizontal overflow at 1280px.
+- Do not shrink font tokens, labels, or hit targets to make the layout fit.
 
-- Do not reduce font sizes for small screens. Use wrapping, grouping, or horizontal scroll inside the module.
-- Do not remove the visible gap between field label and control.
-- Do not replace business labels with unclear abbreviations unless the product domain already uses that abbreviation.
-- Low-frequency toolbar actions move into `More` before reducing primary action hit areas.
-- Active scope/status state remains visible. If a status group scrolls, the active item should still be reachable within the group.
+## Wide Desktop Rules
 
-## Required CSS Hooks
+- Wider viewports expose more columns, status items, and table rows.
+- Do not scale fonts or controls with viewport width.
+- Do not stretch field widths until labels and controls lose grouping; use weighted columns and bounded widths where needed.
+- Do not add decorative whitespace, KPI bands, or extra cards merely because space is available.
 
-- `filter-card__slim-row` controls visible filter wrapping.
-- `filter-card__inline-actions` controls query/reset/filter alignment.
-- `merged-bar` controls toolbar/status wrapping.
-- `toolbar-group` contains business actions.
-- `stab-group` contains scope/cargo segmentation.
-- `stat-tab-group` contains status counts and must support internal horizontal scroll.
-- `toolbar-aside` contains utilities and selected count.
+## Portable Smaller-Viewport Extension
+
+Another project may support smaller widths only after all of these are explicit:
+
+```text
+supported_min_width:
+shell_behavior:
+filter_behavior:
+workflow_behavior:
+table_behavior:
+overlay_behavior:
+verification_viewports:
+```
+
+That extension belongs to the consuming project. It must not be inferred from FE.OHL.WEB.UI class names or added as unverified core behavior.
 
 ## Forbidden Fallbacks
 
 - No `transform: scale(...)` to fit modules.
-- No arbitrary font-size reduction below the typography tokens.
-- No page-scoped hard widths for status groups.
-- No hiding status counts only because the viewport is narrow.
-- No browser-level horizontal scroll caused by filter or toolbar modules.
+- No arbitrary font-size reduction below typography tokens.
+- No page-scoped hard width for the entire status group.
+- No hiding active state or daily workflow controls only because 1280px is tighter.
+- No claim of mobile/tablet support without implementation and real-viewport verification.

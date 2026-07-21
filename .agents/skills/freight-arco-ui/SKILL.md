@@ -42,6 +42,23 @@ Full rules: **`references/arco-first.md`**. Every shared custom class must state
 
 **Rule:** Arco structure first → business slots and labels from `module-patterns.md` / `domain-language.md` → thin shared enhancement from `global.css` only where needed → details in topic references. Do not duplicate long rule blocks across `AGENTS.md` / skill.
 
+## Rule Ownership
+
+Each rule family has one authority. Other files route to it or verify it; they do not redefine it.
+
+| Rule family | Authority |
+|-------------|-----------|
+| Theme ownership and token scope | `theme-contract.md` |
+| Cross-page layout quality, surface relationships, first-viewport evidence | `redesign-calibration.md` |
+| List workbench implementation | `list-page.md` |
+| Query-count selection | `filter-layout.md` |
+| Supported viewport behavior | `responsive.md` |
+| Visual role usage | `visual-system.md` |
+| Product-grade scoring | `product-grade-evaluation.md` |
+| Delivery checks only | `checklist.md` |
+
+When two files disagree, use the authority above and delete the duplicate rule during maintenance.
+
 ## Four-Layer Prompt Model
 
 All agents should understand the project in this order:
@@ -79,7 +96,7 @@ The product is used by freight sales, operators, and coordinators for continuous
 
 Target experience: a modern international freight ERP/SaaS workbench. It should preserve dense visible business data, short operation paths, status scanning, and stable repeated workflows while removing old ERP signals such as heavy grids, all-blue buttons, gray form walls, and unclear hierarchy.
 
-For list/workbench pages, aim to keep most first-screen space owned by business data, normally 70-80% when the module is table-dominant. Treat 75% as a workbench target, not a universal rule for detail, review, modal, or exception pages.
+For list/workbench pages, keep the first viewport dominated by business data. The measurable threshold and exceptions are owned only by `redesign-calibration.md`.
 
 Do not hide daily filters, status tabs, or reversible workflow actions merely to look minimal. Modern restraint means neutral grouping, semantic color, and one clear primary anchor, not removing the controls operators need all day.
 
@@ -92,12 +109,12 @@ Do not hide daily filters, status tabs, or reversible workflow actions merely to
 5. `references/module-patterns.md` + `references/domain-language.md` (new pages)
 6. For any task with behavior or request flow: `references/feature-routing.md` + `references/feature-delivery-contract.md`
 7. For any screenshot/prototype-driven task only: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
-8. One topic file from the map below
-7. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
-8. **Before changing icon usage:** read `icons.md`.
-9. **Before any redesign / 布局重写 / 质感优化 / 普通后台味反馈:** read `redesign-calibration.md`.
-10. **Before any custom class or `global.css` pattern:** re-check `arco-first.md` and document why Arco + tokens are insufficient.
-11. **`src/styles/global.css`** — only after steps 1–10; grep tokens/patterns already justified, do not browse the file as the primary design catalog.
+8. One topic file from the map below.
+9. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
+10. **Before changing icon usage:** read `icons.md`.
+11. **Before any redesign / 布局重写 / 质感优化 / 普通后台味反馈:** read `redesign-calibration.md`.
+12. **Before any custom class or `global.css` pattern:** re-check `arco-first.md` and document why Arco + tokens are insufficient.
+13. **`src/styles/global.css`** — only after steps 1–12; grep tokens/patterns already justified, do not browse the file as the primary design catalog.
 
 **Coding gate:** `.cursor/rules/spec-first-coding.mdc` — read references first; run `check-spec.js` before delivery.
 
@@ -154,7 +171,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 - `vxe-table` only; no `a-table`
 - Freight terms from `domain-language.md`; no generic `步骤1` / `处理中`
 - Map business object + user job before layout; no copying order fields to unrelated modules
-- Structural classes (`dds-head`, `detail-section`, `table-card-cap`) are slots — content follows the object
+- Exact class names are not a portable API. Use a documented shared class only when grep proves its implementation exists; otherwise preserve the required role with Arco structure plus minimal page-local layout CSS
 - One `primary` per scope; row actions icon + tooltip; danger → confirm
 - Generic action icons use Arco; business-semantic identity/menu/empty-state icons use IconPark; no forced icons when the metaphor is weak
 - `detail-mini-vxe`: no `show-overflow`; header bg ≠ row hover bg; no checkbox without batch toolbar
@@ -162,8 +179,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 - When the task is redesign, AI may regroup surfaces or rewrite the page skeleton if business workflow becomes clearer; do not default to structure-preserving polish. See `redesign-calibration.md`.
 - When the task goal is productization, sellable SaaS quality, financing/demo quality, or "高级感", evaluate against `product-grade-evaluation.md`; do not stop at internal-system quality.
 - Any feature with click/submit/request/state change must complete the functional contract: `feature_type` + `entry_point` + `actor_roles` + `visible_when` + `enabled_when` + `api_request` + `api_response` + `success_result` + `error_result` + `refresh_scope` + `verification_cases`
-- Any screenshot/prototype-driven task must complete the artifact intake template and prototype translation block before coding
-- Any screenshot/prototype-driven task must complete the prototype translation block before coding; do not code directly from visual similarity
+- Any screenshot/prototype-driven task must complete the artifact intake template and prototype translation block before coding; do not code directly from visual similarity
 - UI rules must be written as AI-executable design language: scope + structure/class + token/density + state + business semantics + forbidden fallback. Vague taste rules like “更好看/更有质感/不要贴在一起” must be translated before coding.
 
 ## Working Protocol

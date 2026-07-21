@@ -241,7 +241,7 @@ These are starting floors; adjust per module but keep the `min-width` vs `width`
 - Risk attributes may use an icon inside `.s-pill` when the icon has an unambiguous meaning, but must not combine icon and leading dot.
 - Attribute/risk columns should use a consistent attribute token pattern, not workflow status pills. All values keep the same baseline and size; risk values may use warning token color/border without an icon-heavy label.
 - Table status/attribute tokens in the same visual family must share one size: 20px height, F5 11px text, same padding/radius/line-height. Semantic color may differ; component size must not.
-- Two-line cell: `cell-two-line`, `c2-main`, `c2-sub`. Use it only for primary value + its own auxiliary metadata, not for merging two independent fields. Examples of independent pairs: two parties, two locations, two dates, two identifiers.
+- Two-line cell: one local container with explicit main and auxiliary roles. Exact child class names are page-local unless grep proves a shared implementation. Use it only for a primary value plus its own metadata, not for merging two independent fields such as two parties, locations, dates, or identifiers.
 - Empty value: `—` with weak color.
 - Numeric values: tabular numbers and right alignment.
 - Units: micro typography after value, not a separate dominant column unless users sort/filter by unit.
@@ -368,9 +368,9 @@ count effective actions (merge exclusive A verbs)
 - Use `a-tooltip` + `a-button type="text" class="row-action-btn"`.
 - Wrap in `row-actions` (alignment only — no border/background/capsule chrome).
 - Primary direct action: `row-action-btn row-action-btn--primary` (eye / edit).
-- More trigger: `row-action-btn row-action-btn--more` + `content-class="action-menu action-menu--row"`.
+- More trigger: icon-only `row-action-btn row-action-btn--more` with the native Arco Dropdown popup.
 - Row action icons stay visible in default state; no permanent borders on buttons.
-- Danger in `···`: `action-menu__divider` then `a-popconfirm` + `a-doption.danger-opt` — never flat `status="danger"` on list rows.
+- Danger in `···`: Arco Divider then `a-popconfirm` + `a-doption.danger-opt` — never flat `status="danger"` on list rows.
 - VXE cell focus/selection on workbench tables: use project `global.css` tokens only; no page-scoped black focus rings.
 
 ### Examples
@@ -416,14 +416,14 @@ count effective actions (merge exclusive A verbs)
           <template #icon><icon-eye /></template>
         </a-button>
       </a-tooltip>
-      <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--row">
+      <a-dropdown trigger="click" position="br">
         <a-button size="small" type="text" class="row-action-btn row-action-btn--more" title="更多操作">
           <template #icon><icon-more /></template>
         </a-button>
         <template #content>
           <a-doption @click="handleEdit(row)">编辑</a-doption>
           <a-doption @click="handlePrint(row)">打印</a-doption>
-          <a-divider class="action-menu__divider" />
+          <a-divider />
           <a-popconfirm content="确认废弃？此操作不可恢复。" @ok="handleVoid(row)">
             <a-doption class="danger-opt">废弃</a-doption>
           </a-popconfirm>

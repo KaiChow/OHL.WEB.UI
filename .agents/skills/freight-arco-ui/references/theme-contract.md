@@ -42,14 +42,16 @@ Use the official Arco documentation to understand roles:
 
 Arco color-scale variables store RGB channels. Consume a channel token as `rgb(var(--primary-6))`; do not use `var(--primary-6)` directly as a CSS color.
 
-Do not redeclare official color variables in `global.css` or page CSS. The rendered GI value is the source of truth.
+Do not redeclare official color variables in `global.css` or page CSS. The rendered GI value is the source of truth. Layout-only values such as widths, gaps, row heights, and font sizes may remain on `:root` because they do not depend on body-scoped theme values.
 
 ## Global CSS Boundary
+
+The GI package exposes its effective official variables on `body`. Theme-dependent aliases must therefore be declared on `body` or a descendant scope. Declaring `--dense-card-border: var(--color-border-1)` on `:root` resolves before the body-scoped token exists and produces an invalid empty value.
 
 Allowed:
 
 ```css
-:root {
+body {
   --dense-primary-6: rgb(var(--primary-6));
   --dense-card-border: var(--color-border-1);
   --dense-table-header-bg: var(--color-fill-1);

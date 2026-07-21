@@ -6,6 +6,40 @@ Use this reference when the user is not asking for a small compliance fix, but f
 
 This file defines **how far AI is allowed to change the page skeleton** while still staying inside FE.OHL.WEB.UI and PESDP.
 
+It is also the single authority for cross-page layout quality. Topic references may describe their local structure, but must not redefine the surface-count, first-viewport, or shell-budget rules below.
+
+## Layout Authority
+
+### Surface Relationship
+
+- Use physical surfaces only when they express different ownership. Logical rows may share one Arco surface.
+- A table-dominant workbench normally has two physical surfaces: one command surface for query/actions/status and one dominant data surface.
+- Do not nest cards, turn every logical row into a floating card, or create three equal-weight horizontal bands.
+- Duplicate page title, total, risk count, queue label, instruction, and table context each have one visible owner.
+- Utilities stay beside the data they affect; high-frequency workflow actions remain visible.
+
+### First-Viewport Evidence
+
+At the supported 1280px desktop baseline, a normal table workbench should give at least 70% of usable page height to the data surface; about 75% is a calibration target. Below 65% is a blocking layout defect. Taller viewports may exceed 80% naturally and must not gain artificial whitespace to stay inside a range.
+
+Measure the rendered page root and table host. Do not estimate from source code. Record viewport, usable height, command-surface height, data-surface height, ratio, visible rows, and overflow.
+
+The threshold does not apply to detail forms, approval/review pages, exception investigation, dashboards, or overlays; those archetypes still require a clear primary work surface.
+
+### Shell Budget
+
+- The shell stays subordinate to work. At the project desktop baseline, sider width normally remains 192-216px and header height 44-52px unless a product constraint is recorded.
+- Page-level title/description bands are not added to high-frequency list workbenches when the app shell already identifies the route.
+- Wide screens expose more data or breathing room; they do not scale fonts, controls, or decorative whitespace with viewport width.
+- The project supports 1280px and wider desktop layouts. Smaller-width behavior exists only when a project explicitly declares and implements a different baseline in `responsive.md`.
+
+### Command Surface Budget
+
+- Query, actions, and status may be separate logical rows inside one surface.
+- The normal query + workflow area stays near 112px; up to about 128px is acceptable when visible daily filters retain clear labels.
+- At 1280px the primary command path does not stack. Status groups may scroll inside their own region before another full-width band is added.
+- The table may scroll horizontally; the page shell, query area, and workflow bar may not create browser-level horizontal overflow.
+
 ## Direction
 
 The project redesign direction is self-contained:
@@ -80,7 +114,7 @@ Do not:
 
 Allowed moves:
 
-- toolbar + scope row + status row -> one `merged-bar`
+- toolbar + scope row + status row -> one coherent Arco command surface
 - weak scattered actions -> grouped workflow actions
 - plain tabs -> explicit workflow/status controls
 
@@ -156,19 +190,13 @@ Even during redesign, these stay fixed:
 
 When a list page has **daily actions + range/scope switching + status handling**, prefer a single workflow bar.
 
-### Required structure
+### Required roles
 
 ```text
-[toolbar-group] | [scope tabs] | [status stat-tabs]
+[business actions] | [scope controls] | [status queue controls]
 ```
 
-Preferred classes:
-
-- container: `merged-bar`
-- actions: `toolbar-group`
-- separators: `bar-sep`
-- scope: `scope-status-bar__scope` + `stab stab--scope`
-- status: `scope-status-bar__status` + `stat-tab-group` + `stat-tab`
+Prefer Arco `a-space`, `a-button`, `a-dropdown`, `a-tabs`, and neutral dividers. Class names shown in older examples are not a shared API unless grep finds their implementation in the current project.
 
 ### Visual hierarchy
 
