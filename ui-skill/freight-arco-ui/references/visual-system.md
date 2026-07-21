@@ -16,7 +16,7 @@ This project targets a professional freight ERP/SaaS interface for sales, operat
 2. Long-session visual comfort.
 3. Visual beauty.
 
-For table-dominant workbench pages, the first viewport should usually reserve 70-80% of usable page space for business data. Use 75% as a target signal, not as a rigid rule for detail forms, drawers, approval reviews, or exception pages.
+For table-dominant workbench pages, use the first-viewport layout gate owned by `redesign-calibration.md`. This file defines visual roles, not competing layout thresholds.
 
 The correct direction is not "old ERP" and not "minimal SaaS dashboard." The target is **Modern Freight Operations Workbench**: dense data, low visual noise, visible high-frequency workflows, semantic status, and stable Arco/VXE interaction.
 
@@ -118,9 +118,8 @@ Rules:
 - Search cards, toolbar rows, table caps, and table body default surfaces stay neutral unless they are in active/hover/selected state.
 - Do not solve "too gray" by tinting every container. Improve hierarchy through brand-neutral hairlines, surface layering, primary identifiers, status pills, table columns, and action priority first.
 - Do not solve "too blue" by assigning arbitrary colors to workflow buttons. Buttons use type hierarchy; colors use semantic meaning.
-- List module top borders are structural brand hairlines, not active-state anchors. Use `--dense-zone-top-border` consistently for `zone-l1-transport`, `zone-l2-filter-card`, `zone-l3-action`, and `zone-l4-table-card`; do not mix primary top borders with plain gray top borders between adjacent modules.
-- If a raw theme token fix makes the page visibly bluer, reduce the semantic alias intensity or move that surface back to neutral.
-- `--dense-primary-1/2/3/4` are project semantic aliases. They may be weaker than the original theme scale to preserve long-term comfort.
+- Module boundaries use the effective GI border hierarchy. Do not add colored top borders as generic decoration.
+- `--dense-primary-*` aliases map directly to the effective GI scale. Do not retune their values in a page or shared pattern.
 
 ## Selected State Standard
 

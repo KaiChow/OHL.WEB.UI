@@ -44,4 +44,5 @@ scripts/check-spec.js   ← 自动化验收
 | 文件 | 用途 |
 |------|------|
 | `AGENTS.md` | Agent 一页摘要 |
-| `.cursor/rules/ui-spec.mdc` | Cursor 始终生效的强制项 |
+| `.cursor/rules/spec-first-coding.mdc` | 编码前的规范路由门禁 |
+| `.cursor/rules/adversarial-review.mdc` | 交付前的对抗审查门禁 |

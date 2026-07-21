@@ -27,7 +27,7 @@ const RULES = [
     fileFilter: /\.vue$/,
   },
   {
-    desc: '禁止 <a-upload> — 必须用 UppyUploader 组件',
+    desc: '禁止直接使用 <a-upload> — 业务上传必须走已实现的共享上传契约',
     pattern: /<a-upload[\s>]/,
     fileFilter: /\.vue$/,
   },
@@ -41,15 +41,6 @@ const RULES = [
     desc: '禁止 freight-table（已废弃类名）',
     pattern: /freight-table/,
   },
-  {
-    desc: '禁止 .toolbar-left / .toolbar-right（应用 toolbar-group / toolbar-aside）',
-    pattern: /["'\s](toolbar-left|toolbar-right)["'\s]/,
-  },
-  {
-    desc: '禁止 .search-bar / .sf-label（应用 filter-card 体系）',
-    pattern: /["'\s](search-bar|sf-label|\.sf\b)["'\s]/,
-  },
-
   // 禁止裸用 a-pagination（须在 table-card-cap 结构内）
   // 结构型规则在下方单独检查，避免只按文件名放行导致 table-card-cap 内误报。
 
@@ -74,15 +65,6 @@ const RULES = [
     pattern: /(border(?:-color)?\s*:\s*(black|#000|#111|#121314|currentColor|var\(--color-text-1\))|outline\s*:\s*[^;]*(ButtonText|currentColor|black|#000))/,
     fileFilter: /\.(vue|css)$/,
     exclude: /\/\*|\/\//,
-  },
-
-  // 禁止硬编码字号
-  {
-    desc: '禁止 font-size: 14px / 15px / 16px（应用 token，如 var(--dense-font-data)）',
-    pattern: /font-size\s*:\s*1[456]px/,
-    fileFilter: /\.(vue|css)$/,
-    // 排除 global.css 中的变量定义
-    fileExclude: /global\.css$/,
   },
 
   // 禁止 font-weight: 700
@@ -110,7 +92,7 @@ const RULES = [
     fileFilter: /\.vue$/,
   },
   {
-    desc: '下拉触发按钮禁止内联 icon margin（由 toolbar-group 统一控制 trailing icon 间距）',
+    desc: '下拉触发按钮禁止内联 icon margin（使用 Arco Space/gap 或局部布局类统一间距）',
     pattern: /<icon-down\b[^>]*\bstyle=/,
     fileFilter: /\.vue$/,
   },

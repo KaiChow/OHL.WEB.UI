@@ -12,6 +12,7 @@ alwaysApply: true
 0. 是否按 **`arco-first.md`** 优先级实现？有无可用 Arco props 却套了多余壳层？共享 class 是否说明了 why Arco 不够？
 0.1 是否符合 **`theme-contract.md`**：GI 单一 baseline/palette、无项目主题适配层、`global.css` 仅直接语义 alias / 密度 / VXE 增强？
 0.2 无参考图的既有项目改造是否按 **`existing-project-modernization.md`** 提供 before/after 实测证据？
+0.3 是否把 reference 中未实现的示例类名误当成共享 API？是否先 grep 定义再使用？
 1. 筛选字段数 → Tier → DOM 结构是否符合 **`filter-layout.md`**？
 2. Modal / Drawer 是否符合 **`modal.md`**？
 3. 列表 zone / 表格 / 分页是否符合 **`list-page.md`** + **`table.md`**？

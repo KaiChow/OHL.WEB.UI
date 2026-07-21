@@ -36,7 +36,7 @@ alwaysApply: true
 
 0. **框架优先**：Arco props/slots 能否解决？→ token？→ 业务 pattern？→ 最后才 page-local CSS（**`arco-first.md`**）
 1. **筛选**：字段总数 → Tier → DOM 结构（**`filter-layout.md`** 为唯一决策源）
-2. **筛选 DOM**：按 Tier 选用 skill 给出的结构组合（如双行见 `filter-card--two-row` 示例），**禁止自拼未在 reference 出现的结构**
+2. **筛选结构**：按 Tier 选用 `filter-layout.md` 的字段关系与交互场景；示例类名只有在 grep 证明共享实现存在时才是 API，否则用 Arco 结构 + 最小局部布局 CSS
 3. **Overlay**：字段数 + 是否含子表/多分区 → 查 `modal.md` 容器表
 4. **功能行为**：先补 `feature_type / actor_roles / visible_when / enabled_when / api_request / success_result / error_result / refresh_scope`
 5. **图标**：先判定当前 surface 用 Arco 还是 IconPark；无精确隐喻则不用 icon

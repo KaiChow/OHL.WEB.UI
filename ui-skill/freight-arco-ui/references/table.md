@@ -241,7 +241,7 @@ These are starting floors; adjust per module but keep the `min-width` vs `width`
 - Risk attributes may use an icon inside `.s-pill` when the icon has an unambiguous meaning, but must not combine icon and leading dot.
 - Attribute/risk columns should use a consistent attribute token pattern, not workflow status pills. All values keep the same baseline and size; risk values may use warning token color/border without an icon-heavy label.
 - Table status/attribute tokens in the same visual family must share one size: 20px height, F5 11px text, same padding/radius/line-height. Semantic color may differ; component size must not.
-- Two-line cell: `cell-two-line`, `c2-main`, `c2-sub`. Use it only for primary value + its own auxiliary metadata, not for merging two independent fields. Examples of independent pairs: two parties, two locations, two dates, two identifiers.
+- Two-line cell: one local container with explicit main and auxiliary roles. Exact child class names are page-local unless grep proves a shared implementation. Use it only for a primary value plus its own metadata, not for merging two independent fields such as two parties, locations, dates, or identifiers.
 - Empty value: `—` with weak color.
 - Numeric values: tabular numbers and right alignment.
 - Units: micro typography after value, not a separate dominant column unless users sort/filter by unit.

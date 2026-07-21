@@ -465,46 +465,43 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 ## 6. Action Menu And Danger
 
-Dropdown is an **action menu**, not a plain list of links. It should feel like a compact freight operation panel: clear trigger hierarchy, stable option rhythm, light Arco-native surface, and a separated danger zone.
+Use Arco Dropdown and Doption with the GI theme's native popup surface. Do not add a custom menu skin merely to differentiate toolbar, footer, and row triggers.
 
-### 6.1 Variants
+### 6.1 Trigger Roles
 
-| Variant | Usage | Required content class | Trigger |
-|---------|-------|----------------------|---------|
-| Toolbar action menu | `导出`, `更多`, batch/low-frequency workflow actions | `content-class="action-menu action-menu--toolbar"` | visible text button with trailing `<icon-down />` |
-| Footer action menu | detail sticky footer `输出`, `流转`, secondary workflow actions | `content-class="action-menu action-menu--footer"` | footer secondary text button with trailing `<icon-down />` |
-| Row action menu | operation-column `···` menu | `content-class="action-menu action-menu--row"` | `row-action-btn row-action-btn--more` |
+| Role | Usage | Trigger |
+|------|-------|---------|
+| Toolbar menu | export, batch, and low-frequency workflow groups | visible text button with trailing `<icon-down />` |
+| Footer menu | output, transition, and secondary detail workflow | secondary text button with trailing `<icon-down />` |
+| Row menu | operation-column overflow | icon-only `···` button with tooltip/accessible label |
 
-`a-dropdown` must use `content-class`, not `popup-class`. `popup-class` is not a valid Arco Dropdown prop in this project and will not style the floating menu. `row-action-menu` is legacy-compatible only. New code must use the variant that matches the trigger scope: toolbar → `action-menu--toolbar`; sticky detail footer → `action-menu--footer`; row operation → `action-menu--row`.
+`popup-class` is not a valid Arco Dropdown prop in this project. Use `content-class` only when grep proves a real shared or local popup rule exists; do not attach inert class names.
 
 ### 6.2 Option Order
 
 1. Direct business workflow: close, approve, push, assign.
 2. File/output: export, download, print, import template.
 3. Maintenance/secondary workflow: batch modify, copy, reuse.
-4. `action-menu__divider`.
+4. Arco Divider.
 5. Dangerous or irreversible actions with `danger-opt`.
 
 Keep options task-oriented. Do not add section labels inside dense menus unless there are more than 8 items and the groups cannot be understood from verbs.
 
 ### 6.3 Visual Contract
 
-- Menu panel uses `action-menu`: white-to-subtle surface, restrained border, soft elevation, no decorative color block.
-- Action menus are attached operation surfaces, not floating dialog cards. The panel must visually belong to its trigger: compact radius, restrained shadow, no large blank inset, no heavy card border, and no detached "modal card" feeling.
-- Toolbar and footer menus use content-based width with `width: max-content`, compact variant minimum widths, and `--dense-action-menu-max-w` as the upper bound so Chinese labels stay compact while longer English/i18n labels can expand before truncation.
-- Footer menus are closest to the sticky action bar. They use `action-menu--footer`, smaller minimum width than toolbar menus, and option height around 31px to keep click targets comfortable without creating a bulky popup.
-- Row menus remain compact but cannot drop below a 32px option hit area.
-- Menu content must not create horizontal scrollbars. Use bounded adaptive panel width, `overflow-x: hidden`, no wrapping, and ellipsis only after the max width is reached.
+- Keep the GI/Arco popup surface, radius, border, shadow, padding, and interaction states.
+- Options are text-first. Do not force an icon for every freight operation.
+- Long labels remain readable; introduce a scoped width rule only when real i18n content proves the native popup insufficient.
+- The menu must not create horizontal scrolling or look like a dialog card.
 - Dropdown options are text-first. Do not add icons by default and do not force an icon for every operation; many freight operations do not have a precise icon. Use an option icon only when the action has a strong, unambiguous system metaphor and the whole menu still remains visually even.
-- `action-menu__divider` separates semantic danger, not every two options.
+- Arco Divider separates semantic danger, not every two options.
 - `danger-opt` must be the final group and must not look like a normal option.
-- Do not write page-scoped dropdown shadows, radii, item padding, danger colors, or inline divider margins.
+- Do not write page-scoped dropdown shadows, radii, item padding, or alternate popup colors.
 
 Danger rules:
 
-- Toolbar dropdowns use `content-class="action-menu action-menu--toolbar"`; row dropdowns use `content-class="action-menu action-menu--row"`.
-- Detail sticky footer dropdowns use `content-class="action-menu action-menu--footer"`. Do not reuse toolbar dropdown style in a sticky footer because it reads too wide and visually detached from the footer button group.
-- Divider uses `action-menu__divider`; `row-action-menu__divider` is legacy-compatible only.
+- Toolbar, footer, and row menus share Arco popup styling; trigger form communicates the scope.
+- Use Arco Divider before the final danger group.
 - 下拉危险项：`class="danger-opt"`，点击后 `Modal.confirm` 或业务确认，禁止直接执行。
 - 行内删除：`a-popconfirm`。
 - 批量/不可逆：`Modal.confirm({ type: 'warning' })`。

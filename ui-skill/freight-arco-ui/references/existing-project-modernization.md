@@ -74,7 +74,7 @@ For table workbenches record:
 - number of visible rows and core columns;
 - any breakpoint that activates at the minimum supported desktop width.
 
-Target 70-80% first-viewport data ownership when the table is the main job. Below 65% is a blocking issue unless the page is an exception/review archetype.
+Judge the measurement against the single layout threshold in `redesign-calibration.md`; do not restate or alter it here.
 
 ### Layout Quality Gate
 
@@ -84,7 +84,7 @@ For a table-dominant list workbench, enforce these relationships before visual p
 - the page normally has two physical surfaces: one command surface for query/actions/status and one dominant data surface; logical rows may share a surface but cards must not nest;
 - default query + action + status height stays near the `filter-layout.md` target and must not become a form wall;
 - at 1280px, the primary command path remains compact and does not stack at the breakpoint itself;
-- the table host owns 70-80% of usable first-viewport height; below 65% blocks acceptance;
+- the table host passes the first-viewport gate in `redesign-calibration.md`;
 - duplicate totals, risk counts, queue labels, titles, instructions, and table context each have one visible owner;
 - utility controls stay near the data they affect; primary workflow controls stay visible and do not move into More merely to make the page sparse;
 - wide desktop adds data visibility or breathing room, not larger fonts, decorative whitespace, or stretched control chrome.

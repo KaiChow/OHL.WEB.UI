@@ -37,7 +37,7 @@ Vue 3 · TypeScript · Arco Design Vue · `@arco-themes/vue-gi-demo` · VXE Tabl
 - **Arco-first**：能用 Arco props/结构解决就不用自定义 class；`global.css` 是增强层不是第二框架
 - **主题唯一所有权**：GI 是唯一 Arco CSS baseline 与 palette；项目无 `theme.css` 适配层，页面与 `global.css` 禁止改色或另起皮肤
 - 表格一律 `vxe-table`，禁止 `a-table`
-- 上传用 Uppy，禁止 `a-upload`
+- 上传遵循 `upload.md` 的共享上传契约；未安装/未实现的上传库不得写成既定事实，禁止直接用 `a-upload` 绕过业务策略
 - 状态只用 `s-pill[data-s]`，禁止行铺色
 - 通用动作 icon 用 Arco；业务语义/菜单/空态/模块标题 icon 才用 IconPark；无精确隐喻则不用 icon
 - 每作用域仅 1 个 `type="primary"`
@@ -47,21 +47,21 @@ Vue 3 · TypeScript · Arco Design Vue · `@arco-themes/vue-gi-demo` · VXE Tabl
 - 有点击/提交/请求/状态流转的功能，必须先补功能契约再写交互
 - 有截图/原型输入时，必须先补输入模板和原型转译，禁止按视觉相似度直接开写
 
-## 结构类名速查
+## 布局角色速查
 
-共享 pattern 仅在 Arco + token 不够时使用。类名 grep 验证后使用。
+先实现角色关系，再决定是否需要类名。只有 grep 能证明定义存在的共享类才可直接使用；否则使用 Arco 结构和最小 page-local layout CSS。
 
-| 场景 | 类名 |
-|------|------|
-| 列表根 | `page-root page-root--dense` |
-| 筛选 | `filter-card` / `filter-field`（禁 `search-bar`） |
-| 工具栏 | `toolbar` / `toolbar-group` / `toolbar-aside` |
-| 表格容器 | `table-wrap` |
-| 详情抽屉 | `detail-drawer`（复杂）/ `detail-drawer--standard`（只读）+ `detail-section` |
-| 浮层宽度 | `overlay-dimensions.md`（Modal 420–860；Drawer D1–D4） |
-| 子表容器 | `detail-section__body--table` + `detail-mini-vxe` |
+| 场景 | 结构角色 |
+|------|----------|
+| 列表 | 一个 command surface + 一个主 data surface；阈值见 `redesign-calibration.md` |
+| 筛选 | Arco Form/Grid/Input Group；字段数量选型见 `filter-layout.md` |
+| 工作流 | 业务动作 + scope/status；1280 不折行，状态区内部滚动 |
+| 主表 | `vxe-table.workbench-table` |
+| 详情 | identity → sections → local actions；抽屉层级见 `detail-form.md` |
+| 浮层 | `overlay-dimensions.md`（Modal 420–860；Drawer D1–D4） |
+| 子表 | `vxe-table.detail-mini-vxe`，按行任务选择密度 |
 
-按钮五类型 × 四状态、表格 hover/表头分层、详情 footer 分区：见 `references/actions.md` 与 `references/table.md`。
+按钮、表格、详情 footer 的具体规则见 `references/actions.md`、`references/table.md` 与 `references/detail-form.md`。
 
 ## 验证
 

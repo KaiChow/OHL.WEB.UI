@@ -7,10 +7,14 @@ body,
   margin: 0;
   min-width: 1280px;
   font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-  background: var(--color-bg-body);
-  color: var(--color-text-1);
   font-size: 13px;
   -webkit-font-smoothing: antialiased;
+}
+
+body,
+#app {
+  background: var(--color-bg-body);
+  color: var(--color-text-1);
 }
 
 /* Scrollbars stay quiet during scanning and appear when the user works in a scrollable surface. */
@@ -49,15 +53,7 @@ body,
    Official Arco color values come directly from the GI theme.
    ================================================================= */
 :root {
-  --color-bg-body: var(--color-fill-1);
-  --color-bg-card: var(--color-bg-1);
-  --dense-control-surface: var(--color-bg-1);
-  --dense-control-disabled-bg: var(--color-fill-1);
-  --dense-control-border: var(--color-border-2);
-  --dense-control-border-hover: var(--color-border-3);
-
   /* 布局密度（列表页专用，非色彩） */
-  --dense-radius: var(--border-radius-medium);
   --dense-row-h: 36px;
   /* 主列表行高：高频扫描，不承载表单控件 */
   --dense-row-h-detail-edit: 38px;
@@ -165,6 +161,19 @@ body,
   --dense-pad-head-x: 12px;
   /* 分区 head 左右 */
 
+}
+
+/* GI declares its effective theme variables on body. Theme-dependent aliases
+   must resolve in the same scope; defining them on :root makes them invalid. */
+body {
+  --color-bg-body: var(--color-fill-1);
+  --color-bg-card: var(--color-bg-1);
+  --dense-control-surface: var(--color-bg-1);
+  --dense-control-disabled-bg: var(--color-fill-1);
+  --dense-control-border: var(--color-border-2);
+  --dense-control-border-hover: var(--color-border-3);
+  --dense-radius: var(--border-radius-medium);
+
   /* Semantic aliases resolve against the active Arco theme at use time. */
   --dense-primary-1: rgb(var(--primary-1));
   --dense-primary-2: rgb(var(--primary-2));
@@ -220,7 +229,6 @@ body,
   --dense-surface-tint: var(--color-bg-1);
   --dense-surface-head: var(--color-fill-1);
   --dense-surface-section: var(--color-bg-1);
-  --dense-surface-rail: linear-gradient(90deg, var(--dense-primary-1) 0, var(--color-bg-1) 42px);
   --dense-border: var(--color-border-2);
   --dense-border-subtle: var(--color-border-1);
   --dense-row-stripe: var(--color-bg-1);
@@ -252,7 +260,6 @@ body,
 
   /* 结构阴影（中性灰，不含独立色相） */
   --dense-shadow-card: 0 1px 2px rgba(29, 33, 41, 0.04), 0 0 0 1px var(--color-border-1);
-  --dense-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.95);
   --dense-shadow-lift: 0 8px 24px rgba(29, 33, 41, 0.1);
 }
 
@@ -262,8 +269,8 @@ body,
    wrappers, fixed columns, hover, stripe, current, and custom panels do not
    fall back to gray ERP defaults. Keep both v4.5 legacy --vxe-* and newer
    --vxe-ui-* variables because the original OHL project is on vxe-table 4.5.x. */
-:root,
-[data-vxe-ui-theme='light'] {
+body,
+body [data-vxe-ui-theme='light'] {
   --vxe-font-color: var(--color-text-2);
   --vxe-primary-color: var(--dense-primary-6);
   --vxe-primary-lighten-color: var(--dense-primary-5);
@@ -607,26 +614,30 @@ body,
 
 .vxe-table.workbench-table .row-action-btn.arco-btn:hover,
 .vxe-table.workbench-table .row-action-btn.arco-btn:focus,
-.vxe-table.workbench-table .row-action-btn.arco-btn:focus-visible,
 .vxe-table.workbench-table .row-action-btn.arco-btn:active,
 .vxe-table.workbench-table .row-action-btn.arco-btn[aria-expanded="true"],
 .detail-mini-vxe.vxe-table .row-action-btn.arco-btn:hover,
 .detail-mini-vxe.vxe-table .row-action-btn.arco-btn:focus,
-.detail-mini-vxe.vxe-table .row-action-btn.arco-btn:focus-visible,
 .detail-mini-vxe.vxe-table .row-action-btn.arco-btn:active,
 .detail-mini-vxe.vxe-table .row-action-btn.arco-btn[aria-expanded="true"] {
   color: var(--dense-primary) !important;
   background: var(--dense-primary-soft) !important;
   border-color: var(--dense-primary-2) !important;
-  outline: none !important;
   transform: none !important;
   box-shadow: none !important;
 }
 
+.vxe-table.workbench-table .row-action-btn.arco-btn:focus-visible,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn:focus-visible {
+  color: var(--dense-primary) !important;
+  background: var(--dense-primary-soft) !important;
+  border-color: var(--dense-primary-3) !important;
+  outline: 2px solid var(--dense-primary-2) !important;
+  outline-offset: 1px;
+}
+
 .vxe-table.workbench-table .row-action-btn.arco-btn-disabled,
-.vxe-table.workbench-table .btn-download-disabled.arco-btn,
-.detail-mini-vxe.vxe-table .row-action-btn.arco-btn-disabled,
-.detail-mini-vxe.vxe-table .btn-download-disabled.arco-btn {
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn-disabled {
   color: var(--color-text-4) !important;
   border-color: var(--color-border-1) !important;
   background: var(--color-fill-1) !important;
@@ -635,7 +646,7 @@ body,
 
 .vxe-table.workbench-table .row-action-btn--primary.arco-btn:hover,
 .detail-mini-vxe.vxe-table .row-action-btn--primary.arco-btn:hover {
-  color: #fff !important;
+  color: var(--color-white) !important;
   background: var(--dense-primary) !important;
   border-color: var(--dense-primary) !important;
 }
@@ -651,6 +662,13 @@ body,
 .vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn:hover,
 .vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn:focus,
 .vxe-table.workbench-table .row-action-btn.arco-btn-status-danger.arco-btn:focus-visible,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:hover,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:focus,
+.detail-mini-vxe.vxe-table .row-action-btn.arco-btn-status-danger.arco-btn:focus-visible {
+  color: var(--dense-danger-7) !important;
+  border-color: var(--dense-danger-3) !important;
+  background: var(--dense-danger-1) !important;
+}
 
 .detail-mini-vxe--editable.vxe-table {
   --detail-mini-row-h: var(--dense-row-h-detail-edit);
@@ -770,31 +788,6 @@ body,
 }
 
 .link-text--strong:hover {
-  color: var(--dense-primary-deep);
-  text-decoration: underline;
-}
-
-.link-text.c2-main,
-.link-text--strong.c2-main {
-  color: var(--dense-primary-7);
-  font-weight: var(--dense-weight-title);
-}
-
-.link-text.c2-main:hover,
-.link-text--strong.c2-main:hover {
-  color: var(--dense-primary-deep);
-}
-
-.link-primary {
-  color: var(--dense-primary-6);
-  cursor: pointer;
-  font-size: var(--dense-font-data);
-  font-weight: var(--dense-weight-title);
-  text-decoration: none;
-  transition: color .1s;
-}
-
-.link-primary:hover {
   color: var(--dense-primary-deep);
   text-decoration: underline;
 }

@@ -4,14 +4,12 @@
 
 Use this logical order:
 
-1. Optional transport/page segment: `zone-l1-transport`
-2. Search/filter: `zone-l2-filter-card zone-card filter-card`
-3. Scope/status/actions: `zone-l3-action zone-card zone-card--stack`
-4. Table card: `zone-l4-table-card`
-5. Table cap inside table card: right-side pagination/settings; total count is owned by pagination
-6. Table body: `table-wrap`
+1. Optional page-mode segment using an Arco segmented or tab control.
+2. Query row using Arco Form, Grid, Input/Select and Button.
+3. Business actions and scope/status queue controls.
+4. Dominant data surface containing table context, pagination/settings, and `vxe-table.workbench-table`.
 
-Search and scope/status/actions are logical zones, not mandatory separate floating cards. They may share one Arco workbench command surface when their ownership remains clear, a neutral divider separates the rows, the combined default height stays near the `filter-layout.md` target, and no card is nested inside another card. The table remains its own dominant surface.
+Search and scope/status/actions are logical zones, not mandatory separate floating cards. They may share one Arco workbench command surface when their ownership remains clear, a neutral divider separates the rows, the combined height passes the command-surface budget in `redesign-calibration.md`, and no card is nested inside another card. The table remains its own dominant surface.
 
 Do not add a page-level title/description band for operational list pages.
 
@@ -30,47 +28,36 @@ Priority:
 3. Keep long-session visual comfort through neutral surfaces and low noise.
 4. Add visual beauty only when it improves scanning, confidence, or error prevention.
 
-For data-dominant workbench pages, the first viewport should normally allocate 70-80% of usable page space to the data area. The practical target is 75% data space after the default search/action/status area. This number is not a rigid rule for drawers, editing pages, or exception review flows.
-
-Below 65% is a blocking layout defect for a normal table workbench. Measure the rendered table host against the usable content height at the minimum supported desktop viewport; do not estimate from source code.
+The first-viewport threshold, surface count, shell budget, and measurement method are owned by `redesign-calibration.md`.
 
 Daily status tabs and daily reversible actions should stay visible when operators use them repeatedly. Hiding them behind "More" only to look cleaner is a PESDP failure.
 
-## Zone Boundary
-
-List zones use one neutral module boundary rhythm. `zone-l1-transport`, `zone-l2-filter-card`, `zone-l3-action`, and `zone-l4-table-card` all use `border-top: 1px solid var(--dense-zone-top-border)`.
-
-Do not use primary-colored top borders to decorate normal modules. Arco primary belongs to active page segments, primary actions, links, focus/selection, status pills, and table header anchors. If a module needs more hierarchy, improve structure, spacing, or local title/action grouping before adding colored container lines.
-
 ## Page Segment
 
-Use `zone-l1-transport` only when the segment changes the page mode, such as transport mode, order class, warehouse mode, or bill type.
+Add a page segment only when it changes the page mode, such as transport mode, order class, warehouse mode, or bill type.
 
 This is not a status filter. It is a compact segmented control:
 
-- Container: `zone-l1-transport zone-card`.
-- Item: `seg-btn`; active item: `seg-btn--active`.
-- Active state uses a white input-like surface, Arco-primary border/inset rhythm, and a thin bottom anchor.
-- Do not use `.stab` for L1 page segments. `.stab` is for scope/status filters inside the action row.
-- Do not use a naked underline tab here; the app route/nav may already use underline active state, and a second underline makes the current page state ambiguous.
+- Prefer the matching Arco control and its native active state.
+- Do not create custom segment classes until an Arco gap is documented and reuse is proven.
+- Do not confuse page mode with row status filtering.
 
 ## Search Area
 
-- Use `filter-card`, `filter-grid`, `filter-field`, `filter-field__label`.
+- Use an Arco Form/Grid composition. Exact class names in examples are local implementation details unless grep proves a shared definition exists.
 - Query button is primary.
 - Reset is text, no icon.
 - Low-frequency filters use the right-side `query-filter-drawer` by default. Inline expansion is an exception only when allowed by `filter-layout.md`.
 
 ### Filter Actions Recipe
 
-The visible query row uses `filter-card__inline-actions`: one primary query button, one text reset button, and one text filter-entry button when a drawer exists. The controls must feel like a single command surface, not loose floating elements.
+The visible query row uses one primary query button, one text reset button, and one text filter-entry button when a drawer exists. Keep them in one stable command group.
 
 ```vue
-<div class="filter-card__inline-actions">
+<a-space :size="8">
   <a-button
     size="small"
     type="primary"
-    class="filter-card__query-btn"
     title="查询"
     @click="handleSearch"
   >
@@ -80,28 +67,26 @@ The visible query row uses `filter-card__inline-actions`: one primary query butt
   <a-button
     size="small"
     type="text"
-    class="reset-btn"
     title="重置"
     @click="handleReset"
   >重置</a-button>
   <a-button
     size="small"
     type="text"
-    class="reset-btn"
     title="更多筛选"
     @click="advancedFilterVisible = true"
   >
     <template #icon><icon-filter /></template>筛选
   </a-button>
-</div>
+</a-space>
 ```
 
 Rules:
 
-- All three controls: `height: var(--dense-control-h-filter)` (32px), `font-size: 12px`. Do not use `height: auto` or `min-height: 24px` on reset or expand — they must match query button height.
-- Query: `type="primary"` + icon + `class="filter-card__query-btn"`.
-- Reset: `type="text"` + `class="reset-btn"` (transparent bg, `color-text-2`, hover tints primary-1).
-- More filters: `type="text"` + `class="reset-btn"` + filter icon, opens `query-filter-drawer`.
+- All three controls use the same Arco `size` and align to the same baseline; do not hand-set a second control skin.
+- Query uses `type="primary"` plus search icon.
+- Reset uses `type="text"` without an unnecessary icon.
+- More filters uses `type="text"` plus filter icon and opens the advanced filter drawer.
 - Advanced filters are grouped by business meaning inside the drawer, not random field order.
 - Do not show a separate “selected filters” strip. Current values are visible in controls/tabs.
 - Basic filters should be the 3-6 highest-frequency query fields for the object.
@@ -120,14 +105,14 @@ List-page rules that stay in this file:
 - Do not show 50 fields as a flat form wall.
 - Put active query state in the controls, transport/status tabs, and selected values; do not add a separate selected-filter strip.
 - Text inputs trigger by Enter or Query button; selects and chips may auto-search when safe.
-- Query and reset actions stay in a stable location in the visible query row or `inline-actions--matrix`.
-- **S2** pages use `filter-card__advanced` + `filter-expand-link` (see `filter-layout.md` § Three Query UI Scenarios). **S3** pages use `query-filter-drawer` — do not use both expand and drawer on the same page.
-- Two visible rows (6–10 daily fields, S1): `filter-card--two-row` + `filter-card__matrix` + `filter-grid` + `inline-actions--matrix` — see `filter-layout.md`.
+- Query and reset actions stay in a stable location in the visible query row.
+- Follow the S1/S2/S3 interaction selection from `filter-layout.md`; do not combine inline expansion and a drawer on the same page.
+- Two visible rows are allowed only for the S1 daily-filter case defined in `filter-layout.md`.
 - 30+/40+ filters use grouped/wide drawer patterns. 50+ filters use a saved query workspace, not a larger drawer.
 - Query actions must be internationalization-safe. Do not size them by Chinese labels; use min/max or `clamp()`, allow 1.3-2x text expansion, and give secondary actions tooltip/title/aria labels when text may ellipsize.
 - If secondary query actions cannot fit translated text, use icon + accessible label or move the actions to a horizontal command row. Do not silently clip action meaning.
 - For international freight pages, field examples should use domain identifiers such as order no, business no, HBL, MBL, container no, customer, port, and warehouse no.
-- Combined keyword filters such as `field type + keyword` are allowed only when they reduce repeated identifier inputs. Use the shared `filter-combo` structure: one fixed-width selector, one flexible input, same 32px height, continuous border, and one clear label such as `单号检索`. Do not place multiple independent query fields into one visual field.
+- Combined keyword filters such as `field type + keyword` are allowed only when they reduce repeated identifier inputs. Use Arco Input Group with one bounded selector, one flexible input, one control size, and one clear label such as `单号检索`. Do not place unrelated query fields into one visual field.
 - A combined keyword filter must list related identifiers only, such as 业务单号 / 业务编号 / HBL / MBL / 柜号. Do not mix unrelated filters such as customer, staff, port, date, and status into the same combo.
 
 ## Filter Typography
@@ -159,9 +144,9 @@ Toolbar actions are chosen by workflow:
 - Export/print/import when the page has reporting or document output.
 - Batch action only when multi-selection exists and the operation is safe or confirmed.
 - Refresh/settings/density/columns are utilities, not business actions.
-- Batch business actions belong with the left `toolbar-group` workflow buttons, usually as `批量操作↓`; do not isolate them in the right utility area.
-- Column settings, density, pagination, refresh, and other table-only utilities can sit in `toolbar-aside` for compact pages. When a meaningful `table-card-cap` exists, put refresh at `table-card-cap__start` before selection feedback, and keep pagination/settings/density in `table-card-cap__right`; do not create an otherwise empty cap just for a tool icon or pagination.
-- When row selection is active and a meaningful `table-card-cap` exists, put selected-row feedback in `table-card-cap__start`: `toolbar-selection-context` (`已选 N 条` + `清空`). Keep total count in pagination `show-total`; do not repeat `共 N 条` on the cap left.
+- Batch business actions stay with the left workflow command group, usually as `批量操作↓`; do not isolate them in the utility area.
+- Column settings, density, pagination, refresh, and other table-only utilities belong in the table surface. Use the Arco Card title/extra slots when a meaningful cap exists; do not create an empty band for one icon.
+- When row selection is active, place `已选 N 条` and `清空` in the table context area. Keep total count in pagination `show-total`; do not repeat it.
 - For high-frequency production pages, 5-7 visible toolbar commands are acceptable when they are grouped, neutral, and do not wrap. The rule is not "few buttons"; the rule is "one primary, clear grouping, no color noise, no line wrap."
 
 ## Table Cap And Pagination
@@ -210,9 +195,9 @@ Use them to choose equivalent identity, status, next-decision, and supporting fi
 - Keep row/card gaps predictable: 8-12px.
 - Do not compress search labels into controls.
 - Keep table as the dominant screen area.
-- On table-dominant production workbenches, the default search + toolbar + status area should not become a form wall. It should leave the table visible in the first viewport and target 70-80% data ownership.
-- Operational list pages must keep a small viewport bottom breathing space, usually 8-10px from `page-root--dense` bottom padding.
-- The bottom breathing space is a global list-page contract: `page-root--dense` uses `padding-bottom: var(--dense-page-bottom-space)`. Do not solve it per page with table padding, fake rows, footer margins, or page-scoped overrides.
+- On table-dominant production workbenches, the default search + toolbar + status area must pass the command-surface and first-viewport gates in `redesign-calibration.md`.
+- Operational list pages keep a small viewport-bottom breathing space through the page root or app content shell.
+- Do not solve bottom breathing space with table padding, fake rows, footer margins, or unexplained inner-table gaps.
 - The table card should flex to fill available space, but it must not visually touch the browser or app viewport bottom when scrolled to the last row.
 - Do not create this bottom breathing space by adding fake blank table rows or unexplained inner table gaps. It belongs to the page/layout container.
 
