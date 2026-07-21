@@ -18,7 +18,7 @@ Project-level **UI delivery contract** for `FE.OHL.WEB.UI`.
 Execution priority (mandatory):
 
 1. **Arco-first** — props, slots, layout primitives, built-in interaction
-2. **Token-second** — Arco theme + existing `--dense-*` / semantic tokens
+2. **Token-second** — GI baseline/palette + direct `--dense-*` semantic aliases
 3. **Business-pattern-third** — freight semantics, workbench archetype, VXE bridge
 4. **Page-local-css-last** — minimal page shell only
 
@@ -28,8 +28,8 @@ Full rules: **`references/arco-first.md`**. Every shared custom class must state
 
 | Layer | Location | Contains |
 |-------|----------|----------|
-| **Arco foundation** | Arco Design Vue | Default owner: controls, layout, tabs, overlay, interaction states |
-| **Shared enhancement CSS** | `src/styles/global.css` | Tokens, VXE bridge, freight semantics, documented archetype slots only |
+| **Arco foundation** | `@arco-themes/vue-gi-demo` | Default owner: controls, layout, tabs, overlay, interaction states |
+| **Shared enhancement CSS** | `src/styles/global.css` | Direct GI/Arco semantic aliases, density tokens, VXE bridge, freight semantics, documented archetype slots only |
 | **Agent summary** | `AGENTS.md` | One-page pointer (no duplicate rules) |
 | **This skill** | `SKILL.md` + `references/` | PESDP principles + executable rules |
 | **Structure slots** | `module-patterns.md` | English slots only; no field lists |
@@ -86,11 +86,13 @@ Do not hide daily filters, status tabs, or reversible workflow actions merely to
 ## First Load (minimal)
 
 1. **`references/arco-first.md`**
-2. `references/design-principles.md`
-3. `references/module-patterns.md` + `references/domain-language.md` (new pages)
-4. For any task with behavior or request flow: `references/feature-routing.md` + `references/feature-delivery-contract.md`
-5. For any screenshot/prototype-driven task: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
-6. One topic file from the map below
+2. **`references/theme-contract.md`**
+3. `references/design-principles.md`
+4. For an existing-project rewrite without a visual reference: **`references/existing-project-modernization.md`**
+5. `references/module-patterns.md` + `references/domain-language.md` (new pages)
+6. For any task with behavior or request flow: `references/feature-routing.md` + `references/feature-delivery-contract.md`
+7. For any screenshot/prototype-driven task only: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
+8. One topic file from the map below
 7. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
 8. **Before changing icon usage:** read `icons.md`.
 9. **Before any redesign / 布局重写 / 质感优化 / 普通后台味反馈:** read `redesign-calibration.md`.
@@ -105,6 +107,8 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 
 | Task | Read |
 |------|------|
+| **Theme / token / palette / component chrome** | **`theme-contract.md`** + `arco-first.md` + `visual-system.md` |
+| **Existing project modernization with no reference image** | **`existing-project-modernization.md`** + `redesign-calibration.md` + page archetype reference |
 | **Large system / which doc for which menu** | **`domain-routing.md`** |
 | **Any feature with click/submit/request/state change** | **`feature-routing.md`** + **`feature-delivery-contract.md`** |
 | **Any screenshot / 原型 / Figma / 视觉稿驱动任务** | **`artifact-intake-template.md`** + **`prototype-to-ui-contract.md`** + `page-archetypes.md` + `module-patterns.md` |
@@ -144,6 +148,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 ## Non-Negotiables
 
 - Arco-first: prefer Arco built-ins, props, slots, and theme behavior before shared custom CSS
+- Theme ownership: GI is the single Arco baseline and palette; `global.css` may alias its variables but must not redefine them or become another component skin
 - `global.css` is a shared enhancement layer, not a second UI framework
 - Arco + `global.css` tokens; no new color system
 - `vxe-table` only; no `a-table`
@@ -164,17 +169,19 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 ## Working Protocol
 
 1. Fill slot mapping (`module-patterns.md` template).
-2. If the task comes from a screenshot/prototype, complete the artifact intake template.
-3. If the task comes from a screenshot/prototype, complete the prototype translation block.
+2. For an existing project with no reference image, complete the no-reference intake and measured audit from `existing-project-modernization.md`.
+3. If the task comes from a screenshot/prototype, complete the artifact intake template and prototype translation block.
 4. If the task has behavior, classify `feature_type` and complete the functional contract.
 5. Pick archetype; read topic references.
-6. Implement in priority order: Arco built-ins → tokens → documented business patterns → minimal page-local CSS. Shared classes only when `arco-first.md` justification is clear.
-7. Run `node scripts/check-spec.js` and build when possible.
-8. Report object mapping, artifact intake, prototype mapping, feature mapping, files changed, rules applied, verification.
+6. Repair theme ownership before page-local visual tuning.
+7. Implement in priority order: Arco built-ins → official/project tokens → documented business patterns → minimal page-local CSS.
+8. Run real-route visual inspection, `node scripts/check-spec.js`, and build when possible.
+9. Report object mapping, applicable intake/audit, product-grade evidence, files changed, rules applied, and verification.
 
 ## Output Standard
 
 - Slot mapping + archetype (design/generation tasks)
+- Existing-project audit block when no visual artifact is supplied
 - Artifact intake block (screenshot/prototype-driven tasks)
 - Prototype translation block (screenshot/prototype-driven tasks)
 - Feature mapping + delivery contract keys (behavior tasks)

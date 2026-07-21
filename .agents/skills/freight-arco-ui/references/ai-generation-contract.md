@@ -22,21 +22,24 @@ Do not implement a visual idea only because it resembles a modern SaaS reference
 Before generating UI:
 
 1. **`references/arco-first.md`**
-2. `references/design-principles.md`
-3. `references/domain-language.md`
-4. `references/page-archetypes.md`
-5. For any redesign / rewrite / layout-polish task: `references/redesign-calibration.md`
-6. For any productization / financing-demo / sellable-SaaS goal: `references/product-grade-evaluation.md`
-7. For any screenshot/prototype input: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
-8. For any interactive feature: `references/feature-routing.md` + `references/feature-delivery-contract.md`
-9. The task-specific reference: list/detail/table/actions/visual/checklist.
-10. `src/styles/global.css` — only for tokens/patterns already justified by steps 1–9; grep, do not treat as primary catalog.
+2. **`references/theme-contract.md`**
+3. `references/design-principles.md`
+4. `references/domain-language.md`
+5. `references/page-archetypes.md`
+6. For an existing-project redesign without a visual artifact: `references/existing-project-modernization.md`
+7. For any redesign / rewrite / layout-polish task: `references/redesign-calibration.md`
+8. For any productization / financing-demo / sellable-SaaS goal: `references/product-grade-evaluation.md`
+9. For any screenshot/prototype input only: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
+10. For any interactive feature: `references/feature-routing.md` + `references/feature-delivery-contract.md`
+11. The task-specific reference: list/detail/table/actions/visual/checklist.
+12. `src/main.ts`, then `src/styles/global.css` — verify GI is the sole stylesheet/palette owner; do not treat global CSS as a design catalog.
 
 ## Generation Workflow
 
 1. If the task starts from a screenshot/prototype, complete the intake template from `artifact-intake-template.md`.
 2. If the task starts from a screenshot/prototype, complete the prototype translation block from `prototype-to-ui-contract.md`.
-3. If the task is redesign/rewrite/polish, classify it as `polish-only`, `surface-regrouping`, or `skeleton-rewrite` using `redesign-calibration.md`.
+3. If no visual artifact exists and the task modernizes an existing project, complete the no-reference intake and measured audit from `existing-project-modernization.md`.
+4. If the task is redesign/rewrite/polish, classify it using `existing-project-modernization.md` and `redesign-calibration.md`.
 4. If the task targets product-grade quality, define the desired level using `product-grade-evaluation.md`: `internal-system`, `strong-internal-product`, `customer-facing-product`, or `sellable-saas-grade`.
 5. Decide whether the page can stay `arco-only`, needs `arco-plus-shared-enhancement`, or truly needs a custom pattern using `arco-first.md`.
 6. Classify page archetype.
@@ -156,6 +159,7 @@ src/views/<domain>/<module>/
 ## Visual Generation Rules
 
 - Use Arco components and theme tokens.
+- Keep one Arco component and palette baseline from GI. Normal page work does not change official theme values; page CSS must not reskin the component library.
 - Always use Arco Design components whenever possible.
 - Prefer Arco props, slots, layout primitives, and existing interaction behavior before introducing shared custom wrappers.
 - Do not redesign existing Arco interaction behaviors.
@@ -181,7 +185,7 @@ src/views/<domain>/<module>/
 - Group low-frequency actions in dropdowns.
 - For process-bearing operational detail drawers, use `dds-milestone-bar` for compact process awareness. Do not generate `a-steps type="arrow"` or a full-width KPI/report strip under the hero. Repeated data totals belong in the owning module summary, not in the hero.
 - For detail sections with internal groups, generate `form-subgroup` blocks with `form-subgroup__head`, `form-subgroup__title`, and a following `detail-form-grid`. Do not generate consecutive bare `form-subgroup-label` elements or repeated blue left rails.
-- Generate list workbenches with the responsive contract from `responsive.md`: filter rows may wrap below `1280px`, merged toolbar/status may become two rows, and `stat-tab-group` must scroll internally instead of creating page-level horizontal overflow.
+- Generate list workbenches with the responsive contract from `responsive.md`: at 1280px the primary filter/workflow path stays compact; only widths below the supported desktop baseline may wrap, and status groups scroll internally before creating another full-width band.
 - Select query UI by field count from `filter-layout.md`: 1-8 visible core filters, 9-16 core row + drawer, 17-32 grouped drawer, 33-50 wide drawer with group navigation, and 50+ saved query workspace. Do not generate a flat 30/40/50-field query wall.
 - Keep table/list area dominant on operational pages.
 

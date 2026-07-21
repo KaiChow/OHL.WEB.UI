@@ -20,6 +20,22 @@
 - Every shared class used on the page has a one-line `why_arco_not_enough` if challenged in review.
 - Page-local scoped CSS is minimal shell only.
 
+## Theme Ownership Gate
+
+- `@arco-themes/vue-gi-demo/css/arco.css` is the only Arco baseline stylesheet; the default Arco CSS is not imported beside it.
+- GI owns all official Arco palette variables. This project has no `src/styles/theme.css` adapter or second palette.
+- `global.css` consumes official variables through `--dense-*` aliases; it does not redefine the official palette or act as another component skin.
+- Remaining broad `.arco-*` rules have a documented token/prop gap.
+- Computed `--primary-6`, `--color-text-1`, `--color-fill-2`, and `--color-border-1` are checked on a real route against the effective GI baseline.
+
+## Existing Project Modernization Gate
+
+- When no screenshot/prototype exists, the no-reference intake from `existing-project-modernization.md` is used instead of artifact intake.
+- Existing code is treated as evidence, not design authority; business behavior is preserved while theme/layout debt may be removed.
+- The modernization mode is explicit: `theme-realignment`, `surface-regrouping`, or `skeleton-rewrite`.
+- Before/after evidence records theme ownership, removed visual debt, first-viewport allocation, and product-grade score.
+- The skill remains portable: current route names, field lists, and page-local classes are not promoted to universal rules.
+
 ## PESDP Gate
 
 - Professional: uses freight/logistics terms and industry structure.
@@ -44,6 +60,7 @@
 - The page is judged as a production workbench when sales/operators/coordinators use it for repeated daily office work.
 - Production workbench priority is business efficiency first, long-session visual comfort second, visual beauty third.
 - Table-dominant list pages target 70-80% first-viewport business data ownership; 75% is a target signal, not a universal rule for details, drawers, approvals, or exception pages.
+- A normal table workbench below 65% is rejected and structurally revised before visual polish.
 - Daily status tabs remain visible when users process records by state.
 - Daily reversible workflow actions remain directly reachable as neutral grouped actions; rare, risky, or destructive actions move to dropdown/confirm flows.
 - Modernization preserves operational affordances while removing old ERP noise: all-blue buttons, warning workflow buttons, red normal data, heavy vertical grids, gray form walls, and equal-weight bordered zones.
@@ -180,13 +197,13 @@
 ## Visual
 
 - Uses Arco tokens, no new hex palette.
-- Main surface follows the 2026 Brand-Neutral Premium Dense standard from `visual-system.md`: cool brand-neutral page base, white work surfaces, light shadow, weak brand-neutral boundary, no flat gray ERP surface and no blue-gradient page/table chrome.
-- Main palette follows the Deep-Sea Neutral color contract from `visual-system.md`: cool neutral page base, white work surfaces, neutral headers, weak row separators, transparent vertical grid by default, primary only for anchors/interactions, semantic colors only for state/risk.
+- Main surface follows the Premium Dense usage rules from `visual-system.md`: GI page/container/fill/border tokens, restrained elevation, no page-local repaint or decorative gradients.
+- Main palette is the effective GI palette: primary only for anchors/interactions, semantic colors only for state/risk, and neutral GI roles for surfaces, headers and separators.
 - Page is not dominated by gray, blue, or repeated bordered boxes.
 - One primary anchor is visible in the first viewport, but primary tint does not cover whole search/tool/table surfaces.
-- Search card, toolbar, table cap, and default table rows use brand-neutral/white surfaces; primary appears in active nav, links, focus, hover, selection, status, and thin anchors only.
-- Workbench table header is brand-neutral (`--dense-table-header-bg`), not gray sheet fill or blue gradient; table body uses weak horizontal separators and no dominant vertical grid lines.
-- Card boundaries do not read as blue frames or plain gray boxes; hierarchy comes from gap, white surface, subtle shadow, and brand-neutral 1px boundary.
+- Search card, toolbar, table cap, and default table rows use GI neutral surfaces; primary appears in active nav, links, focus, hover, selection, status, and thin anchors only.
+- Workbench table header uses the shared GI alias (`--dense-table-header-bg`); table body uses weak horizontal separators and no dominant vertical grid lines.
+- Card hierarchy comes from grouping, gap, the effective GI surface, restrained elevation, and the shared boundary token.
 - Toolbar workflow buttons are separated by type/group/icon, not by arbitrary success/warning/purple colors. Semantic colors remain reserved for status, validation, risk, and destructive actions.
 - List modules follow `responsive.md`: no filter/toolbar/status module creates page-level horizontal scroll; below `1280px`, status groups may wrap to a second row and scroll internally.
 - Raw theme channel tokens are not used as complete CSS colors; use `--dense-*` aliases or `rgb()/rgba(var(...))`.

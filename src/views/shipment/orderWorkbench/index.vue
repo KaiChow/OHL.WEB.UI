@@ -14,7 +14,6 @@ import {
   IconMore,
   IconSettings,
   IconInfoCircle,
-  IconExclamationCircleFill,
   IconEmpty,
 } from '@arco-design/web-vue/es/icon';
 import { downloadCsvFile } from '../../../utils/mock-actions';
@@ -446,7 +445,7 @@ const fetchList = async () => {
 <template>
   <div class="workbench-page">
     <div class="workbench-stack">
-      <a-card size="small" :bordered="true" class="workbench-page__filter">
+      <a-card size="small" :bordered="true" class="workbench-page__command">
         <div class="filter-panel">
           <div class="filter-panel__fields">
             <a-form :model="query" layout="vertical" size="small" class="filter-panel__form">
@@ -532,9 +531,6 @@ const fetchList = async () => {
             </a-badge>
           </div>
         </div>
-      </a-card>
-
-      <a-card size="small" :bordered="true" class="workbench-page__flow">
         <div class="flow-bar">
           <div class="flow-bar__actions">
             <a-button size="small" type="primary">
@@ -558,35 +554,28 @@ const fetchList = async () => {
             </a-dropdown>
           </div>
 
-          <div class="flow-bar__aside">
-            <div v-if="riskRows.length" class="flow-notice flow-notice--warn" title="存在缺文件、异常或节点超期订单，请优先处理">
-              <icon-exclamation-circle-fill class="flow-notice__icon" />
-              <span class="flow-notice__text">优先处理 {{ riskRows.length }} 票风险订单</span>
-            </div>
-
-            <a-tabs
-              v-model:active-key="activeStatusTab"
-              type="line"
-              size="small"
-              class="workbench-status-tabs"
-              @change="onStatusTabChange"
-            >
-              <a-tab-pane v-for="tab in statusTabStats" :key="tab.key">
-                <template #title>
-                  <span class="workbench-tab-title">
-                    {{ tab.label }}
-                    <span
-                      class="workbench-tab-count"
-                      :class="{
-                        'workbench-tab-count--warn': tab.tone === 'warn',
-                        'workbench-tab-count--danger': tab.tone === 'danger',
-                      }"
-                    >{{ tab.count }}</span>
-                  </span>
-                </template>
-              </a-tab-pane>
-            </a-tabs>
-          </div>
+          <a-tabs
+            v-model:active-key="activeStatusTab"
+            type="line"
+            size="small"
+            class="workbench-status-tabs"
+            @change="onStatusTabChange"
+          >
+            <a-tab-pane v-for="tab in statusTabStats" :key="tab.key">
+              <template #title>
+                <span class="workbench-tab-title">
+                  {{ tab.label }}
+                  <span
+                    class="workbench-tab-count"
+                    :class="{
+                      'workbench-tab-count--warn': tab.tone === 'warn',
+                      'workbench-tab-count--danger': tab.tone === 'danger',
+                    }"
+                  >{{ tab.count }}</span>
+                </span>
+              </template>
+            </a-tab-pane>
+          </a-tabs>
         </div>
       </a-card>
 
@@ -978,14 +967,14 @@ const fetchList = async () => {
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  padding: 12px;
+  padding: 0;
   box-sizing: border-box;
 }
 
 .workbench-page :deep(.arco-card) {
   border-color: var(--dense-card-border);
   border-radius: var(--dense-radius);
-  box-shadow: var(--dense-shadow-card);
+  box-shadow: none;
 }
 
 .workbench-stack {
@@ -996,15 +985,15 @@ const fetchList = async () => {
   min-height: 0;
 }
 
-.workbench-page__filter :deep(.arco-card-body),
-.workbench-page__flow :deep(.arco-card-body) {
-  padding: 10px 12px;
+.workbench-page__command :deep(.arco-card-body) {
+  padding: 0;
 }
 
 .filter-panel {
   display: flex;
   align-items: flex-end;
   gap: 12px;
+  padding: 8px 12px;
 }
 
 .filter-panel__fields {
@@ -1031,13 +1020,9 @@ const fetchList = async () => {
   justify-content: space-between;
   gap: 14px;
   min-width: 0;
-}
-
-.flow-bar__aside {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
+  min-height: 40px;
+  padding: 0 12px;
+  border-top: 1px solid var(--color-border-1);
 }
 
 .flow-bar__actions {
@@ -1047,38 +1032,6 @@ const fetchList = async () => {
   gap: 8px;
   padding-right: 12px;
   border-right: 1px solid var(--color-border-1);
-}
-
-.flow-notice {
-  display: inline-flex;
-  flex: 0 1 auto;
-  align-items: center;
-  gap: 5px;
-  max-width: 220px;
-  height: 24px;
-  padding: 0 8px;
-  border: 1px solid var(--color-border-1);
-  border-radius: var(--dense-radius-sm);
-  background: var(--color-fill-1);
-  color: var(--color-text-2);
-  font-size: var(--dense-font-aux);
-  line-height: 22px;
-}
-
-.flow-notice--warn {
-  border-color: var(--dense-warning-2);
-  background: var(--dense-warning-1);
-  color: var(--dense-warning-7);
-}
-
-.flow-notice__icon {
-  flex: 0 0 auto;
-}
-
-.flow-notice__text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .workbench-status-tabs :deep(.arco-tabs-content) {
@@ -1150,6 +1103,7 @@ const fetchList = async () => {
   min-height: 0;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--dense-shadow-card) !important;
 }
 
 .workbench-page__table-host :deep(.arco-card-header) {
@@ -1376,34 +1330,4 @@ const fetchList = async () => {
   white-space: nowrap;
 }
 
-@media (max-width: 1280px) {
-  .filter-panel {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-panel__actions {
-    width: 100%;
-    padding-top: 0;
-    justify-content: flex-end;
-  }
-
-  .flow-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .flow-bar__aside {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .flow-bar__actions {
-    flex-wrap: wrap;
-    padding-right: 0;
-    border-right: 0;
-  }
-}
 </style>

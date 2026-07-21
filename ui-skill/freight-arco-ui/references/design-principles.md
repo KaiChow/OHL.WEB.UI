@@ -117,7 +117,7 @@ Do not create quality by:
 - Random accent colors.
 - Excessive shadows.
 
-Use Arco Design Vue default theme tokens (`@arco-design/web-vue`) as the color source. Custom color should be exceptional and justified.
+Use the project theme stack from `theme-contract.md`: GI owns the Arco component baseline and palette; `src/styles/global.css` may expose direct semantic aliases only. Page CSS must not invent a palette or reskin Arco controls.
 
 ## PESDP+ Operating Principles
 
@@ -208,7 +208,8 @@ If any answer is no, revise structure before tuning colors.
 
 | Layer | File | Language |
 |-------|------|----------|
-| Framework | Arco Design Vue (`@arco-design/web-vue`) | props / CSS variables |
+| Framework | Arco Design Vue + `@arco-themes/vue-gi-demo` | props / component baseline |
+| Theme contract | `theme-contract.md` | GI/Arco variables → direct semantic aliases |
 | Arco-first contract | `arco-first.md` | EN |
 | Enhancement tokens / patterns | `src/styles/global.css` | CSS (thin layer) |
 | Principles | `design-principles.md` | EN |

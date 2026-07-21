@@ -12,7 +12,8 @@ alwaysApply: true
 
 | 任务 | 读 |
 |------|-----|
-| **所有 UI 任务（最先）** | **`arco-first.md`** |
+| **所有 UI 任务（最先）** | **`arco-first.md` + `theme-contract.md`** |
+| **无截图/原型的既有项目改造** | **`existing-project-modernization.md`** + `redesign-calibration.md` |
 | **新菜单 / 不确定用哪种布局** | **`domain-routing.md`** |
 | **任何有点击/提交/请求/状态流转的功能** | **`feature-routing.md`** + **`feature-delivery-contract.md`** |
 | **任何截图 / 原型 / Figma / 视觉稿驱动任务** | **`artifact-intake-template.md`** + **`prototype-to-ui-contract.md`** + `page-archetypes.md` + `module-patterns.md` |

@@ -4,7 +4,7 @@
  * 检查页面、组件和 UI skill 样式下所有 .vue / .ts / .css 文件
  */
 
-import { readFileSync, readdirSync, statSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join, extname, sep } from 'path';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1');
@@ -179,6 +179,7 @@ for (const file of files) {
 }
 
 const globalCss = readFileSync(join(ROOT, 'src/styles/global.css'), 'utf8');
+const packageJson = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
 const modulePatterns = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/module-patterns.md'), 'utf8');
 const aiGenerationContract = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/ai-generation-contract.md'), 'utf8');
 const checklist = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/checklist.md'), 'utf8');
@@ -196,6 +197,75 @@ const skillSource = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/SKILL.md')
 const specFirstCoding = readFileSync(join(ROOT, '.cursor/rules/spec-first-coding.mdc'), 'utf8');
 const adversarialReview = readFileSync(join(ROOT, '.cursor/rules/adversarial-review.mdc'), 'utf8');
 const mainTs = readFileSync(join(ROOT, 'src/main.ts'), 'utf8');
+const existingProjectModernization = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/existing-project-modernization.md'), 'utf8');
+
+if (!/^[~^]?0\.0\.58$/.test(packageJson.dependencies?.['@arco-themes/vue-gi-demo'] || '')) {
+  violations.push({
+    rule: '项目 dependencies 必须声明 @arco-themes/vue-gi-demo 0.0.58 兼容版本作为唯一 Arco 主题 baseline',
+    file: 'package.json',
+    line: 1,
+    content: 'missing or unexpected @arco-themes/vue-gi-demo dependency',
+  });
+}
+if (!packageJson.dependencies?.['@arco-design/web-vue']) {
+  violations.push({
+    rule: '项目 dependencies 必须声明 @arco-design/web-vue；组件实现版本需满足 GI 主题 peer dependency',
+    file: 'package.json',
+    line: 1,
+    content: 'missing @arco-design/web-vue dependency',
+  });
+}
+const giThemeIndex = mainTs.indexOf("@arco-themes/vue-gi-demo/css/arco.css");
+const globalCssIndex = mainTs.indexOf("./styles/global.css");
+if (giThemeIndex < 0 || globalCssIndex < giThemeIndex) {
+  violations.push({
+    rule: '主题导入顺序必须是 GI baseline → global.css',
+    file: 'src/main.ts',
+    line: 1,
+    content: 'invalid theme import order',
+  });
+}
+if (mainTs.includes('@arco-design/web-vue/dist/arco.css')) {
+  violations.push({
+    rule: '使用 GI 主题时禁止同时导入 Arco 默认 CSS',
+    file: 'src/main.ts',
+    line: 1,
+    content: 'duplicate Arco baseline stylesheet',
+  });
+}
+if (mainTs.includes('./styles/theme.css') || existsSync(join(ROOT, 'src/styles/theme.css'))) {
+  violations.push({
+    rule: '当前项目由 GI 单独拥有 palette，禁止保留或导入 src/styles/theme.css 适配层',
+    file: 'src/styles/theme.css',
+    line: 1,
+    content: 'project theme adapter detected',
+  });
+}
+const officialTokensInGlobal = globalCss.match(/^\s*--(?:primary-\d+|color-(?:bg|fill|text|border)-\d+)\s*:/gm) || [];
+if (officialTokensInGlobal.length) {
+  violations.push({
+    rule: 'Arco 官方主题变量由 GI 单独拥有，global.css 仅保留直接 --dense-* 语义 alias',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: officialTokensInGlobal.slice(0, 3).join(', '),
+  });
+}
+if (existsSync(join(ROOT, 'CLAUDE.md')) || existsSync(join(ROOT, '.claude'))) {
+  violations.push({
+    rule: '项目已停用 Claude，禁止保留 CLAUDE.md 或 .claude 目录',
+    file: '.',
+    line: 1,
+    content: 'Claude configuration detected',
+  });
+}
+if (!skillSource.includes('theme-contract.md') || !skillSource.includes('existing-project-modernization.md')) {
+  violations.push({
+    rule: 'SKILL.md 必须路由主题任务与无参考图的既有项目改造任务',
+    file: 'ui-skill/freight-arco-ui/SKILL.md',
+    line: 1,
+    content: 'missing theme/modernization routing',
+  });
+}
 
 if (!modulePatterns.includes('Specification Granularity Rule')) {
   violations.push({
@@ -237,12 +307,20 @@ if (!checklist.includes('Functional Delivery Gate')) {
     content: 'missing Functional Delivery Gate',
   });
 }
-if (!visualSystem.includes('Deep-Sea Neutral Color Contract')) {
+if (!visualSystem.includes('Arco Theme Color Contract')) {
   violations.push({
-    rule: '视觉规范必须定义 Deep-Sea Neutral Color Contract，统一货代作业台配色边界',
+    rule: '视觉规范必须定义 Arco Theme Color Contract，禁止项目另起配色系统',
     file: 'ui-skill/freight-arco-ui/references/visual-system.md',
     line: 1,
-    content: 'missing Deep-Sea Neutral Color Contract',
+    content: 'missing Arco Theme Color Contract',
+  });
+}
+if (!existingProjectModernization.includes('Layout Quality Gate')) {
+  violations.push({
+    rule: '无参考图的既有项目改造必须包含可量化的 Layout Quality Gate',
+    file: 'ui-skill/freight-arco-ui/references/existing-project-modernization.md',
+    line: 1,
+    content: 'missing Layout Quality Gate',
   });
 }
 if (!filterLayout.includes('group navigation should be anchors')) {

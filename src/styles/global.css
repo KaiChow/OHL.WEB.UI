@@ -45,39 +45,19 @@ body,
 }
 
 /* =================================================================
-   Design tokens — 高密度列表页（布局 + 固定项目主题）
-   项目主题色固定为 Arco Blue，不依赖运行时主题变量形态。
+   Design tokens — high-density layout + semantic aliases.
+   Official Arco color values come directly from the GI theme.
    ================================================================= */
 :root {
-  /* 项目基础表面 */
-  --color-bg-body: #F2F5F8;
-  --color-bg-card: #FFFFFF;
-
-  /* Arco 语义表面桥接 — 白底工作面 + 轻边框（见 visual-system.md · Deep-Sea Neutral） */
-  --color-bg-1: #FFFFFF;
-  --color-bg-2: #FFFFFF;
-  --color-bg-3: #F7F9FC;
-  --color-bg-4: #F0F3F7;
-  --color-bg-5: #E5EAF0;
-  --color-fill-1: #F7F9FC;
-  --color-fill-2: #FFFFFF;
-  --color-fill-3: #F2F4F7;
-  --color-fill-4: #E8EDF3;
-  --color-border-1: #EEF2F6;
-  --color-border-2: #DCE3EA;
-  --color-border-3: #C5D0DB;
-  --color-border-4: #A9B8C6;
-  --color-text-1: #1D2129;
-  --color-text-2: #4E5969;
-  --color-text-3: #86909C;
-  --color-text-4: #C9CDD4;
-  --dense-control-surface: #FFFFFF;
-  --dense-control-disabled-bg: #F4F6F9;
+  --color-bg-body: var(--color-fill-1);
+  --color-bg-card: var(--color-bg-1);
+  --dense-control-surface: var(--color-bg-1);
+  --dense-control-disabled-bg: var(--color-fill-1);
   --dense-control-border: var(--color-border-2);
-  --dense-control-border-hover: #C5D0DB;
+  --dense-control-border-hover: var(--color-border-3);
 
   /* 布局密度（列表页专用，非色彩） */
-  --dense-radius: 6px;
+  --dense-radius: var(--border-radius-medium);
   --dense-row-h: 36px;
   /* 主列表行高：高频扫描，不承载表单控件 */
   --dense-row-h-detail-edit: 38px;
@@ -185,71 +165,71 @@ body,
   --dense-pad-head-x: 12px;
   /* 分区 head 左右 */
 
-  /* 固定项目主题色板：Arco Blue / Orange / Green / Red */
-  --dense-primary-1: #F2F7FF;
-  --dense-primary-2: #E3EEFF;
-  --dense-primary-3: #C7DCFF;
-  --dense-primary-4: #8FB8FF;
-  --dense-primary-5: #4080FF;
-  --dense-primary-6: #165DFF;
-  --dense-primary-7: #0E42D2;
-  --dense-primary-8: #072CA6;
-  --dense-primary-9: #031A79;
-  --dense-primary-10: #000D4D;
-  --dense-warning-1: #FFF7E8;
-  --dense-warning-2: #FFE4BA;
-  --dense-warning-3: #FFCF8B;
-  --dense-warning-4: #FFB65D;
-  --dense-warning-5: #FF9A2E;
-  --dense-warning-6: #FF7D00;
-  --dense-warning-7: #D25F00;
-  --dense-warning-8: #A64500;
-  --dense-warning-9: #792E00;
-  --dense-warning-10: #4D1B00;
-  --dense-success-1: #E8FFEA;
-  --dense-success-2: #AFF0B5;
-  --dense-success-3: #7BE188;
-  --dense-success-4: #4CD263;
-  --dense-success-5: #23C343;
-  --dense-success-6: #00B42A;
-  --dense-success-7: #009A29;
-  --dense-success-8: #008026;
-  --dense-success-9: #006622;
-  --dense-success-10: #004D1C;
-  --dense-danger-1: #FFECE8;
-  --dense-danger-2: #FDCDC5;
-  --dense-danger-3: #FBACA3;
-  --dense-danger-4: #F98981;
-  --dense-danger-5: #F76560;
-  --dense-danger-6: #F53F3F;
-  --dense-danger-7: #CB272D;
-  --dense-danger-8: #A1151E;
-  --dense-danger-9: #770813;
-  --dense-danger-10: #4D000A;
+  /* Semantic aliases resolve against the active Arco theme at use time. */
+  --dense-primary-1: rgb(var(--primary-1));
+  --dense-primary-2: rgb(var(--primary-2));
+  --dense-primary-3: rgb(var(--primary-3));
+  --dense-primary-4: rgb(var(--primary-4));
+  --dense-primary-5: rgb(var(--primary-5));
+  --dense-primary-6: rgb(var(--primary-6));
+  --dense-primary-7: rgb(var(--primary-7));
+  --dense-primary-8: rgb(var(--primary-8));
+  --dense-primary-9: rgb(var(--primary-9));
+  --dense-primary-10: rgb(var(--primary-10));
+  --dense-warning-1: rgb(var(--warning-1));
+  --dense-warning-2: rgb(var(--warning-2));
+  --dense-warning-3: rgb(var(--warning-3));
+  --dense-warning-4: rgb(var(--warning-4));
+  --dense-warning-5: rgb(var(--warning-5));
+  --dense-warning-6: rgb(var(--warning-6));
+  --dense-warning-7: rgb(var(--warning-7));
+  --dense-warning-8: rgb(var(--warning-8));
+  --dense-warning-9: rgb(var(--warning-9));
+  --dense-warning-10: rgb(var(--warning-10));
+  --dense-success-1: rgb(var(--success-1));
+  --dense-success-2: rgb(var(--success-2));
+  --dense-success-3: rgb(var(--success-3));
+  --dense-success-4: rgb(var(--success-4));
+  --dense-success-5: rgb(var(--success-5));
+  --dense-success-6: rgb(var(--success-6));
+  --dense-success-7: rgb(var(--success-7));
+  --dense-success-8: rgb(var(--success-8));
+  --dense-success-9: rgb(var(--success-9));
+  --dense-success-10: rgb(var(--success-10));
+  --dense-danger-1: rgb(var(--danger-1));
+  --dense-danger-2: rgb(var(--danger-2));
+  --dense-danger-3: rgb(var(--danger-3));
+  --dense-danger-4: rgb(var(--danger-4));
+  --dense-danger-5: rgb(var(--danger-5));
+  --dense-danger-6: rgb(var(--danger-6));
+  --dense-danger-7: rgb(var(--danger-7));
+  --dense-danger-8: rgb(var(--danger-8));
+  --dense-danger-9: rgb(var(--danger-9));
+  --dense-danger-10: rgb(var(--danger-10));
 
   --dense-primary: var(--dense-primary-6);
   --dense-primary-deep: var(--dense-primary-7);
   --dense-primary-soft: var(--dense-primary-1);
-  --dense-brand-surface: #F2F7FA;
-  --dense-brand-line: #D5E1EA;
-  --dense-brand-line-strong: #A9BCCB;
-  --dense-page-bg: #F2F5F8;
-  --dense-card-border: #DCE5EC;
+  --dense-brand-surface: var(--color-primary-light-1);
+  --dense-brand-line: var(--color-border-1);
+  --dense-brand-line-strong: var(--color-border-3);
+  --dense-page-bg: var(--color-fill-1);
+  --dense-card-border: var(--color-border-1);
   --dense-card-border-active: var(--dense-primary-3);
   --dense-zone-top-border: var(--dense-brand-line);
-  --dense-surface-tint: #FFFFFF;
-  --dense-surface-head: #FAFBFC;
-  --dense-surface-section: #FFFFFF;
-  --dense-surface-rail: linear-gradient(90deg, var(--dense-primary-1) 0, #FFFFFF 42px);
-  --dense-border: #DCE4EA;
-  --dense-border-subtle: #E8EEF3;
-  --dense-row-stripe: #FFFFFF;
-  --dense-table-header-bg: #FAFBFC;
-  --dense-table-header-border: #DDE8F1;
+  --dense-surface-tint: var(--color-bg-1);
+  --dense-surface-head: var(--color-fill-1);
+  --dense-surface-section: var(--color-bg-1);
+  --dense-surface-rail: linear-gradient(90deg, var(--dense-primary-1) 0, var(--color-bg-1) 42px);
+  --dense-border: var(--color-border-2);
+  --dense-border-subtle: var(--color-border-1);
+  --dense-row-stripe: var(--color-bg-1);
+  --dense-table-header-bg: var(--color-fill-1);
+  --dense-table-header-border: var(--color-border-1);
   /* 全项目 VXE 数据表共用交互色（列表 workbench-table + 详情 detail-mini-vxe） */
-  --dense-vxe-surface-hover-bg: #EFF6FF;
-  --dense-vxe-surface-checked-bg: #E4F0FF;
-  --dense-vxe-surface-checked-hover-bg: #DCEBFF;
+  --dense-vxe-surface-hover-bg: var(--color-primary-light-1);
+  --dense-vxe-surface-checked-bg: var(--color-primary-light-2);
+  --dense-vxe-surface-checked-hover-bg: rgb(var(--primary-2));
   --dense-workbench-hover-bg: var(--dense-vxe-surface-hover-bg);
   --dense-workbench-checked-bg: var(--dense-vxe-surface-checked-bg);
   --dense-workbench-checked-hover-bg: var(--dense-vxe-surface-checked-hover-bg);
@@ -260,9 +240,9 @@ body,
   --dense-mini-vxe-checked-bg: var(--dense-vxe-surface-checked-bg);
   --dense-mini-vxe-checked-hover-bg: var(--dense-vxe-surface-checked-hover-bg);
   --dense-table-col-border: transparent;
-  --dense-table-row-border: #EEF2F6;
-  --dense-table-empty-bg: #FFFFFF;
-  --dense-table-fixed-bg: #FFFFFF;
+  --dense-table-row-border: var(--color-border-1);
+  --dense-table-empty-bg: var(--color-bg-1);
+  --dense-table-fixed-bg: var(--color-bg-1);
   --dense-table-fixed-shadow: -6px 0 14px rgba(16, 24, 40, 0.032);
   --dense-bg-body: var(--color-bg-body);
   --dense-bg-body-top: var(--color-bg-body);
@@ -271,12 +251,9 @@ body,
   --dense-bg-advanced: var(--color-fill-1);
 
   /* 结构阴影（中性灰，不含独立色相） */
-  --dense-shadow-card:
-    0 1px 2px rgba(16, 24, 40, 0.04),
-    0 8px 20px rgba(28, 43, 64, 0.055),
-    0 0 0 1px var(--dense-card-border);
+  --dense-shadow-card: 0 1px 2px rgba(29, 33, 41, 0.04), 0 0 0 1px var(--color-border-1);
   --dense-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  --dense-shadow-lift: 0 6px 16px rgba(29, 33, 41, 0.08);
+  --dense-shadow-lift: 0 8px 24px rgba(29, 33, 41, 0.1);
 }
 
 /* VXE native theme bridge:
@@ -827,57 +804,6 @@ body,
   font-size: var(--dense-font-data);
   font-weight: var(--dense-weight-title);
   letter-spacing: .01em;
-}
-
-/* =================================================================
-   Arco 表面桥接 — 全局配色（控件白底描边；灰底仅 true disabled）
-   ================================================================= */
-.arco-input-wrapper:not(.arco-input-disabled),
-.arco-textarea-wrapper:not(.arco-textarea-disabled),
-.arco-select-view-single:not(.arco-select-view-disabled),
-.arco-select-view-multiple:not(.arco-select-view-disabled),
-.arco-picker:not(.arco-picker-disabled),
-.arco-input-number:not(.arco-input-number-mode-button):not(.arco-input-number-disabled) {
-  background-color: var(--dense-control-surface);
-  border-color: var(--dense-control-border);
-}
-
-.arco-input-wrapper:not(.arco-input-disabled):hover,
-.arco-textarea-wrapper:not(.arco-textarea-disabled):hover,
-.arco-select-view-single:not(.arco-select-view-disabled):hover,
-.arco-select-view-multiple:not(.arco-select-view-disabled):hover,
-.arco-picker:not(.arco-picker-disabled):hover,
-.arco-input-number:not(.arco-input-number-mode-button):not(.arco-input-number-disabled):hover {
-  background-color: var(--dense-control-surface);
-  border-color: var(--dense-control-border-hover);
-}
-
-.arco-input-wrapper.arco-input-disabled,
-.arco-textarea-wrapper.arco-textarea-disabled,
-.arco-select-view-single.arco-select-view-disabled,
-.arco-select-view-multiple.arco-select-view-disabled,
-.arco-picker-disabled,
-.arco-input-number.arco-input-number-disabled {
-  background-color: var(--dense-control-disabled-bg);
-  color: var(--color-text-3);
-}
-
-.arco-card {
-  background-color: var(--color-bg-card);
-  border-color: var(--dense-card-border);
-}
-
-.arco-radio-group-button .arco-radio-button:not(.arco-radio-checked) {
-  background-color: var(--color-bg-1);
-  color: var(--color-text-2);
-  border-color: var(--color-border-2);
-}
-
-.arco-radio-group-button .arco-radio-button.arco-radio-checked {
-  background-color: var(--dense-primary-1);
-  color: var(--dense-primary-7);
-  border-color: var(--dense-primary-3);
-  font-weight: var(--dense-weight-nav-active);
 }
 
 /* =================================================================

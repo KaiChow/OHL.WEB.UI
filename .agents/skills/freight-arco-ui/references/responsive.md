@@ -13,10 +13,11 @@ Responsive design in this project protects operational work, not marketing compo
 
 ## List Workbench Rules
 
-- The visible filter row may wrap below `1280px`; it must not compress label/control spacing until labels touch controls.
+- At the supported 1280px desktop baseline, the visible filter row and primary workflow row must remain compact. Do not use `@media (max-width: 1280px)` to stack both surfaces at the exact minimum viewport.
+- Below the supported desktop baseline, the visible filter row may wrap; it must not compress label/control spacing until labels touch controls.
 - Filter fields keep a minimum readable width. Combined keyword fields get the widest allocation; lower-frequency filters move to the drawer.
 - Query/reset/filter actions stay together. On small screens they align to the end of the wrapped row instead of becoming detached buttons.
-- `merged-bar` may use two rows below `1280px`: business actions and scope tabs first, status counts on the second row.
+- `merged-bar` may use two rows only below the supported desktop baseline: business actions and scope tabs first, status counts on the second row.
 - Status count groups must use `flex: 1 1 auto`, `min-width: 0`, and internal horizontal scrolling. They must not force the page or toolbar to create a browser-level horizontal scrollbar.
 - Utility icons such as refresh stay at the right edge of the toolbar row when width allows; if not, they remain icon-only and do not push status tabs out of view.
 - The table is allowed to scroll horizontally. Toolbar/filter modules should not create unexpected page-level horizontal scrollbars.

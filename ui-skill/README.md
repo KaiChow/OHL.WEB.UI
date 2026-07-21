@@ -6,11 +6,14 @@ PESDP Design System 2.0 · Vue 3 + Arco + VXE Table · 货代 SaaS
 
 ```
 Arco Design Vue         ← 页面默认组件与交互基础
-src/styles/global.css   ← 薄增强层（Token + VXE 桥接 + 货代语义）
+@arco-themes/vue-gi-demo ← 唯一 Arco 组件样式与配色来源
+src/styles/global.css   ← 薄增强层（直接语义 alias + 密度 + VXE 桥接 + 货代语义）
 ui-skill/freight-arco-ui/
 ├── SKILL.md            ← 入口：架构、必读顺序、不可协商项
 └── references/
     ├── arco-first.md          ← Arco → token → 业务 pattern → page-local CSS
+    ├── theme-contract.md      ← GI baseline → 官方变量 → 语义 alias 的所有权
+    ├── existing-project-modernization.md ← 无参考图的既有项目审计与改造
     ├── design-principles.md   ← PESDP 原则
     ├── module-patterns.md     ← 英文槽位 / 结构（无字段表）
     ├── artifact-intake-template.md ← 原型/截图任务的最小业务输入模板

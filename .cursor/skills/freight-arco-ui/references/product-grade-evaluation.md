@@ -208,6 +208,10 @@ Hard scoring rules:
 - A page cannot be marked `customer-facing-product` if `consistency` or `credibility` is below `4`.
 - A page cannot be marked `sellable-saas-grade` if `demo_value` is below `4`.
 - A page may pass internal operation but still fail product-grade quality.
+- Product-grade claims require evidence from a real route. For table workbenches record viewport, usable content height, table host height, data ownership ratio, computed theme tokens, and visible workflow controls.
+- A normal table workbench below 65% first-viewport data ownership cannot score `4` or `5` for efficiency feel or order.
+- A page that does not leave GI as the sole palette owner, contains duplicate component skins, or redeclares official theme values cannot score `4` or `5` for consistency or credibility.
+- A score without evidence is provisional and must not be reported as `customer-facing-product` or `sellable-saas-grade`.
 
 ## Current Level Definitions
 

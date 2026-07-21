@@ -4,11 +4,11 @@
 
 ## 技术栈
 
-Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
+Vue 3 · TypeScript · Arco Design Vue · `@arco-themes/vue-gi-demo` · VXE Table · Vite
 
 ## 三条铁律
 
-1. **Arco-first** — Arco 驱动页面；执行链：Arco → token → 业务 pattern → page-local CSS（见 `references/arco-first.md`）。
+1. **Arco-first** — Arco 驱动页面；执行链：GI baseline/palette → 直接语义 token → 业务 pattern → page-local layout CSS（见 `references/arco-first.md` + `references/theme-contract.md`）。
 2. **Skill** — 页面/布局/表格/按钮/质感/功能流程先读 `$freight-arco-ui`，按任务读 `references/`。
 3. **编码门禁** — 写前 `spec-first-coding.mdc`；交付前 `adversarial-review.mdc` + `check-spec.js`。
 
@@ -19,6 +19,8 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 
 | 域 | 读 |
 |----|-----|
+| 主题 / token / 组件皮肤 | `theme-contract.md` + `visual-system.md` |
+| 无参考图改造既有项目 | `existing-project-modernization.md` + `redesign-calibration.md` |
 | 框架优先 / 减 global.css 依赖 | `arco-first.md` |
 | 新菜单选型 | `domain-routing.md` |
 | 截图/原型转页面 | `artifact-intake-template.md` + `prototype-to-ui-contract.md` + `page-archetypes.md` + `module-patterns.md` |
@@ -33,6 +35,7 @@ Vue 3 · TypeScript · Arco Design Vue · VXE Table · Vite
 ## 不可协商（摘要）
 
 - **Arco-first**：能用 Arco props/结构解决就不用自定义 class；`global.css` 是增强层不是第二框架
+- **主题唯一所有权**：GI 是唯一 Arco CSS baseline 与 palette；项目无 `theme.css` 适配层，页面与 `global.css` 禁止改色或另起皮肤
 - 表格一律 `vxe-table`，禁止 `a-table`
 - 上传用 Uppy，禁止 `a-upload`
 - 状态只用 `s-pill[data-s]`，禁止行铺色

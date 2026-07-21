@@ -66,21 +66,21 @@ The target standard is **Brand-Neutral Premium Dense**:
 
 Do not copy consumer SaaS defaults into freight operations. Large 12px card radii, spacious 44-46px rows, and multicolor workflow buttons may look modern in a light dashboard, but they reduce first-screen throughput in high-frequency freight finance and operation workbenches. Use those only for low-frequency review or analytics pages with a documented archetype reason.
 
-## Deep-Sea Neutral Color Contract
+## Arco Theme Color Contract
 
-The default product palette is **deep-sea neutral**: cool, stable, professional, and logistics-oriented without turning the whole page blue.
+The product palette is the effective `@arco-themes/vue-gi-demo` palette. Do not replace it with a project-specific "freight blue", "deep-sea neutral", fixed hex palette, or copied token table.
 
 | Role | Token/value | Rule |
 |------|-------------|------|
-| Page workbench base | `--dense-page-bg: #F2F5F8` | Quiet cool base; not pure gray, not blue gradient. |
-| Primary work surface | `var(--color-bg-card)` / white | Search, toolbar, table card, drawer body. |
-| Header/cap surface | `--dense-table-header-bg: #FAFBFC`, `--dense-surface-head` | Neutral cool-white, not pale-blue admin fill or gray slab. |
-| Structural boundary | `--dense-card-border: #DCE5EC`, `--dense-brand-line: #D5E1EA` | Subtle freight-neutral hairline; never heavy blue frame. |
-| Row divider | `--dense-table-row-border: #EEF2F6` | Horizontal only by default; weak enough that rows still read as white data surface. |
+| Page workbench base | `--dense-page-bg` → `var(--color-fill-1)` | Use the GI neutral surface; no page-local replacement. |
+| Primary work surface | `var(--color-bg-1)` / `var(--color-bg-card)` | Search, toolbar, table card and drawer body follow GI. |
+| Header/cap surface | `--dense-table-header-bg` → `var(--color-fill-1)` | Use the GI neutral hierarchy; do not add tinted headers. |
+| Structural boundary | `--dense-card-border` → `var(--color-border-1)` | Use the GI boundary hierarchy without custom color values. |
+| Row divider | `--dense-table-row-border` → `var(--color-border-1)` | Horizontal only by default; no independent table-gray palette. |
 | Column divider | `--dense-table-col-border: transparent` | Vertical grid lines off unless a documented finance comparison exception exists. |
 | Hover/selected wash | `--dense-vxe-surface-hover-bg`, `--dense-workbench-hover-bg` | Very light primary wash, lower strength than header. |
 | Primary anchor | `--dense-primary-6/7` | Query, create, active segment, links, focus, one main action. |
-| Semantic states | `--dense-warning-*`, `--dense-success-*`, `--dense-danger-*`, `cyan/purple` aliases when available | Status, validation, risk, and destructive intent only. |
+| Semantic states | direct aliases of GI `warning`, `success`, `danger` and supported status scales | Status, validation, risk, and destructive intent only. |
 
 Do not solve "too gray" with random accent colors. First check whether the page has the required anchors: active page segment, one primary action, scan-critical links, semantic status pills, selected/hover states, and neutral freight hairlines.
 
@@ -96,9 +96,9 @@ Do not solve "too blue" by removing all primary anchors. The page needs enough p
 | Table header | Use cool brand-neutral header fill (`--dense-table-header-bg`). Do not use gray sheet headers or blue gradients for normal workbench headers. |
 | Status | Use semantic tokens only: `warning`, `primary`, `success`, `danger`, `cyan`, `purple`, neutral. |
 | Disabled/empty | Use `color-text-4` and `--dense-control-disabled-bg`, only for true disabled or low-priority empty. |
-| Interactive control surface | `--dense-control-surface` / `--color-fill-2: #FFFFFF` | Default inputs/selects/pickers on white cards: white + hairline border. Gray fill is not the default work-surface look. |
+| Interactive control surface | GI component styles and official surface tokens | Do not globally repaint inputs/selects/pickers. |
 
-Use Arco Design Vue default theme (`@arco-design/web-vue/dist/arco.css`) as the color source. Do not add third-party Arco theme packages or build an independent palette.
+Use the ownership stack in `theme-contract.md`: `@arco-themes/vue-gi-demo` is the single component CSS and palette baseline. Do not also import the default Arco stylesheet, add a project theme adapter, or build a page-local palette.
 
 ## Primary Usage Boundary
 
@@ -161,7 +161,7 @@ The incorrect form creates invalid CSS color values such as `190, 218, 255`; bro
 
 ### Project Token Boundary
 
-`src/styles/global.css` owns the project semantic aliases. Page, component, and skill CSS must consume these aliases instead of rebuilding colors from raw theme channels.
+The GI theme owns official Arco variable values. `src/styles/global.css` owns only direct project semantic aliases that consume those values. Page, component, and skill CSS must consume official tokens or aliases instead of rebuilding colors from raw theme channels.
 
 Allowed in page/component CSS:
 
@@ -205,13 +205,13 @@ Business users spend long sessions in list and detail pages. The interface must 
 
 | Surface | Required token behavior |
 |---------|-------------------------|
-| `--dense-brand-surface` | Very light cool brand surface for small anchors and controlled rhythm. |
-| `--dense-brand-line` | Brand-neutral hairline for zone top boundaries; stronger than plain gray, weaker than active primary. |
-| `--dense-page-bg` | Cool brand-neutral page base, no flat gray and no blue gradient. |
+| `--dense-brand-surface` | Direct GI light-primary surface alias for small interaction anchors only. |
+| `--dense-brand-line` | Direct GI border alias for zone boundaries. |
+| `--dense-page-bg` | Direct GI neutral page-surface alias. |
 | `--dense-shadow-card` | Neutral elevation plus subtle 1px boundary; no blue glow. |
-| `--dense-card-border` | Very light brand-neutral boundary, not blue frame. |
-| `--dense-surface-head` | White/cool head surface; no gray slab and no blue gradient by default. |
-| `--dense-table-header-bg` | Cool neutral-white header fill, normally equivalent to `#FAFBFC`; avoid the old pale-blue admin header or gray sheet fill. |
+| `--dense-card-border` | Direct GI boundary alias; do not replace it per page. |
+| `--dense-surface-head` | Direct GI container/fill alias for restrained hierarchy. |
+| `--dense-table-header-bg` | Direct GI neutral fill alias; do not declare a separate table-header color. |
 | `--dense-table-col-border` | Transparent or near-invisible by default; vertical grid lines must not dominate. |
 | `--dense-table-row-border` | Weak horizontal separator for scan rhythm. |
 | `--dense-workbench-hover-bg` | Light primary wash for interaction only. |
@@ -260,7 +260,7 @@ Required:
 - Status pills must be readable at scan distance; use semantic token level 7 for text when level 6 is too weak.
 - Row actions should be visible as actions but not compete with data: text/icon buttons with primary hover, no always-heavy button frames.
 - Zebra stripes must be very low contrast. They should support scanning, not create a gray page.
-- In dense workbench lists, default zebra should normally be disabled or `#FFFFFF`. Use row separators, hover, selected state, and primary identifiers for scan rhythm before adding stripe color.
+- In dense workbench lists, default zebra should normally be disabled or use the same GI work-surface token as normal rows. Use row separators, hover, selected state, and primary identifiers for scan rhythm before adding stripe color.
 
 Avoid:
 
@@ -297,7 +297,6 @@ Detail pages must expose hierarchy across the whole vertical stack:
 
 - `dds-head` owns identity and actions. It may use a subtle top/inset primary anchor.
 - `dds-hero` owns 3-6 key facts. The lead fact may sit on a primary-1 surface or rail; supporting facts remain readable on white.
-- `detail-section` owns a module. It uses a white card, blue-tinted border, section title marker, and `--dense-surface-head` header. Do not render section heads as plain gray divider rows.
 - In the modern brand-neutral standard, `detail-section` uses a white card, brand-neutral boundary, restrained shadow, section title marker, and `--dense-surface-head` header. Blue-tinted borders are reserved for active/focused/selected module states, not normal module chrome.
 - `form-subgroup` owns an internal concept. It is a compact sub-surface with subtle left/inset primary-2 anchor, not another card and not a bare gray label.
 - `detail-module-summary--inline` owns module-level totals. It uses a primary rail and white stat cells; it must not look like a disabled gray table row.

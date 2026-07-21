@@ -2,7 +2,7 @@
 
 ## Required Structure
 
-Use this order:
+Use this logical order:
 
 1. Optional transport/page segment: `zone-l1-transport`
 2. Search/filter: `zone-l2-filter-card zone-card filter-card`
@@ -10,6 +10,8 @@ Use this order:
 4. Table card: `zone-l4-table-card`
 5. Table cap inside table card: right-side pagination/settings; total count is owned by pagination
 6. Table body: `table-wrap`
+
+Search and scope/status/actions are logical zones, not mandatory separate floating cards. They may share one Arco workbench command surface when their ownership remains clear, a neutral divider separates the rows, the combined default height stays near the `filter-layout.md` target, and no card is nested inside another card. The table remains its own dominant surface.
 
 Do not add a page-level title/description band for operational list pages.
 
@@ -29,6 +31,8 @@ Priority:
 4. Add visual beauty only when it improves scanning, confidence, or error prevention.
 
 For data-dominant workbench pages, the first viewport should normally allocate 70-80% of usable page space to the data area. The practical target is 75% data space after the default search/action/status area. This number is not a rigid rule for drawers, editing pages, or exception review flows.
+
+Below 65% is a blocking layout defect for a normal table workbench. Measure the rendered table host against the usable content height at the minimum supported desktop viewport; do not estimate from source code.
 
 Daily status tabs and daily reversible actions should stay visible when operators use them repeatedly. Hiding them behind "More" only to look cleaner is a PESDP failure.
 
@@ -178,7 +182,7 @@ Toolbar actions are chosen by workflow:
 - Use status tabs only when users actually filter by that state many times per day.
 - If sales/operators process the list by state every day, status tabs are required visible workflow controls, not optional decoration.
 - Do not create fake status tabs just to fill the layout.
-- Small-screen behavior follows `responsive.md`: below `1280px`, status groups may move to a second row and must scroll inside `stat-tab-group` rather than forcing page-level horizontal overflow.
+- Small-screen behavior follows `responsive.md`: below the supported 1280px desktop baseline, status groups may move to a second row and must scroll inside `stat-tab-group` rather than forcing page-level horizontal overflow.
 
 ## Table Column Selection
 

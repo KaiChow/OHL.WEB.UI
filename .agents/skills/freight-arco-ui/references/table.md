@@ -32,7 +32,7 @@ Shared rules:
 - VXE theme tokens are centralized in `src/styles/global.css`. The bridge must cover both `vxe-table@4.5.x` legacy `--vxe-*` variables and newer `--vxe-ui-*` variables, including header, border, hover, stripe, checked/current rows, fixed-column shadow, custom panel, and row-height tokens.
 - Header uses brand-neutral `--dense-table-header-bg` on both list and detail. Do not use gray sheet fill or blue gradients for normal table headers.
 - Hover/selection always use `--dense-vxe-surface-hover-bg` / `--dense-vxe-surface-checked-bg`, never the same value as the header background.
-- Data rows are the main working surface and should read white by default. Zebra stripes are optional and should normally be `#FFFFFF` or visually indistinguishable from white on dense freight workbenches.
+- Data rows are the main working surface and use the GI container surface by default. Zebra stripes are optional and should normally use the same effective surface token on dense freight workbenches.
 - Do not add `border-bottom` on `vxe-table--header-wrapper`; structure vs data is separated by brand-neutral header contrast and weak row separators.
 - Do not let column borders dominate. Workbench tables default to horizontal scan rhythm; vertical separators are disabled or near-invisible unless the page documents a finance comparison exception.
 - Detail-only differences: role-based row height, ghost Arco controls for editable rows, padding on `.vxe-cell` not on `td`, no `show-overflow`, no checkbox without batch toolbar.

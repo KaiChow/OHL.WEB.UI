@@ -106,7 +106,7 @@ const onMenuItemClick = (key: string) => {
 
 <template>
   <a-layout class="app-layout">
-    <a-layout-sider class="app-layout__sider" :width="220" :collapsible="false">
+    <a-layout-sider class="app-layout__sider" :width="204" :collapsible="false">
       <div class="app-layout__brand">
         <a-avatar :size="28" shape="square" class="app-layout__logo">OHL</a-avatar>
         <div class="app-layout__brand-text">
@@ -188,7 +188,7 @@ const onMenuItemClick = (key: string) => {
   flex-direction: column;
   background: var(--color-bg-card);
   border-right: 1px solid var(--dense-card-border);
-  box-shadow: var(--dense-shadow-card);
+  box-shadow: none;
 }
 
 .app-layout__sider :deep(.arco-layout-sider-children) {
@@ -211,7 +211,6 @@ const onMenuItemClick = (key: string) => {
   color: var(--color-white);
   font-size: 11px;
   font-weight: var(--dense-weight-title);
-  box-shadow: 0 6px 14px var(--dense-primary-2);
 }
 
 .app-layout__brand-title {
@@ -262,7 +261,7 @@ const onMenuItemClick = (key: string) => {
 }
 
 .app-layout__menu :deep(.arco-menu-selected) {
-  background: rgba(0, 82, 255, 0.06);
+  background: var(--dense-primary-1);
   color: var(--dense-primary-7);
   font-weight: var(--dense-weight-title);
   box-shadow: inset 2px 0 0 var(--dense-primary-5);
@@ -270,7 +269,7 @@ const onMenuItemClick = (key: string) => {
 
 .app-layout__menu :deep(.arco-menu-item:hover),
 .app-layout__menu :deep(.arco-menu-inline-header:hover) {
-  background: rgba(0, 82, 255, 0.04);
+  background: var(--color-fill-1);
 }
 
 .app-layout__footer {
@@ -322,7 +321,7 @@ const onMenuItemClick = (key: string) => {
 }
 
 .app-layout__page-title {
-  font-size: var(--dense-font-nav);
+  font-size: var(--dense-font-overlay);
   font-weight: var(--dense-weight-title);
   color: var(--color-text-1);
   line-height: 18px;

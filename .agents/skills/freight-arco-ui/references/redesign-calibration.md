@@ -8,11 +8,11 @@ This file defines **how far AI is allowed to change the page skeleton** while st
 
 ## Direction
 
-The project redesign direction is:
+The project redesign direction is self-contained:
 
-- **method** from `redesign-existing-projects`
-- **visual restraint** from `minimalist-ui`
-- **business structure** from `freight-arco-ui`
+- **method** from `existing-project-modernization.md`
+- **visual restraint** from `theme-contract.md` and `visual-system.md`
+- **business structure** from the page archetype and freight domain references
 
 Target result:
 
