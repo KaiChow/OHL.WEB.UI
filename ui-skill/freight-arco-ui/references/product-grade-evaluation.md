@@ -38,6 +38,42 @@ Do not chase decoration, large empty space, or marketing-SaaS styling. The produ
 
 A page may be operationally acceptable but still not product-grade.
 
+## Sellable Freight Product Maturity Gates
+
+These gates translate product maturity into executable UI and interaction evidence. They route to existing authorities instead of creating a second component specification.
+
+| # | Gate | Project pass condition | Authority / required evidence |
+|---|------|------------------------|-------------------------------|
+| 1 | One product | Shell, query, table, detail, overlay, action, status, spacing, and feedback use one ownership stack; no page-local skin or team-specific pattern | `theme-contract.md`, `arco-first.md`; cross-route screenshots and computed tokens |
+| 2 | Dense, not crowded | Data dominates operational pages; labels, controls, and rows keep readable rhythm; density never comes from tiny text or collapsed hit targets | `redesign-calibration.md`, `typography.md`, `component-size.md`; measured first viewport |
+| 3 | Stable archetypes | The route identity appears once in the shell or page, followed by command context and the primary work surface; pagination belongs to the data surface | `page-archetypes.md`, `list-page.md`, `detail-form.md`; same-archetype comparison |
+| 4 | Clear action priority | One visual primary per scope; daily reversible actions visible; rare actions grouped; destructive actions separated and confirmed | `actions.md`, `feature-delivery-contract.md`; action inventory by frequency and risk |
+| 5 | Professional query | Daily conditions visible; occasional conditions expand or move to a grouped drawer; reset and condition feedback are stable; saved schemes exist when repeated query sets are a real workflow | `filter-layout.md`, `feature-delivery-contract.md`; query scenario and persistence contract |
+| 6 | Office-grade table | VXE table has rational min-widths, key/fixed columns, horizontal scroll, selection/batch contract, column settings, density behavior, and readable overflow handling | `table.md`; 1366 and long-data evidence |
+| 7 | Recognizable status | One `.s-pill[data-s]` semantic system; text always names the state; color is secondary and never the only discriminator | `visual-system.md`, `table.md`; status inventory and grayscale/contrast review |
+| 8 | Complete feedback | Loading, success, failure, disabled, empty, permission, duplicate-submit, and refresh outcomes are explicit | `feedback.md`, `feature-delivery-contract.md`; success/failure/network/permission cases |
+| 9 | Exception locality | Field errors stay at the field; row conflicts stay at the row/cell; a summary may navigate to errors but never replace their local markers | `feedback.md`, `form-rules.md`; focus/scroll-to-error evidence |
+| 10 | Context preservation | Detail, simple edit, supplemental data, and row workflow prefer drawer/modal/inline handling when legal; full navigation is reserved for genuinely full-page work | `page-archetypes.md`, `modal.md`, `feature-delivery-contract.md`; navigation rationale |
+| 11 | Staged complex flow | Complex order/review/fee work uses sections, steps, or status nodes according to dependency and commit boundaries; progress and draft preservation are explicit | `full-page-form.md`, `form-rules.md`; stage decision and resume behavior |
+| 12 | Real office conditions | 1366 laptop is release-blocking; 1280 is the current lower desktop bound; long tables, multiple windows, slow interaction, and wide desktop are evaluated explicitly | `responsive.md`, `table.md`; viewport matrix and overflow record |
+| 13 | Reusable detail system | Heights, spacing, radii, shadows, overlay widths, table rows, and typography come from shared variables/roles; pages do not tune their own visual scale | `theme-contract.md`, `component-size.md`, `overlay-dimensions.md`, `typography.md`; token audit |
+| 14 | Product completion | Skeleton/loading, empty, error, no-permission, long text, extreme values, slow network, partial failure, and retry paths are designed | `feedback.md`, `feature-delivery-contract.md`, `checklist.md`; edge-state matrix |
+
+Core acceptance language: **unified, compact, clear, efficient, predictable, and traceable**.
+
+### Release Evidence Matrix
+
+A `sellable-saas-grade` claim requires all of the following:
+
+- at least one representative list workbench, object detail, and drawer/modal inspected on real routes;
+- `1366x768` and `1280x720` desktop evidence, plus one wide desktop such as `1920x1080`;
+- a split-window audit; if the current 1280 minimum prevents a usable smaller window, record it as an open product-grade gap rather than claiming support;
+- normal, loading/skeleton, empty, permission, validation, business rejection, network failure, slow request, long text, extreme numeric/date, and partial batch failure states;
+- keyboard focus, error localization, state text without color, horizontal table scroll, fixed-column behavior, and action confirmation evidence;
+- successful `check-spec`, type check/build, and a remaining-risk list.
+
+Failure of any gate may still allow an internal release, but it blocks `sellable-saas-grade`.
+
 ## Eight Product-Grade Dimensions
 
 Judge every important page and every redesign pass across these eight dimensions.

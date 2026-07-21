@@ -488,12 +488,12 @@ Container:
 ```vue
 <div class="detail-section__body detail-section__body--table">
   <vxe-table
-    class="detail-mini-vxe"
+    class="detail-mini-vxe detail-mini-vxe--editable"
     border="none"
     size="small"
     height="auto"
     :data="rows"
-    :row-config="{ isHover: true, keyField: 'id', height: 38 }"
+    :row-config="{ isHover: true, keyField: 'id' }"
   >
     <!-- columns -->
   </vxe-table>
@@ -504,7 +504,7 @@ Required:
 
 - Always add `class="detail-mini-vxe"` to VXE tables embedded in `detail-section__body` that contain editable controls.
 - Use `detail-section__body--table` on the section body (or `detail-child-pane__table` for nested child panes).
-- Match `row-config.height` to `38` when controls are 28px (`--dense-control-h-detail`).
+- Use `detail-mini-vxe--editable`; the global CSS bridge resolves the row to 38px for 28px controls (`--dense-control-h-detail`). Do not set `row-config.height` on pinned VXE 4.5.
 - Business columns use `min-width`; only checkbox / seq / operation use fixed `width` (see `table.md` width policy).
 
 Forbidden:

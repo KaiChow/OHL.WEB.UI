@@ -102,6 +102,16 @@ const RULES = [
     fileFilter: /\.vue$/,
   },
   {
+    desc: '禁止在 a-dropdown 内嵌 a-popconfirm（菜单销毁会导致确认浮层失效；使用独立 Modal）',
+    pattern: /<a-dropdown\b(?:(?!<\/a-dropdown>)[\s\S])*<a-popconfirm\b(?:(?!<\/a-dropdown>)[\s\S])*<\/a-dropdown>/,
+    fileFilter: /\.vue$/,
+  },
+  {
+    desc: '含表单的 a-modal 禁止用 @ok 提交（校验失败仍会关闭；使用 :on-before-ok 并返回 false）',
+    pattern: /<a-modal\b(?=[^>]*@ok=)[^>]*>(?:(?!<\/a-modal>)[\s\S])*<a-form\b(?:(?!<\/a-modal>)[\s\S])*<\/a-modal>/,
+    fileFilter: /\.vue$/,
+  },
+  {
     desc: 'IconPark 图标禁止使用 filled/two-tone/multi-color 主题，统一 outline',
     pattern: /\btheme="(filled|two-tone|multi-color)"/,
     fileFilter: /\.vue$/,
@@ -178,6 +188,7 @@ const existingProjectModernization = readFileSync(join(ROOT, 'ui-skill/freight-a
 const redesignCalibration = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/redesign-calibration.md'), 'utf8');
 const responsiveReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/responsive.md'), 'utf8');
 const agentsSummary = readFileSync(join(ROOT, 'AGENTS.md'), 'utf8');
+const productGradeEvaluation = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/product-grade-evaluation.md'), 'utf8');
 
 if (!/^[~^]?0\.0\.58$/.test(packageJson.dependencies?.['@arco-themes/vue-gi-demo'] || '')) {
   violations.push({
@@ -282,12 +293,28 @@ if (existsSync(join(ROOT, '.cursor/rules/ui-spec.mdc'))) {
     content: 'duplicate always-on UI specification detected',
   });
 }
-if (responsiveReference.includes('1024-1279') || responsiveReference.includes('< 1024px')) {
+if (!responsiveReference.includes('1366x768') || !responsiveReference.includes('1024px split-window audit')) {
   violations.push({
-    rule: '当前项目 min-width 为 1280px，responsive.md 禁止宣称未实现的 1024/mobile 支持',
+    rule: 'responsive.md 必须包含 1366 笔记本发布门禁与 1024 多窗口审计，不得只验证大屏',
     file: 'ui-skill/freight-arco-ui/references/responsive.md',
     line: 1,
-    content: 'unsupported smaller viewport contract detected',
+    content: 'missing office viewport evidence contract',
+  });
+}
+if (!productGradeEvaluation.includes('## Sellable Freight Product Maturity Gates') || !productGradeEvaluation.includes('| 14 | Product completion |')) {
+  violations.push({
+    rule: '融资/可销售级评估必须包含完整 14 项产品成熟度门禁',
+    file: 'ui-skill/freight-arco-ui/references/product-grade-evaluation.md',
+    line: 1,
+    content: 'missing sellable freight maturity gates',
+  });
+}
+if (!checklist.includes('### Sellable Maturity Evidence')) {
+  violations.push({
+    rule: '交付清单必须检查 14 项成熟度、办公视口、异常就地处理和边界状态证据',
+    file: 'ui-skill/freight-arco-ui/references/checklist.md',
+    line: 1,
+    content: 'missing sellable maturity evidence checklist',
   });
 }
 if (/上传用\s*Uppy/.test(agentsSummary)) {
@@ -630,6 +657,16 @@ if (!globalCss.includes('.detail-mini-vxe')) {
     content: 'missing detail-mini-vxe bridge',
   });
 }
+if (!globalCss.includes('.detail-mini-vxe.vxe-table .vxe-body--row')
+  || !globalCss.includes('height: var(--detail-mini-row-h) !important')
+  || !globalCss.includes('.detail-mini-vxe.vxe-table .vxe-body--column {\n  padding: 0 !important')) {
+  violations.push({
+    rule: 'global.css 必须由 detail-mini-vxe density modifier 统一承接明细表行高',
+    file: 'src/styles/global.css',
+    line: 1,
+    content: 'missing detail-mini-vxe density row bridge',
+  });
+}
 if (!specFirstCoding.includes('arco-first.md')) {
   violations.push({
     rule: 'spec-first-coding.mdc 必须要求 UI 任务先读 arco-first.md',
@@ -882,7 +919,7 @@ for (const file of files) {
   }
 }
 
-// VXE 表格行高与结构列宽必须显式匹配设计 token：主列表 36，详情按职责分 38/34/32，序号列 52。
+// VXE 行高：主列表 compact=36（可提供 44 舒适档）；详情由 density modifier + CSS token 控制，避免 VXE 4.5 row-config.height 警告。
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
@@ -907,9 +944,12 @@ for (const file of files) {
         content: firstLine.trim().slice(0, 140),
       });
     }
-    if (/class=(["'])[^"']*\bworkbench-table\b[^"']*\1/.test(firstLine) && !/:row-config=(["'])[\s\S]*?height:\s*36[\s\S]*?\1/.test(block)) {
+    const hasStaticCompactRowHeight = /:row-config=(["'])[\s\S]*?height:\s*36[\s\S]*?\1/.test(block);
+    const hasDensityRowConfig = /:row-config=(["'])tableRowConfig\1/.test(block)
+      && /const\s+tableRowConfig\s*=\s*computed[\s\S]*?compact[\s\S]*?36[\s\S]*?44/.test(content);
+    if (/class=(["'])[^"']*\bworkbench-table\b[^"']*\1/.test(firstLine) && !hasStaticCompactRowHeight && !hasDensityRowConfig) {
       violations.push({
-        rule: 'workbench-table 必须显式设置 row-config.height = 36，避免 VXE small 默认 40px 泄漏',
+        rule: 'workbench-table 必须声明 compact=36 的 row-config；提供密度切换时舒适档统一为 44',
         file: relPath,
         line: getLineNumber(content, blockIndex),
         content: firstLine.trim().slice(0, 140),
@@ -923,16 +963,9 @@ for (const file of files) {
         content: firstLine.trim().slice(0, 140),
       });
     }
-    const detailDensity = firstLine.includes('detail-mini-vxe--editable')
-      ? { height: 38, rule: 'detail-mini-vxe--editable 必须显式设置 row-config.height = 38，承载 28px 表单控件' }
-      : firstLine.includes('detail-mini-vxe--readonly')
-        ? { height: 34, rule: 'detail-mini-vxe--readonly 必须显式设置 row-config.height = 34，只读资料/状态行保持紧凑' }
-        : firstLine.includes('detail-mini-vxe--summary')
-          ? { height: 32, rule: 'detail-mini-vxe--summary 必须显式设置 row-config.height = 32，摘要小表保持紧凑' }
-          : null;
-    if (detailDensity && !new RegExp(`:?row-config=(["'])\\{[\\s\\S]*?height:\\s*${detailDensity.height}[\\s\\S]*?\\1`).test(firstLine)) {
+    if (/\bdetail-mini-vxe\b/.test(firstLine) && /:row-config=(["'])[\s\S]*?height\s*:/.test(firstLine)) {
       violations.push({
-        rule: detailDensity.rule,
+        rule: 'detail-mini-vxe 行高由 density modifier + global.css token 控制，禁止 row-config.height（VXE 4.5 会要求 show-overflow 并产生运行警告）',
         file: relPath,
         line: getLineNumber(content, blockIndex),
         content: firstLine.trim().slice(0, 140),

@@ -15,6 +15,11 @@ import {
   IconSettings,
   IconInfoCircle,
   IconEmpty,
+  IconHistory,
+  IconSave,
+  IconDelete,
+  IconLayout,
+  IconCheck,
 } from '@arco-design/web-vue/es/icon';
 import { downloadCsvFile } from '../../../utils/mock-actions';
 import ShipmentOrderDetailDrawer from '../orderDetail/ShipmentOrderDetailDrawer.vue';
@@ -32,6 +37,17 @@ import { getShipmentOrderMock } from '../orderDetail/mockData';
 const router = useRouter();
 
 const CURRENT_OPERATOR = '张操作';
+const QUERY_SCHEME_STORAGE_KEY = 'ohl.shipment.export-order.query-schemes.v1';
+
+type TableDensity = 'compact' | 'standard';
+
+interface SavedQueryScheme {
+  id: string;
+  name: string;
+  query: ShipmentOrderQuery;
+  statusTab: ShipmentStatusKey;
+  isSystem?: boolean;
+}
 
 const KEYWORD_OPTIONS: { label: string; value: ShipmentKeywordType }[] = [
   { label: '业务单号', value: 'orderNo' },
@@ -80,6 +96,36 @@ const cloneQuery = (source: ShipmentOrderQuery): ShipmentOrderQuery => ({
   updatedRange: [...source.updatedRange],
 });
 
+const getSystemQuerySchemes = (): SavedQueryScheme[] => [
+  {
+    id: 'system-my-orders',
+    name: '我的在手订单',
+    query: { ...defaultQuery(), operator: CURRENT_OPERATOR },
+    statusTab: 'all',
+    isSystem: true,
+  },
+  {
+    id: 'system-risk-orders',
+    name: '风险与异常',
+    query: defaultQuery(),
+    statusTab: 'exception',
+    isSystem: true,
+  },
+];
+
+const loadCustomQuerySchemes = (): SavedQueryScheme[] => {
+  try {
+    const raw = window.localStorage.getItem(QUERY_SCHEME_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as SavedQueryScheme[];
+    return Array.isArray(parsed)
+      ? parsed.filter((item) => item?.id && item?.name && item?.query && !item.isSystem)
+      : [];
+  } catch {
+    return [];
+  }
+};
+
 const query = reactive<ShipmentOrderQuery>(defaultQuery());
 const appliedQuery = ref<ShipmentOrderQuery>(cloneQuery(defaultQuery()));
 const activeStatusTab = ref<ShipmentStatusKey>('all');
@@ -92,12 +138,30 @@ const drawerVisible = ref(false);
 const currentDetail = ref<ShipmentOrderDetailRecord | null>(null);
 const statusModalVisible = ref(false);
 const statusForm = reactive({ targetStatus: undefined as string | undefined, reason: '', notify: true, createNode: true });
+const statusErrors = reactive({ targetStatus: '', reason: '' });
 const statusTargetRow = ref<ShipmentWorkbenchRow | null>(null);
+const voidTargetRow = ref<ShipmentWorkbenchRow | null>(null);
+const voidModalVisible = ref(false);
+const tableDensity = ref<TableDensity>('compact');
+const customQuerySchemes = ref<SavedQueryScheme[]>(loadCustomQuerySchemes());
+const activeQuerySchemeId = ref<string>();
+const schemeModalVisible = ref(false);
+const deleteSchemeModalVisible = ref(false);
+const schemeName = ref('');
+const schemeNameError = ref('');
 
 const page = reactive({ current: 1, size: 50 });
 
 const operatorOptions = Array.from(new Set(shipmentWorkbenchRows.map((row) => row.operator)));
 const carrierOptions = Array.from(new Set(shipmentWorkbenchRows.map((row) => row.carrier)));
+const querySchemes = computed(() => [...getSystemQuerySchemes(), ...customQuerySchemes.value]);
+const activeQueryScheme = computed(() => querySchemes.value.find((item) => item.id === activeQuerySchemeId.value));
+const canDeleteActiveScheme = computed(() => Boolean(activeQueryScheme.value && !activeQueryScheme.value.isSystem));
+const tableRowConfig = computed(() => ({
+  isHover: true,
+  keyField: 'id',
+  height: tableDensity.value === 'compact' ? 36 : 44,
+}));
 
 const matchText = (value: string, keyword: string) =>
   !keyword.trim() || value.toLowerCase().includes(keyword.trim().toLowerCase());
@@ -300,6 +364,7 @@ const getVisibleExecutionSignals = (row: ShipmentWorkbenchRow) => {
 
 const handleSearch = () => {
   appliedQuery.value = cloneQuery(query);
+  activeQuerySchemeId.value = undefined;
   page.current = 1;
   clearSelection();
 };
@@ -308,9 +373,79 @@ const handleReset = () => {
   Object.assign(query, defaultQuery());
   appliedQuery.value = cloneQuery(defaultQuery());
   activeStatusTab.value = 'all';
+  activeQuerySchemeId.value = undefined;
   advancedFilterVisible.value = false;
   page.current = 1;
   clearSelection();
+};
+
+const persistCustomQuerySchemes = () => {
+  try {
+    window.localStorage.setItem(QUERY_SCHEME_STORAGE_KEY, JSON.stringify(customQuerySchemes.value));
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const applyQueryScheme = (scheme: SavedQueryScheme) => {
+  Object.assign(query, cloneQuery(scheme.query));
+  appliedQuery.value = cloneQuery(scheme.query);
+  activeStatusTab.value = scheme.statusTab;
+  activeQuerySchemeId.value = scheme.id;
+  advancedFilterVisible.value = false;
+  page.current = 1;
+  clearSelection();
+};
+
+const openSchemeModal = () => {
+  schemeName.value = '';
+  schemeNameError.value = '';
+  schemeModalVisible.value = true;
+};
+
+const saveCurrentQueryScheme = () => {
+  const name = schemeName.value.trim();
+  if (!name) {
+    schemeNameError.value = '请填写方案名称';
+    return false;
+  }
+  if (name.length > 20) {
+    schemeNameError.value = '方案名称不能超过 20 个字符';
+    return false;
+  }
+  if (querySchemes.value.some((item) => item.name === name)) {
+    schemeNameError.value = '已存在同名查询方案';
+    return false;
+  }
+
+  const next: SavedQueryScheme = {
+    id: `custom-${Date.now()}`,
+    name,
+    query: cloneQuery(query),
+    statusTab: activeStatusTab.value,
+  };
+  customQuerySchemes.value.push(next);
+  const persisted = persistCustomQuerySchemes();
+  activeQuerySchemeId.value = next.id;
+  schemeModalVisible.value = false;
+  if (persisted) Message.success(`查询方案“${name}”已保存`);
+  else Message.warning('浏览器存储不可用，查询方案仅在本次会话保留');
+  return true;
+};
+
+const deleteActiveQueryScheme = () => {
+  if (!activeQueryScheme.value || activeQueryScheme.value.isSystem) return;
+  const deletedName = activeQueryScheme.value.name;
+  customQuerySchemes.value = customQuerySchemes.value.filter((item) => item.id !== activeQuerySchemeId.value);
+  persistCustomQuerySchemes();
+  activeQuerySchemeId.value = undefined;
+  deleteSchemeModalVisible.value = false;
+  Message.success(`查询方案“${deletedName}”已删除`);
+};
+
+const setTableDensity = (density: TableDensity) => {
+  tableDensity.value = density;
 };
 
 const clearAdvancedFilters = () => {
@@ -373,9 +508,26 @@ const openDetailDrawer = (row: ShipmentWorkbenchRow) => {
   drawerVisible.value = true;
 };
 
-const openFullDetail = (orderNo: string) => {
+const openFullDetail = (orderNo: string, tab = 'overview') => {
   drawerVisible.value = false;
-  router.push({ name: 'ShipmentOrderDetail', query: { orderNo } });
+  router.push({ name: 'ShipmentOrderDetail', query: { orderNo, tab } });
+};
+
+const handleCreateOrder = () => {
+  openFullDetail(`NEW${Date.now()}`, 'overview');
+};
+
+const handleAssignOperator = (row: ShipmentWorkbenchRow) => {
+  row.operator = CURRENT_OPERATOR;
+  row.updatedAt = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  Message.success(`订单 ${row.orderNo} 已分配给${CURRENT_OPERATOR}`);
+};
+
+const handleGenerateRowFee = (row: ShipmentWorkbenchRow) => {
+  row.feeStatus = 'pending';
+  row.feeStatusLabel = '待确认';
+  if (!row.quickStatus.includes('feeUnconfirmed')) row.quickStatus.push('feeUnconfirmed');
+  Message.success(`订单 ${row.orderNo} 已生成待确认费用`);
 };
 
 const openStatusModal = (row: ShipmentWorkbenchRow) => {
@@ -384,21 +536,43 @@ const openStatusModal = (row: ShipmentWorkbenchRow) => {
   statusForm.reason = '';
   statusForm.notify = true;
   statusForm.createNode = true;
+  statusErrors.targetStatus = '';
+  statusErrors.reason = '';
   statusModalVisible.value = true;
 };
 
 const confirmStatusChange = () => {
-  if (!statusForm.targetStatus || !statusForm.reason.trim()) {
-    Message.warning('请选择目标状态并填写修改原因');
-    return;
-  }
+  statusErrors.targetStatus = statusForm.targetStatus ? '' : '请选择目标状态';
+  statusErrors.reason = statusForm.reason.trim() ? '' : '请填写修改原因';
+  if (statusErrors.targetStatus || statusErrors.reason || !statusTargetRow.value) return false;
 
-  Message.success('状态已更新');
+  const statusMap: Record<string, { label: string; pill: string }> = {
+    released: { label: '已放舱', pill: 'acc' },
+    customs: { label: '报关中', pill: 'op' },
+    sailed: { label: '已开船', pill: 'rel' },
+    completed: { label: '已完成', pill: 'rel' },
+  };
+  const nextStatus = statusMap[statusForm.targetStatus!];
+  statusTargetRow.value.orderStatus = statusForm.targetStatus as ShipmentWorkbenchRow['orderStatus'];
+  statusTargetRow.value.orderStatusLabel = nextStatus.label;
+  statusTargetRow.value.statusPill = nextStatus.pill;
+  Message.success(`订单 ${statusTargetRow.value.orderNo} 状态已更新为${nextStatus.label}`);
   statusModalVisible.value = false;
+  return true;
 };
 
-const voidOrder = (row: ShipmentWorkbenchRow) => {
-  Message.success(`订单 ${row.orderNo} 已作废`);
+const openVoidModal = (row: ShipmentWorkbenchRow) => {
+  voidTargetRow.value = row;
+  voidModalVisible.value = true;
+};
+
+const voidOrder = () => {
+  if (!voidTargetRow.value) return;
+  voidTargetRow.value.orderStatus = 'cancelled';
+  voidTargetRow.value.orderStatusLabel = '已作废';
+  voidTargetRow.value.statusPill = 'rej';
+  Message.success(`订单 ${voidTargetRow.value.orderNo} 已作废`);
+  voidModalVisible.value = false;
 };
 
 const handleExport = () => {
@@ -518,6 +692,37 @@ const fetchList = async () => {
             </a-form>
           </div>
           <div class="filter-panel__actions">
+            <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+              <a-button size="small" type="text" class="query-scheme-trigger">
+                <template #icon><icon-history /></template>
+                <span>{{ activeQueryScheme?.name ?? '查询方案' }}</span>
+                <icon-down />
+              </a-button>
+              <template #content>
+                <a-doption
+                  v-for="scheme in querySchemes"
+                  :key="scheme.id"
+                  @click="applyQueryScheme(scheme)"
+                >
+                  <span class="query-scheme-option">
+                    <icon-check v-if="activeQuerySchemeId === scheme.id" />
+                    <span v-else class="query-scheme-option__placeholder" />
+                    {{ scheme.name }}
+                  </span>
+                </a-doption>
+                <a-divider class="action-menu__divider" />
+                <a-doption @click="openSchemeModal">
+                  <icon-save /> 保存当前条件
+                </a-doption>
+                <a-doption
+                  v-if="canDeleteActiveScheme"
+                  class="danger-opt"
+                  @click="deleteSchemeModalVisible = true"
+                >
+                  <icon-delete /> 删除当前方案
+                </a-doption>
+              </template>
+            </a-dropdown>
             <a-button size="small" type="primary" @click="handleSearch">
               <template #icon><icon-search /></template>
               查询
@@ -533,11 +738,13 @@ const fetchList = async () => {
         </div>
         <div class="flow-bar">
           <div class="flow-bar__actions">
-            <a-button size="small" type="primary">
+            <a-button size="small" type="primary" @click="handleCreateOrder">
               <template #icon><icon-plus /></template>
               新增订单
             </a-button>
-            <a-button size="small" type="outline">批量导入</a-button>
+            <a-tooltip content="导入服务尚未配置">
+              <span><a-button size="small" type="outline" disabled>批量导入</a-button></span>
+            </a-tooltip>
             <a-button size="small" type="outline" @click="handleExport">
               <template #icon><icon-download /></template>
               导出
@@ -583,7 +790,7 @@ const fetchList = async () => {
         <template #title>
           <div class="table-cap-start">
             <a-tooltip content="刷新">
-              <a-button size="small" type="text" class="table-cap-tool" @click="fetchList">
+              <a-button size="small" type="text" class="table-cap-tool" title="刷新" aria-label="刷新" @click="fetchList">
                 <template #icon><icon-refresh /></template>
               </a-button>
             </a-tooltip>
@@ -610,8 +817,31 @@ const fetchList = async () => {
               @change="onPageChange"
               @page-size-change="onPageSizeChange"
             />
+            <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--toolbar">
+              <a-tooltip content="表格密度">
+                <a-button size="small" type="text" class="table-cap-tool" title="表格密度" aria-label="表格密度">
+                  <template #icon><icon-layout /></template>
+                </a-button>
+              </a-tooltip>
+              <template #content>
+                <a-doption @click="setTableDensity('compact')">
+                  <span class="density-option">
+                    <icon-check v-if="tableDensity === 'compact'" />
+                    <span v-else class="density-option__placeholder" />
+                    紧凑
+                  </span>
+                </a-doption>
+                <a-doption @click="setTableDensity('standard')">
+                  <span class="density-option">
+                    <icon-check v-if="tableDensity === 'standard'" />
+                    <span v-else class="density-option__placeholder" />
+                    舒适
+                  </span>
+                </a-doption>
+              </template>
+            </a-dropdown>
             <a-tooltip content="列设置">
-              <a-button size="small" type="text" class="table-cap-tool" @click="openColumnSettings">
+              <a-button size="small" type="text" class="table-cap-tool" title="列设置" aria-label="列设置" @click="openColumnSettings">
                 <template #icon><icon-settings /></template>
               </a-button>
             </a-tooltip>
@@ -622,7 +852,7 @@ const fetchList = async () => {
           <vxe-table
             ref="tableRef"
             id="shipment-export-orders"
-            class="compact workbench-table"
+            :class="[tableDensity, 'workbench-table']"
             size="small"
             style="width: 100%"
             height="100%"
@@ -634,7 +864,7 @@ const fetchList = async () => {
             :data="pagedRows"
             :column-config="{ resizable: true }"
             :custom-config="{ storage: true }"
-            :row-config="{ isHover: true, keyField: 'id', height: 36 }"
+            :row-config="tableRowConfig"
             :checkbox-config="{ highlight: true }"
             @checkbox-change="onSelectionChange"
             @checkbox-all="onSelectionChange"
@@ -723,17 +953,15 @@ const fetchList = async () => {
                       <icon-more />
                     </a-button>
                     <template #content>
-                      <a-doption @click="openFullDetail(row.orderNo)">编辑</a-doption>
+                      <a-doption @click="openFullDetail(row.orderNo, 'overview')">编辑</a-doption>
                       <a-doption @click="openStatusModal(row)">修改状态</a-doption>
-                      <a-doption>分配操作员</a-doption>
-                      <a-doption>生成费用</a-doption>
-                      <a-doption>上传文件</a-doption>
+                      <a-doption @click="handleAssignOperator(row)">分配给我</a-doption>
+                      <a-doption @click="handleGenerateRowFee(row)">生成费用</a-doption>
+                      <a-doption @click="openFullDetail(row.orderNo, 'files')">上传文件</a-doption>
                       <a-doption @click="handleRowNotify(row)">发送通知</a-doption>
-                      <a-doption>查看日志</a-doption>
+                      <a-doption @click="openFullDetail(row.orderNo, 'collaboration')">查看日志</a-doption>
                       <a-divider class="action-menu__divider" />
-                      <a-popconfirm content="确认作废该订单？此操作不可撤销。" @ok="voidOrder(row)">
-                        <a-doption class="danger-opt">作废订单</a-doption>
-                      </a-popconfirm>
+                      <a-doption class="danger-opt" @click="openVoidModal(row)">作废订单</a-doption>
                     </template>
                   </a-dropdown>
                 </div>
@@ -750,7 +978,7 @@ const fetchList = async () => {
                 </div>
                 <div class="workbench-empty__actions">
                   <a-button v-if="hasActiveFilter" size="small" type="text" @click="handleReset">重置筛选</a-button>
-                  <a-button v-else size="small" type="primary">
+                  <a-button v-else size="small" type="primary" @click="handleCreateOrder">
                     <template #icon><icon-plus /></template>
                     新增订单
                   </a-button>
@@ -910,7 +1138,7 @@ const fetchList = async () => {
       title="修改订单状态"
       :width="560"
       :mask-closable="false"
-      @ok="confirmStatusChange"
+      :on-before-ok="confirmStatusChange"
     >
       <a-form :model="statusForm" layout="vertical" size="small">
         <a-row :gutter="16">
@@ -920,8 +1148,19 @@ const fetchList = async () => {
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item label="目标状态" required>
-              <a-select v-model="statusForm.targetStatus" size="small" allow-clear placeholder="请选择">
+            <a-form-item
+              label="目标状态"
+              required
+              :validate-status="statusErrors.targetStatus ? 'error' : undefined"
+              :help="statusErrors.targetStatus"
+            >
+              <a-select
+                v-model="statusForm.targetStatus"
+                size="small"
+                allow-clear
+                placeholder="请选择"
+                @change="statusErrors.targetStatus = ''"
+              >
                 <a-option value="released">已放舱</a-option>
                 <a-option value="customs">报关中</a-option>
                 <a-option value="sailed">已开船</a-option>
@@ -930,12 +1169,18 @@ const fetchList = async () => {
             </a-form-item>
           </a-col>
           <a-col :span="24">
-            <a-form-item label="修改原因" required>
+            <a-form-item
+              label="修改原因"
+              required
+              :validate-status="statusErrors.reason ? 'error' : undefined"
+              :help="statusErrors.reason"
+            >
               <a-textarea
                 v-model="statusForm.reason"
                 size="small"
                 :auto-size="{ minRows: 2, maxRows: 4 }"
                 placeholder="请填写修改原因"
+                @input="statusErrors.reason = ''"
               />
             </a-form-item>
           </a-col>
@@ -951,6 +1196,54 @@ const fetchList = async () => {
           </a-col>
         </a-row>
       </a-form>
+    </a-modal>
+
+    <a-modal
+      v-model:visible="schemeModalVisible"
+      title="保存查询方案"
+      :width="460"
+      :mask-closable="false"
+      :on-before-ok="saveCurrentQueryScheme"
+    >
+      <a-form :model="{ schemeName }" layout="vertical" size="small">
+        <a-form-item
+          label="方案名称"
+          required
+          :validate-status="schemeNameError ? 'error' : undefined"
+          :help="schemeNameError"
+        >
+          <a-input
+            v-model="schemeName"
+            allow-clear
+            :max-length="20"
+            show-word-limit
+            placeholder="例如：华南区本周待放舱"
+            @input="schemeNameError = ''"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+
+    <a-modal
+      v-model:visible="deleteSchemeModalVisible"
+      title="删除查询方案"
+      :width="420"
+      :mask-closable="false"
+      :ok-button-props="{ status: 'danger' }"
+      @ok="deleteActiveQueryScheme"
+    >
+      确认删除查询方案“{{ activeQueryScheme?.name }}”？删除后不可恢复。
+    </a-modal>
+
+    <a-modal
+      v-model:visible="voidModalVisible"
+      title="作废订单"
+      :width="440"
+      :mask-closable="false"
+      :ok-button-props="{ status: 'danger' }"
+      @ok="voidOrder"
+    >
+      确认作废订单 {{ voidTargetRow?.orderNo }}？此操作不可撤销，并会保留操作日志。
     </a-modal>
 
     <shipment-order-detail-drawer
@@ -1012,6 +1305,30 @@ const fetchList = async () => {
   gap: 6px;
   padding-bottom: 1px;
   white-space: nowrap;
+}
+
+.query-scheme-trigger {
+  max-width: 142px;
+}
+
+.query-scheme-trigger span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.query-scheme-option,
+.density-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 112px;
+}
+
+.query-scheme-option__placeholder,
+.density-option__placeholder {
+  width: 12px;
+  flex: 0 0 12px;
 }
 
 .flow-bar {
@@ -1328,6 +1645,31 @@ const fetchList = async () => {
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (max-width: 1199px) {
+  .filter-panel {
+    flex-wrap: wrap;
+  }
+
+  .filter-panel__fields,
+  .filter-panel__actions {
+    width: 100%;
+  }
+
+  .filter-panel__actions {
+    justify-content: flex-end;
+    padding-bottom: 0;
+  }
+
+  .flow-bar {
+    gap: 10px;
+  }
+
+  .flow-bar__actions {
+    gap: 6px;
+    padding-right: 8px;
+  }
 }
 
 </style>

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Unified interaction feedback across **all domains** (operations, CRM, settings, BI). Use Arco + project classes — no `alert()` / `window.confirm`.
+Unified interaction feedback across **all domains** (operations, CRM, settings, BI). Use Arco components first; use a shared project class only when grep proves its implementation. No `alert()` / `window.confirm`.
 
 ## Success & Warning
 
@@ -29,29 +29,46 @@ Rules:
 
 Keep modal/drawer **open** after save failure.
 
+## Exception Locality
+
+An error appears where the user can fix it. A global Message may summarize failure, but it never replaces the local marker.
+
+| Error owner | Required placement | Required behavior |
+|-------------|--------------------|-------------------|
+| Form field | Arco Form Item validation | retain input; focus or scroll to the first invalid field |
+| Table cell/row | affected cell or a status/action area inside the row | keep row identity visible; offer retry/fix/view-detail beside the error |
+| Batch subset | marked failed rows plus a compact batch summary | preserve selection of failed items; expose failure reason per row |
+| Section/module | the section head/body that owns the request | keep other sections usable; retry locally |
+| Modal/drawer submit | inside the open overlay | keep the overlay and entered values; do not close on failure |
+| Permission | disabled/hidden action or local no-permission state according to contract | explain why when showing a disabled action; do not reveal forbidden data |
+
+API field paths must map to the corresponding form item. Unknown/global errors stay in the owning surface and include a retry or trace identifier when the backend provides one.
+
+For Arco Modal validation, bind `:on-before-ok="submit"` and return `false` when local validation or the request fails. Do not use `@ok` for a submit that can fail: Arco will continue its default close flow, briefly show errors, then destroy the user's context. Return `true` only after success; preserve input and focus the first invalid field on `false`.
+
 ## Loading
 
 | Surface | Pattern |
 |---------|---------|
 | Workbench table | `vxe-table :loading="loading"` |
 | Submit button | `:loading="submitting"` — block double click |
-| Full page first paint | `a-skeleton` rows in `table-skeleton` OR table loading — not blank white |
-| Panel refresh | `a-spin` on `md-layout__main` / `detail-section__body` only |
+| Full page first paint | Arco Skeleton rows or table loading — not blank white |
+| Panel refresh | Arco Spin on the owning panel only |
 | Button async | `:loading` on that button |
 
 Forbidden: full-screen spinner that hides filter + toolbar on every refresh.
 
 ## Empty States
 
-Use `state-center` / `state-center--in-table` from `global.css`. Icon: Arco icon only — no emoji.
+Use Arco Empty or a small local empty-state layout. Do not assume a shared empty-state class exists without grep. Icon: Arco icon only — no emoji.
 
 | Context | Condition | Content |
 |---------|-----------|---------|
 | List no data (no filter) | `!loading && rows.length===0` | Object-specific: `暂无业务单` + 新建 `primary` |
 | List no match | has active filter | `未找到匹配的{对象}，请调整筛选条件` + 重置 `text` |
-| Table in card | inside `table-wrap` | `state-center--in-table` |
-| Detail section | no child rows | `detail-mini-empty` or section text + `outline` 添加 |
-| Tree | no nodes | `state-center` in tree pane |
+| Table in card | inside the table body | compact Arco Empty with reset/create action when legal |
+| Detail section | no child rows | local section empty text plus `outline` add action when legal |
+| Tree | no nodes | Arco Empty in the tree pane |
 | Permission | no role selected | `请选择左侧角色` |
 
 ```vue

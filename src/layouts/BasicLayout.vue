@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IconRefresh, IconSearch, IconUser, IconDown } from '@arco-design/web-vue/es/icon';
 import { appMenus } from '../config/menu';
@@ -9,6 +9,22 @@ const router = useRouter();
 const menuKeyword = ref('');
 const openKeys = ref(appMenus.map((g) => g.key));
 const selectedMenuKeys = ref<string[]>([]);
+const isCompactShell = ref(false);
+let compactShellMedia: MediaQueryList | undefined;
+
+const syncCompactShell = (source: MediaQueryList | MediaQueryListEvent) => {
+  isCompactShell.value = source.matches;
+};
+
+onMounted(() => {
+  compactShellMedia = window.matchMedia('(max-width: 1199px)');
+  syncCompactShell(compactShellMedia);
+  compactShellMedia.addEventListener('change', syncCompactShell);
+});
+
+onBeforeUnmount(() => {
+  compactShellMedia?.removeEventListener('change', syncCompactShell);
+});
 
 const isSameKeys = (a: string[], b: string[]) =>
   a.length === b.length && a.every((k, i) => k === b[i]);
@@ -106,7 +122,12 @@ const onMenuItemClick = (key: string) => {
 
 <template>
   <a-layout class="app-layout">
-    <a-layout-sider class="app-layout__sider" :width="204" :collapsible="false">
+    <a-layout-sider
+      class="app-layout__sider"
+      :class="{ 'app-layout__sider--compact': isCompactShell }"
+      :width="isCompactShell ? 176 : 204"
+      :collapsible="false"
+    >
       <div class="app-layout__brand">
         <a-avatar :size="28" shape="square" class="app-layout__logo">OHL</a-avatar>
         <div class="app-layout__brand-text">
@@ -224,6 +245,23 @@ const onMenuItemClick = (key: string) => {
   font-size: var(--dense-font-micro);
   color: var(--color-text-3);
   line-height: 1.2;
+}
+
+.app-layout__sider--compact .app-layout__brand {
+  gap: 8px;
+  padding-inline: 10px;
+}
+
+.app-layout__sider--compact .app-layout__brand-sub {
+  display: none;
+}
+
+.app-layout__sider--compact .app-layout__search {
+  padding-inline: 8px;
+}
+
+.app-layout__sider--compact .app-layout__menu {
+  padding-inline: 4px;
 }
 
 .app-layout__search {

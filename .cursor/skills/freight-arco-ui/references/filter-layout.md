@@ -36,6 +36,15 @@ For freight list pages, this usually means:
 - two to three route or party filters if they are daily scan keys: 客户, 起运港, 目的港, 船公司 / 航司
 - query, reset, and filter entry in a stable right-side position
 
+### Query State And Saved Schemes
+
+- Entered conditions remain visible in their controls. The advanced-filter entry shows an active-condition count when hidden conditions are applied.
+- Reset has one explicit meaning: return to the current default scheme or to the system default when no scheme is active. Do not silently keep hidden drawer values.
+- Saved schemes are required when users repeatedly rebuild the same multi-condition query, regardless of whether the page has 17 or 50 fields.
+- A saved scheme feature must define owner (personal/shared), persistence, permission, default behavior, rename/update/duplicate/delete, conflict handling, and condition-version migration.
+- Do not render a fake Save Scheme button backed only by temporary component state.
+- Avoid a second selected-filter strip when controls, active count, and scheme name already provide complete feedback.
+
 ## Three Query UI Scenarios (S1 / S2 / S3)
 
 **Every list page picks exactly one scenario** from field count + usage frequency. Do not mix surfaces (no drawer + full flat wall; no drawer when S2 fits).

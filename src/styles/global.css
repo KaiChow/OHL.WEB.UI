@@ -5,7 +5,7 @@ body,
 #app {
   height: 100%;
   margin: 0;
-  min-width: 1280px;
+  min-width: 1024px;
   font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 13px;
   -webkit-font-smoothing: antialiased;
@@ -475,13 +475,13 @@ body [data-vxe-ui-theme='light'] {
 }
 
 .vxe-table.standard {
-  --vxe-table-row-height-small: 48px;
-  --vxe-ui-table-row-height-small: 48px;
+  --vxe-table-row-height-small: 44px;
+  --vxe-ui-table-row-height-small: 44px;
 }
 
 .vxe-table.standard .vxe-body--row,
 .vxe-table.standard .vxe-body--column {
-  height: 48px !important;
+  height: 44px !important;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -674,6 +674,22 @@ body [data-vxe-ui-theme='light'] {
 
 .detail-mini-vxe--summary.vxe-table {
   --detail-mini-row-h: var(--dense-row-h-summary);
+}
+
+.detail-mini-vxe.vxe-table .vxe-body--row,
+.detail-mini-vxe.vxe-table .vxe-body--column {
+  height: var(--detail-mini-row-h) !important;
+}
+
+.detail-mini-vxe.vxe-table .vxe-body--column {
+  padding: 0 !important;
+}
+
+.detail-mini-vxe.vxe-table .vxe-body--column .vxe-cell {
+  min-height: 0 !important;
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+  line-height: 20px !important;
 }
 
 

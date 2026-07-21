@@ -76,6 +76,15 @@
 - Expandability: the page feels like part of a platform-ready product system, not a one-off delivered screen.
 - If the page passes internal-system quality but fails product-grade quality, do not call the redesign finished when the task goal is productization or sellable SaaS quality.
 
+### Sellable Maturity Evidence
+
+- All 14 gates in `product-grade-evaluation.md` have evidence; none is waived by visual polish.
+- Representative list, detail, and overlay routes are checked at `1366x768`, `1280x720`, and one wide desktop viewport.
+- Multi-window/split-width behavior is either verified or recorded as a release-blocking product-grade gap.
+- Field, row, batch, overlay, permission, and network errors remain local to the surface that can fix them.
+- Complex flows document why they use sections, Steps, or status nodes, including draft/resume behavior.
+- Edge-state evidence covers skeleton/loading, empty, no permission, long text, extreme values, slow network, retry, duplicate submit, and partial batch failure.
+
 ## Module Generalization Gate
 
 - Business object is explicitly identified (see `module-patterns.md` slot mapping).
@@ -85,7 +94,7 @@
 - Business field names in a rule are marked as examples of slots; they are not treated as mandatory content for every page using the same class.
 - Repeated modules are present only when the object owns that data.
 - Steps/milestones appear only when the object has a real business process.
-- Shared classes are used as structural slots, not as fixed business content.
+- Shared classes are used as structural slots only when grep proves their implementation exists; example class names are not portable API.
 - Global CSS class names describe structure or role, such as identity band, key fact, line module, document checklist, or action menu; they do not encode one page's business field unless that field is a real reusable domain object.
 
 ## Functional Delivery Gate
@@ -142,7 +151,7 @@
 - List total count is owned by pagination when pagination is present.
 - Main tables, detail line tables, editable line tables, and file tables follow their own table type rules.
 - Main workbench VXE tables use compact density: header 32px, body row 36px, unless a documented two-line/standard-row reason exists.
-- Detail VXE tables choose density by row job: editable rows use `detail-mini-vxe--editable` + `row-config.height = 38`; readonly rows use `detail-mini-vxe--readonly` + `row-config.height = 34`; summary rows use `detail-mini-vxe--summary` + `row-config.height = 32`.
+- Detail VXE tables choose density by row job: editable uses `detail-mini-vxe--editable` (38px); readonly uses `detail-mini-vxe--readonly` (34px); summary uses `detail-mini-vxe--summary` (32px). The global CSS bridge owns these heights; component `row-config.height` is forbidden.
 - Table columns expose object identity, key state, main working data, and next-decision fields before passive metadata.
 - Table empty states are explicit and object-specific, not blank table bodies.
 - Editable tables keep inputs readable and aligned without clipping.
@@ -151,7 +160,7 @@
 - VXE sequence columns: `width="52"`, `align="center"`, title `序号`; required on detail editable mini tables with ≥2 rows; optional on workbench lists (default omit when identity column is fixed left).
 - Overlay typography: popconfirm/modal/select dropdown options use F4 12px; overlay footer buttons use F2 13px (`typography.md`).
 - Arco `size`: business modules use `size="small"` only; forbid `medium`/`large`/template `mini` (`component-size.md`).
-- Detail embedded VXE tables use `detail-mini-vxe` + one density modifier + `detail-section__body--table`; no `show-overflow` on those tables.
+- Detail embedded VXE tables use `detail-mini-vxe` + one density modifier + `detail-section__body--table`; no `show-overflow` and no `row-config.height` on those tables.
 - Detail form grids use `min-width: 0` children and full-width controls; date pickers follow 28px detail control height.
 - Detail combo fields (port code/name, vessel/voyage, field+copy) use `detail-combo` modifiers from `global.css`, not page-scoped borders.
 - Detail sections with multiple business sub-concepts use `form-subgroup` blocks (`form-subgroup__head` + `form-subgroup__title` + `detail-form-grid`); do not stack bare subgroup labels with repeated blue left rails.

@@ -54,7 +54,7 @@ Each rule family has one authority. Other files route to it or verify it; they d
 | Query-count selection | `filter-layout.md` |
 | Supported viewport behavior | `responsive.md` |
 | Visual role usage | `visual-system.md` |
-| Product-grade scoring | `product-grade-evaluation.md` |
+| Sellable product maturity gates and scoring | `product-grade-evaluation.md` |
 | Delivery checks only | `checklist.md` |
 
 When two files disagree, use the authority above and delete the duplicate rule during maintenance.

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { IconRight } from '@arco-design/web-vue/es/icon';
+import { IconArrowRight, IconClockCircle, IconExclamationCircle } from '@arco-design/web-vue/es/icon';
 import type { ShipmentOrderDetailRecord } from './types';
 
 const props = defineProps<{
@@ -15,8 +15,11 @@ const emit = defineEmits<{
 
 const drawerVisible = computed({
   get: () => props.visible,
-  set: (v) => emit('update:visible', v),
+  set: (value) => emit('update:visible', value),
 });
+
+const pendingNodes = computed(() => props.record?.nodes.filter((item) => item.statusKey !== 'rel').length ?? 0);
+const pendingRisks = computed(() => props.record?.risks.filter((item) => item.status !== '已关闭').length ?? 0);
 
 const close = () => {
   drawerVisible.value = false;
@@ -31,108 +34,381 @@ const goFull = () => {
   <a-drawer
     v-model:visible="drawerVisible"
     :width="720"
-    :footer="false"
     :mask-closable="true"
     unmount-on-close
+    class="detail-drawer--standard"
   >
     <template v-if="record" #title>
-      <a-space :size="8">
-        <span class="link-text link-text--strong mono">{{ record.orderNo }}</span>
+      <div class="quickview-title">
+        <span class="mono quickview-title__id">{{ record.orderNo }}</span>
         <span class="s-pill" :data-s="record.statusPill">{{ record.orderStatusLabel }}</span>
-      </a-space>
+      </div>
     </template>
 
-    <a-space v-if="record" direction="vertical" :size="12" fill class="detail-drawer">
-      <a-typography-text type="secondary">
-        {{ record.customerName }} · {{ record.vesselVoyage }}
-      </a-typography-text>
+    <div v-if="record" class="order-quickview">
+      <header class="quickview-identity">
+        <div class="quickview-identity__main">
+          <div class="quickview-route">
+            <strong>{{ record.pol }}</strong>
+            <icon-arrow-right />
+            <strong>{{ record.pod }}</strong>
+          </div>
+          <div class="quickview-context">{{ record.customerName }} · {{ record.businessType }}</div>
+          <div class="quickview-context">{{ record.carrier }} / {{ record.vesselVoyage }}</div>
+        </div>
+        <div class="quickview-attention" :data-active="pendingRisks > 0">
+          <icon-exclamation-circle />
+          <span>{{ pendingRisks ? `${pendingRisks} 项风险待处理` : '当前无阻塞风险' }}</span>
+        </div>
+      </header>
 
-      <a-alert v-if="record.risks.length" type="warning">
-        <template #title>风险提醒</template>
-        <div v-for="risk in record.risks" :key="risk.id">{{ risk.message }}</div>
-      </a-alert>
+      <div class="quickview-facts">
+        <div class="quickview-fact">
+          <span>ETD / ETA</span>
+          <strong class="mono">{{ record.etd }} / {{ record.eta }}</strong>
+        </div>
+        <div class="quickview-fact">
+          <span>截关时间</span>
+          <strong class="mono">{{ record.closingTime }}</strong>
+        </div>
+        <div class="quickview-fact">
+          <span>柜型柜量</span>
+          <strong>{{ record.containerSummary }}</strong>
+        </div>
+        <div class="quickview-fact">
+          <span>当前操作</span>
+          <strong>{{ record.operator }}</strong>
+        </div>
+      </div>
 
-      <a-card title="订单摘要" size="small" :bordered="true">
-        <a-descriptions :column="2" size="small">
-          <a-descriptions-item label="业务类型">{{ record.businessType }}</a-descriptions-item>
-          <a-descriptions-item label="起运港">{{ record.pol }}</a-descriptions-item>
-          <a-descriptions-item label="目的港">{{ record.pod }}</a-descriptions-item>
-          <a-descriptions-item label="ETD / ETA">{{ record.etd }} / {{ record.eta }}</a-descriptions-item>
-          <a-descriptions-item label="操作人员">{{ record.operator }}</a-descriptions-item>
-          <a-descriptions-item label="柜型柜量">{{ record.containerSummary }}</a-descriptions-item>
-          <a-descriptions-item label="利润状态">
-            <span class="s-pill" :data-s="record.profitStatusKey">{{ record.profitStatus }}</span>
-          </a-descriptions-item>
-          <a-descriptions-item label="异常状态">{{ record.exceptionStatus }}</a-descriptions-item>
-        </a-descriptions>
-      </a-card>
+      <section v-if="record.risks.length" class="quickview-section">
+        <div class="quickview-section__head">
+          <div>
+            <strong>待处理风险</strong>
+            <span>直接定位当前订单的阻塞项</span>
+          </div>
+          <span class="quickview-section__count">{{ pendingRisks }}</span>
+        </div>
+        <div class="quickview-risk-list">
+          <div v-for="risk in record.risks" :key="risk.id" class="quickview-risk">
+            <span class="s-pill" :data-s="risk.level === 'danger' ? 'rej' : 'wait'">{{ risk.status }}</span>
+            <div class="quickview-risk__body">
+              <strong>{{ risk.type }}</strong>
+              <span>{{ risk.message }}</span>
+            </div>
+            <div class="quickview-risk__meta">
+              <span>{{ risk.owner }}</span>
+              <span class="mono">{{ risk.dueAt }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <a-card title="最近节点" size="small" :bordered="true">
-        <a-timeline size="small">
-          <a-timeline-item v-for="node in record.nodes.slice(0, 4)" :key="node.id">
-            <a-space :size="8">
-              <span>{{ node.name }}</span>
-              <span class="s-pill" :data-s="node.statusKey">{{ node.status }}</span>
-            </a-space>
-            <div class="detail-drawer__meta">
-              计划 {{ node.planTime }} · {{ node.owner }}
+      <section class="quickview-section">
+        <div class="quickview-section__head">
+          <div>
+            <strong>执行进度</strong>
+            <span>{{ pendingNodes }} 个节点待推进</span>
+          </div>
+          <icon-clock-circle class="quickview-section__icon" />
+        </div>
+        <a-timeline size="small" class="quickview-timeline">
+          <a-timeline-item
+            v-for="node in record.nodes.slice(0, 5)"
+            :key="node.id"
+            :line-type="node.statusKey === 'rel' ? 'solid' : 'dashed'"
+          >
+            <div class="quickview-node">
+              <div class="quickview-node__main">
+                <strong>{{ node.name }}</strong>
+                <span class="s-pill" :data-s="node.statusKey">{{ node.status }}</span>
+              </div>
+              <span>{{ node.owner }} · 计划 <span class="mono">{{ node.planTime }}</span></span>
             </div>
           </a-timeline-item>
         </a-timeline>
-      </a-card>
+      </section>
 
-      <a-card title="费用概览" size="small" :bordered="true">
-        <a-descriptions :column="2" size="small">
-          <a-descriptions-item label="应收合计">{{ record.feeSummary.receivableTotal.toLocaleString() }}</a-descriptions-item>
-          <a-descriptions-item label="应付合计">{{ record.feeSummary.payableTotal.toLocaleString() }}</a-descriptions-item>
-          <a-descriptions-item label="毛利">{{ record.feeSummary.grossProfit.toLocaleString() }}</a-descriptions-item>
-          <a-descriptions-item label="毛利率">{{ record.feeSummary.grossMargin }}%</a-descriptions-item>
-        </a-descriptions>
-      </a-card>
+      <section class="quickview-section">
+        <div class="quickview-section__head">
+          <div>
+            <strong>费用概览</strong>
+            <span>{{ record.profitStatus }}</span>
+          </div>
+          <span class="s-pill" :data-s="record.profitStatusKey">{{ record.profitStatus }}</span>
+        </div>
+        <div class="quickview-money">
+          <div><span>应收</span><strong>{{ record.feeSummary.receivableTotal.toLocaleString() }}</strong></div>
+          <div><span>应付</span><strong>{{ record.feeSummary.payableTotal.toLocaleString() }}</strong></div>
+          <div><span>毛利</span><strong>{{ record.feeSummary.grossProfit.toLocaleString() }}</strong></div>
+          <div><span>毛利率</span><strong>{{ record.feeSummary.grossMargin }}%</strong></div>
+        </div>
+      </section>
 
-      <a-card title="最近日志" size="small" :bordered="true">
+      <section class="quickview-section quickview-section--table">
+        <div class="quickview-section__head">
+          <div>
+            <strong>最近操作</strong>
+            <span>关键变更可追溯</span>
+          </div>
+        </div>
         <vxe-table
           class="detail-mini-vxe detail-mini-vxe--readonly"
           border="none"
           size="small"
           height="auto"
-          :data="record.logs"
-          :row-config="{ isHover: true, keyField: 'id', height: 34 }"
+          :data="record.logs.slice(0, 4)"
+          :row-config="{ isHover: true, keyField: 'id' }"
         >
           <vxe-column field="time" title="时间" min-width="130" />
           <vxe-column field="operator" title="操作人" min-width="80" />
           <vxe-column field="action" title="操作" min-width="100" />
-          <vxe-column field="after" title="结果" min-width="80" />
+          <vxe-column field="after" title="结果" min-width="90" />
         </vxe-table>
-      </a-card>
+      </section>
+    </div>
 
-      <a-space class="detail-drawer__footer">
-        <a-button size="small" type="outline">上传文件</a-button>
-        <a-button size="small" type="primary" @click="goFull">
-          进入完整详情
-          <template #icon><icon-right /></template>
-        </a-button>
+    <template #footer>
+      <div class="quickview-footer">
         <a-button size="small" @click="close">关闭</a-button>
-      </a-space>
-    </a-space>
+        <a-button size="small" type="primary" @click="goFull">
+          打开完整详情
+          <template #icon><icon-arrow-right /></template>
+        </a-button>
+      </div>
+    </template>
   </a-drawer>
 </template>
 
 <style scoped>
-.detail-drawer {
-  min-height: 0;
+.quickview-title,
+.quickview-footer,
+.quickview-section__head,
+.quickview-node__main {
+  display: flex;
+  align-items: center;
 }
 
-.detail-drawer__meta {
-  margin-top: 4px;
+.quickview-title {
+  gap: 8px;
+}
+
+.quickview-title__id {
+  color: var(--color-text-1);
+  font-size: var(--dense-font-nav);
+  font-weight: var(--dense-weight-title);
+}
+
+.order-quickview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quickview-identity {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-border-1);
+}
+
+.quickview-identity__main {
+  min-width: 0;
+}
+
+.quickview-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-1);
+  font-size: 16px;
+  line-height: 22px;
+}
+
+.quickview-context {
+  margin-top: 3px;
+  overflow: hidden;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-control);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quickview-attention {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border-1);
+  border-radius: var(--dense-radius);
+  color: var(--color-text-2);
+  background: var(--color-fill-1);
+  font-size: var(--dense-font-control);
+}
+
+.quickview-attention[data-active='true'] {
+  border-color: var(--dense-warning-3);
+  color: var(--dense-warning-7);
+  background: var(--dense-warning-1);
+}
+
+.quickview-facts,
+.quickview-money {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.quickview-fact,
+.quickview-money > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.quickview-fact > span,
+.quickview-money span {
+  color: var(--color-text-3);
   font-size: var(--dense-font-aux);
+}
+
+.quickview-fact > strong,
+.quickview-money strong {
+  overflow: hidden;
+  color: var(--color-text-1);
+  font-size: var(--dense-font-data);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--dense-weight-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quickview-section {
+  border-top: 1px solid var(--color-border-1);
+  padding-top: 14px;
+}
+
+.quickview-section__head {
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.quickview-section__head > div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.quickview-section__head strong {
+  color: var(--color-text-1);
+  font-size: var(--dense-font-nav);
+  font-weight: var(--dense-weight-title);
+}
+
+.quickview-section__head span:not(.s-pill):not(.quickview-section__count) {
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+}
+
+.quickview-section__count {
+  min-width: 22px;
+  color: var(--dense-danger-7);
+  font-size: var(--dense-font-control);
+  font-weight: var(--dense-weight-title);
+  text-align: right;
+}
+
+.quickview-section__icon {
   color: var(--color-text-3);
 }
 
-.detail-drawer__footer {
+.quickview-risk-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--color-border-1);
+}
+
+.quickview-risk {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) 132px;
+  align-items: start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border-1);
+}
+
+.quickview-risk__body,
+.quickview-risk__meta,
+.quickview-node {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.quickview-risk__body strong,
+.quickview-node strong {
+  color: var(--color-text-1);
+  font-size: var(--dense-font-data);
+  font-weight: var(--dense-weight-title);
+}
+
+.quickview-risk__body span,
+.quickview-risk__meta,
+.quickview-node > span {
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  line-height: 17px;
+}
+
+.quickview-risk__meta {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.quickview-timeline {
+  padding: 2px 4px 0;
+}
+
+.quickview-node__main {
+  gap: 8px;
+}
+
+.quickview-section--table {
+  padding-bottom: 4px;
+}
+
+.quickview-footer {
   justify-content: flex-end;
+  gap: 8px;
   width: 100%;
-  padding-top: 8px;
-  border-top: 1px solid var(--color-border-2);
+}
+
+@media (max-width: 760px) {
+  .quickview-identity {
+    flex-direction: column;
+  }
+
+  .quickview-facts,
+  .quickview-money {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quickview-risk {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+
+  .quickview-risk__meta {
+    grid-column: 2;
+    align-items: flex-start;
+    text-align: left;
+  }
 }
 </style>

@@ -71,10 +71,22 @@ Shell classes: `xf-wrap`, `xf-head`, `xf-body`, `xf-footer` in `global.css`.
 
 Client portal may hide 废弃; keep one primary.
 
-## Steps (optional)
+## Staging Decision
 
-- Simple objects: **no** step wizard — use `detail-section` groups only.
-- Multi-phase client order (货物 → 运输 → 附件): `a-steps size="small"` in `xf-head` or first section — max 5 steps; do not use `type="arrow"` blocks (see `detail-form.md`).
+Complexity must be staged, but not every long form becomes a wizard.
+
+| Presentation | Use when | Required behavior |
+|--------------|----------|-------------------|
+| Sections/groups | fields can be edited in one session and share one submit boundary | clear business grouping, local validation, stable footer |
+| Arco Steps | phases have dependencies, separate validation/permission, or meaningful save/resume boundaries | max 5 stages, visible stage names/state, draft preservation, back/next without losing data |
+| Status nodes/timeline | the user is reviewing process progress rather than entering data | current state, completed/blocked nodes, owner/time/reason, next legal action |
+
+- Simple objects use sections, not a wizard.
+- A multi-phase order/review/fee flow uses Steps only when each stage represents a real user job or commit boundary.
+- Step changes do not silently submit. Save draft, final submit, and stage transition are distinct actions.
+- Returning to an earlier stage preserves later-stage data unless the business contract explicitly invalidates it.
+- Validation stays local to fields/rows; a step summary may navigate to failures but cannot replace local errors.
+- Do not use arrow-block decoration or show all stages' fields at once below the steps.
 
 ## Client Portal Variant
 

@@ -12,6 +12,19 @@ Choose the table type before designing columns.
 | File table | Attachments/documents | Compact | File status and actions are mandatory |
 | Summary table | Read-only small totals | Very compact | No heavy borders, no action column unless needed |
 
+## Office Table Gate
+
+A main freight workbench table is accepted only when all of these are demonstrated:
+
+- at `1366x768` the primary identity, key status/decision data, and operation entry remain reachable without browser-level overflow;
+- structural columns use fixed widths, business columns use rational `min-width`, and the table owns horizontal scrolling;
+- the primary identity may be fixed left and the compact operation column fixed right; fixed surfaces retain hover/selection state;
+- long text has title/tooltip or an approved two-line relationship; no business meaning disappears through silent clipping;
+- multi-select appears only with a real batch toolbar and complete partial-failure contract;
+- more than 12 columns defines 8-12 useful defaults plus column settings; density changes use supported row configurations rather than CSS-only scaling;
+- long data, extreme values, empty values, loading, no-match, and slow refresh are verified;
+- keyboard focus, row actions, virtual scrolling, and horizontal scrolling do not shift row height or lose state.
+
 ## Unified Table Surface
 
 List workbench tables and detail nested tables must read as **one VXE design system**, not two different grids.
@@ -35,7 +48,8 @@ Shared rules:
 - Data rows are the main working surface and use the GI container surface by default. Zebra stripes are optional and should normally use the same effective surface token on dense freight workbenches.
 - Do not add `border-bottom` on `vxe-table--header-wrapper`; structure vs data is separated by brand-neutral header contrast and weak row separators.
 - Do not let column borders dominate. Workbench tables default to horizontal scan rhythm; vertical separators are disabled or near-invisible unless the page documents a finance comparison exception.
-- Detail-only differences: role-based row height, ghost Arco controls for editable rows, padding on `.vxe-cell` not on `td`, no `show-overflow`, no checkbox without batch toolbar.
+- Detail-only differences: role-based row height through density modifier + global CSS token, ghost Arco controls for editable rows, padding on `.vxe-cell` not on `td`, no `show-overflow`, no checkbox without batch toolbar.
+- With pinned VXE Table 4.5, do **not** set `row-config.height` on `detail-mini-vxe`. VXE then requires `show-overflow`, which is forbidden for editable detail rows and produces runtime warnings. Use `detail-mini-vxe--editable|readonly|summary`; the global bridge owns 38/34/32px.
 - **Borders:** `border="none"` + no vertical lines + weak horizontal row separators — see **Border Policy**.
 - **Sequence:** see **Sequence Column (序号)** — width `52`, detail editable tables require it; list tables usually omit.
 
@@ -78,9 +92,9 @@ Rules:
 - Main list VXE tables use `class="compact"` unless the page has a documented reason to use `standard`.
 - Do not use 40px as the default workbench row height; it reduces first-screen data density.
 - VXE `size="small"` defaults to a 40px row variable. A compact table must override both `--vxe-table-row-height-small` and `--vxe-ui-table-row-height-small`, then set `row-config.height = 36`; changing only `.vxe-body--row` is not enough.
-- `detail-mini-vxe--editable` must set `row-config.height = 38`.
-- `detail-mini-vxe--readonly` must set `row-config.height = 34`.
-- `detail-mini-vxe--summary` must set `row-config.height = 32`.
+- `detail-mini-vxe--editable` resolves to 38px through the global density token.
+- `detail-mini-vxe--readonly` resolves to 34px through the global density token.
+- `detail-mini-vxe--summary` resolves to 32px through the global density token.
 - CSS-only row height is not enough because VXE virtualization, fixed columns, and scroll calculations use the table config.
 - Do not apply editable density to read-only documents, attachments, logs, or status-only rows. Density is chosen by the row job, not by the surrounding drawer.
 - Do not push main list rows below 34px; checkbox, status pill, icon actions, and text line-height begin to clip.
@@ -463,7 +477,7 @@ Detail tables must look like part of the module, not a full page table pasted in
 - For short summary tables, use `detail-mini-vxe detail-mini-vxe--summary`: 28-32px header rhythm, 32px body row, no row actions unless the summary itself is editable.
 - `detail-mini-vxe` shares `--dense-table-header-bg` and `--dense-vxe-surface-hover-bg` with list tables. Data rows stay white; hover is primary wash on white. **Do not** use a separate flat-gray header in detail.
 - Detail mini tables without batch toolbar must **not** include a `type="checkbox"` column (VXE default checkbox reads as a solid blue square and has no batch action in detail sub-tables).
-- `detail-mini-vxe` CSS row height, both VXE row-height variables (`--vxe-table-row-height-small` / `--vxe-ui-table-row-height-small`), and `row-config.height` must match the chosen density variant. Do not set readonly height 34px while rendering 28px input/select/date controls, because VXE cell clipping will cut input text and displayed values.
+- `detail-mini-vxe` CSS row height and both VXE row-height variables (`--vxe-table-row-height-small` / `--vxe-ui-table-row-height-small`) must match the chosen density variant. Do not add `row-config.height` on this pinned VXE version. Do not use readonly density while rendering 28px input/select/date controls, because the 34px row can clip displayed values.
 - `detail-mini-vxe` is isolated from list-page `.vxe-table` global rules in `global.css` for **cell padding and row height only**. Header/hover/border tokens must match `workbench-table`.
 - Wrap detail-section embedded tables with `detail-section__body detail-section__body--table` (padding 0, horizontal scroll). Do not use page-scoped `overflow: hidden` wrappers around wide child tables.
 - Do **not** set `show-overflow` on `detail-mini-vxe` tables. It adds `col--ellipsis`, clips numbers/inputs, and can desync header/body columns (especially with `fixed="right"`). List/workbench tables still use `show-overflow="title"`.

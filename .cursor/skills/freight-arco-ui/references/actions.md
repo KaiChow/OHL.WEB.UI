@@ -360,7 +360,7 @@ Key rules:
 
 | 场景 | 直出 | 危险操作 |
 |------|------|----------|
-| **列表主表** `workbench-table` | 最多 2 个 affordance；N≥3 或含 D → `[A] + ···` | 永远在 `···` 内 + `danger-opt` + `a-popconfirm` |
+| **列表主表** `workbench-table` | 最多 2 个 affordance；N≥3 或含 D → `[A] + ···` | 永远在 `···` 内 + `danger-opt`，点击后打开独立确认 Modal |
 | **详情可编辑子表** `detail-mini-vxe--editable` | 同上上限 | 允许 1 个直出 danger icon + `a-popconfirm`（行编辑场景） |
 
 ```vue
@@ -373,9 +373,7 @@ Key rules:
     <a-button type="text" class="row-action-btn row-action-btn--more" title="更多操作"><icon-more /></a-button>
     <template #content>
       <a-divider />
-      <a-popconfirm content="确认删除？" @ok="remove(row)">
-        <a-doption class="danger-opt">删除</a-doption>
-      </a-popconfirm>
+      <a-doption class="danger-opt" @click="openRemoveConfirm(row)">删除</a-doption>
     </template>
   </a-dropdown>
 </div>
@@ -429,6 +427,7 @@ Danger rules:
 - Toolbar, footer, and row menus share Arco popup styling; trigger form communicates the scope.
 - Use Arco Divider before the final danger group.
 - 下拉危险项：`class="danger-opt"`，点击后 `Modal.confirm` 或业务确认，禁止直接执行。
+- 禁止在 Dropdown 内容中嵌套 `a-popconfirm`：下拉层会先销毁，确认浮层可能无法出现。先保存目标对象，再打开独立 Modal 或调用 `Modal.confirm`。
 - 行内删除：`a-popconfirm`。
 - 批量/不可逆：`Modal.confirm({ type: 'warning' })`。
 - 禁止 `alert()` / `confirm()`。

@@ -21,6 +21,7 @@ Vue 3 · TypeScript · Arco Design Vue · `@arco-themes/vue-gi-demo` · VXE Tabl
 |----|-----|
 | 主题 / token / 组件皮肤 | `theme-contract.md` + `visual-system.md` |
 | 无参考图改造既有项目 | `existing-project-modernization.md` + `redesign-calibration.md` |
+| 融资 / 可销售产品成熟度 | `product-grade-evaluation.md` + `checklist.md` |
 | 框架优先 / 减 global.css 依赖 | `arco-first.md` |
 | 新菜单选型 | `domain-routing.md` |
 | 截图/原型转页面 | `artifact-intake-template.md` + `prototype-to-ui-contract.md` + `page-archetypes.md` + `module-patterns.md` |
