@@ -24,7 +24,7 @@ alwaysApply: true
 | 列表 / 筛选 / 弹层 / 详情等 | 只读当前 surface 权威文件（`list-page` / `filter-layout` / `modal` / `detail-form`…） |
 | 任意共享类名 / global.css pattern | 先过 **`arco-first.md`**，再 grep `src/styles/global.css` |
 
-路径：`ui-skill/freight-arco-ui/references/`（已 sync 到 `.agents/skills/`）。
+路径：`.agents/skills/freight-arco-ui/references/`（已 sync 到 `.agents/skills/`）。
 
 ## 1. 写 template 前必须完成的决策（答案在 reference 里查，禁止凭记忆）
 

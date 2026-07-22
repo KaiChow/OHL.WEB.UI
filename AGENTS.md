@@ -1,6 +1,6 @@
 # OHL 货代系统 — Agent 规范（摘要）
 
-> **完整 UI 规范不在此文件。** 详见项目 skill：`ui-skill/freight-arco-ui/SKILL.md`（维护后运行 `npm run sync-ui-skill`）。
+> **完整 UI 规范不在此文件。** 详见项目 skill：`.agents/skills/freight-arco-ui/SKILL.md`（维护后运行 `npm run sync-ui-skill`）。
 
 ## 技术栈
 
@@ -14,7 +14,7 @@ Vue 3 · TypeScript · Arco Design Vue · `@arco-themes/vue-gi-demo` · VXE Tabl
 
 ## Skill 读什么
 
-完整索引 → `ui-skill/freight-arco-ui/SKILL.md` · **默认无设计稿路径** → `references/existing-project-modernization.md` · **框架优先** → `references/arco-first.md`  
+完整索引 → `.agents/skills/freight-arco-ui/SKILL.md` · **默认无设计稿路径** → `references/existing-project-modernization.md` · **框架优先** → `references/arco-first.md`
 编码流程 → `.cursor/rules/spec-first-coding.mdc`
 
 **无设计稿（默认）只读：** `arco-first` + `theme-contract` + `existing-project-modernization` + `redesign-calibration` + **一个**页面原型 reference。不要预读全库。

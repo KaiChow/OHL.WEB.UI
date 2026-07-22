@@ -1,7 +1,7 @@
 /**
- * 将 ui-skill/freight-arco-ui 同步到各 AI 工具的 skill 目录。
+ * 将 Codex skill 同步到 Cursor skill 目录。
  * 用法: node scripts/sync-ui-skill.mjs
- * 源码目录: ui-skill/freight-arco-ui/
+ * 源码目录: .agents/skills/freight-arco-ui/
  */
 
 import { cpSync, existsSync, mkdirSync, rmSync } from 'fs';
@@ -10,12 +10,11 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
-const SOURCE = join(ROOT, 'ui-skill', 'freight-arco-ui');
+const SOURCE = join(ROOT, '.agents', 'skills', 'freight-arco-ui');
 
 /** @type {{ label: string; path: string }[]} */
 const TARGETS = [
   { label: 'Cursor', path: join(ROOT, '.cursor', 'skills', 'freight-arco-ui') },
-  { label: 'Codex', path: join(ROOT, '.agents', 'skills', 'freight-arco-ui') },
 ];
 
 function syncSkill() {
@@ -37,7 +36,7 @@ function syncSkill() {
   }
 
   console.log('');
-  console.log('Done. Skill synced to Cursor and Codex (.agents/skills).');
+  console.log('Done. Skill synced to Cursor from Codex (.agents/skills).');
 }
 
 syncSkill();
