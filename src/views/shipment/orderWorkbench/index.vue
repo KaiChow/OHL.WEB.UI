@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Message } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
@@ -40,6 +40,7 @@ const router = useRouter();
 const CURRENT_OPERATOR = '张操作';
 const QUERY_SCHEME_STORAGE_KEY = 'ohl.shipment.export-order.query-schemes.v2';
 const LEGACY_QUERY_SCHEME_STORAGE_KEY = 'ohl.shipment.export-order.query-schemes.v1';
+const COLUMN_SETTING_STORAGE_KEY = 'ohl.shipment.export-order.visible-columns.v3';
 
 type TableDensity = 'compact' | 'standard';
 
@@ -57,6 +58,86 @@ interface SavedQueryScheme {
 }
 
 type SchemeModalMode = 'create' | 'rename' | 'duplicate';
+
+type ColumnSettingField = keyof ShipmentWorkbenchRow | 'nextAction';
+
+interface ColumnSettingGroup {
+  label: string;
+  options: Array<{ field: ColumnSettingField; label: string; required?: boolean }>;
+}
+
+const COLUMN_SETTING_GROUPS: ColumnSettingGroup[] = [
+  {
+    label: '核心信息',
+    options: [
+      { field: 'orderNo', label: '订单号', required: true },
+      { field: 'orderStatus', label: '订单状态', required: true },
+      { field: 'customerName', label: '客户名称' },
+      { field: 'businessType', label: '业务类型' },
+      { field: 'operator', label: '操作人员' },
+    ],
+  },
+  {
+    label: '运输节点',
+    options: [
+      { field: 'pol', label: '起运港' },
+      { field: 'pod', label: '目的港' },
+      { field: 'carrier', label: '船公司' },
+      { field: 'vesselVoyage', label: '船名航次' },
+      { field: 'etd', label: 'ETD' },
+      { field: 'eta', label: 'ETA' },
+      { field: 'closingTime', label: '截关时间' },
+      { field: 'containerSummary', label: '柜型柜量' },
+    ],
+  },
+  {
+    label: '单证信息',
+    options: [
+      { field: 'bookingNo', label: '订舱号' },
+      { field: 'blNo', label: '提单号' },
+      { field: 'fileStatus', label: '文件状态' },
+    ],
+  },
+  {
+    label: '执行跟进',
+    options: [
+      { field: 'nextAction', label: '当前待办' },
+      { field: 'feeStatus', label: '费用状态' },
+      { field: 'exceptionStatus', label: '异常状态' },
+      { field: 'isOverdue', label: '是否超期' },
+      { field: 'updatedAt', label: '更新时间' },
+    ],
+  },
+];
+
+const COLUMN_SETTING_OPTIONS = COLUMN_SETTING_GROUPS.flatMap((group) => group.options);
+const REQUIRED_COLUMN_FIELDS = COLUMN_SETTING_OPTIONS.filter((option) => option.required).map((option) => option.field);
+const DEFAULT_VISIBLE_COLUMN_FIELDS: ColumnSettingField[] = [
+  'orderNo',
+  'orderStatus',
+  'customerName',
+  'operator',
+  'pol',
+  'pod',
+  'etd',
+  'nextAction',
+  'fileStatus',
+  'feeStatus',
+  'exceptionStatus',
+  'updatedAt',
+];
+
+const loadVisibleColumnFields = (): ColumnSettingField[] => {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) ?? '[]') as string[];
+    const availableFields = new Set(COLUMN_SETTING_OPTIONS.map((option) => option.field));
+    const validFields = stored.filter((field): field is ColumnSettingField => availableFields.has(field as ColumnSettingField));
+    const normalized = Array.from(new Set([...REQUIRED_COLUMN_FIELDS, ...validFields]));
+    return normalized.length >= 8 ? normalized : [...DEFAULT_VISIBLE_COLUMN_FIELDS];
+  } catch {
+    return [...DEFAULT_VISIBLE_COLUMN_FIELDS];
+  }
+};
 
 const KEYWORD_OPTIONS: { label: string; value: ShipmentKeywordType }[] = [
   { label: '业务单号', value: 'orderNo' },
@@ -178,6 +259,9 @@ const loadError = ref('');
 const hasSimulatedError = ref(false);
 const batchFeedback = ref<{ success: number; failedOrderNos: string[] } | null>(null);
 const tableRef = ref<VxeTableInstance>();
+const columnSettingsVisible = ref(false);
+const visibleColumnFields = ref<ColumnSettingField[]>(loadVisibleColumnFields());
+const columnSettingDraft = ref<ColumnSettingField[]>([...visibleColumnFields.value]);
 const selectedRows = ref<ShipmentWorkbenchRow[]>([]);
 const allRows = ref<ShipmentWorkbenchRow[]>([...shipmentWorkbenchRows]);
 const drawerVisible = ref(false);
@@ -223,6 +307,8 @@ const tableRowConfig = computed(() => ({
   keyField: 'id',
   height: tableDensity.value === 'compact' ? 36 : 44,
 }));
+
+const isColumnVisible = (field: ColumnSettingField) => visibleColumnFields.value.includes(field);
 
 const matchText = (value: string, keyword: string) =>
   !keyword.trim() || value.toLowerCase().includes(keyword.trim().toLowerCase());
@@ -386,19 +472,6 @@ const advancedActiveCount = computed(() => {
   return count;
 });
 
-const getOrderAuxText = (row: ShipmentWorkbenchRow) => {
-  const parts: string[] = [];
-
-  if (row.bookingNo) parts.push(`订舱 ${row.bookingNo}`);
-  if (row.blNo) parts.push(`提单 ${row.blNo}`);
-
-  return parts.length ? parts.join(' / ') : '待回传订舱号 / 提单号';
-};
-
-const getOwnerMeta = (row: ShipmentWorkbenchRow) => `业务类型 ${row.businessType} / 操作 ${row.operator}`;
-
-const getRouteMeta = (row: ShipmentWorkbenchRow) => `ETD ${row.etd} / 截关 ${row.closingTime}`;
-
 const getNextActionLabel = (row: ShipmentWorkbenchRow) => {
   if (row.exceptionStatus === 'open') return '处理异常';
   if (row.fileStatus === 'missing') return '补齐文件';
@@ -421,30 +494,27 @@ const getNextActionMeta = (row: ShipmentWorkbenchRow) => {
   return '继续跟踪节点变化';
 };
 
-const getExecutionSignals = (row: ShipmentWorkbenchRow) => {
-  const signals: Array<{ label: string; tone: 'acc' | 'wait' | 'rej' | 'rel' }> = [];
-
-  if (row.fileStatus === 'missing') signals.push({ label: '缺文件', tone: 'rej' });
-  else if (row.fileStatus === 'pending') signals.push({ label: '文件待确认', tone: 'wait' });
-
-  if (row.feeStatus === 'none') signals.push({ label: '未生成费用', tone: 'wait' });
-  else if (row.feeStatus === 'pending') signals.push({ label: '费用待确认', tone: 'wait' });
-
-  if (row.exceptionStatus === 'open') signals.push({ label: '异常处理中', tone: 'rej' });
-  else if (row.isOverdue) signals.push({ label: '节点超期', tone: 'wait' });
-
-  if (!signals.length) signals.push({ label: '执行就绪', tone: 'acc' });
-
-  return signals;
+const fileStatusMeta: Record<ShipmentWorkbenchRow['fileStatus'], { label: string; tone: 'acc' | 'wait' | 'rej' }> = {
+  complete: { label: '文件齐全', tone: 'acc' },
+  pending: { label: '待确认', tone: 'wait' },
+  missing: { label: '缺文件', tone: 'rej' },
 };
 
-const getVisibleExecutionSignals = (row: ShipmentWorkbenchRow) => {
-  const signals = getExecutionSignals(row);
-  return {
-    items: signals.slice(0, 2),
-    overflow: signals.length > 2 ? signals.length - 2 : 0,
-  };
+const feeStatusMeta: Record<ShipmentWorkbenchRow['feeStatus'], { label: string; tone: 'rel' | 'wait' }> = {
+  confirmed: { label: '已确认', tone: 'rel' },
+  pending: { label: '待确认', tone: 'wait' },
+  none: { label: '未生成', tone: 'wait' },
 };
+
+const exceptionStatusMeta: Record<ShipmentWorkbenchRow['exceptionStatus'], { label: string; tone: 'acc' | 'rel' | 'rej' }> = {
+  normal: { label: '正常', tone: 'acc' },
+  resolved: { label: '已关闭', tone: 'rel' },
+  open: { label: '处理中', tone: 'rej' },
+};
+
+const getFileStatusMeta = (row: ShipmentWorkbenchRow) => fileStatusMeta[row.fileStatus];
+const getFeeStatusMeta = (row: ShipmentWorkbenchRow) => feeStatusMeta[row.feeStatus];
+const getExceptionStatusMeta = (row: ShipmentWorkbenchRow) => exceptionStatusMeta[row.exceptionStatus];
 
 const canTransitionOrder = (row: ShipmentWorkbenchRow) => getOrderStatusTransitions(row.orderStatus).length > 0;
 
@@ -644,7 +714,36 @@ const onPageSizeChange = (nextSize: number) => {
 };
 
 const openColumnSettings = () => {
-  (tableRef.value as (VxeTableInstance & { openCustom?: () => void }) | undefined)?.openCustom?.();
+  columnSettingDraft.value = [...visibleColumnFields.value];
+  columnSettingsVisible.value = true;
+};
+
+const resetColumnSettingDraft = () => {
+  columnSettingDraft.value = [...DEFAULT_VISIBLE_COLUMN_FIELDS];
+};
+
+const applyColumnSettings = async () => {
+  const nextFields = Array.from(new Set([...REQUIRED_COLUMN_FIELDS, ...columnSettingDraft.value]));
+  if (nextFields.length < 8) {
+    Message.warning('至少保留 8 个业务字段');
+    return false;
+  }
+  if (!tableRef.value) {
+    Message.error('表格尚未就绪，请稍后重试');
+    return false;
+  }
+
+  visibleColumnFields.value = nextFields;
+  window.localStorage.setItem(COLUMN_SETTING_STORAGE_KEY, JSON.stringify(nextFields));
+  await nextTick();
+  await Promise.all(COLUMN_SETTING_OPTIONS.map((option) => (
+    nextFields.includes(option.field)
+      ? tableRef.value?.showColumn(option.field)
+      : tableRef.value?.hideColumn(option.field)
+  )));
+  await tableRef.value.refreshColumn();
+  Message.success('列设置已应用');
+  return true;
 };
 
 const openDetailDrawer = (row: ShipmentWorkbenchRow) => {
@@ -1037,7 +1136,7 @@ watch(uiScenario, () => {
         <div class="workbench-table-frame">
           <vxe-table
             ref="tableRef"
-            id="shipment-export-orders"
+            id="shipment-export-orders-v2"
             :class="[tableDensity, 'workbench-table']"
             size="small"
             style="width: 100%"
@@ -1057,73 +1156,63 @@ watch(uiScenario, () => {
           >
             <vxe-column type="checkbox" width="44" fixed="left" />
 
-            <vxe-column field="orderNo" title="业务对象" min-width="260" fixed="left">
+            <vxe-column field="orderNo" title="订单号" min-width="168" fixed="left" :visible="isColumnVisible('orderNo')">
               <template #default="{ row }">
-                <div class="cell-two-line">
-                  <div class="cell-two-line__main">
-                    <span class="s-pill" :data-s="row.statusPill">{{ row.orderStatusLabel }}</span>
-                    <span class="link-text link-text--strong mono" @click="openDetailDrawer(row)">{{ row.orderNo }}</span>
-                  </div>
-                  <span class="cell-two-line__sub mono">{{ getOrderAuxText(row) }}</span>
+                <span class="link-text link-text--strong mono" @click="openDetailDrawer(row)">{{ row.orderNo }}</span>
+              </template>
+            </vxe-column>
+
+            <vxe-column field="orderStatus" title="订单状态" min-width="96" fixed="left" :visible="isColumnVisible('orderStatus')">
+              <template #default="{ row }">
+                <span class="s-pill" :data-s="row.statusPill">{{ row.orderStatusLabel }}</span>
+              </template>
+            </vxe-column>
+
+            <vxe-column field="customerName" title="客户名称" min-width="190" :visible="isColumnVisible('customerName')" />
+            <vxe-column field="operator" title="操作人员" min-width="90" :visible="isColumnVisible('operator')" />
+            <vxe-column field="pol" title="起运港" min-width="96" class-name="mono" :visible="isColumnVisible('pol')" />
+            <vxe-column field="pod" title="目的港" min-width="96" class-name="mono" :visible="isColumnVisible('pod')" />
+            <vxe-column field="etd" title="ETD" min-width="104" class-name="mono" :visible="isColumnVisible('etd')" />
+
+            <vxe-column field="nextAction" title="当前待办" min-width="230" :visible="isColumnVisible('nextAction')">
+              <template #default="{ row }">
+                <div class="decision-cell" data-cell-role="decision-context">
+                  <span class="decision-cell__main">{{ getNextActionLabel(row) }}</span>
+                  <span class="decision-cell__context">{{ getNextActionMeta(row) }}</span>
                 </div>
               </template>
             </vxe-column>
 
-            <vxe-column field="customerName" title="客户 / 归属" min-width="260">
+            <vxe-column field="fileStatus" title="文件状态" min-width="100" :visible="isColumnVisible('fileStatus')">
               <template #default="{ row }">
-                <div class="cell-two-line">
-                  <span class="cell-two-line__main">{{ row.customerName }}</span>
-                  <span class="cell-two-line__sub">{{ getOwnerMeta(row) }}</span>
-                </div>
+                <span class="s-pill" :data-s="getFileStatusMeta(row).tone">{{ getFileStatusMeta(row).label }}</span>
               </template>
             </vxe-column>
 
-            <vxe-column title="航程 / 节点" min-width="310">
+            <vxe-column field="feeStatus" title="费用状态" min-width="100" :visible="isColumnVisible('feeStatus')">
               <template #default="{ row }">
-                <div class="cell-two-line">
-                  <span class="cell-two-line__main mono">{{ row.pol }} -> {{ row.pod }}</span>
-                  <span class="cell-two-line__sub">{{ row.carrier }} / {{ row.vesselVoyage }} · {{ getRouteMeta(row) }}</span>
-                </div>
+                <span class="s-pill" :data-s="getFeeStatusMeta(row).tone">{{ getFeeStatusMeta(row).label }}</span>
               </template>
             </vxe-column>
 
-            <vxe-column field="containerSummary" title="柜型柜量" min-width="110" align="center" />
-
-            <vxe-column title="当前待办" min-width="230">
+            <vxe-column field="exceptionStatus" title="异常状态" min-width="100" :visible="isColumnVisible('exceptionStatus')">
               <template #default="{ row }">
-                <div class="cell-two-line">
-                  <span class="cell-two-line__main">{{ getNextActionLabel(row) }}</span>
-                  <span class="cell-two-line__sub">{{ getNextActionMeta(row) }}</span>
-                </div>
+                <span class="s-pill" :data-s="getExceptionStatusMeta(row).tone">{{ getExceptionStatusMeta(row).label }}</span>
               </template>
             </vxe-column>
 
-            <vxe-column title="跟进信息" min-width="190">
-              <template #default="{ row }">
-                <div class="cell-two-line">
-                  <span class="cell-two-line__main">{{ row.operator }}</span>
-                  <span class="cell-two-line__sub mono">{{ row.updatedAt }}</span>
-                </div>
-              </template>
-            </vxe-column>
+            <vxe-column field="updatedAt" title="更新时间" min-width="140" class-name="mono" :visible="isColumnVisible('updatedAt')" />
 
-            <vxe-column title="执行缺口" min-width="220">
-              <template #default="{ row }">
-                <a-space wrap :size="4">
-                  <span
-                    v-for="signal in getVisibleExecutionSignals(row).items"
-                    :key="signal.label"
-                    class="s-pill"
-                    :data-s="signal.tone"
-                  >
-                    {{ signal.label }}
-                  </span>
-                  <span
-                    v-if="getVisibleExecutionSignals(row).overflow"
-                    class="workbench-signal-more"
-                  >+{{ getVisibleExecutionSignals(row).overflow }}</span>
-                </a-space>
-              </template>
+            <vxe-column field="businessType" title="业务类型" min-width="84" :visible="isColumnVisible('businessType')" />
+            <vxe-column field="carrier" title="船公司" min-width="120" :visible="isColumnVisible('carrier')" />
+            <vxe-column field="vesselVoyage" title="船名航次" min-width="190" :visible="isColumnVisible('vesselVoyage')" />
+            <vxe-column field="eta" title="ETA" min-width="104" class-name="mono" :visible="isColumnVisible('eta')" />
+            <vxe-column field="closingTime" title="截关时间" min-width="140" class-name="mono" :visible="isColumnVisible('closingTime')" />
+            <vxe-column field="bookingNo" title="订舱号" min-width="150" class-name="mono" :visible="isColumnVisible('bookingNo')" />
+            <vxe-column field="blNo" title="提单号" min-width="160" class-name="mono" :visible="isColumnVisible('blNo')" />
+            <vxe-column field="containerSummary" title="柜型柜量" min-width="110" :visible="isColumnVisible('containerSummary')" />
+            <vxe-column field="isOverdue" title="是否超期" min-width="90" :visible="isColumnVisible('isOverdue')">
+              <template #default="{ row }">{{ row.isOverdue ? '已超期' : '未超期' }}</template>
             </vxe-column>
 
             <vxe-column title="操作" width="88" fixed="right" align="center">
@@ -1329,6 +1418,36 @@ watch(uiScenario, () => {
         </div>
       </template>
     </a-drawer>
+
+    <a-modal
+      v-model:visible="columnSettingsVisible"
+      title="列设置"
+      class="column-settings-modal"
+      :width="560"
+      :mask-closable="false"
+      ok-text="应用"
+      :on-before-ok="applyColumnSettings"
+    >
+      <div class="column-settings-summary">
+        <span>已选择 {{ columnSettingDraft.length }} 个字段</span>
+        <a-button size="small" type="text" @click="resetColumnSettingDraft">恢复默认</a-button>
+      </div>
+      <a-checkbox-group v-model="columnSettingDraft" class="column-settings-groups">
+        <section v-for="group in COLUMN_SETTING_GROUPS" :key="group.label" class="column-settings-group">
+          <div class="column-settings-group__title">{{ group.label }}</div>
+          <div class="column-settings-grid">
+            <a-checkbox
+              v-for="option in group.options"
+              :key="option.field"
+              :value="option.field"
+              :disabled="option.required"
+            >
+              {{ option.label }}
+            </a-checkbox>
+          </div>
+        </section>
+      </a-checkbox-group>
+    </a-modal>
 
     <a-modal
       v-model:visible="statusModalVisible"
@@ -1615,11 +1734,6 @@ watch(uiScenario, () => {
   color: var(--dense-primary-7);
 }
 
-.workbench-signal-more {
-  font-size: var(--dense-font-micro);
-  color: var(--color-text-3);
-}
-
 .workbench-page__table-host {
   flex: 1;
   min-height: 0;
@@ -1732,6 +1846,54 @@ watch(uiScenario, () => {
   margin-top: 12px;
 }
 
+.column-settings-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 32px;
+  padding-bottom: 8px;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  border-bottom: 1px solid var(--color-border-1);
+}
+
+.column-settings-groups {
+  display: block;
+}
+
+.column-settings-group {
+  padding: 12px 0;
+}
+
+.column-settings-group + .column-settings-group {
+  border-top: 1px solid var(--color-border-1);
+}
+
+.column-settings-group__title {
+  margin-bottom: 8px;
+  color: var(--color-text-1);
+  font-size: var(--dense-font-nav);
+  font-weight: var(--dense-weight-title);
+  line-height: 18px;
+}
+
+.column-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+
+.column-settings-grid :deep(.arco-checkbox) {
+  min-width: 0;
+  margin-right: 0;
+}
+
+.column-settings-grid :deep(.arco-checkbox-label) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .drawer-footer-line {
   display: flex;
   align-items: center;
@@ -1828,33 +1990,32 @@ watch(uiScenario, () => {
   color: var(--color-text-3);
 }
 
-.cell-two-line {
+.decision-cell {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  justify-content: center;
+  gap: 1px;
   min-width: 0;
 }
 
-.cell-two-line__main {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
+.decision-cell__main,
+.decision-cell__context {
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.decision-cell__main {
   color: var(--color-text-1);
   font-size: var(--dense-font-data);
-  line-height: 1.3;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-weight: var(--dense-weight-title);
+  line-height: 15px;
 }
 
-.cell-two-line__sub {
-  overflow: hidden;
+.decision-cell__context {
   color: var(--color-text-3);
   font-size: var(--dense-font-aux);
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 14px;
 }
 
 @media (max-width: 1199px) {

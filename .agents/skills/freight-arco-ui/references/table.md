@@ -264,6 +264,51 @@ These are starting floors; adjust per module but keep the `min-width` vs `width`
 - Primary identifiers, parties, locations, operators, quantities, amounts, dates, and other next-decision values are core business values. Do not style them as helper/disabled text.
 - Passive metadata such as submit time, uploader time, and audit time can be one level weaker than object identifiers.
 
+### Composite Cell Decision Contract
+
+The default is **one independently understood business dimension per column**. Density, viewport pressure, or a desire to reduce the visible column count is not sufficient justification for combining fields.
+
+A two-line/composite cell is allowed only for one of these dependency roles:
+
+| Role | Main line | Auxiliary line | Requirement |
+|------|-----------|----------------|-------------|
+| `identity-metadata` | one primary object identity | metadata owned exclusively by that same identity | auxiliary value cannot reasonably stand as an independent scan/sort/filter dimension |
+| `decision-context` | one next action / decision | its reason, deadline, or blocking context | auxiliary value directly explains or qualifies the decision |
+| `value-unit` | one numeric/business value | its unit or display qualifier | unit is not independently operated on in this list |
+
+Before implementing a composite cell, record:
+
+```text
+cell_role: identity-metadata | decision-context | value-unit
+main_value:
+auxiliary_value:
+dependency:
+sort_filter_export_semantics:
+why_separate_columns_are_worse:
+```
+
+If any field has its own filter, sort, export meaning, permission, status semantics, or frequent scan task, it remains a separate column. When evidence is missing, separate the columns.
+
+Implementation rules:
+
+- Use a role-specific local container such as `decision-cell`; annotate it with `data-cell-role="decision-context"` (or the other accepted role).
+- Do not use a generic `cell-two-line` class in a workbench table. Generic naming hides whether the relationship is legal.
+- Composite display does not change the source schema: sorting, filtering, export, permissions, and API fields still target stable source fields.
+- A column header names the one displayed business dimension. Slash-joined headers are not a shortcut for unrelated fields.
+- Horizontal scrolling, column settings, and default/hidden columns are the correct response to many independent dimensions.
+
+Forbidden combinations include:
+
+| Main value | Incorrect auxiliary values | Correct treatment |
+|------------|----------------------------|-------------------|
+| Primary object number | other document/booking numbers | separate restorable columns |
+| Party/customer | owner, business type, department | separate columns |
+| Route/location | carrier, schedule, vessel/voyage | separate columns |
+| Operator/owner | update or audit time | separate columns |
+| One workflow status | file, fee, exception, or approval statuses | separate semantic status columns |
+
+The examples above describe classes of independent dimensions, not mandatory fields for every domain.
+
 ## Row Interaction
 
 - Hover and selected states must cover fixed columns consistently.
@@ -303,17 +348,30 @@ Workbench tables with more than 12 columns **must** define default visible colum
 **Rules:**
 
 - Default visible: 8–12 columns covering identity, status, key business values, and operation.
-- Extra columns: `field`-only columns with `:visible="false"` — appear in picker, hidden by default.
+- Count only business/data columns for the 8–12 default; checkbox, sequence, and operation columns are structural and do not count.
+- Extra columns: `field`-only columns with `:visible="false"`, or a deterministic `isColumnVisible(field)` binding backed by an explicit default-visible list. They appear in the picker and remain hidden by default.
+- When a workbench defines more than 12 business columns, at least one secondary column must be hidden by default and a functional column-configuration surface must be enabled.
 - Do not default to showing every backend field. Use next-decision fields first.
 - Column picker button goes in `table-card-cap__right`, `type="text" class="table-card-cap__tool"`.
+- The picker must preserve required identity/status columns, keep at least 8 business columns selected, support restoring defaults, and persist the applied selection.
+- A column-settings trigger must open a visible surface and update real VXE column state. A no-op optional call such as `xTable?.openCustom?.()` is forbidden.
+- Use either a connected `<vxe-toolbar custom>` or an owned Arco Modal/Drawer that calls VXE `showColumn` / `hideColumn` and `refreshColumn`.
 
 ```vue
 <!-- table-card-cap: column settings button -->
 <a-tooltip content="列设置">
-  <a-button size="small" type="text" class="table-card-cap__tool" @click="xTable?.openCustom()">
+  <a-button size="small" type="text" class="table-card-cap__tool" @click="columnSettingsVisible = true">
     <template #icon><icon-settings /></template>
   </a-button>
 </a-tooltip>
+
+<a-modal
+  v-model:visible="columnSettingsVisible"
+  title="列设置"
+  :on-before-ok="applyColumnSettings"
+>
+  <a-checkbox-group v-model="columnSettingDraft" />
+</a-modal>
 
 <!-- vxe-table setup -->
 <vxe-table
@@ -325,13 +383,23 @@ Workbench tables with more than 12 columns **must** define default visible colum
   <!-- default visible -->
   <vxe-column field="orderNo" title="订单编号" min-width="148" />
   <!-- hidden by default, user-restorable -->
-  <vxe-column field="weight" title="毛重(kg)" min-width="88" :visible="false" />
+  <vxe-column field="weight" title="毛重(kg)" min-width="88" :visible="isColumnVisible('weight')" />
 </vxe-table>
 ```
 
 ```ts
 import type { VxeTableInstance } from 'vxe-table'
 const xTable = ref<VxeTableInstance>()
+
+const applyColumnSettings = async () => {
+  await Promise.all(columns.map(({ field }) => (
+    selectedFields.value.includes(field)
+      ? xTable.value?.showColumn(field)
+      : xTable.value?.hideColumn(field)
+  )))
+  await xTable.value?.refreshColumn()
+  return true
+}
 ```
 
 ## Row Actions

@@ -130,7 +130,7 @@ Do not:
 Allowed moves:
 
 - equal-weight flat columns -> identity-first column order
-- single-line business cells -> `cell-two-line`
+- single-line business cells -> an approved role-specific composite only when `table.md` Composite Cell Decision Contract proves a direct dependency
 - passive metadata columns early -> move decision fields forward
 
 Use table order:
@@ -141,6 +141,8 @@ Use table order:
 4. next-decision fields
 5. supporting metadata
 6. actions
+
+Two-line layout is not a general density technique. Independent identifiers, parties, owners, locations, schedules, and statuses remain separate columns; use default/hidden columns, column settings, and table-owned horizontal scrolling instead.
 
 Do not:
 

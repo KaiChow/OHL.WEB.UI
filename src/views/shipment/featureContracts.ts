@@ -84,6 +84,16 @@ export const SHIPMENT_FEATURE_CONTRACTS: ShipmentFeatureContract[] = [
     refreshScope: 'scheme menu and active condition snapshot only',
   },
   {
+    id: 'export-order-column-preferences',
+    actorRoles: ['shipment.viewer', 'shipment.operator', 'shipment.manager'],
+    visibleWhen: 'export-order workbench table is visible',
+    enabledWhen: 'table instance is ready and at least eight business columns remain selected',
+    request: 'persist a versioned visible-field list in local workspace storage; no backend request',
+    successResult: 'close the modal, show success feedback, and apply the selected VXE columns immediately',
+    errorResult: 'keep the modal open, preserve the draft selection, and show a specific readiness or selection error',
+    refreshScope: 'workbench table column visibility and horizontal layout only',
+  },
+  {
     id: 'export-order-status-transition',
     actorRoles: ['shipment.operator', 'shipment.manager'],
     visibleWhen: 'order is active and actor has transition permission',

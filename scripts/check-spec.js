@@ -335,6 +335,15 @@ if (tableReference.includes('| Workbench standard list | 36px | 48px')
     content: 'conflicting table density or danger rule detected',
   });
 }
+if (!tableReference.includes('### Composite Cell Decision Contract')
+  || !tableReference.includes('data-cell-role="decision-context"')) {
+  violations.push({
+    rule: '表格规范必须包含可执行的复合单元格决策契约与角色证据',
+    file: 'ui-skill/freight-arco-ui/references/table.md',
+    line: 1,
+    content: 'missing composite cell decision contract',
+  });
+}
 if (!productGradeEvaluation.includes('## Sellable Freight Product Maturity Gates') || !productGradeEvaluation.includes('| 14 | Product completion |')) {
   violations.push({
     rule: '融资/可销售级评估必须包含完整 14 项产品成熟度门禁',
@@ -359,6 +368,14 @@ if (!shipmentFeatureContracts.includes('SHIPMENT_FEATURE_CONTRACTS')
     file: 'src/views/shipment/featureContracts.ts',
     line: 1,
     content: 'missing executable shipment feature contract',
+  });
+}
+if (!shipmentFeatureContracts.includes("id: 'export-order-column-preferences'")) {
+  violations.push({
+    rule: '出口订单列设置必须声明可见、可用、失败保留与刷新范围的功能契约',
+    file: 'src/views/shipment/featureContracts.ts',
+    line: 1,
+    content: 'missing export-order-column-preferences contract',
   });
 }
 for (const page of [
@@ -897,6 +914,33 @@ for (const file of files) {
   }
 }
 
+// 列设置必须有可见配置面板并实际驱动 VXE 列状态，禁止空按钮或不存在的可选 API。
+for (const file of files) {
+  if (!file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('workbench-table') || !content.includes('title="列设置"')) continue;
+  if (content.includes('openCustom?.')) {
+    violations.push({
+      rule: '列设置禁止调用不存在的 openCustom 可选 API；必须提供真实配置面板',
+      file: relPath,
+      line: getLineNumber(content, content.indexOf('openCustom?.')),
+      content: 'openCustom?.()',
+    });
+  }
+  const hasBuiltInCustomToolbar = /<vxe-toolbar\b[^>]*\bcustom/.test(content);
+  const hasOwnedSettingsSurface = content.includes('column-settings-modal')
+    && content.includes('.showColumn(')
+    && content.includes('.hideColumn(');
+  if (hasBuiltInCustomToolbar || hasOwnedSettingsSurface) continue;
+  violations.push({
+    rule: '工作台列设置按钮必须连接 VXE 内置工具栏或项目自有配置面板，并真实显示/隐藏列',
+    file: relPath,
+    line: getLineNumber(content, content.indexOf('title="列设置"')),
+    content: 'missing functional column settings surface',
+  });
+}
+
 // 详情小模块禁止使用连续裸 label 形成左侧蓝竖线噪声；新代码应使用 form-subgroup block。
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
@@ -1062,6 +1106,67 @@ for (const file of files) {
         line: getLineNumber(content, blockIndex),
         content: firstLine.trim().slice(0, 140),
       });
+    }
+    if (/class=(["'])[^"']*\bworkbench-table\b[^"']*\1/.test(firstLine)) {
+      for (const genericComposite of block.matchAll(/class=(["'])[^"']*\bcell-two-line\b[^"']*\1/g)) {
+        violations.push({
+          rule: '主列表禁止通用 cell-two-line；复合单元格必须声明合法角色与直接依赖证据',
+          file: relPath,
+          line: getLineNumber(content, blockIndex + genericComposite.index),
+          content: genericComposite[0].trim().slice(0, 140),
+        });
+      }
+
+      for (const composite of block.matchAll(/<[^>]+\bclass=(["'])[^"']*\b(?:identity-metadata-cell|decision-cell|value-unit-cell)\b[^"']*\1[^>]*>/g)) {
+        if (/\bdata-cell-role=(["'])(?:identity-metadata|decision-context|value-unit)\1/.test(composite[0])) continue;
+        violations.push({
+          rule: '主列表复合单元格必须声明 data-cell-role，明确 identity-metadata / decision-context / value-unit',
+          file: relPath,
+          line: getLineNumber(content, blockIndex + composite.index),
+          content: composite[0].trim().slice(0, 140),
+        });
+      }
+
+      for (const joinedHeader of block.matchAll(/<vxe-column\b[^>]*\btitle=(["'])[^"']*\s\/\s[^"']*\1[^>]*>/g)) {
+        violations.push({
+          rule: '主列表禁止用斜杠拼接独立字段表头；应拆列并通过列设置管理次要字段',
+          file: relPath,
+          line: getLineNumber(content, blockIndex + joinedHeader.index),
+          content: joinedHeader[0].trim().slice(0, 140),
+        });
+      }
+
+      const defaultVisibleFieldsMatch = content.match(/const\s+DEFAULT_VISIBLE_COLUMN_FIELDS[^=]*=\s*\[([\s\S]*?)\];/);
+      const defaultVisibleFields = new Set(
+        [...(defaultVisibleFieldsMatch?.[1] ?? '').matchAll(/['"]([^'"]+)['"]/g)].map((match) => match[1]),
+      );
+      const isVisibleByDefault = (tag) => {
+        if (/:?visible="false"/.test(tag)) return false;
+        const dynamicVisible = tag.match(/:visible="isColumnVisible\('([^']+)'\)"/);
+        return dynamicVisible ? defaultVisibleFields.has(dynamicVisible[1]) : true;
+      };
+      const columnTags = [...block.matchAll(/<vxe-column\b[^>]*>/g)].map((match) => match[0]);
+      const businessColumns = columnTags.filter((tag) => !isStructuralVxeColumn(tag));
+      const visibleBusinessColumns = businessColumns.filter(isVisibleByDefault);
+      const hiddenBusinessColumns = businessColumns.length - visibleBusinessColumns.length;
+      if (businessColumns.length > 12) {
+        if (visibleBusinessColumns.length < 8 || visibleBusinessColumns.length > 12) {
+          violations.push({
+            rule: '主列表超过 12 个业务列时，默认可见业务列必须控制在 8–12 个',
+            file: relPath,
+            line: getLineNumber(content, blockIndex),
+            content: `业务列 ${businessColumns.length}，默认可见 ${visibleBusinessColumns.length}`,
+          });
+        }
+        if (hiddenBusinessColumns === 0 || !/:custom-config=/.test(block)) {
+          violations.push({
+            rule: '主列表超过 12 个业务列时，必须提供默认隐藏列与 VXE 列设置',
+            file: relPath,
+            line: getLineNumber(content, blockIndex),
+            content: `隐藏列 ${hiddenBusinessColumns}，列设置 ${/:custom-config=/.test(block) ? '已配置' : '未配置'}`,
+          });
+        }
+      }
     }
     for (const column of block.matchAll(/<vxe-column\b[^>]*\btype=(["'])seq\1[^>]*>/g)) {
       const tag = column[0];
