@@ -213,13 +213,13 @@
 - Card hierarchy comes from grouping, gap, the effective GI surface, restrained elevation, and the shared boundary token.
 - Toolbar workflow buttons are separated by type/group/icon, not by arbitrary success/warning/purple colors. Semantic colors remain reserved for status, validation, risk, and destructive actions.
 - List modules follow `responsive.md`: at the `1366x768` release gate and `1024x768` split-window bound, no filter/toolbar/status module creates page-level horizontal scroll; status groups scroll internally before another full-width row is added.
-- Raw theme channel tokens are not used as complete CSS colors; use `--dense-*` aliases or `rgb()/rgba(var(...))`.
+- Page/component CSS does not consume raw theme channels; it uses `--dense-*` aliases or official non-channel surface tokens. Raw channel composition is limited to the documented `global.css` bridge.
 - Status colors are consistent and only used for semantic state.
 - Primary identity, key state, owner/person, business context, and object-owned key facts do not use disabled/empty `color-text-4`.
 - Detail header fact labels are readable metadata and values are stronger than labels.
 - Drawer/modal width matches `overlay-dimensions.md` tier (no arbitrary 900/1080).
 - Complex detail drawers use `class="detail-drawer"` (D4); read-only simple detail uses `detail-drawer--standard` (720px).
-- Filter drawers use `query-filter-drawer` (640px) or `--wide` (1120px).
+- Advanced-filter drawers expose `data-ui-surface="advanced-filter"` / `advanced-filter-wide`, pass the responsive D1/D2 width expression directly to the component, use one vertical content scroll owner, and have no horizontal overflow.
 - Master-data pages use `md-layout`; permission pages use `perm-layout`; BI uses `db-wrap`; full-page create uses `xf-wrap` + `detail-form`.
 - Empty/loading/success/error follow `feedback.md`.
 - Staff/party display shows role + name clearly; company/context is auxiliary but readable.

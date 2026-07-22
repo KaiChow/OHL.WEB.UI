@@ -47,7 +47,7 @@ This is not a status filter. It is a compact segmented control:
 - Use an Arco Form/Grid composition. Exact class names in examples are local implementation details unless grep proves a shared definition exists.
 - Query button is primary.
 - Reset is text, no icon.
-- Low-frequency filters use the right-side `query-filter-drawer` by default. Inline expansion is an exception only when allowed by `filter-layout.md`.
+- Select S1/S2/S3 from `filter-layout.md`. Regular Narrow fields may expand in-page; occasional Investigate fields use an advanced-filter drawer. Do not choose a surface from visual preference alone.
 
 ### Filter Actions Recipe
 

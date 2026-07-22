@@ -1,514 +1,233 @@
 # Query Filter Layout
 
-## Class-Name Status
+## Authority And Boundary
 
-This file is authoritative for query-count scenarios, visible-field selection, and layout relationships. It does not guarantee that every class name in historical examples exists as a shared implementation.
+This file owns query-field priority, scenario selection, query-state behavior, advanced-filter composition, and acceptance evidence.
 
-- Prefer Arco Form, Grid, Input Group, Space, Drawer, and their props first.
-- Treat example class names as local semantic hooks unless grep proves a shared definition exists.
-- The required contract is field priority, grouping, action placement, overflow behavior, and state handling; exact BEM names are not portable API.
-- Do not add a missing example class to `global.css` merely because it appears in this document.
+It does not define a second component framework:
 
-List query design is driven by the user's job, not by showing every field that exists.
+- Start with Arco Form, Grid, Input Group, Space, Badge, Drawer, and their props.
+- A class name shown in an example is a local semantic hook, not a reusable API, unless `rg` proves that `src/styles/global.css` implements it.
+- Page CSS may arrange local grid, flex, stable width, and overflow relationships. It must not reskin Arco inputs, drawers, buttons, or popup chrome.
+- Field count selects a candidate scenario; frequency, task continuity, and adjustment cost decide the final surface.
 
-Core target: keep the default top work area compact so the first viewport is dominated by the VXE table. The cross-page command-surface budget is owned by `redesign-calibration.md`; this file only decides query layout within that budget.
+The command-surface height and first-viewport table budget are owned by `redesign-calibration.md`. Control dimensions and typography are owned by `form-field.md`.
 
-For production workbench pages used all day by sales/operators/coordinators, visible filters are judged by daily frequency, not by visual minimalism. A two-row query area is acceptable when every visible field is used repeatedly and the table still dominates the first viewport. The design failure to avoid is a gray 50-field form wall, not the existence of high-frequency visible filters.
+## Query Field Classification
 
-Density is created by removing low-value fields and decorative space, not by erasing the field rhythm. A query field is a small "name / input surface" unit: the label identifies the business dimension, the control is the input plane, and the gap between them lets operators scan the row without the label visually merging into the control border.
+Classify every available condition before choosing a layout.
 
-## Query Goals
+| Layer | User job | Default surface |
+|------|----------|-----------------|
+| Locate | Find a known record or very small result set | Always-visible query row |
+| Narrow | Repeatedly reduce the current work queue | Visible row when used daily; page expansion when used regularly |
+| Investigate | Diagnose occasional attributes, ranges, flags, or audit conditions | Advanced-filter drawer |
+| Reuse | Reapply a complex condition set across sessions | Saved query scheme/workspace |
 
-Classify every query field before layout:
+The default row answers: "What does the target operator enter first to find the object now?" Do not promote a field merely because it exists in the API.
 
-| Layer | Purpose | Default surface |
-|------|---------|-----------------|
-| Locate | Find one record or a small set quickly | Always visible query row |
-| Narrow | Reduce a working set by route, party, status, owner | Visible only when used many times per day |
-| Investigate | Low-frequency attributes, date ranges, flags | Right-side filter drawer |
-| Reuse | Power-user saved conditions | Saved query workspace, not a flat form |
+## Scenario Decision
 
-Default visible filters should answer: "What do operators type first when they need this record now?"
+Every list page selects one primary query scenario. Do not combine a full flat query wall with an advanced drawer.
 
-For freight list pages, this usually means:
+| Total query fields | Scenario | Default visible | Secondary surface | Selection rule |
+|--------------------|----------|-----------------|-------------------|----------------|
+| `1-8` | **S1** | all daily Locate/Narrow fields | none | every field is used frequently enough to justify permanent space |
+| `9-16` | **S2** | 1-2 rows, usually 6-12 fields | inline expand/collapse | secondary fields are still Narrow and users scan-adjust them in the same session |
+| `17-20` | **S2** or **S3** | 1-2 core rows | expand or drawer | S2 only for a specialist workbench when all hidden fields are regular Narrow conditions |
+| `21-32` | **S3** | one core row, usually 3-8 fields | grouped advanced-filter drawer | hidden conditions span several concepts or contain Investigate fields |
+| `33-50` | **S3 wide** | core row plus optional scheme entry | wide drawer with group anchors | occasional conditions remain composable in one query session |
+| `50+` | **workspace** | quick query plus saved-scheme entry | dedicated saved-query workspace | condition reuse and navigation are more important than a larger overlay |
 
-- one combined identifier search: 业务单号 / 订单编号 / HBL / MBL / SO / 柜号
-- two to three route or party filters if they are daily scan keys: 客户, 起运港, 目的港, 船公司 / 航司
-- query, reset, and filter entry in a stable right-side position
+Boundary overrides:
 
-### Query State And Saved Schemes
+1. A `9-16` field page may use S3 when Investigate fields dominate and opening them is uncommon.
+2. A `17-20` field specialist page may use S2 only when the table still owns the first viewport and expanded fields are used several times per week.
+3. A page moves to S3 when hidden conditions require four or more visible rows, contain nine or more Investigate fields, or make the query actions move while editing.
+4. A page moves to the workspace model when users need saved/shared schemes, recent queries, version migration, and group navigation together.
 
-- Entered conditions remain visible in their controls. The advanced-filter entry shows an active-condition count when hidden conditions are applied.
-- Reset has one explicit meaning: return to the current default scheme or to the system default when no scheme is active. Do not silently keep hidden drawer values.
-- Saved schemes are required when users repeatedly rebuild the same multi-condition query, regardless of whether the page has 17 or 50 fields.
-- A saved scheme feature must define owner (personal/shared), persistence, permission, default behavior, rename/update/duplicate/delete, conflict handling, and condition-version migration.
-- Do not render a fake Save Scheme button backed only by temporary component state.
-- Avoid a second selected-filter strip when controls, active count, and scheme name already provide complete feedback.
+## Scenario Contracts
 
-## Three Query UI Scenarios (S1 / S2 / S3)
+### S1: Full Inline
 
-**Every list page picks exactly one scenario** from field count + usage frequency. Do not mix surfaces (no drawer + full flat wall; no drawer when S2 fits).
+- Compose fields with Arco Form/Grid and keep query actions at a stable row end.
+- Use one primary `查询` action and one text `重置` action.
+- One row is preferred; two aligned rows are allowed when all fields are daily and the table remains visible in the first viewport.
+- Do not add expand, drawer, hidden active count, or saved-scheme chrome when there is no hidden state.
 
-| Scenario | 字段总数（主规则） | 默认可见 | 次要条件去向 | 典型页面 |
-|----------|-------------------|----------|--------------|----------|
-| **S1 完全平铺** | **1–8**（全部日常高频） | 全部字段 inline | 无收起、无抽屉 | 通知列表、字典维护 |
-| **S2 页内展开** | **9–16**；专项重型工作台可至 **20**（见下） | 1–2 行核心高频（通常 6–12 个） | `filter-card__advanced` 收起区，操作列 `展开(+N)` / `收起` | 运单列表、验收上架 |
-| **S3 抽屉** | **≥17**（重型工作台 ≥21 或低频字段多） | 1 行或 2 行核心（3–8 个） | `query-filter-drawer`，操作列「筛选」按钮 | 对账单、利润表、复杂订单 |
+### S2: Inline Expand
 
-### How to choose S2 vs S3 at the boundary
+- Keep the permanent grid and collapsed grid inside one query surface so columns share the same start lines.
+- Expansion adds rows below the permanent fields; it does not move the query/reset action group.
+- The trigger states `展开 (+N)` and `收起`, where `N` is the hidden field count.
+- When collapsed fields contain values, show an active count on the trigger.
+- Remember expansion state locally when useful; do not persist query values without a saved-query contract.
+- Expanded query content must not become a four-row default wall.
 
-1. Count fields that operators can apply as filters (combo = 1; date range = 1).
-2. Mark each field **Locate / Narrow / Investigate** (see Query Goals table).
-3. **S1** — all fields are Locate or daily Narrow.
-4. **S2** — total 9–16, or **17–20 on 专项重型工作台** when every non-default field is still **Narrow** (used at least several times per week, not Investigate).
-5. **S3** — total ≥17 with any **Investigate** field, or ≥21 regardless, or non-default fields are rarely used.
+### S3: Advanced Filter Drawer
 
-专项重型工作台（财务核销、仓储验收、操作稽核）：默认可见行可增至 **2 行（6–12 字段）**；S2 收起区最多 **2–3 行**，禁止 4 行全平铺。
+- Keep Locate and daily Narrow fields visible. Move occasional Narrow and Investigate fields into the drawer.
+- The entry remains beside query/reset and shows the applied hidden-condition count.
+- Open the drawer with a draft copied from applied query state.
+- `取消` discards draft edits and preserves the current list.
+- `清空更多筛选` clears only advanced draft fields unless the label explicitly says `清空全部条件`.
+- `应用筛选` commits the draft, closes the drawer, resets pagination to page 1, and runs the query.
+- Closing with the drawer close affordance follows cancel semantics; do not partially apply hidden fields.
 
-### Scenario contracts (DOM + interaction)
+## Advanced Filter Overlay Contract
 
-#### S1 — Full inline
+### Container And Width
 
-- `filter-card__slim-row`（≤5 字段）或 `filter-card--two-row` + `filter-grid`（6–8 字段）。
-- 操作列：`查询` primary + `重置` text。**无**展开链、**无**筛选抽屉。
+- Use native `a-drawer`; set `data-ui-surface="advanced-filter"` as non-visual audit evidence.
+- The component width prop is authoritative. Use the D1 or D2 responsive expression from `overlay-dimensions.md` directly on the drawer.
+- D1 example: `width="min(var(--dense-drawer-w-filter), calc(100vw - var(--dense-drawer-filter-pad)))"`.
+- Do not rely on a class or `!important` rule to replace the width prop.
+- Do not override `.arco-drawer-header`, `.arco-drawer-title`, `.arco-drawer-body`, or `.arco-drawer-footer` merely to make the overlay look different from Arco.
 
-#### S2 — Default visible + page expand/collapse
+### Form And Grouping
 
-- 结构：`filter-card--s2-expand` → `filter-card__main` → **`filter-card__fields`**（常驻 grid + `filter-card__advanced`）+ **`filter-card__actions-panel`**（右侧贯穿，查询/重置置顶、展开链贴底）。
-- 常驻区：`filter-grid`（4 列；仓储可用 `filter-grid--6col`）。
-- 收起区：放在 **`filter-card__fields` 内**、常驻 grid 之后；`filter-card__advanced` + `filter-card__advanced--open` → `filter-card__advanced-inner` → `filter-grid filter-grid--advanced`（**禁止** advanced 与 matrix 并列导致操作列只贴前两行）。
-- **禁止** S2 使用 `filter-card__matrix` + 外部 `filter-card__advanced`（展开后字段与操作列错位）。
-  1. `查询` primary
-  2. `重置` text
-  3. `filter-expand-link filter-expand-link--panel`：`icon-down` + `展开(+N)` / `icon-up` + `收起`；N = 收起区字段数
-- 收起区有激活值时：`a-badge` 显示激活数量（禁止底部「已筛选」横条）。
-- `localStorage` 记忆展开态；**不**记忆筛选值。
-- 展开/收起**不改变**查询/重置位置；收起后表格首行仍应在 1440×900 首屏内。
+- Use `a-form layout="vertical" size="small"` and Arco Grid.
+- D1 uses two columns at normal desktop width and one column when the actual drawer becomes too narrow for readable controls.
+- Group by user-recognizable concepts, not backend field order. A group needs at least two related fields unless a single high-cost field needs its own explanation or validation state.
+- Section headings are quiet structural text. A colored rail, icon, card background, and shadow are not all required; use only the minimum hierarchy that makes scanning clear.
+- A final odd field stays aligned to the left grid track. Do not stretch it across two columns only to fill space.
 
-```vue
-<div class="zone-l2-filter-card zone-card filter-card filter-card--s2-expand">
-  <div class="filter-card__main">
-    <div class="filter-card__fields">
-      <div class="filter-grid filter-grid--6col">
-        <!-- 常驻高频字段 -->
-      </div>
-      <div class="filter-card__advanced" :class="{ 'filter-card__advanced--open': filterExpanded }">
-        <div class="filter-card__advanced-inner">
-          <div class="filter-grid filter-grid--6col filter-grid--advanced">
-            <!-- 收起区字段 -->
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="filter-card__actions-panel">
-      <a-button size="small" type="primary" class="filter-card__query-btn" @click="handleSearch">
-        <template #icon><icon-search /></template>查询
-      </a-button>
-      <a-button size="small" type="text" class="reset-btn" @click="handleReset">重置</a-button>
-      <button
-        type="button"
-        class="filter-expand-link filter-expand-link--panel"
-        :class="{ 'is-open': filterExpanded }"
-        @click="toggleFilterExpanded"
-      >
-        <icon-down v-if="!filterExpanded" /><icon-up v-else />
-        <span class="filter-expand-link__text">
-          {{ filterExpanded ? '收起' : `展开(+${collapsedFieldCount})` }}
-        </span>
-        <a-badge v-if="!filterExpanded && collapsedActiveCount > 0" :count="collapsedActiveCount" />
-      </button>
-    </div>
-  </div>
-</div>
-```
+### Scroll Ownership
 
-#### S3 — Default visible + filter drawer
+- A standard advanced drawer has one vertical scroll owner: the native Arco drawer body.
+- Do not add nested `height: 100%` plus `overflow-y: auto` shell/body wrappers around the form.
+- D2 may use a fixed group-anchor rail and one scrolling editor region. The outer drawer and editor must not both scroll vertically.
+- The drawer root, scroll owner, and footer must satisfy `scrollWidth === clientWidth`; horizontal scrolling is a release blocker. Arco Grid's negative gutter may extend inside the body's padding, but it must not increase an ancestor scroll container's width.
 
-- 常驻 1 行 `filter-card__slim-row` 或 2 行 `filter-card--two-row`（核心 3–12 字段，按频率选取）。
-- 操作列第三项：`筛选` text + `icon-filter` → `query-filter-drawer`（见 **More Filter Drawer**）。
-- 抽屉内分组编辑；页脚「清空更多筛选 / 取消 / 应用筛选」。
-- **禁止**把 S3 低频字段平铺成 3–4 行可见墙；**禁止**用 S2 展开替代 S3 当 Investigate 字段 ≥9 个。
+### Footer
 
-## Query Count Decision Matrix
+- Use the native Drawer footer slot.
+- Layout is clear/reset at the left, then cancel and one primary apply action at the right.
+- The footer child may use flex and `width: 100%`, but it must use `box-sizing: border-box` when it also owns horizontal padding. Prefer the native footer padding and no duplicate child padding.
+- Footer buttons stay fully inside the drawer inset at every supported viewport and never require horizontal scrolling.
+- When the actual drawer is narrower than the command groups, wrap the clear action above the right-aligned cancel/apply cluster; do not clip labels or hide the apply action.
+- While applying, only the apply button shows loading; cancel and close behavior must be explicit.
 
-Do not decide drawer usage by "one row vs two rows" alone. Decide by field count, field frequency, and whether the user needs repeated scan-adjust work.
+### Minimal Arco-First Example
 
-| Total query fields | Scenario | Visible area | Secondary surface | Use this when | Forbidden fallback |
-|--------------------|----------|--------------|-------------------|---------------|--------------------|
-| `1-8` | **S1** | all inline | none | every field is daily high-frequency | drawer or expand for Tier-1 fields |
-| `9-16` | **S2** | 1-2 core rows (6-12 fields) | `filter-card__advanced` + expand link | non-default fields are Narrow, same session | flat 3-4 row wall; drawer when S2 fits |
-| `17-20` | **S2*** or **S3** | core rows per heavy-workbench rule | expand *or* drawer per boundary rules above | *heavy workbench + all Narrow | flat wall; wrong surface for Investigate fields |
-| `21-32` | **S3** | one core row (3-8 fields) | `query-filter-drawer` grouped | advanced filters span 4-6 business groups | two-line visible query wall |
-| `33-50` | **S3 wide** | core row + optional preset entry | `query-filter-drawer--wide` + nav | power users need many occasional fields | flat drawer without grouping |
-| `50+` | **workspace** | quick search + saved query entry | saved query workspace / advanced tab | reusable schemes, cross-module search | all fields in drawer or page wall |
-
-### Visible Row Count Decision（核心判断规则）
-
-不要用「最多 N 行」来判断可见字段数量。正确的判断标准是：
-
-> **这些字段，目标用户在日常工作中多久用一次？**
-
-| 用户角色 & 使用场景 | 默认可见 | Scenario | 说明 |
-|---|---|---|---|
-| 普通列表浏览 | 1 行（3-5 字段） | **S1** | 字段少，全部平铺 |
-| 中等频率列表 | 1-2 行（6-12 字段） | **S2** | 核心常驻，其余页内展开 |
-| **专项重型工作台** | 2 行（6-12 字段）常驻 + 收起区 | **S2** 或 **S3** | 按字段总数与 Narrow/Investigate 分层；禁止 4 行全平铺 |
-| 复杂财务 / 报表 | 1 行核心（3-8 字段） | **S3** | 其余进分组抽屉 |
-
-**判断是否可增加可见行：**
-
-1. **使用频率**：所有可见字段都是目标用户每天必用的。若有字段只是「偶尔会用」，它属于抽屉。
-2. **表格可见性**：增加一行筛选后，VXE 表格的首行是否仍在 1440px 屏幕的首屏视口内？如是，则可加行。
-3. **空间利用率**：当前筛选行是否有肉眼可见的大块空白区？有空白就是在浪费操作员的空间效率。
-
-### Visible layout structure（结构选型）
-
-| 可见字段数 | DOM 结构 |
-|-----------|----------|
-| 1 行（约 3–5 个字段） | `filter-card__slim-row` + 行末 `filter-card__inline-actions` |
-| 2 行（6–10 个高频字段，仍 Tier 1 全 inline） | `filter-card--two-row` → `filter-card__matrix` → **`filter-grid`（4 列）** + `filter-card__inline-actions--matrix` |
-
-禁止：
-
-- 多个独立 `filter-card__slim-row` 堆叠拼双行（列无法对齐、按钮错位）
-- 在 `filter-card--two-row` 内叠加 `filter-grid--two-row`（与 4 列 `filter-grid` 规则冲突）
-
-字段宽度：主标识 combo / 日期范围用 `filter-field--span2`；维度过滤器 span1。操作按钮在双行模式下只放在 **`inline-actions--matrix`**，不要塞进第二行字段末尾。
-
-For `30+ / 40+ / 50+` filters:
-
-- Do not expose all fields as a visible filter area.
-- Group fields by business object slots: identifiers, parties/context, location/route when owned by the object, schedule/time, repeated entity attributes, finance, document, owner, audit/system.
-- Provide local group scan anchors. For 33-50 fields, use a group navigation rail or sticky group index inside the wide drawer.
-- Provide "clear current group" and "clear all" semantics; do not make reset ambiguous.
-- Preserve applied filters after closing. Reopening the surface must show the active values.
-- For 50+ fields, use saved query schemes: name, save, update, duplicate, set default, and recent queries. Treat this as a query workspace, not a bigger drawer.
-- In 50+ query workspaces, group navigation should be anchors over all condition modules, not exclusive tabs that hide other groups. Operators often combine identifiers, time ranges, parties, route, and flags in one query session.
-
-## Default Pattern
-
-Use a compact single visible row:
+The section class names below are local hooks. They are not a mandatory shared DOM.
 
 ```vue
-<div class="zone-l2-filter-card zone-card filter-card">
-  <div class="filter-card__slim-row">
-    <div class="filter-field filter-field--span2">
-      <label class="filter-field__label">单号检索</label>
-      <div class="filter-combo arco-input-group">
-        <a-select v-model="q.noType" size="small" class="filter-combo__select filter-combo--keyword">
-          <a-option value="mbl">MBL 主单号</a-option>
-          <a-option value="orderNo">订单编号</a-option>
-          <a-option value="hbl">HBL 单号</a-option>
-        </a-select>
-        <a-input v-model="q.keyword" size="small" allow-clear placeholder="请输入单号" />
-      </div>
-    </div>
-
-    <div class="filter-field">
-      <label class="filter-field__label">起运港</label>
-      <a-input v-model="q.pol" size="small" allow-clear placeholder="请输入" />
-    </div>
-
-    <div class="filter-field">
-      <label class="filter-field__label">目的港</label>
-      <a-input v-model="q.pod" size="small" allow-clear placeholder="请输入" />
-    </div>
-
-    <div class="filter-field">
-      <label class="filter-field__label">船公司</label>
-      <a-select v-model="q.carrier" size="small" allow-clear placeholder="请选择" />
-    </div>
-
-    <div class="filter-card__inline-actions">
-      <a-button size="small" type="primary" class="filter-card__query-btn" @click="handleSearch">
-        <template #icon><icon-search /></template>查询
-      </a-button>
-      <a-button size="small" type="text" class="reset-btn" @click="handleReset">重置</a-button>
-      <a-button size="small" type="text" class="reset-btn" @click="advancedFilterVisible = true">
-        <template #icon><icon-filter /></template>筛选
-      </a-button>
-    </div>
-  </div>
-</div>
-```
-
-### Field Rhythm
-
-The visible row should read as ordered field units, not as a strip of attached labels and boxes.
-
-- Each `filter-field` is vertical: label above, control below, both left-aligned.
-- Label uses metadata strength (`color-text-3`, F4 control size); the control carries the active input surface.
-- Label → control gap: **`--dense-gap-label` (4px)** everywhere — see `form-field.md` § Form Field Contract.
-- If the gap is reduced until the label touches the control frame, the field loses its name/value hierarchy and the row feels mechanically compressed rather than premium dense.
-
-Rules:
-
-- Visible row: 3-5 fields plus actions. A span2 combo counts as two field units.
-- Use `filter-card__slim-row`; height target is 64px.
-- Preserve the field rhythm above; the query row should look compact but still show clear name/input separation.
-- Query and reset must stay in the visible row.
-- The visible row should stay one line on standard desktop widths (`>= 1440px`). Below the responsive breakpoints in `responsive.md`, it may wrap according to the global CSS contract; do not solve small-screen pressure by removing label/control spacing.
-- Do not show a page-level title/description band above operational list filters.
-
-### Filter Field Visual Hierarchy（字段宽度与业务权重）
-
-同一可见筛选行内，字段宽度必须反映其业务权重，不能让所有字段等宽平铺。
-
-| 字段类型 | 业务角色 | 宽度 | 理由 |
-|---------|---------|------|------|
-| 主标识符检索 combo | 定位记录的首要维度（单号/账单号/订单号） | `filter-field--span2` | combo 内含 type 选择器 + 输入框，需空间；是用户最先输入的字段 |
-| 业务对象 combo | 往来方/公司 + 包含/排除切换 | `filter-field--span2` | 两控件并排，span1 显示过窄 |
-| 维度过滤器 | 状态/类型/币种/日期 等单一下拉 | `filter-field`（span1） | 单一控件，紧凑即可 |
-
-实现规则：
-
-- 使用 `filter-grid`（4列，`repeat(4, minmax(0, 1fr))`）而不是 `filter-grid filter-grid--two-row`——后者 class 叠加时 4列规则覆盖 5列规则，导致 span3 溢出产生第三行。
-- 两行网格的标准结构：Row1 = 维度(1)+维度(1)+业务对象combo(span2)，Row2 = 维度(1)+维度(1)+主标识符combo(span2)，合计每行恰好 4 列。
-- `filter-card--two-row` 的外层 matrix 仍然使用，它负责将 `filter-grid` 和 `filter-card__inline-actions--matrix` 左右排列。
-- 所有字段等宽 = 视觉无层次（PESDP 违规）。主标识符 span2 是结构语义，不是为了美观。
-- `filter-combo` uses explicit control roles: the leading selector is `filter-combo__select` (fixed width), and the trailing control fills the remaining space. Text inputs inherit the fill behavior from `global.css`; trailing selects must add `filter-combo__fill`.
-- `filter-combo` is a connected control: adjacent controls share one visual surface, use `margin-left:-1px`, and all joined inner corners must be radius `0`. If two controls should keep independent rounded corners, separate them with an explicit gap and do not use `filter-combo`.
-- Never render `select + input` or `select + select` with both joined corners rounded. That double-radius seam reads as two unrelated controls and fails the dense workbench standard.
-- Do not style every `.arco-select` inside `filter-combo` as `width:auto`; this breaks `select + select` combos such as party include/exclude + party selector.
-
-```vue
-<!-- 正确：4列网格，span2 体现业务权重 -->
-<div class="zone-l2-filter-card zone-card filter-card filter-card--two-row">
-  <div class="filter-card__matrix">
-    <div class="filter-grid">
-      <!-- Row 1 -->
-      <div class="filter-field"><label class="filter-field__label">管理公司</label>...</div>       <!-- 1 -->
-      <div class="filter-field"><label class="filter-field__label">收付类型</label>...</div>       <!-- 1 -->
-      <div class="filter-field filter-field--span2">
-        <label class="filter-field__label">往来单位</label>
-        <div class="filter-combo arco-input-group">
-          <a-select size="small" class="filter-combo__select filter-combo--keyword">...</a-select>
-          <a-select size="small" class="filter-combo__fill" allow-clear placeholder="请选择往来单位" />
-        </div>
-      </div> <!-- 2 -->
-      <!-- Row 2 -->
-      <div class="filter-field"><label class="filter-field__label">核销状态</label>...</div>       <!-- 1 -->
-      <div class="filter-field"><label class="filter-field__label">币种</label>...</div>           <!-- 1 -->
-      <div class="filter-field filter-field--span2"><label class="filter-field__label">单号检索</label><!-- combo --></div> <!-- 2 -->
-    </div>
-    <div class="filter-card__inline-actions filter-card__inline-actions--matrix">
-      <a-button size="small" type="primary" class="filter-card__query-btn">查询</a-button>
-      <a-button size="small" type="text" class="reset-btn">重置</a-button>
-      <a-button size="small" type="text" class="reset-btn">更多</a-button>
-    </div>
-  </div>
-</div>
-```
-
-## Two-Row Visible Query (6–10 fields)
-
-Use only when every visible field is daily high-frequency and total visible count is 6–10. Structure: see **Visible layout structure** above.
-
-```vue
-<div class="zone-l2-filter-card zone-card filter-card filter-card--two-row">
-  <div class="filter-card__matrix">
-    <div class="filter-grid">
-      <div class="filter-field">...</div>
-      <!-- 4-column grid; use filter-field--span2 for wide fields -->
-    </div>
-    <div class="filter-card__inline-actions filter-card__inline-actions--matrix">
-      <a-button size="small" type="primary" class="filter-card__query-btn">查询</a-button>
-      <a-button size="small" type="text" class="reset-btn">重置</a-button>
-    </div>
-  </div>
-</div>
-```
-
-Rules:
-
-- One query command area (`inline-actions--matrix`) for both rows.
-- Do not use two visible rows for low-frequency filters.
-- Total **9–16** fields → **S2** (expand), not drawer, unless Investigate fields dominate.
-- Total **≥17** → **S3** (drawer) unless heavy-workbench S2 exception applies (see **Three Query UI Scenarios**).
-
-## More Filter Drawer (S3)
-
-Use a drawer when filters are not daily first-scan keys, even if the total field count is only 9-16.
-
-```vue
-<a-drawer v-model:visible="advancedFilterVisible" title="主单筛选" :width="640" class="query-filter-drawer">
-  <div class="query-filter-drawer__shell">
-    <div class="query-filter-drawer__body">
-      <a-form class="detail-form" layout="vertical" size="small" :model="q">
-        <div class="query-filter-drawer__group">
-          <div class="query-filter-drawer__group-head">订单信息</div>
-          <div class="detail-form-grid detail-form-grid--2">
-            <a-form-item label="业务类型"><a-select size="small" /></a-form-item>
-            <a-form-item label="订单类型"><a-select size="small" /></a-form-item>
-          </div>
-        </div>
-
-        <div class="query-filter-drawer__group">
-          <div class="query-filter-drawer__group-head">航线信息</div>
-          <div class="detail-form-grid detail-form-grid--2">
-            <a-form-item label="船名"><a-input size="small" /></a-form-item>
-            <a-form-item label="航次"><a-input size="small" /></a-form-item>
-          </div>
-        </div>
-
-        <div class="query-filter-drawer__group">
-          <div class="query-filter-drawer__group-head">时间范围</div>
-          <div class="detail-form-grid detail-form-grid--2">
-            <a-form-item label="ETD 范围"><a-range-picker size="small" style="width:100%" /></a-form-item>
-          </div>
-        </div>
-      </a-form>
-    </div>
-  </div>
+<a-drawer
+  v-model:visible="advancedVisible"
+  title="高级筛选"
+  data-ui-surface="advanced-filter"
+  width="min(var(--dense-drawer-w-filter), calc(100vw - var(--dense-drawer-filter-pad)))"
+  :mask-closable="false"
+>
+  <a-form layout="vertical" size="small" :model="draftQuery">
+    <section class="advanced-filter-section" aria-labelledby="identity-filter-title">
+      <h3 id="identity-filter-title" class="advanced-filter-section__title">识别条件</h3>
+      <a-row :gutter="[16, 0]">
+        <a-col :span="12" :xs="24" :sm="12">
+          <a-form-item field="identifier" label="对象标识">
+            <a-input v-model="draftQuery.identifier" size="small" allow-clear />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12" :xs="24" :sm="12">
+          <a-form-item field="owner" label="负责人">
+            <a-select v-model="draftQuery.owner" size="small" allow-clear />
+          </a-form-item>
+        </a-col>
+      </a-row>
+    </section>
+  </a-form>
 
   <template #footer>
-    <div class="detail-drawer-footer">
-      <div class="detail-drawer-footer__start">
-        <a-button size="small" type="text" class="reset-btn">清空更多筛选</a-button>
-      </div>
-      <div class="detail-drawer-footer__end">
-        <a-button size="small">取消</a-button>
-        <a-button size="small" type="primary">应用筛选</a-button>
-      </div>
+    <div class="advanced-filter-footer">
+      <a-button size="small" type="text" @click="clearAdvanced">清空更多筛选</a-button>
+      <a-space :size="8">
+        <a-button size="small" @click="cancelAdvanced">取消</a-button>
+        <a-button size="small" type="primary" :loading="applying" @click="applyAdvanced">应用筛选</a-button>
+      </a-space>
     </div>
   </template>
 </a-drawer>
 ```
 
-Drawer rules:
+## Wide Drawer: 33-50 Fields
 
-- Use `class="query-filter-drawer"` on the drawer.
-- Body structure is fixed: `query-filter-drawer__shell` → scrollable `__body` → repeated `__group`.
-- Each business group uses `query-filter-drawer__group` + `query-filter-drawer__group-head` + inner `detail-form-grid`.
-- Use `detail-form` + `detail-form-grid` for drawer filter fields.
-- Group by business meaning, not backend order. Example group labels for freight objects include 单号信息 / 订单信息 / 人员信息 / 客户往来 / 港口路线 / 航线信息 / 时间范围 / 货物信息. These labels are examples; choose equivalent groups from the current object's slots.
-- Drawer footer uses left clear + right cancel/apply.
-- Applying drawer filters closes the drawer and triggers search.
-- Do not put table, KPI, charts, instruction copy, descriptive summaries, or usage hints in the filter drawer. The drawer title, business group heads, field labels, and footer actions already provide the hierarchy.
-- Do not render drawer fields as one flat white form wall; grouping surfaces provide scan anchors and keep long drawers usable.
+- Use D2 width from `overlay-dimensions.md`.
+- Add a group-anchor rail when there are seven or more groups or when scrolling cannot keep the current group obvious.
+- Anchors scroll to sections; they do not behave as exclusive tabs. Users must be able to combine conditions across groups without losing context.
+- The rail stays fixed while the editor is the one vertical scroll owner.
+- Provide `清空本组` only when group-level reset is implemented and distinguish it from `清空全部`.
+- Do not make a wide filter drawer fullscreen.
 
-## Large Query Surfaces
+## Saved Query Workspace: 50+ Fields
 
-### Grouped Drawer: 17-32 Fields
-
-Use `query-filter-drawer query-filter-drawer--grouped`.
-
-- Width: **`--dense-drawer-w-filter` (640px)** — see `overlay-dimensions.md` tier D1.
-- Body: repeated `query-filter-drawer__group`.
-- Interaction: clear all in footer; optional clear group inside each group head when group-level reset is implemented.
-- Field grid: 2 columns by default.
-
-### Wide Drawer: 33-50 Fields
-
-Use `query-filter-drawer query-filter-drawer--wide`.
-
-- Width: **`--dense-drawer-w-filter-wide` (1120px)** — tier D2 in `overlay-dimensions.md`.
-
-Required structure:
-
-```vue
-<a-drawer class="query-filter-drawer query-filter-drawer--wide">
-  <div class="query-filter-drawer__shell query-filter-drawer__shell--with-nav">
-    <aside class="query-filter-drawer__nav">...</aside>
-    <div class="query-filter-drawer__body">...</div>
-  </div>
-</a-drawer>
-```
-
-Rules:
-
-- Add `query-filter-drawer__nav` for group anchors when there are 7+ groups or 33+ fields.
-- The nav shows group names only; no filters inside the nav.
-- The body still uses `query-filter-drawer__group` and `detail-form-grid`.
-- Footer is sticky and contains clear all, cancel, and apply.
-- Do not make the drawer full-screen unless the product explicitly enters an advanced query workspace.
-
-### Saved Query Workspace: 50+ Fields
-
-Use a dedicated advanced query workspace, not a giant drawer. It can be a tab/panel within the list page, but must keep the table reachable.
+Use a dedicated query workspace, not a giant drawer.
 
 Required capabilities:
 
-- Quick search remains visible in the normal filter row.
-- Saved schemes: save, rename, duplicate, delete, set default.
-- Recent queries.
-- Grouped advanced editor with collapse/expand by group.
-- Applied filters summary by business group, not by a long comma string.
-- Clear current group and clear all.
+- The normal page keeps quick Locate fields and the current scheme entry visible.
+- Saved schemes define personal/shared ownership, persistence, default behavior, rename, update, duplicate, delete, permission, conflict handling, and condition-version migration.
+- Recent queries and applied-condition summaries use business groups instead of one long comma-separated string.
+- Provide clear-current-group and clear-all as distinct commands.
+- The group navigation should be anchors over all condition modules, not exclusive tabs that hide other groups.
 
 Alignment contract:
 
-- Use one 8px-based spacing system for the whole workspace. Do not mix ad hoc 10px, 12px, 14px, and 16px padding per column.
-- The drawer header, saved-query column, group-anchor column, and editor column must share the same left/right outer inset token (`--query-ws-pad-x`) so vertical start lines feel intentional.
-- The three-column workspace uses fixed rail widths plus a flexible editor: saved schemes around `224px`, group anchors around `152px`, editor `minmax(0, 1fr)`.
-- Column internal rhythm is fixed: outer padding `16px`, nav inner item inset `8px`, group/card gap `12px`, group body gap `12px`.
-- Section title anchors (`subpanel-cap__title`, `query-filter-drawer__group-head`) use the same short primary rail style. Avoid stacking multiple unrelated blue rails in the same vertical band.
-- Cards and nav items align their text to the same local content start. Active indicators may sit inside the item, but must not push the text column.
+- Use one `--query-ws-pad-x` outer inset for the workspace header, saved-scheme rail, group-anchor rail, and editor.
+- Use fixed rails plus `minmax(0, 1fr)` for the editor; rails must not force page-level horizontal scrolling.
+- Use the project 8px spacing rhythm. Avoid unrelated per-column padding values.
+- Active indicators stay inside their item and do not shift the text start line.
 
-Forbidden:
+## Connected Identifier Search
 
-- 50+ fields in one drawer.
-- 50+ fields in one flat page form above the table.
-- Hiding table and pagination behind a full-page filter wall for normal list work.
+`filter-combo` is a connected control, not two unrelated controls placed beside each other.
 
-## Field Selection
+- Use Arco Input Group or an equivalent local flex relationship.
+- The selector owns the left rounded corners; the input owns the right rounded corners; the joining edge is single.
+- The input flexes with `min-width: 0`; the selector has a stable width based on its longest option.
+- The combined control counts as one query field.
+- Focus behavior must remain visible across both parts without creating a double border.
 
-### Main order / shipment
+## Query State And Feedback
 
-Visible:
+- Visible control values are the primary condition feedback. Do not duplicate them into a second chip strip by default.
+- The advanced entry shows hidden applied count, not temporary draft count.
+- Query and apply requests show loading on the triggering action and block duplicate submissions.
+- Failure preserves all conditions and leaves the user in the same context.
+- Reset has one documented target: the active default scheme or the system default. It never silently retains hidden conditions.
+- URL or route persistence is optional, but when implemented it must serialize visible and advanced state consistently.
 
-- 单号检索
-- 客户 or 起运港/目的港
-- 船公司/航司 when carrier is a daily scan key
-- 业务员/操作员 only if ownership is the main work split
+## Verification Gate
 
-Drawer:
+Verify the selected scenario against real content at `1024x768`, `1366x768`, and `1440x900`:
 
-- 业务类型, 订单类型
-- 船名, 航次, 合约号, 境外代理
-- ETD/ETA/ATD/ATA ranges
-- 是否船司主单, 柜子类型, 快捷标签
-
-### Finance
-
-Visible:
-
-- 账单号 / 业务单号 combo
-- 往来单位
-- 确认状态 or 到期状态
-- 币种 when finance users scan by currency
-
-Drawer:
-
-- 开票/核销状态
-- 金额区间
-- 到期日/确认日/创建日
-- 业务员, 客服, 操作员
-
-### Customer
-
-Visible:
-
-- 客户名称/编码
-- 客户状态
-- 负责人
-- 客户类型 or 等级
-
-Drawer:
-
-- 来源, 信用, 最近跟进, 国家/地区, 标签
+- [ ] Query actions stay in a stable position when S2 expands or S3 opens/closes.
+- [ ] The advanced entry shows the number of applied hidden conditions.
+- [ ] Cancel/close does not mutate the applied list; apply resets pagination and queries once.
+- [ ] Drawer root, vertical scroll owner, and footer satisfy `scrollWidth === clientWidth`; grid gutters remain contained inside body padding.
+- [ ] Exactly one vertical form-content scroll owner exists.
+- [ ] Footer action rectangles remain inside the drawer rectangle with the required viewport inset.
+- [ ] Two-column controls remain readable; the grid becomes one column when the drawer is genuinely narrow.
+- [ ] The first table header and first data row remain visible within the workbench budget when the query surface is closed.
+- [ ] Long labels, empty values, validation errors, loading, no permission, and request failure are exercised.
 
 ## Prohibited
 
-- **S1** 页面使用抽屉或展开收起。
-- **S2** 页面把低频 Investigate 字段塞进收起区超过 3 行，或总数应走 **S3** 却不用抽屉。
-- **S3** 页面把 10+ 低频字段平铺成 3–4 行可见墙。
-- 四行及以上字段**全部默认展开**、无展开链也无抽屉。
-- Using `filter-card__advanced-inner` with `filter-card__slim-row`.
-- Using `filter-card__actions-panel` as a vertical command column on list pages.
-- Using a modal for frequent filters.
-- Mixing unrelated fields into one combo. A combo is for related identifiers only.
-- Duplicating status filters in both tabs and query fields.
-- Hiding the table below the first viewport with query controls.
-- Removing label/control spacing in the name of density.
-- Omitting `size="small"` on Arco query controls.
+- Treating historical BEM examples as a globally available component without checking their implementation.
+- A page-local second Drawer skin that overrides Arco header, body, footer, colors, radius, or shadow.
+- Nested full-height scroll wrappers in a standard advanced-filter drawer.
+- A footer child whose `width: 100%` plus padding increases intrinsic width.
+- Three or four default-visible query rows used to avoid choosing S2/S3.
+- A flat ungrouped drawer for dozens of unrelated conditions.
+- `50+` conditions in one drawer or in a page wall above the table.
+- Exclusive group tabs that prevent users from combining conditions across concepts.
+- A fake saved-scheme button backed only by temporary component state.
+
+## Related References
+
+- Overlay width and scroll ownership: `overlay-dimensions.md`
+- Control dimensions and label rhythm: `form-field.md`
+- Query/list surface order: `list-page.md`
+- Query and footer action hierarchy: `actions.md`
+- First-viewport budget: `redesign-calibration.md`
+- Loading, failure, empty, and permission feedback: `feedback.md`

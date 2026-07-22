@@ -206,7 +206,7 @@ Use this table as the fast lookup for implementation and review.
 | Pager select trigger | editable control | `--dense-font-control` | 12px |
 | Pager total / jumper text | helper/meta | `--dense-font-aux` | 11px |
 | `detail-section__title` | structure title | `--dense-font-title` | 12px |
-| `query-filter-drawer__group-head` | structure title | `--dense-font-title` | 12px |
+| Advanced-filter section heading | structure title | `--dense-font-title` | 12px |
 | `form-subgroup__title` | structure title | `--dense-font-title` | 12px |
 | Table header | structure title | `--dense-font-title` | 12px |
 | Table body text | data | `--dense-font-data` | 12px |

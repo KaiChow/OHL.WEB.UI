@@ -8,11 +8,11 @@ Drawer width tiers (D3 standard / D4 complex / fullscreen): **`overlay-dimension
 
 | Detail type | Class | Width |
 |-------------|-------|-------|
-| Read-only, few sections | `detail-drawer detail-drawer--standard` | `min(720px, 100vw - 32px)` via CSS |
-| Multi-tab, mini tables, footer workflow | `detail-drawer` | `min(1200px, 100vw - 32px)` via CSS |
-| Order console fullscreen | `detail-drawer detail-drawer--fullscreen` | `100vw` via CSS |
+| Read-only, few sections | `detail-drawer detail-drawer--standard` | `min(var(--dense-drawer-w-standard), calc(100vw - var(--dense-drawer-viewport-pad)))` via `width` prop |
+| Multi-tab, mini tables, footer workflow | `detail-drawer` | `min(var(--dense-drawer-w-complex-max), calc(100vw - var(--dense-drawer-viewport-pad)))` via `width` prop |
+| Object console fullscreen | `detail-drawer detail-drawer--fullscreen` | explicit `100vw` mode via `width` prop |
 
-`:width` on classified drawers documents the tier; **`global.css` wins** with `!important`. Pick class first, then set matching `:width` for readability.
+The Drawer `width` prop is authoritative. Classes select documented shared detail structure only; they do not replace the prop with hidden `!important` width rules.
 
 Recommended complex detail order:
 

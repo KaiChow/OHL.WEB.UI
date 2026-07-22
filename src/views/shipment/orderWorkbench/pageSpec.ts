@@ -27,8 +27,8 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       evidence: ['Totals appear in pagination and queue counts only; table context does not repeat the total or risk count.'],
     },
     dense: {
-      decisions: ['Use an S3 core-query plus grouped drawer and standard two-line decision rows; compact density hides auxiliary context instead of clipping it.'],
-      evidence: ['1366, 1024 split, and wide viewport checks record overflow ownership and visible row count.'],
+      decisions: ['Use an S3 core query plus an Arco-native grouped drawer; the Drawer body is the only filter scroll owner and compact table density hides auxiliary context instead of clipping it.'],
+      evidence: ['1366, 1024 split, and wide checks record visible rows, drawer/body/footer scrollWidth-clientWidth equality, contained grid gutters, footer containment, and scroll ownership.'],
     },
     premium: {
       decisions: ['Keep GI as palette owner and derive product quality from stable hierarchy, semantic status, restraint, and complete states.'],
@@ -37,6 +37,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   },
   surfaces: [
     { id: 'command', role: 'command', owns: ['query', 'create', 'batch', 'ownership-scope', 'status-queues'], primaryAction: 'export-order-create', implementation: 'arco' },
+    { id: 'advanced-query', role: 'supporting', owns: ['advanced-query-draft', 'business-grouping', 'cancel-apply-state'], primaryAction: 'export-order-query', implementation: 'arco' },
     { id: 'orders', role: 'data', owns: ['table-context', 'selection', 'column-settings', 'density', 'pagination', 'table-feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'VXE integration and freight workbench density require the documented workbench-table bridge.' },
   ],
   query: {
@@ -71,12 +72,13 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   },
   detail: { mode: 'none', focus: [], milestones: [] },
   actions: [
+    { id: 'export-order-query', scope: 'query', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'export-order-query', successOwner: 'orders', failureOwner: 'orders' },
     { id: 'export-order-create', scope: 'command', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'export-order-create', successOwner: 'order-list', failureOwner: 'create-flow' },
     { id: 'export-order-open-detail', scope: 'row', frequency: 'daily', risk: 'low', presentation: 'row-action', contract: 'export-order-open-detail', successOwner: 'detail-context', failureOwner: 'row-action' },
     { id: 'export-order-column-preferences', scope: 'data-utilities', frequency: 'regular', risk: 'low', presentation: 'text', contract: 'export-order-column-preferences', successOwner: 'table', failureOwner: 'column-settings-popover' },
   ],
   states: ['loading', 'slow', 'empty', 'no-permission', 'network-error', 'long-text', 'extreme-value', 'partial-failure', 'success'],
   responsive: { release: ['1366x768', '1280x720'], split: '1024x768', wide: '1920x1080' },
-  authorities: ['list-page.md', 'filter-layout.md', 'table.md', 'actions.md', 'feedback.md', 'responsive.md'],
+  authorities: ['list-page.md', 'filter-layout.md', 'overlay-dimensions.md', 'table.md', 'actions.md', 'feedback.md', 'responsive.md'],
   verification: ['node scripts/check-spec.js', 'npm run build', 'real-route viewport and state matrix'],
 });

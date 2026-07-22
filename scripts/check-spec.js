@@ -123,6 +123,11 @@ const RULES = [
     pattern: /\btheme="(filled|two-tone|multi-color)"/,
     fileFilter: /\.vue$/,
   },
+  {
+    desc: '业务页面禁止 scoped/deep 重绘 Arco Drawer chrome',
+    pattern: /:deep\(\.arco-drawer-(header|title|body|footer)\)/,
+    fileFilter: /\.vue$/,
+  },
 ];
 
 // ─── 文件扫描 ─────────────────────────────────────────────────────────────────
@@ -167,6 +172,64 @@ for (const file of files) {
         file: relPath,
         line: i + 1,
         content: line.trim().slice(0, 120),
+      });
+    }
+  }
+}
+
+for (const file of files.filter((file) => file.endsWith('.vue'))) {
+  const source = readFileSync(file, 'utf8');
+  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  const hasAdvancedFilterDrawer = /<a-drawer\b[\s\S]*?data-ui-surface=["']advanced-filter(?:-wide)?["']/.test(source);
+  for (const ruleMatch of source.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const selector = ruleMatch[1];
+    const declarations = ruleMatch[2];
+    const line = source.slice(0, ruleMatch.index).split('\n').length;
+    const isOverlayFooter = /(drawer|filter)[^{}]*(footer)|footer[^{}]*(drawer|filter)/i.test(selector);
+    if (isOverlayFooter
+      && /width\s*:\s*100%/.test(declarations)
+      && /padding(?:-inline)?\s*:/.test(declarations)
+      && !/box-sizing\s*:\s*border-box/.test(declarations)) {
+      violations.push({
+        rule: 'Overlay footer 使用 width:100% 和水平 padding 时必须 border-box，禁止制造固有横向溢出',
+        file: relPath,
+        line,
+        content: selector.trim().replace(/\s+/g, ' ').slice(0, 120),
+      });
+    }
+    if (hasAdvancedFilterDrawer
+      && /(drawer|filter)/i.test(selector)
+      && /height\s*:\s*100%/.test(declarations)
+      && /overflow-y\s*:\s*(auto|scroll)/.test(declarations)) {
+      violations.push({
+        rule: '标准高级筛选禁止页面自建 height:100% + overflow-y 嵌套滚动容器',
+        file: relPath,
+        line,
+        content: selector.trim().replace(/\s+/g, ' ').slice(0, 120),
+      });
+    }
+  }
+  for (const match of source.matchAll(/<a-drawer\b[\s\S]*?>/g)) {
+    const tag = match[0];
+    const isLegacyAdvanced = /class=["'][^"']*query-filter-drawer/.test(tag);
+    const isAdvanced = /data-ui-surface=["']advanced-filter(?:-wide)?["']/.test(tag);
+    if (!isAdvanced && !isLegacyAdvanced) continue;
+
+    const line = source.slice(0, match.index).split('\n').length;
+    if (!isAdvanced) {
+      violations.push({
+        rule: '高级筛选 Drawer 必须提供 data-ui-surface 审计证据，禁止仅靠历史样式类识别',
+        file: relPath,
+        line,
+        content: tag.replace(/\s+/g, ' ').slice(0, 120),
+      });
+    }
+    if (!/\b(?:width|:width)=["'][^"']*min\([^"']*100vw/.test(tag)) {
+      violations.push({
+        rule: '高级筛选 Drawer 必须由 width prop 直接声明带 viewport inset 的响应式 min(...)',
+        file: relPath,
+        line,
+        content: tag.replace(/\s+/g, ' ').slice(0, 120),
       });
     }
   }
@@ -468,11 +531,19 @@ const parseStringArray = (source, key) => {
 const declaredQueryTotal = Number(shipmentWorkbenchSpec.match(/totalFields:\s*(\d+)/)?.[1]);
 const declaredVisibleQueryFields = parseStringArray(shipmentWorkbenchSpec, 'visibleFields');
 const declaredAdvancedQueryFields = parseStringArray(shipmentWorkbenchSpec, 'advancedFields');
-const implementedQueryFields = [...new Set(
+const implementedVisibleQueryFields = [...new Set(
   [...shipmentWorkbenchPage.matchAll(/v-model="query\.([\w]+)"/g)]
     .map((match) => match[1])
     .filter((field) => field !== 'keywordType'),
 )];
+const implementedAdvancedQueryFields = [...new Set(
+  [...shipmentWorkbenchPage.matchAll(/v-model="advancedQuery\.([\w]+)"/g)]
+    .map((match) => match[1]),
+)];
+const implementedQueryFields = [...new Set([
+  ...implementedVisibleQueryFields,
+  ...implementedAdvancedQueryFields,
+])];
 const declaredQueryFields = [...declaredVisibleQueryFields, ...declaredAdvancedQueryFields];
 const missingQueryFields = implementedQueryFields.filter((field) => !declaredQueryFields.includes(field));
 const phantomQueryFields = declaredQueryFields.filter((field) => !implementedQueryFields.includes(field));
@@ -486,6 +557,34 @@ if (declaredQueryTotal !== implementedQueryFields.length
     file: 'src/views/shipment/orderWorkbench/pageSpec.ts',
     line: 1,
     content: `declared=${declaredQueryTotal}, implemented=${implementedQueryFields.length}, missing=${missingQueryFields.join(',') || '-'}, phantom=${phantomQueryFields.join(',') || '-'}`,
+  });
+}
+const visibleModelMismatch = declaredVisibleQueryFields.filter((field) => !implementedVisibleQueryFields.includes(field));
+const advancedModelMismatch = declaredAdvancedQueryFields.filter((field) => !implementedAdvancedQueryFields.includes(field));
+const responsiveAdvancedColumnCount = [...shipmentWorkbenchPage.matchAll(/<a-col\b[^>]*>/g)]
+  .map((match) => match[0])
+  .filter((tag) => /:span="12"/.test(tag) && /:xs="24"/.test(tag) && /:sm="12"/.test(tag))
+  .length;
+if (visibleModelMismatch.length
+  || advancedModelMismatch.length
+  || !shipmentWorkbenchPage.includes('Object.assign(advancedQuery, cloneQuery(query))')
+  || !shipmentWorkbenchPage.includes('@cancel="cancelAdvancedFilters"')
+  || responsiveAdvancedColumnCount !== declaredAdvancedQueryFields.length) {
+  violations.push({
+    rule: 'S3 高级筛选必须使用独立草稿模型、完整响应式列契约；取消/关闭不修改已应用查询',
+    file: 'src/views/shipment/orderWorkbench/index.vue',
+    line: 1,
+    content: `visible-model=${visibleModelMismatch.join(',') || 'ok'}, advanced-model=${advancedModelMismatch.join(',') || 'ok'}, responsive-columns=${responsiveAdvancedColumnCount}`,
+  });
+}
+const advancedFooterLayout = shipmentWorkbenchPage.match(/\.advanced-filter-footer\s*\{([\s\S]*?)\}/)?.[1] ?? '';
+if (!advancedFooterLayout.includes('box-sizing: border-box')
+  || !advancedFooterLayout.includes('flex-wrap: wrap')) {
+  violations.push({
+    rule: '高级筛选 footer 必须使用 border-box 并允许窄窗口换行，禁止 width+padding 横向溢出',
+    file: 'src/views/shipment/orderWorkbench/index.vue',
+    line: 1,
+    content: 'missing border-box or flex-wrap on advanced-filter-footer',
   });
 }
 if (!shipmentWorkbenchPage.includes('data-pesdp-page="shipment-export-order-workbench"')

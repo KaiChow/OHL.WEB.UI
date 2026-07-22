@@ -152,7 +152,7 @@ If removing a `global.css` rule would break standard Arco surfaces (button, inpu
 
 ## Rewrite Guidance
 
-When refactoring an existing page (e.g. `shipment/export-orders`):
+When refactoring an existing page:
 
 1. **Strip** unnecessary custom layers and global.css-dependent hacks
 2. **Restore** Arco-native structure (props, slots, layout primitives)

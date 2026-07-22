@@ -227,6 +227,7 @@ const loadCustomQuerySchemes = (): SavedQueryScheme[] => {
 };
 
 const query = reactive<ShipmentOrderQuery>(defaultQuery());
+const advancedQuery = reactive<ShipmentOrderQuery>(defaultQuery());
 const uiScenario = computed(() => resolveShipmentUiScenario(route.query.uiState));
 const appliedQuery = ref<ShipmentOrderQuery>(cloneQuery(defaultQuery()));
 const activeStatusTab = ref<ShipmentStatusKey>('all');
@@ -640,23 +641,34 @@ const setTableDensity = (density: TableDensity) => {
   tableDensity.value = density;
 };
 
+const openAdvancedFilters = () => {
+  Object.assign(advancedQuery, cloneQuery(query));
+  advancedFilterVisible.value = true;
+};
+
+const cancelAdvancedFilters = () => {
+  Object.assign(advancedQuery, cloneQuery(query));
+  advancedFilterVisible.value = false;
+};
+
 const clearAdvancedFilters = () => {
-  query.vesselVoyage = '';
-  query.blNo = '';
-  query.bookingNo = '';
-  query.orderStatus = undefined;
-  query.operator = undefined;
-  query.businessType = undefined;
-  query.etdRange = [];
-  query.closingRange = [];
-  query.hasException = undefined;
-  query.fileStatus = undefined;
-  query.feeStatus = undefined;
-  query.updatedRange = [];
-  query.isOverdue = undefined;
+  advancedQuery.vesselVoyage = '';
+  advancedQuery.blNo = '';
+  advancedQuery.bookingNo = '';
+  advancedQuery.orderStatus = undefined;
+  advancedQuery.operator = undefined;
+  advancedQuery.businessType = undefined;
+  advancedQuery.etdRange = [];
+  advancedQuery.closingRange = [];
+  advancedQuery.hasException = undefined;
+  advancedQuery.fileStatus = undefined;
+  advancedQuery.feeStatus = undefined;
+  advancedQuery.updatedRange = [];
+  advancedQuery.isOverdue = undefined;
 };
 
 const applyAdvancedFilters = () => {
+  Object.assign(query, cloneQuery(advancedQuery));
   advancedFilterVisible.value = false;
   handleSearch();
 };
@@ -988,7 +1000,7 @@ watch(uiScenario, () => {
             </a-button>
             <a-button size="small" type="text" @click="handleReset">重置</a-button>
             <a-badge :count="advancedActiveCount" :offset="[-4, 4]">
-              <a-button size="small" type="text" @click="advancedFilterVisible = true">
+              <a-button size="small" type="text" @click="openAdvancedFilters">
                 <template #icon><icon-filter /></template>
                 筛选
               </a-button>
@@ -1276,140 +1288,137 @@ watch(uiScenario, () => {
     <a-drawer
       v-model:visible="advancedFilterVisible"
       title="订单高级筛选"
-      :width="640"
+      data-ui-surface="advanced-filter"
+      width="min(var(--dense-drawer-w-filter), calc(100vw - var(--dense-drawer-filter-pad)))"
       :mask-closable="false"
-      class="query-filter-drawer"
+      @cancel="cancelAdvancedFilters"
     >
-      <div class="query-filter-drawer__shell">
-        <div class="query-filter-drawer__body">
-          <a-form layout="vertical" size="small" :model="query">
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">单证识别</div>
-              <a-row :gutter="16">
-                <a-col :span="12">
-                  <a-form-item label="船名航次">
-                    <a-input v-model="query.vesselVoyage" size="small" allow-clear placeholder="请输入船名 / 航次" />
-                  </a-form-item>
-                </a-col>
-                <a-col :span="12">
-                  <a-form-item label="提单号">
-                    <a-input v-model="query.blNo" size="small" allow-clear placeholder="请输入提单号" />
-                  </a-form-item>
-                </a-col>
-                <a-col :span="12">
-                  <a-form-item label="订舱号">
-                    <a-input v-model="query.bookingNo" size="small" allow-clear placeholder="请输入订舱号" />
-                  </a-form-item>
-                </a-col>
-              </a-row>
-            </div>
+      <a-form class="advanced-filter-form" layout="vertical" size="small" :model="advancedQuery">
+        <section class="advanced-filter-section" aria-labelledby="document-filter-title">
+          <h3 id="document-filter-title" class="advanced-filter-section__title">单证识别</h3>
+          <a-row :gutter="[16, 0]">
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="vesselVoyage" label="船名航次">
+                <a-input v-model="advancedQuery.vesselVoyage" size="small" allow-clear placeholder="请输入船名 / 航次" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="blNo" label="提单号">
+                <a-input v-model="advancedQuery.blNo" size="small" allow-clear placeholder="请输入提单号" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="bookingNo" label="订舱号">
+                <a-input v-model="advancedQuery.bookingNo" size="small" allow-clear placeholder="请输入订舱号" />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </section>
 
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">业务归属</div>
-              <a-row :gutter="16">
-                <a-col :span="12">
-                  <a-form-item label="订单状态">
-                    <a-select v-model="query.orderStatus" size="small" allow-clear placeholder="请选择">
-                      <a-option value="waitBooking">待订舱</a-option>
-                      <a-option value="booking">订舱中</a-option>
-                      <a-option value="released">已放舱</a-option>
-                      <a-option value="waitTruck">待拖车</a-option>
-                      <a-option value="trucking">拖车中</a-option>
-                      <a-option value="waitCustoms">待报关</a-option>
-                      <a-option value="customs">报关中</a-option>
-                      <a-option value="sailed">已开船</a-option>
-                      <a-option value="completed">已完成</a-option>
-                    </a-select>
-                  </a-form-item>
-                </a-col>
-                <a-col :span="12">
-                  <a-form-item label="操作人员">
-                    <a-select v-model="query.operator" size="small" allow-clear placeholder="请选择">
-                      <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
-                        {{ operator }}
-                      </a-option>
-                    </a-select>
-                  </a-form-item>
-                </a-col>
-                <a-col :span="12">
-                  <a-form-item label="业务类型">
-                    <a-select v-model="query.businessType" size="small" allow-clear placeholder="请选择">
-                      <a-option value="FCL">FCL</a-option>
-                      <a-option value="LCL">LCL</a-option>
-                    </a-select>
-                  </a-form-item>
-                </a-col>
-                <a-col :span="12">
-                  <a-form-item label="是否异常">
-                    <a-select v-model="query.hasException" size="small" allow-clear placeholder="请选择">
-                      <a-option value="yes">是</a-option>
-                      <a-option value="no">否</a-option>
-                    </a-select>
-                  </a-form-item>
-                </a-col>
-              </a-row>
-            </div>
+        <section class="advanced-filter-section" aria-labelledby="ownership-filter-title">
+          <h3 id="ownership-filter-title" class="advanced-filter-section__title">业务归属</h3>
+          <a-row :gutter="[16, 0]">
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="orderStatus" label="订单状态">
+                <a-select v-model="advancedQuery.orderStatus" size="small" allow-clear placeholder="请选择">
+                  <a-option value="waitBooking">待订舱</a-option>
+                  <a-option value="booking">订舱中</a-option>
+                  <a-option value="released">已放舱</a-option>
+                  <a-option value="waitTruck">待拖车</a-option>
+                  <a-option value="trucking">拖车中</a-option>
+                  <a-option value="waitCustoms">待报关</a-option>
+                  <a-option value="customs">报关中</a-option>
+                  <a-option value="sailed">已开船</a-option>
+                  <a-option value="completed">已完成</a-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="operator" label="操作人员">
+                <a-select v-model="advancedQuery.operator" size="small" allow-clear placeholder="请选择">
+                  <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
+                    {{ operator }}
+                  </a-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="businessType" label="业务类型">
+                <a-select v-model="advancedQuery.businessType" size="small" allow-clear placeholder="请选择">
+                  <a-option value="FCL">FCL</a-option>
+                  <a-option value="LCL">LCL</a-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="hasException" label="是否异常">
+                <a-select v-model="advancedQuery.hasException" size="small" allow-clear placeholder="请选择">
+                  <a-option value="yes">是</a-option>
+                  <a-option value="no">否</a-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </section>
 
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">航程时间</div>
-              <a-row :gutter="16">
-                <a-col :span="12">
-                  <a-form-item label="开船日期">
-                    <a-range-picker v-model="query.etdRange" size="small" style="width: 100%" />
-                  </a-form-item>
-                </a-col>
-                <a-col :span="12">
-                  <a-form-item label="截关日期">
-                    <a-range-picker v-model="query.closingRange" size="small" style="width: 100%" />
-                  </a-form-item>
-                </a-col>
-                <a-col :span="12">
-                  <a-form-item label="更新时间">
-                    <a-range-picker v-model="query.updatedRange" size="small" style="width: 100%" />
-                  </a-form-item>
-                </a-col>
-              </a-row>
-            </div>
+        <section class="advanced-filter-section" aria-labelledby="schedule-filter-title">
+          <h3 id="schedule-filter-title" class="advanced-filter-section__title">航程时间</h3>
+          <a-row :gutter="[16, 0]">
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="etdRange" label="开船日期">
+                <a-range-picker v-model="advancedQuery.etdRange" size="small" style="width: 100%" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="closingRange" label="截关日期">
+                <a-range-picker v-model="advancedQuery.closingRange" size="small" style="width: 100%" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="updatedRange" label="更新时间">
+                <a-range-picker v-model="advancedQuery.updatedRange" size="small" style="width: 100%" />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </section>
 
-            <div class="query-filter-drawer__group">
-              <div class="query-filter-drawer__group-head">风险与结算</div>
-              <a-row :gutter="16">
-                <a-col :span="12">
-                  <a-form-item label="文件状态">
-                    <a-select v-model="query.fileStatus" size="small" allow-clear placeholder="请选择">
-                      <a-option value="missing">缺失</a-option>
-                      <a-option value="pending">待确认</a-option>
-                      <a-option value="complete">完整</a-option>
-                    </a-select>
-                  </a-form-item>
-                </a-col>
-                <a-col :span="12">
-                  <a-form-item label="费用状态">
-                    <a-select v-model="query.feeStatus" size="small" allow-clear placeholder="请选择">
-                      <a-option value="none">未生成</a-option>
-                      <a-option value="pending">待确认</a-option>
-                      <a-option value="confirmed">已确认</a-option>
-                    </a-select>
-                  </a-form-item>
-                </a-col>
-                <a-col :span="12">
-                  <a-form-item label="是否超期">
-                    <a-select v-model="query.isOverdue" size="small" allow-clear placeholder="请选择">
-                      <a-option value="yes">是</a-option>
-                      <a-option value="no">否</a-option>
-                    </a-select>
-                  </a-form-item>
-                </a-col>
-              </a-row>
-            </div>
-          </a-form>
-        </div>
-      </div>
+        <section class="advanced-filter-section" aria-labelledby="risk-filter-title">
+          <h3 id="risk-filter-title" class="advanced-filter-section__title">风险与结算</h3>
+          <a-row :gutter="[16, 0]">
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="fileStatus" label="文件状态">
+                <a-select v-model="advancedQuery.fileStatus" size="small" allow-clear placeholder="请选择">
+                  <a-option value="missing">缺失</a-option>
+                  <a-option value="pending">待确认</a-option>
+                  <a-option value="complete">完整</a-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="feeStatus" label="费用状态">
+                <a-select v-model="advancedQuery.feeStatus" size="small" allow-clear placeholder="请选择">
+                  <a-option value="none">未生成</a-option>
+                  <a-option value="pending">待确认</a-option>
+                  <a-option value="confirmed">已确认</a-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="isOverdue" label="是否超期">
+                <a-select v-model="advancedQuery.isOverdue" size="small" allow-clear placeholder="请选择">
+                  <a-option value="yes">是</a-option>
+                  <a-option value="no">否</a-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </section>
+      </a-form>
       <template #footer>
-        <div class="drawer-footer-line">
+        <div class="advanced-filter-footer">
           <a-button size="small" type="text" @click="clearAdvancedFilters">清空更多筛选</a-button>
-          <a-space>
-            <a-button size="small" @click="advancedFilterVisible = false">取消</a-button>
+          <a-space class="advanced-filter-footer__actions" :size="8">
+            <a-button size="small" @click="cancelAdvancedFilters">取消</a-button>
             <a-button size="small" type="primary" @click="applyAdvancedFilters">应用筛选</a-button>
           </a-space>
         </div>
@@ -1910,95 +1919,41 @@ watch(uiScenario, () => {
   white-space: nowrap;
 }
 
-.drawer-footer-line {
+.advanced-filter-footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
   width: 100%;
-  padding: 12px 16px;
+  box-sizing: border-box;
 }
 
-.query-filter-drawer__shell {
-  height: 100%;
-  background: var(--color-bg-card);
+.advanced-filter-footer__actions {
+  margin-left: auto;
 }
 
-.query-filter-drawer__body {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  height: 100%;
-  padding: 10px 0 0;
-  overflow-y: auto;
+.advanced-filter-form {
+  min-width: 0;
 }
 
-.query-filter-drawer__group {
-  padding: 0 16px 4px;
-  background: transparent;
-}
-
-.query-filter-drawer__group + .query-filter-drawer__group {
-  margin-top: 14px;
-  padding-top: 14px;
+.advanced-filter-section + .advanced-filter-section {
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid var(--color-border-1);
 }
 
-.query-filter-drawer__group-head {
-  position: relative;
-  margin-bottom: 10px;
-  padding-left: 8px;
+.advanced-filter-section__title {
+  margin: 0 0 12px;
   color: var(--color-text-1);
-  font-size: var(--dense-font-nav);
+  font-size: var(--dense-font-title);
   font-weight: var(--dense-weight-title);
   line-height: 18px;
 }
 
-.query-filter-drawer__group-head::before {
-  position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: 0;
-  width: 2px;
-  border-radius: 2px;
-  background: var(--dense-primary-5);
-  content: '';
-}
-
-.query-filter-drawer__body :deep(.arco-form-item) {
+.advanced-filter-form :deep(.arco-form-item) {
   margin-bottom: 12px;
-}
-
-.query-filter-drawer__body :deep(.arco-form-item-label-col) {
-  padding-bottom: 4px;
-}
-
-.query-filter-drawer__body :deep(.arco-input-wrapper),
-.query-filter-drawer__body :deep(.arco-select-view),
-.query-filter-drawer__body :deep(.arco-range-picker) {
-  background: var(--color-bg-card);
-}
-
-.query-filter-drawer :deep(.arco-drawer-header) {
-  height: 46px;
-  min-height: 46px;
-  padding: 0 16px;
-  border-bottom-color: var(--dense-card-border);
-}
-
-.query-filter-drawer :deep(.arco-drawer-title) {
-  color: var(--color-text-1);
-  font-size: var(--dense-font-nav);
-  font-weight: var(--dense-weight-title);
-}
-
-.query-filter-drawer :deep(.arco-drawer-body) {
-  padding: 0;
-}
-
-.query-filter-drawer :deep(.arco-drawer-footer) {
-  padding: 0;
-  border-top-color: var(--dense-card-border);
-  background: var(--color-bg-card);
 }
 
 .selection-tip {

@@ -1,144 +1,171 @@
-# Overlay Dimensions (Modal & Drawer Width)
+# Overlay Dimensions
 
 ## Goal
 
-Modal and drawer widths must follow a **fixed tier system**. Pick the tier from content type and field count — do not invent arbitrary values (`900`, `1080`, etc.).
+Modal and drawer dimensions follow content tiers so users see stable, readable overlays instead of arbitrary page-by-page widths.
 
-Viewport baseline: **supported min 1024px**, release gate **1366px**, design evidence **1440px**. All responsive widths use `min(token, calc(100vw - pad))` so overlays never touch the viewport edge.
+Viewport baseline: supported minimum `1024px`, release gate `1366px`, design evidence `1440px`. Drawer widths use `min(token, calc(100vw - pad))` so the overlay keeps a viewport inset.
 
-## Decision Flow
+## Ownership
 
+- Arco owns overlay chrome, accessibility, mask, focus, portal, header, body, footer, and close behavior.
+- The component `width` prop is authoritative for the rendered width.
+- `global.css` owns only reusable dimension tokens. It does not override Drawer inline width with `!important`.
+- A surface class may identify a documented shared structure, but the class does not imply width unless `rg` proves an implementation exists.
+- Page CSS may arrange content inside the body; it must not create a second overlay skin.
+
+## Container Decision
+
+```text
+Need an overlay?
+|- confirmation, short state change, or compact form -> Modal
+|- advanced list conditions that must preserve list context -> Drawer D1/D2
+|- record detail, long form, tabs, or mini tables -> Drawer D3/D4
+`- 50+ query conditions with saved/recent schemes -> query workspace, not an overlay
 ```
-Need overlay?
-├─ Short form / confirm / status change (≤8 fields, no mini table) → Modal
-├─ Advanced list filters (Tier 2+) → Drawer + query-filter-drawer
-└─ Record detail / long form / mini tables → Drawer + detail-drawer*
-```
 
-## Width Tokens (`global.css`)
-
-All widths are CSS variables. Pages pass tier via **class + documented token value** on `:width` for modals; drawers with project classes get width from `global.css` (`!important` overrides inline `:width`).
+## Dimension Tokens
 
 | Token | Value | Use |
 |-------|-------|-----|
-| `--dense-drawer-viewport-pad` | 32px | Side inset for detail drawers (`16px` each side) |
-| `--dense-drawer-filter-pad` | 24px | Side inset for filter drawers |
-| `--dense-modal-w-confirm` | 420px | `Modal.confirm`, single-line confirm |
-| `--dense-modal-w-sm` | 480px | Modal ≤3 fields, single column |
-| `--dense-modal-w-md` | 560px | Modal 4–6 fields, 2-column grid |
-| `--dense-modal-w-lg` | 640px | Modal 7–8 fields, 2-column grid |
-| `--dense-modal-w-xl` | 760px | Modal with textarea block or 9–12 fields |
-| `--dense-modal-w-max` | 860px | Modal with small sub-table — **hard ceiling** |
-| `--dense-drawer-w-filter` | 640px | Standard advanced-filter drawer |
-| `--dense-drawer-w-filter-wide` | 1120px | Wide business-query drawer (50+ fields) |
-| `--dense-drawer-w-standard` | 720px | Read-only detail, ≤4 sections, no wide mini-table |
+| `--dense-drawer-viewport-pad` | 32px | Detail drawer viewport inset |
+| `--dense-drawer-filter-pad` | 24px | Filter drawer viewport inset |
+| `--dense-modal-w-confirm` | 420px | Confirm or short acknowledgement |
+| `--dense-modal-w-sm` | 480px | Modal with 1-3 fields |
+| `--dense-modal-w-md` | 560px | Modal with 4-6 fields |
+| `--dense-modal-w-lg` | 640px | Modal with 7-8 fields |
+| `--dense-modal-w-xl` | 760px | Modal with 9-12 fields or textarea block |
+| `--dense-modal-w-max` | 860px | Modal hard ceiling with a small read-only sub-table |
+| `--dense-drawer-w-filter` | 640px | Standard grouped advanced filter |
+| `--dense-drawer-w-filter-wide` | 1120px | 33-50 conditions with group anchors |
+| `--dense-drawer-w-standard` | 720px | Read-only detail with few sections |
 | `--dense-drawer-w-complex-max` | 1200px | Complex detail upper cap |
 
-## Modal Width
+## Modal Tiers
 
-Set `:width` explicitly on every `<a-modal>`. Use **token values only**.
+Set `:width` explicitly on every `a-modal` and select only a documented tier.
 
-| Tier | Width token | When |
-|------|-------------|------|
-| Confirm | `420` (`--dense-modal-w-confirm`) | `Modal.confirm`, irreversible ack, ≤2 sentences body |
-| SM | `480` | 1–3 fields, single column |
-| MD | `560` | 4–6 fields, `filter-grid--2col` |
-| LG | `640` | 7–8 fields, 2-column |
-| XL | `760` | 9–12 fields, or form + one textarea span-2 |
-| MAX | `760`–`860` | Form + embedded mini read-only table; **never exceed 860** |
+| Tier | Width | Use |
+|------|-------|-----|
+| Confirm | `420` | Irreversible acknowledgement or at most two short sentences |
+| SM | `480` | 1-3 fields, one column |
+| MD | `560` | 4-6 fields, one or two columns |
+| LG | `640` | 7-8 fields, two columns |
+| XL | `760` | 9-12 fields or one span-two textarea |
+| MAX | `760-860` | Form plus one small read-only table; never exceed 860 |
 
 Rules:
 
-- Default Arco `520px` is forbidden when it does not match the tier.
-- Modal width is **fixed px** — do not use `vw` on modals.
-- If content needs tabs, multiple `detail-section`, or `detail-mini-vxe`, use a **drawer**, not a wider modal.
-- `:mask-closable="false"` on all business modals (see `modal.md`).
+- Default Arco `520px` is not a project tier; set the intended tier.
+- Modal width remains a tiered pixel value at supported desktop widths.
+- Content with tabs, several business sections, or editable child rows belongs in a drawer.
+- Business form modals use `:mask-closable="false"` and the submit contract from `modal.md`.
 
 ```vue
-<!-- 5 fields, 2-col → MD 560 -->
-<a-modal title="添加联系人" :width="560" :mask-closable="false">
-
-<!-- 7 fields → LG 640 -->
-<a-modal title="新建通知" :width="640" :mask-closable="false">
+<a-modal title="添加记录" :width="560" :mask-closable="false" />
 ```
 
-## Drawer Width
+## Drawer Tiers
 
-Drawers use **surface class** to bind width in `global.css`. Inline `:width` on classified drawers is **documentation only** — CSS wins.
+Pass the responsive expression directly to `width`.
 
-| Tier | Class | Computed width | When |
-|------|-------|----------------|------|
-| D1 Filter | `query-filter-drawer` | `min(640px, 100vw - 24px)` | Tier 2 list «更多筛选», grouped filter form |
-| D2 Filter wide | `query-filter-drawer query-filter-drawer--wide` | `min(1120px, 100vw - 24px)` | Business query 50+ fields, nav + groups |
-| D3 Detail standard | `detail-drawer detail-drawer--standard` | `min(720px, 100vw - 32px)` | Read-only detail, few sections, attachment list only |
-| D4 Detail complex | `detail-drawer` (no `--standard`) | `min(1200px, 100vw - 32px)` | Multi-section, tabs, `detail-mini-vxe`, editable footer |
-
-### Complex drawer fullscreen (exception)
-
-Only **order-level operational drawers** with dense mini-tables may expose fullscreen:
-
-```ts
-const drawerWidth = computed(() =>
-  isFullscreen.value ? '100vw' : 'min(1200px, calc(100vw - 32px))'
-)
-```
-
-- Fullscreen is optional UX, not the default width.
-- Do not use `100vw` on filter drawers or read-only detail.
-
-### Class + width examples
+| Tier | Evidence hook / shared class | Width expression | Use |
+|------|------------------------------|------------------|-----|
+| D1 Filter | `data-ui-surface="advanced-filter"` | `min(var(--dense-drawer-w-filter), calc(100vw - var(--dense-drawer-filter-pad)))` | Standard grouped advanced filter |
+| D2 Filter wide | `data-ui-surface="advanced-filter-wide"` | `min(var(--dense-drawer-w-filter-wide), calc(100vw - var(--dense-drawer-filter-pad)))` | 33-50 fields with anchor rail |
+| D3 Detail standard | `detail-drawer detail-drawer--standard` | `min(var(--dense-drawer-w-standard), calc(100vw - var(--dense-drawer-viewport-pad)))` | Read-only detail, few sections, no wide mini-table |
+| D4 Detail complex | `detail-drawer` | `min(var(--dense-drawer-w-complex-max), calc(100vw - var(--dense-drawer-viewport-pad)))` | Tabs, sections, child tables, or editable footer |
 
 ```vue
-<!-- D1 高级筛选 -->
+<!-- D1 advanced filter -->
 <a-drawer
-  v-model:visible="advancedVisible"
-  title="更多筛选"
-  class="query-filter-drawer"
-  :width="640"
->
+  data-ui-surface="advanced-filter"
+  width="min(var(--dense-drawer-w-filter), calc(100vw - var(--dense-drawer-filter-pad)))"
+  :mask-closable="false"
+/>
 
-<!-- D3 通知详情（只读） -->
+<!-- D3 standard detail -->
 <a-drawer
   class="detail-drawer detail-drawer--standard"
-  :width="720"
+  width="min(var(--dense-drawer-w-standard), calc(100vw - var(--dense-drawer-viewport-pad)))"
   :footer="false"
->
+/>
 
-<!-- D4 业务单详情（复杂） -->
+<!-- D4 complex detail -->
 <a-drawer
   class="detail-drawer"
   :width="drawerWidth"
   :footer="false"
->
+/>
 ```
 
-## Modal vs Drawer (width angle)
-
-| Signal | Container | Typical width |
-|--------|-----------|---------------|
-| ≤8 fields, one flat form | Modal | 480–640px |
-| Confirm / delete / batch ack | `Modal.confirm` | 420px (Arco default OK) |
-| 9–16 filter fields, grouped | Drawer D1 | 640px |
-| Read-only record, ≤4 sections | Drawer D3 | 720px |
-| Tabs + mini tables + footer workflow | Drawer D4 | up to 1200px |
-| Order console, fullscreen editing | Drawer D4 + fullscreen | 100vw optional |
-
-## Forbidden
-
+```ts
+const drawerWidth = computed(() =>
+  isFullscreen.value
+    ? '100vw'
+    : 'min(var(--dense-drawer-w-complex-max), calc(100vw - var(--dense-drawer-viewport-pad)))'
+)
 ```
-❌ Arbitrary widths: 900, 1080, 680 when tier says 640 or 720
-❌ Modal > 860px
-❌ Modal with vw units
-❌ detail-drawer for a 3-field read-only view (use --standard or modal)
-❌ Relying only on :width without the correct drawer class
-❌ Filter workflow in modal (use query-filter-drawer)
-❌ Complex multi-section detail squeezed into modal because "drawer feels heavy"
-```
+
+## Scroll Ownership
+
+The overlay must have one content scroll owner.
+
+- Standard Modal: native Modal body owns content overflow.
+- D1 and D3: native Drawer body owns content overflow.
+- D2: a fixed anchor rail may sit beside one scrolling editor; do not also scroll the outer body.
+- D4: the documented detail body owns business-content scrolling while the object header and action footer remain stable.
+- Never create horizontal scrolling to compensate for an invalid grid, child width, or footer box model.
+
+For every overlay, inspect the root, body, content shell, form/grid, table wrapper, and footer. Each non-horizontal-data surface must satisfy `scrollWidth === clientWidth`.
+
+## Fullscreen Exception
+
+Only dense object-level operational drawers with large editable child tables may offer fullscreen.
+
+- Fullscreen is an explicit user mode, not the default width.
+- Filter drawers and simple read-only detail drawers do not use `100vw`.
+- Entering or leaving fullscreen preserves active tab, scroll context, draft edits, and validation state.
+
+## Container Selection By Content
+
+| Signal | Container | Typical tier |
+|--------|-----------|--------------|
+| Up to 8 fields, one compact form | Modal | SM-LG |
+| Confirm/delete/batch acknowledgement | `Modal.confirm` | Confirm |
+| Grouped advanced conditions | Drawer | D1 |
+| 33-50 advanced conditions with anchors | Drawer | D2 |
+| Read-only record with few sections | Drawer | D3 |
+| Tabs, child tables, and footer workflow | Drawer | D4 |
+| 50+ query conditions and scheme management | Query workspace | page-owned |
 
 ## Verification
 
-- [ ] Modal `:width` matches a token tier for field count / content type
-- [ ] Drawer has correct class (`query-filter-drawer` / `detail-drawer` / `--standard`)
-- [ ] No `:width` values outside the token table except documented fullscreen
-- [ ] At 1024px and 1280px viewports, drawer still leaves ≥16px margin (no horizontal page scroll)
-- [ ] At 1920px, complex drawer caps at 1200px unless fullscreen
+At `1024x768`, `1366x768`, and `1440x900`:
+
+- [ ] The rendered width matches the selected tier expression.
+- [ ] The overlay rectangle keeps its documented viewport inset unless fullscreen.
+- [ ] Root/body/content/footer do not have horizontal overflow.
+- [ ] Footer buttons are entirely inside the overlay rectangle.
+- [ ] Exactly one vertical content scroll owner exists.
+- [ ] Long labels, validation errors, popup menus, date panels, and child tables remain usable.
+- [ ] D4 caps at 1200px on wide screens unless fullscreen is active.
+
+## Forbidden
+
+- Arbitrary widths outside the tier table without a recorded content reason.
+- Modal width above 860px.
+- Treating a class name as an invisible width override.
+- `!important` width rules that compete with the component prop.
+- A standard drawer with nested full-height scroll shells.
+- Footer `width: 100%` plus unaccounted horizontal padding.
+- D2 for 50+ fields; use a query workspace.
+- Filter workflow in a Modal only because a Drawer implementation is inconvenient.
+- Complex detail compressed into a Modal only to reduce implementation work.
+
+## Related References
+
+- Advanced filter scenarios and state: `filter-layout.md`
+- Modal submit and validation: `modal.md`
+- Detail drawer composition: `detail-form.md`
+- Responsive release evidence: `responsive.md`
