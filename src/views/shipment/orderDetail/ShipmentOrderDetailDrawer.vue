@@ -33,10 +33,11 @@ const goFull = () => {
 <template>
   <a-drawer
     v-model:visible="drawerVisible"
-    :width="720"
+    width="min(var(--dense-drawer-w-standard), calc(100vw - var(--dense-drawer-viewport-pad)))"
     :mask-closable="true"
     unmount-on-close
-    class="detail-drawer--standard"
+    class="detail-drawer detail-drawer--standard"
+    data-ui-surface="quick-detail"
   >
     <template v-if="record" #title>
       <div class="quickview-title">
@@ -45,7 +46,7 @@ const goFull = () => {
       </div>
     </template>
 
-    <div v-if="record" class="order-quickview">
+    <div v-if="record" class="order-quickview" data-overlay-content="quick-detail">
       <header class="quickview-identity">
         <div class="quickview-identity__main">
           <div class="quickview-route">
@@ -150,7 +151,6 @@ const goFull = () => {
           class="detail-mini-vxe detail-mini-vxe--readonly"
           border="none"
           size="small"
-          height="auto"
           :data="record.logs.slice(0, 4)"
           :row-config="{ isHover: true, keyField: 'id' }"
         >
@@ -197,6 +197,7 @@ const goFull = () => {
   display: flex;
   flex-direction: column;
   gap: var(--dense-gap-module);
+  min-width: 0;
 }
 
 .quickview-identity {
@@ -376,7 +377,12 @@ const goFull = () => {
 }
 
 .quickview-section--table {
+  min-width: 0;
   padding-bottom: 4px;
+}
+
+.quickview-section--table .detail-mini-vxe {
+  width: 100%;
 }
 
 .quickview-footer {

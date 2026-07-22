@@ -2,7 +2,7 @@ import { definePesdpPageSpec } from '../../../design-system/pesdpPageSpec';
 
 export const EXPORT_ORDER_DETAIL_SPEC = definePesdpPageSpec({
   id: 'shipment-export-order-detail',
-  goal: 'sellable-saas-grade',
+  target: 'sellable-saas-grade',
   archetype: 'object-detail',
   business: {
     object: 'sea-export-order',
@@ -16,23 +16,23 @@ export const EXPORT_ORDER_DETAIL_SPEC = definePesdpPageSpec({
   pesdp: {
     professional: {
       decisions: ['Use a sea-export object workspace with real milestones, ownership, documents, fees, and exception semantics.'],
-      evidence: ['Identity, current node, next action, and freight terminology remain consistent across header, milestone, tabs, and actions.'],
+      acceptance: ['Identity, current node, next action, and freight terminology must remain consistent across header, milestone, tabs, and actions.'],
     },
     efficient: {
       decisions: ['Default to scan mode, expose the next action and blocking work, and enter editing explicitly without losing context.'],
-      evidence: ['Overview opens read-only; edit/save/cancel retain the route and error state; row edits stay local to their table.'],
+      acceptance: ['Overview must open read-only; edit/save/cancel must retain route and error state; row edits must stay local to their table.'],
     },
     structured: {
       decisions: ['Identity owns object facts, execution focus owns next work, milestone owns progress, and tabs own detailed modules.'],
-      evidence: ['File, fee, and risk counts have one visible owner each and are not repeated in the identity band.'],
+      acceptance: ['File, fee, and risk counts must have one visible owner each and must not repeat in the identity band.'],
     },
     dense: {
-      decisions: ['Use compact read grids and detail-specific VXE densities while keeping controls visible only in active edit scope.'],
-      evidence: ['1366 and 1024 checks confirm readable facts, accessible footer actions, and local table overflow without a form wall.'],
+      decisions: ['Use compact read grids and detail-specific VXE densities while keeping controls visible only in active edit scope; the active tab pane owns vertical scrolling.'],
+      acceptance: ['At 1366 and 1024, all detail sections must remain reachable through one active-pane scrollbar, with stable scrollHeight and no clipped content.'],
     },
     premium: {
       decisions: ['Use GI surfaces and restrained role hierarchy; credibility comes from traceable state, local feedback, and predictable edit sessions.'],
-      evidence: ['Loading, missing, permission, network error, long text, invalid data, dirty-leave, and retry paths are reproducible on route.'],
+      acceptance: ['Loading, missing, permission, network error, long text, invalid data, dirty-leave, and retry paths must be reproducible on route.'],
     },
   },
   surfaces: [

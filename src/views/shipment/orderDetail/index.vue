@@ -720,7 +720,7 @@ const addExceptionRow = () => {
           <div class="detail-pane">
             <section class="detail-section-local detail-section-local--table">
               <header><strong>文件清单</strong><a-space :size="8"><span>必传 {{ requiredFileCount }} · 缺失 {{ fileMissingCount }} · 待确认 {{ pendingFileConfirmCount }}</span><a-tooltip content="上传服务尚未配置"><span><a-button size="small" type="outline" disabled><template #icon><icon-plus /></template>添加文件</a-button></span></a-tooltip></a-space></header>
-              <vxe-table class="detail-mini-vxe detail-mini-vxe--readonly" border="none" size="small" height="auto" :data="form.files" :row-config="{ isHover: true, keyField: 'id' }">
+              <vxe-table class="detail-mini-vxe detail-mini-vxe--readonly" border="none" size="small" :data="form.files" :row-config="{ isHover: true, keyField: 'id' }">
                 <vxe-column type="seq" title="序号" width="52" align="center" />
                 <vxe-column field="name" title="文件名" min-width="180" />
                 <vxe-column field="category" title="分类" min-width="100" />
@@ -746,7 +746,7 @@ const addExceptionRow = () => {
             <section class="detail-section-local detail-section-local--table">
               <header><strong>应收费用</strong><a-space :size="8"><span>{{ form.receivableFees.length }} 条 · 待确认 {{ form.receivableFees.filter((item) => item.statusKey === 'wait').length }}</span><a-button size="small" type="outline" :disabled="Boolean(rowEdit.id)" @click="addReceivableRow"><template #icon><icon-plus /></template>新增应收</a-button></a-space></header>
               <div v-if="rowEdit.scope === 'receivable' && Object.keys(rowEdit.errors).length" class="detail-row-validation">{{ Object.values(rowEdit.errors).join('；') }}</div>
-              <vxe-table class="detail-mini-vxe detail-mini-vxe--editable" border="none" size="small" height="auto" :data="form.receivableFees" :row-config="{ isHover: true, keyField: 'id' }">
+              <vxe-table class="detail-mini-vxe detail-mini-vxe--editable" border="none" size="small" :data="form.receivableFees" :row-config="{ isHover: true, keyField: 'id' }">
                 <vxe-column type="seq" title="序号" width="52" align="center" />
                 <vxe-column field="name" title="费用名称" min-width="110"><template #default="{ row }"><a-input v-if="isEditingRow('receivable', row)" v-model="row.name" size="small" :error="Boolean(rowEdit.errors.name)" /><span v-else>{{ row.name || '—' }}</span></template></vxe-column>
                 <vxe-column field="currency" title="币种" min-width="72"><template #default="{ row }"><a-select v-if="isEditingRow('receivable', row)" v-model="row.currency" size="small"><a-option value="CNY">CNY</a-option><a-option value="USD">USD</a-option></a-select><span v-else class="mono">{{ row.currency }}</span></template></vxe-column>
@@ -760,7 +760,7 @@ const addExceptionRow = () => {
             <section class="detail-section-local detail-section-local--table">
               <header><strong>应付费用</strong><a-space :size="8"><span>{{ form.payableFees.length }} 条 · 待确认 {{ form.payableFees.filter((item) => item.statusKey === 'wait').length }}</span><a-button size="small" type="outline" :disabled="Boolean(rowEdit.id)" @click="addPayableRow"><template #icon><icon-plus /></template>新增应付</a-button></a-space></header>
               <div v-if="rowEdit.scope === 'payable' && Object.keys(rowEdit.errors).length" class="detail-row-validation">{{ Object.values(rowEdit.errors).join('；') }}</div>
-              <vxe-table class="detail-mini-vxe detail-mini-vxe--editable" border="none" size="small" height="auto" :data="form.payableFees" :row-config="{ isHover: true, keyField: 'id' }">
+              <vxe-table class="detail-mini-vxe detail-mini-vxe--editable" border="none" size="small" :data="form.payableFees" :row-config="{ isHover: true, keyField: 'id' }">
                 <vxe-column type="seq" title="序号" width="52" align="center" />
                 <vxe-column field="name" title="费用名称" min-width="110"><template #default="{ row }"><a-input v-if="isEditingRow('payable', row)" v-model="row.name" size="small" :error="Boolean(rowEdit.errors.name)" /><span v-else>{{ row.name || '—' }}</span></template></vxe-column>
                 <vxe-column field="currency" title="币种" min-width="72"><template #default="{ row }"><a-select v-if="isEditingRow('payable', row)" v-model="row.currency" size="small"><a-option value="CNY">CNY</a-option><a-option value="USD">USD</a-option></a-select><span v-else class="mono">{{ row.currency }}</span></template></vxe-column>
@@ -791,7 +791,7 @@ const addExceptionRow = () => {
             <section class="detail-section-local detail-section-local--table">
               <header><strong>物流节点</strong><a-space :size="8"><span>已完成 {{ completedNodeCount }} · 待推进 {{ form.nodes.length - completedNodeCount }}</span><a-button size="small" type="outline" :disabled="Boolean(rowEdit.id)" @click="addNodeRow"><template #icon><icon-plus /></template>新增节点</a-button></a-space></header>
               <div v-if="rowEdit.scope === 'node' && Object.keys(rowEdit.errors).length" class="detail-row-validation">{{ Object.values(rowEdit.errors).join('；') }}</div>
-              <vxe-table class="detail-mini-vxe detail-mini-vxe--editable" border="none" size="small" height="auto" :data="form.nodes" :row-config="{ isHover: true, keyField: 'id' }">
+              <vxe-table class="detail-mini-vxe detail-mini-vxe--editable" border="none" size="small" :data="form.nodes" :row-config="{ isHover: true, keyField: 'id' }">
                 <vxe-column type="seq" title="序号" width="52" align="center" />
                 <vxe-column field="name" title="节点名称" min-width="110"><template #default="{ row }"><a-input v-if="isEditingRow('node', row)" v-model="row.name" size="small" :error="Boolean(rowEdit.errors.name)" /><span v-else>{{ row.name || '—' }}</span></template></vxe-column>
                 <vxe-column field="planTime" title="计划时间" min-width="150"><template #default="{ row }"><a-date-picker v-if="isEditingRow('node', row)" v-model="row.planTime" size="small" :error="Boolean(rowEdit.errors.planTime)" show-time style="width: 100%" /><span v-else class="mono">{{ row.planTime || '—' }}</span></template></vxe-column>
@@ -805,7 +805,7 @@ const addExceptionRow = () => {
             <section class="detail-section-local detail-section-local--table">
               <header><strong>异常记录</strong><a-space :size="8"><span>未关闭 {{ openExceptionCount }} 条</span><a-button size="small" type="outline" :disabled="Boolean(rowEdit.id)" @click="addExceptionRow"><template #icon><icon-plus /></template>登记异常</a-button></a-space></header>
               <div v-if="rowEdit.scope === 'exception' && Object.keys(rowEdit.errors).length" class="detail-row-validation">{{ Object.values(rowEdit.errors).join('；') }}</div>
-              <vxe-table class="detail-mini-vxe detail-mini-vxe--editable" border="none" size="small" height="auto" :data="form.exceptions" :row-config="{ isHover: true, keyField: 'id' }">
+              <vxe-table class="detail-mini-vxe detail-mini-vxe--editable" border="none" size="small" :data="form.exceptions" :row-config="{ isHover: true, keyField: 'id' }">
                 <vxe-column type="seq" title="序号" width="52" align="center" />
                 <vxe-column field="no" title="异常编号" min-width="130" />
                 <vxe-column field="type" title="类型" min-width="110"><template #default="{ row }"><a-input v-if="isEditingRow('exception', row)" v-model="row.type" size="small" :error="Boolean(rowEdit.errors.type)" /><span v-else>{{ row.type || '—' }}</span></template></vxe-column>
@@ -834,7 +834,7 @@ const addExceptionRow = () => {
             </section>
             <section class="detail-section-local detail-section-local--table">
               <header><strong>操作日志</strong></header>
-              <vxe-table class="detail-mini-vxe detail-mini-vxe--readonly" border="none" size="small" height="auto" :data="form.logs" :row-config="{ isHover: true, keyField: 'id' }">
+              <vxe-table class="detail-mini-vxe detail-mini-vxe--readonly" border="none" size="small" :data="form.logs" :row-config="{ isHover: true, keyField: 'id' }">
                 <vxe-column field="time" title="操作时间" min-width="140" />
                 <vxe-column field="operator" title="操作人" min-width="90" />
                 <vxe-column field="module" title="模块" min-width="80" />
@@ -1222,8 +1222,19 @@ const addExceptionRow = () => {
   overflow: hidden;
 }
 
+.detail-work-tabs :deep(.arco-tabs-content-list),
+.detail-work-tabs :deep(.arco-tabs-content-item) {
+  height: 100%;
+  min-height: 0;
+}
+
+.detail-work-tabs :deep(.arco-tabs-content-item) {
+  overflow: hidden;
+}
+
 .detail-work-tabs :deep(.arco-tabs-pane) {
   height: 100%;
+  min-height: 0;
 }
 
 .detail-tab-title {

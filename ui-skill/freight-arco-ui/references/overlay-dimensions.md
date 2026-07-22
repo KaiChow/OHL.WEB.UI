@@ -119,6 +119,18 @@ The overlay must have one content scroll owner.
 
 For every overlay, inspect the root, body, content shell, form/grid, table wrapper, and footer. Each non-horizontal-data surface must satisfy `scrollWidth === clientWidth`.
 
+## Size Stability Gate
+
+An overlay is not valid merely because it has one scrollbar at one instant. Its content geometry must settle and remain stable after mount.
+
+- In D1 and D3, omit `height="auto"` from embedded `vxe-table`. Let a short table take its natural row height while the native Drawer body owns vertical scrolling.
+- Never combine an intrinsic-height Drawer body, a content shell sized by children, and a VXE table sized from its parent. That parent/child feedback loop continuously changes `scrollHeight` and the scrollbar thumb.
+- Use an explicitly bounded VXE height only when the table itself is the declared vertical scroll owner and the surrounding body cannot also scroll vertically.
+- Flex-based D4 panes must propagate `height: 100%` and `min-height: 0` through every intermediate Arco tab content/list/item layer before the active pane uses `overflow: auto`.
+- Add stable evidence hooks such as `data-ui-surface` and `data-overlay-content`; do not rely on page-local class names for browser checks.
+
+After the open transition settles, sample the declared scroll owner at least three times over one second. `clientHeight`, `scrollHeight`, and `scrollWidth` must remain stable within 1px unless business data actually changes. A continuously changing measurement is a release-blocking layout defect.
+
 ## Fullscreen Exception
 
 Only dense object-level operational drawers with large editable child tables may offer fullscreen.
@@ -148,6 +160,7 @@ At `1024x768`, `1366x768`, and `1440x900`:
 - [ ] Root/body/content/footer do not have horizontal overflow.
 - [ ] Footer buttons are entirely inside the overlay rectangle.
 - [ ] Exactly one vertical content scroll owner exists.
+- [ ] The declared scroll owner's dimensions remain stable across post-mount samples.
 - [ ] Long labels, validation errors, popup menus, date panels, and child tables remain usable.
 - [ ] D4 caps at 1200px on wide screens unless fullscreen is active.
 
@@ -158,6 +171,7 @@ At `1024x768`, `1366x768`, and `1440x900`:
 - Treating a class name as an invisible width override.
 - `!important` width rules that compete with the component prop.
 - A standard drawer with nested full-height scroll shells.
+- `height="auto"` on a VXE table inside a native-scroll Drawer or intrinsic-height detail pane.
 - Footer `width: 100%` plus unaccounted horizontal padding.
 - D2 for 50+ fields; use a query workspace.
 - Filter workflow in a Modal only because a Drawer implementation is inconvenient.

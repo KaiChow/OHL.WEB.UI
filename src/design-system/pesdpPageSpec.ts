@@ -16,7 +16,7 @@ export type NonEmptyStrings = readonly [string, ...string[]];
 
 export interface PesdpTrace {
   decisions: NonEmptyStrings;
-  evidence: NonEmptyStrings;
+  acceptance: NonEmptyStrings;
 }
 
 export interface PesdpSurfaceSpec {
@@ -41,7 +41,7 @@ export interface PesdpActionSpec {
 
 export interface PesdpPageSpec {
   id: string;
-  goal: PesdpPageGoal;
+  target: PesdpPageGoal;
   archetype: PesdpPageArchetype;
   business: {
     object: string;

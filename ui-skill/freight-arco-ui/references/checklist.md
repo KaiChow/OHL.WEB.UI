@@ -126,6 +126,15 @@
 - Query field count, scenario, and two-row relationship follow `filter-layout.md`; exact example class names are not required unless implemented.
 - 50+ query workspaces use group anchors over all condition modules; they do not hide groups behind exclusive tabs when operators need to combine identifiers, time, route, parties, and flags.
 
+## Overlay Stability
+
+- Drawer/Modal uses the tier and width expression from `overlay-dimensions.md`.
+- Exactly one element owns vertical business-content scrolling; nested full-height scroll shells are absent.
+- Embedded VXE tables in native-scroll drawers omit `height="auto"`; a bounded table may scroll only when it is the declared sole vertical owner.
+- After the open transition, three samples over one second show stable `clientHeight`, `scrollHeight`, and `scrollWidth` within 1px when data is unchanged.
+- Flex/tab detail panes propagate `height: 100%` and `min-height: 0` through all intermediate layers; the active pane scrolls and no lower section is clipped.
+- Root, body, content, table wrapper, and footer satisfy horizontal containment; footer actions remain fully visible at 1024 and 1366.
+
 ## Components
 
 - Tables use VXE Table.

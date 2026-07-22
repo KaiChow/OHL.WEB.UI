@@ -30,7 +30,7 @@ PESDP is a coding contract, not a score added after implementation. For every ne
 
 1. Read **`references/page-spec-contract.md`**.
 2. Create or update the page's typed `pageSpec.ts` before editing its Vue template.
-3. Give Professional, Efficient, Structured, Dense, and Premium at least one concrete implementation decision and one verification item each.
+3. Give Professional, Efficient, Structured, Dense, and Premium at least one concrete implementation decision and one measurable acceptance condition each.
 4. Read the single-authority references selected by that spec.
 5. Implement, inspect the real route, and reconcile the evidence back to the spec.
 
@@ -44,7 +44,7 @@ No page may be called PESDP-compliant because it merely uses Arco, shared classe
 | **Shared enhancement CSS** | `src/styles/global.css` | Direct GI/Arco semantic aliases, density tokens, VXE bridge, freight semantics, documented archetype slots only |
 | **Agent summary** | `AGENTS.md` | One-page pointer (no duplicate rules) |
 | **This skill** | `SKILL.md` + `references/` | PESDP principles + executable rules |
-| **Page specification** | `page-spec-contract.md` + page-local `pageSpec.ts` | Typed business/PESDP/surface/action/evidence decisions required before template code |
+| **Page specification** | `page-spec-contract.md` + page-local `pageSpec.ts` | Typed business/PESDP/surface/action decisions and acceptance conditions required before template code |
 | **Structure slots** | `module-patterns.md` | English slots only; no field lists |
 | **Artifact intake** | `artifact-intake-template.md` | Minimum business context required with screenshot/prototype input |
 | **Prototype translation** | `prototype-to-ui-contract.md` | Screenshot/prototype -> business object/archetype/contracts |
@@ -196,7 +196,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 - Any feature with click/submit/request/state change must complete the functional contract: `feature_type` + `entry_point` + `actor_roles` + `visible_when` + `enabled_when` + `api_request` + `api_response` + `success_result` + `error_result` + `refresh_scope` + `verification_cases`
 - Any screenshot/prototype-driven task must complete the artifact intake template and prototype translation block before coding; do not code directly from visual similarity
 - UI rules must be written as AI-executable design language: scope + structure/class + token/density + state + business semantics + forbidden fallback. Vague taste rules like “更好看/更有质感/不要贴在一起” must be translated before coding.
-- New pages and material rewrites must have a typed `pageSpec.ts`; every PESDP dimension requires decisions plus evidence before template code.
+- New pages and material rewrites must have a typed `pageSpec.ts`; every PESDP dimension requires decisions plus acceptance conditions before template code. The target grade is not an achieved grade.
 
 ## Working Protocol
 
@@ -207,7 +207,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 5. Repair theme ownership before page-local visual tuning.
 6. Implement in priority order: Arco built-ins → official/project tokens → documented business patterns → minimal page-local CSS.
 7. Run real-route visual inspection, `node scripts/check-spec.js`, and build when possible.
-8. Reconcile evidence with `pageSpec.ts`; a claim without evidence remains failed.
+8. Compare real-route evidence with `pageSpec.ts` acceptance conditions; a target without rendered evidence remains unverified.
 9. Report page-spec mapping, applicable intake/audit, product-grade evidence, files changed, rules applied, and verification.
 
 ## Output Standard

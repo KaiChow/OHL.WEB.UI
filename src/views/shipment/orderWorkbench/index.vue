@@ -1228,7 +1228,7 @@ watch(uiScenario, () => {
               <template #default="{ row }">
                 <div class="row-actions">
                   <a-tooltip content="详情">
-                    <a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="openDetailDrawer(row)">
+                    <a-button aria-label="查看订单详情" size="small" type="text" class="row-action-btn row-action-btn--primary" @click="openDetailDrawer(row)">
                       <icon-eye />
                     </a-button>
                   </a-tooltip>

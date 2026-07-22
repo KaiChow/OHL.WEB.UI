@@ -2,7 +2,7 @@ import { definePesdpPageSpec } from '../../../design-system/pesdpPageSpec';
 
 export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   id: 'shipment-export-order-workbench',
-  goal: 'sellable-saas-grade',
+  target: 'sellable-saas-grade',
   archetype: 'list-workbench',
   business: {
     object: 'sea-export-order',
@@ -16,28 +16,29 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   pesdp: {
     professional: {
       decisions: ['Use sea-export order vocabulary, ownership scope, operational queues, and the next freight action.'],
-      evidence: ['Rendered columns expose order identity, owner, route, status, and next action without generic task wording.'],
+      acceptance: ['Rendered columns must expose order identity, owner, route, status, and next action without generic task wording.'],
     },
     efficient: {
       decisions: ['Keep daily query fields, ownership scope, status queues, batch entry, and row detail directly reachable.'],
-      evidence: ['At 1366x768 the command path remains one compact surface and the table owns at least 70% of usable height.'],
+      acceptance: ['At 1366x768 the command path must remain one compact surface and the table must own at least 70% of usable height.'],
     },
     structured: {
       decisions: ['Command surface owns query/actions/queues; data surface owns table context, selection, utilities, and pagination.'],
-      evidence: ['Totals appear in pagination and queue counts only; table context does not repeat the total or risk count.'],
+      acceptance: ['Totals must appear in pagination and queue counts only; table context must not repeat the total or risk count.'],
     },
     dense: {
-      decisions: ['Use an S3 core query plus an Arco-native grouped drawer; the Drawer body is the only filter scroll owner and compact table density hides auxiliary context instead of clipping it.'],
-      evidence: ['1366, 1024 split, and wide checks record visible rows, drawer/body/footer scrollWidth-clientWidth equality, contained grid gutters, footer containment, and scroll ownership.'],
+      decisions: ['Use an S3 core query plus Arco-native grouped drawers; each Drawer body is the only vertical scroll owner and embedded VXE tables use stable intrinsic height.'],
+      acceptance: ['At 1366, 1024 split, and wide viewports, record visible rows, overlay width, horizontal containment, footer containment, one scroll owner, and stable scrollHeight samples after mount.'],
     },
     premium: {
       decisions: ['Keep GI as palette owner and derive product quality from stable hierarchy, semantic status, restraint, and complete states.'],
-      evidence: ['Computed theme tokens, normal/error/empty/permission states, long text, column settings, and density behavior are inspected on route.'],
+      acceptance: ['Computed theme tokens, normal/error/empty/permission states, long text, column settings, and density behavior must be inspected on the real route.'],
     },
   },
   surfaces: [
     { id: 'command', role: 'command', owns: ['query', 'create', 'batch', 'ownership-scope', 'status-queues'], primaryAction: 'export-order-create', implementation: 'arco' },
     { id: 'advanced-query', role: 'supporting', owns: ['advanced-query-draft', 'business-grouping', 'cancel-apply-state'], primaryAction: 'export-order-query', implementation: 'arco' },
+    { id: 'quick-detail', role: 'detail', owns: ['order-context', 'risk-summary', 'milestones', 'fee-summary', 'recent-activity', 'overlay-scroll'], implementation: 'arco' },
     { id: 'orders', role: 'data', owns: ['table-context', 'selection', 'column-settings', 'density', 'pagination', 'table-feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'VXE integration and freight workbench density require the documented workbench-table bridge.' },
   ],
   query: {

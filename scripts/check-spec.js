@@ -128,6 +128,11 @@ const RULES = [
     pattern: /:deep\(\.arco-drawer-(header|title|body|footer)\)/,
     fileFilter: /\.vue$/,
   },
+  {
+    desc: '禁止 VXE 使用 height="auto"（抽屉/详情会形成父子高度反馈；短表省略 height，长表声明唯一有界滚动区）',
+    pattern: /height="auto"/,
+    fileFilter: /\.vue$/,
+  },
 ];
 
 // ─── 文件扫描 ─────────────────────────────────────────────────────────────────
@@ -365,10 +370,12 @@ for (const error of validateFreightUiSkill()) {
   });
 }
 if (!pageSpecReference.includes('## PESDP Traceability Gate')
+  || !pageSpecReference.includes("target: 'sellable-saas-grade'")
+  || !pageSpecReference.includes('acceptance:')
   || !skillSource.includes('## Mandatory PESDP Execution Gate')
   || !specFirstCoding.includes('pageSpec.ts')) {
   violations.push({
-    rule: '页面生成必须经过 typed pageSpec.ts，并在写 template 前完成 PESDP 决策与证据',
+    rule: '页面生成必须经过 typed pageSpec.ts，并在写 template 前完成 PESDP 决策与验收条件；目标等级不得冒充已达等级',
     file: 'ui-skill/freight-arco-ui/references/page-spec-contract.md',
     line: 1,
     content: 'missing PESDP page-spec generation gate',
@@ -506,12 +513,20 @@ for (const [specFile, specSource] of [
   ['src/views/shipment/orderDetail/pageSpec.ts', shipmentDetailSpec],
 ]) {
   for (const dimension of pesdpDimensions) {
-    if (new RegExp(`${dimension}:\\s*\\{[\\s\\S]*?decisions:\\s*\\[[^\\]]+\\][\\s\\S]*?evidence:\\s*\\[[^\\]]+\\]`).test(specSource)) continue;
+    if (new RegExp(`${dimension}:\\s*\\{[\\s\\S]*?decisions:\\s*\\[[^\\]]+\\][\\s\\S]*?acceptance:\\s*\\[[^\\]]+\\]`).test(specSource)) continue;
     violations.push({
-      rule: '代表页面的 typed pageSpec.ts 必须为每个 PESDP 维度声明非空决策与证据',
+      rule: '代表页面的 typed pageSpec.ts 必须为每个 PESDP 维度声明非空决策与可测验收条件',
       file: specFile,
       line: 1,
       content: `missing trace for ${dimension}`,
+    });
+  }
+  if (!specSource.includes("target: 'sellable-saas-grade'") || /\bgoal\s*:|\bevidence\s*:/.test(specSource)) {
+    violations.push({
+      rule: '代表页面只能声明 target + acceptance，禁止用 goal/evidence 在源码中自证已达到售卖级',
+      file: specFile,
+      line: 1,
+      content: 'invalid page quality declaration',
     });
   }
   for (const match of specSource.matchAll(/contract:\s*'([^']+)'/g)) {
