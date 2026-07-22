@@ -83,10 +83,7 @@ const goFull = () => {
 
       <section v-if="record.risks.length" class="quickview-section">
         <div class="quickview-section__head">
-          <div>
-            <strong>待处理风险</strong>
-            <span>直接定位当前订单的阻塞项</span>
-          </div>
+          <strong>待处理风险</strong>
           <span class="quickview-section__count">{{ pendingRisks }}</span>
         </div>
         <div class="quickview-risk-list">
@@ -147,10 +144,7 @@ const goFull = () => {
 
       <section class="quickview-section quickview-section--table">
         <div class="quickview-section__head">
-          <div>
-            <strong>最近操作</strong>
-            <span>关键变更可追溯</span>
-          </div>
+          <strong>最近操作</strong>
         </div>
         <vxe-table
           class="detail-mini-vxe detail-mini-vxe--readonly"
@@ -202,7 +196,7 @@ const goFull = () => {
 .order-quickview {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--dense-gap-module);
 }
 
 .quickview-identity {
@@ -210,7 +204,7 @@ const goFull = () => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  padding-bottom: 14px;
+  padding-bottom: var(--dense-gap-module);
   border-bottom: 1px solid var(--color-border-1);
 }
 
@@ -223,7 +217,7 @@ const goFull = () => {
   align-items: center;
   gap: 8px;
   color: var(--color-text-1);
-  font-size: 16px;
+  font-size: var(--dense-font-hero);
   line-height: 22px;
 }
 
@@ -290,7 +284,7 @@ const goFull = () => {
 
 .quickview-section {
   border-top: 1px solid var(--color-border-1);
-  padding-top: 14px;
+  padding-top: var(--dense-gap-module);
 }
 
 .quickview-section__head {

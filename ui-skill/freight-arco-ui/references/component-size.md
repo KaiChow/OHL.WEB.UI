@@ -33,7 +33,7 @@ This project uses **one business density**. Map Arco `size` in templates; map re
 |------|---------------|------|
 | Table row icon | `.row-action-btn` | 22×22px |
 | VXE 主表行 | `--dense-row-h` + `workbench-table` | 36px |
-| VXE 详情子表行 | `detail-mini-vxe` row-config | 38px |
+| VXE 详情子表行 | `detail-mini-vxe--editable` + global density variables | 38px |
 | Modal / Drawer 标题 | `.arco-modal-title` | F0 14px |
 
 ## Must use `size="small"`

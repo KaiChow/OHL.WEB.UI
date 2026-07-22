@@ -55,7 +55,7 @@ These gates translate product maturity into executable UI and interaction eviden
 | 9 | Exception locality | Field errors stay at the field; row conflicts stay at the row/cell; a summary may navigate to errors but never replace their local markers | `feedback.md`, `form-rules.md`; focus/scroll-to-error evidence |
 | 10 | Context preservation | Detail, simple edit, supplemental data, and row workflow prefer drawer/modal/inline handling when legal; full navigation is reserved for genuinely full-page work | `page-archetypes.md`, `modal.md`, `feature-delivery-contract.md`; navigation rationale |
 | 11 | Staged complex flow | Complex order/review/fee work uses sections, steps, or status nodes according to dependency and commit boundaries; progress and draft preservation are explicit | `full-page-form.md`, `form-rules.md`; stage decision and resume behavior |
-| 12 | Real office conditions | 1366 laptop is release-blocking; 1280 is the current lower desktop bound; long tables, multiple windows, slow interaction, and wide desktop are evaluated explicitly | `responsive.md`, `table.md`; viewport matrix and overflow record |
+| 12 | Real office conditions | 1366 laptop is release-blocking; 1024 split-window is the supported lower desktop bound; long tables, multiple windows, slow interaction, and wide desktop are evaluated explicitly | `responsive.md`, `table.md`; viewport matrix and overflow record |
 | 13 | Reusable detail system | Heights, spacing, radii, shadows, overlay widths, table rows, and typography come from shared variables/roles; pages do not tune their own visual scale | `theme-contract.md`, `component-size.md`, `overlay-dimensions.md`, `typography.md`; token audit |
 | 14 | Product completion | Skeleton/loading, empty, error, no-permission, long text, extreme values, slow network, partial failure, and retry paths are designed | `feedback.md`, `feature-delivery-contract.md`, `checklist.md`; edge-state matrix |
 
@@ -67,12 +67,21 @@ A `sellable-saas-grade` claim requires all of the following:
 
 - at least one representative list workbench, object detail, and drawer/modal inspected on real routes;
 - `1366x768` and `1280x720` desktop evidence, plus one wide desktop such as `1920x1080`;
-- a split-window audit; if the current 1280 minimum prevents a usable smaller window, record it as an open product-grade gap rather than claiming support;
+- a `1024x768` split-window audit proving compact-shell behavior, local overflow ownership, and access to primary commands;
 - normal, loading/skeleton, empty, permission, validation, business rejection, network failure, slow request, long text, extreme numeric/date, and partial batch failure states;
 - keyboard focus, error localization, state text without color, horizontal table scroll, fixed-column behavior, and action confirmation evidence;
 - successful `check-spec`, type check/build, and a remaining-risk list.
 
 Failure of any gate may still allow an internal release, but it blocks `sellable-saas-grade`.
+
+### Deterministic Edge-State Evidence
+
+Product completion states must be reproducible through a fixture, component/story test, automated interception, or a documented QA-only route/query contract. Reviewers must not need to edit production handlers or wait for a real outage to inspect them.
+
+- The harness covers loading, slow request, empty, permission, request error with retry, long text, extreme values, and partial batch failure where the archetype owns those states.
+- A state rendered only as a transient global Message does not count when the failure belongs to a field, row, table, or page surface.
+- QA controls must not appear as explanatory text or developer switches in the normal product UI.
+- Evidence records the state trigger, viewport, expected local owner, recovery action, and whether user input/selection is preserved.
 
 ## Eight Product-Grade Dimensions
 

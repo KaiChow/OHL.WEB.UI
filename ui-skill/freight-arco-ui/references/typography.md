@@ -66,6 +66,7 @@ Use the global tokens. Do not hard-code page-specific font sizes.
 
 | Level | Token | Size | Weight | Use |
 |-------|-------|------|--------|-----|
+| Hero | `--dense-font-hero` | 16px | 600 max | One object/route identity in a full detail context or standard detail drawer |
 | F0 | `--dense-font-overlay` | 14px | 600 | Modal title, Popover title, full-page form head (`xf-head`) |
 | F1 | `--dense-font-data` | 12px | 400/500 | Table cells, core links, business identifiers |
 | F2 | `--dense-font-nav` | 13px | 500/600 active | Buttons, tabs, chips, segmented controls |
@@ -82,7 +83,7 @@ Aliases:
 
 Exceptions:
 
-- A true page/detail hero may use one local hero token, max **16px/600**, only when visually separated from normal fact rows.
+- A true page/detail hero may use the shared `--dense-font-hero` token, max **16px/600**, only when visually separated from normal fact rows. Do not create page-local hero size values.
 - In a dense `dds-hero` key-facts row, all fact values use F1 12px. Stronger lead facts use weight/placement, not a larger size inside the same row.
 - Brand/logo shell may use larger text; never copy shell typography into business modules.
 - Icons use `--dense-icon-action` (14px graphic), not text tokens.

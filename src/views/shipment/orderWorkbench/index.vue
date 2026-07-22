@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, reactive, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { Message } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
@@ -14,10 +14,9 @@ import {
   IconMore,
   IconSettings,
   IconInfoCircle,
+  IconLock,
   IconEmpty,
   IconHistory,
-  IconSave,
-  IconDelete,
   IconLayout,
   IconCheck,
 } from '@arco-design/web-vue/es/icon';
@@ -33,11 +32,14 @@ import type {
 } from './types';
 import type { ShipmentOrderDetailRecord } from '../orderDetail/types';
 import { getShipmentOrderMock } from '../orderDetail/mockData';
+import { getOrderStatusTransitions, resolveShipmentUiScenario } from '../featureContracts';
 
+const route = useRoute();
 const router = useRouter();
 
 const CURRENT_OPERATOR = '张操作';
-const QUERY_SCHEME_STORAGE_KEY = 'ohl.shipment.export-order.query-schemes.v1';
+const QUERY_SCHEME_STORAGE_KEY = 'ohl.shipment.export-order.query-schemes.v2';
+const LEGACY_QUERY_SCHEME_STORAGE_KEY = 'ohl.shipment.export-order.query-schemes.v1';
 
 type TableDensity = 'compact' | 'standard';
 
@@ -46,8 +48,15 @@ interface SavedQueryScheme {
   name: string;
   query: ShipmentOrderQuery;
   statusTab: ShipmentStatusKey;
+  version: 2;
+  revision: number;
+  owner: 'system' | 'personal' | 'shared';
+  isDefault: boolean;
+  updatedAt: string;
   isSystem?: boolean;
 }
+
+type SchemeModalMode = 'create' | 'rename' | 'duplicate';
 
 const KEYWORD_OPTIONS: { label: string; value: ShipmentKeywordType }[] = [
   { label: '业务单号', value: 'orderNo' },
@@ -102,6 +111,11 @@ const getSystemQuerySchemes = (): SavedQueryScheme[] => [
     name: '我的在手订单',
     query: { ...defaultQuery(), operator: CURRENT_OPERATOR },
     statusTab: 'all',
+    version: 2,
+    revision: 1,
+    owner: 'system',
+    isDefault: false,
+    updatedAt: '',
     isSystem: true,
   },
   {
@@ -109,28 +123,60 @@ const getSystemQuerySchemes = (): SavedQueryScheme[] => [
     name: '风险与异常',
     query: defaultQuery(),
     statusTab: 'exception',
+    version: 2,
+    revision: 1,
+    owner: 'system',
+    isDefault: false,
+    updatedAt: '',
     isSystem: true,
   },
 ];
 
 const loadCustomQuerySchemes = (): SavedQueryScheme[] => {
   try {
-    const raw = window.localStorage.getItem(QUERY_SCHEME_STORAGE_KEY);
+    const raw = window.localStorage.getItem(QUERY_SCHEME_STORAGE_KEY)
+      ?? window.localStorage.getItem(LEGACY_QUERY_SCHEME_STORAGE_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw) as SavedQueryScheme[];
-    return Array.isArray(parsed)
-      ? parsed.filter((item) => item?.id && item?.name && item?.query && !item.isSystem)
-      : [];
+    const parsed = JSON.parse(raw) as Array<Partial<SavedQueryScheme>>;
+    if (!Array.isArray(parsed)) return [];
+
+    const seenIds = new Set<string>();
+    const normalized = parsed.flatMap((item) => {
+      if (!item?.id || !item?.name || !item?.query || item.isSystem || seenIds.has(item.id)) return [];
+      seenIds.add(item.id);
+      return [{
+        id: item.id,
+        name: item.name.slice(0, 20),
+        query: cloneQuery({ ...defaultQuery(), ...item.query }),
+        statusTab: item.statusTab ?? 'all',
+        version: 2 as const,
+        revision: Math.max(1, Number(item.revision) || 1),
+        owner: item.owner === 'shared' ? 'shared' as const : 'personal' as const,
+        isDefault: Boolean(item.isDefault),
+        updatedAt: item.updatedAt ?? new Date().toISOString(),
+      }];
+    });
+    let hasDefault = false;
+    normalized.forEach((item) => {
+      if (!item.isDefault) return;
+      if (hasDefault) item.isDefault = false;
+      hasDefault = true;
+    });
+    return normalized;
   } catch {
     return [];
   }
 };
 
 const query = reactive<ShipmentOrderQuery>(defaultQuery());
+const uiScenario = computed(() => resolveShipmentUiScenario(route.query.uiState));
 const appliedQuery = ref<ShipmentOrderQuery>(cloneQuery(defaultQuery()));
 const activeStatusTab = ref<ShipmentStatusKey>('all');
 const advancedFilterVisible = ref(false);
 const loading = ref(false);
+const loadError = ref('');
+const hasSimulatedError = ref(false);
+const batchFeedback = ref<{ success: number; failedOrderNos: string[] } | null>(null);
 const tableRef = ref<VxeTableInstance>();
 const selectedRows = ref<ShipmentWorkbenchRow[]>([]);
 const allRows = ref<ShipmentWorkbenchRow[]>([...shipmentWorkbenchRows]);
@@ -147,7 +193,8 @@ const customQuerySchemes = ref<SavedQueryScheme[]>(loadCustomQuerySchemes());
 const activeQuerySchemeId = ref<string>();
 const schemeModalVisible = ref(false);
 const deleteSchemeModalVisible = ref(false);
-const schemeName = ref('');
+const schemeModalMode = ref<SchemeModalMode>('create');
+const schemeForm = reactive({ name: '', owner: 'personal' as 'personal' | 'shared' });
 const schemeNameError = ref('');
 
 const page = reactive({ current: 1, size: 50 });
@@ -157,6 +204,20 @@ const carrierOptions = Array.from(new Set(shipmentWorkbenchRows.map((row) => row
 const querySchemes = computed(() => [...getSystemQuerySchemes(), ...customQuerySchemes.value]);
 const activeQueryScheme = computed(() => querySchemes.value.find((item) => item.id === activeQuerySchemeId.value));
 const canDeleteActiveScheme = computed(() => Boolean(activeQueryScheme.value && !activeQueryScheme.value.isSystem));
+const activeSchemeDirty = computed(() => Boolean(
+  activeQueryScheme.value
+  && (JSON.stringify(activeQueryScheme.value.query) !== JSON.stringify(cloneQuery(query))
+    || activeQueryScheme.value.statusTab !== activeStatusTab.value),
+));
+const canOperate = computed(() => uiScenario.value !== 'permission');
+const forcedLoading = computed(() => uiScenario.value === 'loading');
+const tableError = computed(() => loadError.value);
+const schemeModalTitle = computed(() => ({
+  create: '保存查询方案',
+  rename: '重命名查询方案',
+  duplicate: '复制查询方案',
+})[schemeModalMode.value]);
+const statusTransitionOptions = computed(() => getOrderStatusTransitions(statusTargetRow.value?.orderStatus ?? ''));
 const tableRowConfig = computed(() => ({
   isHover: true,
   keyField: 'id',
@@ -190,10 +251,29 @@ const matchRange = (value: string, range: string[], dateOnly = false) => {
   return true;
 };
 
+const scenarioRows = computed(() => allRows.value.map((row, index) => {
+  if (index !== 0 || (uiScenario.value !== 'long' && uiScenario.value !== 'extreme')) return row;
+  if (uiScenario.value === 'long') {
+    return {
+      ...row,
+      customerName: `${row.customerName}（华南区跨境电商事业部长期战略合作客户与多法人结算主体）`,
+      vesselVoyage: `${row.vesselVoyage} / 超长船名与多段中转航次识别验证`,
+      riskFlags: [...row.riskFlags, '超长异常描述用于验证文本溢出与固定列稳定性'],
+    };
+  }
+  return {
+    ...row,
+    containerSummary: '999x40HQ + 999x20GP',
+    etd: '2099-12-31',
+    eta: '2100-01-31',
+    closingTime: '2099-12-30 23:59',
+  };
+}));
+
 const queryBaseRows = computed(() => {
   const q = appliedQuery.value;
 
-  return allRows.value.filter((row) => {
+  return scenarioRows.value.filter((row) => {
     if (!matchKeyword(row, q)) return false;
     if (!matchText(row.customerName, q.customerName)) return false;
     if (!matchText(row.pol, q.pol)) return false;
@@ -223,6 +303,7 @@ const filteredRows = computed(() =>
 );
 
 const pagedRows = computed(() => {
+  if (['empty', 'permission'].includes(uiScenario.value) || tableError.value) return [];
   const start = (page.current - 1) * page.size;
   return filteredRows.value.slice(start, start + page.size);
 });
@@ -278,9 +359,12 @@ const hasActiveFilter = computed(() => {
 });
 
 const tableContextText = computed(() => {
+  if (uiScenario.value === 'permission') return '海运出口订单 · 无查看权限';
+  if (tableError.value) return '海运出口订单 · 加载失败';
   const scope = activeQueueLabel.value === '全部' ? '全部在手订单' : `${activeQueueLabel.value}队列`;
   return `${scope} · ${filteredRows.value.length} 票 · 风险 ${riskRows.value.length} 票`;
 });
+const tableTotal = computed(() => ['empty', 'permission'].includes(uiScenario.value) || tableError.value ? 0 : filteredRows.value.length);
 
 const advancedActiveCount = computed(() => {
   let count = 0;
@@ -362,14 +446,20 @@ const getVisibleExecutionSignals = (row: ShipmentWorkbenchRow) => {
   };
 };
 
+const canTransitionOrder = (row: ShipmentWorkbenchRow) => getOrderStatusTransitions(row.orderStatus).length > 0;
+
 const handleSearch = () => {
   appliedQuery.value = cloneQuery(query);
-  activeQuerySchemeId.value = undefined;
   page.current = 1;
   clearSelection();
 };
 
 const handleReset = () => {
+  const defaultScheme = customQuerySchemes.value.find((item) => item.isDefault);
+  if (defaultScheme) {
+    applyQueryScheme(defaultScheme);
+    return;
+  }
   Object.assign(query, defaultQuery());
   appliedQuery.value = cloneQuery(defaultQuery());
   activeStatusTab.value = 'all';
@@ -382,6 +472,7 @@ const handleReset = () => {
 const persistCustomQuerySchemes = () => {
   try {
     window.localStorage.setItem(QUERY_SCHEME_STORAGE_KEY, JSON.stringify(customQuerySchemes.value));
+    window.localStorage.removeItem(LEGACY_QUERY_SCHEME_STORAGE_KEY);
     return true;
   } catch {
     return false;
@@ -398,14 +489,24 @@ const applyQueryScheme = (scheme: SavedQueryScheme) => {
   clearSelection();
 };
 
-const openSchemeModal = () => {
-  schemeName.value = '';
+const openSchemeModal = (mode: SchemeModalMode = 'create') => {
+  schemeModalMode.value = mode;
+  if (mode === 'rename') {
+    schemeForm.name = activeQueryScheme.value?.name ?? '';
+    schemeForm.owner = activeQueryScheme.value?.owner === 'shared' ? 'shared' : 'personal';
+  } else if (mode === 'duplicate') {
+    schemeForm.name = activeQueryScheme.value ? `${activeQueryScheme.value.name} - 副本` : '';
+    schemeForm.owner = activeQueryScheme.value?.owner === 'shared' ? 'shared' : 'personal';
+  } else {
+    schemeForm.name = '';
+    schemeForm.owner = 'personal';
+  }
   schemeNameError.value = '';
   schemeModalVisible.value = true;
 };
 
 const saveCurrentQueryScheme = () => {
-  const name = schemeName.value.trim();
+  const name = schemeForm.name.trim();
   if (!name) {
     schemeNameError.value = '请填写方案名称';
     return false;
@@ -414,24 +515,67 @@ const saveCurrentQueryScheme = () => {
     schemeNameError.value = '方案名称不能超过 20 个字符';
     return false;
   }
-  if (querySchemes.value.some((item) => item.name === name)) {
+  const ignoredId = schemeModalMode.value === 'rename' ? activeQuerySchemeId.value : undefined;
+  if (querySchemes.value.some((item) => item.name === name && item.id !== ignoredId)) {
     schemeNameError.value = '已存在同名查询方案';
     return false;
   }
 
+  if (schemeModalMode.value === 'rename' && activeQueryScheme.value && !activeQueryScheme.value.isSystem) {
+    const target = customQuerySchemes.value.find((item) => item.id === activeQuerySchemeId.value);
+    if (!target) return false;
+    target.name = name;
+    target.owner = schemeForm.owner;
+    target.revision += 1;
+    target.updatedAt = new Date().toISOString();
+    const persisted = persistCustomQuerySchemes();
+    if (persisted) Message.success(`查询方案已重命名为“${name}”`);
+    else Message.warning('浏览器存储不可用，本次修改仅在当前会话生效');
+    return true;
+  }
+
+  const source = schemeModalMode.value === 'duplicate' && activeQueryScheme.value
+    ? activeQueryScheme.value
+    : undefined;
   const next: SavedQueryScheme = {
     id: `custom-${Date.now()}`,
     name,
-    query: cloneQuery(query),
-    statusTab: activeStatusTab.value,
+    query: cloneQuery(source?.query ?? query),
+    statusTab: source?.statusTab ?? activeStatusTab.value,
+    version: 2,
+    revision: 1,
+    owner: schemeForm.owner,
+    isDefault: false,
+    updatedAt: new Date().toISOString(),
   };
   customQuerySchemes.value.push(next);
   const persisted = persistCustomQuerySchemes();
   activeQuerySchemeId.value = next.id;
-  schemeModalVisible.value = false;
-  if (persisted) Message.success(`查询方案“${name}”已保存`);
+  if (persisted) Message.success(`查询方案“${name}”已${schemeModalMode.value === 'duplicate' ? '复制' : '保存'}`);
   else Message.warning('浏览器存储不可用，查询方案仅在本次会话保留');
   return true;
+};
+
+const updateActiveQueryScheme = () => {
+  if (!activeQueryScheme.value || activeQueryScheme.value.isSystem) return;
+  const target = customQuerySchemes.value.find((item) => item.id === activeQuerySchemeId.value);
+  if (!target) return;
+  target.query = cloneQuery(query);
+  target.statusTab = activeStatusTab.value;
+  target.revision += 1;
+  target.updatedAt = new Date().toISOString();
+  persistCustomQuerySchemes();
+  Message.success(`查询方案“${target.name}”已更新`);
+};
+
+const toggleDefaultQueryScheme = () => {
+  if (!activeQueryScheme.value || activeQueryScheme.value.isSystem) return;
+  const nextDefault = !activeQueryScheme.value.isDefault;
+  customQuerySchemes.value.forEach((item) => {
+    item.isDefault = nextDefault && item.id === activeQuerySchemeId.value;
+  });
+  persistCustomQuerySchemes();
+  Message.success(nextDefault ? `已将“${activeQueryScheme.value.name}”设为默认方案` : '已取消默认查询方案');
 };
 
 const deleteActiveQueryScheme = () => {
@@ -546,16 +690,14 @@ const confirmStatusChange = () => {
   statusErrors.reason = statusForm.reason.trim() ? '' : '请填写修改原因';
   if (statusErrors.targetStatus || statusErrors.reason || !statusTargetRow.value) return false;
 
-  const statusMap: Record<string, { label: string; pill: string }> = {
-    released: { label: '已放舱', pill: 'acc' },
-    customs: { label: '报关中', pill: 'op' },
-    sailed: { label: '已开船', pill: 'rel' },
-    completed: { label: '已完成', pill: 'rel' },
-  };
-  const nextStatus = statusMap[statusForm.targetStatus!];
+  const nextStatus = statusTransitionOptions.value.find((item) => item.value === statusForm.targetStatus);
+  if (!nextStatus) {
+    statusErrors.targetStatus = '当前状态不允许执行该流转，请刷新后重试';
+    return false;
+  }
   statusTargetRow.value.orderStatus = statusForm.targetStatus as ShipmentWorkbenchRow['orderStatus'];
   statusTargetRow.value.orderStatusLabel = nextStatus.label;
-  statusTargetRow.value.statusPill = nextStatus.pill;
+  statusTargetRow.value.statusPill = nextStatus.tone;
   Message.success(`订单 ${statusTargetRow.value.orderNo} 状态已更新为${nextStatus.label}`);
   statusModalVisible.value = false;
   return true;
@@ -588,32 +730,55 @@ const handleExport = () => {
 };
 
 const handleBatchNotify = () => {
-  if (!selectedCount.value) {
-    Message.warning('请先选择订单');
-    return;
-  }
-
-  Message.success(`已向 ${selectedCount.value} 票订单发送通知（模拟）`);
+  runBatchAction('批量通知');
 };
 
 const handleRowNotify = (row: ShipmentWorkbenchRow) => {
-  Message.success(`已向订单 ${row.orderNo} 发送通知（模拟）`);
+  Message.success(`订单 ${row.orderNo} 的通知已发送`);
 };
 
-const handleBatchAction = (label: string) => {
+const runBatchAction = async (label: string) => {
   if (!selectedCount.value) {
     Message.warning('请先选择订单');
     return;
   }
 
-  Message.success(`${label}已提交（模拟）`);
+  const submittedRows = [...selectedRows.value];
+  await new Promise((resolve) => setTimeout(resolve, uiScenario.value === 'slow' ? 1400 : 320));
+  if (uiScenario.value === 'partial') {
+    const failedRows = submittedRows.filter((_, index) => index % 3 === 0);
+    const success = submittedRows.length - failedRows.length;
+    batchFeedback.value = { success, failedOrderNos: failedRows.map((row) => row.orderNo) };
+    tableRef.value?.clearCheckboxRow();
+    if (failedRows.length) tableRef.value?.setCheckboxRow(failedRows, true);
+    selectedRows.value = failedRows;
+    Message.warning(`${label}完成，${success} 条成功，${failedRows.length} 条失败`);
+    return;
+  }
+  batchFeedback.value = null;
+  clearSelection();
+  Message.success(`${label}已完成，共处理 ${submittedRows.length} 条`);
 };
 
+const handleBatchAction = (label: string) => runBatchAction(label);
+
 const fetchList = async () => {
+  if (uiScenario.value === 'permission') return;
+  loadError.value = '';
   loading.value = true;
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  await new Promise((resolve) => setTimeout(resolve, uiScenario.value === 'slow' ? 1600 : 300));
+  if (uiScenario.value === 'error' && !hasSimulatedError.value) {
+    loadError.value = '订单数据加载失败，请检查网络后重试。';
+    hasSimulatedError.value = true;
+  }
   loading.value = false;
 };
+
+watch(uiScenario, () => {
+  batchFeedback.value = null;
+  hasSimulatedError.value = false;
+  fetchList();
+}, { immediate: true });
 </script>
 
 <template>
@@ -695,7 +860,7 @@ const fetchList = async () => {
             <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
               <a-button size="small" type="text" class="query-scheme-trigger">
                 <template #icon><icon-history /></template>
-                <span>{{ activeQueryScheme?.name ?? '查询方案' }}</span>
+                <span>{{ activeQueryScheme?.name ?? '查询方案' }}{{ activeSchemeDirty ? ' *' : '' }}</span>
                 <icon-down />
               </a-button>
               <template #content>
@@ -706,21 +871,32 @@ const fetchList = async () => {
                 >
                   <span class="query-scheme-option">
                     <icon-check v-if="activeQuerySchemeId === scheme.id" />
-                    <span v-else class="query-scheme-option__placeholder" />
-                    {{ scheme.name }}
-                  </span>
-                </a-doption>
-                <a-divider class="action-menu__divider" />
-                <a-doption @click="openSchemeModal">
-                  <icon-save /> 保存当前条件
-                </a-doption>
-                <a-doption
-                  v-if="canDeleteActiveScheme"
-                  class="danger-opt"
-                  @click="deleteSchemeModalVisible = true"
-                >
-                  <icon-delete /> 删除当前方案
-                </a-doption>
+                     <span v-else class="query-scheme-option__placeholder" />
+                     {{ scheme.name }}
+                     <small v-if="scheme.isDefault">默认</small>
+                     <small v-else-if="scheme.owner === 'shared'">共享</small>
+                   </span>
+                 </a-doption>
+                 <a-divider class="action-menu__divider" />
+                 <a-doption @click="openSchemeModal('create')">保存为新方案</a-doption>
+                 <a-doption
+                   v-if="canDeleteActiveScheme"
+                   :disabled="!activeSchemeDirty"
+                   @click="updateActiveQueryScheme"
+                 >更新当前方案</a-doption>
+                 <a-doption v-if="canDeleteActiveScheme" @click="openSchemeModal('rename')">重命名</a-doption>
+                 <a-doption v-if="activeQueryScheme" @click="openSchemeModal('duplicate')">复制方案</a-doption>
+                 <a-doption v-if="canDeleteActiveScheme" @click="toggleDefaultQueryScheme">
+                   {{ activeQueryScheme?.isDefault ? '取消默认方案' : '设为默认方案' }}
+                 </a-doption>
+                 <a-divider v-if="canDeleteActiveScheme" class="action-menu__divider" />
+                 <a-doption
+                   v-if="canDeleteActiveScheme"
+                   class="danger-opt"
+                   @click="deleteSchemeModalVisible = true"
+                 >
+                   删除当前方案
+                 </a-doption>
               </template>
             </a-dropdown>
             <a-button size="small" type="primary" @click="handleSearch">
@@ -737,7 +913,7 @@ const fetchList = async () => {
           </div>
         </div>
         <div class="flow-bar">
-          <div class="flow-bar__actions">
+          <div v-if="canOperate" class="flow-bar__actions">
             <a-button size="small" type="primary" @click="handleCreateOrder">
               <template #icon><icon-plus /></template>
               新增订单
@@ -808,7 +984,7 @@ const fetchList = async () => {
             <a-pagination
               :current="page.current"
               :page-size="page.size"
-              :total="filteredRows.length"
+              :total="tableTotal"
               :page-size-options="[20, 50, 100, 200]"
               size="small"
               show-total
@@ -848,6 +1024,16 @@ const fetchList = async () => {
           </a-space>
         </template>
 
+        <a-alert
+          v-if="batchFeedback"
+          type="warning"
+          closable
+          class="batch-result-alert"
+          @close="batchFeedback = null"
+        >
+          批量处理完成：成功 {{ batchFeedback.success }} 条，失败 {{ batchFeedback.failedOrderNos.length }} 条；失败订单 {{ batchFeedback.failedOrderNos.join('、') }} 已保留选中，可修正后重试。
+        </a-alert>
+
         <div class="workbench-table-frame">
           <vxe-table
             ref="tableRef"
@@ -860,7 +1046,7 @@ const fetchList = async () => {
             fit
             border="none"
             show-overflow="title"
-            :loading="loading"
+            :loading="loading || forcedLoading"
             :data="pagedRows"
             :column-config="{ resizable: true }"
             :custom-config="{ storage: true }"
@@ -954,7 +1140,7 @@ const fetchList = async () => {
                     </a-button>
                     <template #content>
                       <a-doption @click="openFullDetail(row.orderNo, 'overview')">编辑</a-doption>
-                      <a-doption @click="openStatusModal(row)">修改状态</a-doption>
+                      <a-doption v-if="canTransitionOrder(row)" @click="openStatusModal(row)">修改状态</a-doption>
                       <a-doption @click="handleAssignOperator(row)">分配给我</a-doption>
                       <a-doption @click="handleGenerateRowFee(row)">生成费用</a-doption>
                       <a-doption @click="openFullDetail(row.orderNo, 'files')">上传文件</a-doption>
@@ -969,16 +1155,27 @@ const fetchList = async () => {
             </vxe-column>
             <template #empty>
               <div class="workbench-empty">
-                <icon-empty class="workbench-empty__icon" />
+                <icon-lock v-if="uiScenario === 'permission'" class="workbench-empty__icon" />
+                <icon-info-circle v-else-if="tableError" class="workbench-empty__icon" />
+                <icon-empty v-else class="workbench-empty__icon" />
                 <div class="workbench-empty__title">
-                  {{ hasActiveFilter ? '未找到匹配的海运出口订单' : '暂无海运出口订单' }}
+                  {{ uiScenario === 'permission'
+                    ? '暂无海运出口订单查看权限'
+                    : tableError
+                      ? '海运出口订单加载失败'
+                      : hasActiveFilter ? '未找到匹配的海运出口订单' : '暂无海运出口订单' }}
                 </div>
                 <div class="workbench-empty__desc">
-                  {{ hasActiveFilter ? '请调整查询条件或切换状态队列后重试。' : '可以先新建订单，或通过批量导入创建业务单。' }}
+                  {{ uiScenario === 'permission'
+                    ? '请联系管理员开通海运出口订单的数据权限。'
+                    : tableError
+                      ? tableError
+                      : hasActiveFilter ? '请调整查询条件或切换状态队列后重试。' : '可以先新建订单，或通过已配置的导入服务创建业务单。' }}
                 </div>
                 <div class="workbench-empty__actions">
-                  <a-button v-if="hasActiveFilter" size="small" type="text" @click="handleReset">重置筛选</a-button>
-                  <a-button v-else size="small" type="primary" @click="handleCreateOrder">
+                  <a-button v-if="tableError" size="small" type="primary" @click="fetchList">重新加载</a-button>
+                  <a-button v-else-if="hasActiveFilter && uiScenario !== 'permission'" size="small" type="text" @click="handleReset">重置筛选</a-button>
+                  <a-button v-else-if="uiScenario !== 'permission'" size="small" type="primary" @click="handleCreateOrder">
                     <template #icon><icon-plus /></template>
                     新增订单
                   </a-button>
@@ -1140,7 +1337,7 @@ const fetchList = async () => {
       :mask-closable="false"
       :on-before-ok="confirmStatusChange"
     >
-      <a-form :model="statusForm" layout="vertical" size="small">
+      <a-form :model="statusForm" layout="vertical" size="small" class="detail-form">
         <a-row :gutter="16">
           <a-col :span="12">
             <a-form-item label="当前状态">
@@ -1150,6 +1347,7 @@ const fetchList = async () => {
           <a-col :span="12">
             <a-form-item
               label="目标状态"
+              field="targetStatus"
               required
               :validate-status="statusErrors.targetStatus ? 'error' : undefined"
               :help="statusErrors.targetStatus"
@@ -1161,16 +1359,16 @@ const fetchList = async () => {
                 placeholder="请选择"
                 @change="statusErrors.targetStatus = ''"
               >
-                <a-option value="released">已放舱</a-option>
-                <a-option value="customs">报关中</a-option>
-                <a-option value="sailed">已开船</a-option>
-                <a-option value="completed">已完成</a-option>
+                <a-option v-for="option in statusTransitionOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </a-option>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :span="24">
             <a-form-item
               label="修改原因"
+              field="reason"
               required
               :validate-status="statusErrors.reason ? 'error' : undefined"
               :help="statusErrors.reason"
@@ -1200,20 +1398,21 @@ const fetchList = async () => {
 
     <a-modal
       v-model:visible="schemeModalVisible"
-      title="保存查询方案"
-      :width="460"
+      :title="schemeModalTitle"
+      :width="480"
       :mask-closable="false"
       :on-before-ok="saveCurrentQueryScheme"
     >
-      <a-form :model="{ schemeName }" layout="vertical" size="small">
+      <a-form :model="schemeForm" layout="vertical" size="small" class="detail-form">
         <a-form-item
+          field="name"
           label="方案名称"
           required
           :validate-status="schemeNameError ? 'error' : undefined"
           :help="schemeNameError"
         >
           <a-input
-            v-model="schemeName"
+            v-model="schemeForm.name"
             allow-clear
             :max-length="20"
             show-word-limit
@@ -1238,7 +1437,7 @@ const fetchList = async () => {
     <a-modal
       v-model:visible="voidModalVisible"
       title="作废订单"
-      :width="440"
+      :width="420"
       :mask-closable="false"
       :ok-button-props="{ status: 'danger' }"
       @ok="voidOrder"
@@ -1329,6 +1528,12 @@ const fetchList = async () => {
 .density-option__placeholder {
   width: 12px;
   flex: 0 0 12px;
+}
+
+.query-scheme-option small {
+  margin-left: auto;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-micro);
 }
 
 .flow-bar {
@@ -1436,6 +1641,11 @@ const fetchList = async () => {
   display: flex;
   flex-direction: column;
   padding: 0;
+}
+
+.batch-result-alert {
+  flex-shrink: 0;
+  margin: 8px 12px;
 }
 
 .workbench-table-frame {

@@ -34,7 +34,7 @@ Set `:width` explicitly on every `<a-modal>` to a token value. **Hard max 860px.
   title="添加联系人"
   :width="560"
   :mask-closable="false"
-  @ok="handleOk"
+  :on-before-ok="handleBeforeOk"
   @cancel="handleCancel"
 >
   <a-form
@@ -55,6 +55,8 @@ Set `:width` explicitly on every `<a-modal>` to a token value. **Hard max 860px.
   </a-form>
 </a-modal>
 ```
+
+`handleBeforeOk` must return `true` only after validation and persistence succeed. Return `false` for validation, business rejection, or request failure so the modal remains open with the user's input preserved.
 
 ## Modal Footer Buttons
 

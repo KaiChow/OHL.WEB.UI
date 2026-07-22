@@ -3,9 +3,9 @@ import type { AppMenuItem } from '../types/navigation';
 export const appMenus: AppMenuItem[] = [
   {
     key: 'shipment',
-    title: '业务单',
+    title: '海运业务',
     children: [
-      { key: 'shipment-order-workbench', title: '海运出口订单', routeName: 'ShipmentOrderWorkbench' },
+      { key: 'shipment-order-workbench', title: '出口订单', routeName: 'ShipmentOrderWorkbench' },
     ],
   },
   {

@@ -2,12 +2,12 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IconRefresh, IconSearch, IconUser, IconDown } from '@arco-design/web-vue/es/icon';
+import { Ship } from '@icon-park/vue-next';
 import { appMenus } from '../config/menu';
 
 const route = useRoute();
 const router = useRouter();
 const menuKeyword = ref('');
-const openKeys = ref(appMenus.map((g) => g.key));
 const selectedMenuKeys = ref<string[]>([]);
 const isCompactShell = ref(false);
 let compactShellMedia: MediaQueryList | undefined;
@@ -29,41 +29,27 @@ onBeforeUnmount(() => {
 const isSameKeys = (a: string[], b: string[]) =>
   a.length === b.length && a.every((k, i) => k === b[i]);
 
-const setOpenKeys = (keys: string[]) => {
-  if (isSameKeys(openKeys.value, keys)) return;
-  openKeys.value = keys;
-};
+const registeredRouteNames = new Set(
+  router.getRoutes().map((item) => item.name).filter(Boolean).map(String),
+);
 
-const getParentGroupKey = (itemKey: string) => {
-  for (const group of appMenus) {
-    if (group.children?.some((item) => item.key === itemKey)) return group.key;
-  }
-  return undefined;
-};
+const availableMenus = computed(() => appMenus
+  .map((group) => ({
+    ...group,
+    children: group.children?.filter((item) => item.routeName && registeredRouteNames.has(item.routeName)),
+  }))
+  .filter((group) => (group.children?.length ?? 0) > 0));
 
-const ensureParentMenuOpen = (itemKey: string) => {
-  const parentKey = getParentGroupKey(itemKey);
-  if (!parentKey || openKeys.value.includes(parentKey)) return;
-  setOpenKeys([...openKeys.value, parentKey]);
-};
+const availableMenuCount = computed(() => availableMenus.value.reduce(
+  (count, group) => count + (group.children?.length ?? 0),
+  0,
+));
 
 const menuKeyRouteMap = computed(() => {
   const map = new Map<string, string>();
-  for (const group of appMenus) {
+  for (const group of availableMenus.value) {
     for (const item of group.children ?? []) {
       if (item.routeName) map.set(item.key, item.routeName);
-    }
-  }
-  return map;
-});
-
-const menuRouteMap = computed(() => {
-  const map = new Map<string, { key: string; title: string }>();
-  for (const group of appMenus) {
-    for (const item of group.children ?? []) {
-      if (item.routeName) {
-        map.set(item.routeName, { key: item.key, title: item.title });
-      }
     }
   }
   return map;
@@ -75,14 +61,14 @@ const currentPageTitle = computed(() =>
 
 const currentGroupTitle = computed(() => {
   const key = route.meta.menuKey ? String(route.meta.menuKey) : '';
-  const group = appMenus.find((item) => item.children?.some((child) => child.key === key));
-  return group?.title ?? '业务单';
+  const group = availableMenus.value.find((item) => item.children?.some((child) => child.key === key));
+  return group?.title ?? '海运业务';
 });
 
 const filteredMenus = computed(() => {
   const kw = menuKeyword.value.trim().toLowerCase();
-  if (!kw) return appMenus;
-  return appMenus
+  if (!kw) return availableMenus.value;
+  return availableMenus.value
     .map((group) => ({
       ...group,
       children: group.children?.filter(
@@ -90,10 +76,6 @@ const filteredMenus = computed(() => {
       ),
     }))
     .filter((group) => (group.children?.length ?? 0) > 0);
-});
-
-watch(menuKeyword, () => {
-  setOpenKeys(filteredMenus.value.map((g) => g.key));
 });
 
 watch(
@@ -104,14 +86,9 @@ watch(
     if (!isSameKeys(selectedMenuKeys.value, next)) {
       selectedMenuKeys.value = next;
     }
-    if (key) ensureParentMenuOpen(key);
   },
   { immediate: true },
 );
-
-const onOpenKeysChange = (keys: string[]) => {
-  setOpenKeys(keys);
-};
 
 const onMenuItemClick = (key: string) => {
   const routeName = menuKeyRouteMap.value.get(key);
@@ -131,12 +108,17 @@ const onMenuItemClick = (key: string) => {
       <div class="app-layout__brand">
         <a-avatar :size="28" shape="square" class="app-layout__logo">OHL</a-avatar>
         <div class="app-layout__brand-text">
-          <div class="app-layout__brand-title">OHL Freight OS</div>
-          <div class="app-layout__brand-sub">Freight Operations Platform</div>
+          <div class="app-layout__brand-title">OHL Freight</div>
+          <div class="app-layout__brand-sub">Operations OS</div>
         </div>
       </div>
 
-      <div class="app-layout__search">
+      <div class="app-layout__workspace">
+        <span>当前工作区</span>
+        <strong>华南操作中心</strong>
+      </div>
+
+      <div v-if="availableMenuCount >= 6" class="app-layout__search">
         <a-input v-model="menuKeyword" size="small" allow-clear placeholder="搜索菜单">
           <template #suffix><icon-search /></template>
         </a-input>
@@ -145,20 +127,18 @@ const onMenuItemClick = (key: string) => {
       <a-menu
         class="app-layout__menu"
         :selected-keys="selectedMenuKeys"
-        :open-keys="openKeys"
-        @update:open-keys="onOpenKeysChange"
         @menu-item-click="onMenuItemClick"
       >
-        <a-sub-menu v-for="group in filteredMenus" :key="group.key">
-          <template #title>{{ group.title }}</template>
+        <a-menu-item-group v-for="group in filteredMenus" :key="group.key" :title="group.title">
           <a-menu-item v-for="item in group.children" :key="item.key">
+            <template #icon><ship theme="outline" :size="16" /></template>
             {{ item.title }}
           </a-menu-item>
-        </a-sub-menu>
+        </a-menu-item-group>
       </a-menu>
 
       <div class="app-layout__footer">
-        <span>CN Workspace</span>
+        <span>中国区 · CN</span>
         <span>v0.1</span>
       </div>
     </a-layout-sider>
@@ -256,6 +236,10 @@ const onMenuItemClick = (key: string) => {
   display: none;
 }
 
+.app-layout__sider--compact .app-layout__workspace {
+  padding-inline: 10px;
+}
+
 .app-layout__sider--compact .app-layout__search {
   padding-inline: 8px;
 }
@@ -269,6 +253,32 @@ const onMenuItemClick = (key: string) => {
   border-bottom: 1px solid var(--color-border-1);
 }
 
+.app-layout__workspace {
+  padding: 11px 14px 10px;
+  border-bottom: 1px solid var(--color-border-1);
+}
+
+.app-layout__workspace span,
+.app-layout__workspace strong {
+  display: block;
+}
+
+.app-layout__workspace span {
+  color: var(--color-text-3);
+  font-size: var(--dense-font-micro);
+  line-height: 16px;
+}
+
+.app-layout__workspace strong {
+  overflow: hidden;
+  color: var(--color-text-1);
+  font-size: var(--dense-font-data);
+  font-weight: var(--dense-weight-title);
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .app-layout__search :deep(.arco-input-wrapper) {
   background: var(--color-bg-card);
 }
@@ -277,7 +287,7 @@ const onMenuItemClick = (key: string) => {
   flex: 1;
   overflow: auto;
   border-right: none;
-  padding: 8px 6px 8px;
+  padding: 8px 6px;
   margin-top: 0;
 }
 
@@ -285,28 +295,34 @@ const onMenuItemClick = (key: string) => {
   background: transparent;
 }
 
-.app-layout__menu :deep(.arco-menu-inline-header),
 .app-layout__menu :deep(.arco-menu-item) {
-  border-radius: 6px;
-}
-
-.app-layout__menu :deep(.arco-menu-inline-header) {
+  height: 34px;
+  margin-bottom: 2px;
+  border-radius: 4px;
+  padding-left: 10px !important;
   color: var(--color-text-2);
   font-size: var(--dense-font-nav);
+  font-weight: var(--dense-weight-nav);
+  line-height: 34px;
+}
+
+.app-layout__menu :deep(.arco-menu-group-title) {
+  height: auto;
+  padding: 8px 10px 5px !important;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-micro);
   font-weight: var(--dense-weight-title);
-  background: transparent;
-  padding-left: 12px;
+  line-height: 16px;
 }
 
 .app-layout__menu :deep(.arco-menu-selected) {
-  background: var(--dense-primary-1);
+  background: var(--color-fill-1);
   color: var(--dense-primary-7);
   font-weight: var(--dense-weight-title);
-  box-shadow: inset 2px 0 0 var(--dense-primary-5);
+  box-shadow: inset 2px 0 0 var(--dense-primary-6);
 }
 
-.app-layout__menu :deep(.arco-menu-item:hover),
-.app-layout__menu :deep(.arco-menu-inline-header:hover) {
+.app-layout__menu :deep(.arco-menu-item:hover) {
   background: var(--color-fill-1);
 }
 

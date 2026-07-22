@@ -55,7 +55,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 | 空状态添加行 | `dashed` + normal | — |
 | 重置/刷新/复制 | `text` + normal | — |
 | 行内删除（`detail-mini-vxe--editable`） | `text` + `danger` + `row-action-btn` | `a-popconfirm` |
-| 列表行删除 | row More menu + final `danger-opt` | `a-popconfirm` |
+| 列表行删除 | row More menu + final `danger-opt` | 独立 `Modal.confirm` / business Modal |
 | 吸底废弃 | `text` + `danger` | `Modal.confirm` |
 | 弹窗确定删除 | `primary` + `danger`（仅 confirm 弹窗内） | 已在 Modal 中 |
 | 下拉危险项 | — | `a-doption class="danger-opt"` + 二次确认 |
@@ -428,7 +428,7 @@ Danger rules:
 - Use Arco Divider before the final danger group.
 - 下拉危险项：`class="danger-opt"`，点击后 `Modal.confirm` 或业务确认，禁止直接执行。
 - 禁止在 Dropdown 内容中嵌套 `a-popconfirm`：下拉层会先销毁，确认浮层可能无法出现。先保存目标对象，再打开独立 Modal 或调用 `Modal.confirm`。
-- 行内删除：`a-popconfirm`。
+- 非 Dropdown 内的详情行内删除：可用 `a-popconfirm`；列表 More 菜单内必须使用独立 Modal。
 - 批量/不可逆：`Modal.confirm({ type: 'warning' })`。
 - 禁止 `alert()` / `confirm()`。
 

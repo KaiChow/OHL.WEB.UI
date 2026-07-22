@@ -5,7 +5,7 @@ const form = defineModel<ShipmentOrderDetailRecord>('form', { required: true });
 </script>
 
 <template>
-  <a-form :model="form" layout="vertical" size="small" class="order-info-tab">
+  <a-form :model="form" layout="vertical" size="small" class="detail-form order-info-tab">
     <section class="order-info-section">
       <header class="order-info-section__head">
         <strong>客户与归属</strong>

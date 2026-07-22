@@ -71,6 +71,8 @@ body,
   --dense-col-w-seq: 52px;
 
   /* 字号 + 字重（F0–F6 阶梯，列表/详情共用；见 typography.md） */
+  --dense-font-hero: 16px;
+  /* 详情页唯一的对象/航线主标识；禁止用于普通标题、表格或字段值 */
   --dense-font-overlay: 14px;
   /* F0 浮层/页头标题：Modal、Popover 标题、全页表单页头 */
   --dense-weight-overlay: 600;

@@ -4,7 +4,7 @@
 
 Modal and drawer widths must follow a **fixed tier system**. Pick the tier from content type and field count — do not invent arbitrary values (`900`, `1080`, etc.).
 
-Viewport baseline: **min 1280px**, design **1440px**. All responsive widths use `min(token, calc(100vw - pad))` so overlays never touch the viewport edge.
+Viewport baseline: **supported min 1024px**, release gate **1366px**, design evidence **1440px**. All responsive widths use `min(token, calc(100vw - pad))` so overlays never touch the viewport edge.
 
 ## Decision Flow
 
@@ -140,5 +140,5 @@ const drawerWidth = computed(() =>
 - [ ] Modal `:width` matches a token tier for field count / content type
 - [ ] Drawer has correct class (`query-filter-drawer` / `detail-drawer` / `--standard`)
 - [ ] No `:width` values outside the token table except documented fullscreen
-- [ ] At 1280px viewport, drawer still leaves ≥16px margin (no horizontal page scroll)
+- [ ] At 1024px and 1280px viewports, drawer still leaves ≥16px margin (no horizontal page scroll)
 - [ ] At 1920px, complex drawer caps at 1200px unless fullscreen

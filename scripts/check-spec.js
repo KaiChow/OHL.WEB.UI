@@ -187,8 +187,15 @@ const mainTs = readFileSync(join(ROOT, 'src/main.ts'), 'utf8');
 const existingProjectModernization = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/existing-project-modernization.md'), 'utf8');
 const redesignCalibration = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/redesign-calibration.md'), 'utf8');
 const responsiveReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/responsive.md'), 'utf8');
+const overlayDimensions = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/overlay-dimensions.md'), 'utf8');
+const modalReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/modal.md'), 'utf8');
+const tableReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/table.md'), 'utf8');
 const agentsSummary = readFileSync(join(ROOT, 'AGENTS.md'), 'utf8');
 const productGradeEvaluation = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/product-grade-evaluation.md'), 'utf8');
+const shipmentFeatureContractPath = join(ROOT, 'src/views/shipment/featureContracts.ts');
+const shipmentFeatureContracts = existsSync(shipmentFeatureContractPath)
+  ? readFileSync(shipmentFeatureContractPath, 'utf8')
+  : '';
 
 if (!/^[~^]?0\.0\.58$/.test(packageJson.dependencies?.['@arco-themes/vue-gi-demo'] || '')) {
   violations.push({
@@ -293,12 +300,39 @@ if (existsSync(join(ROOT, '.cursor/rules/ui-spec.mdc'))) {
     content: 'duplicate always-on UI specification detected',
   });
 }
-if (!responsiveReference.includes('1366x768') || !responsiveReference.includes('1024px split-window audit')) {
+if (!responsiveReference.includes('1366x768') || !responsiveReference.includes('1024x768')) {
   violations.push({
     rule: 'responsive.md 必须包含 1366 笔记本发布门禁与 1024 多窗口审计，不得只验证大屏',
     file: 'ui-skill/freight-arco-ui/references/responsive.md',
     line: 1,
     content: 'missing office viewport evidence contract',
+  });
+}
+if (!responsiveReference.includes('supported minimum viewport width of **1024px**')
+  || overlayDimensions.includes('min 1280px')
+  || productGradeEvaluation.includes('1280 is the current lower desktop bound')) {
+  violations.push({
+    rule: '响应式规范必须统一为 1024 分屏下限、1366 发布门禁，禁止残留 1280 下限的第二口径',
+    file: 'ui-skill/freight-arco-ui/references/responsive.md',
+    line: 1,
+    content: 'conflicting responsive baseline detected',
+  });
+}
+if (!modalReference.includes(':on-before-ok="handleBeforeOk"') || modalReference.includes('@ok="handleOk"')) {
+  violations.push({
+    rule: 'Modal 表单规范必须使用 on-before-ok 保留校验失败输入，禁止保留 @ok 旧示例',
+    file: 'ui-skill/freight-arco-ui/references/modal.md',
+    line: 1,
+    content: 'conflicting modal submit example detected',
+  });
+}
+if (tableReference.includes('| Workbench standard list | 36px | 48px')
+  || tableReference.includes('a-popconfirm` + `a-doption.danger-opt')) {
+  violations.push({
+    rule: '表格规范必须统一舒适档 44px，并禁止 Dropdown 内 Popconfirm 的旧规则',
+    file: 'ui-skill/freight-arco-ui/references/table.md',
+    line: 1,
+    content: 'conflicting table density or danger rule detected',
   });
 }
 if (!productGradeEvaluation.includes('## Sellable Freight Product Maturity Gates') || !productGradeEvaluation.includes('| 14 | Product completion |')) {
@@ -307,6 +341,37 @@ if (!productGradeEvaluation.includes('## Sellable Freight Product Maturity Gates
     file: 'ui-skill/freight-arco-ui/references/product-grade-evaluation.md',
     line: 1,
     content: 'missing sellable freight maturity gates',
+  });
+}
+if (!productGradeEvaluation.includes('### Deterministic Edge-State Evidence')) {
+  violations.push({
+    rule: '融资/可销售级评估必须要求边界态可确定性复现，禁止只在文档中声称已设计',
+    file: 'ui-skill/freight-arco-ui/references/product-grade-evaluation.md',
+    line: 1,
+    content: 'missing deterministic edge-state evidence contract',
+  });
+}
+if (!shipmentFeatureContracts.includes('SHIPMENT_FEATURE_CONTRACTS')
+  || !shipmentFeatureContracts.includes('refreshScope')
+  || !shipmentFeatureContracts.includes('getOrderStatusTransitions')) {
+  violations.push({
+    rule: '出口订单必须具备页面级功能契约，显式声明权限、状态流转、请求结果和刷新范围',
+    file: 'src/views/shipment/featureContracts.ts',
+    line: 1,
+    content: 'missing executable shipment feature contract',
+  });
+}
+for (const page of [
+  'src/views/shipment/orderWorkbench/index.vue',
+  'src/views/shipment/orderDetail/index.vue',
+]) {
+  const content = readFileSync(join(ROOT, page), 'utf8');
+  if (content.includes('../featureContracts')) continue;
+  violations.push({
+    rule: '出口订单列表与详情必须复用页面级状态/功能契约，禁止各写一套状态流转',
+    file: page,
+    line: 1,
+    content: 'missing featureContracts import',
   });
 }
 if (!checklist.includes('### Sellable Maturity Evidence')) {
@@ -701,6 +766,22 @@ for (const file of files) {
   }
 }
 
+// 业务页的 14-16px 视觉层级必须来自共享 typography token，避免页面自建字号体系。
+for (const file of files) {
+  if (!file.includes(`${sep}src${sep}views${sep}`) || !file.endsWith('.vue')) continue;
+  const relPath = file.replace(ROOT + sep, '').replace(/\\/g, '/');
+  const lines = readFileSync(file, 'utf8').split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    if (!/font-size\s*:\s*(14|15|16)px\b/.test(lines[i])) continue;
+    violations.push({
+      rule: '业务页禁止硬编码 14/15/16px 字号；对象主标识使用 --dense-font-hero，其余使用 F0-F6 token',
+      file: relPath,
+      line: i + 1,
+      content: lines[i].trim().slice(0, 140),
+    });
+  }
+}
+
 // 业务列禁止固定 width（仅 checkbox / seq / 操作列允许）
 function isStructuralVxeColumn(attrs) {
   if (/type="checkbox"/.test(attrs) || /type="seq"/.test(attrs)) return true;
@@ -962,6 +1043,17 @@ for (const file of files) {
         line: getLineNumber(content, blockIndex),
         content: firstLine.trim().slice(0, 140),
       });
+    }
+    if (/\bdetail-mini-vxe--editable\b/.test(firstLine)) {
+      for (const control of block.matchAll(/<a-(?:input|input-number|select|date-picker)\b([^>]*)>/g)) {
+        if (/\bv-if=(['"])isEditingRow\(/.test(control[1])) continue;
+        violations.push({
+          rule: '详情可编辑子表默认必须是展示态；输入控件只允许在 isEditingRow 当前行出现',
+          file: relPath,
+          line: getLineNumber(content, blockIndex + control.index),
+          content: control[0].trim().slice(0, 140),
+        });
+      }
     }
     if (/\bdetail-mini-vxe\b/.test(firstLine) && /:row-config=(["'])[\s\S]*?height\s*:/.test(firstLine)) {
       violations.push({

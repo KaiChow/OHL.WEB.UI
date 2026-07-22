@@ -78,7 +78,7 @@ Main workbench tables must be compact enough for all-day operation, but not comp
 | Table type | Header | Body row | Rule |
 |------------|--------|----------|------|
 | Workbench compact list | 32px | 36px | Default for order, customer, finance, warehouse, and operation lists |
-| Workbench standard list | 36px | 48px | Only for low-frequency review pages or rows with two-line cells |
+| Workbench standard list | 36px | 44px | Only for low-frequency review pages or rows with two-line cells |
 | Detail editable line table | 32px | 38px | Use when row cells render `a-input`, `a-select`, `a-input-number`, date picker, or inline row editing |
 | Detail readonly line table | 32px | 34px | Use for documents, file status, timeline-like records, read-only child rows |
 | Summary/read-only mini table | 28-32px | 32px | Use for compact totals, short read-only facts, no operation column unless necessary |
@@ -91,7 +91,7 @@ Rules:
 - Summary mini row token is `--dense-row-h-summary: 32px`; use it only for short totals or read-only facts, not editable child rows.
 - Main list VXE tables use `class="compact"` unless the page has a documented reason to use `standard`.
 - Do not use 40px as the default workbench row height; it reduces first-screen data density.
-- VXE `size="small"` defaults to a 40px row variable. A compact table must override both `--vxe-table-row-height-small` and `--vxe-ui-table-row-height-small`, then set `row-config.height = 36`; changing only `.vxe-body--row` is not enough.
+- VXE `size="small"` defaults to a 40px row variable. A list table must override both `--vxe-table-row-height-small` and `--vxe-ui-table-row-height-small`, then set `row-config.height` to the selected list density (`36` compact / `44` standard); changing only `.vxe-body--row` is not enough.
 - `detail-mini-vxe--editable` resolves to 38px through the global density token.
 - `detail-mini-vxe--readonly` resolves to 34px through the global density token.
 - `detail-mini-vxe--summary` resolves to 32px through the global density token.
@@ -384,7 +384,7 @@ count effective actions (merge exclusive A verbs)
 - Primary direct action: `row-action-btn row-action-btn--primary` (eye / edit).
 - More trigger: icon-only `row-action-btn row-action-btn--more` with the native Arco Dropdown popup.
 - Row action icons stay visible in default state; no permanent borders on buttons.
-- Danger in `···`: Arco Divider then `a-popconfirm` + `a-doption.danger-opt` — never flat `status="danger"` on list rows.
+- Danger in `···`: Arco Divider then `a-doption.danger-opt`; its click stores the target and opens a separate business Modal or `Modal.confirm` after the dropdown closes. Never nest `a-popconfirm` in Dropdown and never expose flat `status="danger"` on list rows.
 - VXE cell focus/selection on workbench tables: use project `global.css` tokens only; no page-scoped black focus rings.
 
 ### Examples
@@ -438,15 +438,15 @@ count effective actions (merge exclusive A verbs)
           <a-doption @click="handleEdit(row)">编辑</a-doption>
           <a-doption @click="handlePrint(row)">打印</a-doption>
           <a-divider />
-          <a-popconfirm content="确认废弃？此操作不可恢复。" @ok="handleVoid(row)">
-            <a-doption class="danger-opt">废弃</a-doption>
-          </a-popconfirm>
+          <a-doption class="danger-opt" @click="requestVoid(row)">废弃</a-doption>
         </template>
       </a-dropdown>
     </div>
   </template>
 </vxe-column>
 ```
+
+`requestVoid(row)` stores the row and opens an independent confirmation Modal. The Modal performs the irreversible action only after explicit confirmation.
 
 ### `detail-mini-vxe` exception
 
@@ -523,7 +523,7 @@ Required behavior:
 - Pagination, filtering, route leave, or drawer close must warn when unsaved edits exist.
 - Editing many rows must use pagination/virtual-safe state keyed by stable row id, not row index.
 - Do not store editing state only in rendered DOM; it must survive horizontal scroll and row re-render.
-- When virtual scroll is enabled, `row-config.height` must match actual row height.
+- When virtual scroll is enabled on a main/list table, `row-config.height` must match actual row height. On this project's pinned VXE version, detail mini tables continue to use their density modifier and global CSS variables instead of `row-config.height`.
 
 Avoid:
 
