@@ -10,50 +10,41 @@ alwaysApply: true
 
 ## 0. 任务 → 必读（写第一行 template 前）
 
+**默认：无 UI 设计稿。** 先走 lean 路径，禁止预读全库 reference。
+
 | 任务 | 读 |
 |------|-----|
 | **所有 UI 任务（最先）** | **`arco-first.md` + `theme-contract.md`** |
+| **无截图/原型（默认）** | **`existing-project-modernization.md`** + `redesign-calibration.md` + **一个**页面原型 reference |
 | **新页面 / 页面重写 / 重大布局交互改造** | **`page-spec-contract.md`**，先创建/更新 typed `pageSpec.ts` |
-| **无截图/原型的既有项目改造** | **`existing-project-modernization.md`** + `redesign-calibration.md` |
 | **新菜单 / 不确定用哪种布局** | **`domain-routing.md`** |
 | **任何有点击/提交/请求/状态流转的功能** | **`feature-routing.md`** + **`feature-delivery-contract.md`** |
-| **任何截图 / 原型 / Figma / 视觉稿驱动任务** | **`artifact-intake-template.md`** + **`prototype-to-ui-contract.md`** + `page-archetypes.md` + `module-patterns.md` |
-| **任何 icon 变更（按钮/行操作/模块标题/空态/菜单）** | **`icons.md`** + `actions.md` / `table.md` / `feedback.md` |
-| 新列表页 | `list-page.md` + **`filter-layout.md`** + `table.md` + `actions.md` |
-| 筛选区 | **`filter-layout.md`**（布局 Tier；控件皮肤 → **`form-field.md`**） |
-| 弹窗/抽屉 | **`modal.md`** + `overlay-dimensions.md` + **`form-field.md`**（控件） |
-| 详情/长表单 | `detail-form.md`（布局栅格）+ **`form-field.md`**（控件） |
-| 全页新建/客户端下单 | **`full-page-form.md`** + `form-rules.md` + **`form-field.md`** |
-| 主数据/字典/设置 | **`master-data.md`** |
-| 权限/角色 | **`permissions.md`** |
-| BI/看板 | **`dashboard.md`** |
-| 空态/加载/Message | **`feedback.md`** |
-| 新模块 | `module-patterns.md` + `domain-language.md` + **`domain-routing.md`** |
+| **任何截图 / 原型 / Figma / 视觉稿驱动任务** | **`artifact-intake-template.md`** + **`prototype-to-ui-contract.md`** + 对应原型 reference |
+| **任何 icon 变更** | **`icons.md`** + 对应 surface reference |
+| 列表 / 筛选 / 弹层 / 详情等 | 只读当前 surface 权威文件（`list-page` / `filter-layout` / `modal` / `detail-form`…） |
 | 任意共享类名 / global.css pattern | 先过 **`arco-first.md`**，再 grep `src/styles/global.css` |
 
 路径：`ui-skill/freight-arco-ui/references/`（已 sync 到 `.agents/skills/`）。
 
 ## 1. 写 template 前必须完成的决策（答案在 reference 里查，禁止凭记忆）
 
-0. **框架优先**：Arco props/slots 能否解决？→ token？→ 业务 pattern？→ 最后才 page-local CSS（**`arco-first.md`**）
-0. **PESDP 可追溯**：`pageSpec.ts` 已完成 P/E/S/D/P 的实现决策与验证证据；未完成禁止写 template（**`page-spec-contract.md`**）
-1. **筛选**：字段总数 + 使用频率 → Scenario → surface / state / overflow 契约（**`filter-layout.md`** 为唯一决策源）
-2. **筛选结构**：按 Tier 选用 `filter-layout.md` 的字段关系与交互场景；示例类名只有在 grep 证明共享实现存在时才是 API，否则用 Arco 结构 + 最小局部布局 CSS
-3. **Overlay**：字段数 + 是否含子表/多分区 → 查 `modal.md` 容器表
-4. **功能行为**：先补 `feature_type / actor_roles / visible_when / enabled_when / api_request / success_result / error_result / refresh_scope`
-5. **图标**：先判定当前 surface 用 Arco 还是 IconPark；无精确隐喻则不用 icon
-6. **输入标准化**：先补 `artifact_type / business_object / user_job / visible_actions / explicit_behavior / uncertain_behavior / delivery_expectation`
-7. **原型转译**：再补 `business_object / user_job / page_archetype / visible_actions / uncertain_actions / feature_contracts_required`
+0. **框架优先**：Arco props/slots → token → grep 已有 pattern → 最后才 page-local CSS（**`arco-first.md`**）；遵守无设计稿 CSS budget（**`existing-project-modernization.md`**）
+1. **PESDP 可追溯**：新页面/重写时 `pageSpec.ts` 已有 P/E/S/D/P 决策与可测 acceptance；未完成禁止写 template（**`page-spec-contract.md`**）
+2. **无设计稿 intake**：现代化 mode + behavior freeze + 首屏证据字段已填；有设计稿才走 artifact/原型转译
+3. **筛选 / Overlay**：需要时才查 `filter-layout.md` / `modal.md`；示例类名非共享 API
+4. **功能行为**：改交互时才补 `feature_type / visible_when / enabled_when / api_* / refresh_scope`
+5. **禁止**：用新增 skill 文档代替共享 UI 能力；用空 acceptance 句子代替真实路由实测
 
 ## 2. 写代码
 
 - 先 Arco 原生结构与 props；共享类名写前过 `arco-first.md` 并 grep `global.css`
-- 禁止自写与 Arco / 已有 pattern 等效的 CSS
+- 禁止自写与 Arco / 已有 pattern 等效的 CSS；超 budget 先抽共享层
 - 用户要求「只按 skill」时，禁止参考其他 `src/views/**` 页面
 - 行为代码禁止把权限、状态、刷新、副作用只埋在 handler 里而不先写契约
-- 原型/截图任务禁止只按视觉相似度直接开写，必须先完成输入模板和原型转译块
+- 原型/截图任务禁止只按视觉相似度直接开写
 
 ## 3. 交付前
 
-1. 对抗式审查 → `.cursor/rules/adversarial-review.mdc`（输出 `[审查] 通过 | 不通过`）
+1. 对抗式审查 → `.cursor/rules/adversarial-review.mdc`（无设计稿须含首屏/surface 证据，否则不通过）
 2. `node scripts/check-spec.js`
+3. 真实路由 before/after（脚本绿 ≠ 交付完成）

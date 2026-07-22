@@ -31,6 +31,8 @@ export function validateFreightUiSkill() {
 
   const requirements = [
     [skill, '## Mandatory PESDP Execution Gate', 'SKILL.md must make PESDP execution a blocking gate'],
+    [skill, '## Default Path (No UI Design)', 'SKILL.md must define the no-design default lean path'],
+    [skill, '## Skill Growth Freeze', 'SKILL.md must freeze skill growth in favor of shared UI capability'],
     [skill, 'page-spec-contract.md', 'SKILL.md must route page generation through the page spec'],
     [pageSpec, '## PESDP Traceability Gate', 'page spec must define PESDP traceability'],
     [pageSpec, "target: 'sellable-saas-grade'", 'page spec must express product grade as a target, not an achieved result'],

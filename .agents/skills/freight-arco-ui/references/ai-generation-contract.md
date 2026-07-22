@@ -44,7 +44,7 @@ Before generating UI:
 5. Choose Arco built-ins first; then tokens; then proven shared patterns with a stated Arco gap; then minimal page-local CSS.
 6. When the old skeleton fails the page spec, regroup or rewrite it before tuning component chrome.
 7. Implement in module files, compile, run `check-spec`, and inspect the real route.
-8. Reconcile real evidence back to the spec. A PESDP claim with no evidence is failed, not provisional success.
+8. Compare real evidence with the spec's acceptance conditions. A target with no rendered evidence is unverified, not provisional success.
 
 ## Executable Design Language Contract
 
@@ -190,7 +190,7 @@ Before template code and again before final delivery, reconcile the page against
 | Dense | Query/table/detail density decision → office viewport behavior → measured evidence |
 | Premium | Arco/GI ownership, shared roles, complete states → real-route consistency/credibility evidence |
 
-Each dimension needs at least one concrete decision and one verification item. If any trace is missing or contradicted by the rendered route, revise structure before styling and do not call the page PESDP-compliant.
+Each dimension needs at least one concrete decision and one measurable acceptance condition. If any acceptance condition is untested or contradicted by the rendered route, revise structure before styling and do not call the page PESDP-compliant.
 
 ## Anti-Patterns To Reject
 

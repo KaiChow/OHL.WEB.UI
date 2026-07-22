@@ -272,8 +272,11 @@ Do not put read-only fields in a separate grid below the editable grid unless th
       size="small"
       :model="form"
     >
-      <div class="form-subgroup-label">单号信息</div>
-      <div class="detail-form-grid detail-form-grid--4">
+      <div class="form-subgroup">
+        <div class="form-subgroup__head">
+          <span class="form-subgroup__title">单号信息</span>
+        </div>
+        <div class="detail-form-grid detail-form-grid--4">
         <a-form-item label="业务单号">
           <a-input v-model="form.businessNo" size="small" disabled />
         </a-form-item>
@@ -291,10 +294,14 @@ Do not put read-only fields in a separate grid below the editable grid unless th
             </a-button>
           </div>
         </a-form-item>
+        </div>
       </div>
 
-      <div class="form-subgroup-label">航线信息</div>
-      <div class="detail-form-grid detail-form-grid--4">
+      <div class="form-subgroup">
+        <div class="form-subgroup__head">
+          <span class="form-subgroup__title">航线信息</span>
+        </div>
+        <div class="detail-form-grid detail-form-grid--4">
         <a-form-item label="起运港" :rules="[{ required: true }]">
           <div class="detail-combo detail-combo--code-name">
             <a-input v-model="form.polCode" size="small" placeholder="代码" />
@@ -316,6 +323,7 @@ Do not put read-only fields in a separate grid below the editable grid unless th
         <a-form-item label="备注" class="detail-form-grid__span4">
           <a-textarea v-model="form.remark" size="small" :auto-size="{ minRows: 2 }" />
         </a-form-item>
+        </div>
       </div>
     </a-form>
   </div>
@@ -357,15 +365,17 @@ Rules:
 - Do not create a new `detail-section` for every internal group.
 - Do not use card-in-card styling for internal groups.
 
-Default layout:
+Legacy layout to migrate away from:
 
 ```text
 detail-section title
 └── detail-form
-    ├── form-subgroup-label
-    ├── detail-form-grid
-    ├── form-subgroup-label
-    └── detail-form-grid
+    ├── form-subgroup
+    │   ├── form-subgroup__head
+    │   └── detail-form-grid
+    └── form-subgroup
+        ├── form-subgroup__head
+        └── detail-form-grid
 ```
 
 Anti-patterns:
@@ -524,7 +534,6 @@ Container:
     class="detail-mini-vxe detail-mini-vxe--editable"
     border="none"
     size="small"
-    height="auto"
     :data="rows"
     :row-config="{ isHover: true, keyField: 'id' }"
   >
@@ -538,6 +547,7 @@ Required:
 - Always add `class="detail-mini-vxe"` to VXE tables embedded in `detail-section__body` that contain editable controls.
 - Use `detail-section__body--table` on the section body (or `detail-child-pane__table` for nested child panes).
 - Use `detail-mini-vxe--editable`; the global CSS bridge resolves the row to 38px for 28px controls (`--dense-control-h-detail`). Do not set `row-config.height` on pinned VXE 4.5.
+- In a Drawer or intrinsic-height pane, omit the VXE `height` prop. `height="auto"` is forbidden because pinned VXE 4.5 can feed the measured parent height back into its own content height and grow indefinitely.
 - Business columns use `min-width`; only checkbox / seq / operation use fixed `width` (see `table.md` width policy).
 
 Forbidden:
@@ -545,6 +555,7 @@ Forbidden:
 - `show-overflow` / `show-header-overflow` on `detail-mini-vxe` (causes clipping and header/body misalignment).
 - `detail-child-pane__desc` when the child title and field labels already explain the block (no redundant module copy).
 - Page-scoped wrappers with `overflow: hidden` around wide detail tables.
+- `height="auto"` on an embedded VXE table whose Drawer body or detail pane already owns vertical scrolling.
 - Padding on `td` (`.vxe-body--column`) instead of `.vxe-cell`.
 - Forgetting `class="detail-mini-vxe"` — inputs show full Arco borders in every cell, creating Excel-like box grid.
 

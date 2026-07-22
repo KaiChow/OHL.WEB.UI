@@ -62,6 +62,7 @@ Each rule family has one authority. Other files route to it or verify it; they d
 | Rule family | Authority |
 |-------------|-----------|
 | Theme ownership and token scope | `theme-contract.md` |
+| No-design / no-artifact modernization (default path) | `existing-project-modernization.md` |
 | Cross-page layout quality, surface relationships, first-viewport evidence | `redesign-calibration.md` |
 | List workbench implementation | `list-page.md` |
 | Query-count selection | `filter-layout.md` |
@@ -114,24 +115,43 @@ For list/workbench pages, keep the first viewport dominated by business data. Th
 
 Do not hide daily filters, status tabs, or reversible workflow actions merely to look minimal. Modern restraint means neutral grouping, semantic color, and one clear primary anchor, not removing the controls operators need all day.
 
-## First Load (minimal)
+## Default Path (No UI Design)
 
-1. **`references/arco-first.md`**
-2. **`references/theme-contract.md`**
-3. `references/design-principles.md`
-4. **`references/page-spec-contract.md`** — create/update `pageSpec.ts` before template work.
-5. For an existing-project rewrite without a visual reference: **`references/existing-project-modernization.md`**
-6. `references/module-patterns.md` + `references/domain-language.md` (new pages)
-7. For any task with behavior or request flow: `references/feature-routing.md` + `references/feature-delivery-contract.md`
-8. For any screenshot/prototype-driven task only: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
-9. One topic file from the map below.
-10. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
-11. **Before changing icon usage:** read `icons.md`.
-12. **Before any redesign / 布局重写 / 质感优化 / 普通后台味反馈:** read `redesign-calibration.md`.
-13. **Before any custom class or `global.css` pattern:** re-check `arco-first.md` and document why Arco + tokens are insufficient.
-14. **`src/styles/global.css`** — only after steps 1–13; grep tokens/patterns already justified, do not browse the file as the primary design catalog.
+Most tasks in this repo have **no Figma / screenshot / visual mock**. That is the default. Do not invent a design artifact path, and do not expand the pre-read into every reference.
 
-**Coding gate:** `.cursor/rules/spec-first-coding.mdc` — read references first; run `check-spec.js` before delivery.
+**Lean pre-read (blocking order):**
+
+1. **`references/arco-first.md`** + **`references/theme-contract.md`**
+2. **`references/existing-project-modernization.md`** — no-reference intake + modernization mode
+3. **`references/redesign-calibration.md`** — first-viewport / surface / command-surface numbers
+4. **One** archetype authority only (`list-page.md` / `detail-form.md` / `full-page-form.md` / `master-data.md` / `dashboard.md`)
+5. Surface helpers only when that surface is in scope: `filter-layout.md`, `table.md`, `actions.md`, `overlay-dimensions.md`
+6. **`references/page-spec-contract.md`** + typed `pageSpec.ts` for new pages / rewrites / material layout changes
+7. Feature contracts **only** when the task changes click/submit/request/state behavior
+8. Grep **`src/styles/global.css`** for already-justified shared APIs — never browse it as a design catalog
+
+**Skip unless the user actually supplies an artifact:** `artifact-intake-template.md`, `prototype-to-ui-contract.md`.
+
+**Outcome over process:** `pageSpec` prose, checklist ticks, and a green `check-spec.js` do not replace real-route before/after evidence. Without a design file, measured layout + removed visual debt + shared-API reuse are the acceptance source.
+
+## Skill Growth Freeze
+
+Do **not** add a new reference, duplicate gate, or longer checklist to fix a weak UI. Prefer this order:
+
+1. Ship or extend a **shared** Arco composition / `global.css` API used by ≥2 pages
+2. Make the page consume that shared API; delete page-local skin
+3. Only then document a portable rule in the single authority file
+
+A larger skill with the same page-local CSS budget is a process failure, not product progress.
+
+## First Load (with design artifact only)
+
+When the user provides a screenshot / Figma / annotated mock:
+
+1. `artifact-intake-template.md` + `prototype-to-ui-contract.md`
+2. Then follow the Default Path from step 1, using the translated archetype instead of inventing one from visual similarity
+
+**Coding gate:** `.cursor/rules/spec-first-coding.mdc` — lean pre-read first; run `check-spec.js` before delivery; no-design tasks also require modernization evidence from `existing-project-modernization.md`.
 
 Optional mirror of an existing page only when the user explicitly asks. Default: skill + Arco docs + justified `global.css` patterns.
 
@@ -200,24 +220,24 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 
 ## Working Protocol
 
-1. Complete artifact/no-reference intake and business slot mapping.
-2. Create/update the typed `pageSpec.ts` using `page-spec-contract.md`; resolve every PESDP dimension and rule authority before template code.
-3. If the task has behavior, classify `feature_type` and complete the functional contract.
-4. Read only the archetype/topic authorities named by the page spec.
-5. Repair theme ownership before page-local visual tuning.
-6. Implement in priority order: Arco built-ins → official/project tokens → documented business patterns → minimal page-local CSS.
-7. Run real-route visual inspection, `node scripts/check-spec.js`, and build when possible.
-8. Compare real-route evidence with `pageSpec.ts` acceptance conditions; a target without rendered evidence remains unverified.
-9. Report page-spec mapping, applicable intake/audit, product-grade evidence, files changed, rules applied, and verification.
+1. Decide path: **no design (default)** → modernization intake; **has artifact** → artifact + prototype blocks.
+2. Create/update typed `pageSpec.ts` for new pages / rewrites / material layout changes; resolve PESDP decisions + acceptance before template code.
+3. If the task changes behavior, classify `feature_type` and complete the functional contract.
+4. Read only the lean pre-read + the one archetype/topic authority in scope — do not preload the full reference map.
+5. Repair theme ownership; reuse or extract shared APIs before page-local visual tuning.
+6. Implement: Arco built-ins → tokens → grep-proven business patterns → minimal page-local CSS (budget in `existing-project-modernization.md`).
+7. Run real-route inspection with before/after evidence, `node scripts/check-spec.js`, and build when possible.
+8. Reconcile evidence to `pageSpec.ts` acceptance; a target without rendered evidence remains unverified.
+9. Report intake/audit, shared APIs reused, page-local CSS delta, files changed, rules applied, and verification.
 
 ## Output Standard
 
-- Page spec + slot mapping + archetype (design/generation tasks)
-- Existing-project audit block when no visual artifact is supplied
-- Artifact intake block (screenshot/prototype-driven tasks)
-- Prototype translation block (screenshot/prototype-driven tasks)
+- Existing-project audit block (**default** when no visual artifact)
+- Artifact intake + prototype translation (only when an artifact exists)
+- Page spec + archetype (new page / rewrite / material redesign)
 - Feature mapping + delivery contract keys (behavior tasks)
+- Shared APIs reused / page-local CSS lines before→after
 - Files changed
 - Rules applied
-- Verification run
+- Verification run (must include real-route evidence for no-design modernization)
 - Remaining risks

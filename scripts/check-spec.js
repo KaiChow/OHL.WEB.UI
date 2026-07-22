@@ -734,6 +734,33 @@ if (!existingProjectModernization.includes('Layout Quality Gate')) {
     content: 'missing Layout Quality Gate',
   });
 }
+if (!existingProjectModernization.includes('Shared Capability Before New Rules')
+  || !existingProjectModernization.includes('Page-Local CSS Budget')
+  || !existingProjectModernization.includes('No-Design Visual Recipe')) {
+  violations.push({
+    rule: '无设计稿默认路径必须包含共享能力优先、page-local CSS budget 与无设计视觉配方',
+    file: 'ui-skill/freight-arco-ui/references/existing-project-modernization.md',
+    line: 1,
+    content: 'missing no-design shared-capability / CSS budget / visual recipe',
+  });
+}
+if (!skillSource.includes('## Default Path (No UI Design)')
+  || !skillSource.includes('## Skill Growth Freeze')) {
+  violations.push({
+    rule: 'SKILL.md 必须把无设计稿 lean 路径与 Skill Growth Freeze 写成默认交付契约',
+    file: 'ui-skill/freight-arco-ui/SKILL.md',
+    line: 1,
+    content: 'missing Default Path (No UI Design) or Skill Growth Freeze',
+  });
+}
+if (!checklist.includes('## No-Design Default Gate (most tasks)')) {
+  violations.push({
+    rule: 'checklist 必须把无设计稿默认门禁放在交付检查最前',
+    file: 'ui-skill/freight-arco-ui/references/checklist.md',
+    line: 1,
+    content: 'missing No-Design Default Gate',
+  });
+}
 if (!filterLayout.includes('group navigation should be anchors')) {
   violations.push({
     rule: '50+ 查询工作区必须使用分组锚点标准，避免条件模块互斥隐藏',

@@ -6,7 +6,7 @@ This is the mandatory intermediate representation between a UI request and Vue c
 
 For a new page, page rewrite, or material layout/interaction redesign, the AI must create or update a typed `pageSpec.ts` beside the page **before editing the Vue template**. A review-only task may produce the same structure in the review response without adding a file.
 
-The specification is not a design document for stakeholders. It is a compact engineering contract that records why the generated structure, actions, density, states, and evidence satisfy the product standard.
+The specification is not a design document for stakeholders. It is a compact engineering contract that records the target, implementation decisions, and measurable acceptance conditions. It must never self-certify the achieved product grade.
 
 ## Required Source Shape
 
@@ -15,7 +15,7 @@ Use `definePesdpPageSpec` from `src/design-system/pesdpPageSpec.ts`.
 ```ts
 export const PAGE_SPEC = definePesdpPageSpec({
   id: 'domain-object-surface',
-  goal: 'sellable-saas-grade',
+  target: 'sellable-saas-grade',
   archetype: 'list-workbench',
   business: {
     object: 'shipment-order',
@@ -27,11 +27,11 @@ export const PAGE_SPEC = definePesdpPageSpec({
     supportingData: ['updatedAt'],
   },
   pesdp: {
-    professional: { decisions: ['Use object-owned freight language and status.'], evidence: ['Domain label audit on the rendered route.'] },
-    efficient: { decisions: ['Keep the repeated query and next action directly reachable.'], evidence: ['Measured interaction path for the primary user job.'] },
-    structured: { decisions: ['Command and data surfaces have separate ownership.'], evidence: ['Duplicate-owner audit for totals, actions, and feedback.'] },
-    dense: { decisions: ['Use the authority-selected query and table density.'], evidence: ['1366x768 first-viewport measurement.'] },
-    premium: { decisions: ['Use GI/Arco ownership and complete edge states.'], evidence: ['Computed-token and state-matrix inspection.'] },
+    professional: { decisions: ['Use object-owned freight language and status.'], acceptance: ['Rendered labels, statuses, and actions must pass the domain-language audit.'] },
+    efficient: { decisions: ['Keep the repeated query and next action directly reachable.'], acceptance: ['Measure the primary job path and confirm context is preserved.'] },
+    structured: { decisions: ['Command and data surfaces have separate ownership.'], acceptance: ['Rendered totals, actions, and feedback must each have one visible owner.'] },
+    dense: { decisions: ['Use the authority-selected query and table density.'], acceptance: ['Measure the 1366x768 first viewport and all scroll owners.'] },
+    premium: { decisions: ['Use GI/Arco ownership and complete edge states.'], acceptance: ['Inspect computed tokens and reproduce the required state matrix.'] },
   },
   surfaces: [
     { id: 'command', role: 'command', owns: ['query', 'create', 'queues'], primaryAction: 'object-create', implementation: 'arco' },
@@ -52,11 +52,13 @@ export const PAGE_SPEC = definePesdpPageSpec({
 
 Use actual business slots, not presentation prose. `surfaces`, `actions`, every PESDP trace, `states`, `authorities`, and `verification` are non-empty. Empty query/table/detail sub-arrays are allowed only when the chosen archetype does not own that capability.
 
+`target` records intent only. `acceptance` records conditions to verify later; it is not evidence that they already passed. Actual browser measurements, screenshots, state results, and command output belong in the delivery report or automated test artifacts. Do not use past-tense claims such as `checks confirm` in `pageSpec.ts`.
+
 ## PESDP Traceability Gate
 
-Every dimension must contain at least one implementation decision and one verification item.
+Every dimension must contain at least one implementation decision and one measurable acceptance condition.
 
-| Dimension | The specification must answer | Minimum code/evidence binding |
+| Dimension | The specification must answer | Minimum code/acceptance binding |
 |-----------|-------------------------------|-------------------------------|
 | `professional` | Is the business object, role, status vocabulary, and next decision correct for this freight workflow? | Domain terms plus object-owned fields/actions; reject generic admin labels or borrowed module fields. |
 | `efficient` | What repeated job is shortened, what remains directly reachable, and what context is preserved? | Query/action/row/detail path with frequency and risk; success/failure behavior for mutations. |
@@ -165,7 +167,7 @@ When a supporting reference conflicts with an authority, fix or delete the suppo
 4. Create/update feature contracts for every interactive action.
 5. Implement Arco-first, then tokens, then justified patterns, then minimal page-local CSS.
 6. Run type/build and `check-spec`.
-7. Inspect the real route and attach evidence to the spec or delivery report.
-8. Re-open the spec and mark unsupported claims as failures; revise structure before styling.
+7. Inspect the real route and record evidence in the delivery report or automated artifacts.
+8. Re-open the spec and compare evidence with every acceptance condition; revise unsupported structure before styling.
 
 Skipping step 2 is a blocking process violation for page generation or rewrite work.

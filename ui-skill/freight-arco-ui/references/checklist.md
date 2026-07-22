@@ -1,17 +1,23 @@
 # Delivery Checklist
 
+## No-Design Default Gate (most tasks)
+
+When the user supplies **no** screenshot / Figma / mock:
+
+- Follow **`existing-project-modernization.md`** lean path; skip artifact + prototype contracts.
+- Pre-read stays lean: `arco-first` + `theme-contract` + `existing-project-modernization` + `redesign-calibration` + **one** archetype authority.
+- Prefer grep-proven shared APIs over new scoped chrome; respect the page-local CSS budget.
+- Record before/after first-viewport / surface evidence. A green `check-spec.js` alone is not delivery.
+- Do not add skill markdown as the fix for a weak page; ship shared capability first (`SKILL.md` Skill Growth Freeze).
+
 ## Before Editing
 
 - Read **`references/arco-first.md`** and apply Arco-first → token-second → business-pattern-third → page-local-css-last.
-- Read `references/design-principles.md`.
 - For any shared class or `global.css` change: confirm Arco props/tokens cannot solve it; state `why_arco_not_enough`.
 - Grep `src/styles/global.css` only for tokens/patterns already justified — do not start from the stylesheet as the design catalog.
-- Apply the four-layer model before designing: Product Positioning -> Design Philosophy -> Visual Language -> Implementation Rules.
 - Convert vague UI feedback into AI-executable design language before editing: define scope, structure/class, token/density, state behavior, business semantics, forbidden fallback, and verification where possible.
-- Read `references/module-patterns.md` for new pages or module refactors.
-- Read `references/domain-language.md`.
-- Classify the page with `references/page-archetypes.md`.
-- Read the relevant skill reference.
+- No-design tasks: complete the no-reference intake. Artifact tasks: complete artifact intake + prototype translation.
+- New modules: read `module-patterns.md` + `domain-language.md` + the matching archetype. Do not preload every reference.
 
 ## Arco-First Gate
 
