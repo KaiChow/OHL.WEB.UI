@@ -21,6 +21,7 @@ import {
   IconCheck,
 } from '@arco-design/web-vue/es/icon';
 import { downloadCsvFile } from '../../../utils/mock-actions';
+import { formatLocalMinute } from '../../../utils/date-time';
 import ShipmentOrderDetailDrawer from '../orderDetail/ShipmentOrderDetailDrawer.vue';
 import { shipmentWorkbenchRows } from './mockData';
 import type {
@@ -43,6 +44,7 @@ const LEGACY_QUERY_SCHEME_STORAGE_KEY = 'ohl.shipment.export-order.query-schemes
 const COLUMN_SETTING_STORAGE_KEY = 'ohl.shipment.export-order.visible-columns.v3';
 
 type TableDensity = 'compact' | 'standard';
+type WorkScope = 'all' | 'mine';
 
 interface SavedQueryScheme {
   id: string;
@@ -147,7 +149,7 @@ const KEYWORD_OPTIONS: { label: string; value: ShipmentKeywordType }[] = [
 
 const STATUS_TABS: { key: ShipmentStatusKey; label: string; tone?: 'danger' | 'warn' }[] = [
   { key: 'all', label: '全部' },
-  { key: 'waitBooking', label: '待订舱' },
+  { key: 'waitBooking', label: '订舱处理' },
   { key: 'waitRelease', label: '待放舱' },
   { key: 'waitTruck', label: '待拖车' },
   { key: 'waitCustoms', label: '待报关' },
@@ -186,32 +188,7 @@ const cloneQuery = (source: ShipmentOrderQuery): ShipmentOrderQuery => ({
   updatedRange: [...source.updatedRange],
 });
 
-const getSystemQuerySchemes = (): SavedQueryScheme[] => [
-  {
-    id: 'system-my-orders',
-    name: '我的在手订单',
-    query: { ...defaultQuery(), operator: CURRENT_OPERATOR },
-    statusTab: 'all',
-    version: 2,
-    revision: 1,
-    owner: 'system',
-    isDefault: false,
-    updatedAt: '',
-    isSystem: true,
-  },
-  {
-    id: 'system-risk-orders',
-    name: '风险与异常',
-    query: defaultQuery(),
-    statusTab: 'exception',
-    version: 2,
-    revision: 1,
-    owner: 'system',
-    isDefault: false,
-    updatedAt: '',
-    isSystem: true,
-  },
-];
+const getSystemQuerySchemes = (): SavedQueryScheme[] => [];
 
 const loadCustomQuerySchemes = (): SavedQueryScheme[] => {
   try {
@@ -253,6 +230,7 @@ const query = reactive<ShipmentOrderQuery>(defaultQuery());
 const uiScenario = computed(() => resolveShipmentUiScenario(route.query.uiState));
 const appliedQuery = ref<ShipmentOrderQuery>(cloneQuery(defaultQuery()));
 const activeStatusTab = ref<ShipmentStatusKey>('all');
+const activeWorkScope = ref<WorkScope>('all');
 const advancedFilterVisible = ref(false);
 const loading = ref(false);
 const loadError = ref('');
@@ -272,7 +250,7 @@ const statusErrors = reactive({ targetStatus: '', reason: '' });
 const statusTargetRow = ref<ShipmentWorkbenchRow | null>(null);
 const voidTargetRow = ref<ShipmentWorkbenchRow | null>(null);
 const voidModalVisible = ref(false);
-const tableDensity = ref<TableDensity>('compact');
+const tableDensity = ref<TableDensity>('standard');
 const customQuerySchemes = ref<SavedQueryScheme[]>(loadCustomQuerySchemes());
 const activeQuerySchemeId = ref<string>();
 const schemeModalVisible = ref(false);
@@ -360,6 +338,7 @@ const queryBaseRows = computed(() => {
   const q = appliedQuery.value;
 
   return scenarioRows.value.filter((row) => {
+    if (activeWorkScope.value === 'mine' && row.operator !== CURRENT_OPERATOR) return false;
     if (!matchKeyword(row, q)) return false;
     if (!matchText(row.customerName, q.customerName)) return false;
     if (!matchText(row.pol, q.pol)) return false;
@@ -414,10 +393,7 @@ const selectedCount = computed(() => selectedRows.value.length);
 const activeQueue = computed(() => statusTabStats.value.find((tab) => tab.key === activeStatusTab.value));
 
 const activeQueueLabel = computed(() => activeQueue.value?.label ?? '全部');
-
-const riskRows = computed(() =>
-  queryBaseRows.value.filter((row) => row.exceptionStatus === 'open' || row.fileStatus === 'missing' || row.isOverdue),
-);
+const activeWorkScopeLabel = computed(() => activeWorkScope.value === 'mine' ? '我的订单' : '全部在手');
 
 const hasActiveFilter = computed(() => {
   const q = appliedQuery.value;
@@ -440,6 +416,7 @@ const hasActiveFilter = computed(() => {
     || q.feeStatus
     || q.updatedRange.length
     || q.isOverdue
+    || activeWorkScope.value !== 'all'
     || activeStatusTab.value !== 'all',
   );
 });
@@ -447,8 +424,8 @@ const hasActiveFilter = computed(() => {
 const tableContextText = computed(() => {
   if (uiScenario.value === 'permission') return '海运出口订单 · 无查看权限';
   if (tableError.value) return '海运出口订单 · 加载失败';
-  const scope = activeQueueLabel.value === '全部' ? '全部在手订单' : `${activeQueueLabel.value}队列`;
-  return `${scope} · ${filteredRows.value.length} 票 · 风险 ${riskRows.value.length} 票`;
+  const queue = activeQueueLabel.value === '全部' ? '全部状态' : `${activeQueueLabel.value}队列`;
+  return `${activeWorkScopeLabel.value} · ${queue} · 按更新时间倒序`;
 });
 const tableTotal = computed(() => ['empty', 'permission'].includes(uiScenario.value) || tableError.value ? 0 : filteredRows.value.length);
 
@@ -533,6 +510,7 @@ const handleReset = () => {
   Object.assign(query, defaultQuery());
   appliedQuery.value = cloneQuery(defaultQuery());
   activeStatusTab.value = 'all';
+  activeWorkScope.value = 'all';
   activeQuerySchemeId.value = undefined;
   advancedFilterVisible.value = false;
   page.current = 1;
@@ -693,6 +671,12 @@ const onStatusTabChange = (key: string | number) => {
   onStatusTabClick(key as ShipmentStatusKey);
 };
 
+const onWorkScopeChange = (value: string | number | boolean) => {
+  activeWorkScope.value = value as WorkScope;
+  page.current = 1;
+  clearSelection();
+};
+
 const onSelectionChange = () => {
   selectedRows.value = (tableRef.value?.getCheckboxRecords() ?? []) as ShipmentWorkbenchRow[];
 };
@@ -762,7 +746,7 @@ const handleCreateOrder = () => {
 
 const handleAssignOperator = (row: ShipmentWorkbenchRow) => {
   row.operator = CURRENT_OPERATOR;
-  row.updatedAt = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  row.updatedAt = formatLocalMinute();
   Message.success(`订单 ${row.orderNo} 已分配给${CURRENT_OPERATOR}`);
 };
 
@@ -881,7 +865,7 @@ watch(uiScenario, () => {
 </script>
 
 <template>
-  <div class="workbench-page">
+  <div class="workbench-page" data-pesdp-page="shipment-export-order-workbench">
     <div class="workbench-stack">
       <a-card size="small" :bordered="true" class="workbench-page__command">
         <div class="filter-panel">
@@ -1036,6 +1020,19 @@ watch(uiScenario, () => {
             </a-dropdown>
           </div>
 
+          <div class="flow-bar__scope" data-workbench-scope="ownership">
+            <span class="flow-bar__scope-label">工作范围</span>
+            <a-radio-group
+              v-model="activeWorkScope"
+              type="button"
+              size="small"
+              @change="onWorkScopeChange"
+            >
+              <a-radio value="all">全部在手</a-radio>
+              <a-radio value="mine">我的订单</a-radio>
+            </a-radio-group>
+          </div>
+
           <a-tabs
             v-model:active-key="activeStatusTab"
             type="line"
@@ -1168,20 +1165,20 @@ watch(uiScenario, () => {
               </template>
             </vxe-column>
 
-            <vxe-column field="customerName" title="客户名称" min-width="190" :visible="isColumnVisible('customerName')" />
-            <vxe-column field="operator" title="操作人员" min-width="90" :visible="isColumnVisible('operator')" />
-            <vxe-column field="pol" title="起运港" min-width="96" class-name="mono" :visible="isColumnVisible('pol')" />
-            <vxe-column field="pod" title="目的港" min-width="96" class-name="mono" :visible="isColumnVisible('pod')" />
-            <vxe-column field="etd" title="ETD" min-width="104" class-name="mono" :visible="isColumnVisible('etd')" />
-
             <vxe-column field="nextAction" title="当前待办" min-width="230" :visible="isColumnVisible('nextAction')">
               <template #default="{ row }">
                 <div class="decision-cell" data-cell-role="decision-context">
                   <span class="decision-cell__main">{{ getNextActionLabel(row) }}</span>
-                  <span class="decision-cell__context">{{ getNextActionMeta(row) }}</span>
+                  <span v-if="tableDensity === 'standard'" class="decision-cell__context">{{ getNextActionMeta(row) }}</span>
                 </div>
               </template>
             </vxe-column>
+
+            <vxe-column field="operator" title="责任操作" min-width="90" :visible="isColumnVisible('operator')" />
+            <vxe-column field="customerName" title="客户名称" min-width="190" :visible="isColumnVisible('customerName')" />
+            <vxe-column field="pol" title="起运港" min-width="96" class-name="mono" :visible="isColumnVisible('pol')" />
+            <vxe-column field="pod" title="目的港" min-width="96" class-name="mono" :visible="isColumnVisible('pod')" />
+            <vxe-column field="etd" title="ETD" min-width="104" class-name="mono" :visible="isColumnVisible('etd')" />
 
             <vxe-column field="fileStatus" title="文件状态" min-width="100" :visible="isColumnVisible('fileStatus')">
               <template #default="{ row }">
@@ -1675,6 +1672,25 @@ watch(uiScenario, () => {
   border-right: 1px solid var(--color-border-1);
 }
 
+.flow-bar__scope {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding-right: 14px;
+  border-right: 1px solid var(--color-border-1);
+}
+
+.flow-bar__scope-label {
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  white-space: nowrap;
+}
+
+.flow-bar__scope :deep(.arco-radio-group-button) {
+  white-space: nowrap;
+}
+
 .workbench-status-tabs :deep(.arco-tabs-content) {
   display: none;
 }
@@ -2040,6 +2056,19 @@ watch(uiScenario, () => {
   .flow-bar__actions {
     gap: 6px;
     padding-right: 8px;
+  }
+
+  .flow-bar {
+    gap: 8px;
+  }
+
+  .flow-bar__scope {
+    gap: 4px;
+    padding-right: 8px;
+  }
+
+  .flow-bar__scope-label {
+    display: none;
   }
 }
 

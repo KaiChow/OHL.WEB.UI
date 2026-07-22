@@ -224,18 +224,19 @@ formRef.value?.clearValidate()
 
 ## 7. 纯只读字段
 
-### 7.1 操作型详情（常驻编辑）
+### 7.1 对象详情工作区（展示优先）
 
-高频操作控制台（如运单详情、订单作业台）默认 **常驻编辑态**，禁止「先点编辑再改」：
+运单、订单、账单等对象详情默认是可扫描的 **展示态**，遵守 `detail-form.md` 的 Object Workspace Mode Contract。禁止把全部字段在首屏直接渲染为常驻输入控件：
 
-- 可改字段：直接用 `a-input` / `a-select` / `a-date-picker` 等真实控件，`size="small"`。
-- 系统主键/审计字段（订单号、创建时间）：`a-form-item` 内用 **纯文本** `<span class="mono">`，禁止 `readonly` / `disabled` 输入框。
-- 页面根容器加 `detail-workbench`；分区用 `a-card`，依赖 `global.css` 白底控件与无灰头样式。
-- 吸底仅保留 **保存**（primary）+ **取消修改**（secondary，回滚未保存变更）；返回列表走页头 back。
+- 展示态优先用 Arco `a-descriptions class="detail-display"`；字段按业务分区，不使用 disabled/readonly input 假装文本。
+- 用户显式进入编辑后，可改字段才切换为 `a-input` / `a-select` / `a-date-picker` 等真实控件，统一 `size="small"`。
+- 系统主键/审计字段（订单号、创建时间）在编辑态仍用纯文本 `<span class="mono">`，不得伪装成输入框。
+- 保存失败保留输入和编辑态；取消恢复快照；离开/切换对象处理未保存修改。
+- 吸底编辑栏只在编辑态出现，保留一个 primary 保存和 secondary 取消；状态推进、行编辑和对象编辑互斥。
 
-`detail-display` / `a-descriptions` 仅用于审批只读、抽屉速览、日志摘要等 **非作业编辑** 场景。
+全页新建、分阶段交易录入或明确以录入为唯一任务的页面可使用 edit-first，按 `full-page-form.md`，不得把该例外反推到对象详情。
 
-### 7.2 纯展示字段
+### 7.2 局部纯展示字段
 
 只读字段（无需校验，仅展示）不进入 `a-form`，用 `detail-field`：
 

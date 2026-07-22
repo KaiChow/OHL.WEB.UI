@@ -2,9 +2,9 @@ import type { ShipmentOrderDetailRecord } from './types';
 
 const baseDetail: ShipmentOrderDetailRecord = {
   orderNo: 'SEO2026060001',
-  orderStatus: 'waitBooking',
-  orderStatusLabel: '待订舱',
-  statusPill: 'wait',
+  orderStatus: 'booking',
+  orderStatusLabel: '订舱中',
+  statusPill: 'op',
   customerName: '深圳华贸进出口有限公司',
   businessType: 'FCL',
   vesselVoyage: 'COSCO SHIPPING / 028W',
@@ -37,7 +37,7 @@ const baseDetail: ShipmentOrderDetailRecord = {
   contractNo: 'CT2026-0881',
   rateNo: 'RATE-SHA-LAX-0726',
   spaceStatus: '待放舱',
-  releaseTime: '—',
+  releaseTime: '',
   vgmCutoff: '2026-07-04 18:00',
   bookingRemark: '客户要求优先配舱，注意截关时间',
   containerSummary: '2×40HQ',
@@ -78,11 +78,12 @@ const baseDetail: ShipmentOrderDetailRecord = {
     },
   ],
   nodes: [
-    { id: 'n1', name: '订单创建', planTime: '2026-06-28 10:30', actualTime: '2026-06-28 10:30', status: '已完成', statusKey: 'rel', owner: '刘商务', source: '系统', overdue: false },
-    { id: 'n2', name: '订舱提交', planTime: '2026-06-29 12:00', actualTime: '2026-06-29 11:20', status: '已完成', statusKey: 'rel', owner: '张操作', source: '订舱', overdue: false },
-    { id: 'n3', name: '船司放舱', planTime: '2026-06-30 18:00', actualTime: '—', status: '待完成', statusKey: 'wait', owner: '张操作', source: '订舱', overdue: false },
-    { id: 'n4', name: '截关', planTime: '2026-07-05 12:00', actualTime: '—', status: '待完成', statusKey: 'wait', owner: '张操作', source: '系统', overdue: false },
+    { id: 'n1', name: '接单', planTime: '2026-06-28 10:30', actualTime: '2026-06-28 10:30', status: '已完成', statusKey: 'rel', owner: '刘商务', source: '系统', overdue: false },
+    { id: 'n2', name: '订舱', planTime: '2026-06-30 18:00', actualTime: '—', status: '推进中', statusKey: 'op', owner: '张操作', source: '订舱', overdue: false },
+    { id: 'n3', name: '进仓', planTime: '2026-07-04 10:00', actualTime: '—', status: '待完成', statusKey: 'wait', owner: '张操作', source: '拖车', overdue: false },
+    { id: 'n4', name: '报关', planTime: '2026-07-05 12:00', actualTime: '—', status: '待完成', statusKey: 'wait', owner: '张操作', source: '报关', overdue: false },
     { id: 'n5', name: '开船', planTime: '2026-07-08 08:00', actualTime: '—', status: '待完成', statusKey: 'wait', owner: '张操作', source: '船期', overdue: false },
+    { id: 'n6', name: '到港', planTime: '2026-07-28 16:00', actualTime: '—', status: '待完成', statusKey: 'wait', owner: '张操作', source: '船期', overdue: false },
   ],
   feeSummary: {
     receivableTotal: 12800,

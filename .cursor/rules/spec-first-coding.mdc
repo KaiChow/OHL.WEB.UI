@@ -13,6 +13,7 @@ alwaysApply: true
 | 任务 | 读 |
 |------|-----|
 | **所有 UI 任务（最先）** | **`arco-first.md` + `theme-contract.md`** |
+| **新页面 / 页面重写 / 重大布局交互改造** | **`page-spec-contract.md`**，先创建/更新 typed `pageSpec.ts` |
 | **无截图/原型的既有项目改造** | **`existing-project-modernization.md`** + `redesign-calibration.md` |
 | **新菜单 / 不确定用哪种布局** | **`domain-routing.md`** |
 | **任何有点击/提交/请求/状态流转的功能** | **`feature-routing.md`** + **`feature-delivery-contract.md`** |
@@ -35,6 +36,7 @@ alwaysApply: true
 ## 1. 写 template 前必须完成的决策（答案在 reference 里查，禁止凭记忆）
 
 0. **框架优先**：Arco props/slots 能否解决？→ token？→ 业务 pattern？→ 最后才 page-local CSS（**`arco-first.md`**）
+0. **PESDP 可追溯**：`pageSpec.ts` 已完成 P/E/S/D/P 的实现决策与验证证据；未完成禁止写 template（**`page-spec-contract.md`**）
 1. **筛选**：字段总数 → Tier → DOM 结构（**`filter-layout.md`** 为唯一决策源）
 2. **筛选结构**：按 Tier 选用 `filter-layout.md` 的字段关系与交互场景；示例类名只有在 grep 证明共享实现存在时才是 API，否则用 Arco 结构 + 最小局部布局 CSS
 3. **Overlay**：字段数 + 是否含子表/多分区 → 查 `modal.md` 容器表

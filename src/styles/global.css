@@ -843,7 +843,7 @@ body [data-vxe-ui-theme='light'] {
 }
 
 /* =================================================================
-   详情只读展示 — detail-display（审批/只读详情；非常驻编辑页）
+   详情展示态 — detail-display（对象详情/审批/抽屉速览）
    用法：<a-descriptions class="detail-display" :bordered="false" />
    ================================================================= */
 .detail-display.arco-descriptions {

@@ -6,6 +6,7 @@
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join, extname, sep } from 'path';
+import { validateFreightUiSkill } from '../ui-skill/freight-arco-ui/scripts/validate-skill.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1');
 const SCAN_DIRS = ['src/views', 'src/components', 'ui-skill'];
@@ -65,6 +66,12 @@ const RULES = [
     pattern: /(border(?:-color)?\s*:\s*(black|#000|#111|#121314|currentColor|var\(--color-text-1\))|outline\s*:\s*[^;]*(ButtonText|currentColor|black|#000))/,
     fileFilter: /\.(vue|css)$/,
     exclude: /\/\*|\/\//,
+  },
+
+  {
+    desc: '禁止业务页直接用 toISOString 生成本地审计时间（应用 formatLocalMinute）',
+    pattern: /new Date\(\)\.toISOString\(\)\.slice\(0,\s*16\)/,
+    fileFilter: /src[\\/]views[\\/].*\.(vue|ts)$/,
   },
 
   // 禁止 font-weight: 700
@@ -190,6 +197,8 @@ const responsiveReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/re
 const overlayDimensions = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/overlay-dimensions.md'), 'utf8');
 const modalReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/modal.md'), 'utf8');
 const tableReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/table.md'), 'utf8');
+const detailFormReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/detail-form.md'), 'utf8');
+const pageSpecReference = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/page-spec-contract.md'), 'utf8');
 const agentsSummary = readFileSync(join(ROOT, 'AGENTS.md'), 'utf8');
 const productGradeEvaluation = readFileSync(join(ROOT, 'ui-skill/freight-arco-ui/references/product-grade-evaluation.md'), 'utf8');
 const shipmentFeatureContractPath = join(ROOT, 'src/views/shipment/featureContracts.ts');
@@ -284,6 +293,24 @@ if (!skillSource.includes('theme-contract.md') || !skillSource.includes('existin
     content: 'missing theme/modernization routing',
   });
 }
+for (const error of validateFreightUiSkill()) {
+  violations.push({
+    rule: 'freight-arco-ui skill 必须保持单一权威、PESDP 可追溯和无冲突生成链',
+    file: 'ui-skill/freight-arco-ui',
+    line: 1,
+    content: error,
+  });
+}
+if (!pageSpecReference.includes('## PESDP Traceability Gate')
+  || !skillSource.includes('## Mandatory PESDP Execution Gate')
+  || !specFirstCoding.includes('pageSpec.ts')) {
+  violations.push({
+    rule: '页面生成必须经过 typed pageSpec.ts，并在写 template 前完成 PESDP 决策与证据',
+    file: 'ui-skill/freight-arco-ui/references/page-spec-contract.md',
+    line: 1,
+    content: 'missing PESDP page-spec generation gate',
+  });
+}
 if (!skillSource.includes('## Rule Ownership') || !redesignCalibration.includes('## Layout Authority')) {
   violations.push({
     rule: 'Skill 必须声明唯一规则所有权，跨页面布局由 redesign-calibration.md 单独负责',
@@ -344,6 +371,14 @@ if (!tableReference.includes('### Composite Cell Decision Contract')
     content: 'missing composite cell decision contract',
   });
 }
+if (!detailFormReference.includes('## Object Workspace Mode Contract')) {
+  violations.push({
+    rule: '详情规范必须定义默认展示态、显式编辑态与首屏执行焦点的对象工作区契约',
+    file: 'ui-skill/freight-arco-ui/references/detail-form.md',
+    line: 1,
+    content: 'missing object workspace mode contract',
+  });
+}
 if (!productGradeEvaluation.includes('## Sellable Freight Product Maturity Gates') || !productGradeEvaluation.includes('| 14 | Product completion |')) {
   violations.push({
     rule: '融资/可销售级评估必须包含完整 14 项产品成熟度门禁',
@@ -378,6 +413,14 @@ if (!shipmentFeatureContracts.includes("id: 'export-order-column-preferences'"))
     content: 'missing export-order-column-preferences contract',
   });
 }
+if (!shipmentFeatureContracts.includes("id: 'export-order-detail-edit-session'")) {
+  violations.push({
+    rule: '出口订单详情必须声明展示/编辑会话的功能契约',
+    file: 'src/views/shipment/featureContracts.ts',
+    line: 1,
+    content: 'missing export-order-detail-edit-session contract',
+  });
+}
 for (const page of [
   'src/views/shipment/orderWorkbench/index.vue',
   'src/views/shipment/orderDetail/index.vue',
@@ -389,6 +432,119 @@ for (const page of [
     file: page,
     line: 1,
     content: 'missing featureContracts import',
+  });
+}
+const shipmentWorkbenchPage = readFileSync(join(ROOT, 'src/views/shipment/orderWorkbench/index.vue'), 'utf8');
+const shipmentWorkbenchSpec = readFileSync(join(ROOT, 'src/views/shipment/orderWorkbench/pageSpec.ts'), 'utf8');
+const shipmentDetailSpec = readFileSync(join(ROOT, 'src/views/shipment/orderDetail/pageSpec.ts'), 'utf8');
+const pesdpDimensions = ['professional', 'efficient', 'structured', 'dense', 'premium'];
+for (const [specFile, specSource] of [
+  ['src/views/shipment/orderWorkbench/pageSpec.ts', shipmentWorkbenchSpec],
+  ['src/views/shipment/orderDetail/pageSpec.ts', shipmentDetailSpec],
+]) {
+  for (const dimension of pesdpDimensions) {
+    if (new RegExp(`${dimension}:\\s*\\{[\\s\\S]*?decisions:\\s*\\[[^\\]]+\\][\\s\\S]*?evidence:\\s*\\[[^\\]]+\\]`).test(specSource)) continue;
+    violations.push({
+      rule: '代表页面的 typed pageSpec.ts 必须为每个 PESDP 维度声明非空决策与证据',
+      file: specFile,
+      line: 1,
+      content: `missing trace for ${dimension}`,
+    });
+  }
+  for (const match of specSource.matchAll(/contract:\s*'([^']+)'/g)) {
+    if (shipmentFeatureContracts.includes(`id: '${match[1]}'`)) continue;
+    violations.push({
+      rule: 'typed pageSpec.ts 的每个动作必须引用真实的页面级功能契约',
+      file: specFile,
+      line: 1,
+      content: `missing feature contract ${match[1]}`,
+    });
+  }
+}
+const parseStringArray = (source, key) => {
+  const body = source.match(new RegExp(`${key}:\\s*\\[([\\s\\S]*?)\\]`))?.[1] ?? '';
+  return [...body.matchAll(/'([^']+)'/g)].map((match) => match[1]);
+};
+const declaredQueryTotal = Number(shipmentWorkbenchSpec.match(/totalFields:\s*(\d+)/)?.[1]);
+const declaredVisibleQueryFields = parseStringArray(shipmentWorkbenchSpec, 'visibleFields');
+const declaredAdvancedQueryFields = parseStringArray(shipmentWorkbenchSpec, 'advancedFields');
+const implementedQueryFields = [...new Set(
+  [...shipmentWorkbenchPage.matchAll(/v-model="query\.([\w]+)"/g)]
+    .map((match) => match[1])
+    .filter((field) => field !== 'keywordType'),
+)];
+const declaredQueryFields = [...declaredVisibleQueryFields, ...declaredAdvancedQueryFields];
+const missingQueryFields = implementedQueryFields.filter((field) => !declaredQueryFields.includes(field));
+const phantomQueryFields = declaredQueryFields.filter((field) => !implementedQueryFields.includes(field));
+if (declaredQueryTotal !== implementedQueryFields.length
+  || declaredQueryFields.length !== declaredQueryTotal
+  || missingQueryFields.length
+  || phantomQueryFields.length
+  || (implementedQueryFields.length >= 17 && !shipmentWorkbenchSpec.includes("strategy: 's3-drawer'"))) {
+  violations.push({
+    rule: '订单工作台 pageSpec 查询总数、可见字段、高级字段和 S3 策略必须与真实 v-model 一致',
+    file: 'src/views/shipment/orderWorkbench/pageSpec.ts',
+    line: 1,
+    content: `declared=${declaredQueryTotal}, implemented=${implementedQueryFields.length}, missing=${missingQueryFields.join(',') || '-'}, phantom=${phantomQueryFields.join(',') || '-'}`,
+  });
+}
+if (!shipmentWorkbenchPage.includes('data-pesdp-page="shipment-export-order-workbench"')
+  || !shipmentWorkbenchSpec.includes("id: 'shipment-export-order-workbench'")) {
+  violations.push({
+    rule: '出口订单工作台必须用稳定 ID 绑定其 typed PESDP page spec',
+    file: 'src/views/shipment/orderWorkbench/index.vue',
+    line: 1,
+    content: 'missing shipment-export-order-workbench spec binding',
+  });
+}
+if (!shipmentWorkbenchPage.includes('data-workbench-scope')
+  || !shipmentWorkbenchPage.includes('activeWorkScope')) {
+  violations.push({
+    rule: '出口订单工作台必须显式区分工作范围与状态队列',
+    file: 'src/views/shipment/orderWorkbench/index.vue',
+    line: 1,
+    content: 'missing ownership scope control',
+  });
+}
+
+const shipmentDetailPage = readFileSync(join(ROOT, 'src/views/shipment/orderDetail/index.vue'), 'utf8');
+const shipmentOrderInfoTab = readFileSync(join(ROOT, 'src/views/shipment/orderDetail/components/OrderInfoTab.vue'), 'utf8');
+const shipmentDetailWorkspaceRoles = [
+  'data-pesdp-page="shipment-export-order-detail"',
+  'data-detail-workspace="shipment-order"',
+  'isDetailEditing',
+  'detail-focus',
+  'detail-milestone-bar',
+  ':editable="isDetailEditing"',
+];
+for (const role of shipmentDetailWorkspaceRoles) {
+  if (shipmentDetailPage.includes(role)) continue;
+  violations.push({
+    rule: '出口订单详情必须实现默认展示态、执行焦点、轻量节点与显式编辑会话',
+    file: 'src/views/shipment/orderDetail/index.vue',
+    line: 1,
+    content: `missing ${role}`,
+  });
+}
+if (!shipmentDetailSpec.includes("id: 'shipment-export-order-detail'")
+  || (shipmentDetailPage.match(/v-if="isDetailEditing"/g) || []).length < 3
+  || (shipmentDetailPage.match(/<a-descriptions\s+v-else\s+class="detail-display"/g) || []).length < 3
+  || !shipmentDetailPage.includes(':editable="isDetailEditing"')) {
+  violations.push({
+    rule: '订单详情所有对象字段区必须绑定同一 typed spec，并统一遵守展示/编辑双态',
+    file: 'src/views/shipment/orderDetail/index.vue',
+    line: 1,
+    content: 'missing detail spec id or display/edit split on overview and execution sections',
+  });
+}
+if (!shipmentOrderInfoTab.includes('v-if="editable"')
+  || !shipmentOrderInfoTab.includes('<a-descriptions')
+  || !shipmentOrderInfoTab.includes('class="detail-display"')) {
+  violations.push({
+    rule: '订单概览默认必须用 Arco Descriptions 呈现可扫描展示态，只有显式编辑时渲染完整表单',
+    file: 'src/views/shipment/orderDetail/components/OrderInfoTab.vue',
+    line: 1,
+    content: 'missing Arco detail-display / edit mode split',
   });
 }
 if (!checklist.includes('### Sellable Maturity Evidence')) {

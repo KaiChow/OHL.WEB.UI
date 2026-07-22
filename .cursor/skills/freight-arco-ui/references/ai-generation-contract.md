@@ -23,9 +23,10 @@ Before generating UI:
 
 1. **`references/arco-first.md`**
 2. **`references/theme-contract.md`**
-3. `references/design-principles.md`
-4. `references/domain-language.md`
-5. `references/page-archetypes.md`
+3. **`references/page-spec-contract.md`**
+4. `references/design-principles.md`
+5. `references/domain-language.md`
+6. `references/page-archetypes.md`
 6. For an existing-project redesign without a visual artifact: `references/existing-project-modernization.md`
 7. For any redesign / rewrite / layout-polish task: `references/redesign-calibration.md`
 8. For any productization / financing-demo / sellable-SaaS goal: `references/product-grade-evaluation.md`
@@ -36,35 +37,14 @@ Before generating UI:
 
 ## Generation Workflow
 
-1. If the task starts from a screenshot/prototype, complete the intake template from `artifact-intake-template.md`.
-2. If the task starts from a screenshot/prototype, complete the prototype translation block from `prototype-to-ui-contract.md`.
-3. If no visual artifact exists and the task modernizes an existing project, complete the no-reference intake and measured audit from `existing-project-modernization.md`.
-4. If the task is redesign/rewrite/polish, classify it using `existing-project-modernization.md` and `redesign-calibration.md`.
-4. If the task targets product-grade quality, define the desired level using `product-grade-evaluation.md`: `internal-system`, `strong-internal-product`, `customer-facing-product`, or `sellable-saas-grade`.
-5. Decide whether the page can stay `arco-only`, needs `arco-plus-shared-enhancement`, or truly needs a custom pattern using `arco-first.md`.
-6. Classify page archetype.
-7. Identify primary business object and user role.
-8. If the task has behavior, complete the functional contract from `feature-delivery-contract.md`.
-9. Complete the module mapping from `module-patterns.md`:
-   - Business object.
-   - User job.
-   - Primary identity.
-   - Key state.
-   - Main working data.
-   - Repeated modules.
-   - Primary action.
-   - Grouped actions.
-10. Define information hierarchy:
-   - Primary identity.
-   - Key status/node.
-   - Main working data.
-   - Auxiliary metadata.
-11. Choose Arco built-ins first; then tokens; then existing shared business patterns from `global.css` only with a stated Arco gap.
-12. When the task is redesign and the old skeleton is weak, regroup surfaces or rewrite the page skeleton before tuning component chrome.
-13. Implement components in module files, not one huge page file.
-14. Use mock data only when backend integration is not requested.
-15. Verify with `npx vite build`.
-16. Visually inspect the route when a dev server is available.
+1. Complete artifact/no-reference intake and identify business object, user, job, and archetype.
+2. Create or update the typed `pageSpec.ts` from `page-spec-contract.md`. Template edits are forbidden until all applicable PESDP, surface, query/table/detail, action, state, authority, and verification fields are complete.
+3. Resolve contradictions using the single authorities recorded in the page spec; fix the conflicting supporting text before coding.
+4. Complete functional contracts for every click, request, permission, state transition, and mutation.
+5. Choose Arco built-ins first; then tokens; then proven shared patterns with a stated Arco gap; then minimal page-local CSS.
+6. When the old skeleton fails the page spec, regroup or rewrite it before tuning component chrome.
+7. Implement in module files, compile, run `check-spec`, and inspect the real route.
+8. Reconcile real evidence back to the spec. A PESDP claim with no evidence is failed, not provisional success.
 
 ## Executable Design Language Contract
 
@@ -176,17 +156,14 @@ src/views/<domain>/<module>/
 - Prioritize usability over visual novelty.
 - Every design decision should improve reading speed, reduce errors, minimize clicks, or improve workflow efficiency.
 - Use VXE Table for data grids.
-- Generate main list tables as `class="compact workbench-table"` with `row-config.height = 36`.
-- Generate editable detail/nested tables as `class="detail-mini-vxe detail-mini-vxe--editable"` with `row-config.height = 38`; do not rely on CSS-only row height.
-- Generate readonly detail/nested tables, such as documents, files, and status records, as `class="detail-mini-vxe detail-mini-vxe--readonly"` with `row-config.height = 34`.
-- Generate compact summary tables as `class="detail-mini-vxe detail-mini-vxe--summary"` with `row-config.height = 32`; do not use this variant for rows with visible form controls.
-- Generate VXE sequence columns with `width="52"` in both workbench and detail tables unless a documented module exception exists.
+- Select list/detail table density and VXE configuration only from `table.md`; do not duplicate row-height mechanics in this workflow contract.
+- Add a sequence column only when `table.md` requires it for that table job; do not add one mechanically to every workbench.
 - Use icon-only row actions with tooltip; apply the 1–N display matrix in [`table.md`](table.md) Row Actions (max 2 affordances, width 56/88, list danger in `···`).
 - Group low-frequency actions in dropdowns.
 - For process-bearing operational detail drawers, use `dds-milestone-bar` for compact process awareness. Do not generate `a-steps type="arrow"` or a full-width KPI/report strip under the hero. Repeated data totals belong in the owning module summary, not in the hero.
 - For detail sections with internal groups, generate `form-subgroup` blocks with `form-subgroup__head`, `form-subgroup__title`, and a following `detail-form-grid`. Do not generate consecutive bare `form-subgroup-label` elements or repeated blue left rails.
-- Generate list workbenches with the responsive contract from `responsive.md`: at 1280px the primary filter/workflow path stays compact; only widths below the supported desktop baseline may wrap, and status groups scroll internally before creating another full-width band.
-- Select query UI by field count from `filter-layout.md`: 1-8 visible core filters, 9-16 core row + drawer, 17-32 grouped drawer, 33-50 wide drawer with group navigation, and 50+ saved query workspace. Do not generate a flat 30/40/50-field query wall.
+- Generate list workbenches from the viewport matrix in `responsive.md`; `1366x768` is release-blocking and `1024x768` is the supported split-window audit.
+- Select query UI only through the scenario and field-count decision table in `filter-layout.md`. Record the selected strategy in `pageSpec.ts`; do not restate or approximate the thresholds here.
 - Keep table/list area dominant on operational pages.
 
 ## Business Generation Rules
@@ -201,19 +178,19 @@ src/views/<domain>/<module>/
 - Treat every shared class as a UI slot. Fill it with object-specific data.
 - If a page's object does not have a process, do not render a steps bar.
 
-## PESDP Score
+## PESDP Trace Gate
 
-Before final delivery, score the page:
+Before template code and again before final delivery, reconcile the page against `pageSpec.ts`:
 
-| Dimension | Pass condition |
+| Dimension | Required trace |
 |-----------|----------------|
-| Professional | Domain terms and freight structure are correct |
-| Efficient | High-frequency actions/data are fast to access |
-| Structured | Primary/business/auxiliary data are separated |
-| Dense | First screen contains enough useful records/fields |
-| Premium | Visual quality comes from order, not decoration |
+| Professional | Freight object/role/status/decision → rendered labels, fields, and actions → domain evidence |
+| Efficient | Repeated user job → direct path and preserved context → interaction evidence |
+| Structured | Surface ownership → DOM/component boundaries → duplicate-owner audit |
+| Dense | Query/table/detail density decision → office viewport behavior → measured evidence |
+| Premium | Arco/GI ownership, shared roles, complete states → real-route consistency/credibility evidence |
 
-If any dimension is below acceptable level, revise structure before styling.
+Each dimension needs at least one concrete decision and one verification item. If any trace is missing or contradicted by the rendered route, revise structure before styling and do not call the page PESDP-compliant.
 
 ## Anti-Patterns To Reject
 
@@ -237,7 +214,7 @@ When delivering generated UI work, report:
 
 - Module mapping used.
 - Page archetype selected.
-- PESDP rules applied.
+- Page-spec path and PESDP trace evidence.
 - Files changed.
 - Verification command and result.
 - Remaining risk or known limitation.

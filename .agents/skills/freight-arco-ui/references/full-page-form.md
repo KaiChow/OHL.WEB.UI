@@ -57,7 +57,7 @@ Shell classes: `xf-wrap`, `xf-head`, `xf-body`, `xf-footer` in `global.css`.
 
 - **Must** use `a-form` + `class="detail-form"` + `a-form-item` — see `form-rules.md`.
 - **Forbidden** raw `<label class="xf-label">` + custom error div (legacy skeleton only).
-- Grid: four columns by default; three or two only for intrinsically narrow sections. Do not add a `max-width:1280px` column-drop rule at the project's exact minimum desktop width.
+- Grid: four columns by default; three or two only for intrinsically narrow sections. Column reduction follows `responsive.md`; do not treat `1280px` as a second minimum desktop contract.
 - Sub-entity tables: `detail-section__body--table` + `detail-mini-vxe` — same as drawer.
 
 ## Footer (workflow)

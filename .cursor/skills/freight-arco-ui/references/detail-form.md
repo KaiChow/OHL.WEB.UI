@@ -57,6 +57,39 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 - `color-text-4` is forbidden for `primary_identity`, `business_context`, `owner`, or any `key_fact` used to decide the next operation.
 - Long business values must remain readable with ellipsis plus `title`/tooltip. Do not weaken them to gray text to hide overflow.
 
+## Object Workspace Mode Contract
+
+A full business-detail route defaults to an **object workspace**, not an always-editable form. Its first viewport must answer: which object, current state, workflow position, blocking risk, next action, owner, and latest relevant change.
+
+Required modes:
+
+| Mode | Default | Surface | Footer |
+|------|---------|---------|--------|
+| `display` | yes | readable identity, execution focus, read-only facts, contextual row/module actions | hidden unless a real object-level workflow action must remain sticky |
+| `editing` | explicit user action only | Arco form controls for the fields owned by the edit session | cancel/discard + one primary save |
+| `row-editing` | explicit row action | only the active detail-table row renders controls | row-local save/cancel; object footer does not replace it |
+
+Rules:
+
+- Annotate the root work area with a stable role such as `data-detail-workspace="shipment-order"`; keep an explicit reactive edit state such as `isDetailEditing`.
+- The overview tab must provide a compact execution-focus block before passive field groups. It owns one current decision, its blocking context, owner/deadline, and links to the owning risk/file/fee surface.
+- The default overview must render business values as read-only fields/text. Rendering the full overview as visible inputs before the user selects Edit is forbidden.
+- Display sections use Arco `a-descriptions class="detail-display"` before custom read-grid markup. Editable controls replace the same business fields only inside the explicit edit session.
+- Entering edit mode preserves the same section order and field ownership; controls replace values without moving the user to an unrelated page.
+- Save success returns to display mode and refreshes only the object surfaces named by the feature contract. Save failure keeps editing mode and user input.
+- Cancel/discard restores the last saved snapshot and returns to display mode. Route leave during an edit session requires an unsaved-change confirmation.
+- Header actions do not duplicate footer save/cancel actions. Object-level edit is a neutral detail-head action; the editing footer owns the single primary Save.
+- A process-bearing freight object uses a lightweight, domain-named milestone bar. Normal detail pages must not use a large vertical-label step banner or generic numbered steps.
+- File/fee/risk counts have one visible owner in navigation or the execution-focus block. Do not repeat the same counts as a KPI strip in the identity band.
+
+Forbidden fallbacks:
+
+- default detail route with a wall of editable inputs;
+- `保存` footer visible while the page is not in an edit session;
+- business status, next action, and milestone pointing to different workflow stages;
+- a decorative KPI strip between identity and the work surface;
+- hiding risk/next-action context inside a later tab with no first-viewport signal.
+
 ## Detail Sections
 
 - Use `detail-section`.

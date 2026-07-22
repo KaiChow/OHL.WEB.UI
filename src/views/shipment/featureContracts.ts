@@ -64,6 +64,26 @@ const TRANSITIONS: Partial<Record<OrderStatusKey, ShipmentStatusTransition[]>> =
 
 export const SHIPMENT_FEATURE_CONTRACTS: ShipmentFeatureContract[] = [
   {
+    id: 'export-order-create',
+    actorRoles: ['shipment.operator', 'shipment.manager'],
+    visibleWhen: 'actor has export-order create permission',
+    enabledWhen: 'no create navigation or draft initialization is in flight',
+    request: 'initialize a new sea-export order draft, then open the full-page create workspace with its stable draft id',
+    successResult: 'show the create workspace in draft mode and preserve the originating list context for return',
+    errorResult: 'stay on the workbench, keep filters and selection, and show the draft-initialization failure beside the create command',
+    refreshScope: 'no list refresh until the draft is saved; refresh queues and the first page after successful creation',
+  },
+  {
+    id: 'export-order-open-detail',
+    actorRoles: ['shipment.viewer', 'shipment.operator', 'shipment.manager'],
+    visibleWhen: 'actor can read the row and the order has a stable id',
+    enabledWhen: 'the row is not being removed and no conflicting navigation is active',
+    request: 'load summary data into the context-preserving detail drawer; full detail navigation reuses the same order id and active tab',
+    successResult: 'retain workbench query, queue, page, scroll, and selection context while showing the selected order',
+    errorResult: 'keep the workbench context and localize the load/retry state to the drawer or detail surface',
+    refreshScope: 'selected order detail only; refresh the workbench row after a successful mutation',
+  },
+  {
     id: 'export-order-query',
     actorRoles: ['shipment.viewer', 'shipment.operator', 'shipment.manager'],
     visibleWhen: 'actor has export-order read permission',
@@ -92,6 +112,16 @@ export const SHIPMENT_FEATURE_CONTRACTS: ShipmentFeatureContract[] = [
     successResult: 'close the modal, show success feedback, and apply the selected VXE columns immediately',
     errorResult: 'keep the modal open, preserve the draft selection, and show a specific readiness or selection error',
     refreshScope: 'workbench table column visibility and horizontal layout only',
+  },
+  {
+    id: 'export-order-detail-edit-session',
+    actorRoles: ['shipment.operator', 'shipment.manager'],
+    visibleWhen: 'actor can edit the shipment order and the detail workspace is in display mode',
+    enabledWhen: 'no detail row is being edited and no object save request is in flight',
+    request: 'PUT the changed shipment-owned fields with stable order id and current revision',
+    successResult: 'return to display mode, retain the active tab, and show the saved business values immediately',
+    errorResult: 'keep editing mode and all entered values; localize field errors and expose retry on the save action',
+    refreshScope: 'detail identity, active business sections, affected list row, queue counts, and audit log',
   },
   {
     id: 'export-order-status-transition',

@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import type { ShipmentOrderDetailRecord } from '../types';
 
+defineProps<{ editable?: boolean }>();
+
 const form = defineModel<ShipmentOrderDetailRecord>('form', { required: true });
 </script>
 
 <template>
-  <a-form :model="form" layout="vertical" size="small" class="detail-form order-info-tab">
+  <a-form v-if="editable" :model="form" layout="vertical" size="small" class="detail-form order-info-tab">
     <section class="order-info-section">
       <header class="order-info-section__head">
         <strong>客户与归属</strong>
-        <span>联系人、销售与操作责任</span>
       </header>
       <a-row :gutter="[16, 8]" class="order-info-section__body">
         <a-col :md="8" :lg="6"><a-form-item field="customerName" label="客户名称"><a-input v-model="form.customerName" allow-clear /></a-form-item></a-col>
@@ -48,7 +49,6 @@ const form = defineModel<ShipmentOrderDetailRecord>('form', { required: true });
     <section class="order-info-section">
       <header class="order-info-section__head">
         <strong>订单属性</strong>
-        <span>贸易、运输与结算条件</span>
       </header>
       <a-row :gutter="[16, 8]" class="order-info-section__body">
         <a-col :md="8" :lg="6">
@@ -87,7 +87,6 @@ const form = defineModel<ShipmentOrderDetailRecord>('form', { required: true });
     <section class="order-info-section">
       <header class="order-info-section__head">
         <strong>航线与时效</strong>
-        <span>港口、船期与关键截点</span>
       </header>
       <a-row :gutter="[16, 8]" class="order-info-section__body">
         <a-col :md="8" :lg="6"><a-form-item field="pol" label="起运港"><a-input v-model="form.pol" allow-clear /></a-form-item></a-col>
@@ -111,6 +110,49 @@ const form = defineModel<ShipmentOrderDetailRecord>('form', { required: true });
       </a-row>
     </section>
   </a-form>
+
+  <div v-else class="order-info-tab order-info-tab--display">
+    <section class="order-info-section">
+      <header class="order-info-section__head"><strong>客户与归属</strong></header>
+      <a-descriptions class="detail-display" :bordered="false" layout="vertical" :column="4" size="small">
+        <a-descriptions-item label="客户名称" :span="2"><span :title="form.customerName">{{ form.customerName }}</span></a-descriptions-item>
+        <a-descriptions-item label="联系人">{{ form.customerContact || '—' }}</a-descriptions-item>
+        <a-descriptions-item label="联系电话"><span class="mono">{{ form.customerPhone || '—' }}</span></a-descriptions-item>
+        <a-descriptions-item label="邮箱" :span="2"><span :title="form.customerEmail">{{ form.customerEmail || '—' }}</span></a-descriptions-item>
+        <a-descriptions-item label="销售人员">{{ form.salesPerson || '—' }}</a-descriptions-item>
+        <a-descriptions-item label="客服人员">{{ form.csPerson || '—' }}</a-descriptions-item>
+        <a-descriptions-item label="责任操作">{{ form.operator || '—' }}</a-descriptions-item>
+      </a-descriptions>
+    </section>
+
+    <section class="order-info-section">
+      <header class="order-info-section__head"><strong>订单属性</strong></header>
+      <a-descriptions class="detail-display" :bordered="false" layout="vertical" :column="4" size="small">
+        <a-descriptions-item label="业务单号"><span class="mono">{{ form.orderNo }}</span></a-descriptions-item>
+        <a-descriptions-item label="业务类型">{{ form.businessType || '—' }}</a-descriptions-item>
+        <a-descriptions-item label="贸易条款">{{ form.tradeTerm || '—' }}</a-descriptions-item>
+        <a-descriptions-item label="运输条款">{{ form.transportTerm || '—' }}</a-descriptions-item>
+        <a-descriptions-item label="付款方式">{{ form.paymentMethod || '—' }}</a-descriptions-item>
+        <a-descriptions-item label="订单来源">{{ form.orderSource || '—' }}</a-descriptions-item>
+        <a-descriptions-item label="创建时间"><span class="mono">{{ form.createdAt }}</span></a-descriptions-item>
+      </a-descriptions>
+    </section>
+
+    <section class="order-info-section">
+      <header class="order-info-section__head"><strong>航线与时效</strong></header>
+      <a-descriptions class="detail-display" :bordered="false" layout="vertical" :column="4" size="small">
+        <a-descriptions-item label="起运港"><span class="mono">{{ form.pol }}</span></a-descriptions-item>
+        <a-descriptions-item label="目的港"><span class="mono">{{ form.pod }}</span></a-descriptions-item>
+        <a-descriptions-item label="中转港"><span class="mono">{{ form.transitPort || '—' }}</span></a-descriptions-item>
+        <a-descriptions-item label="船公司">{{ form.carrier || '—' }}</a-descriptions-item>
+        <a-descriptions-item label="大船船名/航次" :span="2"><span :title="`${form.vessel} / ${form.voyage}`">{{ form.vessel || '—' }} / {{ form.voyage || '—' }}</span></a-descriptions-item>
+        <a-descriptions-item label="ETD"><span class="mono">{{ form.etd || '—' }}</span></a-descriptions-item>
+        <a-descriptions-item label="ETA"><span class="mono">{{ form.eta || '—' }}</span></a-descriptions-item>
+        <a-descriptions-item label="截关时间"><span class="mono">{{ form.closingTime || '—' }}</span></a-descriptions-item>
+        <a-descriptions-item label="截补料时间"><span class="mono">{{ form.siCutoff || '—' }}</span></a-descriptions-item>
+      </a-descriptions>
+    </section>
+  </div>
 </template>
 
 <style scoped>
@@ -121,11 +163,11 @@ const form = defineModel<ShipmentOrderDetailRecord>('form', { required: true });
 }
 
 .order-info-tab {
-  gap: 16px;
+  gap: 12px;
 }
 
 .order-info-section + .order-info-section {
-  padding-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid var(--color-border-1);
 }
 
@@ -140,11 +182,6 @@ const form = defineModel<ShipmentOrderDetailRecord>('form', { required: true });
   color: var(--color-text-1);
   font-size: var(--dense-font-nav);
   font-weight: var(--dense-weight-title);
-}
-
-.order-info-section__head span {
-  color: var(--color-text-3);
-  font-size: var(--dense-font-aux);
 }
 
 .order-info-section :deep(.arco-form-item) {
@@ -164,4 +201,5 @@ const form = defineModel<ShipmentOrderDetailRecord>('form', { required: true });
   font-size: var(--dense-font-data);
   font-weight: var(--dense-weight-title);
 }
+
 </style>

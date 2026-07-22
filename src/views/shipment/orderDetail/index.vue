@@ -22,6 +22,7 @@ import type {
   ShipmentOrderDetailRecord,
 } from './types';
 import { getOrderStatusTransitions, resolveShipmentUiScenario } from '../featureContracts';
+import { formatLocalMinute } from '../../../utils/date-time';
 
 const route = useRoute();
 const router = useRouter();
@@ -32,6 +33,8 @@ const activeTab = ref(
     : 'overview',
 );
 const submitting = ref(false);
+const isDetailEditing = ref(false);
+const detailSnapshot = ref<ShipmentOrderDetailRecord>();
 const uiScenario = computed(() => resolveShipmentUiScenario(route.query.uiState));
 const detailLoading = ref(false);
 const detailErrorRecovered = ref(false);
@@ -54,6 +57,7 @@ const executionForm = reactive({
   blType: undefined as string | undefined,
   blConfirmStatus: undefined as string | undefined,
 });
+const executionSnapshot = ref<typeof executionForm>();
 const communicationForm = reactive({ target: '', channel: undefined as string | undefined, customerVisible: false, content: '' });
 const communicationFormRef = ref<FormInstance>();
 
@@ -76,23 +80,24 @@ const form = reactive<ShipmentOrderDetailRecord>(loadRecord(
   typeof route.query.orderNo === 'string' ? route.query.orderNo : undefined,
 ));
 const statusTransitionOptions = computed(() => getOrderStatusTransitions(form.orderStatus));
-const canTransitionStatus = computed(() => canEdit.value && statusTransitionOptions.value.length > 0);
+const canTransitionStatus = computed(() => canEdit.value
+  && !isDetailEditing.value
+  && !rowEdit.id
+  && statusTransitionOptions.value.length > 0);
 
-const milestoneItems = computed(() => form.nodes.slice(0, 5));
+const milestoneItems = computed(() => form.nodes.slice(0, 6));
 const currentMilestoneIndex = computed(() => {
   const pendingIndex = milestoneItems.value.findIndex((item) => item.statusKey !== 'rel');
-  return pendingIndex < 0 ? milestoneItems.value.length : pendingIndex + 1;
+  return pendingIndex < 0 ? milestoneItems.value.length - 1 : pendingIndex;
 });
 const fileMissingCount = computed(() => form.files.filter((item) => item.statusKey === 'rej').length);
 const pendingFileConfirmCount = computed(() => form.files.filter((item) => item.statusKey === 'wait').length);
 const pendingRiskCount = computed(() => form.risks.filter((item) => item.status !== '已关闭').length);
-const pendingTodoCount = computed(() => form.todos.filter((item) => item.status !== '已完成').length);
 const feePendingCount = computed(() => form.receivableFees.filter((item) => item.statusKey === 'wait').length + form.payableFees.filter((item) => item.statusKey === 'wait').length);
 const currentNode = computed(() => form.nodes.find((item) => item.statusKey !== 'rel') ?? form.nodes[form.nodes.length - 1]);
-const fileStatusSummary = computed(() => fileMissingCount.value > 0 ? `缺 ${fileMissingCount.value} 份` : pendingFileConfirmCount.value ? `${pendingFileConfirmCount.value} 份待确认` : '已齐套');
-const riskSummary = computed(() => pendingRiskCount.value > 0 ? `${pendingRiskCount.value} 项待处理` : '无阻塞');
-const feeStatusSummary = computed(() => feePendingCount.value > 0 ? `${feePendingCount.value} 项待确认` : '已确认');
 const nextActionSummary = computed(() => currentNode.value?.name ?? '当前无待推进节点');
+const primaryRisk = computed(() => form.risks.find((item) => item.status !== '已关闭'));
+const latestLog = computed(() => form.logs[0]);
 const requiredFileCount = computed(() => form.files.filter((item) => item.required).length);
 const completedNodeCount = computed(() => form.nodes.filter((item) => item.statusKey === 'rel').length);
 const openExceptionCount = computed(() => form.exceptions.filter((item) => item.statusKey !== 'rel').length);
@@ -104,7 +109,12 @@ const profitTone = computed(() => {
 
 watch(
   () => route.query.orderNo,
-  (orderNo) => Object.assign(form, loadRecord(typeof orderNo === 'string' ? orderNo : undefined)),
+  (orderNo) => {
+    Object.assign(form, loadRecord(typeof orderNo === 'string' ? orderNo : undefined));
+    isDetailEditing.value = false;
+    detailSnapshot.value = undefined;
+    executionSnapshot.value = undefined;
+  },
 );
 
 watch(
@@ -137,11 +147,11 @@ watch(uiScenario, async (scenario) => {
 const goBack = () => router.push({ name: 'ShipmentOrderWorkbench' });
 
 onBeforeRouteLeave(() => {
-  if (!rowEdit.id) return true;
+  if (!rowEdit.id && !isDetailEditing.value) return true;
   return new Promise<boolean>((resolve) => {
     Modal.confirm({
-      title: '放弃未保存的明细修改？',
-      content: '当前编辑行尚未保存，离开后本次输入将丢失。',
+      title: '放弃未保存的修改？',
+      content: '当前订单仍在编辑中，离开后本次输入将丢失。',
       okText: '放弃并离开',
       cancelText: '继续编辑',
       okButtonProps: { status: 'danger', size: 'small' },
@@ -167,18 +177,31 @@ const handleSave = async () => {
     return;
   }
   submitting.value = false;
+  isDetailEditing.value = false;
+  detailSnapshot.value = undefined;
+  executionSnapshot.value = undefined;
   Message.success(`订单 ${form.orderNo} 已保存`);
 };
 
 const handleDiscard = () => {
-  Object.assign(form, loadRecord(typeof route.query.orderNo === 'string' ? route.query.orderNo : undefined));
+  Object.assign(form, detailSnapshot.value ?? loadRecord(typeof route.query.orderNo === 'string' ? route.query.orderNo : undefined));
+  if (executionSnapshot.value) Object.assign(executionForm, executionSnapshot.value);
   rowSnapshots.clear();
   rowEdit.scope = undefined;
   rowEdit.id = '';
   rowEdit.isNew = false;
   rowEdit.saving = false;
   rowEdit.errors = {};
-  Message.info('已恢复为上次保存内容');
+  isDetailEditing.value = false;
+  detailSnapshot.value = undefined;
+  executionSnapshot.value = undefined;
+  Message.info('已取消编辑并恢复上次保存内容');
+};
+
+const startDetailEdit = () => {
+  detailSnapshot.value = JSON.parse(JSON.stringify(form)) as ShipmentOrderDetailRecord;
+  executionSnapshot.value = JSON.parse(JSON.stringify(executionForm)) as typeof executionForm;
+  isDetailEditing.value = true;
 };
 
 const handlePrint = () => window.print();
@@ -192,14 +215,61 @@ const openStatusModal = () => {
   statusModalVisible.value = true;
 };
 
+const syncMilestonesForStatus = (status: string) => {
+  const activeIndexByStatus: Record<string, number> = {
+    draft: 0,
+    waitBooking: 1,
+    booking: 1,
+    released: 2,
+    waitTruck: 2,
+    trucking: 2,
+    waitCustoms: 3,
+    customs: 3,
+    cleared: 4,
+    waitSail: 4,
+    sailed: 5,
+    inTransit: 5,
+    arrived: 5,
+    completed: form.nodes.length,
+  };
+  const activeIndex = activeIndexByStatus[status];
+  if (activeIndex === undefined) return;
+  form.nodes.forEach((node, index) => {
+    if (index < activeIndex || activeIndex >= form.nodes.length) {
+      node.status = '已完成';
+      node.statusKey = 'rel';
+      return;
+    }
+    if (index === activeIndex) {
+      node.status = '推进中';
+      node.statusKey = 'op';
+      return;
+    }
+    node.status = '待完成';
+    node.statusKey = 'wait';
+  });
+};
+
 const confirmStatusChange = async () => {
   const errors = await statusFormRef.value?.validate();
   if (errors) return false;
   const nextStatus = statusTransitionOptions.value.find((item) => item.value === statusForm.targetStatus);
   if (!nextStatus) return false;
+  const previousStatus = form.orderStatusLabel;
   form.orderStatus = nextStatus.value;
   form.orderStatusLabel = nextStatus.label;
   form.statusPill = nextStatus.tone;
+  syncMilestonesForStatus(nextStatus.value);
+  form.logs.unshift({
+    id: `log-${Date.now()}`,
+    time: formatLocalMinute(),
+    operator: form.operator,
+    module: '订单节点',
+    action: statusForm.reason.trim(),
+    before: previousStatus,
+    after: nextStatus.label,
+    source: 'Web',
+  });
   Message.success(`订单状态已更新为${form.orderStatusLabel}`);
   return true;
 };
@@ -231,6 +301,17 @@ const handleCancelOrder = () => {
   Message.success(`订单 ${form.orderNo} 已作废`);
 };
 
+const confirmCancelOrder = () => {
+  Modal.confirm({
+    title: '确认作废该订单？',
+    content: `订单 ${form.orderNo} 作废后不可继续推进，请确认业务已终止。`,
+    okText: '确认作废',
+    cancelText: '取消',
+    okButtonProps: { status: 'danger', size: 'small' },
+    onOk: handleCancelOrder,
+  });
+};
+
 const handleRisk = (risk: ShipmentOrderDetailRecord['risks'][number]) => {
   risk.status = '已关闭';
   Message.success(`风险“${risk.type}”已关闭`);
@@ -241,7 +322,7 @@ const handleAddCommunication = async () => {
   if (errors) return;
   form.logs.unshift({
     id: `log-${Date.now()}`,
-    time: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    time: formatLocalMinute(),
     operator: form.operator,
     module: '沟通',
     action: communicationForm.channel || '记录',
@@ -421,7 +502,7 @@ const addExceptionRow = () => {
 </script>
 
 <template>
-  <div class="shipment-detail-page">
+  <div class="shipment-detail-page" data-pesdp-page="shipment-export-order-detail">
     <a-card v-if="detailLoading" class="detail-state-card" size="small">
       <a-skeleton animation><a-skeleton-line :rows="12" /></a-skeleton>
     </a-card>
@@ -452,7 +533,7 @@ const addExceptionRow = () => {
     >
       <template #extra><a-button size="small" type="primary" @click="retryDetail">重新加载</a-button></template>
     </a-result>
-    <template v-else>
+    <div v-else class="detail-workspace" data-detail-workspace="shipment-order">
     <a-card class="detail-context" size="small" :body-style="{ padding: 0 }">
       <header class="detail-context__command">
         <div class="detail-context__identity">
@@ -473,14 +554,16 @@ const addExceptionRow = () => {
           <a-tooltip content="打印订单">
             <a-button size="small" type="text" title="打印订单" aria-label="打印订单" @click="handlePrint"><template #icon><icon-printer /></template></a-button>
           </a-tooltip>
-          <a-button v-if="canTransitionStatus" size="small" @click="openStatusModal">修改状态</a-button>
-          <a-button v-if="canEdit" size="small" @click="handleGenerateFee">生成费用</a-button>
-          <a-button size="small" @click="handleUploadFile">文件资料</a-button>
-          <a-dropdown v-if="canEdit" trigger="click">
+          <a-button v-if="canEdit && !isDetailEditing && !rowEdit.id" size="small" @click="startDetailEdit">编辑订单</a-button>
+          <a-button v-if="canEdit && !isDetailEditing && !rowEdit.id" size="small" @click="handleGenerateFee">生成费用</a-button>
+          <a-button v-if="!isDetailEditing && !rowEdit.id" size="small" @click="handleUploadFile">文件资料</a-button>
+          <a-dropdown v-if="canEdit && !isDetailEditing && !rowEdit.id" trigger="click">
             <a-button size="small">更多<icon-down /></a-button>
             <template #content>
               <a-doption @click="handleNotify">发送通知</a-doption>
               <a-doption @click="handleMarkException">标记异常</a-doption>
+              <a-divider :margin="4" />
+              <a-doption class="danger-opt" @click="confirmCancelOrder">作废订单</a-doption>
             </template>
           </a-dropdown>
         </a-space>
@@ -503,37 +586,60 @@ const addExceptionRow = () => {
           <div><span>下一动作</span><strong class="detail-fact--primary">{{ nextActionSummary }}</strong></div>
         </div>
 
-        <div class="detail-attention">
-          <button type="button" :data-alert="fileMissingCount > 0" @click="switchTab('files')">
-            <span>文件</span><strong>{{ fileStatusSummary }}</strong>
-          </button>
-          <button type="button" :data-alert="feePendingCount > 0" @click="switchTab('fees')">
-            <span>费用</span><strong>{{ feeStatusSummary }}</strong>
-          </button>
-          <button type="button" :data-alert="pendingRiskCount > 0" @click="switchTab('control')">
-            <span>风险</span><strong>{{ riskSummary }}</strong>
-          </button>
-        </div>
       </div>
 
-      <div class="detail-progress">
-        <a-steps :current="currentMilestoneIndex" size="small" label-placement="vertical">
-          <a-step v-for="node in milestoneItems" :key="node.id" :title="node.name" :description="node.planTime.slice(5, 16)" />
-        </a-steps>
+      <section class="detail-focus" aria-label="当前执行焦点">
+        <div class="detail-focus__main">
+          <span>当前待办</span>
+          <strong>{{ nextActionSummary }}</strong>
+          <small>{{ currentNode?.owner || form.operator }} 负责 · 计划 {{ currentNode?.planTime || '待排期' }}</small>
+        </div>
+        <button
+          type="button"
+          class="detail-focus__risk"
+          :data-alert="Boolean(primaryRisk)"
+          @click="switchTab('control')"
+        >
+          <span>{{ primaryRisk ? primaryRisk.type : '执行状态' }}</span>
+          <strong>{{ primaryRisk ? primaryRisk.message : '当前无阻塞异常' }}</strong>
+          <small>{{ primaryRisk ? `${primaryRisk.owner} · ${primaryRisk.dueAt}` : '按计划推进' }}</small>
+        </button>
+        <div class="detail-focus__recent">
+          <span>最近变更</span>
+          <strong>{{ latestLog ? `${latestLog.module} · ${latestLog.action}` : '暂无变更记录' }}</strong>
+          <small>{{ latestLog ? `${latestLog.operator} · ${latestLog.time}` : '—' }}</small>
+        </div>
+        <div class="detail-focus__action">
+          <span>下一节点</span>
+          <strong>{{ statusTransitionOptions[0]?.label || '暂无可推进状态' }}</strong>
+          <a-button v-if="canTransitionStatus" size="small" type="primary" @click="openStatusModal">推进节点</a-button>
+        </div>
+      </section>
+
+      <div class="detail-milestone-bar" aria-label="订单里程碑">
+        <div
+          v-for="(node, index) in milestoneItems"
+          :key="node.id"
+          class="detail-milestone-bar__item"
+          :data-state="node.statusKey === 'rel' ? 'done' : index === currentMilestoneIndex ? 'current' : 'next'"
+        >
+          <span class="detail-milestone-bar__dot" />
+          <div><strong>{{ node.name }}</strong><small>{{ node.planTime.slice(5, 16) }}</small></div>
+        </div>
       </div>
     </a-card>
 
     <a-card class="detail-work-surface" size="small" :body-style="{ padding: 0, height: '100%' }">
       <a-tabs v-model:active-key="activeTab" size="small" class="detail-work-tabs">
         <a-tab-pane key="overview" title="订单概览" :disabled="Boolean(rowEdit.id) && activeTab !== 'overview'">
-          <div class="detail-pane"><order-info-tab v-model:form="form" /></div>
+          <div class="detail-pane"><order-info-tab v-model:form="form" :editable="isDetailEditing" /></div>
         </a-tab-pane>
 
         <a-tab-pane key="execution" title="运输执行" :disabled="Boolean(rowEdit.id) && activeTab !== 'execution'">
           <div class="detail-pane detail-pane--sections">
             <section class="detail-section-local">
               <header><strong>订舱与舱位</strong><span class="s-pill" data-s="wait">{{ form.spaceStatus }}</span></header>
-              <a-form :model="form" layout="vertical" size="small" class="detail-form">
+              <a-form v-if="isDetailEditing" :model="form" layout="vertical" size="small" class="detail-form">
                 <a-row :gutter="[16, 8]">
                   <a-col :md="8" :lg="6"><a-form-item field="bookingNo" label="订舱号"><a-input v-model="form.bookingNo" allow-clear placeholder="待船司回传" /></a-form-item></a-col>
                   <a-col :md="8" :lg="6"><a-form-item field="carrier" label="船公司"><a-input v-model="form.carrier" allow-clear /></a-form-item></a-col>
@@ -546,11 +652,22 @@ const addExceptionRow = () => {
                   <a-col :span="24"><a-form-item field="bookingRemark" label="订舱备注"><a-textarea v-model="form.bookingRemark" :auto-size="{ minRows: 2, maxRows: 4 }" /></a-form-item></a-col>
                 </a-row>
               </a-form>
+              <a-descriptions v-else class="detail-display" :bordered="false" layout="vertical" :column="4" size="small">
+                <a-descriptions-item label="订舱号"><span class="mono">{{ form.bookingNo || '—' }}</span></a-descriptions-item>
+                <a-descriptions-item label="船公司">{{ form.carrier || '—' }}</a-descriptions-item>
+                <a-descriptions-item label="订舱代理">{{ form.bookingAgent || '—' }}</a-descriptions-item>
+                <a-descriptions-item label="合约号"><span class="mono">{{ form.contractNo || '—' }}</span></a-descriptions-item>
+                <a-descriptions-item label="运价编号"><span class="mono">{{ form.rateNo || '—' }}</span></a-descriptions-item>
+                <a-descriptions-item label="舱位状态">{{ form.spaceStatus || '—' }}</a-descriptions-item>
+                <a-descriptions-item label="放舱时间"><span class="mono">{{ form.releaseTime || '—' }}</span></a-descriptions-item>
+                <a-descriptions-item label="截 VGM"><span class="mono">{{ form.vgmCutoff || '—' }}</span></a-descriptions-item>
+                <a-descriptions-item label="订舱备注" :span="2">{{ form.bookingRemark || '—' }}</a-descriptions-item>
+              </a-descriptions>
             </section>
 
             <section class="detail-section-local">
               <header><strong>柜货与拖车</strong><span>{{ form.containerSummary }}</span></header>
-              <a-form :model="executionForm" layout="vertical" size="small" class="detail-form">
+              <a-form v-if="isDetailEditing" :model="executionForm" layout="vertical" size="small" class="detail-form">
                 <a-row :gutter="[16, 8]">
                   <a-col :md="8" :lg="6"><a-form-item label="柜型柜量"><a-input v-model="form.containerSummary" allow-clear /></a-form-item></a-col>
                   <a-col :md="8" :lg="6"><a-form-item field="truckSupplier" label="拖车供应商"><a-input v-model="executionForm.truckSupplier" allow-clear placeholder="请选择供应商" /></a-form-item></a-col>
@@ -560,11 +677,19 @@ const addExceptionRow = () => {
                   <a-col :md="8" :lg="6"><a-form-item field="plateNo" label="车牌号"><a-input v-model="executionForm.plateNo" allow-clear /></a-form-item></a-col>
                 </a-row>
               </a-form>
+              <a-descriptions v-else class="detail-display" :bordered="false" layout="vertical" :column="4" size="small">
+                <a-descriptions-item label="柜型柜量">{{ form.containerSummary || '—' }}</a-descriptions-item>
+                <a-descriptions-item label="拖车供应商">{{ executionForm.truckSupplier || '—' }}</a-descriptions-item>
+                <a-descriptions-item label="装柜地址" :span="2">{{ executionForm.loadingAddress || '—' }}</a-descriptions-item>
+                <a-descriptions-item label="装柜时间"><span class="mono">{{ executionForm.loadingTime || '—' }}</span></a-descriptions-item>
+                <a-descriptions-item label="拖车状态">{{ executionForm.truckStatus || '—' }}</a-descriptions-item>
+                <a-descriptions-item label="车牌号"><span class="mono">{{ executionForm.plateNo || '—' }}</span></a-descriptions-item>
+              </a-descriptions>
             </section>
 
             <section class="detail-section-local">
               <header><strong>报关与提单</strong><span>{{ form.bookingNo || '待回传订舱号' }}</span></header>
-              <a-form :model="executionForm" layout="vertical" size="small" class="detail-form">
+              <a-form v-if="isDetailEditing" :model="executionForm" layout="vertical" size="small" class="detail-form">
                 <a-row :gutter="[16, 8]">
                   <a-col :md="8" :lg="6"><a-form-item field="customsMode" label="报关方式"><a-select v-model="executionForm.customsMode" placeholder="请选择"><a-option value="一般贸易">一般贸易</a-option><a-option value="跨境电商">跨境电商</a-option></a-select></a-form-item></a-col>
                   <a-col :md="8" :lg="6"><a-form-item field="customsBroker" label="报关行"><a-input v-model="executionForm.customsBroker" allow-clear /></a-form-item></a-col>
@@ -576,11 +701,21 @@ const addExceptionRow = () => {
                   <a-col :md="8" :lg="6"><a-form-item field="blConfirmStatus" label="提单确认状态"><a-select v-model="executionForm.blConfirmStatus" placeholder="请选择"><a-option value="待确认">待确认</a-option><a-option value="已确认">已确认</a-option></a-select></a-form-item></a-col>
                 </a-row>
               </a-form>
+              <a-descriptions v-else class="detail-display" :bordered="false" layout="vertical" :column="4" size="small">
+                <a-descriptions-item label="报关方式">{{ executionForm.customsMode || '—' }}</a-descriptions-item>
+                <a-descriptions-item label="报关行">{{ executionForm.customsBroker || '—' }}</a-descriptions-item>
+                <a-descriptions-item label="报关单号"><span class="mono">{{ executionForm.customsNo || '—' }}</span></a-descriptions-item>
+                <a-descriptions-item label="报关状态">{{ executionForm.customsStatus || '—' }}</a-descriptions-item>
+                <a-descriptions-item label="HBL"><span class="mono">{{ executionForm.hbl || '—' }}</span></a-descriptions-item>
+                <a-descriptions-item label="MBL"><span class="mono">{{ executionForm.mbl || '—' }}</span></a-descriptions-item>
+                <a-descriptions-item label="提单类型">{{ executionForm.blType || '—' }}</a-descriptions-item>
+                <a-descriptions-item label="提单确认状态">{{ executionForm.blConfirmStatus || '—' }}</a-descriptions-item>
+              </a-descriptions>
             </section>
           </div>
         </a-tab-pane>
 
-        <a-tab-pane key="files" :disabled="Boolean(rowEdit.id) && activeTab !== 'files'">
+        <a-tab-pane key="files" :disabled="isDetailEditing || (Boolean(rowEdit.id) && activeTab !== 'files')">
           <template #title><span class="detail-tab-title">文件资料 <b :data-alert="fileMissingCount > 0">{{ form.files.length }}</b></span></template>
           <div class="detail-pane">
             <section class="detail-section-local detail-section-local--table">
@@ -597,7 +732,7 @@ const addExceptionRow = () => {
           </div>
         </a-tab-pane>
 
-        <a-tab-pane key="fees" :disabled="Boolean(rowEdit.id) && activeTab !== 'fees'">
+        <a-tab-pane key="fees" :disabled="isDetailEditing || (Boolean(rowEdit.id) && activeTab !== 'fees')">
           <template #title><span class="detail-tab-title">费用结算 <b :data-alert="feePendingCount > 0">{{ feePendingCount }}</b></span></template>
           <div class="detail-pane detail-pane--sections">
             <div class="fee-summary-strip">
@@ -638,7 +773,7 @@ const addExceptionRow = () => {
           </div>
         </a-tab-pane>
 
-        <a-tab-pane key="control" :disabled="Boolean(rowEdit.id) && activeTab !== 'control'">
+        <a-tab-pane key="control" :disabled="isDetailEditing || (Boolean(rowEdit.id) && activeTab !== 'control')">
           <template #title><span class="detail-tab-title">节点与异常 <b :data-alert="pendingRiskCount > 0">{{ pendingRiskCount }}</b></span></template>
           <div class="detail-pane detail-pane--sections">
             <section v-if="form.risks.length" class="detail-section-local">
@@ -684,7 +819,7 @@ const addExceptionRow = () => {
           </div>
         </a-tab-pane>
 
-        <a-tab-pane key="collaboration" title="沟通与日志" :disabled="Boolean(rowEdit.id) && activeTab !== 'collaboration'">
+        <a-tab-pane key="collaboration" title="沟通与日志" :disabled="isDetailEditing || (Boolean(rowEdit.id) && activeTab !== 'collaboration')">
           <div class="detail-pane detail-pane--sections">
             <section class="detail-section-local">
               <header><strong>新增沟通</strong><a-button size="small" type="primary" @click="handleAddCommunication">保存记录</a-button></header>
@@ -714,14 +849,11 @@ const addExceptionRow = () => {
       </a-tabs>
     </a-card>
 
-    <footer v-if="canEdit" class="detail-footer">
-      <a-popconfirm content="确认作废该订单？此操作不可撤销。" @ok="handleCancelOrder">
-        <a-button size="small" type="text" status="danger">作废订单</a-button>
-      </a-popconfirm>
+    <footer v-if="canEdit && isDetailEditing" class="detail-footer">
+      <span>编辑订单信息</span>
       <a-space :size="8">
-        <a-button size="small" @click="handleNotify">发送通知</a-button>
-        <a-button size="small" @click="handleDiscard">放弃修改</a-button>
-        <a-button size="small" type="primary" :loading="submitting" @click="handleSave">保存订单</a-button>
+        <a-button size="small" :disabled="submitting" @click="handleDiscard">取消</a-button>
+        <a-button size="small" type="primary" :loading="submitting" @click="handleSave">保存修改</a-button>
       </a-space>
     </footer>
 
@@ -746,7 +878,7 @@ const addExceptionRow = () => {
         </a-row>
       </a-form>
     </a-modal>
-    </template>
+    </div>
   </div>
 </template>
 
@@ -756,6 +888,14 @@ const addExceptionRow = () => {
   flex-direction: column;
   gap: 8px;
   height: 100%;
+  min-height: 0;
+}
+
+.detail-workspace {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
   min-height: 0;
 }
 
@@ -900,70 +1040,161 @@ const addExceptionRow = () => {
   color: var(--dense-primary-7) !important;
 }
 
-.detail-attention {
+.detail-focus {
   display: grid;
-  flex: 0 0 250px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border: 1px solid var(--color-border-1);
-  border-radius: var(--dense-radius);
-  overflow: hidden;
-}
-
-.detail-attention button {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  align-items: flex-start;
-  justify-content: center;
-  min-width: 0;
-  padding: 6px 8px;
-  border: 0;
-  border-right: 1px solid var(--color-border-1);
-  background: var(--color-bg-1);
-  color: var(--color-text-3);
-  cursor: pointer;
-  text-align: left;
-}
-
-.detail-attention button:last-child {
-  border-right: 0;
-}
-
-.detail-attention button:hover {
+  grid-template-columns: minmax(170px, 0.8fr) minmax(250px, 1.4fr) minmax(170px, 0.8fr) 160px;
+  min-height: 68px;
+  border-top: 1px solid var(--color-border-1);
   background: var(--color-fill-1);
 }
 
-.detail-attention button:focus-visible {
-  outline: 2px solid var(--dense-primary-3);
-  outline-offset: -2px;
+.detail-focus__main,
+.detail-focus__risk,
+.detail-focus__recent,
+.detail-focus__action {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 12px;
 }
 
-.detail-attention button span {
+.detail-focus__main > span,
+.detail-focus__risk > span,
+.detail-focus__recent > span,
+.detail-focus__action > span {
+  color: var(--color-text-3);
   font-size: var(--dense-font-micro);
 }
 
-.detail-attention button strong {
+.detail-focus__main > strong,
+.detail-focus__risk > strong,
+.detail-focus__recent > strong,
+.detail-focus__action > strong {
   overflow: hidden;
   color: var(--color-text-1);
+  font-size: var(--dense-font-data);
+  font-weight: var(--dense-weight-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-focus small {
+  overflow: hidden;
+  color: var(--color-text-3);
   font-size: var(--dense-font-aux);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.detail-attention button[data-alert='true'] strong {
+.detail-focus__risk {
+  border: 0;
+  border-left: 1px solid var(--color-border-1);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.detail-focus__recent {
+  border-left: 1px solid var(--color-border-1);
+}
+
+.detail-focus__risk:hover,
+.detail-focus__risk:focus-visible {
+  background: var(--color-fill-2);
+}
+
+.detail-focus__risk:focus-visible {
+  outline: 2px solid var(--dense-primary-3);
+  outline-offset: -2px;
+}
+
+.detail-focus__risk[data-alert='true'] > strong {
   color: var(--dense-warning-7);
 }
 
-.detail-progress {
-  padding: 8px 16px 6px;
+.detail-focus__action {
+  align-items: flex-start;
+}
+
+.detail-focus__action .arco-btn {
+  margin-top: 3px;
+}
+
+.detail-milestone-bar {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  padding: 8px 12px 9px;
   border-top: 1px solid var(--color-border-1);
 }
 
-.detail-progress :deep(.arco-steps-item-title) {
-  font-size: var(--dense-font-control);
+.detail-milestone-bar__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
-.detail-progress :deep(.arco-steps-item-description) {
+.detail-milestone-bar__item::after {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  left: 20px;
+  height: 1px;
+  background: var(--color-border-2);
+  content: '';
+}
+
+.detail-milestone-bar__item:last-child::after {
+  display: none;
+}
+
+.detail-milestone-bar__dot {
+  position: relative;
+  z-index: 1;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border: 2px solid var(--color-border-3);
+  border-radius: 50%;
+  background: var(--color-bg-1);
+}
+
+.detail-milestone-bar__item[data-state='done'] .detail-milestone-bar__dot {
+  border-color: var(--dense-primary-6);
+  background: var(--dense-primary-6);
+}
+
+.detail-milestone-bar__item[data-state='current'] .detail-milestone-bar__dot {
+  border-color: var(--dense-primary-6);
+}
+
+.detail-milestone-bar__item > div {
+  min-width: 0;
+}
+
+.detail-milestone-bar__item strong,
+.detail-milestone-bar__item small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-milestone-bar__item strong {
+  color: var(--color-text-2);
+  font-size: var(--dense-font-control);
+  font-weight: var(--dense-weight-title);
+}
+
+.detail-milestone-bar__item[data-state='current'] strong {
+  color: var(--dense-primary-7);
+}
+
+.detail-milestone-bar__item small {
+  color: var(--color-text-3);
   font-size: var(--dense-font-micro);
 }
 
@@ -1064,6 +1295,7 @@ const addExceptionRow = () => {
   line-height: 20px;
 }
 
+
 .detail-section-local--table {
   min-width: 0;
 }
@@ -1131,6 +1363,12 @@ const addExceptionRow = () => {
   background: var(--color-bg-1);
 }
 
+.detail-footer > span {
+  color: var(--color-text-2);
+  font-size: var(--dense-font-control);
+  font-weight: var(--dense-weight-title);
+}
+
 @media (max-width: 1199px) {
   .detail-context__overview {
     flex-wrap: wrap;
@@ -1144,9 +1382,10 @@ const addExceptionRow = () => {
     min-width: 520px;
   }
 
-  .detail-attention {
-    flex-basis: 100%;
+  .detail-focus {
+    grid-template-columns: minmax(145px, 0.8fr) minmax(205px, 1.3fr) minmax(150px, 0.8fr) 140px;
   }
+
 }
 
 @media (max-width: 1080px) {
@@ -1171,6 +1410,11 @@ const addExceptionRow = () => {
 
   .fee-summary-strip {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .detail-milestone-bar {
+    overflow-x: auto;
+    grid-template-columns: repeat(6, minmax(112px, 1fr));
   }
 }
 </style>

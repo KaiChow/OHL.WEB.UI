@@ -20,7 +20,7 @@ It is also the single authority for cross-page layout quality. Topic references 
 
 ### First-Viewport Evidence
 
-At the supported 1280px desktop baseline, a normal table workbench should give at least 70% of usable page height to the data surface; about 75% is a calibration target. Below 65% is a blocking layout defect. Taller viewports may exceed 80% naturally and must not gain artificial whitespace to stay inside a range.
+At the release-blocking `1366x768` office viewport, a normal table workbench should give at least 70% of usable page height to the data surface; about 75% is a calibration target. Below 65% is a blocking layout defect. `1280x720` remains an additional compact-desktop evidence point, while `1024x768` is the supported split-window audit. Taller viewports may exceed 80% naturally and must not gain artificial whitespace to stay inside a range.
 
 Measure the rendered page root and table host. Do not estimate from source code. Record viewport, usable height, command-surface height, data-surface height, ratio, visible rows, and overflow.
 
@@ -31,13 +31,13 @@ The threshold does not apply to detail forms, approval/review pages, exception i
 - The shell stays subordinate to work. At the project desktop baseline, sider width normally remains 192-216px and header height 44-52px unless a product constraint is recorded.
 - Page-level title/description bands are not added to high-frequency list workbenches when the app shell already identifies the route.
 - Wide screens expose more data or breathing room; they do not scale fonts, controls, or decorative whitespace with viewport width.
-- The project supports 1280px and wider desktop layouts. Smaller-width behavior exists only when a project explicitly declares and implements a different baseline in `responsive.md`.
+- Viewport ownership comes from `responsive.md`: `1366x768` is the release gate, `1024x768` is the supported desktop lower bound, and wide desktop exposes more data without scaling typography or controls.
 
 ### Command Surface Budget
 
 - Query, actions, and status may be separate logical rows inside one surface.
 - The normal query + workflow area stays near 112px; up to about 128px is acceptable when visible daily filters retain clear labels.
-- At 1280px the primary command path does not stack. Status groups may scroll inside their own region before another full-width band is added.
+- At `1366x768` the primary command path does not stack. At compact/split widths, controls follow `responsive.md`; status groups scroll inside their own region before another full-width band is added.
 - The table may scroll horizontally; the page shell, query area, and workflow bar may not create browser-level horizontal overflow.
 
 ## Direction
@@ -170,11 +170,14 @@ Allowed moves:
 - strengthen `dds-head` and `dds-hero`
 - reduce repeated summaries
 - regroup sections by working order instead of backend order
+- default full-detail routes to an object-workspace display mode, with explicit edit entry instead of always-on inputs
+- place one execution-focus block at the top of the overview when the object has a current decision or blocker
 
 Do not:
 
 - add a right summary panel that repeats header facts
 - stack heavy cards for every section
+- repeat file/fee/risk counts in both the identity band and tab navigation
 
 ## What AI Must Preserve
 

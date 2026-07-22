@@ -47,21 +47,6 @@ Avoid these unless the business itself uses them:
 | 文件 | 附件 / 单证 / 报关资料 / 提单文件 |
 | 添加项目 | 添加发货人 / 添加货物 / 添加派送信息 |
 
-## Object Identity Examples
-
-Examples for filling `module-patterns` slots. **Do not copy every column to every page.**
-
-| Object type | Primary identity | Key facts | Typical status |
-|-------------|------------------|-----------|----------------|
-| Business order / shipment | 业务单号 / 订单编号 | 客户, 航线, ETD/ETA, 船公司/航司 | 待审核, 已接单, 已订舱, 已放舱 |
-| Customer | 客户名称 / 客户编码 | 负责人, 类型, 信用, 最近跟进 | 未合作, 已合作, 冻结, 风险 |
-| Receivable / payable bill | 账单号 | 客户/供应商, 币种, 金额, 到期日 | 未确认, 已确认, 已开票, 已核销 |
-| Reconciliation | 对账单号 | 往来单位, 期间, 差异金额 | 待对账, 已确认, 有差异 |
-| Warehouse receipt | 入仓单号 / 出仓单号 | 仓库, 件数, 重量, 体积, 入仓时间 | 待入仓, 已入仓, 异常 |
-| Trucking / delivery task | 委托单号 / 派送单号 | 车队, 地址, 预约时间, 柜号 | 待派车, 已派车, 已完成, 异常 |
-| Customs declaration | 报关单号 | 客户, 口岸, 报关方式, 截关时间 | 待报关, 报关中, 已报关, 退单 |
-| Master data / configuration | 编码 / 名称 | 启用状态, 归属组织, 更新时间 | 启用, 停用 |
-
 ## Core Module Names
 
 Use stable module names in menu, route titles, tabs, and page headings:

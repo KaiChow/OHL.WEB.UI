@@ -24,6 +24,18 @@ Execution priority (mandatory):
 
 Full rules: **`references/arco-first.md`**. Every shared custom class must state why Arco + tokens were insufficient.
 
+## Mandatory PESDP Execution Gate
+
+PESDP is a coding contract, not a score added after implementation. For every new page, page rewrite, or material UI/interaction redesign:
+
+1. Read **`references/page-spec-contract.md`**.
+2. Create or update the page's typed `pageSpec.ts` before editing its Vue template.
+3. Give Professional, Efficient, Structured, Dense, and Premium at least one concrete implementation decision and one verification item each.
+4. Read the single-authority references selected by that spec.
+5. Implement, inspect the real route, and reconcile the evidence back to the spec.
+
+No page may be called PESDP-compliant because it merely uses Arco, shared classes, compact spacing, or a checklist. Missing/empty PESDP traceability is a blocking failure.
+
 ## Architecture
 
 | Layer | Location | Contains |
@@ -32,6 +44,7 @@ Full rules: **`references/arco-first.md`**. Every shared custom class must state
 | **Shared enhancement CSS** | `src/styles/global.css` | Direct GI/Arco semantic aliases, density tokens, VXE bridge, freight semantics, documented archetype slots only |
 | **Agent summary** | `AGENTS.md` | One-page pointer (no duplicate rules) |
 | **This skill** | `SKILL.md` + `references/` | PESDP principles + executable rules |
+| **Page specification** | `page-spec-contract.md` + page-local `pageSpec.ts` | Typed business/PESDP/surface/action/evidence decisions required before template code |
 | **Structure slots** | `module-patterns.md` | English slots only; no field lists |
 | **Artifact intake** | `artifact-intake-template.md` | Minimum business context required with screenshot/prototype input |
 | **Prototype translation** | `prototype-to-ui-contract.md` | Screenshot/prototype -> business object/archetype/contracts |
@@ -56,6 +69,7 @@ Each rule family has one authority. Other files route to it or verify it; they d
 | Visual role usage | `visual-system.md` |
 | Sellable product maturity gates and scoring | `product-grade-evaluation.md` |
 | Delivery checks only | `checklist.md` |
+| AI generation sequence and mandatory page IR | `page-spec-contract.md` |
 
 When two files disagree, use the authority above and delete the duplicate rule during maintenance.
 
@@ -105,16 +119,17 @@ Do not hide daily filters, status tabs, or reversible workflow actions merely to
 1. **`references/arco-first.md`**
 2. **`references/theme-contract.md`**
 3. `references/design-principles.md`
-4. For an existing-project rewrite without a visual reference: **`references/existing-project-modernization.md`**
-5. `references/module-patterns.md` + `references/domain-language.md` (new pages)
-6. For any task with behavior or request flow: `references/feature-routing.md` + `references/feature-delivery-contract.md`
-7. For any screenshot/prototype-driven task only: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
-8. One topic file from the map below.
-9. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
-10. **Before changing icon usage:** read `icons.md`.
-11. **Before any redesign / 布局重写 / 质感优化 / 普通后台味反馈:** read `redesign-calibration.md`.
-12. **Before any custom class or `global.css` pattern:** re-check `arco-first.md` and document why Arco + tokens are insufficient.
-13. **`src/styles/global.css`** — only after steps 1–12; grep tokens/patterns already justified, do not browse the file as the primary design catalog.
+4. **`references/page-spec-contract.md`** — create/update `pageSpec.ts` before template work.
+5. For an existing-project rewrite without a visual reference: **`references/existing-project-modernization.md`**
+6. `references/module-patterns.md` + `references/domain-language.md` (new pages)
+7. For any task with behavior or request flow: `references/feature-routing.md` + `references/feature-delivery-contract.md`
+8. For any screenshot/prototype-driven task only: `references/artifact-intake-template.md` + `references/prototype-to-ui-contract.md`
+9. One topic file from the map below.
+10. **Before template:** when the page has search or overlays, read `filter-layout.md` and `modal.md`.
+11. **Before changing icon usage:** read `icons.md`.
+12. **Before any redesign / 布局重写 / 质感优化 / 普通后台味反馈:** read `redesign-calibration.md`.
+13. **Before any custom class or `global.css` pattern:** re-check `arco-first.md` and document why Arco + tokens are insufficient.
+14. **`src/styles/global.css`** — only after steps 1–13; grep tokens/patterns already justified, do not browse the file as the primary design catalog.
 
 **Coding gate:** `.cursor/rules/spec-first-coding.mdc` — read references first; run `check-spec.js` before delivery.
 
@@ -136,7 +151,7 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 | **框架优先 / 减少 global.css 依赖 / Arco-first 重构** | **`arco-first.md`** + `ai-generation-contract.md` + relevant surface reference |
 | New page / module | `module-patterns.md` → `domain-language.md` → **`domain-routing.md`** |
 | Page type choice | `page-archetypes.md` |
-| AI page generation | `ai-generation-contract.md` |
+| AI page generation | **`page-spec-contract.md`** + `ai-generation-contract.md` |
 | List / workbench | `list-page.md` + `table.md` + `actions.md` |
 | **筛选区字段数 → 布局选型** | **`filter-layout.md`** |
 | **小屏 / 分辨率适配** | **`responsive.md`** |
@@ -181,22 +196,23 @@ Optional mirror of an existing page only when the user explicitly asks. Default:
 - Any feature with click/submit/request/state change must complete the functional contract: `feature_type` + `entry_point` + `actor_roles` + `visible_when` + `enabled_when` + `api_request` + `api_response` + `success_result` + `error_result` + `refresh_scope` + `verification_cases`
 - Any screenshot/prototype-driven task must complete the artifact intake template and prototype translation block before coding; do not code directly from visual similarity
 - UI rules must be written as AI-executable design language: scope + structure/class + token/density + state + business semantics + forbidden fallback. Vague taste rules like “更好看/更有质感/不要贴在一起” must be translated before coding.
+- New pages and material rewrites must have a typed `pageSpec.ts`; every PESDP dimension requires decisions plus evidence before template code.
 
 ## Working Protocol
 
-1. Fill slot mapping (`module-patterns.md` template).
-2. For an existing project with no reference image, complete the no-reference intake and measured audit from `existing-project-modernization.md`.
-3. If the task comes from a screenshot/prototype, complete the artifact intake template and prototype translation block.
-4. If the task has behavior, classify `feature_type` and complete the functional contract.
-5. Pick archetype; read topic references.
-6. Repair theme ownership before page-local visual tuning.
-7. Implement in priority order: Arco built-ins → official/project tokens → documented business patterns → minimal page-local CSS.
-8. Run real-route visual inspection, `node scripts/check-spec.js`, and build when possible.
-9. Report object mapping, applicable intake/audit, product-grade evidence, files changed, rules applied, and verification.
+1. Complete artifact/no-reference intake and business slot mapping.
+2. Create/update the typed `pageSpec.ts` using `page-spec-contract.md`; resolve every PESDP dimension and rule authority before template code.
+3. If the task has behavior, classify `feature_type` and complete the functional contract.
+4. Read only the archetype/topic authorities named by the page spec.
+5. Repair theme ownership before page-local visual tuning.
+6. Implement in priority order: Arco built-ins → official/project tokens → documented business patterns → minimal page-local CSS.
+7. Run real-route visual inspection, `node scripts/check-spec.js`, and build when possible.
+8. Reconcile evidence with `pageSpec.ts`; a claim without evidence remains failed.
+9. Report page-spec mapping, applicable intake/audit, product-grade evidence, files changed, rules applied, and verification.
 
 ## Output Standard
 
-- Slot mapping + archetype (design/generation tasks)
+- Page spec + slot mapping + archetype (design/generation tasks)
 - Existing-project audit block when no visual artifact is supplied
 - Artifact intake block (screenshot/prototype-driven tasks)
 - Prototype translation block (screenshot/prototype-driven tasks)

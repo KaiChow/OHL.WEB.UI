@@ -167,7 +167,19 @@ Toolbar actions are chosen by workflow:
 - Use status tabs only when users actually filter by that state many times per day.
 - If sales/operators process the list by state every day, status tabs are required visible workflow controls, not optional decoration.
 - Do not create fake status tabs just to fill the layout.
-- At the supported 1280px baseline, status controls scroll inside their own region before adding another full-width row. Widths below 1280px are not a supported project contract; see `responsive.md`.
+- At the `1366x768` release gate, status controls remain in the compact command path. At the supported `1024x768` split-window bound they scroll inside their own region before adding another full-width row; see `responsive.md`.
+
+## Operational Work Scope
+
+When records are repeatedly divided by ownership as well as workflow state, expose a compact work-scope control in the same workflow row.
+
+- Scope answers **whose/which working set**: for example all active records vs records owned by the current operator.
+- Status answers **which workflow queue** inside that scope. Scope and status are separate query dimensions and must not be styled as one undifferentiated tab strip.
+- Use an Arco button-style Radio Group, Select, or another native compact single-choice control. Annotate the role with a stable hook such as `data-workbench-scope` when automated evidence is required.
+- Scope change updates status counts, pagination, selection, empty-state copy, and table context together.
+- Default scope must be explicit and persistent when the business defines a personal default; do not silently filter to “mine” while the visible control says all.
+- The workflow row keeps the order `business actions -> work scope -> status queues`; each role has a visible separator or spacing boundary.
+- Do not add a scope control when the data has no ownership split. Do not duplicate the same mine/all choice in saved-query schemes, visible filters, and the workflow row unless each surface has a distinct persistence purpose.
 
 ## Table Column Selection
 

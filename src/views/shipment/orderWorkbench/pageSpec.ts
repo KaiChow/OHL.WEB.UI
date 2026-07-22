@@ -1,0 +1,82 @@
+import { definePesdpPageSpec } from '../../../design-system/pesdpPageSpec';
+
+export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
+  id: 'shipment-export-order-workbench',
+  goal: 'sellable-saas-grade',
+  archetype: 'list-workbench',
+  business: {
+    object: 'sea-export-order',
+    primaryUser: 'freight-operator',
+    userJob: 'locate-prioritize-and-progress-orders',
+    primaryIdentity: ['orderNo'],
+    keyState: ['status', 'nextAction', 'exceptionState'],
+    mainWorkingData: ['owner', 'customer', 'route', 'etd', 'documentState', 'feeState'],
+    supportingData: ['updatedAt'],
+  },
+  pesdp: {
+    professional: {
+      decisions: ['Use sea-export order vocabulary, ownership scope, operational queues, and the next freight action.'],
+      evidence: ['Rendered columns expose order identity, owner, route, status, and next action without generic task wording.'],
+    },
+    efficient: {
+      decisions: ['Keep daily query fields, ownership scope, status queues, batch entry, and row detail directly reachable.'],
+      evidence: ['At 1366x768 the command path remains one compact surface and the table owns at least 70% of usable height.'],
+    },
+    structured: {
+      decisions: ['Command surface owns query/actions/queues; data surface owns table context, selection, utilities, and pagination.'],
+      evidence: ['Totals appear in pagination and queue counts only; table context does not repeat the total or risk count.'],
+    },
+    dense: {
+      decisions: ['Use an S3 core-query plus grouped drawer and standard two-line decision rows; compact density hides auxiliary context instead of clipping it.'],
+      evidence: ['1366, 1024 split, and wide viewport checks record overflow ownership and visible row count.'],
+    },
+    premium: {
+      decisions: ['Keep GI as palette owner and derive product quality from stable hierarchy, semantic status, restraint, and complete states.'],
+      evidence: ['Computed theme tokens, normal/error/empty/permission states, long text, column settings, and density behavior are inspected on route.'],
+    },
+  },
+  surfaces: [
+    { id: 'command', role: 'command', owns: ['query', 'create', 'batch', 'ownership-scope', 'status-queues'], primaryAction: 'export-order-create', implementation: 'arco' },
+    { id: 'orders', role: 'data', owns: ['table-context', 'selection', 'column-settings', 'density', 'pagination', 'table-feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'VXE integration and freight workbench density require the documented workbench-table bridge.' },
+  ],
+  query: {
+    totalFields: 18,
+    strategy: 's3-drawer',
+    visibleFields: ['keyword', 'customerName', 'pol', 'pod', 'carrier'],
+    advancedFields: [
+      'vesselVoyage',
+      'blNo',
+      'bookingNo',
+      'orderStatus',
+      'operator',
+      'businessType',
+      'hasException',
+      'etdRange',
+      'closingRange',
+      'updatedRange',
+      'fileStatus',
+      'feeStatus',
+      'isOverdue',
+    ],
+    savedSchemes: true,
+  },
+  table: {
+    kind: 'workbench',
+    identityColumns: ['orderNo', 'status'],
+    decisionColumns: ['nextAction', 'operator', 'customerName', 'route', 'documentState', 'feeState', 'exceptionState'],
+    supportingColumns: ['updatedAt'],
+    compositeColumns: ['route-pol-pod-etd'],
+    fixed: ['checkbox', 'orderNo', 'operations'],
+    densityReason: 'Standard rows retain the auxiliary decision line; compact mode intentionally renders one line.',
+  },
+  detail: { mode: 'none', focus: [], milestones: [] },
+  actions: [
+    { id: 'export-order-create', scope: 'command', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'export-order-create', successOwner: 'order-list', failureOwner: 'create-flow' },
+    { id: 'export-order-open-detail', scope: 'row', frequency: 'daily', risk: 'low', presentation: 'row-action', contract: 'export-order-open-detail', successOwner: 'detail-context', failureOwner: 'row-action' },
+    { id: 'export-order-column-preferences', scope: 'data-utilities', frequency: 'regular', risk: 'low', presentation: 'text', contract: 'export-order-column-preferences', successOwner: 'table', failureOwner: 'column-settings-popover' },
+  ],
+  states: ['loading', 'slow', 'empty', 'no-permission', 'network-error', 'long-text', 'extreme-value', 'partial-failure', 'success'],
+  responsive: { release: ['1366x768', '1280x720'], split: '1024x768', wide: '1920x1080' },
+  authorities: ['list-page.md', 'filter-layout.md', 'table.md', 'actions.md', 'feedback.md', 'responsive.md'],
+  verification: ['node scripts/check-spec.js', 'npm run build', 'real-route viewport and state matrix'],
+});

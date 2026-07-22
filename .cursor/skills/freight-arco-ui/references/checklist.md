@@ -212,7 +212,7 @@
 - Workbench table header uses the shared GI alias (`--dense-table-header-bg`); table body uses weak horizontal separators and no dominant vertical grid lines.
 - Card hierarchy comes from grouping, gap, the effective GI surface, restrained elevation, and the shared boundary token.
 - Toolbar workflow buttons are separated by type/group/icon, not by arbitrary success/warning/purple colors. Semantic colors remain reserved for status, validation, risk, and destructive actions.
-- List modules follow `responsive.md`: at the supported 1280px baseline, no filter/toolbar/status module creates page-level horizontal scroll; status groups scroll internally before another full-width row is added.
+- List modules follow `responsive.md`: at the `1366x768` release gate and `1024x768` split-window bound, no filter/toolbar/status module creates page-level horizontal scroll; status groups scroll internally before another full-width row is added.
 - Raw theme channel tokens are not used as complete CSS colors; use `--dense-*` aliases or `rgb()/rgba(var(...))`.
 - Status colors are consistent and only used for semantic state.
 - Primary identity, key state, owner/person, business context, and object-owned key facts do not use disabled/empty `color-text-4`.
@@ -230,6 +230,6 @@
 
 - Run `npx vite build`.
 - If possible, inspect `http://127.0.0.1:9527/#/<route>`.
-- Check at 1280px and 1920px widths for overflow and button crowding.
+- Check at `1366x768`, `1024x768`, and one wide desktop viewport for overflow, focus order, and button crowding; keep `1280x720` as additional compact-desktop evidence for sellable-grade work.
 - Check PESDP score before final response.
 - Mention unrelated build failures separately.
