@@ -9,6 +9,24 @@ This file is the companion to the UI references:
 - UI references define structure, classes, density, and interaction surfaces.
 - This file defines action legality, field behavior, permission boundaries, request/response handling, and verification.
 
+Sections: [routing](#feature-routing) · [contract](#functional-contract-block) · [legality](#action-legality) · [requests](#request--response-contract) · [verification](#verification-cases).
+
+## Feature Routing
+
+Read this contract plus only the surface authorities involved:
+
+| Feature | Add |
+| --- | --- |
+| Query/reset/apply | `filter-layout.md`, `form-field.md`, `feedback.md` |
+| Create/edit/save | `form-rules.md` and `detail-form.md` or `full-page-form.md` |
+| Row/toolbar/batch action | `actions.md`, `table.md`, `feedback.md` |
+| Status or permission flow | `actions.md`, `permissions.md`, `feedback.md` |
+| Modal/drawer workflow | `modal.md`, `overlay-dimensions.md` |
+| Upload/import/export | `upload.md`, `feedback.md` |
+| Dashboard drill-down | `dashboard.md`, `permissions.md` |
+
+Define query payload/reset/empty behavior when visible records change. Define role/state visibility separately from enablement. Define business, permission, validation, and network failure separately. Define loading lock/idempotency for repeatable actions and transition/refresh scope for multi-state work.
+
 ## Non-Negotiable
 
 Any feature that changes data, changes visible result sets, opens a business workflow, or depends on role/state must define the contract below before implementation.

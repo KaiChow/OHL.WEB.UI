@@ -12,8 +12,8 @@ alwaysApply: true
 1. 所有 UI：`arco-first.md` + `theme-contract.md`。
 2. 无设计稿（默认）：`existing-project-modernization.md` + `redesign-calibration.md` + 一个页面 authority。
 3. 新页面、重写或重大布局/交互：先按 `page-spec-contract.md` 更新 typed `pageSpec.ts`。
-4. 点击、请求、权限、状态或提交：`feature-routing.md` + `feature-delivery-contract.md`。
-5. 截图/Figma/原型：`artifact-intake-template.md` + `prototype-to-ui-contract.md`。
+4. 点击、请求、权限、状态或提交：`feature-delivery-contract.md` + 对应 surface authority。
+5. 截图/Figma/原型：先完成 `prototype-to-ui-contract.md` 的统一 intake/translation block。
 6. Icon 变更：`icons.md`；其他 surface 只读对应 authority。
 
 ## 实现顺序

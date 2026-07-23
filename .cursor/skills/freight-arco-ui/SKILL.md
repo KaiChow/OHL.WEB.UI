@@ -51,19 +51,18 @@ Read in order:
    - master/config: `master-data.md`
    - dashboard: `dashboard.md`
 6. Surface helpers only when in scope: `filter-layout.md`, `table.md`, `actions.md`, `icons.md`, `overlay-dimensions.md`, `feedback.md`, `component-size.md`.
-7. Feature references only for behavior changes: `feature-routing.md` + `feature-delivery-contract.md`.
+7. For behavior changes, read `feature-delivery-contract.md` plus the matching surface authority.
 8. Grep `src/styles/global.css` only for justified shared APIs; never use it as a design catalog.
 
-Skip `artifact-intake-template.md` and `prototype-to-ui-contract.md` unless the user provides a screenshot, Figma, prototype, or visual artifact.
+Skip `prototype-to-ui-contract.md` unless the user provides a screenshot, Figma, prototype, or visual artifact.
 
 ## Artifact Path
 
 When the user provides a visual artifact:
 
-1. Read `artifact-intake-template.md`.
-2. Read `prototype-to-ui-contract.md`.
-3. Translate the artifact into business object, archetype, surfaces, actions, uncertain behavior, and required contracts.
-4. Then continue with the Default Path.
+1. Read `prototype-to-ui-contract.md`.
+2. Complete its artifact translation block and delivery level.
+3. Then continue with the Default Path.
 
 Never code directly from visual similarity.
 

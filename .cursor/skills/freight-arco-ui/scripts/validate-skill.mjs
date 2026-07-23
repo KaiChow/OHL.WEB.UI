@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 const SKILL_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const REFERENCES = join(SKILL_ROOT, 'references');
-const MAX_REFERENCE_FILES = 35;
-const MAX_REFERENCE_LINES = 7200;
+const MAX_REFERENCE_FILES = 32;
+const MAX_REFERENCE_LINES = 6800;
 const MAX_SINGLE_REFERENCE_LINES = 700;
 
 const lineCount = (source) => source.split(/\r?\n/).length;

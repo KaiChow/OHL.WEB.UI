@@ -14,7 +14,7 @@ Score only after inspecting real routes. Each gate routes component details to i
 | --- | --- | --- | --- |
 | 1 | One product | Shell, query, data, detail, overlay, actions, status, spacing, and feedback use one ownership stack | `theme-contract.md`, `arco-first.md` |
 | 2 | Dense, not crowded | Data dominates; readable rhythm does not rely on tiny text or collapsed targets | `redesign-calibration.md`, `typography.md`, `component-size.md` |
-| 3 | Stable archetype | Identity, command context, primary work surface, and pagination have one clear owner | `page-archetypes.md`, `list-page.md`, `detail-form.md` |
+| 3 | Stable archetype | Identity, command context, primary work surface, and pagination have one clear owner | `domain-routing.md`, `list-page.md`, `detail-form.md` |
 | 4 | Action priority | One primary per scope; daily actions visible; rare/risky/destructive actions grouped and confirmed | `actions.md`, `feature-delivery-contract.md` |
 | 5 | Professional query | Daily conditions visible; advanced conditions use the selected tier; repeated schemes persist when required | `filter-layout.md` |
 | 6 | Office table | VXE columns, fixed areas, density, overflow, selection/batch, settings, and long data remain usable | `table.md` |

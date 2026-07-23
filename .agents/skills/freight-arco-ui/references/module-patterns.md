@@ -50,7 +50,7 @@ Fill these slots **before** choosing layout or components:
 | 7 | `high_frequency_actions` | Must be one click |
 | 8 | `low_frequency_actions` | Group in dropdown; dangerous → confirm |
 
-Then pick page archetype → see [`page-archetypes.md`](page-archetypes.md).
+Then select the page authority through [`domain-routing.md`](domain-routing.md).
 
 **Domain examples** (identity / facts / status per object type): [`domain-language.md` → Object examples](domain-language.md#object-identity-examples).
 

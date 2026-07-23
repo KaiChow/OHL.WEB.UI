@@ -5,9 +5,9 @@ Use this only before delivery. It verifies that the selected authorities were ap
 ## 1. Task Path
 
 - No visual artifact: use `existing-project-modernization.md`, `redesign-calibration.md`, and one matching page authority.
-- Screenshot/Figma/prototype: complete `artifact-intake-template.md` and `prototype-to-ui-contract.md` first.
+- Screenshot/Figma/prototype: complete the intake, delivery level, and translation block in `prototype-to-ui-contract.md` first.
 - New page or material rewrite: complete typed `pageSpec.ts` from `page-spec-contract.md` before template work.
-- Click/request/permission/mutation/state change: complete `feature-routing.md` and `feature-delivery-contract.md` before behavior code.
+- Click/request/permission/mutation/state change: complete `feature-delivery-contract.md` and the matching surface authority before behavior code.
 - New menu or unclear archetype: resolve it with `domain-routing.md`; fill the current business object through `module-patterns.md` and `domain-language.md`.
 
 ## 2. Implementation Ownership

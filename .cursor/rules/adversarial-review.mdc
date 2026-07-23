@@ -13,7 +13,7 @@ alwaysApply: true
 4. 对应 surface authority：筛选、overlay、列表、表格、详情、动作是否只由各自 authority 决定？
 5. `feature-delivery-contract.md`: 显隐、可用、权限、请求、失败保留、刷新和防重复提交是否完整？
 6. `icons.md`: 图标库和作用域是否正确？
-7. Artifact task: 是否先满足 `artifact-intake-template.md` 与 `prototype-to-ui-contract.md`？
+7. Artifact task: 是否完成 `prototype-to-ui-contract.md` 的 intake、交付级别与转译块？
 8. 是否用新增文档掩盖缺失的共享 UI 能力、过量 page-local CSS 或未验证的真实效果？
 
 发现问题先修复。最后运行 `node scripts/check-spec.js`；脚本不替代真实路由审查。

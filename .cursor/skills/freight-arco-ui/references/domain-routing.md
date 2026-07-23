@@ -1,53 +1,42 @@
-# Domain Routing (Large System)
+# Domain Routing
 
-## Purpose
+Use this only for a new menu or uncertain page type. Choose from business object + user job; domains never get separate CSS themes.
 
-This file maps **business areas** in the OHL freight platform to **page archetypes** and **reference docs**. Use it after `module-patterns.md` slot filling.
+## Route To One Primary Page Authority
 
-One design system serves all domains. Domains differ by **object + job + archetype**, not by separate CSS themes.
+| User job / object shape | Primary authority | Add when needed |
+| --- | --- | --- |
+| Scan or operate many records | `list-page.md` | `filter-layout.md`, `table.md`, `detail-form.md` |
+| Inspect one record without losing list context | `detail-form.md` | `table.md`, `upload.md`, `feedback.md` |
+| Create/edit a full object as the route task | `full-page-form.md` | `form-rules.md`, `upload.md` |
+| Configure dictionaries, organizations, routes, carriers, warehouses | `master-data.md` | `permissions.md`, `detail-form.md` |
+| Configure roles, menus, or data scope | `permissions.md` | `master-data.md` |
+| Analyze KPI/trends with drill-down | `dashboard.md` | `table.md`, `feedback.md` |
+| Complete one narrow decision or small form | `modal.md` | `overlay-dimensions.md`, `feature-delivery-contract.md` |
 
-## Routing Table
+## Domain Mapping
 
-| Business area | Typical objects | User job | Archetype | Primary references |
-|---------------|-----------------|----------|-----------|-------------------|
-| 出口/业务单、操作台 | 业务单、订舱、报关 | scan · operate | A + B | `list-page` · `detail-form` · `table` |
-| 客户端下单 | 委托单草稿 | create | C | `full-page-form` · `upload` |
-| CRM | 客户、联系人、跟进 | scan · create | A + B | `list-page` · `detail-form` · `domain-language` |
-| 运价 | 价卡、运价行、有效期 | scan · configure | A (+ E compare) | `list-page` · `table` · `master-data` |
-| 仓储 | 入仓单、库存、库位 | scan · operate | A + F | `list-page` · `detail-form` · `table` |
-| 财务/对账 | 账单、核销、利润 | scan · reconcile | A + E | `list-page` · `table` · `detail-form` |
-| 基础信息 | 港口、船司、字典 | configure | D | **`master-data.md`** |
-| 用户/组织 | 用户、部门 | configure | D or A | **`master-data.md`** · `list-page` |
-| 权限 | 角色、菜单、数据范围 | configure | D | **`permissions.md`** |
-| 系统设置 | 参数、开关、集成 | configure | D | `master-data` · `detail-form` |
-| 文件/单证中心 | 附件、单证包 | scan | A | `list-page` · `upload` · `table` |
-| 通知管理 | 通知、公告 | scan · create | A + H | `list-page` · `modal` |
-| BI / 报表 | 指标、维度 | analyze | G | **`dashboard.md`** |
-| 行政 / HR | 申请、档案、考勤 | scan · approve | A + C/B | `list-page` · `full-page-form` · `domain-language` |
+| Business area | Object/job emphasis | Route |
+| --- | --- | --- |
+| Export/order operations | order identity, queue, state, next action | workbench + detail |
+| Client ordering | draft, required core fields, repeated owned entities | full-page form |
+| CRM | customer/contact identity, follow-up job | workbench + detail |
+| Rates | rate line, validity, comparison/configuration | workbench + master data |
+| Warehouse | warehouse/location scope, scan, quantity, exception | workbench + detail |
+| Finance/reconciliation | date/scope, currency, amounts, batch, audit trail | workbench + detail |
+| Base information/system settings | effective state, configuration, last update | master data |
+| Users/organization/permissions | hierarchy, role, menu, data scope | master data or permissions |
+| Documents/notifications | document/notification identity, status, focused action | workbench + upload or modal |
+| BI/reporting | time/scope, limited KPI, question-led chart, drill-down | dashboard |
+| Administration/HR | current object and approve/create job | workbench + full-page form or detail |
 
-## Decision Rules
+Finance amounts must show currency, use right alignment/tabular numbers, and confirm irreversible batch work. Warehouse quantity/location are primary data; shortage/difference uses semantic status, never row coloring.
 
-1. **Scan many records daily** → Archetype **A** (workbench list).
-2. **Inspect one record without losing list** → **B** (detail drawer).
-3. **Create/edit a full object as the page task** → **C** (`full-page-form`).
-4. **Tree/category + table or form** → **D** (`master-data` or `permissions`).
-5. **Money columns + batch** → **E** rules in `page-archetypes` + `table` numeric columns.
-6. **Physical qty/location scanning** → **F** + warehouse language in `domain-language`.
-7. **KPI + chart + drill-down** → **G** (`dashboard`).
-8. **≤8 fields single action** → **H** (`modal`).
+## Selection Rules
 
-## Cross-Domain Forbidden
-
-- Do not copy shipment-order columns into CRM, HR, or settings pages.
-- Do not use `dds-hero` / `dds-milestone-bar` on master-data or permission pages.
-- Do not use operational workbench density on BI dashboards without adjusting row height and chart spacing.
-- Do not use `a-table` in any domain.
-- Do not invent a new layout class when `md-layout`, `perm-layout`, `db-wrap`, or `xf-wrap` already fits.
-
-## Read Order For New Menu
-
-1. This file → pick archetype + references.
-2. `module-patterns.md` → fill slots.
-3. `domain-language.md` → labels/status for the object.
-4. Topic references from the routing table.
-5. `checklist.md` + `node scripts/check-spec.js`.
+1. Fill `module-patterns.md` slots and `domain-language.md` object terms first.
+2. Select one primary page authority from the first table; add only surfaces present in the task.
+3. Preserve list context with detail/overlay when the task is focused; use a route only for genuinely full-page work.
+4. Never copy shipment columns, milestones, or hero structures into another domain.
+5. Do not use `a-table` or invent a layout class when a proven shared role already fits.
+6. Finish with `checklist.md` and `node scripts/check-spec.js`.

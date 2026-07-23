@@ -38,7 +38,7 @@ page_local_css_budget:
 target_product_grade:
 ```
 
-Do not use `artifact-intake-template.md` when no artifact exists. Use it only when the user actually provides a screenshot, prototype, or visual reference.
+Do not use `prototype-to-ui-contract.md` when no artifact exists. Use it only when the user actually provides a screenshot, prototype, or visual reference.
 
 ## Shared Capability Before New Rules
 
