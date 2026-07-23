@@ -7,7 +7,7 @@ description: Project UI and feature-delivery skill for FE.OHL.WEB.UI. Use when d
 
 Use this as the executable UI delivery contract for `FE.OHL.WEB.UI`.
 
-Source of truth: `.agents/skills/freight-arco-ui/`. After edits run `npm run sync-ui-skill` to update the Cursor mirror at `.cursor/skills/freight-arco-ui/`.
+Source: `.agents/skills/freight-arco-ui/`. After edits run `npm run sync-freight-skill` to refresh `.cursor/skills/freight-arco-ui/`.
 
 ## Core Contract
 
@@ -44,13 +44,13 @@ Read in order:
 2. `references/theme-contract.md`
 3. `references/existing-project-modernization.md`
 4. `references/redesign-calibration.md`
-5. One archetype authority only:
+5. For a new menu or uncertain archetype, read `domain-routing.md`; then read one archetype authority only:
    - list/workbench: `list-page.md`
    - detail/drawer/object workspace: `detail-form.md`
    - full-page form: `full-page-form.md`
    - master/config: `master-data.md`
    - dashboard: `dashboard.md`
-6. Surface helpers only when in scope: `filter-layout.md`, `table.md`, `actions.md`, `overlay-dimensions.md`, `feedback.md`, `component-size.md`.
+6. Surface helpers only when in scope: `filter-layout.md`, `table.md`, `actions.md`, `icons.md`, `overlay-dimensions.md`, `feedback.md`, `component-size.md`.
 7. Feature references only for behavior changes: `feature-routing.md` + `feature-delivery-contract.md`.
 8. Grep `src/styles/global.css` only for justified shared APIs; never use it as a design catalog.
 
@@ -66,29 +66,6 @@ When the user provides a visual artifact:
 4. Then continue with the Default Path.
 
 Never code directly from visual similarity.
-
-## Rule Ownership
-
-When files disagree, use the authority below and remove/fix the duplicate during maintenance.
-
-| Rule family | Authority |
-| --- | --- |
-| Arco/custom CSS priority | `arco-first.md` |
-| Theme ownership and tokens | `theme-contract.md` |
-| No-design modernization | `existing-project-modernization.md` |
-| Cross-page layout / first viewport | `redesign-calibration.md` |
-| Page IR / PESDP trace | `page-spec-contract.md` |
-| Query count and filter surface | `filter-layout.md` |
-| List workbench | `list-page.md` |
-| Detail/object workspace | `detail-form.md` |
-| VXE table mechanics | `table.md` |
-| Button/action hierarchy | `actions.md` |
-| Icon usage | `icons.md` |
-| Overlay sizing/scroll | `overlay-dimensions.md` |
-| Permissions and feature behavior | `permissions.md`, `feature-delivery-contract.md` |
-| Feedback/empty/error | `feedback.md` |
-| Product-grade scoring | `product-grade-evaluation.md` |
-| Delivery checks | `checklist.md`, `scripts/check-spec.js` |
 
 ## Skill Growth Freeze
 
@@ -131,13 +108,4 @@ A larger skill with the same page-local CSS budget is a process failure.
 
 ## Delivery Report
 
-Report only evidence that was actually produced:
-
-- path used: no-design / artifact / feature / cleanup
-- page spec and authorities used
-- shared APIs reused or added
-- page-local CSS before→after when touched
-- files changed
-- verification commands and results
-- real-route viewport/state evidence when UI quality is in scope
-- remaining risks
+Report the path and authorities used, files/shared APIs changed, verification results, real-route evidence when UI quality is in scope, and remaining risks. Never report unproduced evidence.

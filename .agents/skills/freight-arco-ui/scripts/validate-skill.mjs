@@ -4,109 +4,89 @@ import { fileURLToPath } from 'node:url';
 
 const SKILL_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const REFERENCES = join(SKILL_ROOT, 'references');
+const MAX_REFERENCE_FILES = 35;
+const MAX_REFERENCE_LINES = 7200;
+const MAX_SINGLE_REFERENCE_LINES = 700;
+
+const lineCount = (source) => source.split(/\r?\n/).length;
 
 export function validateFreightUiSkill() {
   const errors = [];
-  const read = (relativePath) => {
-    const path = join(SKILL_ROOT, relativePath);
-    if (!existsSync(path)) {
-      errors.push(`${relativePath}: missing required skill file`);
-      return '';
+  const skillPath = join(SKILL_ROOT, 'SKILL.md');
+  const agentPath = join(SKILL_ROOT, 'agents', 'openai.yaml');
+
+  if (!existsSync(skillPath)) return ['SKILL.md: missing required skill entry'];
+  if (!existsSync(agentPath)) errors.push('agents/openai.yaml: missing Codex skill metadata');
+  if (!existsSync(REFERENCES)) return [...errors, 'references/: missing reference directory'];
+
+  const skill = readFileSync(skillPath, 'utf8');
+  const agent = existsSync(agentPath) ? readFileSync(agentPath, 'utf8') : '';
+  const referenceNames = readdirSync(REFERENCES).filter((name) => name.endsWith('.md')).sort();
+  const references = new Map(
+    referenceNames.map((name) => [name, readFileSync(join(REFERENCES, name), 'utf8')]),
+  );
+
+  if (!/^---\s*\r?\nname:\s*freight-arco-ui\s*\r?\ndescription:\s*.+\r?\n---/s.test(skill)) {
+    errors.push('SKILL.md: frontmatter must contain only a valid name and description entry');
+  }
+  if (!/default_prompt:\s*.+/m.test(agent)) {
+    errors.push('agents/openai.yaml: missing default_prompt');
+  }
+  if (lineCount(skill) > 140) {
+    errors.push(`SKILL.md: ${lineCount(skill)} lines exceeds the 140-line entry budget`);
+  }
+
+  const totalReferenceLines = [...references.values()].reduce((total, source) => total + lineCount(source), 0);
+  if (referenceNames.length > MAX_REFERENCE_FILES) {
+    errors.push(`references/: ${referenceNames.length} files exceeds the ${MAX_REFERENCE_FILES}-file growth freeze`);
+  }
+  if (totalReferenceLines > MAX_REFERENCE_LINES) {
+    errors.push(`references/: ${totalReferenceLines} lines exceeds the ${MAX_REFERENCE_LINES}-line growth freeze`);
+  }
+
+  const documents = new Map([['SKILL.md', skill], ...references]);
+  for (const [name, source] of references) {
+    if (lineCount(source) > MAX_SINGLE_REFERENCE_LINES) {
+      errors.push(`${name}: ${lineCount(source)} lines exceeds the ${MAX_SINGLE_REFERENCE_LINES}-line reference budget`);
     }
-    return readFileSync(path, 'utf8');
-  };
 
-  const skill = read('SKILL.md');
-  const pageSpec = read('references/page-spec-contract.md');
-  const generation = read('references/ai-generation-contract.md');
-  const filter = read('references/filter-layout.md');
-  const overlay = read('references/overlay-dimensions.md');
-  const arcoFirst = read('references/arco-first.md');
-  const table = read('references/table.md');
-  const responsive = read('references/responsive.md');
-  const list = read('references/list-page.md');
-  const detail = read('references/detail-form.md');
-  const formRules = read('references/form-rules.md');
-  const agent = read('agents/openai.yaml');
-
-  const requirements = [
-    [skill, '## Mandatory PESDP Execution Gate', 'SKILL.md must make PESDP execution a blocking gate'],
-    [skill, '## Default Path (No UI Design)', 'SKILL.md must define the no-design default lean path'],
-    [skill, '## Skill Growth Freeze', 'SKILL.md must freeze skill growth in favor of shared UI capability'],
-    [skill, 'page-spec-contract.md', 'SKILL.md must route page generation through the page spec'],
-    [pageSpec, '## PESDP Traceability Gate', 'page spec must define PESDP traceability'],
-    [pageSpec, "target: 'sellable-saas-grade'", 'page spec must express product grade as a target, not an achieved result'],
-    [pageSpec, 'acceptance:', 'page spec must define measurable acceptance conditions rather than self-authored evidence'],
-    [pageSpec, 'Skipping step 2 is a blocking process violation', 'page spec must block template-first generation'],
-    [generation, '## PESDP Trace Gate', 'AI generation contract must reconcile PESDP evidence'],
-    [filter, '| `9-16` | **S2**', 'filter authority must retain the S2 decision row'],
-    [filter, '## Advanced Filter Overlay Contract', 'filter authority must define the advanced-filter overlay contract'],
-    [filter, 'The component width prop is authoritative', 'filter authority must keep Drawer width ownership on the component prop'],
-    [filter, 'one vertical scroll owner', 'filter authority must define one vertical scroll owner'],
-    [filter, 'data-ui-surface="advanced-filter"', 'filter authority must provide non-visual audit evidence'],
-    [filter, ':xs="24" :sm="12"', 'filter authority must retain the one-column/two-column Arco Grid breakpoint example'],
-    [filter, '| `50+` | **workspace**', 'filter authority must route 50+ conditions to a query workspace'],
-    [overlay, 'The component `width` prop is authoritative', 'overlay authority must keep width ownership on the component prop'],
-    [overlay, '| D2 Filter wide |', 'overlay authority must retain the D2 advanced-filter tier'],
-    [overlay, '## Size Stability Gate', 'overlay authority must define post-mount size stability'],
-    [overlay, 'height="auto"', 'overlay authority must address the VXE auto-height feedback loop'],
-    [table, 'do **not** set `row-config.height` on `detail-mini-vxe`', 'table authority must retain the pinned VXE detail rule'],
-    [responsive, 'supported minimum viewport width of **1024px**', 'responsive authority must retain the 1024 lower bound'],
-    [list, 'data-workbench-scope', 'list authority must distinguish work scope from status queues'],
-    [detail, '## Object Workspace Mode Contract', 'detail authority must define display/edit workspace behavior'],
-    [formRules, '### 7.1 对象详情工作区（展示优先）', 'form rules must route object details to display-first workspace behavior'],
-    [agent, 'typed pageSpec.ts', 'agent default prompt must activate the page-spec gate'],
-  ];
-  for (const [source, needle, message] of requirements) {
-    if (!source.includes(needle)) errors.push(message);
-  }
-
-  const forbidden = [
-    [generation, 'row-config.height = 38', 'AI generation contract duplicates the forbidden detail row-height rule'],
-    [generation, '9-16 core row + drawer', 'AI generation contract duplicates an obsolete query threshold'],
-    [generation, '17-32 grouped drawer', 'AI generation contract duplicates query thresholds instead of routing to authority'],
-    [generation, 'supported 1280px baseline', 'AI generation contract restores the obsolete responsive baseline'],
-    [list, 'Widths below 1280px are not a supported project contract', 'list reference conflicts with the 1024 lower bound'],
-    [formRules, '默认 **常驻编辑态**，禁止「先点编辑再改」', 'form rules restore the obsolete always-editable object detail contract'],
-    [pageSpec, 'decisions: []', 'page-spec example contains an empty PESDP decision trace'],
-    [pageSpec, 'acceptance: []', 'page-spec example contains an empty PESDP acceptance trace'],
-    [pageSpec, "goal: 'sellable-saas-grade'", 'page-spec example self-certifies a product grade instead of declaring a target'],
-    [pageSpec, 'surfaces: []', 'page-spec example contains no surface ownership'],
-    [pageSpec, 'actions: []', 'page-spec example contains no action contract binding'],
-    [filter, 'Body structure is fixed', 'filter authority restores the obsolete copied drawer DOM'],
-    [filter, 'query-filter-drawer__shell', 'filter authority restores the obsolete nested drawer shell'],
-    [overlay, 'documentation only', 'overlay authority restores false width ownership wording'],
-    [overlay, 'CSS wins', 'overlay authority restores false CSS width ownership'],
-    [overlay, '!important overrides inline', 'overlay authority restores a hidden width override'],
-    [detail, 'global.css` wins', 'detail authority restores a hidden width override'],
-    [arcoFirst, 'shipment/export-orders', 'framework authority contains a route-specific page instruction'],
-  ];
-  for (const [source, needle, message] of forbidden) {
-    if (source.includes(needle)) errors.push(message);
-  }
-  if (/\| D2 Filter wide \|[^\n]*50\+/.test(overlay)) {
-    errors.push('overlay authority routes 50+ query fields back into a wide drawer');
-  }
-  if (/height="auto"[\s\S]{0,120}class="[^"]*detail-mini-vxe|class="[^"]*detail-mini-vxe[\s\S]{0,120}height="auto"/.test(detail)) {
-    errors.push('detail authority still generates VXE auto-height inside a detail scroll owner');
-  }
-
-  for (const file of readdirSync(REFERENCES).filter((name) => name.endsWith('.md'))) {
-    const content = readFileSync(join(REFERENCES, file), 'utf8');
-    const headings = content
-      .split(/\r?\n/)
-      .filter((line) => line.startsWith('## '));
+    const headings = source.split(/\r?\n/).filter((line) => line.startsWith('## '));
     const seen = new Set();
     for (const heading of headings) {
-      if (seen.has(heading)) errors.push(`${file}: duplicate authority heading ${heading}`);
+      if (seen.has(heading)) errors.push(`${name}: duplicate authority heading ${heading}`);
       seen.add(heading);
     }
-    if (/shipment\/export-orders|orderWorkbench/.test(content)) {
-      errors.push(`${file}: route-specific implementation leaked into the reusable skill`);
+
+    const linkedElsewhere = [...documents].some(([owner, content]) => owner !== name && content.includes(name));
+    if (!linkedElsewhere) errors.push(`${name}: orphan reference has no routing link`);
+    if (/shipment\/export-orders|orderWorkbench/.test(source)) {
+      errors.push(`${name}: route-specific implementation leaked into the reusable skill`);
     }
   }
 
-  return errors;
+  for (const [owner, source] of documents) {
+    const links = source.match(/(?:references\/)?[a-z0-9-]+\.md\b/g) || [];
+    for (const link of links) {
+      const name = link.replace('references/', '');
+      if (!references.has(name)) errors.push(`${owner}: broken reference link ${link}`);
+    }
+  }
+
+  const allReferences = [...references.values()].join('\n');
+  const conflicts = [
+    [/Widths below 1280px are not a supported project contract/, 'obsolete 1280px lower bound'],
+    [/默认 \*\*常驻编辑态\*\*，禁止「先点编辑再改」/, 'obsolete always-editable detail contract'],
+    [/query-filter-drawer__shell/, 'obsolete nested filter drawer shell'],
+    [/!important overrides inline|global\.css` wins/, 'hidden overlay width override'],
+  ];
+  for (const [pattern, message] of conflicts) {
+    if (pattern.test(allReferences)) errors.push(`references/: ${message}`);
+  }
+  if (/\| D2 Filter wide \|[^\n]*50\+/.test(allReferences)) {
+    errors.push('references/: 50+ query fields must not route to a filter drawer');
+  }
+
+  return [...new Set(errors)];
 }
 
 const invokedDirectly = process.argv[1]

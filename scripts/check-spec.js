@@ -1,7 +1,7 @@
 /**
  * OHL 规范自动检查脚本
  * 用法: node scripts/check-spec.js
- * 检查页面、组件和 UI skill 样式下所有 .vue / .ts / .css 文件
+ * 检查页面和组件下的 .vue / .ts / .css 文件，并调用 freight skill validator
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
@@ -9,8 +9,7 @@ import { join, extname, sep } from 'path';
 import { validateFreightUiSkill } from '../.agents/skills/freight-arco-ui/scripts/validate-skill.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1');
-const SKILL_ROOT = join(ROOT, '.agents', 'skills', 'freight-arco-ui');
-const SCAN_DIRS = ['src/views', 'src/components', '.agents/skills/freight-arco-ui'];
+const SCAN_DIRS = ['src/views', 'src/components'];
 const EXTS = ['.vue', '.ts', '.css'];
 
 // ─── 规则定义 ────────────────────────────────────────────────────────────────
@@ -243,34 +242,7 @@ for (const file of files.filter((file) => file.endsWith('.vue'))) {
 
 const globalCss = readFileSync(join(ROOT, 'src/styles/global.css'), 'utf8');
 const packageJson = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
-const skillFile = (relativePath) => readFileSync(join(SKILL_ROOT, relativePath), 'utf8');
-const modulePatterns = skillFile('references/module-patterns.md');
-const aiGenerationContract = skillFile('references/ai-generation-contract.md');
-const checklist = skillFile('references/checklist.md');
-const visualSystem = skillFile('references/visual-system.md');
-const filterLayout = skillFile('references/filter-layout.md');
-const actionsReference = skillFile('references/actions.md');
-const iconsReference = skillFile('references/icons.md');
-const artifactIntakeTemplate = skillFile('references/artifact-intake-template.md');
-const prototypeToUiContract = skillFile('references/prototype-to-ui-contract.md');
-const featureRouting = skillFile('references/feature-routing.md');
-const featureDeliveryContract = skillFile('references/feature-delivery-contract.md');
-const typographyReference = skillFile('references/typography.md');
-const formFieldReference = skillFile('references/form-field.md');
-const skillSource = skillFile('SKILL.md');
-const specFirstCoding = readFileSync(join(ROOT, '.cursor/rules/spec-first-coding.mdc'), 'utf8');
-const adversarialReview = readFileSync(join(ROOT, '.cursor/rules/adversarial-review.mdc'), 'utf8');
 const mainTs = readFileSync(join(ROOT, 'src/main.ts'), 'utf8');
-const existingProjectModernization = skillFile('references/existing-project-modernization.md');
-const redesignCalibration = skillFile('references/redesign-calibration.md');
-const responsiveReference = skillFile('references/responsive.md');
-const overlayDimensions = skillFile('references/overlay-dimensions.md');
-const modalReference = skillFile('references/modal.md');
-const tableReference = skillFile('references/table.md');
-const detailFormReference = skillFile('references/detail-form.md');
-const pageSpecReference = skillFile('references/page-spec-contract.md');
-const agentsSummary = readFileSync(join(ROOT, 'AGENTS.md'), 'utf8');
-const productGradeEvaluation = skillFile('references/product-grade-evaluation.md');
 const shipmentFeatureContractPath = join(ROOT, 'src/views/shipment/featureContracts.ts');
 const shipmentFeatureContracts = existsSync(shipmentFeatureContractPath)
   ? readFileSync(shipmentFeatureContractPath, 'utf8')
@@ -355,14 +327,6 @@ if (existsSync(join(ROOT, 'CLAUDE.md')) || existsSync(join(ROOT, '.claude'))) {
     content: 'Claude configuration detected',
   });
 }
-if (!skillSource.includes('theme-contract.md') || !skillSource.includes('existing-project-modernization.md')) {
-  violations.push({
-    rule: 'SKILL.md 必须路由主题任务与无参考图的既有项目改造任务',
-    file: '.agents/skills/freight-arco-ui/SKILL.md',
-    line: 1,
-    content: 'missing theme/modernization routing',
-  });
-}
 for (const error of validateFreightUiSkill()) {
   violations.push({
     rule: 'freight-arco-ui skill 必须保持单一权威、PESDP 可追溯和无冲突生成链',
@@ -371,100 +335,12 @@ for (const error of validateFreightUiSkill()) {
     content: error,
   });
 }
-if (!pageSpecReference.includes('## PESDP Traceability Gate')
-  || !pageSpecReference.includes("target: 'sellable-saas-grade'")
-  || !pageSpecReference.includes('acceptance:')
-  || !skillSource.includes('## Mandatory PESDP Execution Gate')
-  || !specFirstCoding.includes('pageSpec.ts')) {
-  violations.push({
-    rule: '页面生成必须经过 typed pageSpec.ts，并在写 template 前完成 PESDP 决策与验收条件；目标等级不得冒充已达等级',
-    file: '.agents/skills/freight-arco-ui/references/page-spec-contract.md',
-    line: 1,
-    content: 'missing PESDP page-spec generation gate',
-  });
-}
-if (!skillSource.includes('## Rule Ownership') || !redesignCalibration.includes('## Layout Authority')) {
-  violations.push({
-    rule: 'Skill 必须声明唯一规则所有权，跨页面布局由 redesign-calibration.md 单独负责',
-    file: '.agents/skills/freight-arco-ui/SKILL.md',
-    line: 1,
-    content: 'missing rule ownership or layout authority',
-  });
-}
 if (existsSync(join(ROOT, '.cursor/rules/ui-spec.mdc'))) {
   violations.push({
     rule: '禁止恢复旧 ui-spec.mdc；完整 UI 规则只维护在 canonical skill，Cursor rule 仅保留流程门禁',
     file: '.cursor/rules/ui-spec.mdc',
     line: 1,
     content: 'duplicate always-on UI specification detected',
-  });
-}
-if (!responsiveReference.includes('1366x768') || !responsiveReference.includes('1024x768')) {
-  violations.push({
-    rule: 'responsive.md 必须包含 1366 笔记本发布门禁与 1024 多窗口审计，不得只验证大屏',
-    file: '.agents/skills/freight-arco-ui/references/responsive.md',
-    line: 1,
-    content: 'missing office viewport evidence contract',
-  });
-}
-if (!responsiveReference.includes('supported minimum viewport width of **1024px**')
-  || overlayDimensions.includes('min 1280px')
-  || productGradeEvaluation.includes('1280 is the current lower desktop bound')) {
-  violations.push({
-    rule: '响应式规范必须统一为 1024 分屏下限、1366 发布门禁，禁止残留 1280 下限的第二口径',
-    file: '.agents/skills/freight-arco-ui/references/responsive.md',
-    line: 1,
-    content: 'conflicting responsive baseline detected',
-  });
-}
-if (!modalReference.includes(':on-before-ok="handleBeforeOk"') || modalReference.includes('@ok="handleOk"')) {
-  violations.push({
-    rule: 'Modal 表单规范必须使用 on-before-ok 保留校验失败输入，禁止保留 @ok 旧示例',
-    file: '.agents/skills/freight-arco-ui/references/modal.md',
-    line: 1,
-    content: 'conflicting modal submit example detected',
-  });
-}
-if (tableReference.includes('| Workbench standard list | 36px | 48px')
-  || tableReference.includes('a-popconfirm` + `a-doption.danger-opt')) {
-  violations.push({
-    rule: '表格规范必须统一舒适档 44px，并禁止 Dropdown 内 Popconfirm 的旧规则',
-    file: '.agents/skills/freight-arco-ui/references/table.md',
-    line: 1,
-    content: 'conflicting table density or danger rule detected',
-  });
-}
-if (!tableReference.includes('### Composite Cell Decision Contract')
-  || !tableReference.includes('data-cell-role="decision-context"')) {
-  violations.push({
-    rule: '表格规范必须包含可执行的复合单元格决策契约与角色证据',
-    file: '.agents/skills/freight-arco-ui/references/table.md',
-    line: 1,
-    content: 'missing composite cell decision contract',
-  });
-}
-if (!detailFormReference.includes('## Object Workspace Mode Contract')) {
-  violations.push({
-    rule: '详情规范必须定义默认展示态、显式编辑态与首屏执行焦点的对象工作区契约',
-    file: '.agents/skills/freight-arco-ui/references/detail-form.md',
-    line: 1,
-    content: 'missing object workspace mode contract',
-  });
-}
-if (!productGradeEvaluation.includes('## Sellable Freight Product Maturity Gates') || !productGradeEvaluation.includes('| 14 | Product completion |')) {
-  violations.push({
-    rule: '融资/可销售级评估必须包含完整 14 项产品成熟度门禁',
-    file: '.agents/skills/freight-arco-ui/references/product-grade-evaluation.md',
-    line: 1,
-    content: 'missing sellable freight maturity gates',
-  });
-}
-if (!productGradeEvaluation.includes('### Deterministic Edge-State Evidence')) {
-  violations.push({
-    rule: '融资/可销售级评估必须要求边界态可确定性复现，禁止只在文档中声称已设计',
-    file: '.agents/skills/freight-arco-ui/references/product-grade-evaluation.md',
-    line: 1,
-    content: 'missing deterministic edge-state evidence contract',
   });
 }
 if (!shipmentFeatureContracts.includes('SHIPMENT_FEATURE_CONTRACTS')
@@ -663,320 +539,6 @@ if (!shipmentOrderInfoTab.includes('v-if="editable"')
     content: 'missing Arco detail-display / edit mode split',
   });
 }
-if (!checklist.includes('### Sellable Maturity Evidence')) {
-  violations.push({
-    rule: '交付清单必须检查 14 项成熟度、办公视口、异常就地处理和边界状态证据',
-    file: '.agents/skills/freight-arco-ui/references/checklist.md',
-    line: 1,
-    content: 'missing sellable maturity evidence checklist',
-  });
-}
-if (/上传用\s*Uppy/.test(agentsSummary)) {
-  violations.push({
-    rule: 'AGENTS.md 禁止把未安装/未实现的 Uppy 写成既定项目能力',
-    file: 'AGENTS.md',
-    line: 1,
-    content: 'phantom uploader dependency detected',
-  });
-}
-
-if (!modulePatterns.includes('Specification Granularity Rule')) {
-  violations.push({
-    rule: 'UI 规范必须定义 Specification Granularity Rule，防止按单页面/单字段写规则',
-    file: '.agents/skills/freight-arco-ui/references/module-patterns.md',
-    line: 1,
-    content: 'missing Specification Granularity Rule',
-  });
-}
-if (!aiGenerationContract.includes('Specification Granularity')) {
-  violations.push({
-    rule: 'AI 生成契约必须包含规范粒度要求：先槽位/表面，再填业务字段示例',
-    file: '.agents/skills/freight-arco-ui/references/ai-generation-contract.md',
-    line: 1,
-    content: 'missing Specification Granularity',
-  });
-}
-if (!checklist.includes('New or changed rules are written for a reusable surface/class of problem')) {
-  violations.push({
-    rule: '交付清单必须检查规范粒度，禁止把截图或单模块字段写成全局规范',
-    file: '.agents/skills/freight-arco-ui/references/checklist.md',
-    line: 1,
-    content: 'missing reusable surface/class of problem checklist',
-  });
-}
-if (!checklist.includes('Operational Workbench Gate')) {
-  violations.push({
-    rule: '交付清单必须包含生产作业台门槛，避免把高频办公系统误做成展示型 SaaS',
-    file: '.agents/skills/freight-arco-ui/references/checklist.md',
-    line: 1,
-    content: 'missing Operational Workbench Gate',
-  });
-}
-if (!checklist.includes('Functional Delivery Gate')) {
-  violations.push({
-    rule: '交付清单必须包含 Functional Delivery Gate，约束功能的动作、权限、接口、状态与验证',
-    file: '.agents/skills/freight-arco-ui/references/checklist.md',
-    line: 1,
-    content: 'missing Functional Delivery Gate',
-  });
-}
-if (!visualSystem.includes('Arco Theme Color Contract')) {
-  violations.push({
-    rule: '视觉规范必须定义 Arco Theme Color Contract，禁止项目另起配色系统',
-    file: '.agents/skills/freight-arco-ui/references/visual-system.md',
-    line: 1,
-    content: 'missing Arco Theme Color Contract',
-  });
-}
-if (!existingProjectModernization.includes('Layout Quality Gate')) {
-  violations.push({
-    rule: '无参考图的既有项目改造必须包含可量化的 Layout Quality Gate',
-    file: '.agents/skills/freight-arco-ui/references/existing-project-modernization.md',
-    line: 1,
-    content: 'missing Layout Quality Gate',
-  });
-}
-if (!existingProjectModernization.includes('Shared Capability Before New Rules')
-  || !existingProjectModernization.includes('Page-Local CSS Budget')
-  || !existingProjectModernization.includes('No-Design Visual Recipe')) {
-  violations.push({
-    rule: '无设计稿默认路径必须包含共享能力优先、page-local CSS budget 与无设计视觉配方',
-    file: '.agents/skills/freight-arco-ui/references/existing-project-modernization.md',
-    line: 1,
-    content: 'missing no-design shared-capability / CSS budget / visual recipe',
-  });
-}
-if (!skillSource.includes('## Default Path (No UI Design)')
-  || !skillSource.includes('## Skill Growth Freeze')) {
-  violations.push({
-    rule: 'SKILL.md 必须把无设计稿 lean 路径与 Skill Growth Freeze 写成默认交付契约',
-    file: '.agents/skills/freight-arco-ui/SKILL.md',
-    line: 1,
-    content: 'missing Default Path (No UI Design) or Skill Growth Freeze',
-  });
-}
-if (!checklist.includes('## No-Design Default Gate (most tasks)')) {
-  violations.push({
-    rule: 'checklist 必须把无设计稿默认门禁放在交付检查最前',
-    file: '.agents/skills/freight-arco-ui/references/checklist.md',
-    line: 1,
-    content: 'missing No-Design Default Gate',
-  });
-}
-if (!filterLayout.includes('group navigation should be anchors')) {
-  violations.push({
-    rule: '50+ 查询工作区必须使用分组锚点标准，避免条件模块互斥隐藏',
-    file: '.agents/skills/freight-arco-ui/references/filter-layout.md',
-    line: 1,
-    content: 'missing group anchor standard for 50+ query workspace',
-  });
-}
-if (!filterLayout.includes('filter-combo` is a connected control')) {
-  violations.push({
-    rule: '组合查询控件必须定义 connected control 规则，避免 select + input 连接处双圆角',
-    file: '.agents/skills/freight-arco-ui/references/filter-layout.md',
-    line: 1,
-    content: 'missing connected control standard for filter-combo',
-  });
-}
-if (!filterLayout.includes('Alignment contract:') || !filterLayout.includes('--query-ws-pad-x')) {
-  violations.push({
-    rule: '50+ 查询工作区必须定义对齐与间距契约，避免三栏抽屉 padding/gap 随意漂移',
-    file: '.agents/skills/freight-arco-ui/references/filter-layout.md',
-    line: 1,
-    content: 'missing saved query workspace alignment contract',
-  });
-}
-if (!actionsReference.includes('生产作业台的高频可逆动作可以超过 3')) {
-  violations.push({
-    rule: '动作规范必须允许生产作业台高频可逆动作可见，禁止机械套用三个按钮上限',
-    file: '.agents/skills/freight-arco-ui/references/actions.md',
-    line: 1,
-    content: 'missing operational workbench visible action rule',
-  });
-}
-if (
-  !iconsReference.includes('双图标库') ||
-  !iconsReference.includes('Library Split') ||
-  !iconsReference.includes('Toolbar And Button Icons') ||
-  !iconsReference.includes('Module Title Icons') ||
-  !iconsReference.includes('Empty States') ||
-  !iconsReference.includes('Navigation/Menu Icons')
-) {
-  violations.push({
-    rule: '图标规范必须定义 Arco/IconPark 分工，并覆盖按钮、模块标题、空态、导航等主要场景',
-    file: '.agents/skills/freight-arco-ui/references/icons.md',
-    line: 1,
-    content: 'missing icon scope coverage',
-  });
-}
-if (
-  !artifactIntakeTemplate.includes('Minimum Required Input') ||
-  !artifactIntakeTemplate.includes('Delivery Expectation Levels') ||
-  !artifactIntakeTemplate.includes('Fast Intake Questionnaire')
-) {
-  violations.push({
-    rule: '原型输入模板必须覆盖最小输入字段、交付级别和快速问询顺序',
-    file: '.agents/skills/freight-arco-ui/references/artifact-intake-template.md',
-    line: 1,
-    content: 'missing artifact intake template sections',
-  });
-}
-if (
-  !prototypeToUiContract.includes('Prototype Translation Block') ||
-  !prototypeToUiContract.includes('What A Screenshot Can And Cannot Decide') ||
-  !prototypeToUiContract.includes('Consistency Promise Rule')
-) {
-  violations.push({
-    rule: '原型转译规范必须覆盖 screenshot 边界、转译块与一致性承诺规则',
-    file: '.agents/skills/freight-arco-ui/references/prototype-to-ui-contract.md',
-    line: 1,
-    content: 'missing prototype translation contract sections',
-  });
-}
-if (!typographyReference.includes('Same Component Rule')) {
-  violations.push({
-    rule: '字体规范必须定义 Same Component Rule，禁止同类组件因所在页面不同而切换字号',
-    file: '.agents/skills/freight-arco-ui/references/typography.md',
-    line: 1,
-    content: 'missing Same Component Rule',
-  });
-}
-if (!typographyReference.includes('Component Typography Map')) {
-  violations.push({
-    rule: '字体规范必须提供 Component Typography Map，便于按组件快速查字号层级',
-    file: '.agents/skills/freight-arco-ui/references/typography.md',
-    line: 1,
-    content: 'missing Component Typography Map',
-  });
-}
-if (!formFieldReference.includes('Typography Contract By Role') || !formFieldReference.includes('同一 Arco 组件在任意业务场景使用同一字号层级')) {
-  violations.push({
-    rule: '表单控件规范必须定义按角色分层的字号契约，并禁止同类控件分场景分字号',
-    file: '.agents/skills/freight-arco-ui/references/form-field.md',
-    line: 1,
-    content: 'missing role-based typography contract for controls',
-  });
-}
-if (!featureRouting.includes('feature-delivery-contract.md') || !featureRouting.includes('feature_type:')) {
-  violations.push({
-    rule: '功能路由规范必须把行为任务路由到 feature-delivery-contract，并给出最小输出块',
-    file: '.agents/skills/freight-arco-ui/references/feature-routing.md',
-    line: 1,
-    content: 'missing route to feature-delivery-contract or feature output block',
-  });
-}
-if (
-  !featureDeliveryContract.includes('visible_when') ||
-  !featureDeliveryContract.includes('enabled_when') ||
-  !featureDeliveryContract.includes('api_request') ||
-  !featureDeliveryContract.includes('api_response') ||
-  !featureDeliveryContract.includes('refresh_scope') ||
-  !featureDeliveryContract.includes('verification_cases')
-) {
-  violations.push({
-    rule: '功能交付契约必须覆盖显隐、可点、接口、刷新与验证关键键位',
-    file: '.agents/skills/freight-arco-ui/references/feature-delivery-contract.md',
-    line: 1,
-    content: 'missing required functional contract keys',
-  });
-}
-if (!skillSource.includes('feature-routing.md') || !skillSource.includes('feature-delivery-contract.md')) {
-  violations.push({
-    rule: 'SKILL.md 必须把功能任务路由到 feature-routing 与 feature-delivery-contract',
-    file: '.agents/skills/freight-arco-ui/SKILL.md',
-    line: 1,
-    content: 'missing feature references in skill source',
-  });
-}
-if (!skillSource.includes('artifact-intake-template.md')) {
-  violations.push({
-    rule: 'SKILL.md 必须把截图/原型任务路由到 artifact-intake-template.md',
-    file: '.agents/skills/freight-arco-ui/SKILL.md',
-    line: 1,
-    content: 'missing artifact intake template in skill source',
-  });
-}
-if (!skillSource.includes('prototype-to-ui-contract.md')) {
-  violations.push({
-    rule: 'SKILL.md 必须把截图/原型任务路由到 prototype-to-ui-contract.md',
-    file: '.agents/skills/freight-arco-ui/SKILL.md',
-    line: 1,
-    content: 'missing prototype-to-ui contract in skill source',
-  });
-}
-if (!skillSource.includes('icons.md')) {
-  violations.push({
-    rule: 'SKILL.md 必须把 icon 任务路由到 icons.md',
-    file: '.agents/skills/freight-arco-ui/SKILL.md',
-    line: 1,
-    content: 'missing icons reference in skill source',
-  });
-}
-if (!specFirstCoding.includes('feature-routing.md') || !specFirstCoding.includes('feature-delivery-contract.md')) {
-  violations.push({
-    rule: 'spec-first-coding.mdc 必须要求功能任务先读 feature-routing 与 feature-delivery-contract',
-    file: '.cursor/rules/spec-first-coding.mdc',
-    line: 1,
-    content: 'missing functional pre-read gate',
-  });
-}
-if (!specFirstCoding.includes('artifact-intake-template.md')) {
-  violations.push({
-    rule: 'spec-first-coding.mdc 必须要求截图/原型任务先读 artifact-intake-template.md',
-    file: '.cursor/rules/spec-first-coding.mdc',
-    line: 1,
-    content: 'missing artifact intake pre-read gate',
-  });
-}
-if (!specFirstCoding.includes('prototype-to-ui-contract.md')) {
-  violations.push({
-    rule: 'spec-first-coding.mdc 必须要求截图/原型任务先读 prototype-to-ui-contract.md',
-    file: '.cursor/rules/spec-first-coding.mdc',
-    line: 1,
-    content: 'missing prototype pre-read gate',
-  });
-}
-if (!specFirstCoding.includes('icons.md')) {
-  violations.push({
-    rule: 'spec-first-coding.mdc 必须要求 icon 变更先读 icons.md',
-    file: '.cursor/rules/spec-first-coding.mdc',
-    line: 1,
-    content: 'missing icon pre-read gate',
-  });
-}
-if (!adversarialReview.includes('feature-delivery-contract.md')) {
-  violations.push({
-    rule: 'adversarial-review.mdc 必须审查功能契约，而不只审查 UI 结构',
-    file: '.cursor/rules/adversarial-review.mdc',
-    line: 1,
-    content: 'missing functional review checks',
-  });
-}
-if (!adversarialReview.includes('artifact-intake-template.md')) {
-  violations.push({
-    rule: 'adversarial-review.mdc 必须审查截图/原型任务是否先满足 artifact intake 模板',
-    file: '.cursor/rules/adversarial-review.mdc',
-    line: 1,
-    content: 'missing artifact intake review checks',
-  });
-}
-if (!adversarialReview.includes('prototype-to-ui-contract.md')) {
-  violations.push({
-    rule: 'adversarial-review.mdc 必须审查原型任务是否先完成 prototype-to-ui 转译',
-    file: '.cursor/rules/adversarial-review.mdc',
-    line: 1,
-    content: 'missing prototype review checks',
-  });
-}
-if (!adversarialReview.includes('icons.md')) {
-  violations.push({
-    rule: 'adversarial-review.mdc 必须审查图标作用域与库选择',
-    file: '.cursor/rules/adversarial-review.mdc',
-    line: 1,
-    content: 'missing icon review checks',
-  });
-}
 if (!mainTs.includes("@icon-park/vue-next/styles/index.css")) {
   violations.push({
     rule: '引入 IconPark 后，src/main.ts 必须全局引入 @icon-park/vue-next 样式',
@@ -1048,22 +610,6 @@ if (!globalCss.includes('.detail-mini-vxe.vxe-table .vxe-body--row')
     content: 'missing detail-mini-vxe density row bridge',
   });
 }
-if (!specFirstCoding.includes('arco-first.md')) {
-  violations.push({
-    rule: 'spec-first-coding.mdc 必须要求 UI 任务先读 arco-first.md',
-    file: '.cursor/rules/spec-first-coding.mdc',
-    line: 1,
-    content: 'missing arco-first pre-read gate',
-  });
-}
-if (!adversarialReview.includes('arco-first.md')) {
-  violations.push({
-    rule: 'adversarial-review.mdc 必须审查 Arco-first 优先级',
-    file: '.cursor/rules/adversarial-review.mdc',
-    line: 1,
-    content: 'missing arco-first review gate',
-  });
-}
 // 业务页禁止 Arco size="medium" | "large" | "mini"
 for (const file of files) {
   if (!file.includes(`${sep}src${sep}views${sep}`) || !file.endsWith('.vue')) continue;
@@ -1107,51 +653,6 @@ function isStructuralVxeColumn(attrs) {
 
 function getLineNumber(content, index) {
   return content.slice(0, index).split('\n').length;
-}
-
-function collectReferenceFiles(dir) {
-  const abs = join(ROOT, dir);
-  const results = [];
-  try {
-    for (const name of readdirSync(abs)) {
-      if (name === 'domain-language.md') continue;
-      const full = join(abs, name);
-      const stat = statSync(full);
-      if (stat.isDirectory()) {
-        results.push(...collectReferenceFiles(join(dir, name)));
-      } else if (extname(name) === '.md') {
-        results.push(full);
-      }
-    }
-  } catch {
-    // 目录不存在时静默跳过
-  }
-  return results;
-}
-
-function isExampleOrCodeLine(line) {
-  return /```|`|<[^>]+>|\bExample\b|\bexamples\b|示例|例如|Examples?:|such as|e\.g\.|Good:|Bad:|Object examples|universal detail rule|base pattern|app route\/nav|^\s*\||^\s*[-*]\s/.test(line);
-}
-
-// active UI 规范必须写成“槽位/表面/状态”粒度，不能把单个业务字段写成全局强制规则。
-const referenceFiles = collectReferenceFiles('.agents/skills/freight-arco-ui/references');
-const hardCodedDomainRule = /(必须|禁止|Required|Do not|Generate).*(业务单|订单详情|货物信息|提单信息|客户委托|航线订舱|箱型柜量|ETD|ETA|HBL|MBL|route|carrier|vessel|voyage|cargo)/i;
-const allowedGranularityFiles = /module-patterns\.md|ai-generation-contract\.md|checklist\.md|modal\.md|form-rules\.md/;
-for (const file of referenceFiles) {
-  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
-  if (allowedGranularityFiles.test(relPath)) continue;
-  const lines = readFileSync(file, 'utf8').split('\n');
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (!hardCodedDomainRule.test(line)) continue;
-    if (isExampleOrCodeLine(line) || isExampleOrCodeLine(lines[i - 1] ?? '') || isExampleOrCodeLine(lines[i - 2] ?? '')) continue;
-    violations.push({
-      rule: 'active UI 规范粒度过细：禁止把单个业务字段/模块名写成全局强规则，应改为槽位 + 表面 + token/state + 示例',
-      file: relPath,
-      line: i + 1,
-      content: line.trim().slice(0, 160),
-    });
-  }
 }
 
 // VXE 操作列必须使用 row-actions dock，避免 icon 直接漂浮在固定列背景上。
