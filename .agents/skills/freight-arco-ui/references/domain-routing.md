@@ -39,4 +39,4 @@ Finance amounts must show currency, use right alignment/tabular numbers, and con
 3. Preserve list context with detail/overlay when the task is focused; use a route only for genuinely full-page work.
 4. Never copy shipment columns, milestones, or hero structures into another domain.
 5. Do not use `a-table` or invent a layout class when a proven shared role already fits.
-6. Finish with `checklist.md` and `node scripts/check-spec.js`.
+6. Finish with the Commercial Definition Of Done in `SKILL.md` and `node scripts/check-spec.js`.

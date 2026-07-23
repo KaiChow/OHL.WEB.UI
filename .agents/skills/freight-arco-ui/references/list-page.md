@@ -9,7 +9,7 @@ Use this logical order:
 3. Business actions and scope/status queue controls.
 4. Dominant data surface containing table context, pagination/settings, and `vxe-table.workbench-table`.
 
-Search and scope/status/actions are logical zones, not mandatory separate floating cards. They may share one Arco workbench command surface when their ownership remains clear, a neutral divider separates the rows, the combined height passes the command-surface budget in `redesign-calibration.md`, and no card is nested inside another card. The table remains its own dominant surface.
+Search and scope/status/actions are logical zones, not mandatory separate floating cards. They may share one Arco workbench command surface when their ownership remains clear, a neutral divider separates the rows, the combined height passes the rendered layout gate in `existing-project-modernization.md`, and no card is nested inside another card. The table remains its own dominant surface.
 
 Do not add a page-level title/description band for operational list pages.
 
@@ -28,7 +28,7 @@ Priority:
 3. Keep long-session visual comfort through neutral surfaces and low noise.
 4. Add visual beauty only when it improves scanning, confidence, or error prevention.
 
-The first-viewport threshold, surface count, shell budget, and measurement method are owned by `redesign-calibration.md`.
+The first-viewport threshold, surface count, command budget, and measurement method are owned by `existing-project-modernization.md`.
 
 Daily status tabs and daily reversible actions should stay visible when operators use them repeatedly. Hiding them behind "More" only to look cleaner is a PESDP failure.
 
@@ -207,7 +207,7 @@ Use them to choose equivalent identity, status, next-decision, and supporting fi
 - Keep row/card gaps predictable: 8-12px.
 - Do not compress search labels into controls.
 - Keep table as the dominant screen area.
-- On table-dominant production workbenches, the default search + toolbar + status area must pass the command-surface and first-viewport gates in `redesign-calibration.md`.
+- On table-dominant production workbenches, the default search + toolbar + status area must pass the command-surface and first-viewport gates in `existing-project-modernization.md`.
 - Operational list pages keep a small viewport-bottom breathing space through the page root or app content shell.
 - Do not solve bottom breathing space with table padding, fake rows, footer margins, or unexplained inner-table gaps.
 - The table card should flex to fill available space, but it must not visually touch the browser or app viewport bottom when scrolled to the last row.

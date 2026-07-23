@@ -1,16 +1,10 @@
 # PESDP Page Specification Contract
 
-## Purpose
+Typed `pageSpec.ts` is the compact decision record between a UI request and Vue code. It binds business facts, surface ownership, actions, states, and verification. It is not a design essay and cannot certify its own quality.
 
-This is the mandatory intermediate representation between a UI request and Vue code. It makes PESDP executable instead of leaving it as a visual aspiration.
+Use `definePesdpPageSpec` from `src/design-system/pesdpPageSpec.ts` for a new page, rewrite, or material layout/interaction change before editing the Vue template.
 
-For a new page, page rewrite, or material layout/interaction redesign, the AI must create or update a typed `pageSpec.ts` beside the page **before editing the Vue template**. A review-only task may produce the same structure in the review response without adding a file.
-
-The specification is not a design document for stakeholders. It is a compact engineering contract that records the target, implementation decisions, and measurable acceptance conditions. It must never self-certify the achieved product grade.
-
-## Required Source Shape
-
-Use `definePesdpPageSpec` from `src/design-system/pesdpPageSpec.ts`.
+## Required Shape
 
 ```ts
 export const PAGE_SPEC = definePesdpPageSpec({
@@ -27,147 +21,65 @@ export const PAGE_SPEC = definePesdpPageSpec({
     supportingData: ['updatedAt'],
   },
   pesdp: {
-    professional: { decisions: ['Use object-owned freight language and status.'], acceptance: ['Rendered labels, statuses, and actions must pass the domain-language audit.'] },
-    efficient: { decisions: ['Keep the repeated query and next action directly reachable.'], acceptance: ['Measure the primary job path and confirm context is preserved.'] },
-    structured: { decisions: ['Command and data surfaces have separate ownership.'], acceptance: ['Rendered totals, actions, and feedback must each have one visible owner.'] },
-    dense: { decisions: ['Use the authority-selected query and table density.'], acceptance: ['Measure the 1366x768 first viewport and all scroll owners.'] },
-    premium: { decisions: ['Use GI/Arco ownership and complete edge states.'], acceptance: ['Inspect computed tokens and reproduce the required state matrix.'] },
+    professional: { decisions: ['Use object-owned freight terms and state.'], acceptance: ['Rendered labels/actions match the object contract.'] },
+    efficient: { decisions: ['Keep repeated query and next action directly reachable.'], acceptance: ['Primary job path and preserved context are exercised.'] },
+    structured: { decisions: ['Command and data facts have one visible owner.'], acceptance: ['No total, action, feedback, or state has duplicate ownership.'] },
+    dense: { decisions: ['Use the authority-selected query and table density.'], acceptance: ['First viewport and every scroll owner are measured.'] },
+    premium: { decisions: ['Use GI/Arco ownership and complete adverse states.'], acceptance: ['Computed tokens and the applicable state matrix are inspected.'] },
   },
   surfaces: [
-    { id: 'command', role: 'command', owns: ['query', 'create', 'queues'], primaryAction: 'object-create', implementation: 'arco' },
-    { id: 'data', role: 'data', owns: ['table', 'selection', 'pagination', 'feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'The VXE workbench bridge owns dense data-grid behavior.' },
+    { id: 'command', role: 'command', owns: ['query', 'create'], primaryAction: 'object-create', implementation: 'arco' },
+    { id: 'data', role: 'data', owns: ['table', 'pagination', 'feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'VXE workbench behavior needs the shared bridge.' },
   ],
-  query: { totalFields: 5, strategy: 's1-inline', visibleFields: ['keyword', 'customer', 'pol', 'pod', 'carrier'], advancedFields: [] },
-  table: { kind: 'workbench', identityColumns: ['orderNo', 'status'], decisionColumns: ['nextAction', 'owner'], supportingColumns: ['updatedAt'] },
+  query: { totalFields: 2, strategy: 's1-inline', visibleFields: ['keyword', 'customer'], advancedFields: [] },
+  table: { kind: 'workbench', identityColumns: ['orderNo', 'status'], decisionColumns: ['nextAction'], supportingColumns: ['updatedAt'] },
   detail: { mode: 'none', focus: [], milestones: [] },
   actions: [
     { id: 'object-create', scope: 'command', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'object-create', successOwner: 'data', failureOwner: 'command' },
   ],
   states: ['loading', 'empty', 'no-permission', 'network-error', 'success'],
   responsive: { release: ['1366x768'], split: '1024x768', wide: '1920x1080' },
-  authorities: ['list-page.md', 'filter-layout.md', 'table.md', 'actions.md', 'feedback.md'],
-  verification: ['node scripts/check-spec.js', 'npm run build', 'real-route viewport/state matrix'],
+  authorities: ['list-page.md', 'table.md', 'actions.md', 'feedback.md'],
+  verification: ['check-spec', 'build', 'real-route viewport/state evidence'],
 })
 ```
 
-Use actual business slots, not presentation prose. `surfaces`, `actions`, every PESDP trace, `states`, `authorities`, and `verification` are non-empty. Empty query/table/detail sub-arrays are allowed only when the chosen archetype does not own that capability.
+Use actual business slots, not presentation prose. `target` is intent only. Browser measurements, screenshots, scenario results, and command output belong in the delivery record or automated artifacts, never in the spec.
 
-`target` records intent only. `acceptance` records conditions to verify later; it is not evidence that they already passed. Actual browser measurements, screenshots, state results, and command output belong in the delivery report or automated test artifacts. Do not use past-tense claims such as `checks confirm` in `pageSpec.ts`.
+## Decision Discipline
 
-## PESDP Traceability Gate
+Each PESDP dimension normally gets one implementation decision and one observable acceptance condition. Add a second only when it controls a materially different surface. Never use entries such as `professional style`, `make it convenient`, `use cards`, `reduce spacing`, or `make it beautiful`.
 
-Every dimension must contain at least one implementation decision and one measurable acceptance condition.
+- `professional`: object, actor, vocabulary, state, next decision.
+- `efficient`: repeated job, direct reachability, context preservation.
+- `structured`: ordered surfaces and one visible owner per fact/action/feedback.
+- `dense`: query/table/detail density, first viewport, scroll/overflow ownership.
+- `premium`: shared Arco/GI language, risk control, adverse-state completeness.
 
-| Dimension | The specification must answer | Minimum code/acceptance binding |
-|-----------|-------------------------------|-------------------------------|
-| `professional` | Is the business object, role, status vocabulary, and next decision correct for this freight workflow? | Domain terms plus object-owned fields/actions; reject generic admin labels or borrowed module fields. |
-| `efficient` | What repeated job is shortened, what remains directly reachable, and what context is preserved? | Query/action/row/detail path with frequency and risk; success/failure behavior for mutations. |
-| `structured` | What owns identity, command, working data, supporting data, pagination, and feedback? | Ordered surface list with one owner per fact/count/action and one primary per scope. |
-| `dense` | What density is used and why is it readable at office widths? | Query tier, table/detail density, overflow owner, first-viewport or field-scan evidence. |
-| `premium` | Why does the page feel controlled, credible, and reusable instead of decorated or default-admin? | Arco/GI ownership, shared roles/tokens, edge-state completeness, cross-page/archetype consistency evidence. |
+If an entry cannot point to code or a rendered check, delete or rewrite it.
 
-Forbidden PESDP entries:
+## Surface And Action Binding
 
-- `professional: use professional style`
-- `efficient: make it convenient`
-- `structured: use cards`
-- `dense: reduce spacing`
-- `premium: make it beautiful`
+Order `surfaces` as the user encounters them. IDs describe stable roles, not colors or local styling. `owns` lists only facts/actions/states actually rendered there. The same count, status, summary, action, or error cannot have two owners without an interaction reason.
 
-These are taste claims, not code decisions. Replace them with object, surface, component, state, and verification facts.
+Every business action references an existing feature contract and declares frequency, risk, presentation, success owner, and failure owner. Owners must identify a declared surface or a concrete child surface within it. Do not create action entries for static presentation toggles.
 
-## Surface And Ownership Contract
+## Page-Specific Contracts
 
-`surfaces` is ordered exactly as the user encounters the page. Each item declares:
-
-- `id`: stable semantic role, not a color or page-local visual name;
-- `role`: `identity`, `command`, `workflow`, `data`, `detail`, `supporting`, or `feedback`;
-- `owns`: facts, counts, actions, errors, or pagination owned by that surface;
-- `primaryAction`: zero or one action id;
-- `implementation`: `arco`, `token`, `shared-pattern`, or `page-local`;
-- `whyArcoNotEnough`: required only for `shared-pattern` or `page-local`.
-
-The same total, status group, risk count, or action cannot have two visible owners without a documented interaction reason.
-
-## Query Contract
-
-Record the total available query fields, not only the currently visible fields. Select `strategy` from `filter-layout.md`, the single authority:
-
-- `none`
-- `s1-inline`
-- `s2-expand`
-- `s3-drawer`
-- `s4-workspace`
-
-The specification must separate daily visible fields from advanced fields and state whether saved schemes are a real repeated workflow. Do not infer layout from another page's field count.
-
-## Table Contract
-
-For a workbench table, classify columns before writing `<vxe-column>`:
-
-- `identityColumns`: object identifiers and key state;
-- `decisionColumns`: fields required to decide the next action;
-- `supportingColumns`: passive metadata;
-- `compositeColumns`: only dimensions that form one recognized business scan unit, with the reason recorded;
-- `fixed`: fixed identity and operation columns;
-- `densityReason`: why compact or standard is correct for the actual cell rhythm.
-
-Independent fields stay independent. A composite cell is legal only when `table.md`'s Composite Cell Decision Contract passes.
-
-## Detail Workspace Contract
-
-An object detail route declares:
-
-- default mode: normally `display`, never an unexplained always-editable form wall;
-- `focus`: current state, blocking risk, owner, next action, and recent change where relevant;
-- `milestones`: only real object-owned freight nodes;
-- edit scope and save/cancel ownership;
-- tab/section ownership so counts and summaries are not duplicated;
-- local error owner and input-preservation behavior.
-
-Use a full-page form only when creation or a staged transaction is the primary job. Do not treat every detail page as a form archetype.
-
-## Action And State Contract
-
-Every visible action references a feature contract and declares:
-
-- scope;
-- frequency;
-- risk;
-- presentation;
-- permission/enablement source;
-- success owner;
-- failure owner.
-
-Every owned surface lists applicable states from: `loading`, `slow`, `empty`, `no-permission`, `validation-error`, `business-error`, `network-error`, `long-text`, `extreme-value`, `partial-failure`, and `success`.
-
-Do not claim product completion when a relevant state has no deterministic trigger or recovery evidence.
-
-## Authority Resolution
-
-The page spec records only decisions. Numeric values and component mechanics remain in their single authorities:
-
-- query strategy: `filter-layout.md`
-- list structure: `list-page.md`
-- table mechanics: `table.md`
-- detail workspace: `detail-form.md`
-- actions: `actions.md`
-- feedback: `feedback.md`
-- responsive behavior: `responsive.md`
-- visual roles: `visual-system.md`
-- product maturity: `product-grade-evaluation.md`
-
-When a supporting reference conflicts with an authority, fix or delete the supporting rule before coding. Do not choose the easier version silently.
+- Query: record all fields, visible vs advanced ownership, selected strategy, and saved schemes only when real.
+- Workbench table: classify identity, decision, supporting, composite, fixed, and density roles before columns are coded.
+- Object detail: default mode, current risk/next work, real milestones, edit scope, save/cancel owner, and local failure owner.
+- States: include only applicable states, but every listed state needs a deterministic trigger and recovery check. Omitting an applicable state to shorten the spec is a release defect.
+- Authorities: name one primary page authority plus only surfaces actually touched. Numeric mechanics stay in those authorities.
 
 ## Generation Sequence
 
-1. Gather business context and artifact/no-reference intake.
-2. Create/update `pageSpec.ts` and complete all applicable fields.
-3. Read the authority files named by the spec.
-4. Create/update feature contracts for every interactive action.
-5. Implement Arco-first, then tokens, then justified patterns, then minimal page-local CSS.
-6. Run type/build and `check-spec`.
-7. Inspect the real route and record evidence in the delivery report or automated artifacts.
-8. Re-open the spec and compare evidence with every acceptance condition; revise unsupported structure before styling.
+1. Prove business object, user job, behavior to preserve, and artifact/no-artifact path.
+2. Create/update `pageSpec.ts`.
+3. Read only its primary and affected surface authorities.
+4. Create/update smallest complete feature contracts for business actions.
+5. Implement Arco-first, tokens, shared patterns, then minimal local layout CSS.
+6. Run spec/build checks and inspect the real route with deterministic state scenarios.
+7. Compare produced evidence to every acceptance condition; unsupported quality remains a blocker.
 
-Skipping step 2 is a blocking process violation for page generation or rewrite work.
+Skipping the spec before material template work is a process violation. Completing the spec without rendered evidence is also incomplete.

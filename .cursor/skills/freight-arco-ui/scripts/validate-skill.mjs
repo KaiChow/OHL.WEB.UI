@@ -4,9 +4,15 @@ import { fileURLToPath } from 'node:url';
 
 const SKILL_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const REFERENCES = join(SKILL_ROOT, 'references');
-const MAX_REFERENCE_FILES = 32;
-const MAX_REFERENCE_LINES = 6800;
+const MAX_REFERENCE_FILES = 30;
+const MAX_REFERENCE_LINES = 6100;
 const MAX_SINGLE_REFERENCE_LINES = 700;
+const KEY_DOCUMENT_BUDGETS = new Map([
+  ['existing-project-modernization.md', 150],
+  ['feature-delivery-contract.md', 110],
+  ['page-spec-contract.md', 140],
+  ['product-grade-evaluation.md', 80],
+]);
 
 const lineCount = (source) => source.split(/\r?\n/).length;
 
@@ -36,6 +42,18 @@ export function validateFreightUiSkill() {
     errors.push(`SKILL.md: ${lineCount(skill)} lines exceeds the 140-line entry budget`);
   }
 
+  const requiredFragments = [
+    [skill, '## Commercial Definition Of Done', 'SKILL.md: missing commercial definition of done'],
+    [skill, 'No evidence means no sellable claim.', 'SKILL.md: missing no-self-certification rule'],
+    [references.get('existing-project-modernization.md') || '', '## Rendered Layout Gate', 'existing-project-modernization.md: missing rendered layout authority'],
+    [references.get('feature-delivery-contract.md') || '', '## Smallest Complete Contract', 'feature-delivery-contract.md: missing smallest complete contract'],
+    [references.get('page-spec-contract.md') || '', 'It is not a design essay', 'page-spec-contract.md: missing decision-record boundary'],
+    [references.get('product-grade-evaluation.md') || '', '## Six Blocking Gates', 'product-grade-evaluation.md: missing commercial release gates'],
+  ];
+  for (const [source, fragment, message] of requiredFragments) {
+    if (!source.includes(fragment)) errors.push(message);
+  }
+
   const totalReferenceLines = [...references.values()].reduce((total, source) => total + lineCount(source), 0);
   if (referenceNames.length > MAX_REFERENCE_FILES) {
     errors.push(`references/: ${referenceNames.length} files exceeds the ${MAX_REFERENCE_FILES}-file growth freeze`);
@@ -48,6 +66,10 @@ export function validateFreightUiSkill() {
   for (const [name, source] of references) {
     if (lineCount(source) > MAX_SINGLE_REFERENCE_LINES) {
       errors.push(`${name}: ${lineCount(source)} lines exceeds the ${MAX_SINGLE_REFERENCE_LINES}-line reference budget`);
+    }
+    const keyBudget = KEY_DOCUMENT_BUDGETS.get(name);
+    if (keyBudget && lineCount(source) > keyBudget) {
+      errors.push(`${name}: ${lineCount(source)} lines exceeds its ${keyBudget}-line anti-bloat budget`);
     }
 
     const headings = source.split(/\r?\n/).filter((line) => line.startsWith('## '));
@@ -78,6 +100,7 @@ export function validateFreightUiSkill() {
     [/默认 \*\*常驻编辑态\*\*，禁止「先点编辑再改」/, 'obsolete always-editable detail contract'],
     [/query-filter-drawer__shell/, 'obsolete nested filter drawer shell'],
     [/!important overrides inline|global\.css` wins/, 'hidden overlay width override'],
+    [/redesign-calibration\.md|checklist\.md/, 'superseded delivery authority restored'],
   ];
   for (const [pattern, message] of conflicts) {
     if (pattern.test(allReferences)) errors.push(`references/: ${message}`);

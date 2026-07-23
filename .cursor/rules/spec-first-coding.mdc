@@ -5,21 +5,24 @@ alwaysApply: true
 
 # UI Spec-First Gate
 
-涉及 `src/views/**`、`src/components/**` 时，以 `.agents/skills/freight-arco-ui/SKILL.md` 为唯一规则入口；禁止预读整个 references 目录。
+涉及 `src/views/**`、`src/components/**` 时，以 `.agents/skills/freight-arco-ui/SKILL.md` 为唯一入口；禁止预读整个 references 目录。
 
 ## 写代码前
 
 1. 所有 UI：`arco-first.md` + `theme-contract.md`。
-2. 无设计稿（默认）：`existing-project-modernization.md` + `redesign-calibration.md` + 一个页面 authority。
-3. 新页面、重写或重大布局/交互：先按 `page-spec-contract.md` 更新 typed `pageSpec.ts`。
+2. 新页面、重写或重大布局/交互：先按 `page-spec-contract.md` 更新 typed `pageSpec.ts`。
+3. 无设计稿的现有页面：`existing-project-modernization.md` + 一个页面 authority。
 4. 点击、请求、权限、状态或提交：`feature-delivery-contract.md` + 对应 surface authority。
-5. 截图/Figma/原型：先完成 `prototype-to-ui-contract.md` 的统一 intake/translation block。
-6. Icon 变更：`icons.md`；其他 surface 只读对应 authority。
+5. 截图/Figma/原型：先完成 `prototype-to-ui-contract.md` 的 intake/translation。
+6. 融资、销售、产品化或质感目标：`product-grade-evaluation.md` 的六个门全部是阻塞项。
+7. 其余 surface 只读实际涉及的 authority。
+
+无法从代码、接口或用户输入证明的业务动作、权限或状态不得臆造；保留边界并报告缺失契约。
 
 ## 实现顺序
 
-Arco props/slots/structure -> GI/semantic tokens -> grep-proven shared pattern -> minimal page-local layout CSS. Shared class must exist in `src/styles/global.css`; reference examples are not APIs.
+Arco props/slots/structure -> GI/semantic tokens -> grep-proven shared pattern -> minimal page-local shell/flex/overflow CSS. Markdown 示例类不是 API。
 
 ## 交付
 
-Run `.cursor/rules/adversarial-review.mdc`, `node scripts/check-spec.js`, the relevant build, and real-route before/after verification when visual quality is in scope. A green script alone is not UI evidence.
+执行 `.cursor/rules/adversarial-review.mdc`、`node scripts/check-spec.js`、相关 build；UI/交互质量必须有真实路由、目标 viewport 和可复现状态证据。绿色脚本不等于可售卖产品。

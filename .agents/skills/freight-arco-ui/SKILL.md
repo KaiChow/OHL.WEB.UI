@@ -1,110 +1,85 @@
 ---
 name: freight-arco-ui
-description: Project UI and feature-delivery skill for FE.OHL.WEB.UI. Use when designing, reviewing, redesigning, rewriting, or implementing any Vue 3 + TypeScript + Arco Design Vue + VXE Table freight SaaS page or frontend business feature under PESDP. Covers list workbenches, detail drawers, forms, overlays, tables, actions, status pills, permissions, API/error behavior, real-route verification, UI taste/质感/不好看 feedback, and skill/spec cleanup.
+description: Project UI and interaction delivery skill for FE.OHL.WEB.UI. Use when designing, reviewing, rewriting, or implementing Vue 3 + TypeScript + Arco Design Vue + VXE Table freight SaaS pages and business features, especially product-quality, workflow, state, permission, error, and real-route verification work.
 ---
 
 # Freight Arco UI Skill
 
-Use this as the executable UI delivery contract for `FE.OHL.WEB.UI`.
+Executable UI and interaction contract for `FE.OHL.WEB.UI`.
 
-Source: `.agents/skills/freight-arco-ui/`. After edits run `npm run sync-freight-skill` to refresh `.cursor/skills/freight-arco-ui/`.
+Source: `.agents/skills/freight-arco-ui/`. After edits run `npm run sync-freight-skill`.
 
-## Core Contract
+## Product Outcome
 
-Build a modern freight operations workbench: dense business data, restrained Arco/GI visual language, clear hierarchy, visible daily workflow actions, and predictable failure/permission states.
+Build freight operations software that is credible in a customer or financing demo and dependable in daily office work. Quality comes from business truth, short workflow paths, complete interaction states, restrained hierarchy, and reproducible evidence. Decoration cannot compensate for a fake action, missing failure path, wrong domain model, or weak work surface.
 
-Implementation order is mandatory:
+No evidence means no sellable claim.
 
-1. Arco-first — props, slots, layout primitives, native interaction.
-2. Token-second — GI palette and existing `--dense-*` aliases.
-3. Business-pattern-third — freight semantics, workbench slots, VXE bridge.
-4. Page-local-css-last — only local shell/flex/overflow gaps.
+## Before Code
 
-Do not fix weak UI by adding more skill text. Ship or reuse shared capability first, then document only portable rules.
+Use the smallest path that covers the task:
 
-## Mandatory PESDP Execution Gate
+1. Any UI: read `references/arco-first.md` and `references/theme-contract.md`.
+2. New page, page rewrite, or material layout/interaction change: create/update typed `pageSpec.ts` from `references/page-spec-contract.md` before Vue template work.
+3. Existing page without a visual artifact: read `references/existing-project-modernization.md` and one primary page authority.
+4. New menu or uncertain archetype: use `references/domain-routing.md`, then select one primary authority: `list-page.md`, `detail-form.md`, `full-page-form.md`, `master-data.md`, or `dashboard.md`.
+5. Click, request, permission, mutation, or state transition: read `references/feature-delivery-contract.md` plus only the affected surface authority.
+6. Screenshot, Figma, or prototype: complete `references/prototype-to-ui-contract.md` before steps 2-5.
+7. Financing, sales, demo, productization, `高级感`, or `质感`: apply `references/product-grade-evaluation.md` as a blocking release gate.
+8. Read helpers such as `filter-layout.md`, `table.md`, `actions.md`, `feedback.md`, `icons.md`, `typography.md`, and `overlay-dimensions.md` only when that surface is present.
 
-For a new page, page rewrite, or material UI/interaction redesign:
+If business object, user job, legal action, API behavior, or permission source cannot be proven from the repository or user input, do not invent it. Preserve the boundary visibly and report the missing contract.
 
-1. Read `references/page-spec-contract.md`.
-2. Create/update typed `pageSpec.ts` before editing Vue template.
-3. Record concrete Professional / Efficient / Structured / Dense / Premium decisions and measurable acceptance conditions.
-4. Read the single-authority references named by the spec.
-5. Implement, inspect the real route, and reconcile evidence back to the spec.
+## Implementation Order
 
-Target grade is intent, not proof. `pageSpec.ts`, checklist prose, or a green script do not replace rendered evidence.
+1. Arco props, slots, layout, and native behavior.
+2. GI and existing `--dense-*` semantic tokens.
+3. Grep-proven shared freight/VXE patterns.
+4. A shared capability when reuse is proven.
+5. Minimal page-local shell/flex/overflow CSS only.
 
-## Default Path (No UI Design)
+Do not use markdown example classes as APIs. Shared classes must exist in `src/styles/global.css` or shared Vue code.
 
-Most tasks have no Figma/screenshot/mock. Use this lean path; do not preload all references.
+## Commercial Definition Of Done
 
-Read in order:
+A material UI/interaction task is complete only when all applicable statements are true:
 
-1. `references/arco-first.md`
-2. `references/theme-contract.md`
-3. `references/existing-project-modernization.md`
-4. `references/redesign-calibration.md`
-5. For a new menu or uncertain archetype, read `domain-routing.md`; then read one archetype authority only:
-   - list/workbench: `list-page.md`
-   - detail/drawer/object workspace: `detail-form.md`
-   - full-page form: `full-page-form.md`
-   - master/config: `master-data.md`
-   - dashboard: `dashboard.md`
-6. Surface helpers only when in scope: `filter-layout.md`, `table.md`, `actions.md`, `icons.md`, `overlay-dimensions.md`, `feedback.md`, `component-size.md`.
-7. For behavior changes, read `feature-delivery-contract.md` plus the matching surface authority.
-8. Grep `src/styles/global.css` only for justified shared APIs; never use it as a design catalog.
+- The first viewport identifies the business object, key state, current risk or queue, and next useful action.
+- High-frequency work is directly reachable; risky or destructive work is separated, permission-aware, and confirmed.
+- Every implemented business action has visibility, enablement, request/pending, success, failure-preservation, and refresh behavior.
+- Applicable loading, empty, no-permission, validation, business-error, network/slow, long-data, duplicate-submit, and partial-failure states are reproducible and recoverable.
+- The rendered route has one clear owner for identity, command, data, feedback, totals, and primary action; no nested cards or duplicate summaries fake structure.
+- Real-route inspection proves layout, overflow, focus, feedback locality, and state behavior at required viewports.
 
-Skip `prototype-to-ui-contract.md` unless the user provides a screenshot, Figma, prototype, or visual artifact.
+Any failed applicable item blocks `sellable-saas-grade`; a target in `pageSpec.ts`, prose checklist, build, or green linter cannot waive it.
 
-## Artifact Path
+## Hard Constraints
 
-When the user provides a visual artifact:
-
-1. Read `prototype-to-ui-contract.md`.
-2. Complete its artifact translation block and delivery level.
-3. Then continue with the Default Path.
-
-Never code directly from visual similarity.
-
-## Skill Growth Freeze
-
-Do not add a new reference, duplicate gate, or longer checklist to fix weak UI.
-
-Preferred fix order:
-
-1. Create or extend a shared Arco composition, Vue shell, or `global.css` API used by at least two pages.
-2. Make pages consume it and delete page-local skins.
-3. Add one portable rule to the single authority only after reuse exists.
-
-A larger skill with the same page-local CSS budget is a process failure.
-
-## Non-Negotiables
-
-- GI theme is the only Arco stylesheet/palette; no `theme.css` adapter and no second component skin.
-- `global.css` owns direct `--dense-*` aliases, freight status, VXE bridge, and proven shared slots only.
-- Use Arco business controls with explicit `size="small"`; never `medium`/`large` in `src/views`.
+- GI is the only Arco baseline/palette; no theme adapter or page-local component skin.
 - Use `vxe-table`, never `a-table`.
-- Main list table: `workbench-table`; detail child table: `detail-mini-vxe` with density modifier.
-- `detail-mini-vxe` forbids `show-overflow`, checkbox without batch toolbar, and `row-config.height`.
-- Status uses `.s-pill[data-s]`; never whole-row status coloring.
-- One `type="primary"` per scope.
-- Row actions are icon + tooltip inside `row-actions`; list danger actions go into More + confirm.
-- Business object and user job decide fields; never copy shipment/order fields into unrelated modules.
-- Any click/submit/request/state change needs feature contract keys before behavior code.
-- Existing shared class names must be grep-proven before use; markdown example class names are not APIs.
+- Main list grid: `workbench-table`; detail child grid: `detail-mini-vxe` with density modifier.
+- Status: `.s-pill[data-s]`; never color the whole row by status or rely on color alone.
+- Business controls use explicit `size="small"`; one `type="primary"` per action scope.
+- Row actions use icon + tooltip inside `row-actions`; list danger actions live in More + confirm.
+- Business object and user job decide fields; never transplant shipment/order fields into unrelated modules.
+- Do not implement a business action until its smallest complete feature contract exists.
+- Do not claim UI quality from source inspection alone.
 
-## Working Protocol
+## Verification
 
-1. Classify the task: no-design, artifact, feature behavior, product-grade, or cleanup.
-2. Read only the lean required references.
-3. Complete `pageSpec.ts` for new pages/material rewrites.
-4. Complete feature contracts for behavior changes.
-5. Implement Arco-first → tokens → grep-proven shared patterns → minimal local CSS.
-6. Prefer extracting shared capability before adding page-local chrome.
-7. Run `node scripts/check-spec.js`.
-8. Run `npm run build` or `npx vite build` when relevant.
-9. Inspect real route at required viewports when UI/layout quality is in scope.
+For skill changes: run `npm run validate-freight-skill`, then `npm run sync-freight-skill`.
 
-## Delivery Report
+For UI code: run `node scripts/check-spec.js` and `npm run build`. When visual or interaction quality is in scope, inspect the real route at `1366x768`, `1024x768`, and one wide desktop viewport; add deterministic state scenarios required by the page spec. Commercial claims must pass all gates in `product-grade-evaluation.md` with recorded evidence.
 
-Report the path and authorities used, files/shared APIs changed, verification results, real-route evidence when UI quality is in scope, and remaining risks. Never report unproduced evidence.
+Follow `.cursor/rules/adversarial-review.mdc` before delivery. Report only evidence actually produced and list remaining blockers or unverified states.
+
+## Growth Control
+
+Do not fix a weak result by adding a reference, duplicate checklist, slogan, or page-specific recipe. Fix order:
+
+1. repair the implementation;
+2. extract or extend a reused Arco/shared capability;
+3. change the single existing authority;
+4. delete superseded prose.
+
+The validator freezes reference count and key-document budgets. A new authority requires consolidation or deletion first.

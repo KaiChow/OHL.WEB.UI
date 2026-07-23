@@ -1,19 +1,17 @@
 ---
-description: UI 交付前按 freight skill 做证据审查
+description: UI 交付前按商业产品标准做证据审查
 alwaysApply: true
 ---
 
 # UI Adversarial Review
 
-结束 `src/views/**`、`src/components/**` UI 工作前，以拒绝合并的标准检查：
+结束 `src/views/**`、`src/components/**` UI/交互工作前，以拒绝发布的标准检查：
 
-1. `arco-first.md` + `theme-contract.md`: 是否优先使用 Arco/GI，是否出现第二套皮肤或无依据共享类？
-2. `existing-project-modernization.md`: 无设计稿任务是否有真实路由 before/after，而非只报脚本通过？
-3. `page-spec-contract.md`: material page work 是否有可测 PESDP acceptance，并与渲染证据一致？
-4. 对应 surface authority：筛选、overlay、列表、表格、详情、动作是否只由各自 authority 决定？
-5. `feature-delivery-contract.md`: 显隐、可用、权限、请求、失败保留、刷新和防重复提交是否完整？
-6. `icons.md`: 图标库和作用域是否正确？
-7. Artifact task: 是否完成 `prototype-to-ui-contract.md` 的 intake、交付级别与转译块？
-8. 是否用新增文档掩盖缺失的共享 UI 能力、过量 page-local CSS 或未验证的真实效果？
+1. **业务可信**：对象、用户工作、关键状态/风险、责任人和下一动作是否真实，是否出现复制字段、假指标或通用 admin 语义？
+2. **结构与效率**：`pageSpec.ts` 的 ownership 是否与真实路由一致；高频工作是否直达；主工作面、首屏比例、滚动和 overflow 是否通过所选 page/surface authority？
+3. **交互闭环**：每个业务动作是否有显隐、可用、权限、pending/防重、成功、失败保留、刷新和危险确认；是否存在死按钮、猜测 API 或只做成功态？
+4. **状态韧性**：适用的 loading、empty、permission、validation、business/network error、slow、long/extreme data、retry 和 partial failure 是否可确定复现并可恢复？
+5. **产品一致性**：是否遵循 Arco/GI -> token -> shared pattern -> local layout，是否出现第二套皮肤、无依据共享类、页面私有组件语言或文档替代共享能力？
+6. **真实证据**：是否检查真实路由 viewport、焦点、console、局部反馈和状态行为；是否只凭源码、截图、pageSpec 文案或绿色脚本自证？
 
-发现问题先修复。最后运行 `node scripts/check-spec.js`；脚本不替代真实路由审查。
+融资、销售或产品化目标必须再逐项通过 `product-grade-evaluation.md` 的六个发布门。发现问题先修复；不能复现的状态和剩余风险必须明确报告，不能判定完成。

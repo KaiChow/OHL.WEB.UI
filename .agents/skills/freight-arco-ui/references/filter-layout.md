@@ -11,7 +11,7 @@ It does not define a second component framework:
 - Page CSS may arrange local grid, flex, stable width, and overflow relationships. It must not reskin Arco inputs, drawers, buttons, or popup chrome.
 - Field count selects a candidate scenario; frequency, task continuity, and adjustment cost decide the final surface.
 
-The command-surface height and first-viewport table budget are owned by `redesign-calibration.md`. Control dimensions and typography are owned by `form-field.md`.
+The command-surface height and first-viewport table budget are owned by `existing-project-modernization.md`. Control dimensions and typography are owned by `form-field.md`.
 
 ## Query Field Classification
 
@@ -229,5 +229,5 @@ Verify the selected scenario against real content at `1024x768`, `1366x768`, and
 - Control dimensions and label rhythm: `form-field.md`
 - Query/list surface order: `list-page.md`
 - Query and footer action hierarchy: `actions.md`
-- First-viewport budget: `redesign-calibration.md`
+- First-viewport budget: `existing-project-modernization.md`
 - Loading, failure, empty, and permission feedback: `feedback.md`

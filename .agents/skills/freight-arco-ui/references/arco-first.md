@@ -167,7 +167,7 @@ Do not "improve" a page by piling a new custom skin on top of Arco.
 2. Arco component docs for the surfaces in scope
 3. Task archetype reference (`list-page.md`, `detail-form.md`, etc.)
 4. `global.css` — only for tokens/patterns you have already justified
-5. `check-spec.js` + `checklist.md`
+5. `check-spec.js` + the Commercial Definition Of Done in `SKILL.md`
 
 ## Output Standard
 

@@ -16,7 +16,7 @@ This project targets a professional freight ERP/SaaS interface for sales, operat
 2. Long-session visual comfort.
 3. Visual beauty.
 
-For table-dominant workbench pages, use the first-viewport layout gate owned by `redesign-calibration.md`. This file defines visual roles, not competing layout thresholds.
+For table-dominant workbench pages, use the rendered layout gate owned by `existing-project-modernization.md`. This file defines visual roles, not competing layout thresholds.
 
 The correct direction is not "old ERP" and not "minimal SaaS dashboard." The target is **Modern Freight Operations Workbench**: dense data, low visual noise, visible high-frequency workflows, semantic status, and stable Arco/VXE interaction.
 

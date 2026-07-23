@@ -1,4 +1,4 @@
 interface:
   display_name: "Freight Arco UI"
-  short_description: "PESDP skill for freight SaaS UI redesign, layout rewrites, and feature delivery contracts"
-  default_prompt: "Use $freight-arco-ui to design, redesign, review, or implement FE.OHL.WEB.UI freight SaaS UI. Before template code, create or update the typed pageSpec.ts required by the PESDP Page Specification Contract, resolve its single-authority references, then implement with Vue 3, Arco Design Vue, VXE Table, feature contracts, check-spec, build, and real-route evidence."
+  short_description: "Commercial-grade freight SaaS UI and interaction delivery"
+  default_prompt: "Use $freight-arco-ui to deliver FE.OHL.WEB.UI UI and interactions. Select the smallest authority path, write typed pageSpec.ts before material template work, bind business actions to smallest complete feature contracts, implement Arco/GI/shared-first, and reject sellable-quality claims without real-route viewport and deterministic adverse-state evidence."
