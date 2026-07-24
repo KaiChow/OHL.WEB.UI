@@ -477,7 +477,7 @@ Danger rules:
   - **Page/footer workflow** → default/secondary commands plus one `primary` submit
   - **Module action** → `outline` or default in the owning section head
   - **Auxiliary** → `text`; destructive work uses `status="danger"` plus confirmation
-- Neutral surfaces (search/toolbar/table cap) stay white/gray; primary appears in active nav, links, focus, selection, one primary button, and thin anchors.
+- Neutral surfaces (search/toolbar/table cap) stay neutral; primary appears in active navigation, links, focus, selection, and the one primary button, not decorative lines.
 - Keep GI native hover/focus behavior; do not add transform or floating shadows in page CSS.
 
 ---

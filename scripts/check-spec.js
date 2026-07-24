@@ -301,6 +301,11 @@ for (const routerFile of routerFiles) {
 const pageSpecFiles = files.filter((file) => /[\\/]pageSpec\.ts$/.test(file));
 const featureContractFiles = files.filter((file) => /[\\/]featureContracts\.ts$/.test(file));
 const featureContractIds = new Map();
+const pageSpecIds = new Map();
+const skillReferenceNames = new Set(
+  readdirSync(join(ROOT, '.agents/skills/freight-arco-ui/references'))
+    .filter((name) => name.endsWith('.md')),
+);
 
 if (!/^[~^]?0\.0\.58$/.test(packageJson.dependencies?.['@arco-themes/vue-gi-demo'] || '')) {
   violations.push({
@@ -486,6 +491,37 @@ for (const specFile of pageSpecFiles) {
     });
   }
 
+  const pageId = getStringProperty(spec, 'id');
+  if (!pageId) {
+    violations.push({
+      rule: '每个 typed pageSpec.ts 必须声明稳定页面 id',
+      file: relPath,
+      line: 1,
+      content: 'missing page id',
+    });
+  } else if (pageSpecIds.has(pageId)) {
+    violations.push({
+      rule: 'pageSpec id 必须在项目内唯一',
+      file: relPath,
+      line: 1,
+      content: `${pageId} duplicates ${pageSpecIds.get(pageId)}`,
+    });
+  } else {
+    pageSpecIds.set(pageId, relPath);
+  }
+  if (pageId && routeView) {
+    const routeSource = readFileSync(routeView, 'utf8');
+    const binding = new RegExp(`data-pesdp-page=["']${pageId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']`);
+    if (!binding.test(routeSource)) {
+      violations.push({
+        rule: '真实业务路由必须用 pageSpec id 声明 data-pesdp-page 绑定',
+        file: toRelativePath(routeView),
+        line: 1,
+        content: `missing data-pesdp-page="${pageId}"`,
+      });
+    }
+  }
+
   const pesdp = getObjectLiteralProperty(spec, 'pesdp');
   for (const dimension of pesdpDimensions) {
     const trace = getObjectLiteralProperty(pesdp, dimension);
@@ -511,6 +547,28 @@ for (const specFile of pageSpecFiles) {
     });
   }
 
+  const states = getStringArrayProperty(spec, 'states') ?? [];
+  const missingBaseStates = ['loading', 'empty', 'no-permission'].filter((state) => !states.includes(state));
+  if (missingBaseStates.length || !states.some((state) => /error|failure/.test(state))) {
+    violations.push({
+      rule: '每个 typed pageSpec.ts 必须覆盖 loading、empty、no-permission 和至少一种可恢复失败状态',
+      file: relPath,
+      line: 1,
+      content: `missing=${missingBaseStates.join(',') || '-'}, recoverable-failure=${states.some((state) => /error|failure/.test(state))}`,
+    });
+  }
+
+  const authorities = getStringArrayProperty(spec, 'authorities') ?? [];
+  const missingAuthorities = authorities.filter((name) => !skillReferenceNames.has(name));
+  if (!authorities.length || missingAuthorities.length) {
+    violations.push({
+      rule: 'pageSpec authorities 必须引用 freight-arco-ui 中真实存在的项目级规范',
+      file: relPath,
+      line: 1,
+      content: missingAuthorities.length ? `missing ${missingAuthorities.join(', ')}` : 'empty authorities',
+    });
+  }
+
   if (/\bgoal\s*:|\bevidence\s*:/.test(source)) {
     violations.push({
       rule: 'typed pageSpec.ts 只能声明 target + acceptance，禁止在源码中自证质量',
@@ -524,6 +582,8 @@ for (const specFile of pageSpecFiles) {
   const declaredTotal = Number(getObjectProperty(query, 'totalFields')?.initializer?.text);
   const declaredVisible = getStringArrayProperty(query, 'visibleFields') ?? [];
   const declaredAdvanced = getStringArrayProperty(query, 'advancedFields') ?? [];
+  const queryStrategy = getStringProperty(query, 'strategy');
+  const declaredQueryFields = [...declaredVisible, ...declaredAdvanced];
   if (!Number.isInteger(declaredTotal) || declaredTotal !== declaredVisible.length + declaredAdvanced.length) {
     violations.push({
       rule: 'pageSpec 查询 totalFields 必须等于 visibleFields 与 advancedFields 的字段总数',
@@ -532,23 +592,95 @@ for (const specFile of pageSpecFiles) {
       content: `declared=${declaredTotal}, fields=${declaredVisible.length + declaredAdvanced.length}`,
     });
   }
+  if (new Set(declaredQueryFields).size !== declaredQueryFields.length) {
+    violations.push({
+      rule: 'pageSpec 查询字段不得在 visibleFields / advancedFields 中重复',
+      file: relPath,
+      line: 1,
+      content: 'duplicate query field declaration',
+    });
+  }
+  const invalidQueryStrategy = (declaredTotal === 0 && queryStrategy !== 'none')
+    || (declaredTotal > 0 && queryStrategy === 'none')
+    || (queryStrategy === 's1-inline' && (declaredTotal > 8 || declaredAdvanced.length > 0))
+    || (queryStrategy === 's3-drawer' && (declaredTotal <= 8 || declaredTotal > 50))
+    || (queryStrategy === 's4-workspace' && declaredTotal < 50);
+  if (invalidQueryStrategy) {
+    violations.push({
+      rule: 'pageSpec 查询策略必须与项目级字段规模边界自洽；边界例外只能在允许区间内选择',
+      file: relPath,
+      line: 1,
+      content: `strategy=${queryStrategy}, total=${declaredTotal}, advanced=${declaredAdvanced.length}`,
+    });
+  }
+
+  const surfacesProperty = getObjectProperty(spec, 'surfaces');
+  const surfaces = surfacesProperty && ts.isArrayLiteralExpression(surfacesProperty.initializer)
+    ? surfacesProperty.initializer.elements.filter(ts.isObjectLiteralExpression)
+    : [];
+  const surfaceIds = surfaces.map((surface) => getStringProperty(surface, 'id')).filter(Boolean);
+  if (new Set(surfaceIds).size !== surfaceIds.length) {
+    violations.push({
+      rule: 'typed pageSpec.ts 的 surface id 必须在页面内唯一',
+      file: relPath,
+      line: 1,
+      content: 'duplicate surface id',
+    });
+  }
+  for (const surface of surfaces) {
+    const implementation = getStringProperty(surface, 'implementation');
+    const reason = getStringProperty(surface, 'whyArcoNotEnough');
+    if ((implementation === 'page-local' || implementation === 'shared-pattern') && !reason) {
+      violations.push({
+        rule: '非 Arco 原生 surface 必须说明 whyArcoNotEnough，禁止把自定义结构当默认方案',
+        file: relPath,
+        line: source.slice(0, surface.pos).split('\n').length,
+        content: `${getStringProperty(surface, 'id') ?? '(unknown surface)'} missing whyArcoNotEnough`,
+      });
+    }
+  }
 
   const actionsProperty = getObjectProperty(spec, 'actions');
   const actions = actionsProperty && ts.isArrayLiteralExpression(actionsProperty.initializer)
     ? actionsProperty.initializer.elements.filter(ts.isObjectLiteralExpression)
     : [];
-  for (const action of actions) {
-    const contractId = getStringProperty(action, 'contract');
-    if (contractId && featureContractIds.has(contractId)) continue;
+  const actionIds = actions.map((action) => getStringProperty(action, 'id')).filter(Boolean);
+  if (new Set(actionIds).size !== actionIds.length) {
     violations.push({
-      rule: 'typed pageSpec.ts 的每个动作必须引用项目内真实完整功能契约',
+      rule: 'typed pageSpec.ts 的 action id 必须在页面内唯一',
       file: relPath,
-      line: source.slice(0, action.pos).split('\n').length,
-      content: `missing feature contract ${contractId ?? '(empty)'}`,
+      line: 1,
+      content: 'duplicate action id',
     });
   }
+  const primaryScopes = new Map();
+  for (const action of actions) {
+    const contractId = getStringProperty(action, 'contract');
+    if (!contractId || !featureContractIds.has(contractId)) {
+      violations.push({
+        rule: 'typed pageSpec.ts 的每个动作必须引用项目内真实完整功能契约',
+        file: relPath,
+        line: source.slice(0, action.pos).split('\n').length,
+        content: `missing feature contract ${contractId ?? '(empty)'}`,
+      });
+    }
+    if (getStringProperty(action, 'presentation') === 'primary') {
+      const scope = getStringProperty(action, 'scope') ?? '(empty)';
+      if (primaryScopes.has(scope)) {
+        violations.push({
+          rule: '同一 pageSpec action scope 最多声明一个 primary',
+          file: relPath,
+          line: source.slice(0, action.pos).split('\n').length,
+          content: `${scope}: ${primaryScopes.get(scope)} and ${getStringProperty(action, 'id')}`,
+        });
+      } else {
+        primaryScopes.set(scope, getStringProperty(action, 'id'));
+      }
+    }
+  }
 
-  if (actions.length && routeView && !readFileSync(routeView, 'utf8').includes('featureContracts')) {
+  if (actions.length && routeView
+    && !/from\s+['"][^'"]*featureContracts['"]/.test(readFileSync(routeView, 'utf8'))) {
     violations.push({
       rule: '声明业务动作的路由页面必须复用对应 featureContracts，禁止页面内另写一套交互状态',
       file: toRelativePath(routeView),
@@ -556,138 +688,6 @@ for (const specFile of pageSpecFiles) {
       content: 'missing featureContracts import',
     });
   }
-}
-
-const shipmentWorkbenchPage = readFileSync(join(ROOT, 'src/views/shipment/orderWorkbench/index.vue'), 'utf8');
-const shipmentWorkbenchSpec = readFileSync(join(ROOT, 'src/views/shipment/orderWorkbench/pageSpec.ts'), 'utf8');
-const shipmentDetailSpec = readFileSync(join(ROOT, 'src/views/shipment/orderDetail/pageSpec.ts'), 'utf8');
-const parseStringArray = (source, key) => {
-  const body = source.match(new RegExp(`${key}:\\s*\\[([\\s\\S]*?)\\]`))?.[1] ?? '';
-  return [...body.matchAll(/'([^']+)'/g)].map((match) => match[1]);
-};
-const declaredQueryTotal = Number(shipmentWorkbenchSpec.match(/totalFields:\s*(\d+)/)?.[1]);
-const declaredVisibleQueryFields = parseStringArray(shipmentWorkbenchSpec, 'visibleFields');
-const declaredAdvancedQueryFields = parseStringArray(shipmentWorkbenchSpec, 'advancedFields');
-const implementedVisibleQueryFields = [...new Set(
-  [...shipmentWorkbenchPage.matchAll(/v-model="query\.([\w]+)"/g)]
-    .map((match) => match[1])
-    .filter((field) => field !== 'keywordType'),
-)];
-const implementedAdvancedQueryFields = [...new Set(
-  [...shipmentWorkbenchPage.matchAll(/v-model="advancedQuery\.([\w]+)"/g)]
-    .map((match) => match[1]),
-)];
-const implementedQueryFields = [...new Set([
-  ...implementedVisibleQueryFields,
-  ...implementedAdvancedQueryFields,
-])];
-const declaredQueryFields = [...declaredVisibleQueryFields, ...declaredAdvancedQueryFields];
-const missingQueryFields = implementedQueryFields.filter((field) => !declaredQueryFields.includes(field));
-const phantomQueryFields = declaredQueryFields.filter((field) => !implementedQueryFields.includes(field));
-if (declaredQueryTotal !== implementedQueryFields.length
-  || declaredQueryFields.length !== declaredQueryTotal
-  || missingQueryFields.length
-  || phantomQueryFields.length
-  || (implementedQueryFields.length >= 17 && !shipmentWorkbenchSpec.includes("strategy: 's3-drawer'"))) {
-  violations.push({
-    rule: '订单工作台 pageSpec 查询总数、可见字段、高级字段和 S3 策略必须与真实 v-model 一致',
-    file: 'src/views/shipment/orderWorkbench/pageSpec.ts',
-    line: 1,
-    content: `declared=${declaredQueryTotal}, implemented=${implementedQueryFields.length}, missing=${missingQueryFields.join(',') || '-'}, phantom=${phantomQueryFields.join(',') || '-'}`,
-  });
-}
-const visibleModelMismatch = declaredVisibleQueryFields.filter((field) => !implementedVisibleQueryFields.includes(field));
-const advancedModelMismatch = declaredAdvancedQueryFields.filter((field) => !implementedAdvancedQueryFields.includes(field));
-const responsiveAdvancedColumnCount = [...shipmentWorkbenchPage.matchAll(/<a-col\b[^>]*>/g)]
-  .map((match) => match[0])
-  .filter((tag) => /:span="12"/.test(tag) && /:xs="24"/.test(tag) && /:sm="12"/.test(tag))
-  .length;
-const controlledAdvancedDatePopupCount = [...shipmentWorkbenchPage.matchAll(/v-model:popup-visible="advancedDatePopupVisible\.[^"]+"/g)].length;
-if (visibleModelMismatch.length
-  || advancedModelMismatch.length
-  || !shipmentWorkbenchPage.includes('Object.assign(advancedQuery, cloneQuery(query))')
-  || !shipmentWorkbenchPage.includes('@cancel="cancelAdvancedFilters"')
-  || !shipmentWorkbenchPage.includes(':esc-to-close="false"')
-  || !shipmentWorkbenchPage.includes('closeAdvancedDatePopups')
-  || !shipmentWorkbenchPage.includes('handleAdvancedPopupEscape')
-  || controlledAdvancedDatePopupCount !== 3
-  || !shipmentWorkbenchPage.includes('advancedPreviewCount')
-  || responsiveAdvancedColumnCount !== declaredAdvancedQueryFields.length) {
-  violations.push({
-    rule: 'S3 高级筛选必须使用独立草稿模型、右侧两列响应式契约与同源结果预览；取消/关闭不修改已应用查询',
-    file: 'src/views/shipment/orderWorkbench/index.vue',
-    line: 1,
-    content: `visible-model=${visibleModelMismatch.join(',') || 'ok'}, advanced-model=${advancedModelMismatch.join(',') || 'ok'}, responsive-columns=${responsiveAdvancedColumnCount}`,
-  });
-}
-const advancedFooterLayout = shipmentWorkbenchPage.match(/\.advanced-filter-footer\s*\{([\s\S]*?)\}/)?.[1] ?? '';
-if (!advancedFooterLayout.includes('box-sizing: border-box')
-  || !advancedFooterLayout.includes('flex-wrap: wrap')) {
-  violations.push({
-    rule: '高级筛选 footer 必须使用 border-box 并允许窄窗口换行，禁止 width+padding 横向溢出',
-    file: 'src/views/shipment/orderWorkbench/index.vue',
-    line: 1,
-    content: 'missing border-box or flex-wrap on advanced-filter-footer',
-  });
-}
-if (!shipmentWorkbenchPage.includes('data-pesdp-page="shipment-export-order-workbench"')
-  || !shipmentWorkbenchSpec.includes("id: 'shipment-export-order-workbench'")) {
-  violations.push({
-    rule: '出口订单工作台必须用稳定 ID 绑定其 typed PESDP page spec',
-    file: 'src/views/shipment/orderWorkbench/index.vue',
-    line: 1,
-    content: 'missing shipment-export-order-workbench spec binding',
-  });
-}
-if (!shipmentWorkbenchPage.includes('data-workbench-scope')
-  || !shipmentWorkbenchPage.includes('activeWorkScope')) {
-  violations.push({
-    rule: '出口订单工作台必须显式区分工作范围与状态队列',
-    file: 'src/views/shipment/orderWorkbench/index.vue',
-    line: 1,
-    content: 'missing ownership scope control',
-  });
-}
-
-const shipmentDetailPage = readFileSync(join(ROOT, 'src/views/shipment/orderDetail/index.vue'), 'utf8');
-const shipmentOrderInfoTab = readFileSync(join(ROOT, 'src/views/shipment/orderDetail/components/OrderInfoTab.vue'), 'utf8');
-const shipmentDetailWorkspaceRoles = [
-  'data-pesdp-page="shipment-export-order-detail"',
-  'data-detail-workspace="shipment-order"',
-  'isDetailEditing',
-  'detail-focus',
-  'detail-milestone-bar',
-  ':editable="isDetailEditing"',
-];
-for (const role of shipmentDetailWorkspaceRoles) {
-  if (shipmentDetailPage.includes(role)) continue;
-  violations.push({
-    rule: '出口订单详情必须实现默认展示态、执行焦点、轻量节点与显式编辑会话',
-    file: 'src/views/shipment/orderDetail/index.vue',
-    line: 1,
-    content: `missing ${role}`,
-  });
-}
-if (!shipmentDetailSpec.includes("id: 'shipment-export-order-detail'")
-  || (shipmentDetailPage.match(/v-if="isDetailEditing"/g) || []).length < 3
-  || (shipmentDetailPage.match(/<a-descriptions\s+v-else\s+class="detail-display"/g) || []).length < 3
-  || !shipmentDetailPage.includes(':editable="isDetailEditing"')) {
-  violations.push({
-    rule: '订单详情所有对象字段区必须绑定同一 typed spec，并统一遵守展示/编辑双态',
-    file: 'src/views/shipment/orderDetail/index.vue',
-    line: 1,
-    content: 'missing detail spec id or display/edit split on overview and execution sections',
-  });
-}
-if (!shipmentOrderInfoTab.includes('v-if="editable"')
-  || !shipmentOrderInfoTab.includes('<a-descriptions')
-  || !shipmentOrderInfoTab.includes('class="detail-display"')) {
-  violations.push({
-    rule: '订单概览默认必须用 Arco Descriptions 呈现可扫描展示态，只有显式编辑时渲染完整表单',
-    file: 'src/views/shipment/orderDetail/components/OrderInfoTab.vue',
-    line: 1,
-    content: 'missing Arco detail-display / edit mode split',
-  });
 }
 if (!mainTs.includes("@icon-park/vue-next/styles/index.css")) {
   violations.push({

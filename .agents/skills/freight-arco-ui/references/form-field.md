@@ -28,19 +28,9 @@
 
 ## 组件默认态（Default）
 
-适用：**所有** `size="small"` 单行控件，与所在页面无关。
+适用：**所有** `size="small"` 单行控件，与所在页面无关。Input、Select、Date/Range Picker、InputNumber 和 Textarea 均使用组件公共 props、插槽与状态；禁止把框架内部 class 当成实现 API。
 
-| 组件 | Arco 类名（节选） |
-|------|-------------------|
-| Input | `.arco-input-wrapper.arco-input-size-small` |
-| Select | `.arco-select-view-single.arco-select-size-small` |
-| Date / Range | `.arco-picker-size-small` / `.arco-picker-range.arco-picker-size-small` |
-| InputNumber | `.arco-input-number.arco-input-number-size-small` |
-
-| 属性 | 值 |
-|------|-----|
-| 外框与字号 | GI `size="small"` 原生值 |
-| 边框、Hover / Focus | GI 原生交互状态，不覆盖 |
+外框、字号、边框、Hover、Focus、Disabled 和 Error 外观全部保持 GI 原生值。
 
 ## 字段名（Field label）
 
@@ -48,7 +38,7 @@
 |------|------|
 | 可见 `<label for>` | 非 Arco Form 场景的首选；必须与控件 id 关联 |
 | `.filter-field__label` | 页面局部语义 hook；只管理标签布局，不建立组件皮肤 |
-| `.arco-form-item-label > label` | `a-form layout="vertical"` 内置 label |
+| `a-form-item` 的 `label` prop/slot | `a-form layout="vertical"` 内置 label |
 
 手写业务标签使用 F4 token；`a-form-item` 标签保持 GI 原生层级。两者靠结构、间距和明确分组保持一致，不通过全局内部选择器强制同字号。
 
@@ -56,11 +46,11 @@
 
 仅以下 **场景** 允许覆盖 Default；不得按业务模块新增场景。
 
-| 场景 | 选择器 / 条件 | 差异 |
-|------|----------------|------|
-| **Textarea 多行** | `.arco-textarea-size-small` | 不固定 28px 高；行高 1.45 |
-| **Disabled / 只读** | `.arco-*-disabled` | 灰底；文字仍 `text-1` 可读 |
-| **Form-item 列宽** | `.arco-form-item-content >` | 控件 `width: 100%` |
+| 场景 | 公共 API / 条件 | 差异 |
+|------|------------------|------|
+| **Textarea 多行** | Textarea props | 不固定 28px 高；按内容与行数配置 |
+| **Disabled / 只读** | `disabled` / read-only display pattern | 保持原生状态，同时保证业务值可辨识 |
+| **Form-item 列宽** | Arco Grid + component width prop/style | 控件填满所属列，不穿透内部结构 |
 | **表格行内编辑** | `.detail-mini-vxe` | 控件使用原生 small 外观；单元格内只读值勿用 `link-text`（见 `table.md`） |
 | **组合控件** | `.filter-combo` / `.detail-combo` | 多控件拼接圆角（布局 struct，非模块） |
 | **分页跳转等** | `.table-card-cap__pager` | 分页专用（非表单字段） |

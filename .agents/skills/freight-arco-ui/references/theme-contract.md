@@ -55,7 +55,6 @@ Allowed:
 body {
   --dense-primary-6: rgb(var(--primary-6));
   --dense-card-border: var(--color-border-1);
-  --dense-table-header-bg: var(--color-fill-1);
 }
 ```
 

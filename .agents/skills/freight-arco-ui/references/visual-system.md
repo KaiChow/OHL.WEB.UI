@@ -190,7 +190,7 @@ Reason: depending on the import path, gi-demo theme values may be available as R
 Business users spend long sessions in list and detail pages. The interface must not become a gray ERP sheet or a blue-tinted grid. Use this main surface model:
 
 - Page background is the quiet base: `--dense-page-bg`, normally a cool brand-neutral surface, not plain gray.
-- Primary working surfaces are white: `color-bg-card`, `--dense-surface-section`, or `--dense-surface-head`.
+- Primary working surfaces use GI container backgrounds; use `--dense-surface-section` only for a framework-neutral business surface that genuinely owns content.
 - Surface separation is created first by spacing, ownership, alignment, and typography. Use a boundary only when it clarifies containment; do not add a shadow or colored line to every zone.
 - Each action scope needs one clear attention owner: active segment, primary action, primary identifier, selected state, or status. A passive section does not need a decorative brand anchor.
 - Do not use gray fill as the main way to separate modules. Use whitespace, headings, object-owned key facts, and clear action grouping.
@@ -343,12 +343,12 @@ Risk labels:
 
 ## Premium Dense Rules
 
-- Prefer subtle shadow + surface hierarchy over visible borders. Use borders as the last 1px boundary, not as the main design language.
+- Prefer spacing, alignment, typography, and ownership over extra borders or shadows. Keep Arco component boundaries and elevation GI-native.
 - Prefer project dense radius (`--dense-radius`) unless a component has a documented exception. Do not use large consumer SaaS radius for dense freight pages.
 - Keep long-term reading comfortable: no heavy contrast blocks, no saturated full-width backgrounds.
 - Use whitespace as grouping rhythm, not as decorative emptiness.
 - If a page feels "plain", first improve hierarchy and business grouping, then adjust token-based color accents.
-- If a page feels "too gray", first check whether every major surface has a restrained brand anchor: active segment, primary action, selected rows, links/status pills, and `--dense-zone-top-border`. Do not fix it by adding gray fills or coloring every workflow button.
+- If a page feels "too gray", first check active navigation, the current scope's primary action, selected rows, key links, and status pills. Do not add decorative top borders, gray fills, or colored workflow buttons.
 
 ## Hard Bans
 

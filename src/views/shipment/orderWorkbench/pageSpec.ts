@@ -59,7 +59,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   surfaces: [
     { id: 'command', role: 'command', owns: ['query', 'query-schemes', 'create', 'export', 'ownership-scope', 'status-queues'], primaryAction: 'export-order-create', implementation: 'arco' },
     { id: 'advanced-query', role: 'supporting', owns: ['right-drawer-grid', 'advanced-query-draft', 'freight-business-grouping', 'group-active-counts', 'group-reset', 'live-result-preview', 'draft-dirty-state', 'cancel-apply-state'], primaryAction: 'export-order-query', implementation: 'arco' },
-    { id: 'orders', role: 'data', owns: ['table-data', 'selection', 'batch-result', 'column-settings', 'density', 'pagination', 'total-count', 'table-feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'VXE integration and freight workbench density require the documented workbench-table bridge.' },
+    { id: 'orders', role: 'data', owns: ['table-data', 'selection', 'batch-result', 'column-settings', 'density', 'pagination', 'total-count', 'table-feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'Freight list grids require the shared VXE workbench wrapper and public density, fixed-column, overflow, loading, and preference configuration.' },
     { id: 'quick-detail', role: 'detail', owns: ['order-context', 'risk-summary', 'milestones', 'fee-summary', 'recent-activity', 'overlay-scroll'], implementation: 'arco' },
   ],
   query: {
