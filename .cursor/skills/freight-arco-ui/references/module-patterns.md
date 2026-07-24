@@ -188,4 +188,4 @@ grouped_actions:
 
 Then implement in this order: Arco built-ins -> tokens -> documented business patterns -> minimal page-local CSS.
 
-Use `global.css` classes only when the chosen surface needs a documented freight/VXE/archetype enhancement and `arco-first.md` can explain why Arco + tokens are insufficient.
+Use global classes only for framework-neutral tokens or freight semantics. Repeated surface behavior belongs in a shared Vue component after `arco-first.md` explains why Arco structure is insufficient.

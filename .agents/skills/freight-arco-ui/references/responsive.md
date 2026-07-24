@@ -21,6 +21,8 @@ This is split-window desktop support, not tablet or mobile support. Product-grad
 - Query, reset, and advanced-filter entry stay together.
 - Status controls use `min-width: 0` and internal horizontal scrolling before the page gains another full-width band.
 - Utility icons stay icon-only with tooltips when width is constrained.
+- Collapse order is fixed: keep the primary action and active state visible; convert familiar utilities to named icon-only tools; move low-frequency commands into an existing More menu; only then reduce optional visible fields.
+- A compact action group must be measured against the adjacent field boundary. Children may not overflow a narrower Grid column or visually cover a control even when the page itself reports no horizontal overflow.
 - The VXE table may scroll horizontally. The shell, command surface, and card structure may not create browser-level horizontal overflow at 1024px or 1280px.
 - Do not shrink font tokens, labels, or hit targets to make the layout fit.
 
@@ -64,3 +66,11 @@ That extension belongs to the consuming project. Widths below 1024px must not be
 - No page-scoped hard width for the entire status group.
 - No hiding active state or daily workflow controls only because compact desktop is tighter.
 - No claim of mobile/tablet support without implementation and real-viewport verification.
+
+## Release Gate
+
+- [ ] At 1024x768, primary identity/query, active scope/state, and the next useful action remain visible.
+- [ ] No command wraps, overlaps a neighboring field, or overflows its Grid/Flex owner.
+- [ ] Status/navigation overflow is local; table overflow belongs to VXE; browser-level horizontal overflow is absent.
+- [ ] Icon-only compact tools retain Tooltip, business-specific `aria-label`, and at least 28x28px target.
+- [ ] At wide desktop, fields remain bounded and controls do not stretch merely to consume space.

@@ -12,14 +12,11 @@ Do not claim that the project uses Uppy or another library unless its dependency
 
 ```vue
 <!-- Single file field inside a detail form -->
-<div class="detail-field">
-  <div class="detail-field__label">提单文件</div>
-  <div class="detail-field__val">
+<a-form-item label="提单文件">
     <a-button size="small" type="outline" @click="openUpload">
       <template #icon><icon-upload /></template>上传文件
     </a-button>
-  </div>
-</div>
+</a-form-item>
 ```
 
 ### Section-level trigger (module header right)
@@ -46,11 +43,13 @@ Show uploaded files as a compact list inside the section body. Do not use cards 
     <icon-file class="attach-row__icon" />
     <a class="attach-row__name" :href="file.url" target="_blank">{{ file.name }}</a>
     <span class="attach-row__meta">{{ file.size }} · {{ file.uploadedAt }}</span>
-    <a-popconfirm content="确认删除此附件？" @ok="removeFile(file.id)">
-      <a-button type="text" class="row-action-btn" status="danger">
-        <icon-delete />
-      </a-button>
-    </a-popconfirm>
+    <a-tooltip content="删除附件">
+      <a-popconfirm :content="`确认删除附件 ${file.name}？`" @ok="removeFile(file.id)">
+        <a-button size="small" type="text" class="row-action-btn" status="danger" :aria-label="`删除附件 ${file.name}`">
+          <template #icon><icon-delete /></template>
+        </a-button>
+      </a-popconfirm>
+    </a-tooltip>
   </div>
   <div v-if="!fileList.length" class="attach-row attach-row--empty">
     <icon-file class="attach-row__icon attach-row__icon--muted" />
@@ -64,8 +63,8 @@ Show uploaded files as a compact list inside the section body. Do not use cards 
 | State | Pattern |
 |-------|---------|
 | Uploading | Progress bar or spinner inside `attach-row`; disable delete button |
-| Success | `Message.success('文件上传成功')` |
-| Failure | `Message.error('上传失败，请重试')` with retry affordance |
+| Success | Update the local file row/list + concise `Message.success` |
+| Failure | Keep failed file row/field with reason and retry; Message may summarize |
 | Over size limit | Show inline error near the trigger, not a modal alert |
 
 ## File Type Restrictions
@@ -77,7 +76,14 @@ Show uploaded files as a compact list inside the section body. Do not use cards 
 ## Rules
 
 - Upload triggers follow the button scope rules in `actions.md`: one `outline` per section, auxiliary = `text`.
-- File delete always uses `a-popconfirm` + `status="danger"`.
+- File delete uses `a-popconfirm` + `status="danger"` unless the backend provides a real recoverable delete/Undo contract.
 - Do not show upload progress in the page title or toolbar — keep it local to the section.
 - File list rows use `row-action-btn` for the delete icon, same as table row actions.
 - Do not use emoji or decorative icons in the file list.
+
+## Release Gate
+
+- [ ] Shared uploader contract owns permission, accepted types, size, progress, cancellation, retry, and request errors.
+- [ ] Each file keeps a stable id and explicit uploading/success/failure/removing state.
+- [ ] Failure remains local and retryable; closing an overlay does not silently abandon an active upload.
+- [ ] File actions have Tooltip, business-specific accessible name, pending protection, and destructive confirmation/recovery.

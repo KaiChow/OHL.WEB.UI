@@ -9,7 +9,7 @@ Not for general **user profile editing** — that is `master-data.md` MD-2 or li
 
 ## Layout: `perm-layout`
 
-Three-zone pattern in `global.css`:
+Three-zone page-scoped or shared Vue layout pattern:
 
 ```text
 perm-layout
@@ -105,7 +105,7 @@ Prefer **workbench list** (用户管理):
 
 ## Verification
 
-- [ ] `perm-layout` structure from `global.css`
+- [ ] `perm-layout` is page-scoped or implemented by a shared Vue component
 - [ ] Role list uses `perm-role-item`, not raw styled `<div>`
 - [ ] One primary save per panel
 - [ ] System role delete guarded

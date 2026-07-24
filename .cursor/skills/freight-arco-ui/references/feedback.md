@@ -103,7 +103,7 @@ Toolbar shows `bulk-hint` — `已选 N 条` when `selectedCount > 0`.
 
 ## Workbench Inline Notices（工具栏常驻提示）
 
-List/workbench `merged-bar` 内数据异常、操作说明等**常驻**提示，使用 `global.css` 的 `workbench-notice`，禁止裸 `span` + `style`。
+List/workbench 内数据异常、操作说明等**常驻**提示使用 Arco `a-alert`，放在拥有该反馈的数据 surface 内；禁止裸 `span` + 行内样式。
 
 | 语义 | Class | 用途 |
 |------|-------|------|

@@ -194,7 +194,7 @@ Rules:
 
 | Surface | Default | Library | Form |
 |---------|---------|---------|------|
-| Filter query/reset | `查询` can use Arco search; `重置` text-only | Arco / none | text or icon + text |
+| Filter query/reset | 查询保留 search + text；重置正常宽度 text、紧凑宽度可 icon-only | Arco | responsive, Tooltip + aria when icon-only |
 | Toolbar primary create | icon + text | Arco | `icon-plus` etc. |
 | Toolbar utilities | icon-only + tooltip | Arco | compact utility |
 | Toolbar business workflow | text-only by default | none | text |

@@ -10,7 +10,7 @@ The current product direction is explicit: keep the color palette from `@arco-th
 
 1. `@arco-design/web-vue` owns component implementation, props, slots, behavior, and TypeScript types.
 2. `@arco-themes/vue-gi-demo/css/arco.css` is the only Arco component stylesheet and the only palette owner.
-3. `src/styles/global.css` may expose `--dense-*` semantic aliases that directly reference the effective GI/Arco variables. It also owns freight status semantics and the VXE-to-Arco bridge.
+3. `src/styles/global.css` may expose `--dense-*` semantic aliases that directly reference the effective GI/Arco variables and own framework-neutral freight status semantics.
 4. Shared business patterns own reusable freight structure only when Arco props and layout primitives are insufficient.
 5. Page-scoped CSS owns local flex/grid relationships, overflow, and stable dimensions only.
 
@@ -22,7 +22,8 @@ Do not import `@arco-design/web-vue/dist/arco.css` beside the GI stylesheet. Thi
 |---------|-------|---------|-----------|
 | Components and interaction | `@arco-design/web-vue` | Props, slots, built-in states and accessibility | Rebuilding standard controls in custom CSS |
 | Component CSS and palette | GI theme package | Effective Arco colors, radii, component chrome and interaction states | Default Arco CSS beside GI; page palettes; global reskin |
-| Freight/VXE semantics | `src/styles/global.css` | Direct `--dense-*` aliases, `.s-pill[data-s]`, VXE variable bridge, layout density tokens | Declaring official palette values; broad undocumented `.arco-*` skin |
+| Freight semantics | `src/styles/global.css` | Direct `--dense-*` aliases, `.s-pill[data-s]`, layout/dimension tokens | Official palette values; `.arco-*`, `.vxe-*`, framework data selectors, or `--vxe-*` variables |
+| VXE behavior and density | VXE public API / shared Vue wrapper | `size`, `row-config`, column props, loading, overflow, fixed columns | Global internal-selector or theme-variable bridge |
 | Shared layout patterns | Existing documented patterns | Workbench, toolbar, detail and table structure | Page fields or one-off screenshots promoted to global rules |
 | Page composition | Vue scoped CSS | Local flex/grid, min/max dimensions, overflow, responsive relationships | Colors, shadows, radii or component skins that compete with GI |
 
@@ -71,7 +72,7 @@ Forbidden:
 }
 ```
 
-Broad `.arco-*` rules require a documented gap that props and official variables cannot express. Layout selectors that only remove unused content or stabilize dimensions must remain page-scoped unless two modules prove reuse.
+Global `.arco-*` and `.vxe-*` rules are forbidden. A necessary local layout selector must remain scoped to the owning Vue component and may only manage layout, overflow, or stable dimensions; reusable behavior becomes a shared Vue component.
 
 ## Theme And Layout Separation
 
@@ -89,7 +90,7 @@ It may not recolor controls, declare alternative neutrals, or add a page-specifi
 
 1. One GI stylesheet is imported before `global.css`; default Arco CSS and `theme.css` are absent.
 2. Computed `--primary-6`, `--color-text-1`, `--color-fill-2`, and `--color-border-1` come from GI on a real route.
-3. Inputs, buttons, tabs, menus, drawers, pagination and VXE read as one component family.
+3. Inputs, buttons, tabs, menus and drawers remain GI-native; VXE uses its native small-density public configuration without a hidden global skin.
 4. Page CSS contains no alternate palette or broad Arco reskin.
 5. Primary, hover, active, focus and semantic status states remain distinguishable.
 6. Theme ownership changes do not reduce table dominance or cause wrapping at the minimum desktop width.

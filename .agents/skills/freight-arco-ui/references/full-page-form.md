@@ -4,70 +4,61 @@
 
 - 客户端下单、新建业务单、HR/行政申请表、长创建流
 - User task is **enter or correct a full object** — not list scan
-- Field count &gt;8 or multiple `detail-section` groups
+- Field count &gt;8 or multiple business sections/child modules that share one submit boundary
 
 Prefer **drawer** when user must keep list context. Use **full page** when creation is the primary task or client portal flow.
 
-## Structure: `xf-wrap`
+## Structure
 
 ```vue
-<div class="page-root page-root--dense xf-wrap">
-  <header class="xf-head zone-card">
+<div class="xf-wrap">
+  <header class="xf-head">
     <a-breadcrumb />
-    <div class="xf-head__title">新建出口海运订单</div>
-    <div v-if="draftNo" class="xf-head__meta">草稿编号 {{ draftNo }}</div>
+    <h1 class="xf-head__title">新建业务单</h1>
+    <span v-if="draftNo" class="xf-head__meta">草稿编号 {{ draftNo }}</span>
   </header>
 
-  <div class="xf-body">
-    <div class="detail-section">
-      <div class="detail-section__head">
-        <h4 class="detail-section__title">基础信息</h4>
-      </div>
-      <div class="detail-section__body">
-        <a-form ref="formRef" :model="form" layout="vertical" size="small" class="detail-form">
-          <div class="detail-form-grid detail-form-grid--4">
+  <a-card class="xf-body" size="small">
+    <a-form ref="formRef" :model="form" layout="vertical" size="small" class="detail-form">
+      <section class="xf-section">
+        <h2>基础信息</h2>
+        <a-row :gutter="[16, 8]">
+          <a-col :md="8" :lg="6">
             <a-form-item field="customerId" label="客户" :rules="[{ required: true, message: '请选择客户' }]">
               <a-select v-model="form.customerId" size="small" allow-search />
             </a-form-item>
-            <!-- more fields; span2 for remark -->
-          </div>
-        </a-form>
-      </div>
-    </div>
+          </a-col>
+        </a-row>
+      </section>
+    </a-form>
+  </a-card>
 
-    <!-- repeated line module: detail-section + detail-mini-vxe -->
-  </div>
-
-  <footer class="detail-drawer-footer xf-footer">
-    <div class="detail-drawer-footer__start">
-      <a-button size="small" type="text" status="danger" @click="handleAbandon">废弃</a-button>
-    </div>
-    <div class="detail-drawer-footer__end">
-      <a-button size="small" @click="handleCancel">取消</a-button>
-      <a-button size="small" type="outline" @click="saveDraft">存草稿</a-button>
-      <a-button size="small" type="primary" :loading="submitting" @click="handleSubmit">提交</a-button>
-    </div>
+  <footer class="xf-footer">
+    <a-row justify="space-between" align="center">
+      <a-col><a-button size="small" type="text" status="danger" @click="handleAbandon">废弃</a-button></a-col>
+      <a-col><a-space :size="8"><a-button size="small" @click="handleCancel">取消</a-button><a-button size="small" type="outline" @click="saveDraft">存草稿</a-button><a-button size="small" type="primary" :loading="submitting" @click="handleSubmit">提交</a-button></a-space></a-col>
+    </a-row>
   </footer>
 </div>
 ```
 
-Shell classes: `xf-wrap`, `xf-head`, `xf-body`, `xf-footer` in `global.css`.
+`xf-wrap`, `xf-head`, `xf-body`, `xf-footer` are page-scoped shell hooks. Promote repeated shell behavior to a shared Vue component, not `global.css`.
 
 ## Form Rules
 
 - **Must** use `a-form` + `class="detail-form"` + `a-form-item` — see `form-rules.md`.
 - **Forbidden** raw `<label class="xf-label">` + custom error div (legacy skeleton only).
-- Grid: four columns by default; three or two only for intrinsically narrow sections. Column reduction follows `responsive.md`; do not treat `1280px` as a second minimum desktop contract.
-- Sub-entity tables: `detail-section__body--table` + `detail-mini-vxe` — same as drawer.
+- Grid: use Arco `a-row` / `a-col`; four columns by default, then reduce by content and `responsive.md`.
+- Sub-entity tables use `detail-mini-vxe` inside an unframed owning section.
 
 ## Footer (workflow)
 
 | Button | Type | Notes |
 |--------|------|-------|
-| 取消 | secondary | back / close |
+| 取消 | default button | back / close |
 | 存草稿 | outline | reversible |
 | 提交 | **primary** — one only | `:loading="submitting"` |
-| 废弃 | `text` + `danger` in `__start` | confirm |
+| 废弃 | `text` + `danger`, separated left | confirm |
 
 Client portal may hide 废弃; keep one primary.
 
@@ -116,6 +107,6 @@ Same tokens and `detail-form`. Allowed adjustments:
 
 - [ ] `xf-wrap` shell
 - [ ] `detail-form` on all inputs
-- [ ] `detail-drawer-footer` sticky pattern
+- [ ] footer uses native buttons, stays visible when the page owns a submit workflow, and does not cover content
 - [ ] `form-rules.md` submit/validate flow
 - [ ] `feedback.md` success/error messages

@@ -697,14 +697,14 @@ if (!mainTs.includes("@icon-park/vue-next/styles/index.css")) {
     content: 'missing @icon-park/vue-next/styles/index.css import',
   });
 }
-// Arco-first: global.css is a thin enhancement layer only
+// Arco-first: global.css is framework-neutral.
 const arcoOverrideRules = (globalCss.match(/[^,{]*\.arco-[^,{]*\{/g) || []).length;
-if (arcoOverrideRules > 25) {
+if (arcoOverrideRules > 0) {
   violations.push({
-    rule: 'Arco-first: global.css 禁止大量 .arco-* 规则（当前 ' + arcoOverrideRules + ' 条）',
+    rule: 'Arco-first: global.css 禁止 .arco-* 框架内部规则（当前 ' + arcoOverrideRules + ' 条）',
     file: 'src/styles/global.css',
     line: 1,
-    content: 'prefer body-scoped direct aliases; keep .arco-* to documented VXE/read-only bridges only',
+    content: 'use Arco props/slots and scoped layout CSS',
   });
 }
 const forbiddenLayoutPatterns = ['.filter-card', '.page-root', '.detail-section', '.toolbar-group', '.zone-l2-filter-card'];
@@ -734,32 +734,6 @@ if (!globalCss.includes('.s-pill[data-s="wait"]')) {
     content: 'missing s-pill freight semantics',
   });
 }
-if (!globalCss.includes('.vxe-table.workbench-table')) {
-  violations.push({
-    rule: 'global.css 须保留 VXE workbench-table 桥接',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing workbench-table bridge',
-  });
-}
-if (!globalCss.includes('.detail-mini-vxe')) {
-  violations.push({
-    rule: 'global.css 须保留 detail-mini-vxe 桥接',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing detail-mini-vxe bridge',
-  });
-}
-if (!globalCss.includes('.detail-mini-vxe.vxe-table .vxe-body--row')
-  || !globalCss.includes('height: var(--detail-mini-row-h) !important')
-  || !globalCss.includes('.detail-mini-vxe.vxe-table .vxe-body--column {\n  padding: 0 !important')) {
-  violations.push({
-    rule: 'global.css 必须由 detail-mini-vxe density modifier 统一承接明细表行高',
-    file: 'src/styles/global.css',
-    line: 1,
-    content: 'missing detail-mini-vxe density row bridge',
-  });
-}
 // 业务控件必须显式使用项目唯一密度，避免遗漏 size 后回退到 Arco medium。
 const operationalComponentPattern = /<a-(input-number|tree-select|date-picker|time-picker|pagination|textarea|cascader|button|input|select|tabs|steps)(?![\w-])[\s\S]*?>/g;
 for (const file of files) {
@@ -784,9 +758,22 @@ for (const file of files) {
       .replace(/<[^>]+>/g, '')
       .replace(/\{\{[\s\S]*?\}\}/g, 'dynamic-text')
       .trim();
-    if (visibleText || !/<(?:template\b[^>]*#icon|icon-[\w-]+\b)/.test(body) || /\baria-label=(['"])[^'"]+\1/.test(attributes)) continue;
+    const isIconOnly = !visibleText && /<(?:template\b[^>]*#icon|icon-[\w-]+\b)/.test(body);
+    if (!isIconOnly) continue;
+    if (!/\baria-label=(['"])[^'"]+\1/.test(attributes)) {
+      violations.push({
+        rule: 'icon-only 按钮必须提供业务含义明确的 aria-label；Tooltip 不能替代可访问名称',
+        file: relPath,
+        line: getLineNumber(content, match.index),
+        content: match[0].replace(/\s+/g, ' ').slice(0, 140),
+      });
+    }
+    const tooltipOpen = content.lastIndexOf('<a-tooltip', match.index);
+    const tooltipCloseBefore = content.lastIndexOf('</a-tooltip>', match.index);
+    const tooltipCloseAfter = content.indexOf('</a-tooltip>', match.index + match[0].length);
+    if (tooltipOpen > tooltipCloseBefore && tooltipCloseAfter >= 0) continue;
     violations.push({
-      rule: 'icon-only 按钮必须提供业务含义明确的 aria-label；Tooltip 不能替代可访问名称',
+      rule: 'icon-only 按钮必须由 a-tooltip 提供可见说明，title 不能替代 Tooltip',
       file: relPath,
       line: getLineNumber(content, match.index),
       content: match[0].replace(/\s+/g, ' ').slice(0, 140),
@@ -1182,6 +1169,24 @@ for (const file of files) {
       file: relPath,
       line: 1,
       content: block.split('\n').find((l) => /show-(?:header-)?overflow/.test(l))?.trim().slice(0, 120) ?? '<vxe-table ...>',
+    });
+  }
+}
+
+// 全局样式只允许基础重置、token 和框架无关的业务语义，禁止形成第二套框架皮肤。
+const globalCssFile = join(ROOT, 'src/styles/global.css');
+if (existsSync(globalCssFile)) {
+  const globalCssLines = readFileSync(globalCssFile, 'utf8').split('\n');
+  for (let i = 0; i < globalCssLines.length; i++) {
+    const line = globalCssLines[i];
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('/*') || trimmed.startsWith('*')) continue;
+    if (!/\.arco-|\.vxe-|\[data-vxe|--vxe-(?:ui-)?/.test(line)) continue;
+    violations.push({
+      rule: 'global.css 禁止覆盖 Arco/VXE 内部选择器或 VXE 主题变量',
+      file: toRelativePath(globalCssFile),
+      line: i + 1,
+      content: trimmed.slice(0, 140),
     });
   }
 }

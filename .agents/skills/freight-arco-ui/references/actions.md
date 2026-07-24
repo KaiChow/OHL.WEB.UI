@@ -17,7 +17,7 @@ All operational pages use `size="small"` unless a documented hero/empty-state ex
 | Type | Arco 写法 | 视觉 | 项目语义 |
 |------|-----------|------|----------|
 | **primary** | `type="primary"` | 实心主色 | 当前作用域内**唯一**的主正向操作 |
-| **secondary** | 不写 `type`（默认） | 灰底/中性填充 | 次要正向：导出、取消、关闭、存草稿 |
+| **secondary** | 不写 `type`（默认） | 中性按钮 | 次要正向、取消、关闭、存草稿 |
 | **dashed** | `type="dashed"` | 虚线边框 | 「继续添加 / 上传 / 占位引导」类扩容量操作 |
 | **outline** | `type="outline"` | 线框主色 | 需要比 secondary 更显眼、但又不是主操作的流程/模块操作 |
 | **text** | `type="text"` | 无边框文字/图标 | 工具、降权辅助、行内 icon、重置/刷新 |
@@ -50,7 +50,8 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 | 场景 | 推荐组合 | 确认方式 |
 |------|----------|----------|
 | 全局提交 | `primary` + normal | — |
-| 导出/取消 | `secondary` 或 `outline` + normal | — |
+| 导出 | `outline` 或默认按钮（同一模块固定一种） | — |
+| 取消/关闭 | 默认按钮；行编辑取消可用 `text` icon | — |
 | 模块添加 | `outline` + normal | — |
 | 空状态添加行 | `dashed` + normal | — |
 | 重置/刷新/复制 | `text` + normal | — |
@@ -158,7 +159,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 | 详情吸底 | 保存 ×1 | — | 订舱、放舱、输出 | — | 废弃 danger |
 | 弹窗 footer | 确定 ×1 | — | 取消 | — | 删除 danger（左侧） |
 
-**同一作用域内**：primary ≤ 1；简单平铺按钮通常 ≤ 3。生产作业台的高频可逆动作可以超过 3，但必须通过 Arco Divider、dropdown group、neutral type、右侧 utilities 分区控制噪音，并且不能换行。危险、低频、不可逆动作仍然收入 dropdown 或确认流。
+**同一作用域内**：primary ≤ 1；简单平铺按钮通常 ≤ 3。生产作业台的高频可逆动作可以超过 3，但必须分成业务命令与工具两组且不能换行。高密度主表操作列最多 2 个 affordance，第三个开始使用 More。危险、低频、不可逆动作收入 dropdown 或确认流。
 
 ---
 
@@ -181,7 +182,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 - Primary creation: icon + text when the action adds a new object (`新建`, `添加`, `上传`). Use plus/upload icon only when the metaphor is exact.
 - Module/child add actions: icon + text is preferred for `添加...` because it improves scanning in module heads. Keep at most one outline add action per module head.
 - Business workflow actions: text-only unless the icon is universally precise. Examples: `查船期`, `申请舱位`, `同步报价`, `提交审核`, `转操作接单`, `放舱`. These should not get decorative icons.
-- Footer workflow actions: text-only secondary buttons inside `detail-drawer-footer__cluster`; only dropdown triggers get trailing chevron.
+- Footer workflow actions are text-only in an Arco Space/Flex group; only dropdown triggers get a trailing chevron.
 - Dropdown options: text-only by default. Do not add icons per option. Use an option icon only when it is a strong system metaphor and the whole menu stays visually even.
 - Danger actions: row danger is icon-only + tooltip + confirm; footer/header danger is text-only `text + danger` with confirm; dropdown danger is text-only `danger-opt` in final group.
 - If an action has no precise icon, use text-only. Ambiguous icons increase recognition cost in an 8-hour operational system.
@@ -190,7 +191,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 | Scope | Default content form | Examples |
 |-------|----------------------|----------|
-| Filter | Text-only primary/query, text-only reset/filter entry | `查询`, `重置`, `筛选` |
+| Filter | 查询保留 icon + text；宽度不足时查询方案/重置/高级筛选可收成 icon-only | `查询`, history, refresh, filter |
 | Toolbar primary create | Icon + text | `+ 新建业务单` |
 | Toolbar direct business action | Text-only or icon + text if universal | `打印业务单`, `导出` |
 | Toolbar utility | Icon-only + tooltip | refresh, column settings |
@@ -213,7 +214,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 ```
 
 - 查询 = `primary`
-- 重置 = `text`（禁止 `outline`）
+- 重置 = `text`（禁止 `outline`）；窄工作区可变为 refresh icon-only，但必须保留 Tooltip 与业务化 `aria-label`
 
 ### 5.2 列表页工具栏
 
@@ -316,38 +317,36 @@ Key rules:
 ### 5.6 详情吸底
 
 ```vue
-<div class="detail-drawer-footer">
-  <div class="detail-drawer-footer__start">
+<template #footer>
+  <a-row justify="space-between" align="center">
+    <a-col>
     <a-button size="small" type="text" status="danger" @click="confirmAbandon">废弃</a-button>
-  </div>
-  <div class="detail-drawer-footer__end">
-    <div class="detail-drawer-footer__cluster">
+    </a-col>
+    <a-col>
+      <a-space :size="8">
       <a-dropdown>
         <a-button size="small">输出 <icon-down /></a-button>
       </a-dropdown>
       <a-button size="small">订舱</a-button>
       <a-button size="small">放舱</a-button>
-      <span class="detail-drawer-footer__sep" aria-hidden="true" />
       <a-button size="small" type="primary" :loading="submitting">保存</a-button>
-    </div>
-  </div>
-</div>
+      </a-space>
+    </a-col>
+  </a-row>
+</template>
 ```
 
-- 仅「保存」= `primary`，与 workflow 按钮用 `detail-drawer-footer__sep` 分隔
-- 吸底流程 = **secondary**（默认），收入 `detail-drawer-footer__cluster` 浅底操作组
+- 仅「保存」= `primary`；其他流程按钮保持默认层级并按业务关系分组
+- 不用自定义浅底胶囊、阴影或分隔皮肤包装 footer 按钮
 
 ### 5.7 弹窗 Footer
 
 ```vue
 <template #footer>
-  <div style="display:flex;justify-content:space-between;align-items:center">
-    <a-button v-if="isEdit" type="text" status="danger" size="small" @click="handleDelete">删除</a-button>
-    <div style="display:flex;gap:8px;margin-left:auto">
-      <a-button size="small" @click="handleCancel">取消</a-button>
-      <a-button size="small" type="primary" :loading="submitting" @click="handleOk">确定</a-button>
-    </div>
-  </div>
+  <a-row justify="space-between" align="center">
+    <a-col><a-button v-if="isEdit" type="text" status="danger" size="small" @click="handleDelete">删除</a-button></a-col>
+    <a-col><a-space :size="8"><a-button size="small" @click="handleCancel">取消</a-button><a-button size="small" type="primary" :loading="submitting" @click="handleOk">确定</a-button></a-space></a-col>
+  </a-row>
 </template>
 ```
 
@@ -474,30 +473,44 @@ Danger rules:
 
 - Primary tint is an **anchor**, not wallpaper. Do not make every action `outline`.
 - Semantic colors are for state and risk, not workflow decoration. Import/export/download/reconcile/refresh stay in type hierarchy unless they are truly success/warning/danger states.
-- **Three visual tiers in detail drawers** (implemented in `global.css`):
-  - **Page head + footer workflow** → `secondary` in white micro-shadow chips; footer grouped in `detail-drawer-footer__cluster` with `__sep` before primary
-  - **Module / child-pane main action** → `outline` in `detail-section__actions` action bar (light tint border box)
-  - **Auxiliary** → `text` link-blue in action bar: 复制、清除、发送报关资料
-  - **Section title** → left primary accent bar on `detail-section__title::before`
-  - **Danger** → row delete muted gray until hover; footer abandon stays `text` + `danger`
-  - **Global submit** → `primary` with soft elevation in cluster
-  - **Mini table header** → flat `--dense-table-header-bg`, **no** `header-wrapper` bottom border
+- **Three action tiers in detail drawers** (Arco props, not a global skin):
+  - **Page/footer workflow** → default/secondary commands plus one `primary` submit
+  - **Module action** → `outline` or default in the owning section head
+  - **Auxiliary** → `text`; destructive work uses `status="danger"` plus confirmation
 - Neutral surfaces (search/toolbar/table cap) stay white/gray; primary appears in active nav, links, focus, selection, one primary button, and thin anchors.
-- Hover: no transform/shadow float on dense toolbars (see `global.css` toolbar/detail-drawer overrides).
+- Keep GI native hover/focus behavior; do not add transform or floating shadows in page CSS.
 
 ---
 
 ## 11. Quick Checklist
 
 ```
-□ 每个作用域 primary ≤ 1
-□ 重置/刷新 = text，不是 outline
-□ 复制/清除 = text，不是 outline
-□ 导出/取消 = secondary 或 outline（模块内统一）
-□ 模块添加 = outline；空状态添加可用 dashed
-□ 删除/废弃 = text + danger + 确认
-□ 禁止 warning/success 常驻按钮
-□ 行内 = icon + tooltip + row-action-btn
-□ icon-only = Tooltip + 业务化 aria-label + 点击目标不小于 24×24px
-□ 高频可逆动作可见；低频/危险动作 → dropdown
+层级与位置
+□ 同一视觉作用域 primary ≤ 1；页面、查询区、模块、弹窗分别计算
+□ Primary 只给当前作用域最重要且明确的下一步；没有主动作时不制造 Primary
+□ 查询 = primary；重置 = text；普通刷新/列设置/密度 = icon-only tool
+□ 页面核心新建可用 primary；模块添加 = outline/default；dashed 只用于空状态或容器内新增
+□ 导出 = outline/default；低频或多格式导出进入 dropdown
+□ 取消/关闭统一用默认按钮；行编辑取消可用 text icon，禁止 danger
+□ success/warning 只给真实状态型动作，不作为普通常驻按钮
+
+可见性与收纳
+□ 高频、低风险、可逆动作直接可见；低频动作进入 dropdown；危险动作隔离到末组
+□ 高密度主表操作列最多 2 个 affordance；第三个开始主操作 + More
+□ 核心业务流程可用紧凑文字按钮；重复密集的操作列默认 icon-only
+□ 窄工作区先把熟悉工具图标化，再收纳低频动作；不得隐藏 Primary 或造成控件重叠/换行
+
+内容与可访问性
+□ icon-only = Arco icon + Tooltip + 业务化 aria-label；不能只靠 title 或颜色
+□ icon 14–16px；常规点击热区 ≥ 28×28px，高密度表格最低 ≥ 24×24px
+□ Dropdown 选项默认文字；危险项使用 danger 语义、位于末组并与普通项分隔
+□ 文案必须包含对象或结果，禁止“处理/确定/操作”等脱离上下文的泛化动词
+
+状态与风险
+□ 每个动作都有权限可见性、enablement、pending 防重、成功、失败保留与刷新归属
+□ pending 使用原按钮 loading，标签和宽度稳定；提交期间禁用冲突动作
+□ 错误显示在可修复的 owning surface；Message 只能总结，不能替代局部错误
+□ 删除/废弃等高影响动作 = danger + 确认；确认文案说明对象与影响
+□ Undo 只在后端存在可恢复时窗和真实恢复接口时提供，禁止前端假撤销
+□ 禁止仅依赖颜色表达按钮语义；危险、禁用、选中和 loading 都必须有结构或文字信号
 ```

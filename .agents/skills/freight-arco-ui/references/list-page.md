@@ -46,7 +46,7 @@ This is not a status filter. It is a compact segmented control:
 
 - Use an Arco Form/Grid composition. Exact class names in examples are local implementation details unless grep proves a shared definition exists.
 - Query button is primary.
-- Reset is text, no icon.
+- Reset is text at normal release widths; compact desktop may use a refresh/reset icon-only tool with Tooltip and business-specific `aria-label`.
 - Select S1/S2/S3 from `filter-layout.md`. Regular Narrow fields may expand in-page; occasional Investigate fields use an advanced-filter drawer. Do not choose a surface from visual preference alone.
 
 ### Filter Actions Recipe
@@ -85,7 +85,7 @@ Rules:
 
 - All three controls use the same Arco `size` and align to the same baseline; do not hand-set a second control skin.
 - Query uses `type="primary"` plus search icon.
-- Reset uses `type="text"` without an unnecessary icon.
+- Reset uses `type="text"`; compact desktop may replace its visible label with a familiar reset icon when the accessible name and Tooltip remain.
 - More filters uses `type="text"` plus filter icon and opens the advanced filter drawer.
 - Advanced filters are grouped by business meaning inside the drawer, not random field order.
 - Do not show a separate “selected filters” strip. Current values are visible in controls/tabs.
@@ -117,12 +117,10 @@ List-page rules that stay in this file:
 
 ## Filter Typography
 
-- Filter label: F4 12px/500, `color-text-2`.
-- Entered/selected value: F4 Control 12px/500, `color-text-1`.
-- Placeholder: F4 Control 12px/400, `color-text-3`.
-- Size must stay consistent across label, value, and placeholder. Use color and weight, not mixed font sizes, to separate field name, real query value, and guidance.
-- Do not let Arco default 14px form text leak into the search form.
-- Placeholder copy must explain accepted input, not replace the label.
+- Arco Form labels and controls keep GI native `size="small"` typography and interaction states.
+- Hand-written business labels/helpers use the project field/aux typography tokens; they must not override Arco internals.
+- Placeholder copy explains accepted input and never replaces the visible field label.
+- Do not vary font size per filter to solve width pressure; rebalance columns or move lower-frequency fields instead.
 
 ## Toolbar
 
@@ -162,7 +160,7 @@ Toolbar actions are chosen by workflow:
 ## Status Tabs
 
 - Scope tabs and status tabs may share a row, but must have visual separation.
-- Active state uses Arco primary tokens and no native black focus border.
+- Active state and focus use the native Arco control behavior; do not override internal tab/radio selectors.
 - Count badges use semantic tokens only when they carry risk/attention.
 - Use status tabs only when users actually filter by that state many times per day.
 - If sales/operators process the list by state every day, status tabs are required visible workflow controls, not optional decoration.
@@ -224,3 +222,12 @@ Use them to choose equivalent identity, status, next-decision, and supporting fi
 - Repeating the same scope/status filter in multiple rows.
 - Combining unrelated business fields into one table column just to reduce columns.
 - Reusing another module's table columns because the layout looks similar.
+
+## Release Gate
+
+- [ ] First viewport exposes object identity, key state/queue, next decision data, and one clear primary action per scope.
+- [ ] Query, reset, scope/status, selection, pagination, total count, table utilities, and feedback each have one visible owner.
+- [ ] The command surface passes the rendered height budget and the table remains dominant at 1366x768 and 1024x768.
+- [ ] Compact controls do not wrap or overlap; status and table overflow stay local rather than creating browser-level overflow.
+- [ ] Loading, no rows, no match, permission, network/slow, long text, extreme value, and partial batch failure are reproducible and recoverable.
+- [ ] Keyboard order reaches query, workflow controls, table utilities, row actions, pagination, and opened overlays with named controls and visible focus.

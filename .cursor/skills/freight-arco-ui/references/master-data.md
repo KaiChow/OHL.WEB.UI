@@ -12,7 +12,7 @@ User job is **configure**, not high-frequency scan. Density may be slightly lowe
 
 ### Pattern MD-1: Left tree + right workbench (default)
 
-Category/tree on the left; list or form on the right. Use `md-layout` from `global.css`.
+Category/tree on the left; list or form on the right. Implement `md-layout` as page-scoped grid/flex or a shared Vue split-workspace component.
 
 ```vue
 <div class="page-root page-root--dense md-wrap">

@@ -1166,7 +1166,7 @@ watch(uiScenario, () => {
         <div class="filter-panel">
           <a-form :model="query" layout="vertical" size="small" class="filter-panel__form">
             <a-row :gutter="[12, 0]" align="end">
-              <a-col :xs="24" :sm="24" :md="6" :lg="6">
+              <a-col :xs="24" :sm="24" :md="7" :lg="7" :xl="6">
                 <a-form-item label="单号检索">
                   <a-input-group>
                     <a-select
@@ -1188,7 +1188,7 @@ watch(uiScenario, () => {
                   </a-input-group>
                 </a-form-item>
               </a-col>
-              <a-col :xs="24" :sm="12" :md="4" :lg="4">
+              <a-col :xs="24" :sm="12" :md="5" :lg="5" :xl="4">
                 <a-form-item label="客户名称">
                   <a-input
                     v-model="query.customerName"
@@ -1199,7 +1199,7 @@ watch(uiScenario, () => {
                   />
                 </a-form-item>
               </a-col>
-              <a-col :xs="24" :sm="12" :md="3" :lg="3">
+              <a-col :xs="24" :sm="12" :md="3" :lg="3" :xl="3">
                 <a-form-item label="起运港">
                   <a-input
                     v-model="query.pol"
@@ -1210,7 +1210,7 @@ watch(uiScenario, () => {
                   />
                 </a-form-item>
               </a-col>
-              <a-col :xs="24" :sm="12" :md="3" :lg="3">
+              <a-col :xs="24" :sm="12" :md="3" :lg="3" :xl="3">
                 <a-form-item label="目的港">
                   <a-input
                     v-model="query.pod"
@@ -1221,19 +1221,19 @@ watch(uiScenario, () => {
                   />
                 </a-form-item>
               </a-col>
-              <a-col :xs="24" :sm="24" :md="8" :lg="8" class="filter-panel__action-col">
+              <a-col :xs="24" :sm="24" :md="6" :lg="6" :xl="8" class="filter-panel__action-col">
                 <div class="filter-panel__actions">
                   <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
                     <a-button
                       size="small"
                       type="text"
-                      class="query-scheme-trigger"
+                      class="query-scheme-trigger filter-tool-button"
                       title="查询方案"
                       aria-label="查询方案"
                     >
                       <template #icon><icon-history /></template>
                       <span class="query-scheme-trigger__label">{{ activeQueryScheme?.name ?? '查询方案' }}{{ activeSchemeDirty ? ' *' : '' }}</span>
-                      <icon-down />
+                      <icon-down class="query-scheme-trigger__chevron" />
                     </a-button>
                     <template #content>
                       <a-doption v-if="!querySchemes.length" disabled>暂无已保存方案</a-doption>
@@ -1276,12 +1276,19 @@ watch(uiScenario, () => {
                     <template #icon><icon-search /></template>
                     查询
                   </a-button>
-                  <a-button size="small" type="text" :disabled="querying" @click="handleReset">重置</a-button>
-                  <a-badge :count="advancedActiveCount" :offset="[-4, 4]">
-                    <a-button size="small" type="text" @click="openAdvancedFilters">
-                      <template #icon><icon-filter /></template>
-                      筛选
+                  <a-tooltip content="重置查询条件">
+                    <a-button size="small" type="text" class="filter-tool-button" title="重置查询条件" aria-label="重置查询条件" :disabled="querying" @click="handleReset">
+                      <template #icon><icon-refresh /></template>
+                      <span class="filter-tool-label">重置</span>
                     </a-button>
+                  </a-tooltip>
+                  <a-badge :count="advancedActiveCount" :offset="[-4, 4]">
+                    <a-tooltip content="高级筛选">
+                      <a-button size="small" type="text" class="filter-tool-button" title="高级筛选" aria-label="高级筛选" @click="openAdvancedFilters">
+                        <template #icon><icon-filter /></template>
+                        <span class="filter-tool-label">筛选</span>
+                      </a-button>
+                    </a-tooltip>
                   </a-badge>
                 </div>
               </a-col>
@@ -2468,6 +2475,14 @@ watch(uiScenario, () => {
   line-height: 14px;
 }
 
+.row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+}
+
 .modal-context-alert {
   margin-bottom: 16px;
 }
@@ -2496,6 +2511,17 @@ watch(uiScenario, () => {
 
   .query-scheme-trigger__label {
     display: none;
+  }
+
+  .query-scheme-trigger__chevron,
+  .filter-tool-label {
+    display: none;
+  }
+
+  .filter-tool-button {
+    width: 28px;
+    min-width: 28px;
+    padding-inline: 0;
   }
 
   .flow-bar {

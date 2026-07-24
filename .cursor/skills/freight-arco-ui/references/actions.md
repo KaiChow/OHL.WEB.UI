@@ -474,16 +474,12 @@ Danger rules:
 
 - Primary tint is an **anchor**, not wallpaper. Do not make every action `outline`.
 - Semantic colors are for state and risk, not workflow decoration. Import/export/download/reconcile/refresh stay in type hierarchy unless they are truly success/warning/danger states.
-- **Three visual tiers in detail drawers** (implemented in `global.css`):
-  - **Page head + footer workflow** → `secondary` in white micro-shadow chips; footer grouped in `detail-drawer-footer__cluster` with `__sep` before primary
-  - **Module / child-pane main action** → `outline` in `detail-section__actions` action bar (light tint border box)
-  - **Auxiliary** → `text` link-blue in action bar: 复制、清除、发送报关资料
-  - **Section title** → left primary accent bar on `detail-section__title::before`
-  - **Danger** → row delete muted gray until hover; footer abandon stays `text` + `danger`
-  - **Global submit** → `primary` with soft elevation in cluster
-  - **Mini table header** → flat `--dense-table-header-bg`, **no** `header-wrapper` bottom border
+- **Three action tiers in detail drawers** (Arco props, not a global skin):
+  - **Page/footer workflow** → default/secondary commands plus one `primary` submit
+  - **Module action** → `outline` or default in the owning section head
+  - **Auxiliary** → `text`; destructive work uses `status="danger"` plus confirmation
 - Neutral surfaces (search/toolbar/table cap) stay white/gray; primary appears in active nav, links, focus, selection, one primary button, and thin anchors.
-- Hover: no transform/shadow float on dense toolbars (see `global.css` toolbar/detail-drawer overrides).
+- Keep GI native hover/focus behavior; do not add transform or floating shadows in page CSS.
 
 ---
 

@@ -27,12 +27,18 @@ export const EXPORT_ORDER_DETAIL_SPEC = definePesdpPageSpec({
       acceptance: ['File, fee, and risk counts must have one visible owner each and must not repeat in the identity band.'],
     },
     dense: {
-      decisions: ['Use compact read grids and detail-specific VXE densities while keeping controls visible only in active edit scope; the active tab pane owns vertical scrolling.'],
-      acceptance: ['At 1366 and 1024, all detail sections must remain reachable through one active-pane scrollbar, with stable scrollHeight and no clipped content.'],
+      decisions: ['Use compact complete read grids and native small VXE child tables while keeping controls visible only in active edit scope; the active tab pane owns vertical scrolling.'],
+      acceptance: [
+        'At 1366 and 1024, all detail sections must remain reachable through one active-pane scrollbar, with stable scrollHeight and no clipped content.',
+        'Overview groups fill a four-column reading rhythm without orphan fields or large empty cells; long customer, route, and schedule values retain a title.',
+      ],
     },
     premium: {
-      decisions: ['Use GI surfaces and restrained role hierarchy; credibility comes from traceable state, local feedback, and predictable edit sessions.'],
-      acceptance: ['Loading, missing, permission, network error, long text, invalid data, dirty-leave, and retry paths must be reproducible on route.'],
+      decisions: ['Use GI and VXE native component styling with restrained role hierarchy; credibility comes from traceable state, local feedback, and predictable edit sessions.'],
+      acceptance: [
+        'Loading, missing, permission, network error, long text, invalid data, dirty-leave, and retry paths must be reproducible on route.',
+        'The route must not depend on global selectors or theme-variable bridges that rewrite Arco or VXE internals.',
+      ],
     },
   },
   surfaces: [

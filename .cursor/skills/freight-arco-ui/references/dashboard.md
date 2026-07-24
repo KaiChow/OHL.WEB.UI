@@ -87,7 +87,7 @@ User job is **analyze**, not scan-edit loops. Spacing may be slightly looser tha
 </div>
 ```
 
-Classes: `db-wrap`, `db-kpi-row`, `db-content`, `db-main`, `db-aside`, `db-chart-body`, `db-chart-host`, `db-shortcuts` in `global.css`.
+Treat `db-*` names as page-scoped semantic hooks. Repeated dashboard composition must become a shared Vue component; do not add a global layout skin.
 
 ## KPI Rules
 

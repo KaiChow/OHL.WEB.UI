@@ -544,10 +544,10 @@ const addExceptionRow = () => {
           </a-tooltip>
           <div class="detail-context__title">
             <div>
-              <strong class="mono">{{ form.orderNo }}</strong>
+              <strong class="mono" :title="form.orderNo">{{ form.orderNo }}</strong>
               <span class="s-pill" :data-s="form.statusPill">{{ form.orderStatusLabel }}</span>
             </div>
-            <span>{{ form.customerName }} · {{ form.businessType }} · 操作 {{ form.operator }}</span>
+            <span :title="`${form.customerName} · ${form.businessType} · 操作 ${form.operator}`">{{ form.customerName }} · {{ form.businessType }} · 操作 {{ form.operator }}</span>
           </div>
         </div>
         <a-space :size="6" class="detail-context__actions">
@@ -572,18 +572,18 @@ const addExceptionRow = () => {
       <div class="detail-context__overview">
         <div class="detail-route">
           <div class="detail-route__ports">
-            <strong>{{ form.pol }}</strong>
+            <strong :title="form.pol">{{ form.pol }}</strong>
             <span>→</span>
-            <strong>{{ form.pod }}</strong>
+            <strong :title="form.pod">{{ form.pod }}</strong>
           </div>
-          <span>{{ form.carrier }} / {{ form.vessel }} {{ form.voyage }}</span>
+          <span :title="`${form.carrier} / ${form.vessel} ${form.voyage}`">{{ form.carrier }} / {{ form.vessel }} {{ form.voyage }}</span>
         </div>
 
         <div class="detail-facts">
-          <div><span>ETD / ETA</span><strong class="mono">{{ form.etd }} / {{ form.eta }}</strong></div>
-          <div><span>截关时间</span><strong class="mono">{{ form.closingTime }}</strong></div>
-          <div><span>柜型柜量</span><strong>{{ form.containerSummary }}</strong></div>
-          <div><span>下一动作</span><strong class="detail-fact--primary">{{ nextActionSummary }}</strong></div>
+          <div><span>ETD / ETA</span><strong class="mono" :title="`${form.etd} / ${form.eta}`">{{ form.etd }} / {{ form.eta }}</strong></div>
+          <div><span>截关时间</span><strong class="mono" :title="form.closingTime">{{ form.closingTime }}</strong></div>
+          <div><span>柜型柜量</span><strong :title="form.containerSummary">{{ form.containerSummary }}</strong></div>
+          <div><span>下一动作</span><strong class="detail-fact--primary" :title="nextActionSummary">{{ nextActionSummary }}</strong></div>
         </div>
 
       </div>
@@ -591,8 +591,8 @@ const addExceptionRow = () => {
       <section class="detail-focus" aria-label="当前执行焦点">
         <div class="detail-focus__main">
           <span>当前待办</span>
-          <strong>{{ nextActionSummary }}</strong>
-          <small>{{ currentNode?.owner || form.operator }} 负责 · 计划 {{ currentNode?.planTime || '待排期' }}</small>
+          <strong :title="nextActionSummary">{{ nextActionSummary }}</strong>
+          <small :title="`${currentNode?.owner || form.operator} 负责 · 计划 ${currentNode?.planTime || '待排期'}`">{{ currentNode?.owner || form.operator }} 负责 · 计划 {{ currentNode?.planTime || '待排期' }}</small>
         </div>
         <button
           type="button"
@@ -601,17 +601,17 @@ const addExceptionRow = () => {
           @click="switchTab('control')"
         >
           <span>{{ primaryRisk ? primaryRisk.type : '执行状态' }}</span>
-          <strong>{{ primaryRisk ? primaryRisk.message : '当前无阻塞异常' }}</strong>
-          <small>{{ primaryRisk ? `${primaryRisk.owner} · ${primaryRisk.dueAt}` : '按计划推进' }}</small>
+          <strong :title="primaryRisk ? primaryRisk.message : '当前无阻塞异常'">{{ primaryRisk ? primaryRisk.message : '当前无阻塞异常' }}</strong>
+          <small :title="primaryRisk ? `${primaryRisk.owner} · ${primaryRisk.dueAt}` : '按计划推进'">{{ primaryRisk ? `${primaryRisk.owner} · ${primaryRisk.dueAt}` : '按计划推进' }}</small>
         </button>
         <div class="detail-focus__recent">
           <span>最近变更</span>
-          <strong>{{ latestLog ? `${latestLog.module} · ${latestLog.action}` : '暂无变更记录' }}</strong>
-          <small>{{ latestLog ? `${latestLog.operator} · ${latestLog.time}` : '—' }}</small>
+          <strong :title="latestLog ? `${latestLog.module} · ${latestLog.action}` : '暂无变更记录'">{{ latestLog ? `${latestLog.module} · ${latestLog.action}` : '暂无变更记录' }}</strong>
+          <small :title="latestLog ? `${latestLog.operator} · ${latestLog.time}` : '—'">{{ latestLog ? `${latestLog.operator} · ${latestLog.time}` : '—' }}</small>
         </div>
         <div class="detail-focus__action">
           <span>下一节点</span>
-          <strong>{{ statusTransitionOptions[0]?.label || '暂无可推进状态' }}</strong>
+          <strong :title="statusTransitionOptions[0]?.label || '暂无可推进状态'">{{ statusTransitionOptions[0]?.label || '暂无可推进状态' }}</strong>
           <a-button v-if="canTransitionStatus" size="small" type="primary" @click="openStatusModal">推进节点</a-button>
         </div>
       </section>
@@ -1308,6 +1308,14 @@ const addExceptionRow = () => {
 
 
 .detail-section-local--table {
+  min-width: 0;
+}
+
+.row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   min-width: 0;
 }
 

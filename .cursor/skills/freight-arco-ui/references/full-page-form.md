@@ -51,7 +51,7 @@ Prefer **drawer** when user must keep list context. Use **full page** when creat
 </div>
 ```
 
-Shell classes: `xf-wrap`, `xf-head`, `xf-body`, `xf-footer` in `global.css`.
+`xf-wrap`, `xf-head`, `xf-body`, `xf-footer` are page-scoped shell hooks. Promote repeated shell behavior to a shared Vue component, not `global.css`.
 
 ## Form Rules
 

@@ -138,7 +138,7 @@ Modal.confirm({
 
 ## Modal Typography
 
-- Modal title: F0 `--dense-font-overlay` **14px / 600** — overridden in `global.css` (`.arco-modal-title`). Must be larger than form body.
+- Modal title uses Arco's native title slot and GI typography; do not override `.arco-modal-title` globally.
 - Form inside modal: `a-form` + `class="detail-form"` + `size="small"` on all controls.
 - Form labels: F4 12px / `color-text-2` / weight 500.
 - Form values / placeholders: F4 Control 12px (same size; color/weight differ).

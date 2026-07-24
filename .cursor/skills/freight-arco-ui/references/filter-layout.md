@@ -7,7 +7,7 @@ This file owns query-field priority, scenario selection, query-state behavior, a
 It does not define a second component framework:
 
 - Start with Arco Form, Grid, Input Group, Space, Badge, Drawer, and their props.
-- A class name shown in an example is a local semantic hook, not a reusable API, unless `rg` proves that `src/styles/global.css` implements it.
+- A class name shown in an example is a local semantic hook, not a reusable API. Reuse requires a real shared Vue component or composable found by `rg`.
 - Page CSS may arrange local grid, flex, stable width, and overflow relationships. It must not reskin Arco inputs, drawers, buttons, or popup chrome.
 - Field count selects a candidate scenario; frequency, task continuity, and adjustment cost decide the final surface.
 

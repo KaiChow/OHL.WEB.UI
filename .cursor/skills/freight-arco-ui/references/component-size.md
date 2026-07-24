@@ -2,7 +2,7 @@
 
 Arco exposes `size?: 'mini' | 'small' | 'medium' | 'large'`. **Omitting `size` defaults to `medium` (14px body, taller controls)** — that leaks consumer-SaaS density into this freight ops product.
 
-This project uses **one business density**. Map Arco `size` in templates; map real heights in `global.css` via tokens.
+This project uses **one business density**. Map Arco `size` explicitly in templates; use public component configuration for stable table row heights.
 
 ## Global Rule
 
@@ -11,13 +11,13 @@ This project uses **one business density**. Map Arco `size` in templates; map re
 | **`small`** | **Required default** — all operational UI | Matches PESDP dense ops UI |
 | `medium` | **Forbidden** in `src/views/**` | Arco default; 14px text breaks typography contract |
 | `large` | **Forbidden** in app business area | Marketing/landing only |
-| `mini` | **Do not set in templates** | Popconfirm/footer may render mini internally — normalize in `global.css` |
+| `mini` | **Do not set in templates** | Leave framework-owned internal surfaces unchanged |
 
 **Write `size="small"` explicitly** on inputs, selects, date pickers, textareas, buttons (with label), pagination, tabs, steps, tags.
 
 ## Form Controls（组件规范，非模块规范）
 
-**完整规则 → [`form-field.md`](form-field.md)** · CSS → `global.css` **`§ Arco Form Controls`**
+**完整规则 → [`form-field.md`](form-field.md)**
 
 | 组件 | Template | Token | 高度 | 字号 |
 |------|----------|-------|------|------|
@@ -32,9 +32,9 @@ This project uses **one business density**. Map Arco `size` in templates; map re
 | 用途 | Token / class | 高度 |
 |------|---------------|------|
 | Table row icon | `.row-action-btn` | 24×24px minimum target with a 14px icon |
-| VXE 主表行 | `--dense-row-h` + `workbench-table` | 36px |
-| VXE 详情子表行 | `detail-mini-vxe--editable` + global density variables | 38px |
-| Modal / Drawer 标题 | `.arco-modal-title` | F0 14px |
+| VXE 主表行 | `row-config.height` + `workbench-table` hook | 36px compact / 44px standard |
+| VXE 详情子表行 | `row-config.height` + `detail-mini-vxe` hook | 38px editable / 34px read-only |
+| Modal / Drawer 标题 | Arco native title slot | GI-owned |
 
 ## Must use `size="small"`
 

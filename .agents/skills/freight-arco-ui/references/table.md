@@ -27,29 +27,23 @@ A main freight workbench table is accepted only when all of these are demonstrat
 
 ## Unified Table Surface
 
-List workbench tables and detail nested tables must read as **one VXE design system**, not two different grids.
+List workbench tables and detail nested tables use one **public VXE configuration contract**, not a global CSS skin.
 
-| Layer | Token / class | List (`workbench-table`) | Detail (`detail-mini-vxe`) |
-|-------|----------------|--------------------------|----------------------------|
-| Header background | `--dense-table-header-bg` | 32px near-white brand-neutral header | 32px near-white brand-neutral header |
-| Header column border | `--dense-table-col-border` | off or near-invisible by default | off or near-invisible by default |
-| Body column/row border | `--dense-table-col-border` / `--dense-table-row-border` | vertical weak/off, horizontal weak | vertical weak/off, horizontal weak |
-| Row hover | `--dense-vxe-surface-hover-bg` | `--dense-row-h` / 36px row | role-based row token |
-| Row checked | `--dense-vxe-surface-checked-bg` | yes | yes |
-| Left accent on hover | `inset 2px 0 0 --dense-primary-4` | yes | yes |
-| Overflow tooltip | `show-overflow="title"` | required | **forbidden** |
+| Contract | List (`workbench-table`) | Detail (`detail-mini-vxe`) |
+|----------|--------------------------|----------------------------|
+| Framework size | `size="small"` | `size="small"` |
+| Border | `border="none"` | `border="none"` |
+| Hover | `row-config.isHover` | `row-config.isHover` |
+| Stable identity | `row-config.keyField` | `row-config.keyField` |
+| Density | `row-config.height` when virtualization/density switching requires it | Native small row; controls must be verified unclipped |
+| Overflow tooltip | `show-overflow="title"` | Omit for editable child rows |
 
 Shared rules:
 
-- Every operational VXE table must use either `class="compact workbench-table"` (main list) or `class="detail-mini-vxe"` (detail module child table). Do not leave tables on bare `.vxe-table` global defaults for production pages.
-- VXE theme tokens are centralized in `src/styles/global.css`. The bridge must cover both `vxe-table@4.5.x` legacy `--vxe-*` variables and newer `--vxe-ui-*` variables, including header, border, hover, stripe, checked/current rows, fixed-column shadow, custom panel, and row-height tokens.
-- Header uses brand-neutral `--dense-table-header-bg` on both list and detail. Do not use gray sheet fill or blue gradients for normal table headers.
-- Hover/selection always use `--dense-vxe-surface-hover-bg` / `--dense-vxe-surface-checked-bg`, never the same value as the header background.
-- Data rows are the main working surface and use the GI container surface by default. Zebra stripes are optional and should normally use the same effective surface token on dense freight workbenches.
-- Do not add `border-bottom` on `vxe-table--header-wrapper`; structure vs data is separated by brand-neutral header contrast and weak row separators.
-- Do not let column borders dominate. Workbench tables default to horizontal scan rhythm; vertical separators are disabled or near-invisible unless the page documents a finance comparison exception.
-- Detail-only differences: role-based row height through density modifier + global CSS token, ghost Arco controls for editable rows, padding on `.vxe-cell` not on `td`, no `show-overflow`, no checkbox without batch toolbar.
-- With pinned VXE Table 4.5, do **not** set `row-config.height` on `detail-mini-vxe`. VXE then requires `show-overflow`, which is forbidden for editable detail rows and produces runtime warnings. Use `detail-mini-vxe--editable|readonly|summary`; the global bridge owns 38/34/32px.
+- Every operational VXE table uses `workbench-table` or `detail-mini-vxe` as a semantic/checker hook. The hook must not depend on global selectors targeting VXE internals.
+- Configure header, border, hover, selection, fixed columns, loading, overflow, density, and row identity through VXE props/config only.
+- Do not declare `--vxe-*` / `--vxe-ui-*` variables or target `.vxe-*` internals in global CSS.
+- Detail-only differences: omit overflow clipping for editable rows, omit checkbox without a batch toolbar, and verify native small rows contain small Arco controls.
 - **Borders:** `border="none"` + no vertical lines + weak horizontal row separators — see **Border Policy**.
 - **Sequence:** see **Sequence Column (序号)** — width `52`, detail editable tables require it; list tables usually omit.
 
@@ -75,27 +69,21 @@ Use `workbench-table` only for the primary list table of an operational page. Do
 
 Main workbench tables must be compact enough for all-day operation, but not compressed.
 
-| Table type | Header | Body row | Rule |
+| Table type | Body row | Rule |
 |------------|--------|----------|------|
-| Workbench compact list | 32px | 36px | Default for order, customer, finance, warehouse, and operation lists |
-| Workbench standard list | 36px | 44px | Only for low-frequency review pages or rows with two-line cells |
-| Detail editable line table | 32px | 38px | Use when row cells render `a-input`, `a-select`, `a-input-number`, date picker, or inline row editing |
-| Detail readonly line table | 32px | 34px | Use for documents, file status, timeline-like records, read-only child rows |
-| Summary/read-only mini table | 28-32px | 32px | Use for compact totals, short read-only facts, no operation column unless necessary |
+| Workbench compact list | 36px via `row-config.height` | Default for order, customer, finance, warehouse, and operation lists |
+| Workbench standard list | 44px via `row-config.height` | Only for review pages or rows with two-line cells |
+| Detail editable line table | Native VXE small | Must contain `size="small"` controls without clipping |
+| Detail readonly line table | Native VXE small | Use for documents, file status, logs, and status rows |
+| Summary/read-only mini table | Native VXE small | Use for short totals, no action column unless necessary |
 
 Rules:
 
 - Project default tokens are `--dense-header-h: 32px` and `--dense-row-h: 36px`.
-- Detail editable row token is `--dense-row-h-detail-edit: 38px`; this is intentionally 2px taller than the main list because it hosts 28px Arco controls.
-- Detail readonly row token is `--dense-row-h-detail-read: 34px`; this keeps document/status child rows compact and prevents detail drawers from becoming loose.
-- Summary mini row token is `--dense-row-h-summary: 32px`; use it only for short totals or read-only facts, not editable child rows.
 - Main list VXE tables use `class="compact"` unless the page has a documented reason to use `standard`.
 - Do not use 40px as the default workbench row height; it reduces first-screen data density.
-- VXE `size="small"` defaults to a 40px row variable. A list table must override both `--vxe-table-row-height-small` and `--vxe-ui-table-row-height-small`, then set `row-config.height` to the selected list density (`36` compact / `44` standard); changing only `.vxe-body--row` is not enough.
-- `detail-mini-vxe--editable` resolves to 38px through the global density token.
-- `detail-mini-vxe--readonly` resolves to 34px through the global density token.
-- `detail-mini-vxe--summary` resolves to 32px through the global density token.
-- CSS-only row height is not enough because VXE virtualization, fixed columns, and scroll calculations use the table config.
+- Main-list density switching sets `row-config.height` (`36` compact / `44` standard); CSS-only row height is forbidden because VXE scroll calculations use configuration.
+- Detail variants remain semantic job markers and use native `size="small"` unless a tested shared Vue wrapper exposes a public density prop.
 - Do not apply editable density to read-only documents, attachments, logs, or status-only rows. Density is chosen by the row job, not by the surrounding drawer.
 - Do not push main list rows below 34px; checkbox, status pill, icon actions, and text line-height begin to clip.
 - If row content requires more than 36px, first reduce column complexity or move secondary information to detail, then consider `standard`.
@@ -151,7 +139,7 @@ Rules:
 
 ## Sequence Column (序号)
 
-Structural rhythm column — **not** business data. Token: `--dense-col-w-seq` (52px). Typography: F6 micro 10px, `color-text-4`, centered (`.vxe-cell--seq` in `global.css`).
+Structural rhythm column — **not** business data. Width `52`, centered through VXE column props; typography remains VXE-native.
 
 ### Markup
 
@@ -453,7 +441,7 @@ count effective actions (merge exclusive A verbs)
 - More trigger: icon-only `row-action-btn row-action-btn--more` with the native Arco Dropdown popup.
 - Row action icons stay visible in default state; no permanent borders on buttons.
 - Danger in `···`: Arco Divider then `a-doption.danger-opt`; its click stores the target and opens a separate business Modal or `Modal.confirm` after the dropdown closes. Never nest `a-popconfirm` in Dropdown and never expose flat `status="danger"` on list rows.
-- VXE cell focus/selection on workbench tables: use project `global.css` tokens only; no page-scoped black focus rings.
+- Keep VXE native focus/selection behavior; do not suppress it with global or page-local internal selectors.
 
 ### Examples
 
@@ -540,19 +528,15 @@ Detail tables must look like part of the module, not a full page table pasted in
 - Keep operation column compact and rightmost.
 - Do not use pagination inside nested detail tables unless the row count is genuinely large.
 - Do not use large table captions for child tables; use the parent module/child head for identity.
-- For nested editable line rows, use `detail-mini-vxe detail-mini-vxe--editable`: **same header/hover/border tokens as `workbench-table`**, with 32px header, 38px editable row, 28px Arco controls, and fixed right operation when needed.
-- For nested read-only line rows, use `detail-mini-vxe detail-mini-vxe--readonly`: 32px header, 34px body row, no visible input controls by default.
-- For short summary tables, use `detail-mini-vxe detail-mini-vxe--summary`: 28-32px header rhythm, 32px body row, no row actions unless the summary itself is editable.
-- `detail-mini-vxe` shares `--dense-table-header-bg` and `--dense-vxe-surface-hover-bg` with list tables. Data rows stay white; hover is primary wash on white. **Do not** use a separate flat-gray header in detail.
+- For nested editable line rows, use `detail-mini-vxe detail-mini-vxe--editable`, native small density, small Arco controls, and fixed right operation when needed.
+- For nested read-only and summary rows, use the matching semantic modifier, native small density, and no visible controls by default.
 - Detail mini tables without batch toolbar must **not** include a `type="checkbox"` column (VXE default checkbox reads as a solid blue square and has no batch action in detail sub-tables).
-- `detail-mini-vxe` CSS row height and both VXE row-height variables (`--vxe-table-row-height-small` / `--vxe-ui-table-row-height-small`) must match the chosen density variant. Do not add `row-config.height` on this pinned VXE version. Do not use readonly density while rendering 28px input/select/date controls, because the 34px row can clip displayed values.
-- `detail-mini-vxe` is isolated from list-page `.vxe-table` global rules in `global.css` for **cell padding and row height only**. Header/hover/border tokens must match `workbench-table`.
+- Do not fake detail density with global VXE variables or internal selectors. Verify editable rows on the real route for control clipping and horizontal alignment.
 - Wrap detail-section embedded tables with `detail-section__body detail-section__body--table` (padding 0, horizontal scroll). Do not use page-scoped `overflow: hidden` wrappers around wide child tables.
 - Do **not** set `show-overflow` on `detail-mini-vxe` tables. It adds `col--ellipsis`, clips numbers/inputs, and can desync header/body columns (especially with `fixed="right"`). List/workbench tables still use `show-overflow="title"`.
-- Put padding on `.vxe-cell` inside `detail-mini-vxe`, not on `.vxe-body--column` / `.vxe-header--column`, so VXE colgroup width stays aligned.
+- Do not patch internal VXE cell padding; choose column widths and public table density instead.
 - Native `<table>` is not allowed for editable detail line rows with hover, fixed operations, empty state, or repeated inputs. Use VXE so table behavior and density remain project-wide.
-- Detail mini table hover must use `--dense-vxe-surface-hover-bg` (alias `--dense-workbench-hover-bg`), not the header gradient.
-- In `detail-mini-vxe` cells, **do not** use `link-text` for plain read-only values — use normal cell text. If `link-text` is used on a non-interactive `span`, `global.css` neutralizes it to `text-1`. Keep `link-text` only on real actions (`a`, `a-button`).
+- In `detail-mini-vxe` cells, **do not** use `link-text` for plain read-only values. Keep it only on real actions (`a`, `a-button`).
 
 ## Editable Table Rules
 
@@ -591,7 +575,7 @@ Required behavior:
 - Pagination, filtering, route leave, or drawer close must warn when unsaved edits exist.
 - Editing many rows must use pagination/virtual-safe state keyed by stable row id, not row index.
 - Do not store editing state only in rendered DOM; it must survive horizontal scroll and row re-render.
-- When virtual scroll is enabled on a main/list table, `row-config.height` must match actual row height. On this project's pinned VXE version, detail mini tables continue to use their density modifier and global CSS variables instead of `row-config.height`.
+- When virtual scroll is enabled, `row-config.height` must match the configured public row height. Detail mini tables without virtualization keep native small density.
 
 Avoid:
 
@@ -676,5 +660,5 @@ Reject a table design when:
 - truncated data has no title/tooltip;
 - nested tables look like independent page sections;
 - empty tables appear as blank space.
-- operation column shows black outlined pills or browser focus borders;
-- VXE current/active cell creates a dark border that competes with selected/hover state.
+- current-cell/highlight modes are enabled without a business need;
+- native keyboard focus is suppressed or confused with row selection.

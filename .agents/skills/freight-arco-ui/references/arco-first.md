@@ -6,7 +6,7 @@ Use this reference when deciding **whether a page should rely on Arco built-ins 
 
 This project is **not** replacing Arco. The default strategy is:
 
-**Arco drives the page. `global.css` is a thin enhancement layer, not a second UI framework.**
+**Arco drives the page. `global.css` supplies tokens and freight semantics only; it never rewrites framework internals.**
 
 ## Execution Priority (mandatory order)
 
@@ -16,7 +16,7 @@ Apply decisions in this order. Do not skip to a lower layer when a higher layer 
 |----------|-------|----------|
 | 1 | **Arco-first** | Can Arco props, slots, layout primitives, or built-in structure solve this? |
 | 2 | **Token-second** | Can Arco theme tokens or existing `--dense-*` / semantic tokens solve the remaining gap? |
-| 3 | **Business-pattern-third** | Does freight semantics, workbench archetype, or VXE bridge require a shared project pattern? |
+| 3 | **Business-pattern-third** | Does freight semantics or a repeated workflow require a shared Vue component/pattern? |
 | 4 | **Page-local-css-last** | Is there a truly local shell gap that cannot be shared? Keep it small. |
 
 Shorthand: **Arco-first → token-second → business-pattern-third → page-local-css-last**
@@ -26,8 +26,8 @@ Shorthand: **Arco-first → token-second → business-pattern-third → page-loc
 Before creating or keeping a custom layout/style pattern, ask:
 
 1. Can Arco already solve this with props, slots, layout primitives, or theme tokens?
-2. Can the remaining gap be solved by an Arco CSS variable or an existing token in `global.css`?
-3. Does freight semantics, workbench archetype, or VXE integration require a shared project pattern?
+2. Can the remaining gap be solved by an official Arco prop or an existing framework-neutral token in `global.css`?
+3. Does freight semantics or a repeated workflow require a shared Vue component/pattern?
 4. Only if all three above are no, add page-local CSS — and keep it minimal.
 
 **Every shared custom class must document why Arco + tokens were insufficient.** If you cannot state the gap in one sentence, do not add the class.
@@ -72,8 +72,8 @@ Shared project CSS may own only these categories:
 | Category | Examples | Why Arco alone is not enough |
 |----------|----------|------------------------------|
 | Freight business semantics | `.s-pill[data-s]`, milestone semantics, risk / next-action patterns | Arco Tag/Badge has no freight status vocabulary |
-| Workbench archetype | `filter-card`, `toolbar`, `table-card-cap`, `detail-section` | Repeated freight list/detail shells need stable slots |
-| VXE + Arco bridge | `workbench-table`, `detail-mini-vxe`, table density / hover harmony | VXE is not an Arco component; bridge is required |
+| Workbench archetype | Shared Vue workbench/detail components with named slots | Repeated freight list/detail workflows need stable ownership |
+| Table semantics | `workbench-table`, `detail-mini-vxe` hooks plus VXE public props/config | Main and child tables need distinct jobs without internal selector overrides |
 
 These are **structural slots**, not replacements for Arco controls inside them.
 
@@ -81,28 +81,26 @@ These are **structural slots**, not replacements for Arco controls inside them.
 
 - page shell only (`xp-wrap`, `xf-wrap`, route-specific flex/overflow)
 - truly local visual gaps with no reuse potential
-- must stay small; promote to `global.css` only after a second module needs the same pattern
+- must stay small; promote repeated behavior to a shared Vue component, not a global framework selector
 
 ## What `global.css` Contains
 
-`src/styles/global.css` is a shared enhancement layer. The target is small and explicit. It may contain:
+`src/styles/global.css` is a framework-neutral foundation. It may contain only:
 
 | Layer | Content |
 |-------|---------|
 | Base | `html/body/#app` reset, min-width |
 | Tokens | `:root` density/dimension tokens; `body` theme-dependent aliases because GI variables are body-scoped |
-| VXE bridge | `--vxe-*` theme bridge, `.workbench-table`, `.detail-mini-vxe`, `.compact` row height |
 | Freight semantics | `.s-pill[data-s]`, `.link-text`, `.mono` |
-| Documented transition slots | Existing list/detail/filter/toolbar shell slots that are already documented and reused |
-| Row actions | `.row-actions`, `.row-action-btn` inside VXE tables only |
+| Shared non-framework semantics | Accessibility helpers or business-role utilities that do not target Arco/VXE internals |
 
-**Target after slimming:** layout archetypes should move toward Arco structure plus small scoped shell CSS. Existing documented slots may remain during transition, but new global layout archetypes require a clear `why_arco_not_enough`.
+Layout archetypes use Arco structure plus small scoped shell CSS. Reused layout behavior moves to shared Vue components.
 
-**Forbidden in `global.css`:** new one-off page shells, app shell chrome, page-specific business-field classes, and **broad** `.arco-*` layout overrides.
+**Forbidden in `global.css`:** `.arco-*`, `.vxe-*`, framework data-attribute selectors, `--vxe-*` variables, one-off page shells, app chrome, and page-specific business-field classes.
 
-**Allowed in `global.css`:** direct semantic aliases declared where GI variables resolve, the VXE bridge, VXE row-action fixes, and proven freight/read-only patterns. A broad Arco component reskin is not an allowed bridge.
+**Allowed in `global.css`:** direct semantic aliases declared where GI variables resolve and framework-neutral freight semantics. VXE density uses `size`, `row-config`, column props, and other public configuration.
 
-New layout patterns start as **Arco components** or **Vue scoped CSS**. Promote to `global.css` only after reuse is proven and the Arco gap is documented.
+New layout patterns start as **Arco components** or **Vue scoped CSS**. Promote proven reuse to a shared Vue component.
 
 ## What `global.css` Is NOT
 
@@ -120,7 +118,7 @@ If removing a `global.css` rule would break standard Arco surfaces (button, inpu
 - **Taking over Arco** — wrapping every section in custom containers when Arco layout is enough
 - **global.css-driven pages** — choosing class names before trying Arco structure
 - **Undocumented enhancement** — shared CSS with no stated Arco/token gap
-- **Second framework** — redefining Arco control surfaces project-wide via deep overrides
+- **Second framework** — redefining Arco or VXE surfaces project-wide through selectors or theme-variable bridges
 - **Page fragility** — page only works because of undocumented global side effects
 
 ## Decision Rules
@@ -139,7 +137,7 @@ If removing a `global.css` rule would break standard Arco surfaces (button, inpu
 
 ### Use Arco + shared business pattern when
 
-- VXE must align with Arco workbench rhythm
+- VXE needs a repeated, public-prop configuration packaged in a shared Vue component
 - freight semantics need shared expression
 - a documented archetype slot is required (`list-page.md`, `detail-form.md`, etc.)
 
@@ -166,7 +164,7 @@ Do not "improve" a page by piling a new custom skin on top of Arco.
 1. `arco-first.md` (this file)
 2. Arco component docs for the surfaces in scope
 3. Task archetype reference (`list-page.md`, `detail-form.md`, etc.)
-4. `global.css` — only for tokens/patterns you have already justified
+4. `global.css` — only to consume existing framework-neutral tokens/semantics
 5. `check-spec.js` + the Commercial Definition Of Done in `SKILL.md`
 
 ## Output Standard

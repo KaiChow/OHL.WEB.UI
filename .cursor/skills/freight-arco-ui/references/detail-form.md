@@ -155,7 +155,7 @@ Rules:
 - `a-form` wraps the **whole section's editable area**. One `<a-form>` per `detail-section`. Do not open a new `<a-form>` for every subgroup.
 - `detail-form-grid` is the **column grid**. Place it directly inside `<a-form>` or after a `form-subgroup-label`. All `a-form-item` and `detail-field` elements are **direct children** of the grid — no extra wrapper div per item.
 - `a-form-item` carries the label, required marker, and validation message. Never write a custom label `<div>` above an input — use `a-form-item`.
-- Controls inside `a-form-item` must be `size="small"` and `width: 100%` (inherited from `.detail-form` in `global.css`).
+- Controls inside `a-form-item` must be `size="small"`; set `style="width: 100%"` on pickers or component props where Arco does not naturally fill the form-item.
 
 ### Column Count Rules
 
@@ -524,7 +524,7 @@ Anti-patterns:
 
 ### Inline Editable Table Visual Rules (`detail-mini-vxe`)
 
-When a detail section contains a VXE table with editable cells (`a-input`, `a-select`, `a-date-picker` inside columns), use class `detail-mini-vxe` on the table. `global.css` handles ghost-border treatment automatically.
+When a detail section contains a VXE table with editable cells (`a-input`, `a-select`, `a-date-picker` inside columns), use class `detail-mini-vxe` as a semantic/checker hook. Controls keep GI native small styling.
 
 Container:
 
@@ -546,7 +546,7 @@ Required:
 
 - Always add `class="detail-mini-vxe"` to VXE tables embedded in `detail-section__body` that contain editable controls.
 - Use `detail-section__body--table` on the section body (or `detail-child-pane__table` for nested child panes).
-- Use `detail-mini-vxe--editable`; the global CSS bridge resolves the row to 38px for 28px controls (`--dense-control-h-detail`). Do not set `row-config.height` on pinned VXE 4.5.
+- Use `detail-mini-vxe--editable`; rely on VXE native small density and verify that GI small controls are not clipped.
 - In a Drawer or intrinsic-height pane, omit the VXE `height` prop. `height="auto"` is forbidden because pinned VXE 4.5 can feed the measured parent height back into its own content height and grow indefinitely.
 - Business columns use `min-width`; only checkbox / seq / operation use fixed `width` (see `table.md` width policy).
 
@@ -556,13 +556,13 @@ Forbidden:
 - `detail-child-pane__desc` when the child title and field labels already explain the block (no redundant module copy).
 - Page-scoped wrappers with `overflow: hidden` around wide detail tables.
 - `height="auto"` on an embedded VXE table whose Drawer body or detail pane already owns vertical scrolling.
-- Padding on `td` (`.vxe-body--column`) instead of `.vxe-cell`.
-- Forgetting `class="detail-mini-vxe"` — inputs show full Arco borders in every cell, creating Excel-like box grid.
+- Styling VXE `td` / cell internals to force density.
+- Forgetting `class="detail-mini-vxe"` — the semantic table job becomes invisible to review and automated checks.
 
 Form grid in detail drawers:
 
 - `detail-form-grid` children need `min-width: 0`; controls in `.detail-form` must be `width: 100%`.
-- `detail-drawer` must include `a-picker` / `a-date-picker` in the 28px control height rules, not only input/select.
+- Date/picker controls must also declare `size="small"` and `width: 100%` where needed.
 
 ### Combined Field Inputs (`detail-combo`)
 
@@ -601,7 +601,7 @@ Rules:
 - Modifiers: `--code-name` (fixed narrow first input), `--action` (trailing outline button).
 - Trailing action buttons in combos must be `type="outline"`, never `primary`.
 - Do not put `primary` copy/upload buttons inside form fields.
-- Combo groups share 28px height and primary-tint focus via `global.css`; do not reimplement borders in page scoped CSS.
+- Combo groups use CSS grid/flex for widths only; every child keeps its native GI border, focus, and small size.
 
 ## Footer
 

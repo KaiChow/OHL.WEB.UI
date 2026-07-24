@@ -9,7 +9,7 @@ Not for general **user profile editing** — that is `master-data.md` MD-2 or li
 
 ## Layout: `perm-layout`
 
-Three-zone pattern in `global.css`:
+Three-zone page-scoped or shared Vue layout pattern:
 
 ```text
 perm-layout
@@ -87,8 +87,8 @@ Prefer **workbench list** (用户管理):
 
 ## Button-Level Permission (runtime)
 
-- `v-if="hasPermission('order:create')"` on buttons — not on every table cell without tooltip fallback.
-- Missing permission: hide button or `disabled` + tooltip `无权限` — pick one pattern per page, do not mix.
+- Bind each protected action to the current module's declared `<object>:<action>` capability from the feature contract. Do not copy a route-specific permission key into reusable patterns.
+- Hide an action when exposing its existence or related data is itself forbidden. Use disabled + Tooltip only when the action is visible by product design and the user can understand or resolve the missing condition. Record the choice in the feature contract; do not choose per component ad hoc.
 - No permission page: use `state-center` — `暂无访问权限，请联系管理员`.
 
 ## Danger Actions
@@ -105,7 +105,10 @@ Prefer **workbench list** (用户管理):
 
 ## Verification
 
-- [ ] `perm-layout` structure from `global.css`
-- [ ] Role list uses `perm-role-item`, not raw styled `<div>`
+- [ ] `perm-layout` is page-scoped or implemented by a shared Vue component
+- [ ] Role selection uses an Arco List/Menu/Radio pattern or a real shared Vue component, with visible selected and focus state
 - [ ] One primary save per panel
 - [ ] System role delete guarded
+- [ ] Loading, no-role-selected, no-access, read-only, editable, save-pending, save-failure, and dirty-leave states are all specified
+- [ ] Permission failure preserves the active role and unsaved changes; retry stays in the owning panel
+- [ ] Hidden versus disabled actions follow the feature contract and never expose forbidden data through labels, counts, tooltips, or requests

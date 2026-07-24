@@ -34,11 +34,11 @@ If business object, user job, legal action, API behavior, or permission source c
 
 1. Arco props, slots, layout, and native behavior.
 2. GI and existing `--dense-*` semantic tokens.
-3. Grep-proven shared freight/VXE patterns.
+3. Grep-proven freight semantics and shared Vue components that do not reskin framework internals.
 4. A shared capability when reuse is proven.
 5. Minimal page-local shell/flex/overflow CSS only.
 
-Do not use markdown example classes as APIs. Shared classes must exist in `src/styles/global.css` or shared Vue code.
+Do not use markdown example classes as APIs. Shared behavior belongs in a real Vue component or composable. `global.css` is limited to the base reset, layout/dimension tokens, and framework-neutral business semantics.
 
 ## Commercial Definition Of Done
 
@@ -57,6 +57,7 @@ Any failed applicable item blocks `sellable-saas-grade`; a target in `pageSpec.t
 ## Hard Constraints
 
 - GI is the only Arco baseline/palette; no theme adapter or page-local component skin.
+- Global CSS must not target `.arco-*`, `.vxe-*`, framework data attributes, or declare `--vxe-*` variables. Use public props/slots/configuration and scoped layout CSS.
 - Use `vxe-table`, never `a-table`.
 - Main list grid: `workbench-table`; detail child grid: `detail-mini-vxe` with density modifier.
 - Status: `.s-pill[data-s]`; never color the whole row by status or rely on color alone.

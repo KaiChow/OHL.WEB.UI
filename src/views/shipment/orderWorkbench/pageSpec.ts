@@ -41,16 +41,18 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       decisions: ['Keep four daily locate fields on one stable row; edit fourteen compact advanced conditions in a right-side D1 drawer using two readable columns and one native scroll owner.'],
       acceptance: [
         'At 1366, 1024 split, and wide viewports, the query row does not create a separate action band and the table remains the dominant work surface.',
+        'At 1024, the identifier query keeps the largest field allocation, ports stay readable, and query-scheme/reset/advanced-filter collapse to named icon tools so the action cluster cannot overlap fields.',
         'The advanced filter opens from the right at the shared D1 width, renders two field columns, and keeps the native Drawer body as its only vertical scroll owner.',
         'Drawer content and footer remain horizontally contained at 1024, 1366, and wide desktop viewports.',
       ],
     },
     premium: {
-      decisions: ['Keep GI as palette owner and derive product quality from a context-preserving right drawer, freight-specific grouping, live result confidence, visible draft state, and complete states.'],
+      decisions: ['Keep GI and VXE native component styling; derive product quality from field allocation, context-preserving overlays, freight grouping, live result confidence, visible draft state, and complete states.'],
       acceptance: [
         'The advanced drawer exposes route/document, execution/ownership, schedule, and risk groups with local active counts, local reset, and a live matching-order count without a page-local component skin.',
         'The default advanced-filter interaction preserves the list beside a stable right-side drawer and never changes to a top overlay.',
         'Computed theme tokens, normal/error/empty/permission states, long text, column settings, and density behavior must be inspected on the real route.',
+        'The route must not depend on global selectors or theme-variable bridges that rewrite Arco or VXE internals.',
       ],
     },
   },

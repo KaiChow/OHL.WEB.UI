@@ -218,7 +218,7 @@ formRef.value?.clearValidate()
 </a-form-item>
 ```
 
-`a-input-group` 会注入自己的边框合并逻辑，与 `detail-combo` 的 `global.css` token 冲突。
+组合字段优先用 CSS grid/flex 安排多个原生 small 控件；不要通过内部选择器合并或重画控件边框。
 
 ---
 

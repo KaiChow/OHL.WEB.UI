@@ -311,7 +311,7 @@ The system uses Arco text tokens, not raw black.
 - Default action icons use `color-text-3` or Arco primary-muted; hover/focus uses `--dense-primary-*`.
 - Repeated controls inside table rows must avoid permanent dark borders because they form a black visual column and reduce all-day comfort.
 - If an area looks "too black", first check whether border/icon styles are using `color-text-1`, browser default `currentColor`, raw black, or invalid RGB token fallback.
-- Native focus must never be removed without an equal or stronger replacement. Custom button-like controls use a clearly visible tokenized `:focus-visible` state from `global.css`; `outline: none` without that replacement is a release blocker.
+- Native focus must never be removed without an equal or stronger replacement. Custom button-like controls use a clearly visible tokenized `:focus-visible` state in their scoped component; `outline: none` without that replacement is a release blocker.
 
 ## Status System
 

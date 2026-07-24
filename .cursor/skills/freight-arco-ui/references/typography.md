@@ -242,7 +242,7 @@ Editable forms, filters, and read-only detail field grids share F4 label + **F4 
 
 ## Overlay And Popup Typography
 
-Arco portals do not inherit page-scoped CSS. Normalize in `global.css`:
+Arco portals keep GI-owned typography. The hierarchy below is a review expectation, not an instruction to override portal internals:
 
 | Surface | Typography |
 |---------|------------|
@@ -256,7 +256,7 @@ Rules:
 
 - Modal title must be **larger than** modal form body (14px vs 12px).
 - Select trigger and dropdown option must match size and weight.
-- `global.css` overrides `.arco-modal-title`, `.arco-modal-body`, `.arco-select-dropdown`, `.arco-modal-footer`. Do not fix per page in scoped CSS.
+- Do not override `.arco-modal-*`, `.arco-select-*`, dropdown, tooltip, or popconfirm internals globally.
 - F6 10px is for units, sequence text, and compact counters only — not status pills, buttons, or dropdown options.
 
 Arco `size` prop: see `component-size.md`. Business UI uses `size="small"` only.
@@ -275,15 +275,15 @@ Modal / drawer form:
 </a-modal>
 ```
 
-- `class="detail-form"` on `<a-form>` — binds F4 label + control tokens.
+- `class="detail-form"` on `<a-form>` — identifies the business form and may own layout only.
 - `size="small"` on every Arco control — prevents Arco medium 14px leak.
 - Do not use raw `<label class="xf-label">` in new modals; use `a-form-item`.
 
 ## Hard Bans
 
-- No hardcoded `14px` / `15px` / `16px` in `src/views/**` — use tokens. **14px is allowed only via `--dense-font-overlay` (F0) in `global.css`.**
+- No hardcoded `14px` / `15px` / `16px` in custom page text — use tokens; framework-native typography remains untouched.
 - No `font-weight: 700/800` in business UI.
-- No Arco default medium (14px) leaking into forms — always `size="small"` + `detail-form`.
+- No implicit medium controls in business forms — always declare `size="small"`.
 - No form/filter label-value-placeholder drift (12/13/11 in one row).
 - No overlay title smaller than overlay body (title F0 14px, body F4 12px).
 - No table header smaller than table body (both 12px; header is 600).
