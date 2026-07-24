@@ -62,6 +62,11 @@ export const EXPORT_ORDER_DETAIL_SPEC = definePesdpPageSpec({
   ],
   states: ['loading', 'empty', 'no-permission', 'validation-error', 'business-error', 'network-error', 'long-text', 'extreme-value', 'success'],
   responsive: { release: ['1366x768', '1280x720'], split: '1024x768', wide: '1920x1080' },
+  accessibility: {
+    keyboard: ['Reach the back command, object actions, execution focus, tabs, editable rows, modal workflow, and sticky footer without a focus trap.'],
+    naming: ['Every icon-only command, tab state, editable row action, and validation owner exposes an accessible name.'],
+    zoom: '200%',
+  },
   authorities: ['detail-form.md', 'table.md', 'actions.md', 'feedback.md', 'responsive.md', 'product-grade-evaluation.md'],
   verification: ['node scripts/check-spec.js', 'npm run build', 'real-route detail mode and edge-state matrix'],
 });

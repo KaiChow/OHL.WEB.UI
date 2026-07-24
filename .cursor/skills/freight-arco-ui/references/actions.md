@@ -168,7 +168,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 | Content form | Use when | Required pattern | Forbidden |
 |--------------|----------|------------------|-----------|
-| Icon-only | row actions, toolbar utilities, compact fixed-width tools | Arco/lucide icon + tooltip/accessible label; `type="text"` except documented row dock variants | icon-only for module add/save/submit or business workflow verbs |
+| Icon-only | row actions, toolbar utilities, compact fixed-width tools | Arco icon + Tooltip + business-specific `aria-label`; `type="text"` except documented row dock variants; target at least 24×24px | icon-only for module add/save/submit or business workflow verbs; Tooltip without an accessible name |
 | Icon + text | primary creation, additive module actions, upload/import/export/download/print when the icon has a universal metaphor | icon first, text second, `size="small"`; trailing down icon only for dropdown trigger | forcing icons on every workflow action |
 | Text-only | business workflow verbs, footer workflow, drawer head actions, modal footer, dropdown options | concise object/action text; stable button type by scope | adding vague icons when no precise metaphor exists |
 | Text + trailing chevron | dropdown trigger such as `更多`, `导出`, `输出`, `流转` | text + `<icon-down />`; native Arco popup | standalone chevron without text except row `···` menu |
@@ -176,6 +176,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 ### Content Decision Rules
 
 - Row operation column: icon-only + tooltip. It is a repeated dense column; text buttons make the table noisy and wide.
+- Every icon-only button also declares a concise business-specific `aria-label`; Tooltip is visual help and does not replace the accessible name.
 - Toolbar utility actions: icon-only when the command is a familiar utility (`刷新`, `列设置`, `密度`, `全屏`). Add tooltip. Do not use framed outline buttons for utilities.
 - Primary creation: icon + text when the action adds a new object (`新建`, `添加`, `上传`). Use plus/upload icon only when the metaphor is exact.
 - Module/child add actions: icon + text is preferred for `添加...` because it improves scanning in module heads. Keep at most one outline add action per module head.
@@ -497,5 +498,6 @@ Danger rules:
 □ 删除/废弃 = text + danger + 确认
 □ 禁止 warning/success 常驻按钮
 □ 行内 = icon + tooltip + row-action-btn
+□ icon-only = Tooltip + 业务化 aria-label + 点击目标不小于 24×24px
 □ 高频可逆动作可见；低频/危险动作 → dropdown
 ```

@@ -1,4 +1,5 @@
 import type { OrderStatusKey } from './orderWorkbench/types';
+import { defineFeatureContracts } from '../../design-system/featureContract';
 
 export type ShipmentUiScenario =
   | 'normal'
@@ -15,17 +16,6 @@ export interface ShipmentStatusTransition {
   value: OrderStatusKey;
   label: string;
   tone: 'acc' | 'op' | 'wait' | 'rel';
-}
-
-export interface ShipmentFeatureContract {
-  id: string;
-  actorRoles: string[];
-  visibleWhen: string;
-  enabledWhen: string;
-  request: string;
-  successResult: string;
-  errorResult: string;
-  refreshScope: string;
 }
 
 const SUPPORTED_UI_SCENARIOS = new Set<ShipmentUiScenario>([
@@ -62,7 +52,7 @@ const TRANSITIONS: Partial<Record<OrderStatusKey, ShipmentStatusTransition[]>> =
   signed: [{ value: 'completed', label: '已完成', tone: 'rel' }],
 };
 
-export const SHIPMENT_FEATURE_CONTRACTS: ShipmentFeatureContract[] = [
+export const SHIPMENT_FEATURE_CONTRACTS = defineFeatureContracts([
   {
     id: 'export-order-create',
     actorRoles: ['shipment.operator', 'shipment.manager'],
@@ -143,7 +133,7 @@ export const SHIPMENT_FEATURE_CONTRACTS: ShipmentFeatureContract[] = [
     errorResult: 'show failed count and stable row identifiers beside the table; keep failed rows selected',
     refreshScope: 'affected rows, selection context, queue counts, and partial-failure summary',
   },
-];
+] as const);
 
 export const resolveShipmentUiScenario = (value: unknown): ShipmentUiScenario => {
   if (typeof value !== 'string') return 'normal';

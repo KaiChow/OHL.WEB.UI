@@ -50,6 +50,7 @@ A material UI/interaction task is complete only when all applicable statements a
 - Applicable loading, empty, no-permission, validation, business-error, network/slow, long-data, duplicate-submit, and partial-failure states are reproducible and recoverable.
 - The rendered route has one clear owner for identity, command, data, feedback, totals, and primary action; no nested cards or duplicate summaries fake structure.
 - Real-route inspection proves layout, overflow, focus, feedback locality, and state behavior at required viewports.
+- Keyboard order, accessible names, visible focus, and 200% zoom preserve the primary job and recovery paths.
 
 Any failed applicable item blocks `sellable-saas-grade`; a target in `pageSpec.ts`, prose checklist, build, or green linter cannot waive it.
 
@@ -69,7 +70,7 @@ Any failed applicable item blocks `sellable-saas-grade`; a target in `pageSpec.t
 
 For skill changes: run `npm run validate-freight-skill`, then `npm run sync-freight-skill`.
 
-For UI code: run `node scripts/check-spec.js` and `npm run build`. When visual or interaction quality is in scope, inspect the real route at `1366x768`, `1024x768`, and one wide desktop viewport; add deterministic state scenarios required by the page spec. Commercial claims must pass all gates in `product-grade-evaluation.md` with recorded evidence.
+For UI code: run `node scripts/check-spec.js` and `npm run build`. The checker discovers routed `src/views` pages, colocated `pageSpec.ts` files, and project feature contracts; a new business route must enter the same gate without script path edits. When visual or interaction quality is in scope, inspect the real route at `1366x768`, `1024x768`, one wide desktop viewport, and 200% zoom; add deterministic state scenarios required by the page spec. Commercial claims must pass all gates in `product-grade-evaluation.md` with recorded evidence.
 
 Follow `.cursor/rules/adversarial-review.mdc` before delivery. Report only evidence actually produced and list remaining blockers or unverified states.
 

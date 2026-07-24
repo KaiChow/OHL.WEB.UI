@@ -88,6 +88,11 @@ export interface PesdpPageSpec {
     split: '1024x768';
     wide: string;
   };
+  accessibility: {
+    keyboard: NonEmptyStrings;
+    naming: NonEmptyStrings;
+    zoom: '200%';
+  };
   authorities: NonEmptyStrings;
   verification: NonEmptyStrings;
 }

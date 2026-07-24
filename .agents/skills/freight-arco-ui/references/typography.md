@@ -74,7 +74,7 @@ Use the global tokens. Do not hard-code page-specific font sizes.
 | F4 | `--dense-font-field` | 12px | 500 | Form labels, filter labels (`filter-field__label`) |
 | F4 Control | `--dense-font-control` | 12px | 400/500 | Input/select/textarea values, placeholders, `.detail-field__val` |
 | F5 | `--dense-font-aux` | 11px | 400/500 | Helper text, metadata, pagination summary |
-| F6 | `--dense-font-micro` | 10px | 400/500 | Badges, units, sequence micro text, `.s-pill` |
+| F6 | `--dense-font-micro` | 10px | 400/500 | Units, sequence micro text, compact counters; never normal status text |
 
 Aliases:
 
@@ -148,7 +148,7 @@ Every zone has a fixed font tier. Do not deviate.
 | **Table (zone-l4)** | Cell data | F1 Data | 12px | 400 | `color-text-2` |
 | | Primary identifiers | F1 Data | 12px | 500 | `color-text-1` |
 | | Column header | F3 Title | 12px | 600 | `color-text-2` |
-| | Status pill | F6 Micro | 10px | 500 | semantic |
+| | Status pill | F5 Aux | 11px | 600 | semantic |
 | **Pagination** | Summary, page info | F5 Aux | 11px | 400 | `color-text-3` |
 | **Detail read-only** | Field label (`.detail-field__label`) | F4 Field | 12px | 500 | `color-text-3` |
 | | Field value (`.detail-field__val`) | F4 Control | 12px | 400/500 | `color-text-1` |
@@ -179,7 +179,7 @@ These are limited exceptions and should stay rare:
 
 - shell/brand typography outside business modules, such as app logo or brand mark
 - icon graphics that use `--dense-icon-action` or F6 micro sizing as shapes, not as text
-- badge/pill/micro status counters that intentionally use F6 10px
+- micro counters and units that intentionally use F6 10px; normal status pills stay F5 11px
 
 Outside these cases, prefer tokens over hard-coded `10px/11px/12px/13px`.
 
@@ -212,7 +212,8 @@ Use this table as the fast lookup for implementation and review.
 | Table body text | data | `--dense-font-data` | 12px |
 | Modal / drawer title | overlay chrome | `--dense-font-overlay` | 14px |
 | Tooltip | helper/meta | `--dense-font-aux` | 11px |
-| `s-pill` / badge / seq micro text | micro | `--dense-font-micro` | 10px |
+| `s-pill` | auxiliary status | `--dense-font-aux` | 11px |
+| badge / seq micro text | micro | `--dense-font-micro` | 10px |
 | Icon-only action icon | icon graphic | `--dense-icon-action` | 14px graphic |
 
 Decision shortcut:
@@ -256,7 +257,7 @@ Rules:
 - Modal title must be **larger than** modal form body (14px vs 12px).
 - Select trigger and dropdown option must match size and weight.
 - `global.css` overrides `.arco-modal-title`, `.arco-modal-body`, `.arco-select-dropdown`, `.arco-modal-footer`. Do not fix per page in scoped CSS.
-- F6 10px is for badges only — not buttons or dropdown options.
+- F6 10px is for units, sequence text, and compact counters only — not status pills, buttons, or dropdown options.
 
 Arco `size` prop: see `component-size.md`. Business UI uses `size="small"` only.
 

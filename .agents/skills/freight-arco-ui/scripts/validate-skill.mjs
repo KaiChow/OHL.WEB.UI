@@ -49,6 +49,9 @@ export function validateFreightUiSkill() {
     [references.get('feature-delivery-contract.md') || '', '## Smallest Complete Contract', 'feature-delivery-contract.md: missing smallest complete contract'],
     [references.get('page-spec-contract.md') || '', 'It is not a design essay', 'page-spec-contract.md: missing decision-record boundary'],
     [references.get('product-grade-evaluation.md') || '', '## Six Blocking Gates', 'product-grade-evaluation.md: missing commercial release gates'],
+    [references.get('product-grade-evaluation.md') || '', '200% zoom', 'product-grade-evaluation.md: missing accessible rendered gate'],
+    [references.get('component-size.md') || '', '24×24px minimum target', 'component-size.md: missing row-action target authority'],
+    [references.get('typography.md') || '', '| | Status pill | F5 Aux | 11px', 'typography.md: missing readable status-pill authority'],
   ];
   for (const [source, fragment, message] of requiredFragments) {
     if (!source.includes(fragment)) errors.push(message);
@@ -101,6 +104,9 @@ export function validateFreightUiSkill() {
     [/query-filter-drawer__shell/, 'obsolete nested filter drawer shell'],
     [/!important overrides inline|global\.css` wins/, 'hidden overlay width override'],
     [/redesign-calibration\.md|checklist\.md/, 'superseded delivery authority restored'],
+    [/Table row icon[^\n]*22×22px/, 'obsolete 22px row-action target'],
+    [/Status pill[^\n]*F6 Micro[^\n]*10px/, 'obsolete 10px status-pill typography'],
+    [/must set `outline: none`/, 'unsafe focus removal restored'],
   ];
   for (const [pattern, message] of conflicts) {
     if (pattern.test(allReferences)) errors.push(`references/: ${message}`);

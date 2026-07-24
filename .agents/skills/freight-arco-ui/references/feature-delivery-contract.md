@@ -1,6 +1,6 @@
 # Feature Delivery Contract
 
-Use before implementing business clicks, requests, permissions, mutations, or state transitions. The contract is code-adjacent and typed where the module already has a contract type; it is not a prose design document.
+Use before implementing business clicks, requests, permissions, mutations, or state transitions. Every `src/views/**/featureContracts.ts` uses `defineFeatureContracts` from `src/design-system/featureContract.ts`; the contract is executable project UI/UX infrastructure, not a prose design document.
 
 ## Smallest Complete Contract
 
@@ -16,6 +16,8 @@ successResult:
 errorResult:
 refreshScope:
 ```
+
+Contract IDs are project-wide unique. Every routed `pageSpec.ts` action references one discovered contract ID, and the routed page imports its module's `featureContracts` instead of recreating visibility, enablement, pending, or transition rules locally.
 
 Use object-owned terms and concrete conditions. `request` includes the real local operation or API method, identifiers, payload source, and pending owner. `errorResult` says what remains open/editable, what input/context survives, where the error appears, and how retry works.
 

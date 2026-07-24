@@ -5,7 +5,8 @@
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
-import { join, extname, sep } from 'path';
+import { dirname, extname, join, relative, resolve, sep } from 'path';
+import ts from 'typescript';
 import { validateFreightUiSkill } from '../.agents/skills/freight-arco-ui/scripts/validate-skill.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1');
@@ -158,6 +159,49 @@ function collectFiles(dir) {
 // ─── 主检查逻辑 ───────────────────────────────────────────────────────────────
 const files = SCAN_DIRS.flatMap(collectFiles);
 const violations = [];
+const toRelativePath = (file) => relative(ROOT, file).replace(/\\/g, '/');
+
+function getObjectProperty(objectNode, name) {
+  return objectNode?.properties.find((property) => ts.isPropertyAssignment(property)
+    && ((ts.isIdentifier(property.name) && property.name.text === name)
+      || (ts.isStringLiteral(property.name) && property.name.text === name)));
+}
+
+function getObjectLiteralProperty(objectNode, name) {
+  const property = getObjectProperty(objectNode, name);
+  return property && ts.isObjectLiteralExpression(property.initializer) ? property.initializer : undefined;
+}
+
+function getStringProperty(objectNode, name) {
+  const property = getObjectProperty(objectNode, name);
+  return property && ts.isStringLiteralLike(property.initializer) ? property.initializer.text : undefined;
+}
+
+function getStringArrayProperty(objectNode, name) {
+  const property = getObjectProperty(objectNode, name);
+  if (!property || !ts.isArrayLiteralExpression(property.initializer)) return undefined;
+  return property.initializer.elements
+    .filter(ts.isStringLiteralLike)
+    .map((element) => element.text);
+}
+
+function findCallObject(sourceFile, helperName) {
+  let result;
+  const visit = (node) => {
+    if (result) return;
+    if (ts.isCallExpression(node)
+      && ts.isIdentifier(node.expression)
+      && node.expression.text === helperName
+      && node.arguments[0]
+      && ts.isObjectLiteralExpression(node.arguments[0])) {
+      result = node.arguments[0];
+      return;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return result;
+}
 
 for (const file of files) {
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
@@ -244,10 +288,19 @@ for (const file of files.filter((file) => file.endsWith('.vue'))) {
 const globalCss = readFileSync(join(ROOT, 'src/styles/global.css'), 'utf8');
 const packageJson = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
 const mainTs = readFileSync(join(ROOT, 'src/main.ts'), 'utf8');
-const shipmentFeatureContractPath = join(ROOT, 'src/views/shipment/featureContracts.ts');
-const shipmentFeatureContracts = existsSync(shipmentFeatureContractPath)
-  ? readFileSync(shipmentFeatureContractPath, 'utf8')
-  : '';
+const routerFiles = collectFiles('src/router').filter((file) => file.endsWith('.ts'));
+const routedViewFiles = new Set();
+for (const routerFile of routerFiles) {
+  const source = readFileSync(routerFile, 'utf8');
+  for (const match of source.matchAll(/component\s*:\s*\(\)\s*=>\s*import\((['"])([^'"]+\.vue)\1\)/g)) {
+    const routeView = resolve(dirname(routerFile), match[2]);
+    if (toRelativePath(routeView).startsWith('src/views/')) routedViewFiles.add(routeView);
+  }
+}
+
+const pageSpecFiles = files.filter((file) => /[\\/]pageSpec\.ts$/.test(file));
+const featureContractFiles = files.filter((file) => /[\\/]featureContracts\.ts$/.test(file));
+const featureContractIds = new Map();
 
 if (!/^[~^]?0\.0\.58$/.test(packageJson.dependencies?.['@arco-themes/vue-gi-demo'] || '')) {
   violations.push({
@@ -344,80 +397,170 @@ if (existsSync(join(ROOT, '.cursor/rules/ui-spec.mdc'))) {
     content: 'duplicate always-on UI specification detected',
   });
 }
-if (!shipmentFeatureContracts.includes('SHIPMENT_FEATURE_CONTRACTS')
-  || !shipmentFeatureContracts.includes('refreshScope')
-  || !shipmentFeatureContracts.includes('getOrderStatusTransitions')) {
+for (const routeView of routedViewFiles) {
+  const specFile = join(dirname(routeView), 'pageSpec.ts');
+  if (existsSync(specFile)) continue;
   violations.push({
-    rule: '出口订单必须具备页面级功能契约，显式声明权限、状态流转、请求结果和刷新范围',
-    file: 'src/views/shipment/featureContracts.ts',
+    rule: '每个 src/views 业务路由必须同目录提供 typed pageSpec.ts',
+    file: toRelativePath(routeView),
     line: 1,
-    content: 'missing executable shipment feature contract',
+    content: `missing ${toRelativePath(specFile)}`,
   });
 }
-if (!shipmentFeatureContracts.includes("id: 'export-order-column-preferences'")) {
-  violations.push({
-    rule: '出口订单列设置必须声明可见、可用、失败保留与刷新范围的功能契约',
-    file: 'src/views/shipment/featureContracts.ts',
-    line: 1,
-    content: 'missing export-order-column-preferences contract',
-  });
-}
-if (!shipmentFeatureContracts.includes("id: 'export-order-detail-edit-session'")) {
-  violations.push({
-    rule: '出口订单详情必须声明展示/编辑会话的功能契约',
-    file: 'src/views/shipment/featureContracts.ts',
-    line: 1,
-    content: 'missing export-order-detail-edit-session contract',
-  });
-}
-for (const page of [
-  'src/views/shipment/orderWorkbench/index.vue',
-  'src/views/shipment/orderDetail/index.vue',
-]) {
-  const content = readFileSync(join(ROOT, page), 'utf8');
-  if (content.includes('../featureContracts')) continue;
-  violations.push({
-    rule: '出口订单列表与详情必须复用页面级状态/功能契约，禁止各写一套状态流转',
-    file: page,
-    line: 1,
-    content: 'missing featureContracts import',
-  });
-}
-const shipmentWorkbenchPage = readFileSync(join(ROOT, 'src/views/shipment/orderWorkbench/index.vue'), 'utf8');
-const shipmentWorkbenchSpec = readFileSync(join(ROOT, 'src/views/shipment/orderWorkbench/pageSpec.ts'), 'utf8');
-const shipmentDetailSpec = readFileSync(join(ROOT, 'src/views/shipment/orderDetail/pageSpec.ts'), 'utf8');
-const pesdpDimensions = ['professional', 'efficient', 'structured', 'dense', 'premium'];
-for (const [specFile, specSource] of [
-  ['src/views/shipment/orderWorkbench/pageSpec.ts', shipmentWorkbenchSpec],
-  ['src/views/shipment/orderDetail/pageSpec.ts', shipmentDetailSpec],
-]) {
-  for (const dimension of pesdpDimensions) {
-    if (new RegExp(`${dimension}:\\s*\\{[\\s\\S]*?decisions:\\s*\\[[^\\]]+\\][\\s\\S]*?acceptance:\\s*\\[[^\\]]+\\]`).test(specSource)) continue;
+
+for (const contractFile of featureContractFiles) {
+  const relPath = toRelativePath(contractFile);
+  const source = readFileSync(contractFile, 'utf8');
+  const sourceFile = ts.createSourceFile(contractFile, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  if (!source.includes('defineFeatureContracts')) {
     violations.push({
-      rule: '代表页面的 typed pageSpec.ts 必须为每个 PESDP 维度声明非空决策与可测验收条件',
-      file: specFile,
+      rule: '项目功能契约文件必须通过 defineFeatureContracts 使用共享完整契约类型',
+      file: relPath,
+      line: 1,
+      content: 'missing defineFeatureContracts',
+    });
+  }
+
+  const visit = (node) => {
+    if (ts.isObjectLiteralExpression(node)) {
+      const id = getStringProperty(node, 'id');
+      if (id) {
+        const requiredFields = [
+          'actorRoles',
+          'visibleWhen',
+          'enabledWhen',
+          'request',
+          'successResult',
+          'errorResult',
+          'refreshScope',
+        ];
+        const missing = requiredFields.filter((field) => !getObjectProperty(node, field));
+        if (missing.length) {
+          violations.push({
+            rule: '每个业务交互必须声明最小完整功能契约',
+            file: relPath,
+            line: source.slice(0, node.pos).split('\n').length,
+            content: `${id}: missing ${missing.join(', ')}`,
+          });
+        }
+        if (featureContractIds.has(id)) {
+          violations.push({
+            rule: '功能契约 id 必须在项目内唯一',
+            file: relPath,
+            line: source.slice(0, node.pos).split('\n').length,
+            content: `${id} duplicates ${featureContractIds.get(id)}`,
+          });
+        } else {
+          featureContractIds.set(id, relPath);
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+}
+
+const pesdpDimensions = ['professional', 'efficient', 'structured', 'dense', 'premium'];
+for (const specFile of pageSpecFiles) {
+  const relPath = toRelativePath(specFile);
+  const source = readFileSync(specFile, 'utf8');
+  const sourceFile = ts.createSourceFile(specFile, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const spec = findCallObject(sourceFile, 'definePesdpPageSpec');
+  if (!spec) {
+    violations.push({
+      rule: 'pageSpec.ts 必须通过 definePesdpPageSpec 声明 typed 页面契约',
+      file: relPath,
+      line: 1,
+      content: 'missing definePesdpPageSpec({...})',
+    });
+    continue;
+  }
+
+  const routeView = [...routedViewFiles].find((file) => dirname(file) === dirname(specFile));
+  if (!routeView) {
+    violations.push({
+      rule: 'pageSpec.ts 必须绑定同目录真实业务路由，禁止孤立规范自证',
+      file: relPath,
+      line: 1,
+      content: 'no colocated routed Vue page',
+    });
+  }
+
+  const pesdp = getObjectLiteralProperty(spec, 'pesdp');
+  for (const dimension of pesdpDimensions) {
+    const trace = getObjectLiteralProperty(pesdp, dimension);
+    if ((getStringArrayProperty(trace, 'decisions')?.length ?? 0) > 0
+      && (getStringArrayProperty(trace, 'acceptance')?.length ?? 0) > 0) continue;
+    violations.push({
+      rule: '每个 typed pageSpec.ts 必须为 PESDP 五个维度声明非空决策与可测验收条件',
+      file: relPath,
       line: 1,
       content: `missing trace for ${dimension}`,
     });
   }
-  if (!specSource.includes("target: 'sellable-saas-grade'") || /\bgoal\s*:|\bevidence\s*:/.test(specSource)) {
+
+  const accessibility = getObjectLiteralProperty(spec, 'accessibility');
+  if ((getStringArrayProperty(accessibility, 'keyboard')?.length ?? 0) === 0
+    || (getStringArrayProperty(accessibility, 'naming')?.length ?? 0) === 0
+    || getStringProperty(accessibility, 'zoom') !== '200%') {
     violations.push({
-      rule: '代表页面只能声明 target + acceptance，禁止用 goal/evidence 在源码中自证已达到售卖级',
-      file: specFile,
+      rule: '每个 typed pageSpec.ts 必须声明键盘、可访问名称和 200% 缩放验收',
+      file: relPath,
+      line: 1,
+      content: 'incomplete accessibility contract',
+    });
+  }
+
+  if (/\bgoal\s*:|\bevidence\s*:/.test(source)) {
+    violations.push({
+      rule: 'typed pageSpec.ts 只能声明 target + acceptance，禁止在源码中自证质量',
+      file: relPath,
       line: 1,
       content: 'invalid page quality declaration',
     });
   }
-  for (const match of specSource.matchAll(/contract:\s*'([^']+)'/g)) {
-    if (shipmentFeatureContracts.includes(`id: '${match[1]}'`)) continue;
+
+  const query = getObjectLiteralProperty(spec, 'query');
+  const declaredTotal = Number(getObjectProperty(query, 'totalFields')?.initializer?.text);
+  const declaredVisible = getStringArrayProperty(query, 'visibleFields') ?? [];
+  const declaredAdvanced = getStringArrayProperty(query, 'advancedFields') ?? [];
+  if (!Number.isInteger(declaredTotal) || declaredTotal !== declaredVisible.length + declaredAdvanced.length) {
     violations.push({
-      rule: 'typed pageSpec.ts 的每个动作必须引用真实的页面级功能契约',
-      file: specFile,
+      rule: 'pageSpec 查询 totalFields 必须等于 visibleFields 与 advancedFields 的字段总数',
+      file: relPath,
       line: 1,
-      content: `missing feature contract ${match[1]}`,
+      content: `declared=${declaredTotal}, fields=${declaredVisible.length + declaredAdvanced.length}`,
+    });
+  }
+
+  const actionsProperty = getObjectProperty(spec, 'actions');
+  const actions = actionsProperty && ts.isArrayLiteralExpression(actionsProperty.initializer)
+    ? actionsProperty.initializer.elements.filter(ts.isObjectLiteralExpression)
+    : [];
+  for (const action of actions) {
+    const contractId = getStringProperty(action, 'contract');
+    if (contractId && featureContractIds.has(contractId)) continue;
+    violations.push({
+      rule: 'typed pageSpec.ts 的每个动作必须引用项目内真实完整功能契约',
+      file: relPath,
+      line: source.slice(0, action.pos).split('\n').length,
+      content: `missing feature contract ${contractId ?? '(empty)'}`,
+    });
+  }
+
+  if (actions.length && routeView && !readFileSync(routeView, 'utf8').includes('featureContracts')) {
+    violations.push({
+      rule: '声明业务动作的路由页面必须复用对应 featureContracts，禁止页面内另写一套交互状态',
+      file: toRelativePath(routeView),
+      line: 1,
+      content: 'missing featureContracts import',
     });
   }
 }
+
+const shipmentWorkbenchPage = readFileSync(join(ROOT, 'src/views/shipment/orderWorkbench/index.vue'), 'utf8');
+const shipmentWorkbenchSpec = readFileSync(join(ROOT, 'src/views/shipment/orderWorkbench/pageSpec.ts'), 'utf8');
+const shipmentDetailSpec = readFileSync(join(ROOT, 'src/views/shipment/orderDetail/pageSpec.ts'), 'utf8');
 const parseStringArray = (source, key) => {
   const body = source.match(new RegExp(`${key}:\\s*\\[([\\s\\S]*?)\\]`))?.[1] ?? '';
   return [...body.matchAll(/'([^']+)'/g)].map((match) => match[1]);
@@ -617,20 +760,36 @@ if (!globalCss.includes('.detail-mini-vxe.vxe-table .vxe-body--row')
     content: 'missing detail-mini-vxe density row bridge',
   });
 }
-// 业务页禁止 Arco size="medium" | "large" | "mini"
+// 业务控件必须显式使用项目唯一密度，避免遗漏 size 后回退到 Arco medium。
+const operationalComponentPattern = /<a-(input-number|tree-select|date-picker|time-picker|pagination|textarea|cascader|button|input|select|tabs|steps)(?![\w-])[\s\S]*?>/g;
 for (const file of files) {
-  if (!file.includes(`${sep}src${sep}views${sep}`) || !file.endsWith('.vue')) continue;
-  const relPath = file.replace(ROOT + sep, '').replace(/\\/g, '/');
+  if (!file.endsWith('.vue')) continue;
+  const relPath = toRelativePath(file);
   const content = readFileSync(file, 'utf8');
-  const lines = content.split('\n');
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (!/size="(medium|large|mini)"/.test(line)) continue;
+  for (const match of content.matchAll(operationalComponentPattern)) {
+    const tag = match[0];
+    if (/\bsize=(['"])small\1/.test(tag)) continue;
     violations.push({
-      rule: '业务页 Arco 组件禁止 size="medium|large|mini"，统一 size="small"（见 component-size.md）',
+      rule: '业务 Arco 控件必须显式声明 size="small"，禁止遗漏或使用其他密度',
       file: relPath,
-      line: i + 1,
-      content: line.trim().slice(0, 140),
+      line: getLineNumber(content, match.index),
+      content: tag.replace(/\s+/g, ' ').slice(0, 140),
+    });
+  }
+
+  for (const match of content.matchAll(/<a-button\b([^>]*)>([\s\S]*?)<\/a-button>/g)) {
+    const attributes = match[1];
+    const body = match[2];
+    const visibleText = body
+      .replace(/<[^>]+>/g, '')
+      .replace(/\{\{[\s\S]*?\}\}/g, 'dynamic-text')
+      .trim();
+    if (visibleText || !/<(?:template\b[^>]*#icon|icon-[\w-]+\b)/.test(body) || /\baria-label=(['"])[^'"]+\1/.test(attributes)) continue;
+    violations.push({
+      rule: 'icon-only 按钮必须提供业务含义明确的 aria-label；Tooltip 不能替代可访问名称',
+      file: relPath,
+      line: getLineNumber(content, match.index),
+      content: match[0].replace(/\s+/g, ' ').slice(0, 140),
     });
   }
 }

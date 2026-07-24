@@ -13,7 +13,7 @@ This is pass/fail only. Do not average visual strengths against broken behavior,
 | 3. Operational efficiency | Daily query/scan/update/batch paths are short; action hierarchy and data ownership remain clear at office widths | Hidden daily work, competing primaries, repeated context, oversized command chrome, or broken table/overlay overflow |
 | 4. State resilience | Applicable loading, slow, empty, no-permission, validation, business/network error, retry, long/extreme data, and partial failure are deterministic and recoverable | Happy-path-only demo, global toast replacing local error, color-only state, or unreproducible edge states |
 | 5. Product-system consistency | Arco/GI/shared patterns own shell, controls, status, feedback, VXE, spacing, and interaction language across representative routes | Page-local skin, second palette, one-off component language, or a new module requiring reinvention |
-| 6. Rendered proof | Real routes pass viewport, focus, overflow, state, console, build, and spec checks with evidence and declared residual risk | Source-only review, screenshot-only polish, green scripts without route inspection, or unsupported quality claims |
+| 6. Rendered and accessible proof | Real routes pass viewport, focus, keyboard, naming, 200% zoom, overflow, state, console, build, and spec checks with evidence and declared residual risk | Source-only review, mouse-only flow, unnamed icon action, clipped zoom state, screenshot-only polish, green scripts without route inspection, or unsupported quality claims |
 
 Any failed applicable gate blocks `sellable-saas-grade`.
 
@@ -36,8 +36,10 @@ Required scenario set is page-specific, but every applicable state must have a d
 2. Repeat with denied, invalid, slow, failed, and duplicate input/request conditions that apply.
 3. Verify input/context preservation, retry, refresh scope, and destructive confirmation.
 4. Inspect focus order, keyboard reachability, state meaning without color, long data, local scroll owners, fixed table regions, and console errors.
-5. Compare representative routes for shared ownership and interaction language.
-6. Run `node scripts/check-spec.js` and `npm run build`.
+5. At 200% browser zoom, verify that identity, current state, primary action, validation, overlay commands, and recovery paths remain reachable; table-local horizontal scrolling is allowed, clipped or lost commands are not.
+6. Verify every icon-only control has a business-specific accessible name, every custom control has a visible `:focus-visible` state, and text/state contrast remains readable without color alone.
+7. Compare representative routes for shared ownership and interaction language.
+8. Run `node scripts/check-spec.js` and `npm run build`.
 
 Route a failed gate to the relevant existing authority; do not add another product-quality checklist.
 

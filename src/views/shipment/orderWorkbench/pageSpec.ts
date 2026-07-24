@@ -103,6 +103,11 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   ],
   states: ['loading', 'slow', 'empty', 'no-permission', 'network-error', 'long-text', 'extreme-value', 'partial-failure', 'success'],
   responsive: { release: ['1366x768', '1280x720'], split: '1024x768', wide: '1920x1080' },
+  accessibility: {
+    keyboard: ['Reach and operate query, queues, table utilities, row actions, pagination, and every opened overlay in a logical order.'],
+    naming: ['Every icon-only command and state-changing control exposes a business-specific accessible name.'],
+    zoom: '200%',
+  },
   authorities: ['list-page.md', 'filter-layout.md', 'table.md', 'actions.md', 'detail-form.md', 'modal.md', 'overlay-dimensions.md', 'feedback.md', 'responsive.md'],
   verification: ['node scripts/check-spec.js', 'npm run build', 'real-route viewport and state matrix'],
 });

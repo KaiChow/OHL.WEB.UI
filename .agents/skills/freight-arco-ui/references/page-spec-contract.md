@@ -39,6 +39,11 @@ export const PAGE_SPEC = definePesdpPageSpec({
   ],
   states: ['loading', 'empty', 'no-permission', 'network-error', 'success'],
   responsive: { release: ['1366x768'], split: '1024x768', wide: '1920x1080' },
+  accessibility: {
+    keyboard: ['Reach every command, row action, and opened overlay in workflow order.'],
+    naming: ['Every icon-only command has a business-specific accessible name.'],
+    zoom: '200%',
+  },
   authorities: ['list-page.md', 'table.md', 'actions.md', 'feedback.md'],
   verification: ['check-spec', 'build', 'real-route viewport/state evidence'],
 })
@@ -70,6 +75,7 @@ Every business action references an existing feature contract and declares frequ
 - Workbench table: classify identity, decision, supporting, composite, fixed, and density roles before columns are coded.
 - Object detail: default mode, current risk/next work, real milestones, edit scope, save/cancel owner, and local failure owner.
 - States: include only applicable states, but every listed state needs a deterministic trigger and recovery check. Omitting an applicable state to shorten the spec is a release defect.
+- Accessibility: record the page-specific keyboard path and accessible-name scope; `zoom` is fixed at `200%`. Arco ownership does not waive checks for VXE, custom freight patterns, or icon-only actions.
 - Authorities: name one primary page authority plus only surfaces actually touched. Numeric mechanics stay in those authorities.
 
 ## Generation Sequence

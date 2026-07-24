@@ -538,7 +538,7 @@ const addExceptionRow = () => {
       <header class="detail-context__command">
         <div class="detail-context__identity">
           <a-tooltip content="返回订单列表">
-            <a-button size="small" type="text" class="detail-context__back" @click="goBack">
+            <a-button size="small" type="text" class="detail-context__back" aria-label="返回订单列表" @click="goBack">
               <template #icon><icon-left /></template>
             </a-button>
           </a-tooltip>
@@ -641,15 +641,15 @@ const addExceptionRow = () => {
               <header><strong>订舱与舱位</strong><span class="s-pill" data-s="wait">{{ form.spaceStatus }}</span></header>
               <a-form v-if="isDetailEditing" :model="form" layout="vertical" size="small" class="detail-form">
                 <a-row :gutter="[16, 8]">
-                  <a-col :md="8" :lg="6"><a-form-item field="bookingNo" label="订舱号"><a-input v-model="form.bookingNo" allow-clear placeholder="待船司回传" /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="carrier" label="船公司"><a-input v-model="form.carrier" allow-clear /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="bookingAgent" label="订舱代理"><a-input v-model="form.bookingAgent" allow-clear /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="contractNo" label="合约号"><a-input v-model="form.contractNo" allow-clear /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="rateNo" label="运价编号"><a-input v-model="form.rateNo" allow-clear /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="spaceStatus" label="舱位状态"><a-input v-model="form.spaceStatus" allow-clear /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="releaseTime" label="放舱时间"><a-date-picker v-model="form.releaseTime" show-time style="width: 100%" /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="vgmCutoff" label="截 VGM"><a-date-picker v-model="form.vgmCutoff" show-time style="width: 100%" /></a-form-item></a-col>
-                  <a-col :span="24"><a-form-item field="bookingRemark" label="订舱备注"><a-textarea v-model="form.bookingRemark" :auto-size="{ minRows: 2, maxRows: 4 }" /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="bookingNo" label="订舱号"><a-input v-model="form.bookingNo" size="small" allow-clear placeholder="待船司回传" /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="carrier" label="船公司"><a-input v-model="form.carrier" size="small" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="bookingAgent" label="订舱代理"><a-input v-model="form.bookingAgent" size="small" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="contractNo" label="合约号"><a-input v-model="form.contractNo" size="small" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="rateNo" label="运价编号"><a-input v-model="form.rateNo" size="small" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="spaceStatus" label="舱位状态"><a-input v-model="form.spaceStatus" size="small" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="releaseTime" label="放舱时间"><a-date-picker v-model="form.releaseTime" size="small" show-time style="width: 100%" /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="vgmCutoff" label="截 VGM"><a-date-picker v-model="form.vgmCutoff" size="small" show-time style="width: 100%" /></a-form-item></a-col>
+                  <a-col :span="24"><a-form-item field="bookingRemark" label="订舱备注"><a-textarea v-model="form.bookingRemark" size="small" :auto-size="{ minRows: 2, maxRows: 4 }" /></a-form-item></a-col>
                 </a-row>
               </a-form>
               <a-descriptions v-else class="detail-display" :bordered="false" layout="vertical" :column="4" size="small">
@@ -669,12 +669,12 @@ const addExceptionRow = () => {
               <header><strong>柜货与拖车</strong><span>{{ form.containerSummary }}</span></header>
               <a-form v-if="isDetailEditing" :model="executionForm" layout="vertical" size="small" class="detail-form">
                 <a-row :gutter="[16, 8]">
-                  <a-col :md="8" :lg="6"><a-form-item label="柜型柜量"><a-input v-model="form.containerSummary" allow-clear /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="truckSupplier" label="拖车供应商"><a-input v-model="executionForm.truckSupplier" allow-clear placeholder="请选择供应商" /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="loadingAddress" label="装柜地址"><a-input v-model="executionForm.loadingAddress" allow-clear /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="loadingTime" label="装柜时间"><a-date-picker v-model="executionForm.loadingTime" show-time style="width: 100%" /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="truckStatus" label="拖车状态"><a-select v-model="executionForm.truckStatus" placeholder="请选择"><a-option value="未安排">未安排</a-option><a-option value="已派车">已派车</a-option><a-option value="已到厂">已到厂</a-option></a-select></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="plateNo" label="车牌号"><a-input v-model="executionForm.plateNo" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item label="柜型柜量"><a-input v-model="form.containerSummary" size="small" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="truckSupplier" label="拖车供应商"><a-input v-model="executionForm.truckSupplier" size="small" allow-clear placeholder="请选择供应商" /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="loadingAddress" label="装柜地址"><a-input v-model="executionForm.loadingAddress" size="small" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="loadingTime" label="装柜时间"><a-date-picker v-model="executionForm.loadingTime" size="small" show-time style="width: 100%" /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="truckStatus" label="拖车状态"><a-select v-model="executionForm.truckStatus" size="small" placeholder="请选择"><a-option value="未安排">未安排</a-option><a-option value="已派车">已派车</a-option><a-option value="已到厂">已到厂</a-option></a-select></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="plateNo" label="车牌号"><a-input v-model="executionForm.plateNo" size="small" allow-clear /></a-form-item></a-col>
                 </a-row>
               </a-form>
               <a-descriptions v-else class="detail-display" :bordered="false" layout="vertical" :column="4" size="small">
@@ -691,14 +691,14 @@ const addExceptionRow = () => {
               <header><strong>报关与提单</strong><span>{{ form.bookingNo || '待回传订舱号' }}</span></header>
               <a-form v-if="isDetailEditing" :model="executionForm" layout="vertical" size="small" class="detail-form">
                 <a-row :gutter="[16, 8]">
-                  <a-col :md="8" :lg="6"><a-form-item field="customsMode" label="报关方式"><a-select v-model="executionForm.customsMode" placeholder="请选择"><a-option value="一般贸易">一般贸易</a-option><a-option value="跨境电商">跨境电商</a-option></a-select></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="customsBroker" label="报关行"><a-input v-model="executionForm.customsBroker" allow-clear /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="customsNo" label="报关单号"><a-input v-model="executionForm.customsNo" allow-clear /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="customsStatus" label="报关状态"><a-select v-model="executionForm.customsStatus" placeholder="请选择"><a-option value="未提交">未提交</a-option><a-option value="已提交">已提交</a-option><a-option value="已放行">已放行</a-option></a-select></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="hbl" label="HBL"><a-input v-model="executionForm.hbl" allow-clear /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="mbl" label="MBL"><a-input v-model="executionForm.mbl" allow-clear /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="blType" label="提单类型"><a-select v-model="executionForm.blType" placeholder="请选择"><a-option value="正本">正本</a-option><a-option value="电放">电放</a-option><a-option value="海运单">海运单</a-option></a-select></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="blConfirmStatus" label="提单确认状态"><a-select v-model="executionForm.blConfirmStatus" placeholder="请选择"><a-option value="待确认">待确认</a-option><a-option value="已确认">已确认</a-option></a-select></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="customsMode" label="报关方式"><a-select v-model="executionForm.customsMode" size="small" placeholder="请选择"><a-option value="一般贸易">一般贸易</a-option><a-option value="跨境电商">跨境电商</a-option></a-select></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="customsBroker" label="报关行"><a-input v-model="executionForm.customsBroker" size="small" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="customsNo" label="报关单号"><a-input v-model="executionForm.customsNo" size="small" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="customsStatus" label="报关状态"><a-select v-model="executionForm.customsStatus" size="small" placeholder="请选择"><a-option value="未提交">未提交</a-option><a-option value="已提交">已提交</a-option><a-option value="已放行">已放行</a-option></a-select></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="hbl" label="HBL"><a-input v-model="executionForm.hbl" size="small" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="mbl" label="MBL"><a-input v-model="executionForm.mbl" size="small" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="blType" label="提单类型"><a-select v-model="executionForm.blType" size="small" placeholder="请选择"><a-option value="正本">正本</a-option><a-option value="电放">电放</a-option><a-option value="海运单">海运单</a-option></a-select></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="blConfirmStatus" label="提单确认状态"><a-select v-model="executionForm.blConfirmStatus" size="small" placeholder="请选择"><a-option value="待确认">待确认</a-option><a-option value="已确认">已确认</a-option></a-select></a-form-item></a-col>
                 </a-row>
               </a-form>
               <a-descriptions v-else class="detail-display" :bordered="false" layout="vertical" :column="4" size="small">
@@ -753,7 +753,7 @@ const addExceptionRow = () => {
                 <vxe-column field="amount" title="金额" min-width="100" align="right"><template #default="{ row }"><a-input-number v-if="isEditingRow('receivable', row)" v-model="row.amount" size="small" :error="Boolean(rowEdit.errors.amount)" hide-button /><span v-else class="mono">{{ row.amount.toLocaleString() }}</span></template></vxe-column>
                 <vxe-column field="party" title="客户" min-width="140"><template #default="{ row }"><a-input v-if="isEditingRow('receivable', row)" v-model="row.party" size="small" :error="Boolean(rowEdit.errors.party)" /><span v-else>{{ row.party || '—' }}</span></template></vxe-column>
                 <vxe-column field="status" title="状态" min-width="96"><template #default="{ row }"><span class="s-pill" :data-s="row.statusKey">{{ row.status }}</span></template></vxe-column>
-                <vxe-column title="操作" width="88" fixed="right" align="center"><template #default="{ row }"><div class="row-actions"><template v-if="isEditingRow('receivable', row)"><a-tooltip content="保存"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" :loading="rowEdit.saving" @click="saveDetailRow('receivable', row)"><icon-check /></a-button></a-tooltip><a-tooltip content="取消"><a-button size="small" type="text" class="row-action-btn" :disabled="rowEdit.saving" @click="cancelDetailRow('receivable', row)"><icon-close /></a-button></a-tooltip></template><template v-else><a-tooltip content="编辑"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="startRowEdit('receivable', row)"><icon-edit /></a-button></a-tooltip><a-popconfirm content="确认删除该应收费用？" @ok="removeDetailRow('receivable', row)"><a-tooltip content="删除"><a-button size="small" type="text" status="danger" class="row-action-btn"><icon-delete /></a-button></a-tooltip></a-popconfirm></template></div></template></vxe-column>
+                <vxe-column title="操作" width="88" fixed="right" align="center"><template #default="{ row }"><div class="row-actions"><template v-if="isEditingRow('receivable', row)"><a-tooltip content="保存"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" aria-label="保存应收费用" :loading="rowEdit.saving" @click="saveDetailRow('receivable', row)"><icon-check /></a-button></a-tooltip><a-tooltip content="取消"><a-button size="small" type="text" class="row-action-btn" aria-label="取消编辑应收费用" :disabled="rowEdit.saving" @click="cancelDetailRow('receivable', row)"><icon-close /></a-button></a-tooltip></template><template v-else><a-tooltip content="编辑"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" aria-label="编辑应收费用" @click="startRowEdit('receivable', row)"><icon-edit /></a-button></a-tooltip><a-popconfirm content="确认删除该应收费用？" @ok="removeDetailRow('receivable', row)"><a-tooltip content="删除"><a-button size="small" type="text" status="danger" class="row-action-btn" aria-label="删除应收费用"><icon-delete /></a-button></a-tooltip></a-popconfirm></template></div></template></vxe-column>
               </vxe-table>
             </section>
 
@@ -767,7 +767,7 @@ const addExceptionRow = () => {
                 <vxe-column field="amount" title="金额" min-width="100" align="right"><template #default="{ row }"><a-input-number v-if="isEditingRow('payable', row)" v-model="row.amount" size="small" :error="Boolean(rowEdit.errors.amount)" hide-button /><span v-else class="mono">{{ row.amount.toLocaleString() }}</span></template></vxe-column>
                 <vxe-column field="party" title="供应商" min-width="140"><template #default="{ row }"><a-input v-if="isEditingRow('payable', row)" v-model="row.party" size="small" :error="Boolean(rowEdit.errors.party)" /><span v-else>{{ row.party || '—' }}</span></template></vxe-column>
                 <vxe-column field="status" title="状态" min-width="96"><template #default="{ row }"><span class="s-pill" :data-s="row.statusKey">{{ row.status }}</span></template></vxe-column>
-                <vxe-column title="操作" width="88" fixed="right" align="center"><template #default="{ row }"><div class="row-actions"><template v-if="isEditingRow('payable', row)"><a-tooltip content="保存"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" :loading="rowEdit.saving" @click="saveDetailRow('payable', row)"><icon-check /></a-button></a-tooltip><a-tooltip content="取消"><a-button size="small" type="text" class="row-action-btn" :disabled="rowEdit.saving" @click="cancelDetailRow('payable', row)"><icon-close /></a-button></a-tooltip></template><template v-else><a-tooltip content="编辑"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="startRowEdit('payable', row)"><icon-edit /></a-button></a-tooltip><a-popconfirm content="确认删除该应付费用？" @ok="removeDetailRow('payable', row)"><a-tooltip content="删除"><a-button size="small" type="text" status="danger" class="row-action-btn"><icon-delete /></a-button></a-tooltip></a-popconfirm></template></div></template></vxe-column>
+                <vxe-column title="操作" width="88" fixed="right" align="center"><template #default="{ row }"><div class="row-actions"><template v-if="isEditingRow('payable', row)"><a-tooltip content="保存"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" aria-label="保存应付费用" :loading="rowEdit.saving" @click="saveDetailRow('payable', row)"><icon-check /></a-button></a-tooltip><a-tooltip content="取消"><a-button size="small" type="text" class="row-action-btn" aria-label="取消编辑应付费用" :disabled="rowEdit.saving" @click="cancelDetailRow('payable', row)"><icon-close /></a-button></a-tooltip></template><template v-else><a-tooltip content="编辑"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" aria-label="编辑应付费用" @click="startRowEdit('payable', row)"><icon-edit /></a-button></a-tooltip><a-popconfirm content="确认删除该应付费用？" @ok="removeDetailRow('payable', row)"><a-tooltip content="删除"><a-button size="small" type="text" status="danger" class="row-action-btn" aria-label="删除应付费用"><icon-delete /></a-button></a-tooltip></a-popconfirm></template></div></template></vxe-column>
               </vxe-table>
             </section>
           </div>
@@ -798,7 +798,7 @@ const addExceptionRow = () => {
                 <vxe-column field="actualTime" title="实际时间" min-width="150"><template #default="{ row }"><a-date-picker v-if="isEditingRow('node', row)" v-model="row.actualTime" size="small" show-time style="width: 100%" /><span v-else class="mono">{{ row.actualTime || '—' }}</span></template></vxe-column>
                 <vxe-column field="status" title="状态" min-width="96"><template #default="{ row }"><span class="s-pill" :data-s="row.statusKey">{{ row.status }}</span></template></vxe-column>
                 <vxe-column field="owner" title="负责人" min-width="90" />
-                <vxe-column title="操作" width="88" fixed="right" align="center"><template #default="{ row }"><div class="row-actions"><template v-if="isEditingRow('node', row)"><a-tooltip content="保存"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" :loading="rowEdit.saving" @click="saveDetailRow('node', row)"><icon-check /></a-button></a-tooltip><a-tooltip content="取消"><a-button size="small" type="text" class="row-action-btn" :disabled="rowEdit.saving" @click="cancelDetailRow('node', row)"><icon-close /></a-button></a-tooltip></template><template v-else><a-tooltip content="编辑"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="startRowEdit('node', row)"><icon-edit /></a-button></a-tooltip><a-popconfirm content="确认删除该物流节点？" @ok="removeDetailRow('node', row)"><a-tooltip content="删除"><a-button size="small" type="text" status="danger" class="row-action-btn"><icon-delete /></a-button></a-tooltip></a-popconfirm></template></div></template></vxe-column>
+                <vxe-column title="操作" width="88" fixed="right" align="center"><template #default="{ row }"><div class="row-actions"><template v-if="isEditingRow('node', row)"><a-tooltip content="保存"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" aria-label="保存物流节点" :loading="rowEdit.saving" @click="saveDetailRow('node', row)"><icon-check /></a-button></a-tooltip><a-tooltip content="取消"><a-button size="small" type="text" class="row-action-btn" aria-label="取消编辑物流节点" :disabled="rowEdit.saving" @click="cancelDetailRow('node', row)"><icon-close /></a-button></a-tooltip></template><template v-else><a-tooltip content="编辑"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" aria-label="编辑物流节点" @click="startRowEdit('node', row)"><icon-edit /></a-button></a-tooltip><a-popconfirm content="确认删除该物流节点？" @ok="removeDetailRow('node', row)"><a-tooltip content="删除"><a-button size="small" type="text" status="danger" class="row-action-btn" aria-label="删除物流节点"><icon-delete /></a-button></a-tooltip></a-popconfirm></template></div></template></vxe-column>
               </vxe-table>
             </section>
 
@@ -813,7 +813,7 @@ const addExceptionRow = () => {
                 <vxe-column field="description" title="描述" min-width="180"><template #default="{ row }"><a-input v-if="isEditingRow('exception', row)" v-model="row.description" size="small" :error="Boolean(rowEdit.errors.description)" /><span v-else>{{ row.description || '—' }}</span></template></vxe-column>
                 <vxe-column field="owner" title="责任人" min-width="90" />
                 <vxe-column field="status" title="状态" min-width="96"><template #default="{ row }"><span class="s-pill" :data-s="row.statusKey">{{ row.status }}</span></template></vxe-column>
-                <vxe-column title="操作" width="88" fixed="right" align="center"><template #default="{ row }"><div class="row-actions"><template v-if="isEditingRow('exception', row)"><a-tooltip content="保存"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" :loading="rowEdit.saving" @click="saveDetailRow('exception', row)"><icon-check /></a-button></a-tooltip><a-tooltip content="取消"><a-button size="small" type="text" class="row-action-btn" :disabled="rowEdit.saving" @click="cancelDetailRow('exception', row)"><icon-close /></a-button></a-tooltip></template><template v-else><a-tooltip content="编辑"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="startRowEdit('exception', row)"><icon-edit /></a-button></a-tooltip><a-popconfirm content="确认删除该异常记录？" @ok="removeDetailRow('exception', row)"><a-tooltip content="删除"><a-button size="small" type="text" status="danger" class="row-action-btn"><icon-delete /></a-button></a-tooltip></a-popconfirm></template></div></template></vxe-column>
+                <vxe-column title="操作" width="88" fixed="right" align="center"><template #default="{ row }"><div class="row-actions"><template v-if="isEditingRow('exception', row)"><a-tooltip content="保存"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" aria-label="保存异常记录" :loading="rowEdit.saving" @click="saveDetailRow('exception', row)"><icon-check /></a-button></a-tooltip><a-tooltip content="取消"><a-button size="small" type="text" class="row-action-btn" aria-label="取消编辑异常记录" :disabled="rowEdit.saving" @click="cancelDetailRow('exception', row)"><icon-close /></a-button></a-tooltip></template><template v-else><a-tooltip content="编辑"><a-button size="small" type="text" class="row-action-btn row-action-btn--primary" aria-label="编辑异常记录" @click="startRowEdit('exception', row)"><icon-edit /></a-button></a-tooltip><a-popconfirm content="确认删除该异常记录？" @ok="removeDetailRow('exception', row)"><a-tooltip content="删除"><a-button size="small" type="text" status="danger" class="row-action-btn" aria-label="删除异常记录"><icon-delete /></a-button></a-tooltip></a-popconfirm></template></div></template></vxe-column>
               </vxe-table>
             </section>
           </div>
@@ -825,10 +825,10 @@ const addExceptionRow = () => {
               <header><strong>新增沟通</strong><a-button size="small" type="primary" @click="handleAddCommunication">保存记录</a-button></header>
               <a-form ref="communicationFormRef" :model="communicationForm" layout="vertical" size="small" class="detail-form">
                 <a-row :gutter="[16, 8]">
-                  <a-col :md="8" :lg="6"><a-form-item field="target" label="沟通对象"><a-input v-model="communicationForm.target" allow-clear /></a-form-item></a-col>
-                  <a-col :md="8" :lg="6"><a-form-item field="channel" label="沟通方式"><a-select v-model="communicationForm.channel" placeholder="请选择"><a-option value="电话">电话</a-option><a-option value="邮件">邮件</a-option><a-option value="微信">微信</a-option></a-select></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="target" label="沟通对象"><a-input v-model="communicationForm.target" size="small" allow-clear /></a-form-item></a-col>
+                  <a-col :md="8" :lg="6"><a-form-item field="channel" label="沟通方式"><a-select v-model="communicationForm.channel" size="small" placeholder="请选择"><a-option value="电话">电话</a-option><a-option value="邮件">邮件</a-option><a-option value="微信">微信</a-option></a-select></a-form-item></a-col>
                   <a-col :md="8" :lg="6"><a-form-item field="customerVisible" label="客户可见"><a-switch v-model="communicationForm.customerVisible" size="small" /></a-form-item></a-col>
-                  <a-col :span="24"><a-form-item field="content" label="沟通内容" :rules="[{ required: true, message: '请填写沟通内容' }]"><a-textarea v-model="communicationForm.content" :auto-size="{ minRows: 3, maxRows: 6 }" placeholder="记录沟通内容" /></a-form-item></a-col>
+                  <a-col :span="24"><a-form-item field="content" label="沟通内容" :rules="[{ required: true, message: '请填写沟通内容' }]"><a-textarea v-model="communicationForm.content" size="small" :auto-size="{ minRows: 3, maxRows: 6 }" placeholder="记录沟通内容" /></a-form-item></a-col>
                 </a-row>
               </a-form>
             </section>
@@ -863,14 +863,14 @@ const addExceptionRow = () => {
           <a-col :span="12"><a-form-item label="当前状态"><span class="s-pill" :data-s="form.statusPill">{{ form.orderStatusLabel }}</span></a-form-item></a-col>
           <a-col :span="12">
             <a-form-item field="targetStatus" label="目标状态" :rules="[{ required: true, message: '请选择目标状态' }]">
-              <a-select v-model="statusForm.targetStatus" allow-clear placeholder="请选择">
+              <a-select v-model="statusForm.targetStatus" size="small" allow-clear placeholder="请选择">
                 <a-option v-for="option in statusTransitionOptions" :key="option.value" :value="option.value">{{ option.label }}</a-option>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :span="24">
             <a-form-item field="reason" label="修改原因" :rules="[{ required: true, message: '请填写修改原因' }]">
-              <a-textarea v-model="statusForm.reason" :auto-size="{ minRows: 2, maxRows: 4 }" placeholder="请填写修改原因" />
+              <a-textarea v-model="statusForm.reason" size="small" :auto-size="{ minRows: 2, maxRows: 4 }" placeholder="请填写修改原因" />
             </a-form-item>
           </a-col>
           <a-col :span="12"><a-form-item hide-label><a-checkbox v-model="statusForm.notify">同步通知相关人员</a-checkbox></a-form-item></a-col>

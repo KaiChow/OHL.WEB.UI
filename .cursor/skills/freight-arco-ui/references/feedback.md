@@ -143,12 +143,12 @@ Rules:
 - `alert()` / `window.confirm()`
 - Empty table with no message (white void)
 - Generic `暂无数据` when filter is active — must distinguish no rows vs no match
-- Success without closing modal when user expects close — save success → close + message
+- Success behavior that contradicts the feature contract: close only when the contract completes the overlay job; otherwise keep the surface open and expose the updated result locally.
 
 ## Verification
 
 - [ ] Submit buttons use `:loading`
 - [ ] Tables use `:loading`
-- [ ] Empty uses `state-center` classes
+- [ ] Empty uses Arco Empty or a grep-proven/local state layout with object-specific recovery
 - [ ] Batch without selection → `Message.warning`
 - [ ] Danger → `Modal.confirm`
