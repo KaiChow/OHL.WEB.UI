@@ -229,9 +229,10 @@ for (const file of files.filter((file) => file.endsWith('.vue'))) {
         content: tag.replace(/\s+/g, ' ').slice(0, 120),
       });
     }
-    if (!/\b(?:width|:width)=["'][^"']*min\([^"']*100vw/.test(tag)) {
+    if (/\bplacement=["']top["']/.test(tag)
+      || !/\b(?:width|:width)=["'][^"']*min\([^"']*100vw/.test(tag)) {
       violations.push({
-        rule: '高级筛选 Drawer 必须由 width prop 直接声明带 viewport inset 的响应式 min(...)',
+        rule: '高级筛选 Drawer 必须从右侧打开，并由 width prop 直接声明带 viewport inset 的响应式 min(...)',
         file: relPath,
         line,
         content: tag.replace(/\s+/g, ' ').slice(0, 120),
@@ -458,13 +459,19 @@ const responsiveAdvancedColumnCount = [...shipmentWorkbenchPage.matchAll(/<a-col
   .map((match) => match[0])
   .filter((tag) => /:span="12"/.test(tag) && /:xs="24"/.test(tag) && /:sm="12"/.test(tag))
   .length;
+const controlledAdvancedDatePopupCount = [...shipmentWorkbenchPage.matchAll(/v-model:popup-visible="advancedDatePopupVisible\.[^"]+"/g)].length;
 if (visibleModelMismatch.length
   || advancedModelMismatch.length
   || !shipmentWorkbenchPage.includes('Object.assign(advancedQuery, cloneQuery(query))')
   || !shipmentWorkbenchPage.includes('@cancel="cancelAdvancedFilters"')
+  || !shipmentWorkbenchPage.includes(':esc-to-close="false"')
+  || !shipmentWorkbenchPage.includes('closeAdvancedDatePopups')
+  || !shipmentWorkbenchPage.includes('handleAdvancedPopupEscape')
+  || controlledAdvancedDatePopupCount !== 3
+  || !shipmentWorkbenchPage.includes('advancedPreviewCount')
   || responsiveAdvancedColumnCount !== declaredAdvancedQueryFields.length) {
   violations.push({
-    rule: 'S3 高级筛选必须使用独立草稿模型、完整响应式列契约；取消/关闭不修改已应用查询',
+    rule: 'S3 高级筛选必须使用独立草稿模型、右侧两列响应式契约与同源结果预览；取消/关闭不修改已应用查询',
     file: 'src/views/shipment/orderWorkbench/index.vue',
     line: 1,
     content: `visible-model=${visibleModelMismatch.join(',') || 'ok'}, advanced-model=${advancedModelMismatch.join(',') || 'ok'}, responsive-columns=${responsiveAdvancedColumnCount}`,

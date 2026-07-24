@@ -73,6 +73,7 @@ Boundary overrides:
 - `清空更多筛选` clears only advanced draft fields unless the label explicitly says `清空全部条件`.
 - `应用筛选` commits the draft, closes the drawer, resets pagination to page 1, and runs the query.
 - Closing with the drawer close affordance follows cancel semantics; do not partially apply hidden fields.
+- When the drawer contains portaled Select or Date popups, set Drawer `esc-to-close="false"`: Escape belongs to the active popup, while drawer close and cancel remain explicit. An orphan popup after the drawer closes is a release blocker.
 
 ## Advanced Filter Overlay Contract
 
@@ -89,6 +90,11 @@ Boundary overrides:
 - Use `a-form layout="vertical" size="small"` and Arco Grid.
 - D1 uses two columns at normal desktop width and one column when the actual drawer becomes too narrow for readable controls.
 - Group by user-recognizable concepts, not backend field order. A group needs at least two related fields unless a single high-cost field needs its own explanation or validation state.
+- A D1 drawer with nine or more advanced fields or three or more business concepts uses 2-4 named sections. Do not render it as one uninterrupted form wall.
+- For a mutually exclusive condition with no more than three choices including `全部` (for example yes/no/all), use an Arco button-style Radio Group and keep one value visibly selected. Use Select when option count, search, or label length makes direct choice impractical.
+- Each non-empty section shows its draft-condition count and `清空本组`; the command clears only that section and immediately updates the total draft count. Hide both when the section is empty.
+- When draft state differs from applied state, expose one quiet `待应用` indicator in the drawer title area. The page entry count continues to represent applied conditions only.
+- When the same local predicate or a real count endpoint can produce a preview without another invented API, show the matching-object count in the footer and update it with the draft. Do not fake a preview from static copy.
 - Section headings are quiet structural text. A colored rail, icon, card background, and shadow are not all required; use only the minimum hierarchy that makes scanning clear.
 - A final odd field stays aligned to the left grid track. Do not stretch it across two columns only to fill space.
 
@@ -203,11 +209,15 @@ Verify the selected scenario against real content at `1024x768`, `1366x768`, and
 
 - [ ] Query actions stay in a stable position when S2 expands or S3 opens/closes.
 - [ ] The advanced entry shows the number of applied hidden conditions.
+- [ ] A non-empty advanced group shows its local count; clearing that group preserves conditions in every other group.
+- [ ] Direct three-state conditions have a visible selected value in default, edited, and reopened states.
+- [ ] `待应用` appears only while draft and applied states differ, and disappears after cancel or successful apply.
 - [ ] Cancel/close does not mutate the applied list; apply resets pagination and queries once.
 - [ ] Drawer root, vertical scroll owner, and footer satisfy `scrollWidth === clientWidth`; grid gutters remain contained inside body padding.
 - [ ] Exactly one vertical form-content scroll owner exists.
 - [ ] Footer action rectangles remain inside the drawer rectangle with the required viewport inset.
 - [ ] Two-column controls remain readable; the grid becomes one column when the drawer is genuinely narrow.
+- [ ] A live match count, when implemented, equals the result set produced by applying the same draft.
 - [ ] The first table header and first data row remain visible within the workbench budget when the query surface is closed.
 - [ ] Long labels, empty values, validation errors, loading, no permission, and request failure are exercised.
 
@@ -219,6 +229,8 @@ Verify the selected scenario against real content at `1024x768`, `1366x768`, and
 - A footer child whose `width: 100%` plus padding increases intrinsic width.
 - Three or four default-visible query rows used to avoid choosing S2/S3.
 - A flat ungrouped drawer for dozens of unrelated conditions.
+- A D1 advanced drawer that meets the grouping threshold but still looks like one uninterrupted default form.
+- Yes/no/all conditions hidden in Select without an option-count, search, or label-length reason.
 - `50+` conditions in one drawer or in a page wall above the table.
 - Exclusive group tabs that prevent users from combining conditions across concepts.
 - A fake saved-scheme button backed only by temporary component state.
