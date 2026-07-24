@@ -48,6 +48,7 @@ export function validateFreightUiSkill() {
     [references.get('existing-project-modernization.md') || '', '## Rendered Layout Gate', 'existing-project-modernization.md: missing rendered layout authority'],
     [references.get('feature-delivery-contract.md') || '', '## Smallest Complete Contract', 'feature-delivery-contract.md: missing smallest complete contract'],
     [references.get('page-spec-contract.md') || '', 'It is not a design essay', 'page-spec-contract.md: missing decision-record boundary'],
+    [references.get('visual-system.md') || '', '## Design Sense Gate', 'visual-system.md: missing design-sense gate'],
     [references.get('product-grade-evaluation.md') || '', '## Six Blocking Gates', 'product-grade-evaluation.md: missing commercial release gates'],
     [references.get('product-grade-evaluation.md') || '', '200% zoom', 'product-grade-evaluation.md: missing accessible rendered gate'],
     [references.get('component-size.md') || '', '24×24px minimum target', 'component-size.md: missing row-action target authority'],

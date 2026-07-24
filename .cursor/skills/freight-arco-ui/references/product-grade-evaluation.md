@@ -1,8 +1,8 @@
 # Commercial Product Release Gate
 
-Use for financing, sales, customer, leader, or investor demos and requests such as `高级感`, `质感`, `产品化`, or `像能卖的软件`.
+Use for financing, sales, customer, leader, or investor demos and requests such as `高级感`, `质感`, `设计感`, `产品化`, or `像能卖的软件`.
 
-This is pass/fail only. Do not average visual strengths against broken behavior, missing states, or unverified routes.
+`设计感` is defined by the Design Sense Gate in `visual-system.md`. This file remains the commercial pass/fail release gate; visual hierarchy failures route to that Design Sense Gate and the affected surface authority.
 
 ## Six Blocking Gates
 

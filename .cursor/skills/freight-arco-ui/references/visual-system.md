@@ -350,6 +350,27 @@ Risk labels:
 - If a page feels "plain", first improve hierarchy and business grouping, then adjust token-based color accents.
 - If a page feels "too gray", first check active navigation, the current scope's primary action, selected rows, key links, and status pills. Do not add decorative top borders, gray fills, or colored workflow buttons.
 
+## Design Sense Gate (`设计感`)
+
+`设计感` means readable hierarchy and interaction rhythm under Brand-Neutral Premium Dense. It is not decoration, illustration, gradient marketing chrome, multi-layer shadow, or a second palette.
+
+A surface passes Design Sense only when all of the following are true on the real route:
+
+1. **Ownership is visible** — command, workflow, data, and overlays do not share equal border weight or equal visual loudness.
+2. **Grouping rhythm** — related fields read as sections through spacing, quiet hairlines, and F3 titles before the first control; consecutive sections do not fuse into one uninterrupted form wall.
+3. **One focus per scope** — one primary action owns the scope; secondary actions stay quieter and do not compete.
+4. **Location is obvious** — when anchors, tabs, or segments exist, the current location is marked without shifting text start lines or overpowering content.
+5. **Freight density preserved** — compact controls and short paths remain; consumer SaaS padding or oversized chrome must not fake premium.
+6. **Color stays semantic** — GI primary marks interaction/selection; semantic colors mark state/risk; neutrals carry structure.
+
+Fail Design Sense when any of these appear:
+
+- equal-weight zones, field walls, or nested cards used only to look structured;
+- decorative color, shadow, radius, icon rows, or rails compensating for weak grouping;
+- "looks modern" while daily locate/narrow/apply work becomes longer.
+
+Advanced-filter grouping rhythm is owned by `filter-layout.md`. Commercial release still requires every applicable gate in `product-grade-evaluation.md`.
+
 ## Hard Bans
 
 - No standalone hex colors in new UI CSS.

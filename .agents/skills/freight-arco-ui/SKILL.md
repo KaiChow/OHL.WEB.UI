@@ -27,7 +27,7 @@ Use the smallest path that covers the task:
 4. New menu or uncertain archetype: use `references/domain-routing.md`, then select one primary authority: `list-page.md`, `detail-form.md`, `full-page-form.md`, `master-data.md`, or `dashboard.md`.
 5. Click, request, permission, mutation, or state transition: read `references/feature-delivery-contract.md` plus only the affected surface authority.
 6. Screenshot, Figma, or prototype: complete `references/prototype-to-ui-contract.md` before steps 2-5.
-7. Financing, sales, demo, productization, `高级感`, or `质感`: apply `references/product-grade-evaluation.md` as a blocking release gate.
+7. Financing, sales, demo, productization, `高级感`, `质感`, or `设计感`: read `references/visual-system.md` Design Sense Gate; for commercial release claims also apply `references/product-grade-evaluation.md` as a blocking gate.
 8. Read helpers such as `filter-layout.md`, `table.md`, `actions.md`, `feedback.md`, `icons.md`, `typography.md`, and `overlay-dimensions.md` only when that surface is present.
 
 If business object, user job, legal action, API behavior, or permission source cannot be proven from the repository or user input, do not invent it. Preserve the boundary visibly and report the missing contract.

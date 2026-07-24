@@ -96,6 +96,9 @@ Boundary overrides:
 - When draft state differs from applied state, expose one quiet `待应用` indicator in the drawer title area. The page entry count continues to represent applied conditions only.
 - When the same local predicate or a real count endpoint can produce a preview without another invented API, show the matching-object count in the footer and update it with the draft. Do not fake a preview from static copy.
 - Section headings are quiet structural text. A colored rail, icon, card background, and shadow are not all required; use only the minimum hierarchy that makes scanning clear.
+- Consecutive advanced sections must keep a grouping rhythm: at least `16px` separation plus one quiet hairline, with the F3 section title at least `8px` above the first control. Title text alone is not enough when many Investigate fields are present.
+- High density means packed fields using `--dense-gap-field-row`, `--dense-gap-field-col`, and `--dense-gap-label`. Do not create empty-looking forms with oversized vertical padding, sticky chrome bands, or consumer SaaS air gaps; grouping rhythm is not decorative whitespace.
+- A D2 anchor rail uses a quieter fill than the editor and a stable active marker (`fill` plus an inset indicator). The active state must not shift the text start line.
 - A final odd field stays aligned to the left grid track. Do not stretch it across two columns only to fill space.
 
 ### Scroll Ownership
@@ -243,3 +246,4 @@ Verify the selected scenario against real content at `1024x768`, `1366x768`, and
 - Query and footer action hierarchy: `actions.md`
 - First-viewport budget: `existing-project-modernization.md`
 - Loading, failure, empty, and permission feedback: `feedback.md`
+- Design sense and hierarchy: `visual-system.md`
