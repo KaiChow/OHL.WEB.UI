@@ -2,19 +2,19 @@
 
 ## Detail Drawer Structure
 
-Use `class="detail-drawer"` and `:footer="false"` for complex drawers.
+Use Arco Drawer as the interaction owner. Keep its native header/body/footer when they fit; use a footer slot only when the object workflow needs persistent actions. A page-local class may identify layout ownership but is not a shared skin or hidden width API.
 
 Drawer width tiers (D3 standard / D4 complex / fullscreen): **`overlay-dimensions.md`**.
 
-| Detail type | Class | Width |
-|-------------|-------|-------|
-| Read-only, few sections | `detail-drawer detail-drawer--standard` | `min(var(--dense-drawer-w-standard), calc(100vw - var(--dense-drawer-viewport-pad)))` via `width` prop |
-| Multi-tab, mini tables, footer workflow | `detail-drawer` | `min(var(--dense-drawer-w-complex-max), calc(100vw - var(--dense-drawer-viewport-pad)))` via `width` prop |
-| Object console fullscreen | `detail-drawer detail-drawer--fullscreen` | explicit `100vw` mode via `width` prop |
+| Detail type | Width owner |
+|-------------|-------------|
+| Read-only, few sections | D3 responsive expression on Drawer `width` prop |
+| Multi-tab, mini tables, footer workflow | D4 responsive expression on Drawer `width` prop |
+| Object console fullscreen | Explicit fullscreen product mode; do not simulate it with CSS |
 
-The Drawer `width` prop is authoritative. Classes select documented shared detail structure only; they do not replace the prop with hidden `!important` width rules.
+The Drawer `width` prop is authoritative. CSS classes must not replace it with hidden width rules.
 
-Recommended complex detail order:
+Complex detail ownership order (names are semantic roles, not required class APIs):
 
 1. `dds-head`: status, primary number/name, company/context, view tools.
 2. `dds-hero`: object-specific core facts.
@@ -53,7 +53,7 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 - `dds-head` fills object-level slots: `key_state`, `primary_identity`, `business_context`, `owner`, and `view_tools`. The primary identity uses the project primary text role; context and owner use readable business-value roles, not helper/disabled color.
 - `dds-hero` fills 3-6 `key_facts` owned by the object. A key fact is any value users need before choosing the next operation, such as lane, schedule, counterparty, amount, risk, stock, location, or due date depending on object type.
 - The lead fact is selected from the object's user job. Example: shipment/order users often scan by lane first, while reconciliation users may scan by counterparty + amount, and warehouse users may scan by location + stock state.
-- Lead facts gain emphasis through grouping, left accent, primary-tint surface, 600 weight, and placement. Do not make the whole header blue, do not add decorative gradients, and do not increase random font sizes.
+- Lead facts gain emphasis through grouping, order, and 600 weight. Primary tint is reserved for an interactive/current state, not a passive fact background.
 - `color-text-4` is forbidden for `primary_identity`, `business_context`, `owner`, or any `key_fact` used to decide the next operation.
 - Long business values must remain readable with ellipsis plus `title`/tooltip. Do not weaken them to gray text to hide overflow.
 
@@ -71,10 +71,10 @@ Required modes:
 
 Rules:
 
-- Annotate the root work area with a stable role such as `data-detail-workspace="shipment-order"`; keep an explicit reactive edit state such as `isDetailEditing`.
+- Annotate the root work area with a stable business-object role such as `data-detail-workspace="<business-object>"`; keep an explicit reactive edit state such as `isDetailEditing`.
 - The overview tab must provide a compact execution-focus block before passive field groups. It owns one current decision, its blocking context, owner/deadline, and links to the owning risk/file/fee surface.
 - The default overview must render business values as read-only fields/text. Rendering the full overview as visible inputs before the user selects Edit is forbidden.
-- Display sections use Arco `a-descriptions class="detail-display"` before custom read-grid markup. Editable controls replace the same business fields only inside the explicit edit session.
+- Display sections use Arco `a-descriptions` before custom read-grid markup. A local semantic class may own spacing only; editable controls replace the same business fields inside the explicit edit session.
 - Entering edit mode preserves the same section order and field ownership; controls replace values without moving the user to an unrelated page.
 - Save success returns to display mode and refreshes only the object surfaces named by the feature contract. Save failure keeps editing mode and user input.
 - Cancel/discard restores the last saved snapshot and returns to display mode. Route leave during an edit session requires an unsaved-change confirmation.
@@ -92,27 +92,22 @@ Forbidden fallbacks:
 
 ## Detail Sections
 
-- Use `detail-section`.
-- Header left: section title + optional aggregate stats chips (`detail-data-stats`). Wrap title and stats in a shared `flex:1` container so they stay left-aligned together against the right-side actions.
-- Header right: actions only (`detail-section__actions`). Maximum one `outline` button per module head; consolidate multiple add actions into one `outline` dropdown.
-- Do **not** put stats in a separate row between the section head and the table — this creates two equal-weight rows with no hierarchy. Use `detail-data-stats__item` chips inline in the head instead.
-- Do **not** combine `.detail-module-summary` (card) with `.detail-module-summary--inline` (embedded row) — they conflict. Use only the variant class without the base card class.
-- Do **not** use `--stat--qty / --stat--weight / --stat--volume` color modifiers together on the same stats bar — multiple accent colors (blue+orange+green) violate PESDP single-anchor rule. Keep all stat values `color-text-1`.
+- Use unframed semantic `<section>` blocks inside one owning Arco surface; do not create a card for each field group.
+- Header left owns section title plus optional aggregate facts; header right owns actions. Use Arco Space/Flex/Grid first.
+- Maximum one direct module add action; consolidate additional low-frequency actions into a dropdown.
+- Do not put aggregate facts in a second full row between the section head and its data. Keep them inline or move them to the owning data surface.
+- Aggregate facts use one text hierarchy, not per-metric accent colors.
 - Do not nest cards inside cards.
 - Section order should follow the user's operation order, not the order copied from another module.
 - Do not place a full-width KPI/report bar directly under the hero in complex operational drawers. Quantities, amounts, progress, and validation totals belong in the owning module summary. The top area should stay focused on `primary_identity`, `key_state`, `business_context`, `owner`, and the object's `key_facts`.
-- `detail-section` is a primary operational surface. It uses white/near-white body, blue-tinted border, restrained shadow, `--dense-surface-head` header, and a small title marker. It must not look like a flat gray row stack.
-- Module body backgrounds should stay white or blue-white. Gray fill is only for disabled/empty/secondary states, not normal editable form areas.
+- Normal sections inherit the owning Arco surface. Do not add blue-tinted borders, section shadows, colored title rails, or a second card skin.
+- Neutral fill is reserved for disabled, empty, selected, or secondary states, not normal editable form areas.
 
-### Left Anchor Hierarchy
+### Hierarchy Without Decorative Rails
 
-Detail pages may use primary-color anchors, but only as a controlled hierarchy. Too many left-side markers make the page look broken.
-
-- Top-level module: `detail-section__title::before` is the only default section anchor. Do not add a full-height `detail-section::before` rail on every section.
-- Internal concept: `form-subgroup__title::before` or legacy `form-subgroup-label::before` uses a small dot. Do not use another left border for subgroup labels.
-- Repeated child item: child-head rail appears only for expanded/current child items. Collapsed child rows must not show a permanent primary rail.
-- Module summary: `detail-module-summary--inline::before` is allowed only for repeated data summaries. It must not replace the section title anchor.
-- In one vertical column, anchors must step down by strength: section short bar > summary rail > child current rail > subgroup dot. Do not stack full-height rail + title bar + dot at the same left edge.
+- Use section order, whitespace, a quiet divider, and title weight for normal hierarchy.
+- Use a primary accent only for current/selected/interactive state, never on every section.
+- Nested groups must be visually weaker than the owning section and must not introduce another card, shadow, or permanent rail.
 
 ### Process-Bearing Operational Detail Drawers
 
@@ -229,7 +224,7 @@ Rules:
 - `form-subgroup` is used only inside a `detail-section__body` form when the section has 2+ distinct business concepts such as `路线 / 船期`.
 - `form-subgroup__title` is a scan title. Keep it short (2–6 Chinese characters or equivalent i18n copy). Do not add descriptions under it unless the business meaning would be unclear.
 - Each `form-subgroup` contains exactly one `form-subgroup__head` followed by one `detail-form-grid`.
-- Do not use repeated blue left rails for subgroups. The parent `detail-section__title` owns the vertical primary anchor; subgroups use a small dot + subtle divider to avoid visual noise.
+- Do not use repeated colored rails, dots, or decorative markers for subgroups. Use heading, spacing, alignment, and a divider only when it clarifies grouping.
 - Do not add a subgroup for every field — only when there are 2+ distinct business concepts in one section.
 - Never create a new `detail-section` for a subgroup that has fewer than 3 fields.
 - `form-subgroup-label` is legacy-compatible only. New detail forms should use `form-subgroup`; do not generate consecutive bare subgroup labels in one section.
@@ -389,7 +384,7 @@ Anti-patterns:
 
 Use structured option groups for service items, attribute types, object flags, and similar multi-select business markers.
 
-- Use `.svc-tags` and `.svc-tag` for compact checkbox chips.
+- Use Arco `a-checkbox-group` with `a-space` or `a-row`/`a-col`; do not invent tag-like checkbox controls.
 - Service items and object attributes are user selection actions, not status badges.
 - Do not render checkbox chips with native `<button>` elements. Use Arco checkbox or a custom element with `role="checkbox"`, `aria-checked`, and keyboard support.
 - Each option must show checkbox affordance: empty square when unselected, checked square when selected.
@@ -496,9 +491,9 @@ Rules:
 - The user must be able to tell whether an action affects the whole module, one child, or one row without reading surrounding text.
 - Child body should use lightweight internal panes when it contains both core fields and child-owned lines. Example: `收发货方` pane + `品名明细` pane.
 - Child metrics should appear as compact data chips in the child head, not as weak gray text detached from the child identity.
-- Use a subtle left accent or sequence marker for expanded child items so users can follow nested ownership while scrolling.
+- Expanded child items must remain identifiable while scrolling through a visible selected/expanded state, sequence, or sticky identity; do not add a decorative accent when structure already makes ownership clear.
 - The parent summary, child identity band, pane header, and line table header must each have a distinct role. If they all look like plain white rows, the module fails PESDP even when spacing is compact.
-- Use Arco primary token accents sparingly for nested ownership: summary left anchor, expanded child rail, pane title marker, or mini table header. Do not use custom colors or decorative gradients.
+- Use Arco primary only for real current, selected, expanded, focused, or interactive state. Nested ownership is expressed first through structure, labels, sequence, and alignment; do not decorate every level with primary color.
 - Child line data with editable rows should use the shared VXE mini table pattern, not a one-off native table, so hover, empty, fixed action, and row height stay consistent.
 - A child line empty state must explain what is missing and where the user acts, such as `暂无品名明细，点击添加品名录入该发货人名下货物`.
 - Long international party names must remain readable through truncation plus tooltip/title; do not weaken customer/shipper/consignee names to helper color.
@@ -609,4 +604,13 @@ Rules:
 - Save draft is default/outline.
 - Abandon/delete is danger and confirmed.
 - Footer is sticky and always visible.
-- Use `detail-drawer-footer__start` / `__end` for danger-left + actions-right hierarchy (see `actions.md`).
+- Use the Drawer footer slot with an Arco Space/Flex layout: optional danger action on the left, cancel and one primary action on the right (see `actions.md`).
+
+## Release Gate
+
+- [ ] Display mode is the default for object detail; identity, key state, blocking risk, next action, owner, and current workflow position are coherent.
+- [ ] Edit mode replaces the same owned fields without reordering sections; cancel restores the saved snapshot and failure preserves input.
+- [ ] Each count, summary, error, and action has one owner; no nested cards, duplicate KPI strips, or repeated header/footer actions.
+- [ ] The active pane/Drawer body has one vertical scroll owner; embedded VXE tables do not create height feedback or clipped controls.
+- [ ] Row editing remains local with save/cancel/error state; object-level save never silently commits an active row edit.
+- [ ] At 1366x768 and 1024x768, long values remain readable, actions stay reachable, and keyboard/focus order preserves the workflow.

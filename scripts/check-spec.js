@@ -894,7 +894,7 @@ for (const file of files) {
   });
 }
 
-// 详情小模块禁止使用连续裸 label 形成左侧蓝竖线噪声；新代码应使用 form-subgroup block。
+// 详情小模块禁止使用已废弃的裸 label；新代码应使用一个有明确归属的字段分组。
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
@@ -928,7 +928,7 @@ for (const file of files) {
   }
 }
 
-// 复杂下单详情禁止大蓝箭头步骤和顶层 KPI 报表条，避免详情页退化成流程/KPI 看板。
+// 对象详情禁止装饰性箭头步骤和顶层 KPI 报表条，避免详情页退化成流程/KPI 看板。
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
@@ -937,7 +937,7 @@ for (const file of files) {
   const arrowStepIndex = content.search(/<a-steps\b[^>]*\btype=(["'])arrow\1/);
   if (arrowStepIndex >= 0) {
     violations.push({
-      rule: '复杂订单详情禁止 a-steps type="arrow"，应使用轻量 dds-milestone-bar',
+      rule: '对象详情禁止装饰性 a-steps type="arrow"；进度应采用与真实阶段契约匹配的轻量状态节点或时间线',
       file: relPath,
       line: getLineNumber(content, arrowStepIndex),
       content: content.slice(arrowStepIndex, content.indexOf('\n', arrowStepIndex)).trim().slice(0, 140),
@@ -945,7 +945,7 @@ for (const file of files) {
   }
   if (content.includes('detail-overview-kpi')) {
     violations.push({
-      rule: '复杂订单详情禁止顶层 detail-overview-kpi 报表条，货量/费用统计应进入所属模块 summary',
+      rule: '对象详情禁止顶层 detail-overview-kpi 报表条；统计必须进入其业务归属模块',
       file: relPath,
       line: getLineNumber(content, content.indexOf('detail-overview-kpi')),
       content: 'detail-overview-kpi',
@@ -953,51 +953,7 @@ for (const file of files) {
   }
 }
 
-// 父子嵌套 repeated module 不能只画大白框：必须具备 summary、child identity、child metrics、child body、child-owned table。
-// 这类结构是视觉质量门槛，仅查结构槽位，不绑定具体字段名。
-for (const file of files) {
-  if (!file.endsWith('.vue')) continue;
-  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
-  const content = readFileSync(file, 'utf8');
-  if (!content.includes('detail-module__subitem')) continue;
-  const repeatedModuleRules = [
-    {
-      className: 'detail-module-summary--inline',
-      rule: '父子嵌套 repeated module 必须有模块 summary 行，统计不能散落成宽屏报表空白',
-    },
-    {
-      className: 'detail-cargo-block__meta',
-      rule: '父子嵌套 repeated module 的 child head 必须有 identity/meta 槽位，不能只有孤立标题',
-    },
-    {
-      className: 'detail-data-stats',
-      rule: '父子嵌套 repeated module 的 child head 必须有紧凑 metrics chips，不能把子项统计铺成松散大栏',
-    },
-    {
-      className: 'detail-cargo-block__body',
-      rule: '父子嵌套 repeated module 必须有 child body 承载子项字段和明细，不能把内层卡片直接堆在父模块下',
-    },
-    {
-      className: 'detail-child-pane--compact',
-      rule: '父子嵌套 repeated module 的内部 pane 必须使用紧凑 pane，避免卡片套卡片套表格',
-    },
-    {
-      className: 'detail-child-pane__table',
-      rule: '父子嵌套 repeated module 的 line table 必须归属到 child-owned table 容器',
-    },
-  ];
-  for (const item of repeatedModuleRules) {
-    if (content.includes(item.className)) continue;
-    violations.push({
-      rule: item.rule,
-      file: relPath,
-      line: getLineNumber(content, content.indexOf('detail-module__subitem')),
-      content: `missing ${item.className}`,
-    });
-  }
-}
-
-// VXE 行高：主列表 compact=36（可提供 44 舒适档）；详情由 density modifier + CSS token 控制，避免 VXE 4.5 row-config.height 警告。
+// VXE 行高：主列表 compact=36（可提供 44 舒适档）；详情默认使用 VXE native small density。
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
@@ -1041,20 +997,9 @@ for (const file of files) {
         content: firstLine.trim().slice(0, 140),
       });
     }
-    if (/\bdetail-mini-vxe--editable\b/.test(firstLine)) {
-      for (const control of block.matchAll(/<a-(?:input|input-number|select|date-picker)\b([^>]*)>/g)) {
-        if (/\bv-if=(['"])isEditingRow\(/.test(control[1])) continue;
-        violations.push({
-          rule: '详情可编辑子表默认必须是展示态；输入控件只允许在 isEditingRow 当前行出现',
-          file: relPath,
-          line: getLineNumber(content, blockIndex + control.index),
-          content: control[0].trim().slice(0, 140),
-        });
-      }
-    }
     if (/\bdetail-mini-vxe\b/.test(firstLine) && /:row-config=(["'])[\s\S]*?height\s*:/.test(firstLine)) {
       violations.push({
-        rule: 'detail-mini-vxe 行高由 density modifier + global.css token 控制，禁止 row-config.height（VXE 4.5 会要求 show-overflow 并产生运行警告）',
+        rule: 'detail-mini-vxe 默认使用 VXE native small density；禁止页面用 row-config.height 建立第二套详情表密度',
         file: relPath,
         line: getLineNumber(content, blockIndex),
         content: firstLine.trim().slice(0, 140),

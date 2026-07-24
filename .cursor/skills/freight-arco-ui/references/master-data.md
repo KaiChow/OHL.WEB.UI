@@ -54,7 +54,7 @@ Category/tree on the left; list or form on the right. Implement `md-layout` as p
 Use when each tree node maps to **one config record** (system parameter group, integration profile).
 
 - Right side: `detail-section` + `a-form class="detail-form"` — not a second tree.
-- Sticky save: `detail-drawer-footer` at bottom of `md-layout__main` or page `xf-footer`.
+- Sticky save uses a page-local footer with default Cancel and one primary Save; it must not depend on a drawer-footer skin.
 
 ### Pattern MD-3: Flat list only
 

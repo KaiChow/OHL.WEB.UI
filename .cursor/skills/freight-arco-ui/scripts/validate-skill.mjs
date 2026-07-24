@@ -52,6 +52,13 @@ export function validateFreightUiSkill() {
     [references.get('product-grade-evaluation.md') || '', '200% zoom', 'product-grade-evaluation.md: missing accessible rendered gate'],
     [references.get('component-size.md') || '', '24×24px minimum target', 'component-size.md: missing row-action target authority'],
     [references.get('typography.md') || '', '| | Status pill | F5 Aux | 11px', 'typography.md: missing readable status-pill authority'],
+    [skill, 'Global CSS must not target `.arco-*`, `.vxe-*`, framework data attributes, or declare `--vxe-*` variables.', 'SKILL.md: missing framework-style ownership boundary'],
+    [references.get('theme-contract.md') || '', 'Global `.arco-*` and `.vxe-*` rules are forbidden.', 'theme-contract.md: missing global framework-selector ban'],
+    [references.get('actions.md') || '', 'Undo 只在后端存在可恢复时窗和真实恢复接口时提供', 'actions.md: missing truthful Undo boundary'],
+    [references.get('actions.md') || '', 'Tooltip + 业务化 aria-label', 'actions.md: missing icon-only accessibility contract'],
+    [references.get('responsive.md') || '', 'Collapse order is fixed:', 'responsive.md: missing deterministic compact-layout order'],
+    [references.get('feedback.md') || '', 'Message/Notification is never the sole owner', 'feedback.md: missing owner-local persistent failure gate'],
+    [references.get('permissions.md') || '', 'Loading, no-role-selected, no-access, read-only, editable, save-pending, save-failure, and dirty-leave states', 'permissions.md: missing complete permission-state gate'],
   ];
   for (const [source, fragment, message] of requiredFragments) {
     if (!source.includes(fragment)) errors.push(message);
@@ -107,6 +114,9 @@ export function validateFreightUiSkill() {
     [/Table row icon[^\n]*22×22px/, 'obsolete 22px row-action target'],
     [/Status pill[^\n]*F6 Micro[^\n]*10px/, 'obsolete 10px status-pill typography'],
     [/must set `outline: none`/, 'unsafe focus removal restored'],
+    [/global CSS bridge|workbench-table bridge|Normalize in `global\.css`|`global\.css` overrides/, 'global framework-skin authority restored'],
+    [/subtle (?:top\/inset|left\/inset) primary anchor|uses a primary rail/, 'decorative primary rail restored'],
+    [/--dense-table-(?:header|col|row)|--dense-workbench-hover-bg|--dense-vxe-surface/, 'global VXE skin token restored'],
   ];
   for (const [pattern, message] of conflicts) {
     if (pattern.test(allReferences)) errors.push(`references/: ${message}`);

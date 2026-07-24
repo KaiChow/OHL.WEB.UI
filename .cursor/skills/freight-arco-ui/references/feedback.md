@@ -22,10 +22,10 @@ Rules:
 
 | Scenario | Component | Copy |
 |----------|-----------|------|
-| API/network | `Message.error` | `保存失败，请稍后重试` |
+| API/network | Owning surface error + optional `Message.error` summary | `业务单保存失败，请重试` |
 | Validation | Arco `a-form-item` inline | Field rule `message` |
-| Permission | `Message.error` or inline `state-center` | `无权限执行此操作` |
-| Upload | `Message.error` | `文件超过 20MB 限制` / `仅支持 PDF、Excel…` |
+| Permission | Hidden/disabled action or local no-permission state from contract | `无权限执行此操作` |
+| Upload | Upload item/field error + optional Message summary | `文件超过 20MB 限制` / `仅支持 PDF、Excel…` |
 
 Keep modal/drawer **open** after save failure.
 
@@ -103,40 +103,13 @@ Toolbar shows `bulk-hint` — `已选 N 条` when `selectedCount > 0`.
 
 ## Workbench Inline Notices（工具栏常驻提示）
 
-List/workbench 内数据异常、操作说明等**常驻**提示使用 Arco `a-alert`，放在拥有该反馈的数据 surface 内；禁止裸 `span` + 行内样式。
+List/workbench 内数据异常或持续操作说明使用 compact Arco `a-alert`，放在拥有该问题的数据 surface 内。
 
-| 语义 | Class | 用途 |
-|------|-------|------|
-| 警告 / 数据异常 | `workbench-notice workbench-notice--warn` | 缺 ATD、金额无法折算、权限受限等 |
-| 操作说明 / 轻提示 | `workbench-notice workbench-notice--info` | 双击置顶、列操作说明等 |
-
-结构（图标 + 文案，`title` 放完整句）：
-
-```vue
-<div class="merged-bar">
-  <div class="toolbar-group">…业务按钮…</div>
-  <div v-if="showWarn" class="bar-sep" />
-  <div v-if="showWarn" class="workbench-notice-group">
-    <div class="workbench-notice workbench-notice--warn" title="完整说明">
-      <icon-exclamation-circle-fill class="workbench-notice__icon" />
-      <span class="workbench-notice__text">存在订单无 ATD 时间，无法计算折合金额，请先维护数据</span>
-    </div>
-  </div>
-  <div class="toolbar-aside">
-    <div class="workbench-notice workbench-notice--info" title="双击 ★ 可置顶">
-      <icon-info-circle class="workbench-notice__icon" />
-      <span class="workbench-notice__text">双击 ★ 可置顶</span>
-    </div>
-  </div>
-</div>
-```
-
-Rules:
-
-- 警告放 `workbench-notice-group`（`bar-sep` 后与按钮区分）；说明类放 `toolbar-aside` 右对齐。
-- 文案 F5 `var(--dense-font-aux)`；过长 `ellipsis`，完整句放 `title`。
-- 瞬时操作结果仍用 `Message` / `Notification`，不用 `workbench-notice`。
-- 禁止 `a-alert banner` 占满工具栏行高；禁止 `status="warning"` 按钮代替提示。
+- Alert 文案说明业务对象、原因和恢复动作；不要只写“数据异常”。
+- Alert 不与按钮混在同一个 baseline，也不伪装成 `warning` 按钮。
+- 表格级 Alert 放在 table cap 与数据体之间；模块级 Alert 留在模块内。
+- 多条可操作问题使用一条摘要加“查看明细”，不要堆叠整屏 Alert。
+- 瞬时操作结果仍用 Message/Notification；持续问题不得只用瞬时 Message。
 
 ## Forbidden
 
@@ -152,3 +125,7 @@ Rules:
 - [ ] Empty uses Arco Empty or a grep-proven/local state layout with object-specific recovery
 - [ ] Batch without selection → `Message.warning`
 - [ ] Danger → `Modal.confirm`
+- [ ] Validation, business rejection, network failure, timeout, permission loss, and partial batch failure each have an owner-local state and recovery action
+- [ ] Failed submit preserves entered values, selection, scroll context, and the open modal/drawer when the job is incomplete
+- [ ] Retry affects only the owning field, row, section, or request; unrelated work remains usable
+- [ ] Message/Notification is never the sole owner of a persistent or actionable failure

@@ -95,15 +95,15 @@ Rules:
 
 Freight workbench tables are **scan surfaces**, not Excel grids. The project default is:
 
-| Line type | Show? | Token | Why |
-|-----------|-------|-------|-----|
-| **Vertical column borders** | **No** | `--dense-table-col-border: transparent` | Multi-column horizontal scan; vertical lines create spreadsheet noise and steal density |
-| **Horizontal row borders** | **Yes (weak)** | `--dense-table-row-border` | Helps the eye track a row across 10–20 columns without boxing every cell |
-| **Header / body separation** | **Yes (subtle)** | `--dense-table-header-bg` + `--dense-table-header-border` on header cells | Structure comes from header contrast, not a heavy blue/primary line |
-| **Outer table frame** | **No** | `border="none"` on `<vxe-table>` | Card / `table-wrap` already defines the module boundary |
-| **Zebra stripe** | **Off by default** | `--dense-row-stripe` ≈ white | Row separators + hover are enough; zebra + borders = muddy |
+| Line type | Default | Public control | Why |
+|-----------|---------|----------------|-----|
+| **Vertical column borders** | Off | VXE `border` prop | Multi-column horizontal scan; vertical lines create spreadsheet noise and steal density |
+| **Horizontal row borders** | Native/default | VXE `border` prop | Do not synthesize separators through internal cell selectors |
+| **Header / body separation** | Native | VXE header configuration | Structure comes from column labels and native contrast, not a custom header skin |
+| **Outer table frame** | Off | `border="none"` on `<vxe-table>` | The owning work surface already defines containment |
+| **Zebra stripe** | Off | VXE stripe prop | Hover and selection are usually enough; stripe plus borders becomes muddy |
 
-**Do not** switch to full grid (`border="full"` / visible column lines) on operational list or detail mini tables. Full grids are allowed only for rare finance side-by-side comparison modules — document the exception in the module spec.
+**Do not** switch to a full grid on operational list or detail mini tables. `inner`/`full` borders are allowed only for a finance or comparison matrix where column tracking materially improves; record the reason in `pageSpec`.
 
 ### Implementation (mandatory)
 
@@ -112,28 +112,27 @@ Freight workbench tables are **scan surfaces**, not Excel grids. The project def
 <vxe-table border="none" class="detail-mini-vxe detail-mini-vxe--editable" ... />
 ```
 
-| Surface | `border` attr | Vertical lines | Horizontal lines |
-|---------|---------------|----------------|------------------|
-| List `workbench-table` | `none` | off | weak row separator on body cells |
-| Detail `detail-mini-vxe` | `none` | off | same weak row separator |
-| Summary `detail-mini-vxe--summary` | `none` | off | same or lighter |
+| Surface | `border` attr | Stripe | Notes |
+|---------|---------------|--------|-------|
+| List `workbench-table` | `none` | off | native header, hover, and selection behavior |
+| Detail `detail-mini-vxe` | `none` | off | native small-density behavior |
+| Finance comparison exception | `inner` or `full` | normally off | only with a recorded comparison need |
 
 Rules:
 
 - Never use VXE default bordered skin on production pages.
 - Never add page-scoped `border-right` / `border-bottom` on `.vxe-body--column`.
-- Hover/selection tint replaces strong borders for row state — primary row background, not black outlines.
-- `detail-mini-vxe` header wrapper: `border-bottom: none`; header/body split uses header background only.
+- Hover/selection uses VXE's public state configuration; do not repaint fixed and scrollable cells through internal selectors.
 - Editable cell validation may use Arco field border; that is control chrome, not table grid lines.
 
 ### Visual hierarchy (what users should see)
 
 ```
 ┌─ table card ─────────────────────────────────────┐
-│  HEADER ROW  (near-white bg, no vertical lines) │
-│  data row    ─────────────────── weak 1px line   │
-│  data row    ─────────────────── weak 1px line   │
-│  hover row   ███ primary tint, no extra border │
+│  HEADER ROW  (native, calm, readable)           │
+│  data row    primary identifier + key facts     │
+│  data row    aligned numeric/date values        │
+│  hover row   native hover state                 │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -300,21 +299,20 @@ The examples above describe classes of independent dimensions, not mandatory fie
 ## Row Interaction
 
 - Hover and selected states must cover fixed columns consistently.
-- Hover uses primary tint, not gray.
-- Selection uses a stronger primary tint.
+- Hover and selection must remain visibly different through VXE's public configuration and native theme states.
 - Zebra stripes are optional and must remain low contrast. Prefer no visible stripe for dense workbench pages when row separators already provide scan rhythm.
 - Do not merge cells for the main list unless the business explicitly requires grouped display.
 - Editable row hover must not hide validation borders.
-- Fixed left/right shadows must remain subtle and consistent with Arco theme.
+- Fixed-column boundaries use VXE native behavior; do not add page-level shadow skins.
 
 ## Grid Lines
 
 See **Border Policy** above for the full contract. Short form:
 
 - `border="none"` on every operational `vxe-table`.
-- No vertical column lines; weak horizontal row separators only.
-- Header/body split via `--dense-table-header-bg`, not heavy borders.
-- Selection/hover use primary tint — not stronger grid lines.
+- No vertical column lines on normal operational lists.
+- Keep the native header/body distinction; do not introduce a project table-header token.
+- Selection/hover use VXE's public state behavior, not stronger grid lines or internal-selector CSS.
 
 ## Table Bottom Boundary
 
@@ -660,5 +658,5 @@ Reject a table design when:
 - truncated data has no title/tooltip;
 - nested tables look like independent page sections;
 - empty tables appear as blank space.
-- operation column shows black outlined pills or browser focus borders;
-- VXE current/active cell creates a dark border that competes with selected/hover state.
+- current-cell/highlight modes are enabled without a business need;
+- native keyboard focus is suppressed or confused with row selection.

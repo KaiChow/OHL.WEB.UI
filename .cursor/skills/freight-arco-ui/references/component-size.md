@@ -33,7 +33,7 @@ This project uses **one business density**. Map Arco `size` explicitly in templa
 |------|---------------|------|
 | Table row icon | `.row-action-btn` | 24×24px minimum target with a 14px icon |
 | VXE 主表行 | `row-config.height` + `workbench-table` hook | 36px compact / 44px standard |
-| VXE 详情子表行 | `row-config.height` + `detail-mini-vxe` hook | 38px editable / 34px read-only |
+| VXE 详情子表行 | `size="small"` + `detail-mini-vxe` job hook | VXE native small; verify editable controls are unclipped |
 | Modal / Drawer 标题 | Arco native title slot | GI-owned |
 
 ## Must use `size="small"`

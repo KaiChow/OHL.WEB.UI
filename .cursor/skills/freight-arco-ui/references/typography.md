@@ -10,17 +10,17 @@ The type system must be readable for Chinese, English, codes, dates, amounts, po
 
 Professional dense B2B UI uses a **fixed typographic ladder**, not ad-hoc sizes per page.
 
-1. **Monotonic scale** — business content steps: 10 → 11 → **12** → 13 (nav only) → 14 (overlay). No 12/13 mixing inside one table row or form row.
+1. **Monotonic scale** — custom business text follows the project token ladder. Framework component text follows GI's native `small` scale and must not be globally rewritten to match a page token.
 2. **Chrome above content** — overlay titles (Modal / Popover) and page-form heads must be **visually above** the form body they contain. Never make chrome title smaller than body text.
-3. **Same size, different role** — table headers, section titles, table data, form labels, and field values all use **12px**; distinguish with weight (600 vs 500 vs 400) and color, not font size.
-4. **Content unity** — filter, form, detail, and **list table** body share **12px** for all business data and labels.
-5. **Nav step** — buttons, tabs, and chips use **13px** (F2) as the only routine 13px text tier.
-6. **Token only** — pages use `var(--dense-font-*)`; `global.css` is the implementation source.
+3. **Role before size** — custom table data, section titles, field labels, and helper text use stable role tokens; hierarchy comes from weight, color, placement, and spacing together.
+4. **Content unity** — custom business data and labels use F1/F3/F4 consistently across list, filter, form, and detail surfaces.
+5. **Framework ownership** — buttons, tabs, inputs, selects, pickers, modal titles, and form-item labels keep GI native typography. Do not force internal selectors to F0-F6.
+6. **Token boundary** — page-authored text uses `var(--dense-font-*)`; tokens never authorize global `.arco-*` or `.vxe-*` overrides.
 
 ```
 F0 Overlay chrome   14px / 600   Modal title, Popover title, page form head
 F1 Data             12px / 400-500   Table body, key links, identifiers
-F2 Nav              13px / 500-600   Buttons, tabs, chips
+F2 Nav              13px / 500-600   Custom navigation labels and compact chips
 F3 Structure title  12px / 600   Section title, VXE column header
 F4 Form label       12px / 500   Filter label, form label
 F4 Control          12px / 400-500   Input/select value, placeholder, detail val
@@ -67,12 +67,12 @@ Use the global tokens. Do not hard-code page-specific font sizes.
 | Level | Token | Size | Weight | Use |
 |-------|-------|------|--------|-----|
 | Hero | `--dense-font-hero` | 16px | 600 max | One object/route identity in a full detail context or standard detail drawer |
-| F0 | `--dense-font-overlay` | 14px | 600 | Modal title, Popover title, full-page form head (`xf-head`) |
+| F0 | `--dense-font-overlay` | 14px | 600 | Page-authored overlay heading or full-page form head (`xf-head`) |
 | F1 | `--dense-font-data` | 12px | 400/500 | Table cells, core links, business identifiers |
-| F2 | `--dense-font-nav` | 13px | 500/600 active | Buttons, tabs, chips, segmented controls |
+| F2 | `--dense-font-nav` | 13px | 500/600 active | Custom navigation labels and compact business chips |
 | F3 | `--dense-font-title` | 12px | 600 | Section titles, VXE column headers, subgroup headings |
-| F4 | `--dense-font-field` | 12px | 500 | Form labels, filter labels (`filter-field__label`) |
-| F4 Control | `--dense-font-control` | 12px | 400/500 | Input/select/textarea values, placeholders, `.detail-field__val` |
+| F4 | `--dense-font-field` | 12px | 500 | Page-authored field/filter labels |
+| F4 Control | `--dense-font-control` | 12px | 400/500 | Page-authored read-only values such as `.detail-field__val` |
 | F5 | `--dense-font-aux` | 11px | 400/500 | Helper text, metadata, pagination summary |
 | F6 | `--dense-font-micro` | 10px | 400/500 | Units, sequence micro text, compact counters; never normal status text |
 
@@ -140,10 +140,9 @@ Every zone has a fixed font tier. Do not deviate.
 | Zone | Element | Token | Size | Weight | Color |
 |------|---------|-------|------|--------|-------|
 | **Filter (zone-l2)** | Field label | F4 `--dense-font-field` | 12px | 500 | `color-text-2` |
-| | Input / select value | F4 Control | 12px | 500 | `color-text-1` |
-| | Placeholder | F4 Control | 12px | 400 | `color-text-3` |
-| | Query / reset buttons | F2 Nav | 13px | 500 | — |
-| **Toolbar / status (zone-l3)** | Tab, action button | F2 Nav | 13px | 500/600 | — |
+| | Input / select / placeholder | GI native small | framework-owned | framework-owned | framework-owned |
+| | Query / reset buttons | GI native small | framework-owned | framework-owned | framework-owned |
+| **Toolbar / status (zone-l3)** | Tab, action button | GI native small | framework-owned | framework-owned | framework-owned |
 | | Badge (`.stab-badge`) | F6 Micro | 10px | 600 | semantic |
 | **Table (zone-l4)** | Cell data | F1 Data | 12px | 400 | `color-text-2` |
 | | Primary identifiers | F1 Data | 12px | 500 | `color-text-1` |
@@ -153,22 +152,18 @@ Every zone has a fixed font tier. Do not deviate.
 | **Detail read-only** | Field label (`.detail-field__label`) | F4 Field | 12px | 500 | `color-text-3` |
 | | Field value (`.detail-field__val`) | F4 Control | 12px | 400/500 | `color-text-1` |
 | | Section title | F3 Title | 12px | 600 | `color-text-1` |
-| **Detail editable form** | Label + control + placeholder + readonly val | F4 / F4 Control | 12px | 500 / 400 | per role |
-| **Overlay** | Modal / Popover title | F0 Overlay | **14px** | 600 | `color-text-1` |
-| | Modal / Popconfirm body | F4 Control | 12px | 500 | `color-text-1` |
-| | Dropdown options | F4 Control | 12px | 500 | `color-text-1` |
-| | Footer buttons | F2 Nav | 13px | 500 | — |
-| | Tooltip | F5 Aux | 11px | 400 | — |
+| **Detail editable form** | Arco label + control + placeholder | GI native small | framework-owned | framework-owned | framework-owned |
+| **Overlay** | Modal / Popover / body / footer / Tooltip | GI native | framework-owned | framework-owned | framework-owned |
 | **Page form head** | Title (`xf-head`) | F0 Overlay | 14px | 600 | `color-text-1` |
 
 ### Same Component Rule
 
 The same component type must not change text size because it appears in a different business module.
 
-- `a-input` / `a-select` / `a-date-picker` / `a-input-number` / `a-textarea` values and placeholders stay F4 Control 12px in filter rows, modal forms, drawer forms, and advanced query drawers.
-- `a-form-item` labels and `.filter-field__label` stay F4 12px everywhere.
+- `a-input` / `a-select` / `a-date-picker` / `a-input-number` / `a-textarea` keep GI native small typography in filter rows, modal forms, drawer forms, and advanced query drawers.
+- `a-form-item` labels keep GI native typography; page-authored `.filter-field__label` uses F4.
 - Read-only `.detail-field__val` stays F4 Control 12px everywhere (same as editable controls).
-- Buttons, tabs, segmented controls, pager triggers, and drawer footer buttons stay F2 Nav 13px everywhere.
+- Buttons, tabs, segmented controls, pager triggers, and drawer footer buttons keep GI native small typography everywhere.
 - Pager total/helper/meta stays F5 Aux 11px everywhere.
 
 Do not justify a second size system by saying a component is in a drawer, a detail panel, a table cap, or a specific page.
@@ -189,29 +184,19 @@ Use this table as the fast lookup for implementation and review.
 
 | Component / surface | Text role | Token | Size |
 |---------------------|-----------|-------|------|
-| `a-input` value | editable value | `--dense-font-control` | 12px |
-| `a-input` placeholder | placeholder | `--dense-font-control` | 12px |
-| `a-select` trigger value | editable value | `--dense-font-control` | 12px |
-| `a-select` dropdown option | overlay option | `--dense-font-control` | 12px |
-| `a-date-picker` / `a-range-picker` input | editable value | `--dense-font-control` | 12px |
-| `a-input-number` input | editable value | `--dense-font-control` | 12px |
-| `a-textarea` value / placeholder | editable value | `--dense-font-control` | 12px |
-| `a-form-item` label | field label | `--dense-font-field` | 12px |
+| Arco form controls and placeholders | editable value | GI native small | framework-owned |
+| Arco dropdown/options | overlay option | GI native small | framework-owned |
+| `a-form-item` label | field label | GI native | framework-owned |
 | `.filter-field__label` | field label | `--dense-font-field` | 12px |
 | `.detail-field__label` | readonly field label | `--dense-font-field` | 12px |
 | `.detail-field__val` | detail field value (read-only) | `--dense-font-control` | 12px |
-| `a-button` text | nav/action text | `--dense-font-nav` | 13px |
-| Tabs / segmented / status tab text | nav/action text | `--dense-font-nav` | 13px |
-| Pager page buttons | nav/action text | `--dense-font-nav` | 13px |
-| Pager select trigger | editable control | `--dense-font-control` | 12px |
-| Pager total / jumper text | helper/meta | `--dense-font-aux` | 11px |
+| Arco buttons / tabs / segmented / pager | navigation/action | GI native small | framework-owned |
 | `detail-section__title` | structure title | `--dense-font-title` | 12px |
 | Advanced-filter section heading | structure title | `--dense-font-title` | 12px |
 | `form-subgroup__title` | structure title | `--dense-font-title` | 12px |
 | Table header | structure title | `--dense-font-title` | 12px |
 | Table body text | data | `--dense-font-data` | 12px |
-| Modal / drawer title | overlay chrome | `--dense-font-overlay` | 14px |
-| Tooltip | helper/meta | `--dense-font-aux` | 11px |
+| Modal / drawer / Tooltip | overlay chrome/content | GI native | framework-owned |
 | `s-pill` | auxiliary status | `--dense-font-aux` | 11px |
 | badge / seq micro text | micro | `--dense-font-micro` | 10px |
 | Icon-only action icon | icon graphic | `--dense-icon-action` | 14px graphic |
@@ -219,15 +204,15 @@ Use this table as the fast lookup for implementation and review.
 Decision shortcut:
 
 - If users **read or edit business content** (form, detail, table cell, link), default to **12px**.
-- If it is **navigation / action text**, default to **13px**.
+- If it is a **custom navigation label**, default to **13px**; Arco actions stay GI-native.
 - If it is **helper/meta**, default to 11px.
 - If it is **micro state/count**, default to 10px.
 
 **Zone rules:**
 
 - Filter + detail/form + **table data**: **all 12px**; hierarchy via weight/color only.
-- Toolbar nav/actions: **13px**.
-- Overlay chrome title: **14px** — always ≥ body inside the same surface.
+- Custom toolbar navigation labels: **13px**; Arco actions stay native.
+- Overlay chrome stays GI-native and must remain visibly distinct from body content.
 - Do not mix 12px and 13px within the same table row or form row.
 
 ## Form And Filter Typography
@@ -238,7 +223,7 @@ Decision shortcut:
 | Entered/selected value | F4 Control 12px | `color-text-1` | 500 |
 | Placeholder | F4 Control 12px | `color-text-3` | 400 |
 
-Editable forms, filters, and read-only detail field grids share F4 label + **F4 Control value** (all 12px; distinguish with color/weight, not size).
+Page-authored filter labels and read-only detail fields share F4 roles. Editable Arco form controls keep GI native small typography.
 
 ## Overlay And Popup Typography
 
@@ -246,16 +231,16 @@ Arco portals keep GI-owned typography. The hierarchy below is a review expectati
 
 | Surface | Typography |
 |---------|------------|
-| `.arco-modal-title`, `.arco-popover-title` | F0 Overlay 14px / 600 |
-| `.arco-modal-body`, popconfirm content | F4 Control 12px |
-| Select / dropdown / cascader options | F4 Control 12px (same as trigger) |
-| Modal / popconfirm footer buttons | F2 Nav 13px |
-| Tooltip | F5 Aux 11px |
+| Modal / Popover title | GI native overlay title |
+| Modal / Popconfirm body | GI native overlay content |
+| Select / dropdown / cascader options | GI native popup content |
+| Modal / popconfirm footer buttons | GI native small action text |
+| Tooltip | GI native tooltip text |
 
 Rules:
 
-- Modal title must be **larger than** modal form body (14px vs 12px).
-- Select trigger and dropdown option must match size and weight.
+- Modal title must remain visually distinguishable from modal body through GI's native hierarchy.
+- Select trigger and dropdown option must remain compatible and readable without page/global internal overrides.
 - Do not override `.arco-modal-*`, `.arco-select-*`, dropdown, tooltip, or popconfirm internals globally.
 - F6 10px is for units, sequence text, and compact counters only — not status pills, buttons, or dropdown options.
 
@@ -285,7 +270,7 @@ Modal / drawer form:
 - No `font-weight: 700/800` in business UI.
 - No implicit medium controls in business forms — always declare `size="small"`.
 - No form/filter label-value-placeholder drift (12/13/11 in one row).
-- No overlay title smaller than overlay body (title F0 14px, body F4 12px).
+- No page-authored overlay title weaker than its body; GI-native titles remain untouched.
 - No table header smaller than table body (both 12px; header is 600).
 - No placeholder with same weight/color as entered value.
 - No all-caps UI labels unless the data itself is a code.

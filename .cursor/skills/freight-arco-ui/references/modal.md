@@ -21,10 +21,10 @@ Full tier table and token names: **`overlay-dimensions.md`**.
 | Content type | Width token |
 |-------------|-------------|
 | Confirmation / single field | `--dense-modal-w-confirm` (420px) |
-| Short form (≤ 6 fields) | `--dense-modal-w-md` (560px) or `--dense-modal-w-lg` (640px) |
+| Short form (≤ 6 fields) | `--dense-modal-w-md` (560px) by default; use `--dense-modal-w-lg` (640px) only for two-column fields, long bilingual labels, or persistent validation/help copy |
 | Form with a mini table | `--dense-modal-w-xl`–`--dense-modal-w-max` (760–860px) |
 
-Set `:width` explicitly on every `<a-modal>` to a token value. **Hard max 860px.**
+Set `:width` explicitly on every `<a-modal>` to one declared tier. Choose the smallest tier that preserves readable labels, validation, and footer actions without horizontal overflow. **Hard max 860px.**
 
 ## Modal Structure
 
@@ -44,14 +44,14 @@ Set `:width` explicitly on every `<a-modal>` to a token value. **Hard max 860px.
     size="small"
     class="detail-form"
   >
-    <div class="filter-grid filter-grid--2col">
-      <a-form-item field="name" label="姓名" :rules="[{ required: true }]">
+    <a-row :gutter="[16, 8]">
+      <a-col :span="12"><a-form-item field="name" label="姓名" :rules="[{ required: true }]">
         <a-input v-model="form.name" size="small" placeholder="请输入姓名" />
-      </a-form-item>
-      <a-form-item field="phone" label="电话">
+      </a-form-item></a-col>
+      <a-col :span="12"><a-form-item field="phone" label="电话">
         <a-input v-model="form.phone" size="small" placeholder="请输入电话" />
-      </a-form-item>
-    </div>
+      </a-form-item></a-col>
+    </a-row>
   </a-form>
 </a-modal>
 ```
@@ -64,16 +64,10 @@ Use the `actions.md` section 4.7 recipe. Do not add extra buttons beyond cancel 
 
 ```vue
 <template #footer>
-  <div style="display:flex; justify-content:space-between; align-items:center">
-    <!-- Left: danger action only when editing existing record -->
-    <a-button v-if="isEdit" type="text" status="danger" size="small" @click="handleDelete">
-      删除
-    </a-button>
-    <div style="display:flex; gap:8px; margin-left:auto">
-      <a-button size="small" @click="handleCancel">取消</a-button>
-      <a-button size="small" type="primary" :loading="submitting" @click="handleOk">确定</a-button>
-    </div>
-  </div>
+  <a-row justify="space-between" align="center">
+    <a-col><a-button v-if="isEdit" type="text" status="danger" size="small" @click="handleDelete">删除</a-button></a-col>
+    <a-col><a-space :size="8"><a-button size="small" @click="handleCancel">取消</a-button><a-button size="small" type="primary" :loading="submitting" @click="handleOk">确定</a-button></a-space></a-col>
+  </a-row>
 </template>
 ```
 
@@ -125,22 +119,29 @@ Modal.confirm({
 - Trigger validation on submit (`formRef.validate()`), not on every keystroke.
 - Required mark: Arco adds `*` automatically via `:rules`. Do not duplicate it in the label text.
 - After a failed submit, scroll to the first error field.
-- After success: `Message.success('保存成功')` then close modal.
-- After failure: `Message.error('保存失败，请稍后重试')` and keep modal open.
+- After success: close only after persistence succeeds, then refresh the feature-contract owner and show concise success feedback there or by Message.
+- After failure: keep the modal and user input, show field errors at fields and unknown/business errors in the modal surface; Message may summarize but cannot be the sole error owner.
 
 ## Content Density Inside Modal
 
 - Use `size="small"` on all Arco controls inside the modal form.
 - Use `layout="vertical"` on the form — horizontal labels compress too much at modal widths.
-- Use `class="detail-form"` on the `<a-form>` to inherit the 12px control token.
-- Use `filter-grid--2col` or `filter-grid--3col` grid for multi-column layouts; do not use raw `display:grid` with inline gap values.
+- Use `class="detail-form"` only as a local form-layout hook; GI owns label/control styling.
+- Use Arco `a-row` / `a-col` for multi-column layouts. Page-local grid is allowed only for a proven relationship Arco Grid cannot express.
 - Do not add section cards or nested cards inside modal content — one flat form surface.
 
 ## Modal Typography
 
 - Modal title uses Arco's native title slot and GI typography; do not override `.arco-modal-title` globally.
 - Form inside modal: `a-form` + `class="detail-form"` + `size="small"` on all controls.
-- Form labels: F4 12px / `color-text-2` / weight 500.
-- Form values / placeholders: F4 Control 12px (same size; color/weight differ).
-- Footer buttons: F2 Nav 13px.
-- Do not hardcode 14px in modal content fields; 14px is reserved for F0 chrome title only.
+- Form labels, values, placeholders, and footer buttons keep GI native small typography.
+- Custom helper/meta text uses project typography tokens; do not override modal or form-control internals.
+
+## Release Gate
+
+- [ ] The overlay owns one focused job; content that needs tabs, many sections, or large child tables routes to Drawer/full page.
+- [ ] Width comes from the declared tier and remains within the viewport inset without internal horizontal overflow.
+- [ ] Form submit uses `on-before-ok`, one primary action, button loading, duplicate-submit protection, and preserved input on failure.
+- [ ] Destructive confirmation names the object, action, and consequence; batch confirmation includes the affected count.
+- [ ] Open focuses a useful control, validation focuses the first invalid field, close returns focus to the trigger, and dirty close is confirmed.
+- [ ] GI owns modal chrome; no page/global selector rewrites header, body, footer, radius, shadow, or typography.

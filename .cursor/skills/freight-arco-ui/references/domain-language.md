@@ -64,7 +64,7 @@ Use stable module names in menu, route titles, tabs, and page headings:
 
 ## Freight Status Vocabulary
 
-Use `.s-pill[data-s]` or Arco Tag with the same semantic mapping.
+Use `.s-pill[data-s]` for business status. Use Arco Tag only for non-status categorization such as labels or immutable classifications; do not create two status systems.
 Status visualization means semantic text, background, and border. A leading status dot is optional and must not be treated as the default freight status style.
 
 | Business status | data-s | Semantics |

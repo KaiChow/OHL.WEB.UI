@@ -13,42 +13,32 @@
 2. 先使用 Arco 原生控件、props、插槽与表单布局；不以全局 CSS 修正框架内部字号或皮肤
 3. 控件外观由 GI 负责；`filter-field` / `detail-form` / `detail-drawer` 等布局 class 只管理排列、间距和宽度
 4. 布局 class（`filter-field`、`detail-form-grid`）只管 **排列与栅格**，不管控件皮肤
-5. **同一 Arco 组件在任意业务场景使用同一字号层级**：`a-input` / `a-select` / `a-date-picker` / `a-input-number` / `a-textarea` 的值与 placeholder 一律 F4 Control 12px；不得因为它出现在列表筛选、弹窗表单、详情编辑或查询抽屉里就切换成另一档字号
-6. **同一信息角色使用同一字号层级**：业务内容（label、字段值、表格单元格、链接）一律 **12px**；导航与按钮文字一律 F2 **13px**
+5. **同一 Arco 组件在任意业务场景使用同一原生 small 层级**：不得因为它出现在列表筛选、弹窗表单、详情编辑或查询抽屉里就覆盖内部字号
+6. **自定义业务文字使用项目角色 token**：业务值、页面标签和表格链接遵循 typography 角色；按钮、Tab、分页触发器保持 GI 原生 small 排版
 
 ## Token
 
 | Token | 值 | 用途 |
 |-------|-----|------|
-| `--dense-control-h-form` | 28px | 单行控件外框高度 |
-| `--dense-control-lh-form` | 26px | 内文行高（h − 2px） |
+| `--dense-control-h-form` | 28px | small 控件的布局预算与对齐基线；不得用于覆盖框架内部高度 |
+| `--dense-control-lh-form` | 26px | 页面自绘只读结构的行高参考；不得用于覆盖框架内文 |
 | `--dense-font-field` | 12px / 500 | 字段名 label |
 | `--dense-font-control` | 12px | 输入值 / placeholder |
 | `--dense-gap-label` | 4px | 字段名 → 控件 |
 
 ## 组件默认态（Default）
 
-适用：**所有** `size="small"` 单行控件，与所在页面无关。
+适用：**所有** `size="small"` 单行控件，与所在页面无关。Input、Select、Date/Range Picker、InputNumber 和 Textarea 均使用组件公共 props、插槽与状态；禁止把框架内部 class 当成实现 API。
 
-| 组件 | Arco 类名（节选） |
-|------|-------------------|
-| Input | `.arco-input-wrapper.arco-input-size-small` |
-| Select | `.arco-select-view-single.arco-select-size-small` |
-| Date / Range | `.arco-picker-size-small` / `.arco-picker-range.arco-picker-size-small` |
-| InputNumber | `.arco-input-number.arco-input-number-size-small` |
-
-| 属性 | 值 |
-|------|-----|
-| 外框与字号 | GI `size="small"` 原生值 |
-| 边框、Hover / Focus | GI 原生交互状态，不覆盖 |
+外框、字号、边框、Hover、Focus、Disabled 和 Error 外观全部保持 GI 原生值。
 
 ## 字段名（Field label）
 
 | 写法 | 说明 |
 |------|------|
-| `.field-label` | 推荐通用 class |
-| `.filter-field__label` | 与 `.field-label` 同规范（布局 BEM 别名） |
-| `.arco-form-item-label > label` | `a-form layout="vertical"` 内置 label |
+| 可见 `<label for>` | 非 Arco Form 场景的首选；必须与控件 id 关联 |
+| `.filter-field__label` | 页面局部语义 hook；只管理标签布局，不建立组件皮肤 |
+| `a-form-item` 的 `label` prop/slot | `a-form layout="vertical"` 内置 label |
 
 手写业务标签使用 F4 token；`a-form-item` 标签保持 GI 原生层级。两者靠结构、间距和明确分组保持一致，不通过全局内部选择器强制同字号。
 
@@ -56,11 +46,11 @@
 
 仅以下 **场景** 允许覆盖 Default；不得按业务模块新增场景。
 
-| 场景 | 选择器 / 条件 | 差异 |
-|------|----------------|------|
-| **Textarea 多行** | `.arco-textarea-size-small` | 不固定 28px 高；行高 1.45 |
-| **Disabled / 只读** | `.arco-*-disabled` | 灰底；文字仍 `text-1` 可读 |
-| **Form-item 列宽** | `.arco-form-item-content >` | 控件 `width: 100%` |
+| 场景 | 公共 API / 条件 | 差异 |
+|------|------------------|------|
+| **Textarea 多行** | Textarea props | 不固定 28px 高；按内容与行数配置 |
+| **Disabled / 只读** | `disabled` / read-only display pattern | 保持原生状态，同时保证业务值可辨识 |
+| **Form-item 列宽** | Arco Grid + component width prop/style | 控件填满所属列，不穿透内部结构 |
 | **表格行内编辑** | `.detail-mini-vxe` | 控件使用原生 small 外观；单元格内只读值勿用 `link-text`（见 `table.md`） |
 | **组合控件** | `.filter-combo` / `.detail-combo` | 多控件拼接圆角（布局 struct，非模块） |
 | **分页跳转等** | `.table-card-cap__pager` | 分页专用（非表单字段） |
@@ -70,14 +60,14 @@
 | Role | Token | Size |
 |------|-------|------|
 | Field label | `--dense-font-field` | 12px |
-| Editable control value | `--dense-font-control` | 12px |
-| Editable control placeholder | `--dense-font-control` | 12px |
+| Editable control value | GI native small typography | framework-owned |
+| Editable control placeholder | GI native small typography | framework-owned |
 | Read-only detail value (`.detail-field__val`) | `--dense-font-control` | 12px |
 | Table cell / link text | `--dense-font-data` | 12px |
-| Button / tab / pager trigger | `--dense-font-nav` | 13px |
+| Button / tab / pager trigger | GI native small typography | framework-owned |
 | Pager summary / helper / weak meta | `--dense-font-aux` | 11px |
 
-Do not create page-local variants such as “drawer select uses 13px” or “toolbar button uses 12px”. The surface may change; the component role does not.
+Do not create page-local variants such as “drawer select uses 13px” or “toolbar button uses 12px”. The surface may change; framework ownership does not.
 
 ## 禁止
 
@@ -113,3 +103,10 @@ Do not create page-local variants such as “drawer select uses 13px” or “to
 - 表单栅格布局：`detail-form.md`
 - 筛选区布局（不含控件皮肤）：`filter-layout.md`
 - `size="small"` 枚举：`component-size.md`
+
+## Release Gate
+
+- [ ] Every business control declares `size="small"`; GI owns control chrome, typography, hover, focus, disabled, and error states.
+- [ ] Labels remain visible, associated with controls, and do not rely on placeholder text.
+- [ ] Pickers/selects fill their form-item through public props/layout, not internal-selector overrides.
+- [ ] Long labels, 1.3-2x translated copy, validation messages, disabled/read-only values, keyboard focus, and 200% zoom remain usable.

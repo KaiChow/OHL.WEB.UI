@@ -62,7 +62,7 @@ Any failed applicable item blocks `sellable-saas-grade`; a target in `pageSpec.t
 - Main list grid: `workbench-table`; detail child grid: `detail-mini-vxe` with density modifier.
 - Status: `.s-pill[data-s]`; never color the whole row by status or rely on color alone.
 - Business controls use explicit `size="small"`; one `type="primary"` per action scope.
-- Row actions use icon + tooltip inside `row-actions`; list danger actions live in More + confirm.
+- Row actions use compact text for core workflow verbs or icon + Tooltip + business `aria-label` for familiar utilities. Keep at most two directly visible by default; lower-frequency and list danger actions move to More, with danger confirmation.
 - Business object and user job decide fields; never transplant shipment/order fields into unrelated modules.
 - Do not implement a business action until its smallest complete feature contract exists.
 - Do not claim UI quality from source inspection alone.

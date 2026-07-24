@@ -488,7 +488,7 @@ Danger rules:
 层级与位置
 □ 同一视觉作用域 primary ≤ 1；页面、查询区、模块、弹窗分别计算
 □ Primary 只给当前作用域最重要且明确的下一步；没有主动作时不制造 Primary
-□ 查询 = primary；重置 = text；普通刷新/列设置/密度 = icon-only tool
+□ 查询 = primary；重置 = text；普通刷新 = icon-only 或 text（按频率和空间统一）；列设置/密度 = icon-only tool
 □ 页面核心新建可用 primary；模块添加 = outline/default；dashed 只用于空状态或容器内新增
 □ 导出 = outline/default；低频或多格式导出进入 dropdown
 □ 取消/关闭统一用默认按钮；行编辑取消可用 text icon，禁止 danger
@@ -496,7 +496,7 @@ Danger rules:
 
 可见性与收纳
 □ 高频、低风险、可逆动作直接可见；低频动作进入 dropdown；危险动作隔离到末组
-□ 高密度主表操作列最多 2 个 affordance；第三个开始主操作 + More
+□ 高密度主表默认最多 2 个直出操作；第 3 个及以后进入 More；确需 3 个核心流程文字动作时必须有 pageSpec 频率依据并验证列宽
 □ 核心业务流程可用紧凑文字按钮；重复密集的操作列默认 icon-only
 □ 窄工作区先把熟悉工具图标化，再收纳低频动作；不得隐藏 Primary 或造成控件重叠/换行
 

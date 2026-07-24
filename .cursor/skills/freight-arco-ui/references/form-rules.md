@@ -264,35 +264,29 @@ Modal 内的表单遵循同样规则。额外注意：
 ```vue
 <a-modal v-model:visible="visible" title="添加联系人" :width="560" :mask-closable="false">
   <a-form ref="formRef" :model="form" layout="vertical" size="small" class="detail-form">
-    <div class="filter-grid filter-grid--2col">
-      <a-form-item field="name" label="姓名" :rules="[{ required: true, message: '请填写姓名' }]">
+    <a-row :gutter="[16, 8]">
+      <a-col :span="12"><a-form-item field="name" label="姓名" :rules="[{ required: true, message: '请填写姓名' }]">
         <a-input v-model="form.name" size="small" />
-      </a-form-item>
-      <a-form-item field="phone" label="电话">
+      </a-form-item></a-col>
+      <a-col :span="12"><a-form-item field="phone" label="电话">
         <a-input v-model="form.phone" size="small" />
-      </a-form-item>
-    </div>
+      </a-form-item></a-col>
+    </a-row>
   </a-form>
 
   <template #footer>
-    <div style="display:flex; justify-content:space-between; align-items:center">
-      <a-button v-if="isEdit" type="text" status="danger" size="small" @click="handleDelete">删除</a-button>
-      <div style="display:flex; gap:8px; margin-left:auto">
-        <a-button size="small" @click="handleCancel">取消</a-button>
-        <a-button size="small" type="primary" :loading="submitting" @click="handleSubmit">确定</a-button>
-      </div>
-    </div>
+    <a-row justify="space-between" align="center">
+      <a-col><a-button v-if="isEdit" type="text" status="danger" size="small" @click="handleDelete">删除</a-button></a-col>
+      <a-col><a-space :size="8"><a-button size="small" @click="handleCancel">取消</a-button><a-button size="small" type="primary" :loading="submitting" @click="handleSubmit">确定</a-button></a-space></a-col>
+    </a-row>
   </template>
 </a-modal>
 ```
 
-- 关闭弹窗时必须 `resetFields()`，防止上次错误状态残留：
+- 表单生命周期必须显式重置，防止上次错误状态残留；在 dirty-leave/关闭确认完成后，于 `after-close` 或下一次 open 初始化时重置，不要在用户尚未确认放弃时先清空：
 
   ```ts
-  const handleCancel = () => {
-    formRef.value?.resetFields()
-    visible.value = false
-  }
+  const handleAfterClose = () => formRef.value?.resetFields()
   ```
 
 ---
@@ -300,13 +294,14 @@ Modal 内的表单遵循同样规则。额外注意：
 ## 9. 快速自查
 
 ```
-□ a-form 有 ref / :model / layout="vertical" / size="small" / class="detail-form"
-□ 每个 a-form-item 有 field 属性，且与 :model 对象 key 一致
+□ a-form 有 ref / :model / layout="vertical" / size="small"；local class 只负责布局
+□ 每个需要校验/提交的 a-form-item 有 field，且与 :model key 一致
 □ 校验用 :rules 数组，不用 required prop
 □ 没有在 a-form-item 外手写 label div
-□ 组合字段用 detail-combo div，不用 a-input-group compact
-□ 只读字段用 detail-field，不用 disabled a-input（除非有编辑态切换需求）
+□ 组合字段优先 Arco Space/Grid/Input Group；不靠内部选择器重画边框
+□ 只读字段用 a-descriptions/文本，不用 disabled input 假装展示态（编辑态切换例外）
 □ 提交调用 formRef.value?.validate()，判断返回值
-□ 关闭弹窗/抽屉时调用 resetFields()
+□ dirty close 先确认；关闭完成或下次打开初始化时 resetFields()
 □ 提交按钮绑定 :loading="submitting"
+□ 失败保留输入并聚焦首个错误；成功后按 feature contract 刷新 owner
 ```
