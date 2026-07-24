@@ -13,6 +13,8 @@ Source: `.agents/skills/freight-arco-ui/`. After edits run `npm run sync-freight
 
 Build freight operations software that is credible in a customer or financing demo and dependable in daily office work. Quality comes from business truth, short workflow paths, complete interaction states, restrained hierarchy, and reproducible evidence. Decoration cannot compensate for a fake action, missing failure path, wrong domain model, or weak work surface.
 
+When requirements compete, decide in this order: business efficiency, information clarity, operational safety, system consistency, visual quality, then decoration. Never trade a higher priority for a lower one.
+
 No evidence means no sellable claim.
 
 ## Before Code

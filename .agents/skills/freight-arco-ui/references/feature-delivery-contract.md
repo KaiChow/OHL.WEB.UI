@@ -21,6 +21,8 @@ Contract IDs are project-wide unique. Every routed `pageSpec.ts` action referenc
 
 Use object-owned terms and concrete conditions. `request` includes the real local operation or API method, identifiers, payload source, and pending owner. `errorResult` says what remains open/editable, what input/context survives, where the error appears, and how retry works.
 
+Do not alter an existing endpoint, payload, response interpretation, field meaning, permission rule, or translated business term merely to simplify UI code. When the requested feature intentionally changes one of those contracts, record the change explicitly and preserve every unrelated contract.
+
 Presentation-only toggles such as opening a static help popover do not need a feature contract. Any action that changes data, visible results, route/workflow context, permission exposure, or business state does.
 
 ## Add Only When Risk Requires It

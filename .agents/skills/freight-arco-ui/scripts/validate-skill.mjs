@@ -53,12 +53,15 @@ export function validateFreightUiSkill() {
     [references.get('component-size.md') || '', '24×24px minimum target', 'component-size.md: missing row-action target authority'],
     [references.get('typography.md') || '', '| | Status pill | F5 Aux | 11px', 'typography.md: missing readable status-pill authority'],
     [skill, 'Global CSS must not target `.arco-*`, `.vxe-*`, framework data attributes, or declare `--vxe-*` variables.', 'SKILL.md: missing framework-style ownership boundary'],
+    [skill, 'business efficiency, information clarity, operational safety, system consistency, visual quality, then decoration', 'SKILL.md: missing product decision priority'],
     [references.get('theme-contract.md') || '', 'Global `.arco-*` and `.vxe-*` rules are forbidden.', 'theme-contract.md: missing global framework-selector ban'],
     [references.get('actions.md') || '', 'Undo 只在后端存在可恢复时窗和真实恢复接口时提供', 'actions.md: missing truthful Undo boundary'],
     [references.get('actions.md') || '', 'Tooltip + 业务化 aria-label', 'actions.md: missing icon-only accessibility contract'],
     [references.get('responsive.md') || '', 'Collapse order is fixed:', 'responsive.md: missing deterministic compact-layout order'],
     [references.get('feedback.md') || '', 'Message/Notification is never the sole owner', 'feedback.md: missing owner-local persistent failure gate'],
     [references.get('permissions.md') || '', 'Loading, no-role-selected, no-access, read-only, editable, save-pending, save-failure, and dirty-leave states', 'permissions.md: missing complete permission-state gate'],
+    [references.get('existing-project-modernization.md') || '', 'Preserve unrelated API endpoints', 'existing-project-modernization.md: missing scope-integrity boundary'],
+    [references.get('typography.md') || '', 'Translate complete messages instead of concatenating sentence fragments.', 'typography.md: missing complete-message i18n boundary'],
   ];
   for (const [source, fragment, message] of requiredFragments) {
     if (!source.includes(fragment)) errors.push(message);

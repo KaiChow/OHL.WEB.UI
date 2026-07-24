@@ -103,10 +103,14 @@ Exceptions:
 
 Design for 1.3–2× text expansion compared with Chinese.
 
+- Route all user-visible business copy, validation, empty/error states, Tooltip text, and accessible names through the project's existing internationalization mechanism; do not replace established keys with hardcoded Chinese.
+- Translate complete messages instead of concatenating sentence fragments. Variables, plural forms, and grammar belong to the locale message.
+- Format dates, times, numbers, percentages, and currencies with the active Locale; declare the business timezone whenever the value is not unambiguously local.
 - Do not fixed-width buttons by Chinese label length.
 - Do not truncate business-critical labels.
 - Use vertical form labels for dense multilingual forms.
 - Use `min-width` plus ellipsis/title for table columns.
+- Prefer logical layout properties for new direction-sensitive page CSS; do not claim RTL support until the rendered workflow has been verified.
 - Do not use negative letter spacing or viewport-based font scaling.
 
 ## Codes, Numbers, Dates

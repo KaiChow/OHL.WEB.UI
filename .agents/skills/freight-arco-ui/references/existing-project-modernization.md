@@ -65,6 +65,8 @@ Before restructuring, freeze what must not regress:
 - permissions and action legality;
 - loading, empty, failure, retry, destructive confirmation, and input preservation.
 
+Preserve unrelated API endpoints, request/response handling, field meaning, data shape, permission checks, internationalization keys, and dependency versions. A requested behavior change is allowed only when its feature contract records the new source, result, failure, refresh, permission, and migration boundary; "UI-only" is not a reason to silently change or freeze business behavior.
+
 The first viewport must answer: what object or queue is this, what needs attention, what can be done now, what comes next, and who owns it? A field inventory with buttons is not a product workflow.
 
 ## Visual Direction
@@ -101,6 +103,8 @@ For a list/workbench rewrite, prefer about 80 or fewer scoped CSS lines. Above a
 6. Exercise relevant normal and adverse states.
 7. Capture after evidence at required viewports.
 8. For commercial goals, run `product-grade-evaluation.md` as pass/fail.
+
+For a multi-page migration, prioritize high-frequency core work, customer/demo-critical work, severe workflow or accessibility debt, ordinary business pages, then low-frequency legacy pages. Page simplicity alone does not determine migration order.
 
 ## Delivery Evidence
 
