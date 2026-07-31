@@ -1,13 +1,13 @@
 /**
  * OHL 规范自动检查脚本
  * 用法: node scripts/check-spec.js
- * 检查页面和组件下的 .vue / .ts / .css 文件，并调用 freight skill validator
+ * 检查页面和组件下的 .vue / .ts / .css 文件，并调用 arco-vxe-ui skill validator
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { dirname, extname, join, relative, resolve, sep } from 'path';
 import ts from 'typescript';
-import { validateFreightUiSkill } from '../.agents/skills/freight-arco-ui/scripts/validate-skill.mjs';
+import { validateUiSkill } from '../.agents/skills/arco-vxe-ui/scripts/validate-skill.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1');
 const SCAN_DIRS = ['src/views', 'src/components'];
@@ -303,7 +303,7 @@ const featureContractFiles = files.filter((file) => /[\\/]featureContracts\.ts$/
 const featureContractIds = new Map();
 const pageSpecIds = new Map();
 const skillReferenceNames = new Set(
-  readdirSync(join(ROOT, '.agents/skills/freight-arco-ui/references'))
+  readdirSync(join(ROOT, '.agents/skills/arco-vxe-ui/references'))
     .filter((name) => name.endsWith('.md')),
 );
 
@@ -386,10 +386,10 @@ if (existsSync(join(ROOT, 'CLAUDE.md')) || existsSync(join(ROOT, '.claude'))) {
     content: 'Claude configuration detected',
   });
 }
-for (const error of validateFreightUiSkill()) {
+for (const error of validateUiSkill()) {
   violations.push({
-    rule: 'freight-arco-ui skill 必须保持单一权威、PESDP 可追溯和无冲突生成链',
-    file: '.agents/skills/freight-arco-ui',
+    rule: 'arco-vxe-ui skill 必须保持单一权威、契约可追溯和无冲突生成链',
+    file: '.agents/skills/arco-vxe-ui',
     line: 1,
     content: error,
   });
@@ -562,7 +562,7 @@ for (const specFile of pageSpecFiles) {
   const missingAuthorities = authorities.filter((name) => !skillReferenceNames.has(name));
   if (!authorities.length || missingAuthorities.length) {
     violations.push({
-      rule: 'pageSpec authorities 必须引用 freight-arco-ui 中真实存在的项目级规范',
+      rule: 'pageSpec authorities 必须引用 arco-vxe-ui 中真实存在的项目级规范',
       file: relPath,
       line: 1,
       content: missingAuthorities.length ? `missing ${missingAuthorities.join(', ')}` : 'empty authorities',

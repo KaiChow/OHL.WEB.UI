@@ -1,0 +1,4 @@
+interface:
+  display_name: "Arco VXE UI"
+  short_description: "Commercial-grade enterprise back-office UI and interaction delivery"
+  default_prompt: "Use $arco-vxe-ui to deliver Vue 3 + TypeScript + Arco Design Vue + VXE Table UI and interactions. Select the smallest authority path, write typed pageSpec.ts before material template work, bind business actions to smallest complete feature contracts, implement Arco/GI/shared-first, and reject sellable-quality claims without real-route viewport and deterministic adverse-state evidence."

@@ -1,11 +1,11 @@
 ---
-description: UI 编码前按 freight skill 选择最小规范集
+description: UI 编码前按 arco-vxe-ui skill 选择最小规范集
 alwaysApply: true
 ---
 
 # UI Spec-First Gate
 
-涉及 `src/views/**`、`src/components/**` 时，以 `.agents/skills/freight-arco-ui/SKILL.md` 为唯一入口；禁止预读整个 references 目录。
+涉及 `src/views/**`、`src/components/**` 时，以 `.agents/skills/arco-vxe-ui/SKILL.md` 为唯一入口；禁止预读整个 references 目录。
 
 ## 写代码前
 
