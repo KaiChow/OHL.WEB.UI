@@ -11,6 +11,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:visible': [value: boolean];
   openFull: [orderNo: string];
+  quickAction: [action: string, orderNo: string];
 }>();
 
 const drawerVisible = computed({
@@ -18,8 +19,41 @@ const drawerVisible = computed({
   set: (value) => emit('update:visible', value),
 });
 
+const REQUIRED_FILE_CATEGORIES = ['SO 文件', '报关资料', '装箱单', '提单确认', '费用账单附件'];
+
+const quickActions = [
+  { key: 'assign', label: '分配给我' },
+  { key: 'notify', label: '发送通知' },
+  { key: 'changeStatus', label: '修改状态' },
+];
+
 const pendingNodes = computed(() => props.record?.nodes.filter((item) => item.statusKey !== 'rel').length ?? 0);
 const pendingRisks = computed(() => props.record?.risks.filter((item) => item.status !== '已关闭').length ?? 0);
+
+const fileStats = computed(() => {
+  const files = props.record?.files ?? [];
+  return {
+    required: files.filter((item) => item.required).length,
+    missing: files.filter((item) => item.statusKey === 'rej').length,
+    pending: files.filter((item) => item.statusKey === 'wait').length,
+  };
+});
+
+const requiredFileChecklist = computed(() =>
+  REQUIRED_FILE_CATEGORIES.map((category) => {
+    const file = props.record?.files.find((item) => item.category === category);
+    if (!file || file.statusKey === 'rej') return { category, status: '缺失', statusKey: 'rej' };
+    if (file.statusKey === 'wait') return { category, status: '待确认', statusKey: 'wait' };
+    return { category, status: '已齐', statusKey: 'acc' };
+  }),
+);
+
+const attentionActive = computed(() => pendingRisks.value > 0 || fileStats.value.missing > 0);
+const attentionText = computed(() => {
+  if (pendingRisks.value > 0) return `${pendingRisks.value} 项风险待处理`;
+  if (fileStats.value.missing > 0) return `${fileStats.value.missing} 项文件缺失`;
+  return '当前无阻塞风险';
+});
 
 const close = () => {
   drawerVisible.value = false;
@@ -27,6 +61,10 @@ const close = () => {
 
 const goFull = () => {
   if (props.record?.orderNo) emit('openFull', props.record.orderNo);
+};
+
+const doQuickAction = (action: string) => {
+  if (props.record?.orderNo) emit('quickAction', action, props.record.orderNo);
 };
 </script>
 
@@ -57,9 +95,9 @@ const goFull = () => {
           <div class="quickview-context">{{ record.customerName }} · {{ record.businessType }}</div>
           <div class="quickview-context">{{ record.carrier }} / {{ record.vesselVoyage }}</div>
         </div>
-        <div class="quickview-attention" :data-active="pendingRisks > 0">
+        <div class="quickview-attention" :data-active="attentionActive">
           <icon-exclamation-circle />
-          <span>{{ pendingRisks ? `${pendingRisks} 项风险待处理` : '当前无阻塞风险' }}</span>
+          <span>{{ attentionText }}</span>
         </div>
       </header>
 
@@ -127,6 +165,39 @@ const goFull = () => {
         </a-timeline>
       </section>
 
+      <section class="quickview-section quickview-section--table">
+        <div class="quickview-section__head">
+          <div>
+            <strong>文件状态</strong>
+            <span>必传 {{ fileStats.required }} · 缺失 {{ fileStats.missing }} · 待确认 {{ fileStats.pending }}</span>
+          </div>
+        </div>
+        <div class="quickview-filecheck">
+          <div v-for="item in requiredFileChecklist" :key="item.category" class="quickview-filecheck__item">
+            <span>{{ item.category }}</span>
+            <span class="s-pill" :data-s="item.statusKey">{{ item.status }}</span>
+          </div>
+        </div>
+        <vxe-table
+          class="detail-mini-vxe detail-mini-vxe--readonly"
+          border="none"
+          size="small"
+          :data="record.files.slice(0, 5)"
+          :row-config="{ isHover: true, keyField: 'id' }"
+        >
+          <vxe-column type="seq" title="序号" width="52" align="center" />
+          <vxe-column field="name" title="文件名" min-width="150" />
+          <vxe-column field="category" title="分类" min-width="90" />
+          <vxe-column field="status" title="状态" min-width="80">
+            <template #default="{ row }">
+              <span class="s-pill" :data-s="row.statusKey">{{ row.status }}</span>
+            </template>
+          </vxe-column>
+          <vxe-column field="uploader" title="上传人" min-width="80" />
+          <vxe-column field="uploadedAt" title="上传时间" min-width="130" />
+        </vxe-table>
+      </section>
+
       <section class="quickview-section">
         <div class="quickview-section__head">
           <div>
@@ -165,6 +236,14 @@ const goFull = () => {
     <template #footer>
       <div class="quickview-footer">
         <a-button size="small" @click="close">关闭</a-button>
+        <a-button
+          v-for="action in quickActions"
+          :key="action.key"
+          size="small"
+          @click="doQuickAction(action.key)"
+        >
+          {{ action.label }}
+        </a-button>
         <a-button size="small" type="primary" @click="goFull">
           打开完整详情
           <template #icon><icon-arrow-right /></template>
@@ -370,6 +449,33 @@ const goFull = () => {
 
 .quickview-timeline {
   padding: 2px 4px 0;
+}
+
+.quickview-filecheck {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.quickview-filecheck__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--color-border-1);
+  border-radius: var(--dense-radius);
+  color: var(--color-text-2);
+  background: var(--color-fill-1);
+  font-size: var(--dense-font-control);
+}
+
+.quickview-filecheck__item > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .quickview-node__main {

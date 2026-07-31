@@ -86,11 +86,14 @@ export interface ShipmentWorkbenchRow {
   quickStatus: ShipmentStatusKey[];
   isOverdue: boolean;
   todayNew: boolean;
+  financeLocked: boolean;
 }
 
 export interface StatusTabStat {
   key: ShipmentStatusKey;
   label: string;
   count: number;
+  todayNew: number;
+  overdue: number;
   tone?: 'danger' | 'warn';
 }

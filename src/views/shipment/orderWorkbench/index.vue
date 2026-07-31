@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { Message } from '@arco-design/web-vue';
+import { Message, Modal } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
   IconSearch,
@@ -10,7 +10,10 @@ import {
   IconPlus,
   IconDownload,
   IconDown,
+  IconEdit,
   IconEye,
+  IconFullscreen,
+  IconFullscreenExit,
   IconMore,
   IconSettings,
   IconInfoCircle,
@@ -20,9 +23,11 @@ import {
   IconLayout,
   IconCheck,
 } from '@arco-design/web-vue/es/icon';
-import { downloadCsvFile } from '../../../utils/mock-actions';
+import { buildDateStamp, downloadCsvFile } from '../../../utils/mock-actions';
 import { formatLocalMinute } from '../../../utils/date-time';
 import ShipmentOrderDetailDrawer from '../orderDetail/ShipmentOrderDetailDrawer.vue';
+import ExceptionModal from './components/ExceptionModal.vue';
+import type { ExceptionFormPayload } from './components/ExceptionModal.vue';
 import { shipmentWorkbenchRows } from './mockData';
 import type {
   ShipmentKeywordType,
@@ -33,6 +38,7 @@ import type {
 } from './types';
 import type { ShipmentOrderDetailRecord } from '../orderDetail/types';
 import { getShipmentOrderMock } from '../orderDetail/mockData';
+import type { ShipmentStatusTransition } from '../featureContracts';
 import { getOrderStatusTransitions, resolveShipmentUiScenario } from '../featureContracts';
 
 const route = useRoute();
@@ -114,19 +120,20 @@ const COLUMN_SETTING_GROUPS: ColumnSettingGroup[] = [
 
 const COLUMN_SETTING_OPTIONS = COLUMN_SETTING_GROUPS.flatMap((group) => group.options);
 const REQUIRED_COLUMN_FIELDS = COLUMN_SETTING_OPTIONS.filter((option) => option.required).map((option) => option.field);
+// PRD 4.7 默认 18 列全集受 check-spec「默认可见业务列 8-12」上限约束（风险标记列固定可见占 1 席），
+// 因此默认集取 PRD 点名的 7 个字段 + 订单号/订单状态/客户/操作人员，其余字段经列设置开启。
 const DEFAULT_VISIBLE_COLUMN_FIELDS: ColumnSettingField[] = [
   'orderNo',
   'orderStatus',
   'customerName',
+  'businessType',
   'operator',
-  'pol',
-  'pod',
-  'etd',
-  'nextAction',
-  'fileStatus',
-  'feeStatus',
-  'exceptionStatus',
-  'updatedAt',
+  'vesselVoyage',
+  'eta',
+  'closingTime',
+  'bookingNo',
+  'blNo',
+  'containerSummary',
 ];
 
 const loadVisibleColumnFields = (): ColumnSettingField[] => {
@@ -153,7 +160,10 @@ const STATUS_TABS: { key: ShipmentStatusKey; label: string; tone?: 'danger' | 'w
   { key: 'waitRelease', label: '待放舱' },
   { key: 'waitTruck', label: '待拖车' },
   { key: 'waitCustoms', label: '待报关' },
+  { key: 'waitLoading', label: '待装柜' },
   { key: 'sailed', label: '已开船' },
+  { key: 'waitSi', label: '待补料' },
+  { key: 'waitBlConfirm', label: '待提单确认' },
   { key: 'fileMissing', label: '缺文件', tone: 'warn' },
   { key: 'feeUnconfirmed', label: '待费用', tone: 'warn' },
   { key: 'exception', label: '异常', tone: 'danger' },
@@ -194,7 +204,41 @@ const createWorkbenchRows = () => shipmentWorkbenchRows.map((row) => ({
   quickStatus: [...row.quickStatus],
 }));
 
-const getSystemQuerySchemes = (): SavedQueryScheme[] => [];
+// 系统预置查询方案（PRD 4.5）：只读、可复制，不可重命名/删除/设默认。
+// 拖拽排序暂不实现：纯前端 mock 无方案服务，排序语义待真实后端落地后再评估。
+// 演示口径的「今日」锚定 mock 数据集最新更新时间，保证预置方案在演示数据上有结果。
+const getMockReferenceToday = () => shipmentWorkbenchRows
+  .reduce((latest, row) => (row.updatedAt.slice(0, 10) > latest ? row.updatedAt.slice(0, 10) : latest), '');
+
+const getSystemQuerySchemes = (): SavedQueryScheme[] => {
+  const today = getMockReferenceToday() || buildDateStamp();
+  const weekEnd = buildDateStamp(new Date(new Date(`${today}T00:00:00`).getTime() + 6 * 24 * 60 * 60 * 1000));
+  const systemScheme = (
+    id: string,
+    name: string,
+    schemeQuery: ShipmentOrderQuery,
+    statusTab: ShipmentStatusKey,
+  ): SavedQueryScheme => ({
+    id,
+    name,
+    query: schemeQuery,
+    statusTab,
+    version: 2,
+    revision: 1,
+    owner: 'system',
+    isDefault: false,
+    updatedAt: '2026-06-30T00:00:00.000Z',
+    isSystem: true,
+  });
+  return [
+    systemScheme('sys-my-pending', '我的待处理', { ...defaultQuery(), operator: CURRENT_OPERATOR }, 'all'),
+    systemScheme('sys-today-closing', '今日截关', { ...defaultQuery(), closingRange: [today, today] }, 'all'),
+    systemScheme('sys-week-sailing', '本周开船', { ...defaultQuery(), etdRange: [today, weekEnd] }, 'all'),
+    systemScheme('sys-fee-unconfirmed', '费用未确认', { ...defaultQuery(), feeStatus: 'pending' }, 'feeUnconfirmed'),
+    systemScheme('sys-file-missing', '文件缺失', { ...defaultQuery(), fileStatus: 'missing' }, 'fileMissing'),
+    systemScheme('sys-exception-open', '异常待处理', { ...defaultQuery(), hasException: 'yes' }, 'exception'),
+  ];
+};
 
 const loadCustomQuerySchemes = (): SavedQueryScheme[] => {
   try {
@@ -247,7 +291,13 @@ const creating = ref(false);
 const loadError = ref('');
 const hasSimulatedError = ref(false);
 const batchSubmitting = ref(false);
-const batchFeedback = ref<{ label: string; success: number; failedOrderNos: string[] } | null>(null);
+const activeBatchKeys = new Set<string>();
+const batchFeedback = ref<{
+  label: string;
+  success: number;
+  failed: Array<{ orderNo: string; reason: string }>;
+  skippedOrderNos: string[];
+} | null>(null);
 const batchAssignVisible = ref(false);
 const batchAssignForm = reactive({ operator: CURRENT_OPERATOR });
 const batchAssignError = ref('');
@@ -263,8 +313,15 @@ const currentDetail = ref<ShipmentOrderDetailRecord | null>(null);
 const statusModalVisible = ref(false);
 const statusForm = reactive({ targetStatus: undefined as string | undefined, reason: '', notify: true, createNode: true });
 const statusErrors = reactive({ targetStatus: '', reason: '' });
-const statusTargetRow = ref<ShipmentWorkbenchRow | null>(null);
+const statusTargetRows = ref<ShipmentWorkbenchRow[]>([]);
 const statusSubmitting = ref(false);
+const exceptionModalVisible = ref(false);
+const exceptionTargetRows = ref<ShipmentWorkbenchRow[]>([]);
+const exceptionSubmitting = ref(false);
+const exceptionServerError = ref('');
+const exportScopeModalVisible = ref(false);
+const exportScope = ref<'selected' | 'filtered'>('selected');
+const tableFullscreen = ref(false);
 const voidTargetRow = ref<ShipmentWorkbenchRow | null>(null);
 const voidModalVisible = ref(false);
 const voidSubmitting = ref(false);
@@ -298,7 +355,18 @@ const schemeModalTitle = computed(() => ({
   rename: '重命名查询方案',
   duplicate: '复制查询方案',
 })[schemeModalMode.value]);
-const statusTransitionOptions = computed(() => getOrderStatusTransitions(statusTargetRow.value?.orderStatus ?? ''));
+const statusTransitionOptions = computed(() => {
+  const rows = statusTargetRows.value;
+  if (rows.length <= 1) return getOrderStatusTransitions(rows[0]?.orderStatus ?? '');
+  // 批量修改状态：目标集合取所选行合法流转的并集，提交时逐行校验（不符合项经预检跳过）。
+  const merged = new Map<string, ShipmentStatusTransition>();
+  rows.forEach((row) => {
+    getOrderStatusTransitions(row.orderStatus).forEach((transition) => {
+      if (!merged.has(transition.value)) merged.set(transition.value, transition);
+    });
+  });
+  return Array.from(merged.values());
+});
 const tableRowConfig = computed(() => ({
   isHover: true,
   keyField: 'id',
@@ -335,6 +403,10 @@ const matchRange = (value: string, range: string[], dateOnly = false) => {
 };
 
 const scenarioRows = computed(() => allRows.value.map((row, index) => {
+  if (uiScenario.value === 'locked') {
+    // locked 场景：mock 注入「财务已锁定」行，费用相关入口禁用并说明原因。
+    return index < 3 ? { ...row, financeLocked: true } : row;
+  }
   if (index !== 0 || (uiScenario.value !== 'long' && uiScenario.value !== 'extreme')) return row;
   if (uiScenario.value === 'long') {
     return {
@@ -409,6 +481,8 @@ const statusTabStats = computed<StatusTabStat[]>(() =>
       key: tab.key,
       label: tab.label,
       count: rows.length,
+      todayNew: rows.filter((row) => row.todayNew).length,
+      overdue: rows.filter((row) => row.isOverdue).length,
       tone: tab.tone,
     };
   }),
@@ -588,6 +662,7 @@ const refreshQuickStatuses = (row: ShipmentWorkbenchRow) => {
   (workflowQueue[row.orderStatus] ?? []).forEach((key) => next.add(key));
   if (row.fileStatus === 'missing') next.add('fileMissing');
   if (row.fileStatus !== 'complete' && ['sailed', 'inTransit', 'arrived'].includes(row.orderStatus)) {
+    next.add('waitSi');
     next.add('waitBlConfirm');
   }
   if (row.feeStatus !== 'confirmed') next.add('feeUnconfirmed');

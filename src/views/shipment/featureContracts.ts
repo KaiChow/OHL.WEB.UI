@@ -10,7 +10,9 @@ export type ShipmentUiScenario =
   | 'permission'
   | 'partial'
   | 'long'
-  | 'extreme';
+  | 'extreme'
+  | 'validation'
+  | 'locked';
 
 export interface ShipmentStatusTransition {
   value: OrderStatusKey;
@@ -28,6 +30,8 @@ const SUPPORTED_UI_SCENARIOS = new Set<ShipmentUiScenario>([
   'partial',
   'long',
   'extreme',
+  'validation',
+  'locked',
 ]);
 
 const TRANSITIONS: Partial<Record<OrderStatusKey, ShipmentStatusTransition[]>> = {
@@ -127,11 +131,41 @@ export const SHIPMENT_FEATURE_CONTRACTS = defineFeatureContracts([
     id: 'export-order-batch-action',
     actorRoles: ['shipment.operator', 'shipment.manager'],
     visibleWhen: 'at least one selected row supports the action',
-    enabledWhen: 'selection is non-empty and no request for the same action is in flight',
-    request: 'POST selected stable ids and action payload with an idempotency key',
+    enabledWhen: 'selection is non-empty and no request carrying the same idempotency key is in flight; repeated clicks while pending are intercepted',
+    request: 'POST selected stable ids and action payload with a generated idempotency key cached for the in-flight window; before execution, ineligible rows are listed with reasons and only continue after the actor confirms skipping them',
     successResult: 'show success count, clear successful selection, and refresh affected rows',
-    errorResult: 'show failed count and stable row identifiers beside the table; keep failed rows selected',
+    errorResult: 'show failed count and stable row identifiers beside the table with a session-downloadable CSV failure detail (order no + reason); keep failed rows selected',
     refreshScope: 'affected rows, selection context, queue counts, and partial-failure summary',
+  },
+  {
+    id: 'export-order-exception-create',
+    actorRoles: ['shipment.operator', 'shipment.cs', 'shipment.document', 'shipment.manager'],
+    visibleWhen: 'actor has exception-report permission and the order is not cancelled',
+    enabledWhen: 'exception description is present and no exception-create request for the same order is in flight; duplicate submits are intercepted while pending',
+    request: 'POST exception payload (type, level, description, owner, expected resolve time, notify-supervisor flag) with order id and current revision',
+    successResult: 'close the modal, mark the order exception as open, surface the risk flag on the row, and add the order to the exception queue',
+    errorResult: 'keep the modal open with every entered value preserved; localize field errors to their fields and expose retry on the confirm action',
+    refreshScope: 'current row exception status and risk flags, exception queue count, and audit log',
+  },
+  {
+    id: 'export-order-duplicate',
+    actorRoles: ['shipment.operator', 'shipment.manager'],
+    visibleWhen: 'actor has export-order create permission and the source order is readable',
+    enabledWhen: 'no duplicate request for the same source order is in flight',
+    request: 'create a local draft copy with a newly generated order number derived from the source order',
+    successResult: 'insert the copied row next to the source in the workbench and show the new order number',
+    errorResult: 'keep the workbench unchanged and show the copy failure beside the row action',
+    refreshScope: 'workbench rows and queue counts only',
+  },
+  {
+    id: 'export-order-export',
+    actorRoles: ['shipment.viewer', 'shipment.operator', 'shipment.manager'],
+    visibleWhen: 'actor has export-order read permission and the result set is not in an error state',
+    enabledWhen: 'no export download is being prepared',
+    request: 'when both a selection and active filters exist, ask the actor to choose exporting the N selected rows or the full filtered set, then generate the CSV client-side',
+    successResult: 'download the CSV with the PRD main columns and show the exported row count',
+    errorResult: 'keep the scope modal open and show the failure beside the export command',
+    refreshScope: 'no data refresh; download artifact only',
   },
 ] as const);
 

@@ -62,8 +62,8 @@ export interface ShipmentFileItem {
   id: string;
   name: string;
   category: string;
-  uploader: string;
-  uploadedAt: string;
+  uploader?: string;
+  uploadedAt?: string;
   status: string;
   statusKey: string;
   required: boolean;

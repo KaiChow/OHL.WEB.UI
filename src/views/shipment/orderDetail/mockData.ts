@@ -106,9 +106,13 @@ const baseDetail: ShipmentOrderDetailRecord = {
     { id: 'pf2', name: '拖车费', currency: 'CNY', unitPrice: 2000, qty: 1, unit: '票', amount: 2000, taxRate: 6, taxAmount: 2120, party: '深圳顺达拖车', status: '待确认', statusKey: 'wait', paymentStatus: '未付款' },
   ],
   files: [
-    { id: 'f1', name: '订舱委托书.pdf', category: '订舱文件', uploader: '刘商务', uploadedAt: '2026-06-28 10:35', status: '已上传', statusKey: 'acc', required: true, confirmed: true },
-    { id: 'f2', name: 'SO-待上传', category: 'SO 文件', uploader: '—', uploadedAt: '—', status: '缺失', statusKey: 'rej', required: true, confirmed: false },
-    { id: 'f3', name: '装箱单.xlsx', category: '装箱单', uploader: '张操作', uploadedAt: '2026-06-29 15:20', status: '待确认', statusKey: 'wait', required: false, confirmed: false },
+    { id: 'f1', name: '订舱委托书.pdf', category: '订舱文件', uploader: '刘商务', uploadedAt: '2026-06-28 10:35', status: '已确认', statusKey: 'acc', required: true, confirmed: true },
+    { id: 'f2', name: 'SO 确认件.pdf', category: 'SO 文件', status: '缺失', statusKey: 'rej', required: true, confirmed: false },
+    { id: 'f3', name: '报关资料包.zip', category: '报关资料', status: '缺失', statusKey: 'rej', required: true, confirmed: false },
+    { id: 'f4', name: '装箱单.xlsx', category: '装箱单', uploader: '张操作', uploadedAt: '2026-06-29 15:20', status: '待确认', statusKey: 'wait', required: true, confirmed: false },
+    { id: 'f5', name: '提单确认草件.pdf', category: '提单确认', uploader: '张操作', uploadedAt: '2026-06-30 09:10', status: '待确认', statusKey: 'wait', required: true, confirmed: false },
+    { id: 'f6', name: '费用对账单.pdf', category: '费用账单附件', uploader: '周客服', uploadedAt: '2026-06-30 16:40', status: '待确认', statusKey: 'wait', required: true, confirmed: false },
+    { id: 'f7', name: '客户合同.pdf', category: '合同附件', uploader: '刘商务', uploadedAt: '2026-06-28 11:00', status: '已确认', statusKey: 'acc', required: false, confirmed: true },
   ],
   exceptions: [
     {

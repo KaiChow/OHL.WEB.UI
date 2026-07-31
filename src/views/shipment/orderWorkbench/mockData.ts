@@ -31,6 +31,7 @@ const baseRows: ShipmentWorkbenchRow[] = [
     quickStatus: ['all', 'waitBooking', 'fileMissing'],
     isOverdue: false,
     todayNew: true,
+    financeLocked: false,
   },
   {
     id: '2',
@@ -62,6 +63,7 @@ const baseRows: ShipmentWorkbenchRow[] = [
     quickStatus: ['all', 'waitRelease', 'waitTruck', 'feeUnconfirmed'],
     isOverdue: false,
     todayNew: false,
+    financeLocked: false,
   },
   {
     id: '3',
@@ -93,6 +95,7 @@ const baseRows: ShipmentWorkbenchRow[] = [
     quickStatus: ['all', 'waitCustoms', 'exception'],
     isOverdue: true,
     todayNew: true,
+    financeLocked: false,
   },
   {
     id: '4',
@@ -124,6 +127,7 @@ const baseRows: ShipmentWorkbenchRow[] = [
     quickStatus: ['all', 'sailed', 'waitSi', 'waitBlConfirm'],
     isOverdue: false,
     todayNew: false,
+    financeLocked: false,
   },
   {
     id: '5',
@@ -155,6 +159,7 @@ const baseRows: ShipmentWorkbenchRow[] = [
     quickStatus: ['all', 'waitTruck', 'waitLoading'],
     isOverdue: false,
     todayNew: true,
+    financeLocked: false,
   },
   {
     id: '6',
@@ -186,6 +191,7 @@ const baseRows: ShipmentWorkbenchRow[] = [
     quickStatus: ['all', 'waitCustoms', 'fileMissing'],
     isOverdue: true,
     todayNew: false,
+    financeLocked: false,
   },
   {
     id: '7',
@@ -217,6 +223,7 @@ const baseRows: ShipmentWorkbenchRow[] = [
     quickStatus: ['all'],
     isOverdue: false,
     todayNew: false,
+    financeLocked: true,
   },
   {
     id: '8',
@@ -248,6 +255,7 @@ const baseRows: ShipmentWorkbenchRow[] = [
     quickStatus: ['all', 'waitBooking', 'feeUnconfirmed', 'exception'],
     isOverdue: false,
     todayNew: true,
+    financeLocked: false,
   },
 ];
 
