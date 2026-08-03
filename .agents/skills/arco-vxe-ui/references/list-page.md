@@ -185,10 +185,11 @@ Toolbar actions are chosen by workflow:
 - Create/submit/confirm when the page creates or moves business state.
 - Export/print/import when the page has reporting or document output.
 - Batch action only when multi-selection exists and the operation is safe or confirmed.
+- A frequent batch command remains discoverable in a stable toolbar position and uses disabled plus a reason until the selection is eligible. Only rare selection-only commands may appear contextually, and then they belong to a dedicated selection context that does not move stable commands.
 - Refresh/settings/density/columns are utilities, not business actions.
 - Create, output, and batch business actions stay in the left table-command group, usually with batch work as `批量操作↓`; do not isolate them in the utility area or mix them into the state row.
 - Column settings, density, pagination, refresh, and other table-only utilities belong on the right of the same table surface. Use the Arco Card title/extra slots when a meaningful toolbar exists; do not create an empty band for one icon.
-- When row selection is active, place `已选 N 条` and `清空` in the table context area. Keep total count in pagination `show-total`; do not repeat it.
+- When row selection is active, place `已选 N 条` and `清空` once in the table context area beside the batch commands. Batch trigger labels stay action-only (`批量处理` / `批量操作`) and never append the selected count. Keep result total count in pagination `show-total`; do not repeat either count elsewhere.
 - For high-frequency production pages, 5-7 visible toolbar commands are acceptable when they are grouped, neutral, and do not wrap. The rule is not "few buttons"; the rule is "one primary, clear grouping, no color noise, no line wrap."
 
 ## Table Toolbar And Pagination

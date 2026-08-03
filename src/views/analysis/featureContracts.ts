@@ -34,7 +34,7 @@ export const PROFIT_REVIEW_FEATURE_CONTRACTS = defineFeatureContracts([
     id: 'profit-review-edit', actorRoles: ['analysis.reviewer'], visibleWhen: '当前行可核查', enabledWhen: '说明已填写且提交未进行中', request: '前端 mock 更新核查说明与负责人', successResult: '更新行数据、详情时间线并关闭编辑抽屉', errorResult: '保留编辑抽屉和输入内容', refreshScope: '当前行、详情抽屉与列表',
   },
   {
-    id: 'profit-review-batch-submit', actorRoles: ['analysis.reviewer'], visibleWhen: '至少选中一条待核查订单', enabledWhen: '选择非空且没有批量请求进行中', request: '前端 mock 将选择订单提交至复核中', successResult: '更新状态、清空成功选择并显示结果', errorResult: '保留选择并在表格上下文显示失败反馈', refreshScope: '选择行、状态计数、列表与选择上下文',
+    id: 'profit-review-batch-submit', actorRoles: ['analysis.reviewer'], visibleWhen: '核查人拥有批量提交权限且列表工具栏可见', enabledWhen: '至少选择一条可提交的待核查订单且没有批量请求进行中', request: '前端 mock 将选择订单提交至复核中', successResult: '更新状态、清空成功选择并显示结果', errorResult: '保留选择并在表格上下文显示失败反馈', refreshScope: '选择行、状态计数、列表与选择上下文',
   },
   {
     id: 'profit-review-reject', actorRoles: ['analysis.reviewer'], visibleWhen: '当前行处于待核查或复核中', enabledWhen: '确认框未在提交中', request: '前端 mock 驳回当前订单核查', successResult: '更新当前行状态与时间线', errorResult: '保持确认框与当前行上下文', refreshScope: '当前行、状态计数和详情',

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { Message, Modal } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
@@ -24,9 +25,9 @@ import {
 import { downloadCsvFile } from '../../../utils/mock-actions';
 import { formatLocalMinute } from '../../../utils/date-time';
 import { compactVerticalFormLabelStyle } from '../../../design-system/formLayout';
+import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
+import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
 import WorkflowStateSelector from '../../../components/workbench/WorkflowStateSelector.vue';
-import ExceptionModal from './components/ExceptionModal.vue';
-import type { ExceptionFormPayload } from './components/ExceptionModal.vue';
 import { shipmentWorkbenchRows } from './mockData';
 import type {
   ShipmentKeywordType,
@@ -39,12 +40,13 @@ import type { ShipmentStatusTransition } from '../featureContracts';
 import { getOrderStatusTransitions, resolveShipmentUiScenario } from '../featureContracts';
 
 const route = useRoute();
+const { t, locale } = useI18n();
 
 const CURRENT_OPERATOR = '张操作';
 const COLUMN_SETTING_STORAGE_KEY = 'ohl.shipment.export-order.visible-columns.v3';
 
 type TableDensity = 'compact' | 'standard';
-type WorkScope = 'all' | 'mine';
+type WorkScope = 'all' | 'mine' | 'others';
 
 type ColumnSettingField = keyof ShipmentWorkbenchRow | 'nextAction';
 
@@ -98,6 +100,8 @@ const COLUMN_SETTING_GROUPS: ColumnSettingGroup[] = [
 ];
 
 const COLUMN_SETTING_OPTIONS = COLUMN_SETTING_GROUPS.flatMap((group) => group.options);
+const COLUMN_GROUP_I18N_KEYS: Record<string, string> = { '核心信息': 'core', '运输节点': 'transport', '单证信息': 'documents', '执行跟进': 'execution' };
+const getColumnGroupLabel = (label: string) => t(`shipment.settings.${COLUMN_GROUP_I18N_KEYS[label]}`);
 const REQUIRED_COLUMN_FIELDS = COLUMN_SETTING_OPTIONS.filter((option) => option.required).map((option) => option.field);
 // PRD 4.7 默认 18 列全集受 check-spec「默认可见业务列 8-12」上限约束（风险标记列固定可见占 1 席），
 // 因此默认集取 PRD 点名的 7 个字段 + 订单号/订单状态/客户/操作人员，其余字段经列设置开启。
@@ -127,27 +131,27 @@ const loadVisibleColumnFields = (): ColumnSettingField[] => {
   }
 };
 
-const KEYWORD_OPTIONS: { label: string; value: ShipmentKeywordType }[] = [
-  { label: '业务单号', value: 'orderNo' },
-  { label: '提单号', value: 'blNo' },
-  { label: '订舱号', value: 'bookingNo' },
+const KEYWORD_OPTIONS: { key: string; value: ShipmentKeywordType }[] = [
+  { key: 'orderNo', value: 'orderNo' },
+  { key: 'blNo', value: 'blNo' },
+  { key: 'bookingNo', value: 'bookingNo' },
 ];
 
 const BUSINESS_TYPE_OPTIONS = ['FCL', 'LCL'];
 
-const WORKFLOW_STATE_OPTIONS: { key: ShipmentStatusKey; label: string; tone?: 'danger' | 'warn' }[] = [
-  { key: 'all', label: '全部' },
-  { key: 'waitBooking', label: '订舱处理' },
-  { key: 'waitRelease', label: '待放舱' },
-  { key: 'waitTruck', label: '待拖车' },
-  { key: 'waitCustoms', label: '待报关' },
-  { key: 'waitLoading', label: '待装柜' },
-  { key: 'sailed', label: '已开船' },
-  { key: 'waitSi', label: '待补料' },
-  { key: 'waitBlConfirm', label: '待提单确认' },
-  { key: 'fileMissing', label: '缺文件', tone: 'warn' },
-  { key: 'feeUnconfirmed', label: '待费用', tone: 'warn' },
-  { key: 'exception', label: '异常', tone: 'danger' },
+const WORKFLOW_STATE_OPTIONS: { key: ShipmentStatusKey; tone?: 'danger' | 'warn' }[] = [
+  { key: 'all' },
+  { key: 'waitBooking' },
+  { key: 'waitRelease' },
+  { key: 'waitTruck' },
+  { key: 'waitCustoms' },
+  { key: 'waitLoading' },
+  { key: 'sailed' },
+  { key: 'waitSi' },
+  { key: 'waitBlConfirm' },
+  { key: 'fileMissing', tone: 'warn' },
+  { key: 'feeUnconfirmed', tone: 'warn' },
+  { key: 'exception', tone: 'danger' },
 ];
 
 const defaultQuery = (): ShipmentOrderQuery => ({
@@ -221,10 +225,6 @@ const statusForm = reactive({ targetStatus: undefined as string | undefined, rea
 const statusErrors = reactive({ targetStatus: '', reason: '' });
 const statusTargetRows = ref<ShipmentWorkbenchRow[]>([]);
 const statusSubmitting = ref(false);
-const exceptionModalVisible = ref(false);
-const exceptionTargetRows = ref<ShipmentWorkbenchRow[]>([]);
-const exceptionSubmitting = ref(false);
-const exceptionServerError = ref('');
 const exportScopeModalVisible = ref(false);
 const exportScope = ref<'selected' | 'filtered'>('selected');
 const tableFullscreen = ref(false);
@@ -312,6 +312,7 @@ const scenarioRows = computed(() => allRows.value.map((row, index) => {
 
 const rowMatchesQuery = (row: ShipmentWorkbenchRow, q: ShipmentOrderQuery, workScope: WorkScope) => {
   if (workScope === 'mine' && row.operator !== CURRENT_OPERATOR) return false;
+  if (workScope === 'others' && row.operator === CURRENT_OPERATOR) return false;
   if (!matchKeyword(row, q)) return false;
   if (!matchText(row.customerName, q.customerName)) return false;
   if (!matchText(row.pol, q.pol)) return false;
@@ -364,7 +365,7 @@ const workflowStateOptions = computed<WorkflowStateStat[]>(() =>
 
     return {
       key: state.key,
-      label: state.label,
+      label: t(`shipment.queues.${state.key}`),
       count: rows.length,
       todayNew: rows.filter((row) => row.todayNew).length,
       overdue: rows.filter((row) => row.isOverdue).length,
@@ -474,25 +475,25 @@ const advancedActiveCount = computed(() => {
 });
 
 const getNextActionLabel = (row: ShipmentWorkbenchRow) => {
-  if (row.exceptionStatus === 'open') return '处理异常';
-  if (row.fileStatus === 'missing') return '补齐文件';
-  if (row.orderStatus === 'waitBooking' || row.orderStatus === 'booking') return '推进订舱';
-  if (row.orderStatus === 'released' || row.orderStatus === 'waitTruck' || row.orderStatus === 'trucking') return '安排拖车';
-  if (row.orderStatus === 'waitCustoms' || row.orderStatus === 'customs') return '推进报关';
-  if (row.orderStatus === 'sailed') return '提单确认';
-  if (row.feeStatus === 'none' || row.feeStatus === 'pending') return '维护费用';
-  return '跟踪节点';
+  if (row.exceptionStatus === 'open') return t('shipment.nextActions.exception');
+  if (row.fileStatus === 'missing') return t('shipment.nextActions.files');
+  if (row.orderStatus === 'waitBooking' || row.orderStatus === 'booking') return t('shipment.nextActions.booking');
+  if (row.orderStatus === 'released' || row.orderStatus === 'waitTruck' || row.orderStatus === 'trucking') return t('shipment.nextActions.trucking');
+  if (row.orderStatus === 'waitCustoms' || row.orderStatus === 'customs') return t('shipment.nextActions.customs');
+  if (row.orderStatus === 'sailed') return t('shipment.nextActions.bl');
+  if (row.feeStatus === 'none' || row.feeStatus === 'pending') return t('shipment.nextActions.fee');
+  return t('shipment.nextActions.track');
 };
 
 const getNextActionMeta = (row: ShipmentWorkbenchRow) => {
-  if (row.exceptionStatus === 'open') return row.riskFlags.join(' / ') || '存在阻塞项待关闭';
-  if (row.fileStatus === 'missing') return '缺少 SO / 报关 / 提单资料';
-  if (row.orderStatus === 'waitBooking' || row.orderStatus === 'booking') return '关注放舱与舱位回传';
-  if (row.orderStatus === 'released' || row.orderStatus === 'waitTruck' || row.orderStatus === 'trucking') return '同步装柜与进港安排';
-  if (row.orderStatus === 'waitCustoms' || row.orderStatus === 'customs') return '核对申报与放行节点';
-  if (row.orderStatus === 'sailed') return '补料 / 提单 / 到港跟踪';
-  if (row.feeStatus === 'none' || row.feeStatus === 'pending') return '应收应付待核算';
-  return '继续跟踪节点变化';
+  if (row.exceptionStatus === 'open') return locale.value === 'zh-CN' && row.riskFlags.length ? row.riskFlags.join(' / ') : t('shipment.nextMeta.exception');
+  if (row.fileStatus === 'missing') return t('shipment.nextMeta.files');
+  if (row.orderStatus === 'waitBooking' || row.orderStatus === 'booking') return t('shipment.nextMeta.booking');
+  if (row.orderStatus === 'released' || row.orderStatus === 'waitTruck' || row.orderStatus === 'trucking') return t('shipment.nextMeta.trucking');
+  if (row.orderStatus === 'waitCustoms' || row.orderStatus === 'customs') return t('shipment.nextMeta.customs');
+  if (row.orderStatus === 'sailed') return t('shipment.nextMeta.bl');
+  if (row.feeStatus === 'none' || row.feeStatus === 'pending') return t('shipment.nextMeta.fee');
+  return t('shipment.nextMeta.track');
 };
 
 const fileStatusMeta: Record<ShipmentWorkbenchRow['fileStatus'], { label: string; tone: 'acc' | 'wait' | 'rej' }> = {
@@ -738,11 +739,11 @@ const resetColumnSettingDraft = () => {
 const applyColumnSettings = async () => {
   const nextFields = Array.from(new Set([...REQUIRED_COLUMN_FIELDS, ...columnSettingDraft.value]));
   if (nextFields.length < 8) {
-    Message.warning('至少保留 8 个业务字段');
+    Message.warning(t('shipment.messages.minColumns'));
     return false;
   }
   if (!tableRef.value) {
-    Message.error('表格尚未就绪，请稍后重试');
+    Message.error(t('shipment.messages.tableNotReady'));
     return false;
   }
 
@@ -755,7 +756,7 @@ const applyColumnSettings = async () => {
       : tableRef.value?.hideColumn(option.field)
   )));
   await tableRef.value.refreshColumn();
-  Message.success('列设置已应用');
+  Message.success(t('shipment.messages.columnsApplied'));
   return true;
 };
 
@@ -764,20 +765,20 @@ const handleCreateOrder = async () => {
   creating.value = true;
   await waitForInteraction(240, 1100);
   if (uiScenario.value === 'error') {
-    Message.error('订单草稿初始化失败，当前查询与列表位置已保留');
+    Message.error(t('shipment.messages.draftError'));
     creating.value = false;
     return;
   }
   // 详情编辑模块已下线，草稿初始化结果暂以消息反馈。
-  Message.success(`订单草稿 NEW${Date.now()} 已初始化`);
+  Message.success(t('shipment.messages.draftSuccess', { orderNo: `NEW${Date.now()}` }));
   creating.value = false;
 };
 
 const handleAssignOperator = (row: ShipmentWorkbenchRow) => runRowMutation(
   row,
   () => { row.operator = CURRENT_OPERATOR; },
-  `订单 ${row.orderNo} 已分配给${CURRENT_OPERATOR}`,
-  `订单 ${row.orderNo} 分配失败，请重试`,
+  t('shipment.messages.assignSuccess', { orderNo: row.orderNo, operator: CURRENT_OPERATOR }),
+  t('shipment.messages.assignFail', { orderNo: row.orderNo }),
 );
 
 const handleGenerateRowFee = (row: ShipmentWorkbenchRow) => runRowMutation(
@@ -786,8 +787,8 @@ const handleGenerateRowFee = (row: ShipmentWorkbenchRow) => runRowMutation(
     row.feeStatus = 'pending';
     row.feeStatusLabel = '待确认';
   },
-  `订单 ${row.orderNo} 已生成待确认费用`,
-  `订单 ${row.orderNo} 费用生成失败，请重试`,
+  t('shipment.messages.feeSuccess', { orderNo: row.orderNo }),
+  t('shipment.messages.feeFail', { orderNo: row.orderNo }),
 );
 
 const openStatusModal = (row: ShipmentWorkbenchRow) => {
@@ -802,13 +803,13 @@ const openStatusModal = (row: ShipmentWorkbenchRow) => {
 };
 
 const confirmStatusChange = async () => {
-  statusErrors.targetStatus = statusForm.targetStatus ? '' : '请选择目标状态';
-  statusErrors.reason = statusForm.reason.trim() ? '' : '请填写修改原因';
+  statusErrors.targetStatus = statusForm.targetStatus ? '' : t('shipment.messages.targetRequired');
+  statusErrors.reason = statusForm.reason.trim() ? '' : t('shipment.messages.reasonRequired');
   if (statusErrors.targetStatus || statusErrors.reason || statusTargetRows.value.length === 0) return false;
 
   const nextStatus = statusTransitionOptions.value.find((item) => item.value === statusForm.targetStatus);
   if (!nextStatus) {
-    statusErrors.targetStatus = '当前状态不允许执行该流转，请刷新后重试';
+    statusErrors.targetStatus = t('shipment.messages.transitionInvalid');
     return false;
   }
 
@@ -821,12 +822,12 @@ const confirmStatusChange = async () => {
       row.orderStatusLabel = nextStatus.label;
       row.statusPill = nextStatus.tone;
     },
-    `订单 ${row.orderNo} 状态已更新为${nextStatus.label}`,
-    `订单 ${row.orderNo} 状态更新失败，原因与目标状态已保留`,
+    t('shipment.messages.statusSuccess', { orderNo: row.orderNo, status: t(`shipment.statuses.${nextStatus.value}`) }),
+    t('shipment.messages.statusFail', { orderNo: row.orderNo }),
   );
   statusSubmitting.value = false;
   if (!changed) {
-    statusErrors.reason = '提交失败，请确认订单状态后重试';
+    statusErrors.reason = t('shipment.messages.submitFail');
     return false;
   }
   return true;
@@ -850,11 +851,11 @@ const voidOrder = async () => {
       row.orderStatusLabel = '已作废';
       row.statusPill = 'rej';
     },
-    `订单 ${row.orderNo} 已作废`,
-    `订单 ${row.orderNo} 作废失败，当前列表状态已保留`,
+    t('shipment.messages.voidSuccess', { orderNo: row.orderNo }),
+    t('shipment.messages.voidFail', { orderNo: row.orderNo }),
   );
   voidSubmitting.value = false;
-  if (!changed) voidError.value = '作废请求未完成，请刷新订单状态后重试。';
+  if (!changed) voidError.value = t('shipment.messages.voidError');
   return changed;
 };
 
@@ -862,24 +863,24 @@ const handleExport = () => {
   const rows = selectedRows.value.length ? selectedRows.value : filteredRows.value;
 
   downloadCsvFile(
-    `海运出口订单-${rows.length}条.csv`,
-    ['订单号', '客户', '业务类型', '状态', 'ETD', '目的港', '操作人员'],
-    rows.map((row) => [row.orderNo, row.customerName, row.businessType, row.orderStatusLabel, row.etd, row.pod, row.operator]),
+    t('shipment.messages.exportFile', { count: rows.length }),
+    [t('shipment.columns.orderNo'), t('shipment.columns.customerName'), t('shipment.columns.businessType'), t('shipment.columns.orderStatus'), 'ETD', t('shipment.columns.pod'), t('shipment.columns.operator')],
+    rows.map((row) => [row.orderNo, row.customerName, row.businessType, t(`shipment.statuses.${row.orderStatus}`), row.etd, row.pod, row.operator]),
   );
 
-  Message.success(`已导出 ${rows.length} 条`);
+  Message.success(t('shipment.messages.exportSuccess', { count: rows.length }));
 };
 
 const handleRowNotify = (row: ShipmentWorkbenchRow) => runRowMutation(
   row,
   () => undefined,
-  `订单 ${row.orderNo} 的通知已发送`,
-  `订单 ${row.orderNo} 通知发送失败，请重试`,
+  t('shipment.messages.notifySuccess', { orderNo: row.orderNo }),
+  t('shipment.messages.notifyFail', { orderNo: row.orderNo }),
 );
 
 const runBatchAction = async (label: string, mutate: (row: ShipmentWorkbenchRow) => void) => {
   if (!selectedCount.value) {
-    Message.warning('请先选择订单');
+    Message.warning(t('shipment.messages.selectOrders'));
     return false;
   }
   if (batchSubmitting.value) return false;
@@ -909,15 +910,15 @@ const runBatchAction = async (label: string, mutate: (row: ShipmentWorkbenchRow)
     tableRef.value?.setCheckboxRow(failedRows, true);
     selectedRows.value = failedRows;
     batchSubmitting.value = false;
-    if (succeededRows.length) Message.warning(`${label}完成，${succeededRows.length} 条成功，${failedRows.length} 条失败`);
-    else Message.error(`${label}失败，${failedRows.length} 条订单已保留选中`);
+    if (succeededRows.length) Message.warning(t('shipment.messages.batchPartial', { action: label, success: succeededRows.length, failed: failedRows.length }));
+    else Message.error(t('shipment.messages.batchFail', { action: label, failed: failedRows.length }));
     return false;
   }
 
   batchFeedback.value = null;
   clearSelection();
   batchSubmitting.value = false;
-  Message.success(`${label}已完成，共处理 ${submittedRows.length} 条`);
+  Message.success(t('shipment.messages.batchSuccess', { action: label, count: submittedRows.length }));
   return true;
 };
 
@@ -929,19 +930,19 @@ const openBatchAssignment = (operator = CURRENT_OPERATOR) => {
 
 const confirmBatchAssignment = async () => {
   if (!batchAssignForm.operator) {
-    batchAssignError.value = '请选择操作人员';
+    batchAssignError.value = t('shipment.messages.operatorRequired');
     return false;
   }
   const operator = batchAssignForm.operator;
   const completed = await runBatchAction(
-    `批量分配给${operator}`,
+    t('shipment.messages.batchAssign', { operator }),
     (row) => { row.operator = operator; },
   );
-  if (!completed) batchAssignError.value = '部分或全部订单分配失败，失败订单已保留选中';
+  if (!completed) batchAssignError.value = t('shipment.messages.batchAssignError');
   return completed;
 };
 
-const handleBatchNotify = () => runBatchAction('批量通知', () => undefined);
+const handleBatchNotify = () => runBatchAction(t('shipment.messages.batchNotify'), () => undefined);
 
 const fetchList = async () => {
   if (uiScenario.value === 'permission') return;
@@ -949,7 +950,7 @@ const fetchList = async () => {
   loading.value = true;
   await new Promise((resolve) => setTimeout(resolve, uiScenario.value === 'slow' ? 1600 : 300));
   if (uiScenario.value === 'error' && !hasSimulatedError.value) {
-    loadError.value = '订单数据加载失败，请检查网络后重试。';
+    loadError.value = t('shipment.messages.loadError');
     hasSimulatedError.value = true;
   }
   loading.value = false;
@@ -986,9 +987,9 @@ watch(uiScenario, () => {
       >
         <div class="filter-panel">
           <a-form :model="query" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="filter-panel__form">
-            <a-row :gutter="[12, 0]" align="end">
-              <a-col :xs="24" :sm="24" :md="7" :lg="7" :xl="6">
-                <a-form-item label="单号检索">
+            <QueryFieldGrid>
+              <QueryFieldCol role="composite">
+                <a-form-item :label="t('shipment.fields.keyword')">
                   <a-input-group>
                     <a-select
                       v-model="query.keywordType"
@@ -996,85 +997,85 @@ watch(uiScenario, () => {
                       :style="{ width: '104px' }"
                     >
                       <a-option v-for="option in KEYWORD_OPTIONS" :key="option.value" :value="option.value">
-                        {{ option.label }}
+                        {{ t(`shipment.keywordTypes.${option.key}`) }}
                       </a-option>
                     </a-select>
                     <a-input
                       v-model="query.keyword"
                       size="small"
                       allow-clear
-                      placeholder="请输入业务单号 / 提单号 / 订舱号"
+                      :placeholder="t('shipment.placeholders.keyword')"
                       @press-enter="handleSearch"
                     />
                   </a-input-group>
                 </a-form-item>
-              </a-col>
-              <a-col :xs="24" :sm="12" :md="3" :lg="3" :xl="3">
-                <a-form-item label="业务类型">
-                  <a-select v-model="query.businessType" size="small" allow-clear placeholder="全部类型">
+              </QueryFieldCol>
+              <QueryFieldCol role="compact">
+                <a-form-item :label="t('shipment.fields.businessType')">
+                  <a-select v-model="query.businessType" size="small" allow-clear :placeholder="t('shipment.placeholders.businessType')">
                     <a-option v-for="businessType in BUSINESS_TYPE_OPTIONS" :key="businessType" :value="businessType">
                       {{ businessType }}
                     </a-option>
                   </a-select>
                 </a-form-item>
-              </a-col>
-              <a-col :xs="24" :sm="12" :md="5" :lg="5" :xl="4">
-                <a-form-item label="客户名称">
+              </QueryFieldCol>
+              <QueryFieldCol role="standard">
+                <a-form-item :label="t('shipment.fields.customer')">
                   <a-input
                     v-model="query.customerName"
                     size="small"
                     allow-clear
-                    placeholder="请输入客户名称"
+                    :placeholder="t('shipment.placeholders.customer')"
                     @press-enter="handleSearch"
                   />
                 </a-form-item>
-              </a-col>
-              <a-col :xs="24" :sm="12" :md="3" :lg="3" :xl="3">
-                <a-form-item label="责任操作">
-                  <a-select v-model="query.operator" size="small" allow-clear allow-search placeholder="全部人员">
+              </QueryFieldCol>
+              <QueryFieldCol role="compact">
+                <a-form-item :label="t('shipment.fields.operator')">
+                  <a-select v-model="query.operator" size="small" allow-clear allow-search :placeholder="t('shipment.placeholders.operator')">
                     <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
                       {{ operator }}
                     </a-option>
                   </a-select>
                 </a-form-item>
-              </a-col>
-              <a-col :xs="24" :sm="24" :md="6" :lg="6" :xl="3" class="filter-panel__action-col">
+              </QueryFieldCol>
+              <QueryFieldCol role="actions-wide">
                 <div class="filter-panel__actions">
                   <a-button size="small" type="primary" :loading="querying" @click="handleSearch">
                     <template #icon><icon-search /></template>
-                    查询
+                    {{ t('common.search') }}
                   </a-button>
-                  <a-tooltip content="重置查询条件">
-                    <a-button size="small" type="text" class="filter-tool-button" title="重置查询条件" aria-label="重置查询条件" :disabled="querying" @click="handleReset">
+                  <a-tooltip :content="t('common.reset')">
+                    <a-button size="small" type="text" class="filter-tool-button" :title="t('common.reset')" :aria-label="t('common.reset')" :disabled="querying" @click="handleReset">
                       <template #icon><icon-refresh /></template>
-                      <span class="filter-tool-label">重置</span>
+                      <span class="filter-tool-label">{{ t('common.reset') }}</span>
                     </a-button>
                   </a-tooltip>
                   <a-badge :count="advancedActiveCount" :offset="[-4, 4]">
-                    <a-tooltip content="高级筛选">
-                      <a-button size="small" type="text" class="filter-tool-button" title="高级筛选" aria-label="高级筛选" @click="openAdvancedFilters">
+                    <a-tooltip :content="t('shipment.actions.advanced')">
+                      <a-button size="small" type="text" class="filter-tool-button" :title="t('shipment.actions.advanced')" :aria-label="t('shipment.actions.advanced')" @click="openAdvancedFilters">
                         <template #icon><icon-filter /></template>
-                        <span class="filter-tool-label">筛选</span>
+                        <span class="filter-tool-label">{{ t('common.filter') }}</span>
                       </a-button>
                     </a-tooltip>
                   </a-badge>
                 </div>
-              </a-col>
-            </a-row>
+              </QueryFieldCol>
+            </QueryFieldGrid>
           </a-form>
         </div>
         <div class="workflow-filter-bar">
           <div class="workflow-filter-bar__scope" data-workbench-scope="ownership">
             <a-radio-group
               v-model="activeWorkScope"
-              aria-label="工作范围"
+              :aria-label="t('shipment.scope.label')"
               type="button"
               size="small"
               @change="onWorkScopeChange"
             >
-              <a-radio value="all">全部</a-radio>
-              <a-radio value="mine">我的订单</a-radio>
-              <a-radio value="others">权限单</a-radio>
+              <a-radio value="all">{{ t('shipment.scope.all') }}</a-radio>
+              <a-radio value="mine">{{ t('shipment.scope.mine') }}</a-radio>
+              <a-radio value="others">{{ t('shipment.scope.others') }}</a-radio>
             </a-radio-group>
           </div>
 
@@ -1083,7 +1084,7 @@ watch(uiScenario, () => {
           <WorkflowStateSelector
             class="workflow-filter-bar__state"
             :model-value="activeWorkflowState"
-            label="处理队列"
+            :label="t('shipment.queueLabel')"
             :show-label="false"
             :options="workflowStateOptions"
             @change="onWorkflowStateChange"
@@ -1103,36 +1104,36 @@ watch(uiScenario, () => {
             <div v-if="canOperate" class="table-command-group">
               <a-button size="small" type="primary" :loading="creating" @click="handleCreateOrder">
                 <template #icon><icon-plus /></template>
-                新增订单
+                {{ t('shipment.actions.create') }}
               </a-button>
-              <a-tooltip content="导出当前结果">
-                <a-button size="small" aria-label="导出当前结果" @click="handleExport">
+              <a-tooltip :content="t('shipment.actions.exportCurrent')">
+                <a-button size="small" :aria-label="t('shipment.actions.exportCurrent')" @click="handleExport">
                   <template #icon><icon-download /></template>
-                  <span class="table-command-label--optional">导出</span>
+                  <span class="table-command-label--optional">{{ t('common.export') }}</span>
                 </a-button>
               </a-tooltip>
               <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
                 <a-button size="small" :disabled="!selectedCount" :loading="batchSubmitting">
-                  批量处理<template v-if="selectedCount">（{{ selectedCount }}）</template><icon-down />
+                  {{ t('shipment.actions.batch') }}<icon-down />
                 </a-button>
                 <template #content>
-                  <a-doption @click="openBatchAssignment(CURRENT_OPERATOR)">分配给我</a-doption>
-                  <a-doption @click="openBatchAssignment('')">指定操作人员…</a-doption>
-                  <a-doption @click="handleBatchNotify">发送通知</a-doption>
-                  <a-doption @click="clearSelection">清空选择</a-doption>
+                  <a-doption @click="openBatchAssignment(CURRENT_OPERATOR)">{{ t('shipment.actions.assignMe') }}</a-doption>
+                  <a-doption @click="openBatchAssignment('')">{{ t('shipment.actions.assignOperator') }}</a-doption>
+                  <a-doption @click="handleBatchNotify">{{ t('shipment.actions.notify') }}</a-doption>
+                  <a-doption @click="clearSelection">{{ t('shipment.actions.clearSelection') }}</a-doption>
                 </template>
               </a-dropdown>
             </div>
             <div v-if="selectedCount > 0" class="selection-context">
-              <span class="selection-tip">已选 <b>{{ selectedCount }}</b> 条</span>
-              <a-button size="small" type="text" @click="clearSelection">清空</a-button>
+              <span class="selection-tip">{{ t('common.selected', { count: selectedCount }) }}</span>
+              <a-button size="small" type="text" @click="clearSelection">{{ t('common.clear') }}</a-button>
             </div>
           </div>
         </template>
         <template #extra>
           <a-space :size="8">
-            <a-tooltip content="刷新">
-              <a-button size="small" type="text" class="table-cap-tool" title="刷新" aria-label="刷新" :loading="loading || forcedLoading" @click="fetchList">
+            <a-tooltip :content="t('common.refresh')">
+              <a-button size="small" type="text" class="table-cap-tool" :title="t('common.refresh')" :aria-label="t('common.refresh')" :loading="loading || forcedLoading" @click="fetchList">
                 <template #icon><icon-refresh /></template>
               </a-button>
             </a-tooltip>
@@ -1141,7 +1142,7 @@ watch(uiScenario, () => {
               :page-size="page.size"
               :total="tableTotal"
               :page-size-options="[20, 50, 100, 200]"
-              size="small"
+              size="mini"
               show-total
               show-page-size
               show-jumper
@@ -1149,8 +1150,8 @@ watch(uiScenario, () => {
               @page-size-change="onPageSizeChange"
             />
             <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--toolbar">
-              <a-tooltip content="表格密度">
-                <a-button size="small" type="text" class="table-cap-tool" title="表格密度" aria-label="表格密度">
+              <a-tooltip :content="t('shipment.actions.density')">
+                <a-button size="small" type="text" class="table-cap-tool" :title="t('shipment.actions.density')" :aria-label="t('shipment.actions.density')">
                   <template #icon><icon-layout /></template>
                 </a-button>
               </a-tooltip>
@@ -1159,20 +1160,20 @@ watch(uiScenario, () => {
                   <span class="density-option">
                     <icon-check v-if="tableDensity === 'compact'" />
                     <span v-else class="density-option__placeholder" />
-                    紧凑
+                    {{ t('shipment.actions.compact') }}
                   </span>
                 </a-doption>
                 <a-doption @click="setTableDensity('standard')">
                   <span class="density-option">
                     <icon-check v-if="tableDensity === 'standard'" />
                     <span v-else class="density-option__placeholder" />
-                    舒适
+                    {{ t('shipment.actions.comfortable') }}
                   </span>
                 </a-doption>
               </template>
             </a-dropdown>
-            <a-tooltip content="列设置">
-              <a-button size="small" type="text" class="table-cap-tool" title="列设置" aria-label="列设置" @click="openColumnSettings">
+            <a-tooltip :content="t('shipment.actions.columns')">
+              <a-button size="small" type="text" class="table-cap-tool" :title="t('shipment.actions.columns')" :aria-label="t('shipment.actions.columns')" @click="openColumnSettings">
                 <template #icon><icon-settings /></template>
               </a-button>
             </a-tooltip>
@@ -1186,7 +1187,7 @@ watch(uiScenario, () => {
           class="batch-result-alert"
           @close="batchFeedback = null"
         >
-          {{ batchFeedback.label }}：成功 {{ batchFeedback.success }} 条，失败 {{ batchFeedback.failedOrderNos.length }} 条；失败订单 {{ batchFeedback.failedOrderNos.join('、') }} 已保留选中，可修正后重试。
+          {{ t('shipment.messages.batchAlert', { action: batchFeedback.label, success: batchFeedback.success, failed: batchFeedback.failedOrderNos.length, orders: batchFeedback.failedOrderNos.join(', ') }) }}
         </a-alert>
 
         <div class="workbench-table-frame">
@@ -1201,6 +1202,7 @@ watch(uiScenario, () => {
             show-overflow="title"
             :loading="loading || querying || forcedLoading"
             :data="pagedRows"
+            :seq-config="{ startIndex: (page.current - 1) * page.size }"
             :column-config="{ resizable: true }"
             :custom-config="{ storage: true }"
             :row-config="tableRowConfig"
@@ -1209,20 +1211,21 @@ watch(uiScenario, () => {
             @checkbox-all="onSelectionChange"
           >
             <vxe-column type="checkbox" width="44" fixed="left" />
+            <vxe-column type="seq" :title="t('common.sequence')" width="52" fixed="left" align="center" />
 
-            <vxe-column field="orderNo" title="订单号" min-width="168" fixed="left" :visible="isColumnVisible('orderNo')">
+            <vxe-column field="orderNo" :title="t('shipment.columns.orderNo')" min-width="168" fixed="left" :visible="isColumnVisible('orderNo')">
               <template #default="{ row }">
                 <span class="mono">{{ row.orderNo }}</span>
               </template>
             </vxe-column>
 
-            <vxe-column field="orderStatus" title="订单状态" min-width="96" fixed="left" :visible="isColumnVisible('orderStatus')">
+            <vxe-column field="orderStatus" :title="t('shipment.columns.orderStatus')" min-width="116" fixed="left" :visible="isColumnVisible('orderStatus')">
               <template #default="{ row }">
-                <span class="s-pill" :data-s="row.statusPill">{{ row.orderStatusLabel }}</span>
+                <span class="s-pill" :data-s="row.statusPill">{{ t(`shipment.statuses.${row.orderStatus}`) }}</span>
               </template>
             </vxe-column>
 
-            <vxe-column field="nextAction" title="当前待办" min-width="230" :visible="isColumnVisible('nextAction')">
+            <vxe-column field="nextAction" :title="t('shipment.columns.nextAction')" min-width="230" :visible="isColumnVisible('nextAction')">
               <template #default="{ row }">
                 <div class="decision-cell" data-cell-role="decision-context">
                   <span class="decision-cell__main">{{ getNextActionLabel(row) }}</span>
@@ -1231,45 +1234,45 @@ watch(uiScenario, () => {
               </template>
             </vxe-column>
 
-            <vxe-column field="operator" title="责任操作" min-width="90" :visible="isColumnVisible('operator')" />
-            <vxe-column field="customerName" title="客户名称" min-width="190" :visible="isColumnVisible('customerName')" />
-            <vxe-column field="pol" title="起运港" min-width="96" class-name="mono" :visible="isColumnVisible('pol')" />
-            <vxe-column field="pod" title="目的港" min-width="96" class-name="mono" :visible="isColumnVisible('pod')" />
+            <vxe-column field="operator" :title="t('shipment.columns.operator')" min-width="104" :visible="isColumnVisible('operator')" />
+            <vxe-column field="customerName" :title="t('shipment.columns.customerName')" min-width="190" :visible="isColumnVisible('customerName')" />
+            <vxe-column field="pol" :title="t('shipment.columns.pol')" min-width="96" class-name="mono" :visible="isColumnVisible('pol')" />
+            <vxe-column field="pod" :title="t('shipment.columns.pod')" min-width="96" class-name="mono" :visible="isColumnVisible('pod')" />
             <vxe-column field="etd" title="ETD" min-width="104" class-name="mono" :visible="isColumnVisible('etd')" />
 
-            <vxe-column field="fileStatus" title="文件状态" min-width="100" :visible="isColumnVisible('fileStatus')">
+            <vxe-column field="fileStatus" :title="t('shipment.columns.fileStatus')" min-width="104" :visible="isColumnVisible('fileStatus')">
               <template #default="{ row }">
-                <span class="s-pill" :data-s="getFileStatusMeta(row).tone">{{ getFileStatusMeta(row).label }}</span>
+                <span class="s-pill" :data-s="getFileStatusMeta(row).tone">{{ t(`shipment.fileStatus.${row.fileStatus}`) }}</span>
               </template>
             </vxe-column>
 
-            <vxe-column field="feeStatus" title="费用状态" min-width="100" :visible="isColumnVisible('feeStatus')">
+            <vxe-column field="feeStatus" :title="t('shipment.columns.feeStatus')" min-width="100" :visible="isColumnVisible('feeStatus')">
               <template #default="{ row }">
-                <span class="s-pill" :data-s="getFeeStatusMeta(row).tone">{{ getFeeStatusMeta(row).label }}</span>
+                <span class="s-pill" :data-s="getFeeStatusMeta(row).tone">{{ t(`shipment.feeStatus.${row.feeStatus}`) }}</span>
               </template>
             </vxe-column>
 
-            <vxe-column field="exceptionStatus" title="异常状态" min-width="100" :visible="isColumnVisible('exceptionStatus')">
+            <vxe-column field="exceptionStatus" :title="t('shipment.columns.exceptionStatus')" min-width="112" :visible="isColumnVisible('exceptionStatus')">
               <template #default="{ row }">
-                <span class="s-pill" :data-s="getExceptionStatusMeta(row).tone">{{ getExceptionStatusMeta(row).label }}</span>
+                <span class="s-pill" :data-s="getExceptionStatusMeta(row).tone">{{ t(`shipment.exceptionStatus.${row.exceptionStatus}`) }}</span>
               </template>
             </vxe-column>
 
-            <vxe-column field="updatedAt" title="更新时间" min-width="140" class-name="mono" :visible="isColumnVisible('updatedAt')" />
+            <vxe-column field="updatedAt" :title="t('shipment.columns.updatedAt')" min-width="140" class-name="mono" :visible="isColumnVisible('updatedAt')" />
 
-            <vxe-column field="businessType" title="业务类型" min-width="84" :visible="isColumnVisible('businessType')" />
-            <vxe-column field="carrier" title="船公司" min-width="120" :visible="isColumnVisible('carrier')" />
-            <vxe-column field="vesselVoyage" title="船名航次" min-width="190" :visible="isColumnVisible('vesselVoyage')" />
+            <vxe-column field="businessType" :title="t('shipment.columns.businessType')" min-width="96" :visible="isColumnVisible('businessType')" />
+            <vxe-column field="carrier" :title="t('shipment.columns.carrier')" min-width="120" :visible="isColumnVisible('carrier')" />
+            <vxe-column field="vesselVoyage" :title="t('shipment.columns.vesselVoyage')" min-width="190" :visible="isColumnVisible('vesselVoyage')" />
             <vxe-column field="eta" title="ETA" min-width="104" class-name="mono" :visible="isColumnVisible('eta')" />
-            <vxe-column field="closingTime" title="截关时间" min-width="140" class-name="mono" :visible="isColumnVisible('closingTime')" />
-            <vxe-column field="bookingNo" title="订舱号" min-width="150" class-name="mono" :visible="isColumnVisible('bookingNo')" />
-            <vxe-column field="blNo" title="提单号" min-width="160" class-name="mono" :visible="isColumnVisible('blNo')" />
-            <vxe-column field="containerSummary" title="柜型柜量" min-width="110" :visible="isColumnVisible('containerSummary')" />
-            <vxe-column field="isOverdue" title="是否超期" min-width="90" :visible="isColumnVisible('isOverdue')">
-              <template #default="{ row }">{{ row.isOverdue ? '已超期' : '未超期' }}</template>
+            <vxe-column field="closingTime" :title="t('shipment.columns.closingTime')" min-width="140" class-name="mono" :visible="isColumnVisible('closingTime')" />
+            <vxe-column field="bookingNo" :title="t('shipment.columns.bookingNo')" min-width="150" class-name="mono" :visible="isColumnVisible('bookingNo')" />
+            <vxe-column field="blNo" :title="t('shipment.columns.blNo')" min-width="160" class-name="mono" :visible="isColumnVisible('blNo')" />
+            <vxe-column field="containerSummary" :title="t('shipment.columns.containerSummary')" min-width="110" :visible="isColumnVisible('containerSummary')" />
+            <vxe-column field="isOverdue" :title="t('shipment.columns.isOverdue')" min-width="90" :visible="isColumnVisible('isOverdue')">
+              <template #default="{ row }">{{ row.isOverdue ? t('shipment.overdue.yes') : t('shipment.overdue.no') }}</template>
             </vxe-column>
 
-            <vxe-column title="操作" width="208" fixed="right" align="left" header-align="center">
+            <vxe-column :title="t('common.operations')" width="220" fixed="right" align="left" header-align="center">
               <template #default="{ row }">
                 <a-space class="row-actions" :size="2">
                   <a-button
@@ -1279,21 +1282,21 @@ watch(uiScenario, () => {
                     class="row-action-btn"
                     :disabled="isRowPending(row)"
                     @click="openStatusModal(row)"
-                  >修改状态</a-button>
+                  >{{ t('shipment.actions.updateStatus') }}</a-button>
                   <a-button
                     size="mini"
                     type="text"
                     class="row-action-btn row-action-btn--secondary"
                     :disabled="isRowPending(row)"
                     @click="handleAssignOperator(row)"
-                  >分配给我</a-button>
+                  >{{ t('shipment.actions.assignMe') }}</a-button>
                   <a-dropdown trigger="click" position="br">
-                    <a-tooltip content="更多操作">
+                    <a-tooltip :content="t('common.moreActions')">
                       <a-button
                         size="mini"
                         type="text"
                         class="row-action-btn row-action-btn--more"
-                        aria-label="更多操作"
+                        :aria-label="t('common.moreActions')"
                         :disabled="isRowPending(row)"
                         :loading="isRowPending(row)"
                       >
@@ -1301,10 +1304,10 @@ watch(uiScenario, () => {
                       </a-button>
                     </a-tooltip>
                     <template #content>
-                      <a-doption @click="handleGenerateRowFee(row)">生成费用</a-doption>
-                      <a-doption @click="handleRowNotify(row)">发送通知</a-doption>
+                      <a-doption @click="handleGenerateRowFee(row)">{{ t('shipment.actions.generateFee') }}</a-doption>
+                      <a-doption @click="handleRowNotify(row)">{{ t('shipment.actions.notify') }}</a-doption>
                       <a-divider :margin="4" />
-                      <a-doption class="danger-opt" @click="openVoidModal(row)">作废订单</a-doption>
+                      <a-doption class="danger-opt" @click="openVoidModal(row)">{{ t('shipment.actions.voidOrder') }}</a-doption>
                     </template>
                   </a-dropdown>
                 </a-space>
@@ -1317,24 +1320,24 @@ watch(uiScenario, () => {
                 <icon-empty v-else class="workbench-empty__icon" />
                 <div class="workbench-empty__title">
                   {{ uiScenario === 'permission'
-                    ? '暂无海运出口订单查看权限'
+                    ? t('shipment.empty.permissionTitle')
                     : tableError
-                      ? '海运出口订单加载失败'
-                      : hasActiveFilter ? '未找到匹配的海运出口订单' : '暂无海运出口订单' }}
+                      ? t('shipment.empty.errorTitle')
+                      : hasActiveFilter ? t('shipment.empty.filteredTitle') : t('shipment.empty.defaultTitle') }}
                 </div>
                 <div class="workbench-empty__desc">
                   {{ uiScenario === 'permission'
-                    ? '请联系管理员开通海运出口订单的数据权限。'
+                    ? t('shipment.empty.permissionDesc')
                     : tableError
                       ? tableError
-                      : hasActiveFilter ? '请调整查询条件或切换状态队列后重试。' : '可以先新建订单，或通过已配置的导入服务创建业务单。' }}
+                      : hasActiveFilter ? t('shipment.empty.filteredDesc') : t('shipment.empty.defaultDesc') }}
                 </div>
                 <div class="workbench-empty__actions">
-                  <a-button v-if="tableError" size="small" type="primary" @click="fetchList">重新加载</a-button>
-                  <a-button v-else-if="hasActiveFilter && uiScenario !== 'permission'" size="small" type="text" @click="handleReset">重置筛选</a-button>
+                  <a-button v-if="tableError" size="small" type="primary" @click="fetchList">{{ t('shipment.actions.reload') }}</a-button>
+                  <a-button v-else-if="hasActiveFilter && uiScenario !== 'permission'" size="small" type="text" @click="handleReset">{{ t('shipment.actions.resetFilter') }}</a-button>
                   <a-button v-else-if="uiScenario !== 'permission'" size="small" type="primary" @click="handleCreateOrder">
                     <template #icon><icon-plus /></template>
-                    新增订单
+                    {{ t('shipment.actions.create') }}
                   </a-button>
                 </div>
               </div>
@@ -1355,42 +1358,42 @@ watch(uiScenario, () => {
     >
       <template #title>
         <div class="advanced-filter-title">
-          <span>订单高级筛选</span>
-          <span v-if="advancedDraftCount" class="advanced-filter-title__count">已选 {{ advancedDraftCount }} 项</span>
-          <a-badge v-if="advancedDraftDirty" class="advanced-filter-title__dirty" status="processing" text="待应用" />
+          <span>{{ t('shipment.advanced.title') }}</span>
+          <span v-if="advancedDraftCount" class="advanced-filter-title__count">{{ t('shipment.advanced.selected', { count: advancedDraftCount }) }}</span>
+          <a-badge v-if="advancedDraftDirty" class="advanced-filter-title__dirty" status="processing" :text="t('shipment.advanced.pending')" />
         </div>
       </template>
       <a-form class="advanced-filter-form" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" :model="advancedQuery">
         <section class="advanced-filter-section" aria-labelledby="route-document-filter-title">
           <div class="advanced-filter-section__head">
             <a-space :size="6">
-              <h3 id="route-document-filter-title" class="advanced-filter-section__title">航线与单证</h3>
+              <h3 id="route-document-filter-title" class="advanced-filter-section__title">{{ t('shipment.advanced.routeDocs') }}</h3>
               <span v-if="advancedDraftGroupCounts.routeDocuments" class="advanced-filter-section__count">
-                已选 {{ advancedDraftGroupCounts.routeDocuments }}
+                {{ t('shipment.advanced.selected', { count: advancedDraftGroupCounts.routeDocuments }) }}
               </span>
             </a-space>
             <a-button
               v-if="advancedDraftGroupCounts.routeDocuments"
               size="small"
               type="text"
-              title="清空航线与单证条件"
+              :title="t('shipment.advanced.clearGroup')"
               @click="clearAdvancedGroup('routeDocuments')"
-            >清空本组</a-button>
+            >{{ t('shipment.advanced.clearGroup') }}</a-button>
           </div>
           <a-row :gutter="[16, 0]">
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="pol" label="起运港">
-                <a-input v-model="advancedQuery.pol" size="small" allow-clear placeholder="港口代码 / 名称" @press-enter="applyAdvancedFilters" />
+              <a-form-item field="pol" :label="t('shipment.columns.pol')">
+                <a-input v-model="advancedQuery.pol" size="small" allow-clear :placeholder="t('shipment.advanced.portPlaceholder')" @press-enter="applyAdvancedFilters" />
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="pod" label="目的港">
-                <a-input v-model="advancedQuery.pod" size="small" allow-clear placeholder="港口代码 / 名称" @press-enter="applyAdvancedFilters" />
+              <a-form-item field="pod" :label="t('shipment.columns.pod')">
+                <a-input v-model="advancedQuery.pod" size="small" allow-clear :placeholder="t('shipment.advanced.portPlaceholder')" @press-enter="applyAdvancedFilters" />
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="carrier" label="船公司">
-                <a-select v-model="advancedQuery.carrier" size="small" allow-clear allow-search placeholder="请选择船公司">
+              <a-form-item field="carrier" :label="t('shipment.columns.carrier')">
+                <a-select v-model="advancedQuery.carrier" size="small" allow-clear allow-search :placeholder="t('shipment.advanced.carrierPlaceholder')">
                   <a-option v-for="carrier in carrierOptions" :key="carrier" :value="carrier">
                     {{ carrier }}
                   </a-option>
@@ -1398,18 +1401,18 @@ watch(uiScenario, () => {
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="vesselVoyage" label="船名航次">
-                <a-input v-model="advancedQuery.vesselVoyage" size="small" allow-clear placeholder="请输入船名 / 航次" @press-enter="applyAdvancedFilters" />
+              <a-form-item field="vesselVoyage" :label="t('shipment.columns.vesselVoyage')">
+                <a-input v-model="advancedQuery.vesselVoyage" size="small" allow-clear :placeholder="t('shipment.advanced.vesselPlaceholder')" @press-enter="applyAdvancedFilters" />
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="blNo" label="提单号">
-                <a-input v-model="advancedQuery.blNo" size="small" allow-clear placeholder="请输入提单号" @press-enter="applyAdvancedFilters" />
+              <a-form-item field="blNo" :label="t('shipment.columns.blNo')">
+                <a-input v-model="advancedQuery.blNo" size="small" allow-clear :placeholder="t('shipment.advanced.blPlaceholder')" @press-enter="applyAdvancedFilters" />
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="bookingNo" label="订舱号">
-                <a-input v-model="advancedQuery.bookingNo" size="small" allow-clear placeholder="请输入订舱号" @press-enter="applyAdvancedFilters" />
+              <a-form-item field="bookingNo" :label="t('shipment.columns.bookingNo')">
+                <a-input v-model="advancedQuery.bookingNo" size="small" allow-clear :placeholder="t('shipment.advanced.bookingPlaceholder')" @press-enter="applyAdvancedFilters" />
               </a-form-item>
             </a-col>
           </a-row>
@@ -1418,22 +1421,22 @@ watch(uiScenario, () => {
         <section class="advanced-filter-section" aria-labelledby="schedule-filter-title">
           <div class="advanced-filter-section__head">
             <a-space :size="6">
-              <h3 id="schedule-filter-title" class="advanced-filter-section__title">时效节点</h3>
+              <h3 id="schedule-filter-title" class="advanced-filter-section__title">{{ t('shipment.advanced.schedule') }}</h3>
               <span v-if="advancedDraftGroupCounts.schedule" class="advanced-filter-section__count">
-                已选 {{ advancedDraftGroupCounts.schedule }}
+                {{ t('shipment.advanced.selected', { count: advancedDraftGroupCounts.schedule }) }}
               </span>
             </a-space>
             <a-button
               v-if="advancedDraftGroupCounts.schedule"
               size="small"
               type="text"
-              title="清空时效节点条件"
+              :title="t('shipment.advanced.clearGroup')"
               @click="clearAdvancedGroup('schedule')"
-            >清空本组</a-button>
+            >{{ t('shipment.advanced.clearGroup') }}</a-button>
           </div>
           <a-row :gutter="[16, 0]">
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="etdRange" label="开船日期">
+              <a-form-item field="etdRange" :label="t('shipment.advanced.sailingDate')">
                 <a-range-picker
                   v-model="advancedQuery.etdRange"
                   v-model:popup-visible="advancedDatePopupVisible.etd"
@@ -1443,7 +1446,7 @@ watch(uiScenario, () => {
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="closingRange" label="截关日期">
+              <a-form-item field="closingRange" :label="t('shipment.advanced.closingDate')">
                 <a-range-picker
                   v-model="advancedQuery.closingRange"
                   v-model:popup-visible="advancedDatePopupVisible.closing"
@@ -1453,7 +1456,7 @@ watch(uiScenario, () => {
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="updatedRange" label="更新时间">
+              <a-form-item field="updatedRange" :label="t('shipment.columns.updatedAt')">
                 <a-range-picker
                   v-model="advancedQuery.updatedRange"
                   v-model:popup-visible="advancedDatePopupVisible.updated"
@@ -1468,78 +1471,70 @@ watch(uiScenario, () => {
         <section class="advanced-filter-section" aria-labelledby="risk-filter-title">
           <div class="advanced-filter-section__head">
             <a-space :size="6">
-              <h3 id="risk-filter-title" class="advanced-filter-section__title">状态、风险与结算</h3>
+              <h3 id="risk-filter-title" class="advanced-filter-section__title">{{ t('shipment.advanced.risk') }}</h3>
               <span v-if="advancedDraftGroupCounts.risk" class="advanced-filter-section__count">
-                已选 {{ advancedDraftGroupCounts.risk }}
+                {{ t('shipment.advanced.selected', { count: advancedDraftGroupCounts.risk }) }}
               </span>
             </a-space>
             <a-button
               v-if="advancedDraftGroupCounts.risk"
               size="small"
               type="text"
-              title="清空状态、风险与结算条件"
+              :title="t('shipment.advanced.clearGroup')"
               @click="clearAdvancedGroup('risk')"
-            >清空本组</a-button>
+            >{{ t('shipment.advanced.clearGroup') }}</a-button>
           </div>
           <a-row :gutter="[16, 0]">
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="orderStatus" label="订单状态">
-                <a-select v-model="advancedQuery.orderStatus" size="small" allow-clear placeholder="请选择">
-                  <a-option value="waitBooking">待订舱</a-option>
-                  <a-option value="booking">订舱中</a-option>
-                  <a-option value="released">已放舱</a-option>
-                  <a-option value="waitTruck">待拖车</a-option>
-                  <a-option value="trucking">拖车中</a-option>
-                  <a-option value="waitCustoms">待报关</a-option>
-                  <a-option value="customs">报关中</a-option>
-                  <a-option value="sailed">已开船</a-option>
-                  <a-option value="completed">已完成</a-option>
+              <a-form-item field="orderStatus" :label="t('shipment.columns.orderStatus')">
+                <a-select v-model="advancedQuery.orderStatus" size="small" allow-clear :placeholder="t('shipment.advanced.select')">
+                  <a-option v-for="status in ['waitBooking', 'booking', 'released', 'waitTruck', 'trucking', 'waitCustoms', 'customs', 'sailed', 'completed']" :key="status" :value="status">{{ t(`shipment.statuses.${status}`) }}</a-option>
                 </a-select>
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="hasException" label="是否异常">
+              <a-form-item field="hasException" :label="t('shipment.advanced.hasException')">
                 <a-radio-group
                   v-model="advancedQuery.hasException"
                   type="button"
                   size="small"
                   class="advanced-filter-choice"
                 >
-                  <a-radio value="">全部</a-radio>
-                  <a-radio value="yes">是</a-radio>
-                  <a-radio value="no">否</a-radio>
+                  <a-radio value="">{{ t('shipment.advanced.all') }}</a-radio>
+                  <a-radio value="yes">{{ t('shipment.advanced.yes') }}</a-radio>
+                  <a-radio value="no">{{ t('shipment.advanced.no') }}</a-radio>
                 </a-radio-group>
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="isOverdue" label="是否超期">
+              <a-form-item field="isOverdue" :label="t('shipment.columns.isOverdue')">
                 <a-radio-group
                   v-model="advancedQuery.isOverdue"
                   type="button"
                   size="small"
                   class="advanced-filter-choice"
                 >
-                  <a-radio value="">全部</a-radio>
-                  <a-radio value="yes">是</a-radio>
-                  <a-radio value="no">否</a-radio>
+                  <a-radio value="">{{ t('shipment.advanced.all') }}</a-radio>
+                  <a-radio value="yes">{{ t('shipment.advanced.yes') }}</a-radio>
+                  <a-radio value="no">{{ t('shipment.advanced.no') }}</a-radio>
                 </a-radio-group>
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="fileStatus" label="文件状态">
-                <a-select v-model="advancedQuery.fileStatus" size="small" allow-clear placeholder="请选择">
-                  <a-option value="missing">缺失</a-option>
-                  <a-option value="pending">待确认</a-option>
-                  <a-option value="complete">完整</a-option>
+              <a-form-item field="fileStatus" :label="t('shipment.columns.fileStatus')">
+                <a-select v-model="advancedQuery.fileStatus" size="small" allow-clear :placeholder="t('shipment.advanced.select')">
+                  <a-option value="missing">{{ t('shipment.advanced.missing') }}</a-option>
+                  <a-option value="pending">{{ t('shipment.fileStatus.pending') }}</a-option>
+                  <a-option value="complete">{{ t('shipment.advanced.complete') }}</a-option>
                 </a-select>
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="feeStatus" label="费用状态">
-                <a-select v-model="advancedQuery.feeStatus" size="small" allow-clear placeholder="请选择">
-                  <a-option value="none">未生成</a-option>
-                  <a-option value="pending">待确认</a-option>
-                  <a-option value="confirmed">已确认</a-option>
+              <a-form-item field="feeStatus" :label="t('shipment.columns.feeStatus')">
+                <a-select v-model="advancedQuery.feeStatus" size="small" allow-clear :placeholder="t('shipment.advanced.select')">
+                  <a-option value="none">{{ t('shipment.feeStatus.none') }}</a-option>
+                  <a-option value="pending">{{ t('shipment.feeStatus.pending') }}</a-option>
+                  <a-option value="confirmed">{{ t('shipment.feeStatus.confirmed') }}</a-option>
                 </a-select>
               </a-form-item>
             </a-col>
@@ -1550,14 +1545,14 @@ watch(uiScenario, () => {
         <div class="advanced-filter-footer">
           <a-space :size="8">
             <span class="advanced-filter-preview">
-              匹配订单 <strong>{{ advancedPreviewCount }}</strong> 条
+              {{ t('shipment.advanced.matchCount', { count: advancedPreviewCount }) }}
             </span>
-            <a-button size="small" type="text" :disabled="!advancedDraftCount || advancedApplying" @click="clearAdvancedFilters">清空更多筛选</a-button>
+            <a-button size="small" type="text" :disabled="!advancedDraftCount || advancedApplying" @click="clearAdvancedFilters">{{ t('common.clearAdvanced') }}</a-button>
           </a-space>
           <a-space class="advanced-filter-footer__actions" :size="8">
-            <a-button size="small" :disabled="advancedApplying" @click="cancelAdvancedFilters">取消</a-button>
+            <a-button size="small" :disabled="advancedApplying" @click="cancelAdvancedFilters">{{ t('common.cancel') }}</a-button>
             <a-button size="small" type="primary" :loading="advancedApplying" @click="applyAdvancedFilters">
-              应用筛选
+              {{ t('common.apply') }}
             </a-button>
           </a-space>
         </div>
@@ -1566,22 +1561,22 @@ watch(uiScenario, () => {
 
     <a-modal
       v-model:visible="columnSettingsVisible"
-      title="列设置"
+      :title="t('shipment.settings.title')"
       class="column-settings-modal"
       :width="560"
       :mask-closable="false"
-      ok-text="应用"
+      :ok-text="t('shipment.settings.apply')"
       :ok-button-props="{ size: 'small' }"
       :cancel-button-props="{ size: 'small' }"
       :on-before-ok="applyColumnSettings"
     >
       <div class="column-settings-summary">
-        <span>已选择 {{ columnSettingDraft.length }} 个字段</span>
-        <a-button size="small" type="text" @click="resetColumnSettingDraft">恢复默认</a-button>
+        <span>{{ t('shipment.settings.selected', { count: columnSettingDraft.length }) }}</span>
+        <a-button size="small" type="text" @click="resetColumnSettingDraft">{{ t('shipment.settings.restore') }}</a-button>
       </div>
       <a-checkbox-group v-model="columnSettingDraft" class="column-settings-groups">
         <section v-for="group in COLUMN_SETTING_GROUPS" :key="group.label" class="column-settings-group">
-          <div class="column-settings-group__title">{{ group.label }}</div>
+          <div class="column-settings-group__title">{{ getColumnGroupLabel(group.label) }}</div>
           <div class="column-settings-grid">
             <a-checkbox
               v-for="option in group.options"
@@ -1589,7 +1584,7 @@ watch(uiScenario, () => {
               :value="option.field"
               :disabled="option.required"
             >
-              {{ option.label }}
+              {{ t(`shipment.columns.${option.field}`) }}
             </a-checkbox>
           </div>
         </section>
@@ -1598,22 +1593,22 @@ watch(uiScenario, () => {
 
     <a-modal
       v-model:visible="batchAssignVisible"
-      title="批量分配订单"
+      :title="t('shipment.modal.batchAssignTitle')"
       :width="480"
       :mask-closable="false"
-      ok-text="确认分配"
+      :ok-text="t('shipment.modal.batchAssignOk')"
       :ok-loading="batchSubmitting"
       :ok-button-props="{ size: 'small' }"
       :cancel-button-props="{ size: 'small' }"
       :on-before-ok="confirmBatchAssignment"
     >
       <a-alert type="info" class="modal-context-alert">
-        本次将分配 {{ selectedCount }} 条订单；成功订单会取消选中，失败订单保留选中。
+        {{ t('shipment.modal.batchAssignCopy', { count: selectedCount }) }}
       </a-alert>
       <a-form :model="batchAssignForm" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="detail-form">
         <a-form-item
           field="operator"
-          label="操作人员"
+          :label="t('shipment.modal.operator')"
           required
           :validate-status="batchAssignError ? 'error' : undefined"
           :help="batchAssignError"
@@ -1622,7 +1617,7 @@ watch(uiScenario, () => {
             v-model="batchAssignForm.operator"
             size="small"
             allow-search
-            placeholder="请选择操作人员"
+            :placeholder="t('shipment.modal.operatorPlaceholder')"
             @change="batchAssignError = ''"
           >
             <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
@@ -1635,7 +1630,7 @@ watch(uiScenario, () => {
 
     <a-modal
       v-model:visible="statusModalVisible"
-      title="修改订单状态"
+      :title="t('shipment.modal.statusTitle')"
       :width="560"
       :mask-closable="false"
       :ok-loading="statusSubmitting"
@@ -1646,13 +1641,13 @@ watch(uiScenario, () => {
       <a-form :model="statusForm" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="detail-form">
         <a-row :gutter="16">
           <a-col :span="12">
-            <a-form-item label="当前状态">
-              <span>{{ statusTargetRows[0]?.orderStatusLabel }}</span>
+            <a-form-item :label="t('shipment.modal.currentStatus')">
+              <span>{{ statusTargetRows[0] ? t(`shipment.statuses.${statusTargetRows[0].orderStatus}`) : '' }}</span>
             </a-form-item>
           </a-col>
           <a-col :span="12">
             <a-form-item
-              label="目标状态"
+              :label="t('shipment.modal.targetStatus')"
               field="targetStatus"
               required
               :validate-status="statusErrors.targetStatus ? 'error' : undefined"
@@ -1662,18 +1657,18 @@ watch(uiScenario, () => {
                 v-model="statusForm.targetStatus"
                 size="small"
                 allow-clear
-                placeholder="请选择"
+                :placeholder="t('shipment.advanced.select')"
                 @change="statusErrors.targetStatus = ''"
               >
                 <a-option v-for="option in statusTransitionOptions" :key="option.value" :value="option.value">
-                  {{ option.label }}
+                  {{ t(`shipment.statuses.${option.value}`) }}
                 </a-option>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :span="24">
             <a-form-item
-              label="修改原因"
+              :label="t('shipment.modal.reason')"
               field="reason"
               required
               :validate-status="statusErrors.reason ? 'error' : undefined"
@@ -1683,19 +1678,19 @@ watch(uiScenario, () => {
                 v-model="statusForm.reason"
                 size="small"
                 :auto-size="{ minRows: 2, maxRows: 4 }"
-                placeholder="请填写修改原因"
+                :placeholder="t('shipment.modal.reasonPlaceholder')"
                 @input="statusErrors.reason = ''"
               />
             </a-form-item>
           </a-col>
           <a-col :span="12">
             <a-form-item>
-              <a-checkbox v-model="statusForm.notify">同步通知相关人员</a-checkbox>
+              <a-checkbox v-model="statusForm.notify">{{ t('shipment.modal.notify') }}</a-checkbox>
             </a-form-item>
           </a-col>
           <a-col :span="12">
             <a-form-item>
-              <a-checkbox v-model="statusForm.createNode">生成节点记录</a-checkbox>
+              <a-checkbox v-model="statusForm.createNode">{{ t('shipment.modal.createNode') }}</a-checkbox>
             </a-form-item>
           </a-col>
         </a-row>
@@ -1704,16 +1699,16 @@ watch(uiScenario, () => {
 
     <a-modal
       v-model:visible="voidModalVisible"
-      title="作废订单"
+      :title="t('shipment.modal.voidTitle')"
       :width="420"
       :mask-closable="false"
-      ok-text="确认作废"
+      :ok-text="t('shipment.modal.voidOk')"
       :ok-loading="voidSubmitting"
       :ok-button-props="{ status: 'danger', size: 'small' }"
       :cancel-button-props="{ size: 'small' }"
       :on-before-ok="voidOrder"
     >
-      <p class="modal-confirm-copy">确认作废订单 {{ voidTargetRow?.orderNo }}？此操作不可撤销，并会保留操作日志。</p>
+      <p class="modal-confirm-copy">{{ t('shipment.modal.voidCopy', { orderNo: voidTargetRow?.orderNo }) }}</p>
       <a-alert v-if="voidError" type="error">{{ voidError }}</a-alert>
     </a-modal>
   </div>
@@ -1743,7 +1738,6 @@ watch(uiScenario, () => {
 
 .filter-panel__form {
   width: 100%;
-  max-width: 1240px;
 }
 
 .filter-panel__form :deep(.arco-form-item) {
@@ -1757,6 +1751,16 @@ watch(uiScenario, () => {
   gap: 6px;
   padding-bottom: 1px;
   white-space: nowrap;
+}
+
+.filter-tool-label {
+  display: none;
+}
+
+.filter-tool-button {
+  width: 28px;
+  min-width: 28px;
+  padding-inline: 0;
 }
 
 .density-option {
@@ -2061,17 +2065,7 @@ watch(uiScenario, () => {
 
 @media (max-width: 1199px) {
   .filter-panel__actions {
-    gap: 4px;
-  }
-
-  .filter-tool-label {
-    display: none;
-  }
-
-  .filter-tool-button {
-    width: 28px;
-    min-width: 28px;
-    padding-inline: 0;
+    gap: 1px;
   }
 
   .workflow-filter-bar {

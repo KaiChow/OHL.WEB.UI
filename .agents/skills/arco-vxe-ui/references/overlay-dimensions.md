@@ -38,7 +38,7 @@ Need an overlay?
 | `--dense-modal-w-xl` | 760px | Modal with 9-12 fields or textarea block |
 | `--dense-modal-w-max` | 860px | Modal hard ceiling with a small read-only sub-table |
 | `--dense-drawer-w-filter` | 640px | Standard grouped advanced filter |
-| `--dense-drawer-w-filter-wide` | 1120px | 33-50 conditions with group anchors |
+| `--dense-drawer-w-filter-wide` | 1120px | 33-49 conditions, or documented 50+ fallback, with group anchors |
 | `--dense-drawer-w-standard` | 720px | Read-only detail with few sections |
 | `--dense-drawer-w-complex-max` | 1200px | Complex detail upper cap |
 
@@ -73,7 +73,7 @@ Pass the responsive expression directly to `width`.
 | Tier | Evidence hook / shared class | Width expression | Use |
 |------|------------------------------|------------------|-----|
 | D1 Filter | `data-ui-surface="advanced-filter"` | `min(var(--dense-drawer-w-filter), calc(100vw - var(--dense-drawer-filter-pad)))` | Standard grouped advanced filter |
-| D2 Filter wide | `data-ui-surface="advanced-filter-wide"` | `min(var(--dense-drawer-w-filter-wide), calc(100vw - var(--dense-drawer-filter-pad)))` | 33-50 fields with anchor rail |
+| D2 Filter wide | `data-ui-surface="advanced-filter-wide"` | `min(var(--dense-drawer-w-filter-wide), calc(100vw - var(--dense-drawer-filter-pad)))` | 33-49 fields, or an S4 fallback, with anchor rail |
 | D3 Detail standard | `detail-drawer detail-drawer--standard` | `min(var(--dense-drawer-w-standard), calc(100vw - var(--dense-drawer-viewport-pad)))` | Read-only detail, few sections, no wide mini-table |
 | D4 Detail complex | `detail-drawer` | `min(var(--dense-drawer-w-complex-max), calc(100vw - var(--dense-drawer-viewport-pad)))` | Tabs, sections, child tables, or editable footer |
 
@@ -147,7 +147,7 @@ Only dense object-level operational drawers with large editable child tables may
 | Up to 8 fields, one compact form | Modal | SM-LG |
 | Confirm/delete/batch acknowledgement | `Modal.confirm` | Confirm |
 | Grouped advanced conditions | Drawer | D1 |
-| 33-50 advanced conditions with anchors | Drawer | D2 |
+| 33-49 advanced conditions, or documented 50+ fallback, with anchors | Drawer | D2 |
 | Read-only record with few sections | Drawer | D3 |
 | Tabs, child tables, and footer workflow | Drawer | D4 |
 

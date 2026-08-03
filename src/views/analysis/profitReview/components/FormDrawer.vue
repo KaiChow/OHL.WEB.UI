@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { compactVerticalFormLabelStyle } from '../../../../design-system/formLayout';
 import type { ProfitReviewRow } from '../types';
 import { REVIEW_STATUS_META } from '../displayMeta';
@@ -11,6 +12,7 @@ const props = defineProps<{
   serverError: string;
   ownerOptions: string[];
 }>();
+const { t } = useI18n();
 
 const emit = defineEmits<{
   'update:visible': [value: boolean];
@@ -37,8 +39,8 @@ watch(() => props.visible, (visible) => {
 
 const handleSubmit = () => {
   if (props.submitting) return;
-  errors.reviewNote = draft.reviewNote.trim() ? '' : '请填写核查说明';
-  errors.owner = draft.owner ? '' : '请选择负责人';
+  errors.reviewNote = draft.reviewNote.trim() ? '' : t('profit.form.noteRequired');
+  errors.owner = draft.owner ? '' : t('profit.form.ownerRequired');
   if (errors.reviewNote || errors.owner || !draft.owner) return;
   emit('submit', { reviewNote: draft.reviewNote.trim(), owner: draft.owner });
 };
@@ -58,11 +60,11 @@ const handleCancel = () => {
     unmount-on-close
     @cancel="handleCancel"
   >
-    <template #title>编辑核查说明</template>
+    <template #title>{{ t('profit.form.title') }}</template>
     <div v-if="row && statusMeta" class="edit-body">
       <div class="edit-context">
         <span class="edit-context__identity mono">{{ row.orderNo }}</span>
-        <span class="s-pill" :data-s="statusMeta.tone">{{ statusMeta.label }}</span>
+        <span class="s-pill" :data-s="statusMeta.tone">{{ t(`profit.status.${row.reviewStatus}`) }}</span>
         <span class="edit-context__meta">{{ row.customer }}</span>
       </div>
       <a-alert v-if="serverError" type="error" class="edit-server-error">{{ serverError }}</a-alert>
@@ -70,7 +72,7 @@ const handleCancel = () => {
         <a-row :gutter="[16, 0]">
           <a-col :span="12">
             <a-form-item
-              label="负责人"
+              :label="t('profit.form.owner')"
               required
               :validate-status="errors.owner ? 'error' : undefined"
               :help="errors.owner"
@@ -79,7 +81,7 @@ const handleCancel = () => {
                 v-model="draft.owner"
                 size="small"
                 allow-search
-                placeholder="请选择负责人"
+                :placeholder="t('profit.form.ownerPlaceholder')"
                 @change="errors.owner = ''"
               >
                 <a-option v-for="owner in ownerOptions" :key="owner" :value="owner">{{ owner }}</a-option>
@@ -88,7 +90,7 @@ const handleCancel = () => {
           </a-col>
           <a-col :span="24">
             <a-form-item
-              label="核查说明"
+              :label="t('profit.form.note')"
               required
               :validate-status="errors.reviewNote ? 'error' : undefined"
               :help="errors.reviewNote"
@@ -99,7 +101,7 @@ const handleCancel = () => {
                 :auto-size="{ minRows: 3, maxRows: 6 }"
                 :max-length="200"
                 show-word-limit
-                placeholder="请填写利润核查结论、异常原因或补充说明"
+                :placeholder="t('profit.form.notePlaceholder')"
                 @input="errors.reviewNote = ''"
               />
             </a-form-item>
@@ -109,8 +111,8 @@ const handleCancel = () => {
     </div>
     <template #footer>
       <div class="form-drawer-footer">
-        <a-button size="small" :disabled="submitting" @click="handleCancel">取消</a-button>
-        <a-button size="small" type="primary" :loading="submitting" @click="handleSubmit">保存</a-button>
+        <a-button size="small" :disabled="submitting" @click="handleCancel">{{ t('common.cancel') }}</a-button>
+        <a-button size="small" type="primary" :loading="submitting" @click="handleSubmit">{{ t('common.save') }}</a-button>
       </div>
     </template>
   </a-drawer>

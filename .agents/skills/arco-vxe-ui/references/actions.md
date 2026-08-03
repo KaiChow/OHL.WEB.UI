@@ -239,8 +239,9 @@ Key rules:
 - Daily low-risk actions remain visible and neutral. They may exceed three when the group stays on one line at 1280px.
 - A dropdown trigger is one operation group, regardless of its option count.
 - Selected-row batch actions stay with business commands, not in the utility area.
+- A frequent, permission-visible batch command keeps a stable toolbar position and is disabled with a concise reason until an eligible selection exists. Contextual appearance is reserved for rare selection-only commands inside a dedicated selection surface; it must not shift stable neighboring commands.
 - Refresh, column settings, density, and pagination stay beside the table. Do not create an otherwise empty cap band for one icon.
-- Selected count and Clear appear only while selection exists. Pagination owns the total count.
+- Selected count and Clear appear once beside the batch commands while selection exists. Batch trigger labels remain action-only and never repeat the selected count. Pagination owns the result total count.
 - The final danger group follows an Arco Divider and requires confirmation.
 
 ```vue
@@ -426,7 +427,8 @@ Danger rules:
 ## 7. Toolbar Rules (summary)
 
 - Left: business actions.
-- Right: utilities and selected count.
+- Left: business actions and the adjacent selected-row context when selection exists.
+- Right: pagination and table utilities.
 - No more than one `primary` per toolbar.
 - More than four visible actions → group by workflow. Daily reversible actions may remain visible as neutral buttons/dropdown triggers; low-frequency or risky actions go into dropdown.
 - Refresh / settings / column config = `text` icon-only.

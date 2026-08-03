@@ -1,6 +1,7 @@
 export interface AppMenuItem {
   key: string;
   title: string;
+  titleKey?: string;
   routeName?: string;
   path?: string;
   children?: AppMenuItem[];

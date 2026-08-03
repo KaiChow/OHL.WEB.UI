@@ -47,7 +47,7 @@ Shared rules:
 - Do not declare `--vxe-*` / `--vxe-ui-*` variables or target `.vxe-*` internals anywhere outside `src/styles/vxe-theme/`.
 - Pages must not set `border`/`stripe` attributes; the global defaults apply — see **Border Policy**.
 - Detail-only differences: omit overflow clipping for editable rows, omit checkbox without a batch toolbar, and verify small rows contain small Arco controls.
-- **Sequence:** see **Sequence Column (序号)** — width `52`, detail editable tables require it; list tables usually omit.
+- **Sequence:** see **Sequence Column (序号)** — width `52`; this product includes it in paginated business lists and editable detail tables.
 
 ## Required Setup
 
@@ -164,8 +164,8 @@ Structural rhythm column — **not** business data. Width `52`, centered through
 |-------|------------|------|
 | **Detail editable mini-vxe** (品名/装柜/费用行) | **Required** when ≥2 rows | Users refer to “第 N 行” while editing |
 | **Detail readonly mini-vxe** | **Recommended** when ≥3 rows | Optional for 1–2 rows |
-| **Main workbench list** | **Optional** | Default **omit** when a strong identity column (单号/编号) is already `fixed="left"` |
-| **Main list + batch checkbox** | **Usually omit** | Checkbox + identity is enough; do not add seq just for decoration |
+| **Paginated main business list** | **Required in this product** | Users reconcile screenshots, exports, and spoken row references; keep a continuous display index across pages |
+| **Main list + batch checkbox** | **Required in this product** | Order is checkbox → seq → primary identity; selection and visual reference have different jobs |
 | **Main list without fixed identity** | Consider seq | Rare; fix identity column first instead |
 | **File / attachment table** | **Omit** | File name is the row identity |
 | **Summary mini table** | **Omit** | Too few rows |
@@ -173,7 +173,7 @@ Structural rhythm column — **not** business data. Width `52`, centered through
 ### When seq is misleading
 
 - Do not use seq as row **identity** for save/delete/API — always use stable `keyField` / row id.
-- Pagination seq is **page-local** (1…pageSize), not global record index — that is acceptable for visual reference only.
+- Paginated main-list seq is continuous across pages through VXE `seq-config.startIndex`; detail tables may use page-local sequence.
 - Do not use seq instead of a business line number field when the backend assigns line numbers.
 
 ### Column order (left fixed block)

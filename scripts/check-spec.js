@@ -185,6 +185,12 @@ function getStringArrayProperty(objectNode, name) {
     .map((element) => element.text);
 }
 
+function getObjectArrayProperty(objectNode, name) {
+  const property = getObjectProperty(objectNode, name);
+  if (!property || !ts.isArrayLiteralExpression(property.initializer)) return undefined;
+  return property.initializer.elements.filter(ts.isObjectLiteralExpression);
+}
+
 function findCallObject(sourceFile, helperName) {
   let result;
   const visit = (node) => {
@@ -609,6 +615,16 @@ for (const specFile of pageSpecFiles) {
       content: 'invalid page quality declaration',
     });
   }
+  for (const match of source.matchAll(/<a-button\b[^>]*>[\s\S]*?<\/a-button>/g)) {
+    const buttonBody = match[0].replace(/^<a-button\b[^>]*>/, '').replace(/<\/a-button>$/, '');
+    if (!/批量/.test(buttonBody) || !/\{\{\s*(?:selectedCount|selectedRows\.length)\s*\}\}/.test(buttonBody)) continue;
+    violations.push({
+      rule: '批量操作按钮只表达动作，禁止重复拼接已选数量；已选数量与清空由相邻选择上下文唯一承载',
+      file: relPath,
+      line: source.slice(0, match.index).split('\n').length,
+      content: match[0].replace(/\s+/g, ' ').slice(0, 120),
+    });
+  }
 
   const archetype = getStringProperty(spec, 'archetype');
   const list = getObjectLiteralProperty(spec, 'list');
@@ -717,6 +733,10 @@ for (const specFile of pageSpecFiles) {
   const declaredVisible = getStringArrayProperty(query, 'visibleFields') ?? [];
   const declaredAdvanced = getStringArrayProperty(query, 'advancedFields') ?? [];
   const queryStrategy = getStringProperty(query, 'strategy');
+  const queryLayout = getStringProperty(query, 'layout');
+  const visibleFieldLayout = getObjectArrayProperty(query, 'visibleFieldLayout') ?? [];
+  const visibleLayoutFields = visibleFieldLayout.map((entry) => getStringProperty(entry, 'field'));
+  const visibleLayoutRoles = visibleFieldLayout.map((entry) => getStringProperty(entry, 'width'));
   const declaredQueryFields = [...declaredVisible, ...declaredAdvanced];
   if (!Number.isInteger(declaredTotal) || declaredTotal !== declaredVisible.length + declaredAdvanced.length) {
     violations.push({
@@ -734,10 +754,39 @@ for (const specFile of pageSpecFiles) {
       content: 'duplicate query field declaration',
     });
   }
+  const allowedQueryWidthRoles = new Set(['compact', 'standard', 'wide', 'composite', 'range']);
+  const invalidQueryLayout = (declaredTotal === 0 && (queryLayout !== 'none' || visibleFieldLayout.length > 0))
+    || (declaredTotal > 0 && queryLayout !== 'semantic-grid-v1')
+    || visibleFieldLayout.length !== declaredVisible.length
+    || new Set(visibleLayoutFields).size !== visibleLayoutFields.length
+    || declaredVisible.some((field) => !visibleLayoutFields.includes(field))
+    || visibleLayoutFields.some((field) => !declaredVisible.includes(field))
+    || visibleLayoutRoles.some((role) => !allowedQueryWidthRoles.has(role));
+  if (invalidQueryLayout) {
+    violations.push({
+      rule: 'pageSpec 可见查询字段必须逐项声明 semantic-grid-v1 语义宽度角色，禁止页面自由配置栅格跨度',
+      file: relPath,
+      line: 1,
+      content: `layout=${queryLayout}; visible=${declaredVisible.join(',')}; widthFields=${visibleLayoutFields.join(',')}; roles=${visibleLayoutRoles.join(',')}`,
+    });
+  }
+  if (declaredVisible.length > 0 && routeView) {
+    const routeSource = readFileSync(routeView, 'utf8');
+    if (!/<QueryFieldGrid\b/.test(routeSource) || !/<QueryFieldCol\b/.test(routeSource)) {
+      violations.push({
+        rule: '可见查询区必须使用共享 QueryFieldGrid/QueryFieldCol 渲染语义宽度，禁止路由页自建另一套断点跨度',
+        file: toRelativePath(routeView),
+        line: 1,
+        content: 'missing shared semantic query grid',
+      });
+    }
+  }
   const invalidQueryStrategy = (declaredTotal === 0 && queryStrategy !== 'none')
     || (declaredTotal > 0 && queryStrategy === 'none')
     || (queryStrategy === 's1-inline' && (declaredTotal > 8 || declaredAdvanced.length > 0))
-    || (queryStrategy === 's3-drawer' && (declaredTotal <= 8 || declaredTotal > 50))
+    || (queryStrategy === 's2-expand' && (declaredTotal < 9 || declaredTotal > 20))
+    || (queryStrategy === 's3-drawer' && (declaredTotal <= 8 || declaredTotal >= 50))
+    || (queryStrategy === 's4-drawer-fallback' && declaredTotal < 50)
     || (queryStrategy === 's4-workspace' && declaredTotal < 50);
   if (invalidQueryStrategy) {
     violations.push({
@@ -763,6 +812,18 @@ for (const specFile of pageSpecFiles) {
 
   const table = getObjectLiteralProperty(spec, 'table');
   const tableKind = getStringProperty(table, 'kind');
+  if (routeView) {
+    const routeSource = readFileSync(routeView, 'utf8');
+    const sequenceColumn = /<vxe-column(?=[^>]*\btype=["']seq["'])(?=[^>]*(?:\btitle=["']序号["']|:title=["'][^>]*common\.sequence))(?=[^>]*\bwidth=["']52["'])(?=[^>]*\balign=["']center["'])[^>]*>/.test(routeSource);
+    if (!sequenceColumn) {
+      violations.push({
+        rule: '分页业务列表必须使用 VXE 内建连续序号列：title="序号"、width="52"、align="center"',
+        file: toRelativePath(routeView),
+        line: 1,
+        content: 'missing standard sequence column',
+      });
+    }
+  }
   const expectedTableKinds = {
     'simple-query': 'query-list',
     management: 'management-list',
@@ -937,7 +998,7 @@ for (const file of files) {
       .trim();
     const isIconOnly = !visibleText && /<(?:template\b[^>]*#icon|icon-[\w-]+\b)/.test(body);
     if (!isIconOnly) continue;
-    if (!/\baria-label=(['"])[^'"]+\1/.test(attributes)) {
+    if (!/(?:\baria-label|:aria-label)=(['"])[^>]+\1/.test(attributes)) {
       violations.push({
         rule: 'icon-only 按钮必须提供业务含义明确的 aria-label；Tooltip 不能替代可访问名称',
         file: relPath,
@@ -977,7 +1038,7 @@ for (const file of files) {
 // 业务列禁止固定 width（仅 checkbox / seq / 操作列允许）
 function isStructuralVxeColumn(attrs) {
   if (/type="checkbox"/.test(attrs) || /type="seq"/.test(attrs)) return true;
-  if (/title="操作"/.test(attrs) && /fixed="right"/.test(attrs)) return true;
+  if (/(?:title="操作"|:title="[^"]*common\.operations[^"]*")/.test(attrs) && /fixed="right"/.test(attrs)) return true;
   return false;
 }
 
@@ -990,8 +1051,8 @@ for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
   const content = readFileSync(file, 'utf8');
-  if (!content.includes('title="操作"')) continue;
-  const opColumnPattern = /<vxe-column\b[^>]*title="操作"[^>]*>[\s\S]*?<\/vxe-column>/g;
+  if (!/(?:title="操作"|common\.operations)/.test(content)) continue;
+  const opColumnPattern = /<vxe-column\b[^>]*(?:title="操作"|:title="[^"]*common\.operations[^"]*")[^>]*>[\s\S]*?<\/vxe-column>/g;
   const isWorkbenchList = /<vxe-table\b[\s\S]*?\bshow-overflow=(['"])title\1/.test(content);
   for (const match of content.matchAll(opColumnPattern)) {
     const block = match[0];

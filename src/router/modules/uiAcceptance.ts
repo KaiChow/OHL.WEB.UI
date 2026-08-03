@@ -1,0 +1,12 @@
+import type { RouteRecordRaw } from 'vue-router';
+
+export const uiAcceptanceRoutes: RouteRecordRaw[] = [
+  { path: 'ui-acceptance/query-scenarios/s0', name: 'QueryScenarioS0', component: () => import('../../views/uiAcceptance/queryScenarios/index.vue'), props: { initialScenario: 's0' }, meta: { menuKey: 'query-scenario-s0', title: '无查询场景', titleKey: 'routes.queryS0' } },
+  { path: 'ui-acceptance/query-scenarios/s1-compact', name: 'QueryScenarioS1Compact', component: () => import('../../views/uiAcceptance/queryScenarios/index.vue'), props: { initialScenario: 's1-compact' }, meta: { menuKey: 'query-scenario-s1-compact', title: '2项紧凑查询', titleKey: 'routes.queryS1Compact' } },
+  { path: 'ui-acceptance/query-scenarios/s1-inline', name: 'QueryScenarioS1Inline', component: () => import('../../views/uiAcceptance/queryScenarios/index.vue'), props: { initialScenario: 's1-inline' }, meta: { menuKey: 'query-scenario-s1-inline', title: '6项内联查询', titleKey: 'routes.queryS1Inline' } },
+  { path: 'ui-acceptance/query-scenarios/s2-expand', name: 'QueryScenarioS2Expand', component: () => import('../../views/uiAcceptance/queryScenarios/index.vue'), props: { initialScenario: 's2-expand' }, meta: { menuKey: 'query-scenario-s2-expand', title: '12项展开查询', titleKey: 'routes.queryS2Expand' } },
+  { path: 'ui-acceptance/query-scenarios/s3-drawer', name: 'QueryScenarioS3Drawer', component: () => import('../../views/uiAcceptance/queryScenarios/index.vue'), props: { initialScenario: 's3-drawer' }, meta: { menuKey: 'query-scenario-s3-drawer', title: '24项抽屉查询', titleKey: 'routes.queryS3Drawer' } },
+  { path: 'ui-acceptance/query-scenarios/s3-wide', name: 'QueryScenarioS3Wide', component: () => import('../../views/uiAcceptance/queryScenarios/index.vue'), props: { initialScenario: 's3-wide' }, meta: { menuKey: 'query-scenario-s3-wide', title: '40项宽抽屉查询', titleKey: 'routes.queryS3Wide' } },
+  { path: 'ui-acceptance/query-scenarios/s4-drawer', name: 'QueryScenarioS4Drawer', component: () => import('../../views/uiAcceptance/queryScenarios/index.vue'), props: { initialScenario: 's4-drawer' }, meta: { menuKey: 'query-scenario-s4-drawer', title: '52项分组抽屉', titleKey: 'routes.queryS4Drawer' } },
+  { path: 'ui-acceptance/query-scenarios/s4-workspace', redirect: { name: 'QueryScenarioS4Drawer' } },
+];

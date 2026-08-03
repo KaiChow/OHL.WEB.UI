@@ -27,6 +27,28 @@ Classify every available condition before choosing a layout.
 
 The default row answers: "What does the target operator enter first to find the object now?" Do not promote a field merely because it exists in the API.
 
+## Semantic Width Grid
+
+Visible query fields use the shared `semantic-grid-v1` Arco Grid capability. Pages declare field meaning; they do not invent `xs/sm/md/lg/xl` spans or fixed input widths independently.
+
+| Width role | Use for | Do not use for |
+|------------|---------|----------------|
+| `compact` | Short enum/status, owner, region, yes/no/all choice | Free text, date ranges, connected controls |
+| `standard` | Normal Input/Select such as customer, keyword, warehouse | Long composite identifiers or ranges |
+| `wide` | A proven long-label or long-option field that needs more scan width | Making an ordinary field look important |
+| `composite` | One connected selector + input identifier control | Two unrelated conditions grouped together |
+| `range` | Date/time or numeric range with two visible endpoints | A single date or short enum |
+
+Rules:
+
+- The shared grid owns breakpoint spans, gutter, maximum readable row width, and the query-action column. A page only selects a width role in `pageSpec.ts` and renders it through the shared query-grid components.
+- The normal action slot fits query plus one secondary command. Use the shared wide action slot only when an S2/S3 surface adds an expand or advanced-filter entry; keep reset as a named icon command when translated labels would compete with the primary query action.
+- At the same viewport, the same ordered width roles and action set must produce the same field widths, wrap points, and action alignment across routes.
+- A business difference is expressed by changing the semantic role in `pageSpec.ts`, not by adding page-local column spans. Long content alone does not justify arbitrary width; verify the longest legal localized label/value.
+- Controls fill their semantic column. Only a connected control's bounded internal selector may use a stable width based on its longest option.
+- Query actions keep their shared stable column. Do not resize fields to consume accidental leftover space or stretch the final field merely to fill the row.
+- Advanced-filter drawers keep their documented two-column/one-column grid; the list-row width roles do not leak into drawer composition.
+
 ## Scenario Decision
 
 Every list page selects one primary query scenario. Do not combine a full flat query wall with an advanced drawer.
@@ -39,8 +61,8 @@ Every list page selects one primary query scenario. Do not combine a full flat q
 | `9-16` | **S2** | 1-2 rows, usually 6-12 fields | inline expand/collapse | Secondary fields are still Narrow and users scan-adjust them in the same session. |
 | `17-20` | **S2** or **S3** | 1-2 core rows | expand or drawer | S2 only for a specialist workbench when all hidden fields are regular Narrow conditions. |
 | `21-32` | **S3** | one core row, usually 3-8 fields | grouped advanced-filter drawer | Hidden conditions span several concepts or contain Investigate fields. |
-| `33-50` | **S3 wide** | core row | wide drawer with group anchors | Occasional conditions remain composable in one query session. |
-| `50+` | **S4** | saved-query entry plus core fields | saved-query workspace | Do not build a larger drawer. Users need named, permission-aware saved query views and explicit apply/reset ownership. |
+| `33-49` | **S3 wide** | core row | wide drawer with group anchors | Occasional conditions remain composable in one query session. |
+| `50+` | **S4** | core Locate fields | saved-query workspace, or grouped D2 fallback | Prefer named, permission-aware saved queries. Until that product capability exists, use one grouped wide drawer with an anchor rail instead of an inline field wall. |
 
 Boundary overrides:
 
@@ -85,10 +107,11 @@ Boundary overrides:
 
 ### S4: Saved Query Workspace
 
-- `50+` conditions require named saved queries or views with an explicit current-view owner. Do not replace the missing interaction model with a fullscreen drawer, a multi-row filter wall, or arbitrary URL parameters.
+- `50+` conditions should graduate to named saved queries or views with an explicit current-view owner.
 - The core Locate fields remain directly reachable. Saved-query selection, edit, duplicate, permission, default, apply, reset, and failure behavior need real product/API contracts before implementation.
 - A saved view may combine conditions; it must never silently overwrite unsaved draft edits. Ask the user to apply, discard, or save the draft before switching views.
-- Do not claim S4 from static frontend fixtures. If saved-query persistence, sharing, or permissions are not implemented, select S3 and state the field boundary instead.
+- Do not claim a saved-query workspace from static frontend fixtures. If persistence, sharing, or permissions are not implemented, use `s4-drawer-fallback`: core fields inline plus a grouped D2 drawer with an anchor rail and one scroll owner.
+- The fallback is transitional but complete: it must support draft/apply/cancel/reset, group navigation, applied-condition count, and containment verification. It must not become a fullscreen drawer or an inline 50-field wall.
 
 ## Query Interaction Invariants
 
@@ -183,7 +206,7 @@ The section class names below are local hooks. They are not a mandatory shared D
 </a-drawer>
 ```
 
-## Wide Drawer: 33-50 Fields
+## Wide Drawer: 33-49 Fields, Or S4 Fallback
 
 - Use D2 width from `overlay-dimensions.md`.
 - Add a group-anchor rail when there are seven or more groups or when scrolling cannot keep the current group obvious.
@@ -191,6 +214,7 @@ The section class names below are local hooks. They are not a mandatory shared D
 - The rail stays fixed while the editor is the one vertical scroll owner.
 - Provide `清空本组` only when group-level reset is implemented and distinguish it from `清空全部`.
 - Do not make a wide filter drawer fullscreen.
+- For `50+` fields, this drawer is allowed only as the documented `s4-drawer-fallback` when saved-query product contracts are absent. Record that absence in `pageSpec`; do not label the surface as a saved-query workspace.
 
 ## Connected Identifier Search
 

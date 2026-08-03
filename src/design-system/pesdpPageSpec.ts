@@ -22,6 +22,18 @@ export type PesdpListProfile =
   | 'management'
   | 'operations-workbench';
 
+export type PesdpQueryFieldWidthRole =
+  | 'compact'
+  | 'standard'
+  | 'wide'
+  | 'composite'
+  | 'range';
+
+export interface PesdpQueryFieldLayout {
+  field: string;
+  width: PesdpQueryFieldWidthRole;
+}
+
 export interface PesdpListSpec {
   frame: 'standard-list-v1';
   profile: PesdpListProfile;
@@ -89,8 +101,10 @@ interface PesdpPageSpecBase {
   surfaces: readonly [PesdpSurfaceSpec, ...PesdpSurfaceSpec[]];
   query: {
     totalFields: number;
-    strategy: 'none' | 's1-inline' | 's2-expand' | 's3-drawer' | 's4-workspace';
+    strategy: 'none' | 's1-inline' | 's2-expand' | 's3-drawer' | 's4-drawer-fallback' | 's4-workspace';
+    layout: 'none' | 'semantic-grid-v1';
     visibleFields: readonly string[];
+    visibleFieldLayout: readonly PesdpQueryFieldLayout[];
     advancedFields: readonly string[];
   };
   table: {

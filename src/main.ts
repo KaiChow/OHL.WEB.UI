@@ -3,6 +3,7 @@ import ArcoVue from '@arco-design/web-vue';
 import VXETable from 'vxe-table';
 import App from './App.vue';
 import { router } from './router';
+import { i18n } from './i18n';
 
 import '@arco-themes/vue-gi-demo/css/arco.css';
 import 'vxe-table/lib/style.css';
@@ -24,5 +25,6 @@ const app = createApp(App);
 
 app.use(ArcoVue);
 app.use(VXETable);
+app.use(i18n);
 app.use(router);
 app.mount('#app');

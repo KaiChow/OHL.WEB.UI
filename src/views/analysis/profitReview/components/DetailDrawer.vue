@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { ProfitReviewRow } from '../types';
 import { REVIEW_STATUS_META, RISK_LEVEL_META, formatOrderAmount, formatMarginRate } from '../displayMeta';
 
@@ -7,6 +8,7 @@ const props = defineProps<{
   visible: boolean;
   row: ProfitReviewRow | null;
 }>();
+const { t } = useI18n();
 
 const emit = defineEmits<{
   'update:visible': [value: boolean];
@@ -24,15 +26,15 @@ const profitFacts = computed(() => {
   const row = props.row;
   if (!row) return [];
   return [
-    { label: '订单号', value: row.orderNo },
-    { label: '客户', value: row.customer },
-    { label: '区域', value: row.region },
-    { label: '业务线', value: row.businessLine },
-    { label: '负责人', value: row.owner },
-    { label: '订单金额', value: formatOrderAmount(row.orderAmount) },
-    { label: '毛利率', value: formatMarginRate(row.grossMarginRate) },
-    { label: '更新时间', value: row.updatedAt },
-    { label: '核查说明', value: row.reviewNote || '—', span: 2 },
+    { label: t('profit.columns.orderNo'), value: row.orderNo },
+    { label: t('profit.columns.customer'), value: row.customer },
+    { label: t('profit.columns.region'), value: row.region },
+    { label: t('profit.columns.businessLine'), value: row.businessLine },
+    { label: t('profit.columns.owner'), value: row.owner },
+    { label: t('profit.columns.amount'), value: formatOrderAmount(row.orderAmount) },
+    { label: t('profit.columns.margin'), value: formatMarginRate(row.grossMarginRate) },
+    { label: t('profit.columns.updatedAt'), value: row.updatedAt },
+    { label: t('profit.detail.note'), value: row.reviewNote || '—', span: 2 },
   ];
 });
 </script>
@@ -45,30 +47,30 @@ const profitFacts = computed(() => {
     :footer="false"
     unmount-on-close
   >
-    <template #title>订单利润详情</template>
+    <template #title>{{ t('profit.detail.title') }}</template>
     <div v-if="row && statusMeta && riskMeta" class="detail-body" data-detail-object="order-profit-review">
       <div class="detail-head">
         <span class="detail-head__identity mono">{{ row.orderNo }}</span>
-        <span class="s-pill" :data-s="statusMeta.tone">{{ statusMeta.label }}</span>
-        <span class="s-pill" :data-s="riskMeta.tone">风险{{ riskMeta.label }}</span>
+        <span class="s-pill" :data-s="statusMeta.tone">{{ t(`profit.status.${row.reviewStatus}`) }}</span>
+        <span class="s-pill" :data-s="riskMeta.tone">{{ t('profit.detail.riskPrefix') }} {{ t(`profit.risk.${row.riskLevel}`) }}</span>
       </div>
       <div class="detail-head__context">{{ row.customer }} · {{ row.region }} · {{ row.businessLine }}</div>
 
       <section class="detail-section" aria-labelledby="profit-facts-title">
-        <h3 id="profit-facts-title" class="detail-section__title">利润详情</h3>
+        <h3 id="profit-facts-title" class="detail-section__title">{{ t('profit.detail.profitFacts') }}</h3>
         <a-descriptions :column="2" size="small" :data="profitFacts" />
       </section>
 
       <section class="detail-section" aria-labelledby="risk-items-title">
-        <h3 id="risk-items-title" class="detail-section__title">风险项</h3>
+        <h3 id="risk-items-title" class="detail-section__title">{{ t('profit.detail.riskItems') }}</h3>
         <div v-if="row.riskItems.length" class="risk-list">
           <span v-for="item in row.riskItems" :key="item" class="s-pill" data-s="wait">{{ item }}</span>
         </div>
-        <div v-else class="detail-empty">暂无风险项</div>
+        <div v-else class="detail-empty">{{ t('profit.detail.noRisk') }}</div>
       </section>
 
       <section class="detail-section" aria-labelledby="review-timeline-title">
-        <h3 id="review-timeline-title" class="detail-section__title">核查时间线</h3>
+        <h3 id="review-timeline-title" class="detail-section__title">{{ t('profit.detail.timeline') }}</h3>
         <a-timeline>
           <a-timeline-item v-for="item in row.timeline" :key="`${item.time}-${item.label}`">
             <div class="timeline-item">

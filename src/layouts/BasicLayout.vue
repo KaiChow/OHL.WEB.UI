@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { IconRefresh, IconSearch, IconUser, IconDown } from '@arco-design/web-vue/es/icon';
+import { useI18n } from 'vue-i18n';
+import { IconRefresh, IconSearch, IconUser, IconDown, IconLanguage } from '@arco-design/web-vue/es/icon';
 import { Ship } from '@icon-park/vue-next';
 import { appMenus } from '../config/menu';
+import { setAppLocale, type AppLocale } from '../i18n';
 
 const route = useRoute();
 const router = useRouter();
+const { t, locale } = useI18n();
 const menuKeyword = ref('');
 const selectedMenuKeys = ref<string[]>([]);
 const openMenuKeys = ref<string[]>([]);
@@ -37,7 +40,11 @@ const registeredRouteNames = new Set(
 const availableMenus = computed(() => appMenus
   .map((group) => ({
     ...group,
-    children: group.children?.filter((item) => item.routeName && registeredRouteNames.has(item.routeName)),
+    title: group.titleKey ? t(group.titleKey) : group.title,
+    children: group.children?.filter((item) => item.routeName && registeredRouteNames.has(item.routeName)).map((item) => ({
+      ...item,
+      title: item.titleKey ? t(item.titleKey) : item.title,
+    })),
   }))
   .filter((group) => (group.children?.length ?? 0) > 0));
 
@@ -57,14 +64,18 @@ const menuKeyRouteMap = computed(() => {
 });
 
 const currentPageTitle = computed(() =>
-  route.meta.title ? String(route.meta.title) : '工作台',
+  route.meta.titleKey ? t(String(route.meta.titleKey)) : route.meta.title ? String(route.meta.title) : t('shell.workbench'),
 );
 
 const currentGroupTitle = computed(() => {
   const key = route.meta.menuKey ? String(route.meta.menuKey) : '';
   const group = availableMenus.value.find((item) => item.children?.some((child) => child.key === key));
-  return group?.title ?? '海运业务';
+  return group?.title ?? t('shell.defaultGroup');
 });
+
+const handleLocaleChange = (value: string | number | Record<string, unknown> | undefined) => {
+  if (value === 'zh-CN' || value === 'en-US') setAppLocale(value as AppLocale);
+};
 
 const filteredMenus = computed(() => {
   const kw = menuKeyword.value.trim().toLowerCase();
@@ -119,7 +130,7 @@ const onMenuItemClick = (key: string) => {
       </div>
 
       <div v-if="availableMenuCount >= 6" class="app-layout__search">
-        <a-input v-model="menuKeyword" size="small" allow-clear placeholder="搜索菜单">
+        <a-input v-model="menuKeyword" size="small" allow-clear :placeholder="t('shell.searchMenu')">
           <template #suffix><icon-search /></template>
         </a-input>
       </div>
@@ -133,15 +144,15 @@ const onMenuItemClick = (key: string) => {
       >
         <a-sub-menu v-for="group in filteredMenus" :key="group.key">
           <template #icon><ship theme="outline" :size="16" /></template>
-          <template #title>{{ group.title }}</template>
-          <a-menu-item v-for="item in group.children" :key="item.key">
+          <template #title><span :title="group.title">{{ group.title }}</span></template>
+          <a-menu-item v-for="item in group.children" :key="item.key" :title="item.title">
             {{ item.title }}
           </a-menu-item>
         </a-sub-menu>
       </a-menu>
 
       <div class="app-layout__footer">
-        <span>中国区 · CN</span>
+        <span>{{ t('shell.region') }}</span>
         <span>v0.1</span>
       </div>
     </a-layout-sider>
@@ -156,9 +167,14 @@ const onMenuItemClick = (key: string) => {
         </div>
 
         <a-space class="app-layout__header-actions" :size="8">
-          <a-button size="small" type="text" class="app-layout__icon-action" title="刷新" @click="router.go(0)">
+          <a-button size="small" type="text" class="app-layout__icon-action" :title="t('common.refresh')" @click="router.go(0)">
             <template #icon><icon-refresh /></template>
           </a-button>
+          <a-select class="app-layout__locale" size="small" :model-value="locale" :aria-label="t('shell.language')" @change="handleLocaleChange">
+            <template #prefix><icon-language /></template>
+            <a-option value="zh-CN">{{ t('shell.chinese') }}</a-option>
+            <a-option value="en-US">{{ t('shell.english') }}</a-option>
+          </a-select>
           <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
             <a-button size="small" class="app-layout__user">
               <template #icon><icon-user /></template>
@@ -166,9 +182,9 @@ const onMenuItemClick = (key: string) => {
               <icon-down />
             </a-button>
             <template #content>
-              <a-doption>个人设置</a-doption>
-              <a-doption>切换工作区</a-doption>
-              <a-doption>退出登录</a-doption>
+              <a-doption>{{ t('shell.personalSettings') }}</a-doption>
+              <a-doption>{{ t('shell.switchWorkspace') }}</a-doption>
+              <a-doption>{{ t('shell.logout') }}</a-doption>
             </template>
           </a-dropdown>
         </a-space>
@@ -322,6 +338,10 @@ const onMenuItemClick = (key: string) => {
 
 .app-layout__header-actions {
   flex-shrink: 0;
+}
+
+.app-layout__locale {
+  width: 104px;
 }
 
 .app-layout__icon-action {

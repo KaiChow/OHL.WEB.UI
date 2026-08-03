@@ -104,14 +104,17 @@ Exceptions:
 Design for 1.3–2× text expansion compared with Chinese.
 
 - Route all user-visible business copy, validation, empty/error states, Tooltip text, and accessible names through the project's existing internationalization mechanism; do not replace established keys with hardcoded Chinese.
+- Install one app-level locale owner and pass the same locale to the component provider so pagination, dates, validation, and page copy do not switch independently. Persist only a supported locale code and update the document language.
 - Translate complete messages instead of concatenating sentence fragments. Variables, plural forms, and grammar belong to the locale message.
 - Format dates, times, numbers, percentages, and currencies with the active Locale; declare the business timezone whenever the value is not unambiguously local.
 - Do not fixed-width buttons by Chinese label length.
 - Do not truncate business-critical labels.
 - Use vertical form labels for dense multilingual forms.
+- The same business page uses one semantic field/column layout in every locale. Never create locale-specific grid spans or a second route; verify 1.3–2× expansion and change a semantic width role only when the longest legal label/value proves the role was wrong in every locale.
 - Use `min-width` plus ellipsis/title for table columns.
 - Prefer logical layout properties for new direction-sensitive page CSS; do not claim RTL support until the rendered workflow has been verified.
 - Do not use negative letter spacing or viewport-based font scaling.
+- Release verification covers the default and longest supported locale at `1024`, `1366`, and wide desktop widths, including query actions, table operations, overlays, empty/error copy, and accessible names.
 
 ## Codes, Numbers, Dates
 

@@ -89,7 +89,14 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   query: {
     totalFields: 18,
     strategy: 's3-drawer',
-    visibleFields: ['businessType', 'keyword', 'customerName', 'operator'],
+    layout: 'semantic-grid-v1',
+    visibleFields: ['keyword', 'businessType', 'customerName', 'operator'],
+    visibleFieldLayout: [
+      { field: 'keyword', width: 'composite' },
+      { field: 'businessType', width: 'compact' },
+      { field: 'customerName', width: 'standard' },
+      { field: 'operator', width: 'compact' },
+    ],
     advancedFields: [
       'pol',
       'pod',
@@ -109,11 +116,11 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   },
   table: {
     kind: 'workbench',
-    identityColumns: ['orderNo', 'status'],
+    identityColumns: ['sequence', 'orderNo', 'status'],
     decisionColumns: ['nextAction', 'operator', 'customerName', 'route', 'documentState', 'feeState', 'exceptionState'],
     supportingColumns: ['updatedAt'],
     compositeColumns: ['next-action-decision-context'],
-    fixed: ['checkbox', 'orderNo', 'operations'],
+    fixed: ['checkbox', 'sequence', 'orderNo', 'operations'],
     densityReason: 'Standard rows retain the auxiliary decision line; compact mode intentionally renders one line.',
   },
   detail: { mode: 'none', focus: [], milestones: [] },

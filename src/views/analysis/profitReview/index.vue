@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { Message } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
@@ -15,6 +16,8 @@ import {
 import { downloadCsvFile, buildTimestampSuffix } from '../../../utils/mock-actions';
 import { formatLocalMinute } from '../../../utils/date-time';
 import { compactVerticalFormLabelStyle } from '../../../design-system/formLayout';
+import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
+import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
 import WorkflowStateSelector from '../../../components/workbench/WorkflowStateSelector.vue';
 import DetailDrawer from './components/DetailDrawer.vue';
 import FormDrawer from './components/FormDrawer.vue';
@@ -24,13 +27,14 @@ import type { ProfitReviewQuery, ProfitReviewRow, ProfitReviewStatus } from './t
 import { resolveProfitReviewUiScenario } from '../featureContracts';
 
 const route = useRoute();
+const { t } = useI18n();
 
-const WORKFLOW_STATE_OPTIONS: { key: ProfitReviewStatus; label: string; tone?: 'warn' | 'danger' }[] = [
-  { key: 'all', label: '全部' },
-  { key: 'pending', label: '待核查', tone: 'warn' },
-  { key: 'reviewing', label: '复核中' },
-  { key: 'approved', label: '已通过' },
-  { key: 'rejected', label: '已驳回', tone: 'danger' },
+const WORKFLOW_STATE_OPTIONS: { key: ProfitReviewStatus; tone?: 'warn' | 'danger' }[] = [
+  { key: 'all' },
+  { key: 'pending', tone: 'warn' },
+  { key: 'reviewing' },
+  { key: 'approved' },
+  { key: 'rejected', tone: 'danger' },
 ];
 
 const defaultQuery = (): ProfitReviewQuery => ({
@@ -134,6 +138,7 @@ const pagedRows = computed(() => {
 const workflowStateOptions = computed(() =>
   WORKFLOW_STATE_OPTIONS.map((state) => ({
     ...state,
+    label: t(`profit.status.${state.key}`),
     count: state.key === 'all'
       ? queryBaseRows.value.length
       : queryBaseRows.value.filter((row) => row.reviewStatus === state.key).length,
@@ -218,7 +223,7 @@ const fetchList = async () => {
   loading.value = true;
   await new Promise((resolve) => window.setTimeout(resolve, uiScenario.value === 'slow' ? 1600 : 300));
   if (uiScenario.value === 'error' && !hasSimulatedError.value) {
-    loadError.value = '订单利润核查数据加载失败，请检查网络后重试。';
+    loadError.value = t('profit.messages.loadError');
     hasSimulatedError.value = true;
   }
   loading.value = false;
@@ -242,22 +247,22 @@ const handleEditSubmit = async (payload: { reviewNote: string; owner: string }) 
   editError.value = '';
   await waitForInteraction(260, 1200);
   if (uiScenario.value === 'error') {
-    editError.value = '保存失败，输入内容已保留，请重试。';
+    editError.value = t('profit.messages.saveError');
     editSubmitting.value = false;
-    Message.error(`订单 ${row.orderNo} 核查说明保存失败，请重试`);
+    Message.error(t('profit.messages.saveFailed', { orderNo: row.orderNo }));
     return;
   }
   row.reviewNote = payload.reviewNote;
   row.owner = payload.owner;
-  touchRow(row, '核查说明已更新');
+  touchRow(row, t('profit.messages.noteUpdated'));
   editSubmitting.value = false;
   editVisible.value = false;
-  Message.success(`订单 ${row.orderNo} 核查信息已保存`);
+  Message.success(t('profit.messages.saveSuccess', { orderNo: row.orderNo }));
 };
 
 const openBatchConfirm = () => {
   if (!submittableRows.value.length) {
-    Message.warning('请先选择待核查订单');
+    Message.warning(t('profit.messages.selectPending'));
     return;
   }
   batchError.value = '';
@@ -279,14 +284,14 @@ const confirmBatchSubmit = async () => {
   const succeededRows = submittedRows.filter((row) => !failedIds.has(row.id));
   succeededRows.forEach((row) => {
     row.reviewStatus = 'reviewing';
-    touchRow(row, '复核已提交');
+    touchRow(row, t('profit.messages.reviewSubmitted'));
   });
 
   if (!failedRows.length) {
     batchFeedback.value = null;
     clearSelection();
     batchSubmitting.value = false;
-    Message.success(`已提交复核 ${submittedRows.length} 条`);
+    Message.success(t('profit.messages.batchSuccess', { count: submittedRows.length }));
     return true;
   }
 
@@ -296,11 +301,11 @@ const confirmBatchSubmit = async () => {
   batchSubmitting.value = false;
   if (succeededRows.length) {
     batchFeedback.value = { success: succeededRows.length, failedOrderNos: failedRows.map((row) => row.orderNo) };
-    Message.warning(`批量提交复核完成，${succeededRows.length} 条成功，${failedRows.length} 条失败`);
+    Message.warning(t('profit.messages.batchPartial', { success: succeededRows.length, failed: failedRows.length }));
     return true;
   }
-  batchError.value = '批量提交复核失败，所选订单已保留选中，请重试。';
-  Message.error(`批量提交复核失败，${failedRows.length} 条订单已保留选中`);
+  batchError.value = t('profit.messages.batchError');
+  Message.error(t('profit.messages.batchErrorCount', { count: failedRows.length }));
   return false;
 };
 
@@ -317,14 +322,14 @@ const confirmReject = async () => {
   rejectError.value = '';
   await waitForInteraction(260, 1200);
   if (uiScenario.value === 'error') {
-    rejectError.value = '驳回请求未完成，请确认订单状态后重试。';
+    rejectError.value = t('profit.messages.rejectError');
     rejectSubmitting.value = false;
     return false;
   }
   row.reviewStatus = 'rejected';
-  touchRow(row, '核查已驳回');
+  touchRow(row, t('profit.messages.rejected'));
   rejectSubmitting.value = false;
-  Message.success(`订单 ${row.orderNo} 已驳回`);
+  Message.success(t('profit.messages.rejectSuccess', { orderNo: row.orderNo }));
   return true;
 };
 
@@ -341,7 +346,7 @@ const confirmDelete = async () => {
   deleteError.value = '';
   await waitForInteraction(260, 1200);
   if (uiScenario.value === 'error') {
-    deleteError.value = '删除请求未完成，当前列表已保留，请重试。';
+    deleteError.value = t('profit.messages.deleteError');
     deleteSubmitting.value = false;
     return false;
   }
@@ -350,7 +355,7 @@ const confirmDelete = async () => {
   if (editRow.value?.id === row.id) editVisible.value = false;
   clearSelection();
   deleteSubmitting.value = false;
-  Message.success(`订单 ${row.orderNo} 的核查记录已删除`);
+  Message.success(t('profit.messages.deleteSuccess', { orderNo: row.orderNo }));
   return true;
 };
 
@@ -358,14 +363,14 @@ const handleExport = async () => {
   if (exporting.value) return;
   const rows = filteredRows.value;
   if (!rows.length) {
-    Message.warning('当前筛选结果为空，无可导出数据');
+    Message.warning(t('profit.messages.noExport'));
     return;
   }
   exporting.value = true;
   await waitForInteraction(240, 1000);
   downloadCsvFile(
-    `订单利润核查-${buildTimestampSuffix()}.csv`,
-    ['订单号', '客户', '区域', '业务线', '负责人', '订单金额', '毛利率', '风险等级', '核查状态', '更新时间'],
+    `${t('profit.messages.exportFile')}-${buildTimestampSuffix()}.csv`,
+    [t('profit.columns.orderNo'), t('profit.columns.customer'), t('profit.columns.region'), t('profit.columns.businessLine'), t('profit.columns.owner'), t('profit.columns.amount'), t('profit.columns.margin'), t('profit.columns.risk'), t('profit.columns.reviewStatus'), t('profit.columns.updatedAt')],
     rows.map((row) => [
       row.orderNo,
       row.customer,
@@ -374,13 +379,13 @@ const handleExport = async () => {
       row.owner,
       row.orderAmount,
       formatMarginRate(row.grossMarginRate),
-      RISK_LEVEL_META[row.riskLevel].label,
-      REVIEW_STATUS_META[row.reviewStatus].label,
+      t(`profit.risk.${row.riskLevel}`),
+      t(`profit.status.${row.reviewStatus}`),
       row.updatedAt,
     ]),
   );
   exporting.value = false;
-  Message.success(`已导出 ${rows.length} 条`);
+  Message.success(t('profit.messages.exportSuccess', { count: rows.length }));
 };
 
 watch(uiScenario, () => {
@@ -414,62 +419,62 @@ watch(uiScenario, () => {
       >
         <div class="filter-panel">
           <a-form :model="query" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="filter-panel__form">
-            <a-row :gutter="[12, 10]" align="end">
-              <a-col :xs="24" :sm="12" :md="6" :lg="5" :xl="5">
-                <a-form-item label="关键词">
+            <QueryFieldGrid>
+              <QueryFieldCol role="standard">
+                <a-form-item :label="t('profit.fields.keyword')">
                   <a-input
                     v-model="query.keyword"
                     size="small"
                     allow-clear
-                    placeholder="请输入订单号 / 客户"
+                    :placeholder="t('profit.placeholders.keyword')"
                     @press-enter="handleSearch"
                   />
                 </a-form-item>
-              </a-col>
-              <a-col :xs="24" :sm="12" :md="6" :lg="4" :xl="3">
-                <a-form-item label="风险等级">
-                  <a-select v-model="query.riskLevel" size="small" allow-clear placeholder="全部等级">
-                    <a-option value="high">高</a-option>
-                    <a-option value="medium">中</a-option>
-                    <a-option value="low">低</a-option>
+              </QueryFieldCol>
+              <QueryFieldCol role="compact">
+                <a-form-item :label="t('profit.fields.risk')">
+                  <a-select v-model="query.riskLevel" size="small" allow-clear :placeholder="t('profit.placeholders.risk')">
+                    <a-option value="high">{{ t('profit.risk.high') }}</a-option>
+                    <a-option value="medium">{{ t('profit.risk.medium') }}</a-option>
+                    <a-option value="low">{{ t('profit.risk.low') }}</a-option>
                   </a-select>
                 </a-form-item>
-              </a-col>
-              <a-col :xs="24" :sm="12" :md="6" :lg="4" :xl="3">
-                <a-form-item label="区域">
-                  <a-select v-model="query.region" size="small" allow-clear placeholder="全部区域">
+              </QueryFieldCol>
+              <QueryFieldCol role="compact">
+                <a-form-item :label="t('profit.fields.region')">
+                  <a-select v-model="query.region" size="small" allow-clear :placeholder="t('profit.placeholders.region')">
                     <a-option v-for="region in regionOptions" :key="region" :value="region">{{ region }}</a-option>
                   </a-select>
                 </a-form-item>
-              </a-col>
-              <a-col :xs="24" :sm="12" :md="6" :lg="4" :xl="3">
-                <a-form-item label="负责人">
-                  <a-select v-model="query.owner" size="small" allow-clear allow-search placeholder="全部人员">
+              </QueryFieldCol>
+              <QueryFieldCol role="compact">
+                <a-form-item :label="t('profit.fields.owner')">
+                  <a-select v-model="query.owner" size="small" allow-clear allow-search :placeholder="t('profit.placeholders.owner')">
                     <a-option v-for="owner in ownerOptions" :key="owner" :value="owner">{{ owner }}</a-option>
                   </a-select>
                 </a-form-item>
-              </a-col>
-              <a-col :xs="24" :sm="24" :md="12" :lg="7" :xl="6">
-                <a-form-item label="更新时间">
+              </QueryFieldCol>
+              <QueryFieldCol role="range">
+                <a-form-item :label="t('profit.fields.updatedAt')">
                   <a-range-picker v-model="query.updatedRange" size="small" style="width: 100%" />
                 </a-form-item>
-              </a-col>
-              <a-col :xs="24" :sm="24" :md="12" :lg="24" :xl="4" class="filter-panel__action-col">
+              </QueryFieldCol>
+              <QueryFieldCol role="actions">
                 <div class="filter-panel__actions">
                   <a-button size="small" type="primary" :loading="querying" @click="handleSearch">
                     <template #icon><icon-search /></template>
-                    查询
+                    {{ t('common.search') }}
                   </a-button>
-                  <a-button size="small" type="text" title="重置查询条件" :disabled="querying" @click="handleReset">重置</a-button>
+                  <a-button size="small" type="text" :title="t('common.reset')" :disabled="querying" @click="handleReset">{{ t('common.reset') }}</a-button>
                 </div>
-              </a-col>
-            </a-row>
+              </QueryFieldCol>
+            </QueryFieldGrid>
           </a-form>
         </div>
         <div class="workflow-filter-bar">
           <WorkflowStateSelector
             :model-value="activeWorkflowState"
-            label="核查队列"
+            :label="t('profit.queueLabel')"
             :show-label="false"
             :options="workflowStateOptions"
             @change="onWorkflowStateChange"
@@ -487,30 +492,32 @@ watch(uiScenario, () => {
         <template #title>
           <div class="table-cap-start">
             <div v-if="canOperate" class="table-command-group">
-              <a-button
-                v-if="submittableRows.length > 0"
-                size="small"
-                type="primary"
-                :loading="batchSubmitting"
-                @click="openBatchConfirm"
-              >批量提交复核</a-button>
-              <a-tooltip content="导出当前结果">
-                <a-button size="small" aria-label="导出当前结果" :loading="exporting" :disabled="Boolean(tableError)" @click="handleExport">
+              <a-tooltip :content="submittableRows.length > 0 ? t('profit.actions.submitSelected') : t('profit.actions.selectEligible')">
+                <a-button
+                  size="small"
+                  type="primary"
+                  :disabled="submittableRows.length === 0"
+                  :loading="batchSubmitting"
+                  @click="openBatchConfirm"
+                >{{ t('profit.actions.batchSubmit') }}</a-button>
+              </a-tooltip>
+              <a-tooltip :content="t('profit.actions.exportCurrent')">
+                <a-button size="small" :aria-label="t('profit.actions.exportCurrent')" :loading="exporting" :disabled="Boolean(tableError)" @click="handleExport">
                   <template #icon><icon-download /></template>
-                  <span class="table-command-label--optional">导出</span>
+                  <span class="table-command-label--optional">{{ t('common.export') }}</span>
                 </a-button>
               </a-tooltip>
             </div>
             <template v-if="selectedCount > 0">
-              <span class="selection-tip">已选 <b>{{ selectedCount }}</b> 条</span>
-              <a-button size="small" type="text" @click="clearSelection">清空</a-button>
+              <span class="selection-tip">{{ t('common.selected', { count: selectedCount }) }}</span>
+              <a-button size="small" type="text" @click="clearSelection">{{ t('common.clear') }}</a-button>
             </template>
           </div>
         </template>
         <template #extra>
           <a-space :size="8">
-            <a-tooltip content="刷新">
-              <a-button size="small" type="text" class="table-cap-tool" title="刷新" aria-label="刷新" :loading="loading || forcedLoading" @click="fetchList">
+            <a-tooltip :content="t('common.refresh')">
+              <a-button size="small" type="text" class="table-cap-tool" :title="t('common.refresh')" :aria-label="t('common.refresh')" :loading="loading || forcedLoading" @click="fetchList">
                 <template #icon><icon-refresh /></template>
               </a-button>
             </a-tooltip>
@@ -519,7 +526,7 @@ watch(uiScenario, () => {
               :page-size="page.size"
               :total="tableTotal"
               :page-size-options="[20, 50, 100]"
-              size="small"
+              size="mini"
               show-total
               show-page-size
               show-jumper
@@ -536,7 +543,7 @@ watch(uiScenario, () => {
           class="batch-result-alert"
           @close="batchFeedback = null"
         >
-          批量提交复核：成功 {{ batchFeedback.success }} 条，失败 {{ batchFeedback.failedOrderNos.length }} 条；失败订单 {{ batchFeedback.failedOrderNos.join('、') }} 已保留选中，可修正后重试。
+          {{ t('profit.messages.batchAlert', { success: batchFeedback.success, failed: batchFeedback.failedOrderNos.length, orders: batchFeedback.failedOrderNos.join(', ') }) }}
         </a-alert>
 
         <div class="workbench-table-frame">
@@ -549,6 +556,7 @@ watch(uiScenario, () => {
             show-overflow="title"
             :loading="loading || querying || forcedLoading"
             :data="pagedRows"
+            :seq-config="{ startIndex: (page.current - 1) * page.size }"
             :column-config="{ resizable: true }"
             :row-config="tableRowConfig"
             :checkbox-config="{ highlight: true }"
@@ -556,49 +564,50 @@ watch(uiScenario, () => {
             @checkbox-all="onSelectionChange"
           >
             <vxe-column type="checkbox" width="44" fixed="left" />
+            <vxe-column type="seq" :title="t('common.sequence')" width="52" fixed="left" align="center" />
 
-            <vxe-column field="orderNo" title="订单号" min-width="150" fixed="left">
+            <vxe-column field="orderNo" :title="t('profit.columns.orderNo')" min-width="150" fixed="left">
               <template #default="{ row }">
                 <span class="link-text--strong mono" @click="openDetail(row)">{{ row.orderNo }}</span>
               </template>
             </vxe-column>
 
-            <vxe-column field="reviewStatus" title="核查状态" min-width="96">
+            <vxe-column field="reviewStatus" :title="t('profit.columns.reviewStatus')" min-width="112">
               <template #default="{ row }">
                 <span class="s-pill" :data-s="REVIEW_STATUS_META[row.reviewStatus as keyof typeof REVIEW_STATUS_META].tone">
-                  {{ REVIEW_STATUS_META[row.reviewStatus as keyof typeof REVIEW_STATUS_META].label }}
+                  {{ t(`profit.status.${row.reviewStatus}`) }}
                 </span>
               </template>
             </vxe-column>
 
-            <vxe-column field="riskLevel" title="风险等级" min-width="88">
+            <vxe-column field="riskLevel" :title="t('profit.columns.risk')" min-width="96">
               <template #default="{ row }">
                 <span class="s-pill" :data-s="RISK_LEVEL_META[row.riskLevel as keyof typeof RISK_LEVEL_META].tone">
-                  {{ RISK_LEVEL_META[row.riskLevel as keyof typeof RISK_LEVEL_META].label }}
+                  {{ t(`profit.risk.${row.riskLevel}`) }}
                 </span>
               </template>
             </vxe-column>
 
-            <vxe-column field="customer" title="客户" min-width="160" />
-            <vxe-column field="region" title="区域" min-width="72" />
-            <vxe-column field="businessLine" title="业务线" min-width="90" />
-            <vxe-column field="owner" title="负责人" min-width="80" />
+            <vxe-column field="customer" :title="t('profit.columns.customer')" min-width="160" />
+            <vxe-column field="region" :title="t('profit.columns.region')" min-width="82" />
+            <vxe-column field="businessLine" :title="t('profit.columns.businessLine')" min-width="96" />
+            <vxe-column field="owner" :title="t('profit.columns.owner')" min-width="90" />
 
-            <vxe-column field="orderAmount" title="订单金额" min-width="108" align="right">
+            <vxe-column field="orderAmount" :title="t('profit.columns.amount')" min-width="112" align="right">
               <template #default="{ row }">
                 <span class="mono">{{ formatOrderAmount(row.orderAmount) }}</span>
               </template>
             </vxe-column>
 
-            <vxe-column field="grossMarginRate" title="毛利率" min-width="96" align="right">
+            <vxe-column field="grossMarginRate" :title="t('profit.columns.margin')" min-width="104" align="right">
               <template #default="{ row }">
                 <span class="mono" :class="{ 'margin-negative': row.grossMarginRate < 0 }">{{ formatMarginRate(row.grossMarginRate) }}</span>
               </template>
             </vxe-column>
 
-            <vxe-column field="updatedAt" title="更新时间" min-width="140" class-name="mono" />
+            <vxe-column field="updatedAt" :title="t('profit.columns.updatedAt')" min-width="140" class-name="mono" />
 
-            <vxe-column title="操作" width="120" fixed="right" align="left" header-align="center">
+            <vxe-column :title="t('common.operations')" width="132" fixed="right" align="left" header-align="center">
               <template #default="{ row }">
                 <a-space class="row-actions" :size="2">
                   <a-button
@@ -607,29 +616,29 @@ watch(uiScenario, () => {
                     type="text"
                     class="row-action-btn"
                     @click="openEdit(row)"
-                  >编辑</a-button>
+                  >{{ t('common.edit') }}</a-button>
                   <a-dropdown
                     v-if="canOperate && ['pending', 'reviewing', 'rejected'].includes(row.reviewStatus)"
                     trigger="click"
                     position="br"
                   >
-                    <a-tooltip content="更多操作">
+                    <a-tooltip :content="t('common.moreActions')">
                       <a-button
                         size="mini"
                         type="text"
                         class="row-action-btn row-action-btn--more"
-                        aria-label="更多操作"
+                        :aria-label="t('common.moreActions')"
                       >
                         <icon-more />
                       </a-button>
                     </a-tooltip>
                     <template #content>
-                      <a-doption v-if="['pending', 'reviewing'].includes(row.reviewStatus)" @click="openRejectConfirm(row)">驳回</a-doption>
+                      <a-doption v-if="['pending', 'reviewing'].includes(row.reviewStatus)" @click="openRejectConfirm(row)">{{ t('profit.actions.reject') }}</a-doption>
                       <a-divider
                         v-if="['pending', 'reviewing'].includes(row.reviewStatus) && ['pending', 'rejected'].includes(row.reviewStatus)"
                         :margin="4"
                       />
-                      <a-doption v-if="['pending', 'rejected'].includes(row.reviewStatus)" class="danger-opt" @click="openDeleteConfirm(row)">删除记录</a-doption>
+                      <a-doption v-if="['pending', 'rejected'].includes(row.reviewStatus)" class="danger-opt" @click="openDeleteConfirm(row)">{{ t('profit.actions.deleteRecord') }}</a-doption>
                     </template>
                   </a-dropdown>
                 </a-space>
@@ -643,21 +652,21 @@ watch(uiScenario, () => {
                 <icon-empty v-else class="workbench-empty__icon" />
                 <div class="workbench-empty__title">
                   {{ uiScenario === 'permission'
-                    ? '暂无订单利润核查查看权限'
+                    ? t('profit.empty.permissionTitle')
                     : tableError
-                      ? '订单利润核查加载失败'
-                      : hasActiveFilter ? '未找到匹配的核查订单' : '暂无订单利润核查记录' }}
+                      ? t('profit.empty.errorTitle')
+                      : hasActiveFilter ? t('profit.empty.filteredTitle') : t('profit.empty.defaultTitle') }}
                 </div>
                 <div class="workbench-empty__desc">
                   {{ uiScenario === 'permission'
-                    ? '请联系管理员开通经营分析模块的数据权限。'
+                    ? t('profit.empty.permissionDesc')
                     : tableError
                       ? tableError
-                      : hasActiveFilter ? '请调整查询条件或切换核查队列后重试。' : '当前没有需要核查的订单利润记录。' }}
+                      : hasActiveFilter ? t('profit.empty.filteredDesc') : t('profit.empty.defaultDesc') }}
                 </div>
                 <div class="workbench-empty__actions">
-                  <a-button v-if="tableError" size="small" type="primary" @click="fetchList">重新加载</a-button>
-                  <a-button v-else-if="hasActiveFilter && uiScenario !== 'permission'" size="small" type="text" @click="handleReset">重置筛选</a-button>
+                  <a-button v-if="tableError" size="small" type="primary" @click="fetchList">{{ t('profit.actions.retry') }}</a-button>
+                  <a-button v-else-if="hasActiveFilter && uiScenario !== 'permission'" size="small" type="text" @click="handleReset">{{ t('profit.actions.resetFilter') }}</a-button>
                 </div>
               </div>
             </template>
@@ -679,47 +688,47 @@ watch(uiScenario, () => {
 
     <a-modal
       v-model:visible="batchConfirmVisible"
-      title="批量提交复核"
+      :title="t('profit.modal.batchTitle')"
       :width="420"
       :mask-closable="false"
-      ok-text="确认提交"
+      :ok-text="t('profit.modal.batchOk')"
       :ok-loading="batchSubmitting"
       :ok-button-props="{ size: 'small' }"
       :cancel-button-props="{ size: 'small' }"
       :on-before-ok="confirmBatchSubmit"
     >
-      <p class="modal-confirm-copy">确认将选中的 {{ submittableRows.length }} 条待核查订单提交复核？提交后订单进入「复核中」队列。</p>
+      <p class="modal-confirm-copy">{{ t('profit.modal.batchCopy', { count: submittableRows.length }) }}</p>
       <p class="modal-order-list mono">{{ submittableRows.map((row) => row.orderNo).join('、') }}</p>
       <a-alert v-if="batchError" type="error">{{ batchError }}</a-alert>
     </a-modal>
 
     <a-modal
       v-model:visible="rejectModalVisible"
-      title="驳回核查"
+      :title="t('profit.modal.rejectTitle')"
       :width="420"
       :mask-closable="false"
-      ok-text="确认驳回"
+      :ok-text="t('profit.modal.rejectOk')"
       :ok-loading="rejectSubmitting"
       :ok-button-props="{ status: 'danger', size: 'small' }"
       :cancel-button-props="{ size: 'small' }"
       :on-before-ok="confirmReject"
     >
-      <p class="modal-confirm-copy">确认驳回订单 {{ rejectTargetRow?.orderNo }} 的利润核查？驳回后订单进入「已驳回」队列。</p>
+      <p class="modal-confirm-copy">{{ t('profit.modal.rejectCopy', { orderNo: rejectTargetRow?.orderNo }) }}</p>
       <a-alert v-if="rejectError" type="error">{{ rejectError }}</a-alert>
     </a-modal>
 
     <a-modal
       v-model:visible="deleteModalVisible"
-      title="删除核查记录"
+      :title="t('profit.modal.deleteTitle')"
       :width="420"
       :mask-closable="false"
-      ok-text="确认删除"
+      :ok-text="t('profit.modal.deleteOk')"
       :ok-loading="deleteSubmitting"
       :ok-button-props="{ status: 'danger', size: 'small' }"
       :cancel-button-props="{ size: 'small' }"
       :on-before-ok="confirmDelete"
     >
-      <p class="modal-confirm-copy">确认删除订单 {{ deleteTargetRow?.orderNo }} 的利润核查记录？此操作不可撤销。</p>
+      <p class="modal-confirm-copy">{{ t('profit.modal.deleteCopy', { orderNo: deleteTargetRow?.orderNo }) }}</p>
       <a-alert v-if="deleteError" type="error">{{ deleteError }}</a-alert>
     </a-modal>
   </div>
