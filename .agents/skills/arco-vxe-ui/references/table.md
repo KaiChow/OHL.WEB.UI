@@ -192,7 +192,7 @@ Business columns use **`min-width`**, not fixed `width`. Fixed `width` is allowe
 |-----------------|----------|
 | `type="checkbox"` | `width="40"` |
 | `type="seq"` | `width="52"` project default |
-| Operation column | `title="操作"` + `fixed="right"`, `width="56"`–`88` |
+| Operation column | `title="操作"` + `fixed="right"`; choose one stable width for the table from the longest legal localized action set |
 
 Everything else — codes, names, dates, numbers, ports, status pills, file actions, editable inputs — uses **`min-width`** with a starting value from the width table below. VXE distributes extra horizontal space across `min-width` columns so cells are not crushed on wide tables and can scroll on narrow ones.
 
@@ -204,7 +204,7 @@ Rules:
 - Fixed left: checkbox, sequence, main identifier when needed (`min-width` + `fixed="left"` is OK).
 - Fixed right: operation only (structural `width`).
 - Numeric columns align right.
-- Status/action columns align center.
+- Status columns align center. Main-list operation cells align left while the header may remain centered.
 - Long text uses ellipsis/title or a two-line cell pattern (`show-overflow="title"` on workbench tables only).
 - Do not combine multiple independent business fields into one list column unless the business explicitly requires grouped display.
 - Use object identity columns early: code/no/name/status before secondary metadata.
@@ -394,81 +394,48 @@ Applies to **main-list operation columns** unless noted. Menu order / danger sty
 
 | Class | Examples | Direct exposure on list |
 |-------|----------|-------------------------|
-| **A · Primary** | 修改状态、编辑（按行状态互斥时占 **同一槽位**） | 最多 1 个直出 |
-| **B · Secondary** | 第二高频可逆动作（如「分配给我」「复制单行」） | 与 A 并列直出（直出槽位总共 ≤2） |
-| **C · Workflow** | 生成费用、发送通知、打印 | 收入 `···` |
+| **A · Primary** | 当前行最常用的低风险下一动作，如修改状态、编辑 | 优先直出 |
+| **B · Supporting** | 其他高频、低风险、可逆动作，如分配给我、复制单行 | 仅在仍保持单行、易扫读且不挤压业务数据时直出，否则进入 `···` |
+| **C · Workflow** | 生成费用、发送通知、打印 | 默认进入 `···`；只有真实高频证据支持时才可直出 |
 | **D · Danger** | 删除、废弃、作废 | **列表主表永远进 `···`**，禁止直出 danger |
 
-Counting rules:
+Decision rules:
 
-- Mutually exclusive actions (e.g. 草稿→编辑 / 已发布→查看) count as **one** slot before applying the matrix.
-- If the primary identifier column already opens detail (link-text), the operation column may show edit or `···` only — matrix unchanged.
-- Low-frequency actions must not steal a direct slot just because only two verbs exist; if one verb is **D**, pattern is `[A] + ···`, not two direct buttons.
+- Decide direct exposure from proven frequency, reversibility, recognition cost, permission/state legality, and available table space; never from a button-count formula.
+- Mutually exclusive actions such as 草稿→编辑 / 已发布→查看 occupy the same semantic position.
+- If the primary identifier already opens detail, do not repeat a low-value 查看 action in the operation column.
+- A low-frequency action does not become direct merely because room remains. When direct actions wrap, crowd each other, or make the operation column compete with decision data, move the lower-priority action to `···`.
+- If no legal row action exists, remove the operation column. If only overflow actions exist, render only `···`.
 
-### Display matrix (1–N)
+Alignment and sizing rules:
 
-Count actions after merging mutually exclusive verbs, then separate direct candidates (A/B) from menu actions (C/D).
-
-| Direct A/B candidates | Has C/D menu actions? | Visible pattern | Column `width` |
-|-----------------------|-----------------------|-----------------|----------------|
-| 0 | No | Remove operation column | — |
-| 0 | Yes | `···(C/D)` | `56` |
-| 1 | No | `[A]` 文字按钮 | `88` |
-| 1 | Yes | `[A] + ···(C/D)` | `120` |
-| ≥2 | No | `[A][B]` 两个日常可逆文字按钮 | `176` |
-| ≥2 | Yes | `[A][B] + ···(C/D)` | `176` |
-
-**Hard limits:** operation column shows **at most 2 direct text buttons** plus the `···` trigger; **never** `width` > `200`; **never** three direct buttons. A low-frequency B may also move into More when it does not qualify for a direct slot.
-
-Decision flow:
-
-```
-merge mutually exclusive verbs; classify A/B/C/D
-├─ no actions → no column
-├─ only C/D → ··· width 56
-├─ one A/B, no C/D → [A] width 88
-├─ one A/B + C/D → [A] + ··· width 120
-└─ two or more A/B → [A][B] ± ··· width 176
-```
+- Main-list operation cells are start-aligned. The first visible business action keeps the same left origin on every row.
+- Action order is stable: primary → supporting → `···`. When a conditional action or More is absent, the remaining actions do not recenter.
+- Visual emphasis follows decision priority, not clickability: one clear current next action may use the native primary text color; supporting actions and More are neutral at rest. If no action is clearly primary, keep all direct actions neutral rather than producing an all-blue command strip.
+- Do not reserve a disabled fake action or focusable placeholder to preserve geometry.
+- The operation column uses one stable width for the whole table, chosen from the longest legal visible action set and verified with real localized labels. This authority does not prescribe pixel widths.
+- The chosen width must contain the action group plus native cell padding. Keyboard focus or opening More must not make the cell scroll horizontally or shift the action origin.
+- Use `align="left"` for cells; `header-align="center"` is allowed for the short structural heading.
 
 ### Implementation contract
 
-- Direct actions: `a-button size="mini" type="text" class="row-action-btn"` carrying a business verb — text needs no tooltip.
-- Wrap in `row-actions` (alignment only — no border/background/capsule chrome).
+- Direct actions: `a-button size="mini" type="text" class="row-action-btn"` carrying a business verb — text needs no tooltip. Add the shared `row-action-btn--secondary` semantic class to supporting actions; do not invent page-local colors.
+- Wrap in an Arco `a-space` carrying the semantic `row-actions` hook. It owns horizontal rhythm only; the VXE operation cell owns start alignment. Do not add border/background/capsule chrome or page-local centering CSS.
 - More trigger: icon-only `row-action-btn row-action-btn--more` (`icon-more` + `aria-label="更多操作"` + Tooltip) with the native Arco Dropdown popup; it is the only icon-only button allowed in the column.
 - No permanent borders on buttons.
-- Danger in `···`: Arco Divider then `a-doption.danger-opt`; its click stores the target and opens a separate business Modal or `Modal.confirm` after the dropdown closes. Never nest `a-popconfirm` in Dropdown and never expose flat `status="danger"` on list rows.
+- Danger in `···`: a compact Arco Divider then `a-doption.danger-opt`; set Divider spacing through its public `margin` prop so the options remain a continuous menu instead of inheriting page-section spacing. Its click stores the target and opens a separate business Modal or `Modal.confirm` after the dropdown closes. Never nest `a-popconfirm` in Dropdown and never expose flat `status="danger"` on list rows.
 - Keep VXE native focus/selection behavior; do not suppress it with global or page-local internal selectors.
 
 ### Examples
 
 ```vue
-<!-- N=1：仅主操作 -->
-<vxe-column title="操作" width="88" fixed="right" align="center">
+<!-- Width is derived once from real localized content, not from a standard lookup table. -->
+<vxe-column title="操作" :width="operationColumnWidth" fixed="right" align="left" header-align="center">
   <template #default="{ row }">
-    <div class="row-actions">
-      <a-button size="mini" type="text" class="row-action-btn" @click="handleEdit(row)">编辑</a-button>
-    </div>
-  </template>
-</vxe-column>
-
-<!-- N=2：两个日常可逆动作，文字按钮并列直出 -->
-<vxe-column title="操作" width="176" fixed="right" align="center">
-  <template #default="{ row }">
-    <div class="row-actions">
+    <a-space class="row-actions" :size="2">
       <a-button size="mini" type="text" class="row-action-btn" @click="openStatusModal(row)">修改状态</a-button>
-      <a-button size="mini" type="text" class="row-action-btn" @click="handleAssign(row)">分配给我</a-button>
-    </div>
-  </template>
-</vxe-column>
-
-<!-- N≥3 或含危险：两个核心动词 + ··· -->
-<vxe-column title="操作" width="176" fixed="right" align="center">
-  <template #default="{ row }">
-    <div class="row-actions">
-      <a-button size="mini" type="text" class="row-action-btn" @click="openStatusModal(row)">修改状态</a-button>
-      <a-button size="mini" type="text" class="row-action-btn" @click="handleAssign(row)">分配给我</a-button>
-      <a-dropdown trigger="click" position="br">
+      <a-button v-if="isDailyAssignment(row)" size="mini" type="text" class="row-action-btn row-action-btn--secondary" @click="handleAssign(row)">分配给我</a-button>
+      <a-dropdown v-if="hasOverflowActions(row)" trigger="click" position="br">
         <a-tooltip content="更多操作">
           <a-button size="mini" type="text" class="row-action-btn row-action-btn--more" aria-label="更多操作">
             <template #icon><icon-more /></template>
@@ -477,11 +444,11 @@ merge mutually exclusive verbs; classify A/B/C/D
         <template #content>
           <a-doption @click="handleFee(row)">生成费用</a-doption>
           <a-doption @click="handlePrint(row)">打印</a-doption>
-          <a-divider />
+          <a-divider :margin="4" />
           <a-doption class="danger-opt" @click="requestVoid(row)">作废</a-doption>
         </template>
       </a-dropdown>
-    </div>
+    </a-space>
   </template>
 </vxe-column>
 ```
@@ -490,14 +457,16 @@ merge mutually exclusive verbs; classify A/B/C/D
 
 ### Detail editable-table exception
 
-Editable detail subtables may expose **one** delete icon directly (`status="danger"` + `a-popconfirm`) when the row job is inline line editing. Same matrix limits apply (max 2 affordances; no third flat icon). Read-only detail subtables follow the list matrix — danger stays in menu if present.
+Editable detail subtables may expose a delete icon directly (`status="danger"` + `a-popconfirm`) when the row job is inline line editing and the action remains unambiguous. Read-only detail subtables follow the list danger rule and keep destructive actions in More.
 
 ### Anti-patterns
 
-- Three direct buttons (e.g. 修改状态 + 分配给我 + 生成费用) or `width` > `200`.
-- Hiding a daily **B** action inside `···` when the row only has two non-danger verbs.
+- Promoting equal-weight actions until the operation column wraps or competes with business data.
+- Hiding a proven daily low-risk action without evidence that direct exposure harms scanning or space.
 - Flat danger delete on workbench list rows.
 - Loose buttons outside `row-actions`.
+- Centering a variable-width action group so the first visible action shifts horizontally between rows.
+- Styling every direct action and More trigger as equally blue, which erases the next-action hierarchy and creates a noisy command strip.
 - Icon-only action buttons in operation columns — use text verbs; `···` is the only icon trigger.
 
 ## Detail And Nested Tables

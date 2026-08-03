@@ -151,7 +151,7 @@ text      → 重置、刷新、列设置、复制、清除；行内业务动词
 | 详情吸底 | 保存 ×1 | — | 提交审核、发布、输出 | — | 废弃 danger |
 | 弹窗 footer | 确定 ×1 | — | 取消 | — | 删除 danger（左侧） |
 
-**同一作用域内**：primary ≤ 1；简单平铺按钮通常 ≤ 3。生产作业台的高频可逆动作可以超过 3，但必须分成业务命令与工具两组且不能换行。高密度主表操作列最多 2 个直出文字按钮；其余操作通过 `···` More 承载。危险、低频、不可逆动作收入 dropdown 或确认流。
+**同一作用域内**：primary ≤ 1。生产作业台的高频可逆动作保持直接可见并按业务命令与工具分组；低频、危险或导致换行/挤压的动作进入 dropdown 或确认流。主表操作列不按按钮数量套公式，而按频率、风险、可识别性和可用空间决定直出。
 
 ---
 
@@ -168,7 +168,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 ### Content Decision Rules
 
-- Row operation column: expose at most two concise business-verb text buttons. The `···` More trigger is the only icon-only control in the column and requires Tooltip plus a business-specific `aria-label`.
+- Row operation column: expose only proven frequent, low-risk business verbs that remain readable on one line without competing with table data. The `···` More trigger is the only icon-only control in the column and requires Tooltip plus a business-specific `aria-label`.
 - Every icon-only button also declares a concise business-specific `aria-label`; Tooltip is visual help and does not replace the accessible name.
 - Toolbar utility actions: icon-only when the command is a familiar utility (`刷新`, `列设置`, `密度`, `全屏`). Add tooltip. Do not use framed outline buttons for utilities.
 - Primary creation: icon + text when the action adds a new object (`新建`, `添加`, `上传`). Use plus/upload icon only when the metaphor is exact.
@@ -253,7 +253,7 @@ Key rules:
     <a-button size="small" type="outline">批量操作<icon-down /></a-button>
     <template #content>
       <a-doption>批量修改</a-doption>
-      <a-divider />
+      <a-divider :margin="4" />
       <a-doption class="danger-opt">批量删除</a-doption>
     </template>
   </a-dropdown>
@@ -290,7 +290,7 @@ Key rules:
 
 - 每个模块头：**最多 1 个 `outline`**（模块主操作）
 - 复制 / 清除 / 外部数据同步 = `text`
-- 超过 2 个操作 → 第三个起收入 `outline` 下拉「更多」
+- 当操作开始换行、难以扫读或挤压模块内容时，按频率和风险将较低优先级动作收入 `outline` 下拉「更多」
 
 ### 5.5 子表面板（明细行等）
 
@@ -341,35 +341,37 @@ Footer 布局与完整示例见 `modal.md`；本节只约束按钮层级。
 
 ### 5.8 表格行内
 
-**1–N 分档决策表** → [`table.md`](table.md)（先分类 A/B/C/D，再查矩阵）。
+行操作的直出与收纳按 [`table.md`](table.md) 的频率、风险、识别成本和空间证据决策，不使用按钮数量公式。
 
 | 场景 | 直出 | 危险操作 |
 |------|------|----------|
-| **列表主表** | 文字按钮最多 2 个（核心业务动词）；N≥3 或含 D → `[A][B] + ···` | 永远在 `···` 内 + `danger-opt`，点击后打开独立确认 Modal |
-| **详情可编辑子表** | 同上上限 | 允许 1 个直出 danger icon + `a-popconfirm`（行编辑场景） |
+| **列表主表** | 高频、低风险、单行可读且不挤压业务数据的业务动词 | 永远在 `···` 内 + `danger-opt`，点击后打开独立确认 Modal |
+| **详情可编辑子表** | 与行编辑任务直接相关且保持紧凑可辨识的动作 | 允许明确的 danger icon + `a-popconfirm`（行编辑场景） |
 
 ```vue
-<!-- 列表：两个核心动词文字按钮 + 更多（含危险项） -->
-<div class="row-actions">
+<!-- 列表：经频率与空间验证后直出的业务动词 + More（含危险项） -->
+<a-space class="row-actions" :size="2">
   <a-button size="mini" type="text" class="row-action-btn" @click="openStatusModal(row)">修改状态</a-button>
-  <a-button size="mini" type="text" class="row-action-btn" @click="handleAssign(row)">分配给我</a-button>
+  <a-button size="mini" type="text" class="row-action-btn row-action-btn--secondary" @click="handleAssign(row)">分配给我</a-button>
   <a-dropdown trigger="click">
     <a-button size="mini" type="text" class="row-action-btn row-action-btn--more" aria-label="更多操作"><icon-more /></a-button>
     <template #content>
       <a-doption @click="handleFee(row)">生成费用</a-doption>
-      <a-divider />
+      <a-divider :margin="4" />
       <a-doption class="danger-opt" @click="openVoidConfirm(row)">作废订单</a-doption>
     </template>
   </a-dropdown>
-</div>
+</a-space>
 ```
 
 - 直出用**文字按钮**（业务动词，无学习成本）；`···` 是操作列唯一允许的 icon-only 触发器（配 `aria-label="更多操作"` + Tooltip）
+- 当存在明确的当前下一动作时，它保留 Arco 主色强调；辅助直出动作使用共享 `row-action-btn--secondary` 中性色，`row-action-btn--more` 同样中性。没有明确主次时宁可全部中性，禁止把所有可点击项染成同一种蓝色。
 - 行内控件必须 `size="mini"`（mini 行内容盒 24px，small 28px 会裁切）
-- 操作列内按钮必须放在 `row-actions` 中；更多 `row-action-btn--more`
-- `row-actions` 只是对齐容器，不画常驻边框/背景/阴影
+- 操作列内按钮使用 Arco `a-space.row-actions` 承载；更多使用 `row-action-btn--more`
+- 主列表操作单元格统一左对齐，动作顺序固定为 A → B → `···`；条件动作缺失时禁止重新居中剩余按钮
+- `row-actions` 只负责水平节奏，不画常驻边框/背景/阴影，也不写页面局部居中 CSS
 - 列表主表禁止直出 `status="danger"`；禁止 `outline` 铺满操作列
-- 列宽：`88`（1 直出）/ `120`（1 直出 + ···）/ `176`（2 直出 ± ···）；禁止 `>200`
+- 操作列按最长合法多语言操作组合确定一个稳定宽度；规范不规定像素值
 
 ---
 
@@ -405,6 +407,7 @@ Keep options task-oriented. Do not add section labels inside dense menus unless 
 - The menu must not create horizontal scrolling or look like a dialog card.
 - Dropdown options are text-first. Do not add icons by default and do not force an icon for every operation; many business operations do not have a precise icon. Use an option icon only when the action has a strong, unambiguous system metaphor and the whole menu still remains visually even.
 - Arco Divider separates semantic danger, not every two options.
+- In a compact Dropdown, the Divider must use Arco's public `margin` prop so adjacent options remain one scannable menu; inheriting the page-section Divider rhythm is a defect. Choose the value from the active menu rhythm, not from a project-wide pixel formula.
 - `danger-opt` must be the final group and must not look like a normal option.
 - Do not write page-scoped dropdown shadows, radii, item padding, or alternate popup colors.
 
@@ -482,7 +485,7 @@ Danger rules:
 
 可见性与收纳
 □ 高频、低风险、可逆动作直接可见；低频动作进入 dropdown；危险动作隔离到末组
-□ 高密度主表最多 2 个直出文字操作；第 3 个及以后进入 More；不存在 pageSpec 可豁免的 3 个直出按钮
+□ 高密度主表只直出有频率证据、低风险、单行可读且不挤压业务数据的动作；其余进入 More
 □ 核心业务流程使用紧凑业务动词文字按钮；操作列只有 `···` More 触发器允许 icon-only
 □ 窄工作区先把熟悉工具图标化，再收纳低频动作；不得隐藏 Primary 或造成控件重叠/换行
 

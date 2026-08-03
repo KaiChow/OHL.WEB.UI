@@ -966,7 +966,7 @@ function getLineNumber(content, index) {
   return content.slice(0, index).split('\n').length;
 }
 
-// VXE 操作列必须使用 row-actions dock，避免 icon 直接漂浮在固定列背景上。
+// VXE 操作列必须使用稳定、左对齐的 row-actions 容器，避免条件动作使按钮在行间漂移。
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
@@ -986,31 +986,22 @@ for (const file of files) {
       continue;
     }
     if (!isWorkbenchList) continue;
-    const widthMatch = block.match(/\bwidth="(\d+)"/);
-    if (widthMatch && Number(widthMatch[1]) > 200) {
+    const columnTag = block.match(/^<vxe-column\b[^>]*>/)?.[0] || '';
+    if (!/\balign="left"/.test(columnTag)) {
       violations.push({
-        rule: '列表操作列 width 不得超过 200（文字按钮 ≤2 直出 + ···，见 table.md Row Actions 矩阵）',
+        rule: '列表操作单元格必须 align="left"；条件动作缺失时不得重新居中剩余按钮',
         file: relPath,
         line: getLineNumber(content, match.index),
         content: block.split('\n')[0].trim().slice(0, 140),
       });
     }
-    const directBtnCount = (block.match(/class="[^"]*\brow-action-btn\b(?![^"]*--more)[^"]*"/g) || []).length;
-    const hasMoreMenu = block.includes('row-action-btn--more') || block.includes('<a-dropdown');
-    if (directBtnCount >= 3) {
+    const centeredRowActions = /\.row-actions\s*\{[^}]*justify-content\s*:\s*center/s.exec(content);
+    if (centeredRowActions) {
       violations.push({
-        rule: '列表操作列禁止 3 个及以上直出按钮；N≥3 须 ≤2 直出 + ···（table.md Row Actions）',
+        rule: 'row-actions 禁止页面局部 justify-content:center；使用 VXE 左对齐 + Arco Space 保持行间起点一致',
         file: relPath,
-        line: getLineNumber(content, match.index),
-        content: `直出 ${directBtnCount} 个 row-action-btn`,
-      });
-    }
-    if (directBtnCount >= 2 && !hasMoreMenu && /status="danger"/.test(block)) {
-      violations.push({
-        rule: '列表操作列含危险动作时禁止双直出；危险项须收入 ···',
-        file: relPath,
-        line: getLineNumber(content, match.index),
-        content: block.split('\n').slice(0, 5).join(' ').trim().slice(0, 140),
+        line: getLineNumber(content, centeredRowActions.index),
+        content: centeredRowActions[0].replace(/\s+/g, ' ').slice(0, 140),
       });
     }
     if (/class="[^"]*row-action-btn[^"]*"[^>]*status="danger"/.test(block) ||
@@ -1020,6 +1011,23 @@ for (const file of files) {
         file: relPath,
         line: getLineNumber(content, match.index),
         content: block.split('\n').slice(0, 6).join(' ').trim().slice(0, 140),
+      });
+    }
+    if (block.includes('aria-label="更多操作"') && !/class="[^"]*row-action-btn--more[^"]*"/.test(block)) {
+      violations.push({
+        rule: '列表 More 触发器必须使用共享 row-action-btn--more 中性语义，禁止与核心动作同权全蓝',
+        file: relPath,
+        line: getLineNumber(content, match.index),
+        content: block.split('\n').slice(0, 8).join(' ').trim().slice(0, 140),
+      });
+    }
+    for (const divider of block.matchAll(/<a-divider\b(?![^>]*\bdirection=)[^>]*>/g)) {
+      if (/\b(?::)?margin=/.test(divider[0])) continue;
+      violations.push({
+        rule: '列表 More 菜单的横向 Divider 必须通过公开 margin 属性适配紧凑菜单节奏，禁止继承页面分区间距',
+        file: relPath,
+        line: getLineNumber(content, match.index + divider.index),
+        content: divider[0].replace(/\s+/g, ' ').slice(0, 140),
       });
     }
   }

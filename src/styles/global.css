@@ -336,6 +336,15 @@ body {
   text-decoration: underline;
 }
 
+/* Shared semantic hook for destructive options inside native Arco menus. */
+.danger-opt {
+  color: var(--dense-danger-6);
+}
+
+.danger-opt:hover {
+  color: var(--dense-danger-7);
+}
+
 .mono {
   font-family: "SF Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
   font-size: var(--dense-font-data);

@@ -65,12 +65,14 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       ],
     },
     premium: {
-      decisions: ['Keep GI and VXE native component styling; derive product quality from field allocation, context-preserving overlays, freight grouping, live result confidence, visible draft state, and complete states.'],
+      decisions: ['Keep GI and VXE native component styling; derive product quality from field allocation, context-preserving overlays, freight grouping, live result confidence, visible draft state, complete states, and a restrained row-action hierarchy: current next action uses the primary emphasis, supporting and overflow actions stay neutral, and danger appears only in the final confirmed menu group.'],
       acceptance: [
         'The advanced drawer exposes route/document, execution/ownership, schedule, and risk groups with local active counts, local reset, and a live matching-order count without a page-local component skin.',
         'The default advanced-filter interaction preserves the list beside a stable right-side drawer and never changes to a top overlay.',
         'Computed theme tokens, normal/error/empty/permission states, long text, column settings, and density behavior must be inspected on the real route.',
         'The route must not depend on global selectors or theme-variable bridges that rewrite Arco or VXE internals.',
+        'Row actions must not render as an all-blue command strip: status transition is the emphasized next action, self-assignment and More are neutral at rest, and irreversible actions are danger-styled only inside the final menu group.',
+        'The operation column must contain its longest legal localized action set without cell-level horizontal scrolling; focusing More must not shift the row-action origin.',
       ],
     },
   },

@@ -614,9 +614,9 @@ watch(uiScenario, () => {
 
             <vxe-column field="updatedAt" title="更新时间" min-width="140" class-name="mono" />
 
-            <vxe-column title="操作" width="120" fixed="right" align="center">
+            <vxe-column title="操作" width="120" fixed="right" align="left" header-align="center">
               <template #default="{ row }">
-                <div class="row-actions">
+                <a-space class="row-actions" :size="2">
                   <a-button
                     v-if="canOperate"
                     size="mini"
@@ -628,7 +628,6 @@ watch(uiScenario, () => {
                     v-if="canOperate && ['pending', 'reviewing', 'rejected'].includes(row.reviewStatus)"
                     trigger="click"
                     position="br"
-                    content-class="action-menu action-menu--row"
                   >
                     <a-tooltip content="更多操作">
                       <a-button
@@ -642,11 +641,14 @@ watch(uiScenario, () => {
                     </a-tooltip>
                     <template #content>
                       <a-doption v-if="['pending', 'reviewing'].includes(row.reviewStatus)" @click="openRejectConfirm(row)">驳回</a-doption>
-                      <a-divider v-if="['pending', 'reviewing'].includes(row.reviewStatus) && ['pending', 'rejected'].includes(row.reviewStatus)" class="action-menu__divider" />
+                      <a-divider
+                        v-if="['pending', 'reviewing'].includes(row.reviewStatus) && ['pending', 'rejected'].includes(row.reviewStatus)"
+                        :margin="4"
+                      />
                       <a-doption v-if="['pending', 'rejected'].includes(row.reviewStatus)" class="danger-opt" @click="openDeleteConfirm(row)">删除记录</a-doption>
                     </template>
                   </a-dropdown>
-                </div>
+                </a-space>
               </template>
             </vxe-column>
 
@@ -955,14 +957,6 @@ watch(uiScenario, () => {
 
 .workbench-empty__actions {
   margin-top: 12px;
-}
-
-.row-actions {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-width: 0;
 }
 
 .modal-confirm-copy {

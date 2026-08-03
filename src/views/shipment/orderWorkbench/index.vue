@@ -1284,9 +1284,9 @@ watch(uiScenario, () => {
               <template #default="{ row }">{{ row.isOverdue ? '已超期' : '未超期' }}</template>
             </vxe-column>
 
-            <vxe-column title="操作" width="176" fixed="right" align="center">
+            <vxe-column title="操作" width="208" fixed="right" align="left" header-align="center">
               <template #default="{ row }">
-                <div class="row-actions">
+                <a-space class="row-actions" :size="2">
                   <a-button
                     v-if="canTransitionOrder(row)"
                     size="mini"
@@ -1298,11 +1298,11 @@ watch(uiScenario, () => {
                   <a-button
                     size="mini"
                     type="text"
-                    class="row-action-btn"
+                    class="row-action-btn row-action-btn--secondary"
                     :disabled="isRowPending(row)"
                     @click="handleAssignOperator(row)"
                   >分配给我</a-button>
-                  <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--row">
+                  <a-dropdown trigger="click" position="br">
                     <a-tooltip content="更多操作">
                       <a-button
                         size="mini"
@@ -1318,11 +1318,11 @@ watch(uiScenario, () => {
                     <template #content>
                       <a-doption @click="handleGenerateRowFee(row)">生成费用</a-doption>
                       <a-doption @click="handleRowNotify(row)">发送通知</a-doption>
-                      <a-divider class="action-menu__divider" />
+                      <a-divider :margin="4" />
                       <a-doption class="danger-opt" @click="openVoidModal(row)">作废订单</a-doption>
                     </template>
                   </a-dropdown>
-                </div>
+                </a-space>
               </template>
             </vxe-column>
             <template #empty>
@@ -2142,14 +2142,6 @@ watch(uiScenario, () => {
   color: var(--color-text-3);
   font-size: var(--dense-font-aux);
   line-height: 14px;
-}
-
-.row-actions {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-width: 0;
 }
 
 .modal-context-alert {

@@ -1,25 +1,24 @@
 /**
  * =====================================================
- * Table Action（业务层）
+ * Row action hierarchy（业务语义层）
  * =====================================================
  */
 
-.table-action {
-  display: flex;
-  align-items: center;
-  gap: @vxe-spacing-md;
+/* Primary row action keeps Arco's native text-button color. Supporting
+   actions and overflow stay neutral until interaction. */
+.row-action-btn--secondary.row-action-btn,
+.row-action-btn--more.row-action-btn {
+  color: var(--color-text-2);
 }
 
-.table-action-item {
-  color: @vxe-primary;
-  cursor: pointer;
-  font-size: var(--vxe-theme-font-size, @vxe-font-size-table);
+.row-action-btn--secondary.row-action-btn:hover,
+.row-action-btn--secondary.row-action-btn:focus-visible,
+.row-action-btn--more.row-action-btn:hover,
+.row-action-btn--more.row-action-btn:focus-visible {
+  color: rgb(var(--primary-6));
 }
 
-.table-action-item:hover {
-  opacity: @vxe-action-hover-opacity;
-}
-
-.table-action-danger {
-  color: @vxe-danger;
+.row-action-btn--secondary.row-action-btn:disabled,
+.row-action-btn--more.row-action-btn:disabled {
+  color: var(--color-text-4);
 }
