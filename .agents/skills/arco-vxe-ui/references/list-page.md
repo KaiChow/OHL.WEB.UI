@@ -12,7 +12,7 @@ Every list `pageSpec.ts` declares exactly one matching pair:
 |---|---|---|---|---|
 | `list-query` / `simple-query` | Find, inspect, print, or occasionally export a record | `S1` inline query by default. No command row unless an actual non-row action exists. | None by default. Use a utility cap only for real pagination, column preference, or refresh ownership. | Work scope, status queues, batch selection, synthetic primary action, and an empty cap. |
 | `list-management` / `management` | Maintain master data: create, edit, activate, import/export | Compact query plus a compact command group only when mutations/output actually exist. One primary create action at most. | Optional utility cap; it owns pagination and table preferences, never business create/import actions. | Operational ownership scope, workflow queues, or batch selection without a real batch action. |
-| `list-workbench` / `operations-workbench` | Repeatedly prioritize, assign, progress, and recover operational records | Query, real daily business commands, and only the scope/queues the operator uses to process work. | Context cap required when it owns refresh, selection context, pagination, density, or columns. | A dashboard title band, decorative KPI strip, duplicated totals, or hidden daily queues/actions. |
+| `list-workbench` / `operations-workbench` | Repeatedly prioritize, assign, progress, and recover operational records | Query plus only the scope/queues the operator uses to process work; business commands belong to the result-owned table toolbar. | Workbench toolbar required for applicable business commands, refresh, selection context, pagination, density, or columns. | A dashboard title band, decorative KPI strip, duplicated totals, hidden daily queues/actions, or mutation commands mixed into the state selector. |
 
 ## Standard List Frame V1
 
@@ -21,20 +21,19 @@ Every list page declares `frame: 'standard-list-v1'`. This is the shared UI/UX f
 | Zone | Shared UI rule | UX rule |
 |---|---|---|
 | Query | One top query surface using Arco Form/Grid at `small` density. One primary `查询`; reset and advanced entry are text tools. | Query, Enter, reset, and advanced apply have stable placement and reset page to 1. No empty filter bar. |
-| Command | Zero or one compact business-command group below query. One primary action at most in this scope. | Only real create/output/batch contracts appear. Low-frequency or risky work enters `More` and confirmation. |
-| Scope / queue | Optional, but when present it follows the command group after a separator. Scope and queue use different native controls. | A switch changes one query dimension, clears selection when results can change, and updates counts/table together. |
-| Table context | Optional utility cap for query/management; required context cap for workbench. It is neutral and table-owned. | Refresh, selection feedback, pagination, density, and column preferences preserve query context. Never put business commands here. |
+| Scope / queue | Optional mutation-free result selector below query. Scope and queue use different native controls and may share this state row. | A switch changes one query dimension, clears selection when results can change, and updates counts/table together. |
+| Table toolbar | Optional utility cap for query/management; required workbench toolbar for operational pages. One primary action at most in this scope. | Left owns real create/output/batch contracts and selection context; right owns refresh, pagination, density, and column preferences. Low-frequency or risky work enters `More` and confirmation. |
 | Data | One dominant VXE grid with the global `mini`, bordered, striped baseline. | Identity, state, decision data, and row actions stay in the same column order and behavior across lists. |
 | Feedback | Empty, loading, permission, error, and partial batch feedback live with the owning query/table surface. | Conditions and current result context survive a recoverable failure. |
 
 Non-negotiable visual invariants:
 
 - GI is the only palette; no page-local control, card, tab, or table skin. Use one primary action per scope, neutral structural surfaces, and semantic status pills.
-- The zone order never changes: query -> business commands -> scope/queue -> table context -> data. An absent zone disappears; it is never replaced by blank decoration.
+- The zone order never changes: query -> scope/queue -> table toolbar -> data. An absent zone disappears; it is never replaced by blank decoration.
 - Spacing, control density, typography, table header, row behavior, icon-only utility rules, focus treatment, and overflow ownership come from the shared Arco/VXE contracts. A page may not create a different list "style" to appear distinctive.
 - Differences between pages are limited to business fields, available actions, statuses, columns, and the declared query scenario. They do not justify another toolbar hierarchy, colored header, bespoke table wrapper, or a second filter layout language.
 
-No page-level title/description band is added to operational lists. Search, command, scope, and status are logical zones, not mandatory cards. They may share one Arco command surface only when ownership stays clear, neutral separators distinguish different jobs, the combined height passes `existing-project-modernization.md`, and the table remains dominant.
+No page-level title/description band is added to operational lists. Query, scope/state, and table toolbar are logical zones, not mandatory cards. Scope and workflow state may share one mutation-free row; business commands stay in the result-owned table toolbar so selection and side effects cannot be mistaken for filters.
 
 ## Operations Workbench Required Structure
 
@@ -42,8 +41,8 @@ For `list-workbench`, use this logical order:
 
 1. Optional page-mode segment using an Arco segmented or tab control.
 2. Query row using Arco Form, Grid, Input/Select and Button.
-3. Business actions and only the real ownership/status queue controls.
-4. Dominant data surface containing table context, pagination/settings, and the main-list `vxe-table`.
+3. Only the real ownership/status queue controls in a mutation-free state row.
+4. Dominant data surface containing the table toolbar, business commands, selection context, pagination/settings, and the main-list `vxe-table`.
 
 Each list maps its columns and filters from the current business object. Never add a queue, scope, tool, or cap merely because another list has one.
 
@@ -179,7 +178,7 @@ Order operations by business priority:
 
 Refresh is a utility, not the first business operation.
 
-Do not split equivalent operations to far left and far right. Use one coherent toolbar: business actions first, utilities grouped to the right only when they are truly utilities.
+Do not split equivalent operations to far left and far right. Use one result-owned toolbar: business actions first on the left, utilities grouped to the right only when they are truly utilities.
 
 Toolbar actions are chosen by workflow:
 
@@ -187,12 +186,12 @@ Toolbar actions are chosen by workflow:
 - Export/print/import when the page has reporting or document output.
 - Batch action only when multi-selection exists and the operation is safe or confirmed.
 - Refresh/settings/density/columns are utilities, not business actions.
-- Batch business actions stay with the left workflow command group, usually as `批量操作↓`; do not isolate them in the utility area.
-- Column settings, density, pagination, refresh, and other table-only utilities belong in the table surface. Use the Arco Card title/extra slots when a meaningful cap exists; do not create an empty band for one icon.
+- Create, output, and batch business actions stay in the left table-command group, usually with batch work as `批量操作↓`; do not isolate them in the utility area or mix them into the state row.
+- Column settings, density, pagination, refresh, and other table-only utilities belong on the right of the same table surface. Use the Arco Card title/extra slots when a meaningful toolbar exists; do not create an empty band for one icon.
 - When row selection is active, place `已选 N 条` and `清空` in the table context area. Keep total count in pagination `show-total`; do not repeat it.
 - For high-frequency production pages, 5-7 visible toolbar commands are acceptable when they are grouped, neutral, and do not wrap. The rule is not "few buttons"; the rule is "one primary, clear grouping, no color noise, no line wrap."
 
-## Table Cap And Pagination
+## Table Toolbar And Pagination
 
 ### Table-Top Decision
 
@@ -201,47 +200,67 @@ The strip directly above a VXE table is a data-context surface, not a second too
 | Situation | Table top |
 |---|---|
 | Simple query, no pagination/table preferences beyond defaults | Omit it. The table begins directly below the query surface. |
-| Simple query or management list needs pagination, refresh, column preference, or density | Use one compact utility cap. Keep business actions outside it. |
-| Workbench needs selection context, current sort/context, pagination, refresh, density, or columns | Use the context cap. Left is refresh plus non-duplicated selection/context; right is pagination and utility tools. |
+| Simple query or management list needs pagination, refresh, column preference, or density | Use one compact utility cap. Keep page-global actions outside it; table-owned create/export may enter only when they act on this result surface. |
+| Workbench needs business commands, selection context, pagination, refresh, density, or columns | Use the workbench toolbar. Left is business commands plus non-duplicated selection context; right is pagination and utility tools. |
 | Only one icon would occupy the strip | Omit the cap and place the utility beside the relevant query/command owner. |
 
-Never place `新建`, `导入`, `导出`, `批量处理`, or row workflow verbs in a table cap. They act on business workflow, not the table frame.
+Never place row-specific workflow verbs in the table toolbar; they belong in the row operation column or detail. Table-owned `新建`, `导入`, `导出`, and `批量处理` belong in the left command group when they act on the listed object, filtered result, or current selection.
 
 - Pagination belongs in `table-card-cap` at the top-right of the table card when the cap is already part of the table structure. For compact pages without a meaningful cap, use `toolbar-pager` in `toolbar-aside` so pagination remains visible without adding an empty horizontal band.
 - Total count is shown by the pagination component (`show-total`) when needed.
 - Do not repeat the same total as a separate left-side `共 N 条` summary when pagination already shows it.
-- Refresh lives at the left edge of `table-card-cap` when a meaningful cap exists, because it is a high-frequency table action that should stay close to the table header. Column settings, density, and pagination live on the cap right; otherwise keep table tools as right-side toolbar utilities.
+- Refresh, column settings, density, and pagination live on the right utility group; business commands and selected-row context live on the left. Preserve this ownership as labels collapse or commands enter overflow.
 - Do not render an empty `table-card-cap` between the toolbar and table header. If it only contains one or two utility icons and no pagination/context, it creates a dead horizontal band and should be removed.
-- The left side of `table-card-cap` should stay empty unless it adds non-duplicated context such as selected-row feedback or a real grouped-table title.
+- The left side of a query/management utility cap stays empty unless it adds non-duplicated context. The left side of a workbench toolbar owns applicable business commands and selected-row feedback.
 - Do not use table cap for page titles, instructions, KPI summaries, or duplicated status counts.
 
-## Status Tabs
+## Workflow State Selection
 
-### View Switch Decision
+### Name The Decision Before Choosing The Control
 
-Do not make every switch a Tab. Page mode, ownership scope, workflow queue, and saved query answer different questions and need different controls.
+Do not call every single-choice switch a Tab. First classify what changes, then select the control and its layer.
 
-| Switch type | Direct-item boundary | Control | State and request behavior |
+| Selection role | What it changes | Preferred control | Default placement |
 |---|---|---|---|
-| Page mode, `2-5` mutually exclusive modes | `2-5` | Arco segmented for compact modes; line Tabs when the mode also changes the data schema or table columns | Mode change resets page and selection. Preserve only filters documented as compatible with both modes; otherwise clear incompatible values with visible feedback. |
-| Page mode, `6+` modes | `6+` | Arco Select; do not create a second wrapping tab row | Selected mode stays visible in the trigger. Changing it follows the same page/selection/filter compatibility rule. |
-| Ownership scope, `2-3` choices | `2-3` | Button-style Radio Group or Select when labels are long | Changes the working set, resets page and selection, updates queue counts and table together. It is not a status Tab. |
-| Daily workflow status, `2-8` short queues | `2-8` | Arco line Tabs with optional semantic count | Active queue is visible, keyboard reachable, and changes only the queue dimension while preserving ordinary query conditions. |
-| Daily workflow status, `9-12` short queues | `9-12` | Same line Tabs in one horizontal local-scroll owner | Never wrap into a second row or create browser-level horizontal overflow. Preserve the active Tab in view after switch. |
-| Statuses that are long, rare, or `13+` | `13+` | Arco Select, grouped saved query, or a documented secondary filter | Do not turn a long status catalogue into a scrollable tab strip. |
+| Page mode | Business object, information architecture, form vocabulary, table schema, or columns | Arco Segmented for `2-5` compact modes; line Tabs when each mode owns a real panel/schema; Select for `6+` | Above the query surface or directly below page identity. It may own different compatible filters. |
+| Ownership scope | Whose/which working set is shown, such as all active records vs my records | Button-style Radio Group for `2-3` short choices; Select for long labels or more choices | In the workflow row, before workflow state. It is neither page navigation nor a status Tab. |
+| Workflow state or processing queue | Which high-frequency state slice of the same business object and same table schema is shown | Arco line Tabs for `2-8` short choices; the same native line Tabs with local overflow for `9-12`; Select or grouped saved query for long, rare, or `13+` choices | After query and before the table, normally in the workflow row or a dedicated state row closest to the table. |
+| Ordinary status condition | One of many low-frequency query conditions | Select, Cascader, Tree Select, or documented filter control | Inside the query surface. Do not create a second navigation-looking band. |
+| Saved view | A named reusable bundle of query, sort, columns, and possibly scope | Select or a documented saved-view control | Near query ownership; do not visually merge it with a single status dimension. |
 
-- Page mode changes the data model or table meaning. Status changes the workflow queue inside the current model. Ownership scope changes whose records are shown. Do not combine them into one visually identical control group.
-- One list has at most one visible page-mode control and one visible workflow queue control. If both are justified, separate them with stable spacing/divider and keep the query row independent.
-- Counts belong on status queues only when they help prioritization. A count is not a KPI and must update with the same request/result as the table.
-- A tab is a query control, never a mutation trigger. It must have an explicit selected default, visible focus, keyboard traversal, loading/stale-response protection, and an empty state specific to the selected view.
+`Tabs` in `pageSpec.ts` describes presentation only. The business contract remains **workflow state selection**: it filters a result set and never mutates records.
 
-- Scope tabs and status tabs may share a row, but must have visual separation.
-- Active state and focus use the native Arco control behavior; do not override internal tab/radio selectors.
-- Count badges use semantic tokens only when they carry risk/attention.
-- Use status tabs only when users actually filter by that state many times per day.
-- If sales/operators process the list by state every day, status tabs are required visible workflow controls, not optional decoration.
-- Do not create fake status tabs just to fill the layout.
-- At the `1366x768` release gate, status controls remain in the compact command path. At the supported `1024x768` split-window bound they scroll inside their own region before adding another full-width row; see `responsive.md`.
+### Single And Multiple Choice Rules
+
+- Zero applicable choices: render no control and reclaim the space.
+- One effective choice: do not render an interactive selector. If the fixed state is necessary context, show it once as non-interactive context near the result owner.
+- `2-8` short, daily choices: line Tabs keep all frequent states directly reachable.
+- `9-12` short, daily choices: line Tabs may remain when direct switching is materially faster; Arco owns the native local overflow and keeps the active choice visible. Never wrap the choices into another row.
+- Long, rare, or `13+` choices: use Select, grouped saved views, or a secondary filter. Search/group the catalogue when recognition is insufficient.
+- Counts are optional prioritization metadata, not decoration. Show them only when users use the value to choose work; update counts and table from the same result contract.
+
+### Relationship To Query And Actions
+
+The stable vertical order is `page mode -> query -> ownership/workflow state -> table toolbar -> table`. A workflow-state selector stays below query because it is an applied result dimension; moving it above query incorrectly promotes it to page navigation. Put it above query only when the switch really changes page mode, object/schema, or available query vocabulary.
+
+In an operations workbench, the workflow-state row is mutation-free. It may contain ownership scope, workflow state, and saved-view selection, but never `新增`, `提交`, `导入`, `导出`, `批量处理`, or row workflow verbs. Those commands belong to the result-owned table toolbar directly below the state row, with business commands on the left and table utilities on the right. This keeps the user's mental model explicit: first choose the working set, then act on it.
+
+A workflow state and command may share a physical row only as a documented lightweight exception: there are no create/batch/mutation commands, at most two neutral non-mutating utilities, the selector keeps a clearly separate flexible region, and the layout passes `1024x768` plus `200%` without clipping or wrapping. Passing the width check does not justify merging the visual groups when their roles remain ambiguous.
+
+Use a dedicated state row when queue comparison is a daily job, counts help prioritization, labels are numerous/long, or any combined row would compress the active choice. A dedicated row is a hierarchy decision, not permission to add a decorative card, title, or duplicate total.
+
+For a simple query/management list, keep a low-frequency status inside the query form. Do not add a workflow row merely to imitate an operations workbench.
+
+### Interaction Contract
+
+- State change resets pagination and incompatible selection, preserves ordinary query conditions and ownership scope, and refreshes state counts and rows together.
+- Requests expose loading without hiding the selected state. Ignore stale responses when users switch rapidly; failures preserve the previous usable result and identify retry ownership.
+- Every state has an explicit selected default and a state-specific empty result. Reset restores the documented default, not an implicit first option.
+- Active state, focus, keyboard traversal, and overflow use native Arco behavior. Pages do not override internal Tab/Radio selectors or implement scrolling through DOM-class hacks.
+- Count badges use neutral tokens by default. Warning/danger tokens are reserved for attention or risk semantics; selection remains the dominant state when active.
+- A visible group label is conditional, not mandatory. Omit it when option text and row/divider structure already make the group self-explanatory; keep the control's business-specific accessible name. Show it when labels are ambiguous, adjacent selectors could be confused, or the group question is necessary context. A Divider never replaces an accessible name.
+- One list has at most one visible page-mode control, one ownership-scope control, and one workflow-state control. Do not duplicate the same dimension in visible query fields and the workflow row.
+- At the `1366x768` release gate, the workflow path stays compact and unwrapped. At `1024x768`, labels may reduce and state choices overflow only inside their native region before the layout adds a dedicated row; see `responsive.md`.
 
 ## Operational Work Scope
 

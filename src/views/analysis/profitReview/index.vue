@@ -14,6 +14,8 @@ import {
 } from '@arco-design/web-vue/es/icon';
 import { downloadCsvFile, buildTimestampSuffix } from '../../../utils/mock-actions';
 import { formatLocalMinute } from '../../../utils/date-time';
+import { compactVerticalFormLabelStyle } from '../../../design-system/formLayout';
+import WorkflowStateSelector from '../../../components/workbench/WorkflowStateSelector.vue';
 import DetailDrawer from './components/DetailDrawer.vue';
 import FormDrawer from './components/FormDrawer.vue';
 import { profitReviewRows } from './mockData';
@@ -23,7 +25,7 @@ import { resolveProfitReviewUiScenario } from '../featureContracts';
 
 const route = useRoute();
 
-const STATUS_TABS: { key: ProfitReviewStatus; label: string; tone?: 'warn' | 'danger' }[] = [
+const WORKFLOW_STATE_OPTIONS: { key: ProfitReviewStatus; label: string; tone?: 'warn' | 'danger' }[] = [
   { key: 'all', label: '全部' },
   { key: 'pending', label: '待核查', tone: 'warn' },
   { key: 'reviewing', label: '复核中' },
@@ -54,7 +56,7 @@ const createRows = () => profitReviewRows
 
 const query = reactive<ProfitReviewQuery>(defaultQuery());
 const appliedQuery = ref<ProfitReviewQuery>(cloneQuery(defaultQuery()));
-const activeStatusTab = ref<ProfitReviewStatus>('all');
+const activeWorkflowState = ref<ProfitReviewStatus>('all');
 const uiScenario = computed(() => resolveProfitReviewUiScenario(route.query.uiState));
 const loading = ref(false);
 const querying = ref(false);
@@ -120,7 +122,7 @@ const queryBaseRows = computed(() => {
 });
 
 const filteredRows = computed(() =>
-  queryBaseRows.value.filter((row) => activeStatusTab.value === 'all' || row.reviewStatus === activeStatusTab.value),
+  queryBaseRows.value.filter((row) => activeWorkflowState.value === 'all' || row.reviewStatus === activeWorkflowState.value),
 );
 
 const pagedRows = computed(() => {
@@ -129,12 +131,12 @@ const pagedRows = computed(() => {
   return filteredRows.value.slice(start, start + page.size);
 });
 
-const statusTabStats = computed(() =>
-  STATUS_TABS.map((tab) => ({
-    ...tab,
-    count: tab.key === 'all'
+const workflowStateOptions = computed(() =>
+  WORKFLOW_STATE_OPTIONS.map((state) => ({
+    ...state,
+    count: state.key === 'all'
       ? queryBaseRows.value.length
-      : queryBaseRows.value.filter((row) => row.reviewStatus === tab.key).length,
+      : queryBaseRows.value.filter((row) => row.reviewStatus === state.key).length,
   })),
 );
 
@@ -149,7 +151,7 @@ const hasActiveFilter = computed(() => {
     || q.region
     || q.owner
     || q.updatedRange.length
-    || activeStatusTab.value !== 'all',
+    || activeWorkflowState.value !== 'all',
   );
 });
 
@@ -184,13 +186,13 @@ const handleSearch = async () => {
 const handleReset = () => {
   Object.assign(query, defaultQuery());
   appliedQuery.value = cloneQuery(defaultQuery());
-  activeStatusTab.value = 'all';
+  activeWorkflowState.value = 'all';
   page.current = 1;
   clearSelection();
 };
 
-const onStatusTabChange = (key: string | number) => {
-  activeStatusTab.value = key as ProfitReviewStatus;
+const onWorkflowStateChange = (key: string | number) => {
+  activeWorkflowState.value = key as ProfitReviewStatus;
   page.current = 1;
   clearSelection();
 };
@@ -411,7 +413,7 @@ watch(uiScenario, () => {
         :body-style="{ padding: 0 }"
       >
         <div class="filter-panel">
-          <a-form :model="query" layout="vertical" size="small" class="filter-panel__form">
+          <a-form :model="query" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="filter-panel__form">
             <a-row :gutter="[12, 10]" align="end">
               <a-col :xs="24" :sm="12" :md="6" :lg="5" :xl="5">
                 <a-form-item label="关键词">
@@ -464,48 +466,14 @@ watch(uiScenario, () => {
             </a-row>
           </a-form>
         </div>
-        <div class="flow-bar">
-          <div v-if="canOperate" class="flow-bar__actions">
-            <a-button
-              v-if="submittableRows.length > 0"
-              size="small"
-              type="primary"
-              :loading="batchSubmitting"
-              @click="openBatchConfirm"
-            >批量提交复核</a-button>
-            <a-button size="small" :loading="exporting" :disabled="Boolean(tableError)" @click="handleExport">
-              <template #icon><icon-download /></template>
-              导出
-            </a-button>
-          </div>
-
-          <a-divider v-if="canOperate" direction="vertical" class="flow-bar__divider" />
-
-          <div class="flow-bar__queues">
-            <span class="flow-bar__queue-label">核查队列</span>
-            <a-tabs
-              v-model:active-key="activeStatusTab"
-              type="line"
-              size="small"
-              class="workbench-status-tabs"
-              @change="onStatusTabChange"
-            >
-              <a-tab-pane v-for="tab in statusTabStats" :key="tab.key">
-                <template #title>
-                  <span class="workbench-tab-title">
-                    {{ tab.label }}
-                    <span
-                      class="workbench-tab-count"
-                      :class="{
-                        'workbench-tab-count--warn': tab.tone === 'warn',
-                        'workbench-tab-count--danger': tab.tone === 'danger',
-                      }"
-                    >{{ tab.count }}</span>
-                  </span>
-                </template>
-              </a-tab-pane>
-            </a-tabs>
-          </div>
+        <div class="workflow-filter-bar">
+          <WorkflowStateSelector
+            :model-value="activeWorkflowState"
+            label="核查队列"
+            :show-label="false"
+            :options="workflowStateOptions"
+            @change="onWorkflowStateChange"
+          />
         </div>
       </a-card>
 
@@ -518,12 +486,21 @@ watch(uiScenario, () => {
       >
         <template #title>
           <div class="table-cap-start">
-            <a-tooltip content="刷新">
-              <a-button size="small" type="text" class="table-cap-tool" title="刷新" aria-label="刷新" :loading="loading || forcedLoading" @click="fetchList">
-                <template #icon><icon-refresh /></template>
-              </a-button>
-            </a-tooltip>
-            <span v-if="!tableError && uiScenario !== 'permission'" class="table-sort-context">按更新时间倒序</span>
+            <div v-if="canOperate" class="table-command-group">
+              <a-button
+                v-if="submittableRows.length > 0"
+                size="small"
+                type="primary"
+                :loading="batchSubmitting"
+                @click="openBatchConfirm"
+              >批量提交复核</a-button>
+              <a-tooltip content="导出当前结果">
+                <a-button size="small" aria-label="导出当前结果" :loading="exporting" :disabled="Boolean(tableError)" @click="handleExport">
+                  <template #icon><icon-download /></template>
+                  <span class="table-command-label--optional">导出</span>
+                </a-button>
+              </a-tooltip>
+            </div>
             <template v-if="selectedCount > 0">
               <span class="selection-tip">已选 <b>{{ selectedCount }}</b> 条</span>
               <a-button size="small" type="text" @click="clearSelection">清空</a-button>
@@ -531,18 +508,25 @@ watch(uiScenario, () => {
           </div>
         </template>
         <template #extra>
-          <a-pagination
-            :current="page.current"
-            :page-size="page.size"
-            :total="tableTotal"
-            :page-size-options="[20, 50, 100]"
-            size="small"
-            show-total
-            show-page-size
-            show-jumper
-            @change="onPageChange"
-            @page-size-change="onPageSizeChange"
-          />
+          <a-space :size="8">
+            <a-tooltip content="刷新">
+              <a-button size="small" type="text" class="table-cap-tool" title="刷新" aria-label="刷新" :loading="loading || forcedLoading" @click="fetchList">
+                <template #icon><icon-refresh /></template>
+              </a-button>
+            </a-tooltip>
+            <a-pagination
+              :current="page.current"
+              :page-size="page.size"
+              :total="tableTotal"
+              :page-size-options="[20, 50, 100]"
+              size="small"
+              show-total
+              show-page-size
+              show-jumper
+              @change="onPageChange"
+              @page-size-change="onPageSizeChange"
+            />
+          </a-space>
         </template>
 
         <a-alert
@@ -780,7 +764,7 @@ watch(uiScenario, () => {
   white-space: nowrap;
 }
 
-.flow-bar {
+.workflow-filter-bar {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -790,91 +774,11 @@ watch(uiScenario, () => {
   border-top: 1px solid var(--color-border-1);
 }
 
-.flow-bar__actions {
+.table-command-group {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
   gap: 8px;
-}
-
-.flow-bar__divider {
-  flex: 0 0 auto;
-  height: 24px;
-  margin: 0;
-}
-
-.flow-bar__queues {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.flow-bar__queue-label {
-  flex: 0 0 auto;
-  color: var(--color-text-3);
-  font-size: var(--dense-font-aux);
-  white-space: nowrap;
-}
-
-.workbench-status-tabs {
-  flex: 1;
-  min-width: 0;
-}
-
-.workbench-status-tabs :deep(.arco-tabs-content) {
-  display: none;
-}
-
-.workbench-status-tabs :deep(.arco-tabs-nav) {
-  margin-bottom: 0;
-}
-
-.workbench-status-tabs :deep(.arco-tabs-nav-tab) {
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.workbench-status-tabs :deep(.arco-tabs-nav-tab::-webkit-scrollbar) {
-  display: none;
-}
-
-.workbench-status-tabs :deep(.arco-tabs-nav::before) {
-  display: none;
-}
-
-.workbench-tab-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.workbench-tab-count {
-  min-width: 18px;
-  padding: 0 5px;
-  border-radius: 10px;
-  background: var(--color-fill-3);
-  color: var(--color-text-2);
-  font-size: var(--dense-font-micro);
-  font-weight: var(--dense-weight-nav-active);
-  line-height: 16px;
-  text-align: center;
-}
-
-.workbench-tab-count--warn {
-  background: var(--dense-warning-1);
-  color: var(--dense-warning-7);
-}
-
-.workbench-tab-count--danger {
-  background: var(--dense-danger-1);
-  color: var(--dense-danger-7);
-}
-
-.workbench-status-tabs :deep(.arco-tabs-tab-active .workbench-tab-count) {
-  background: var(--dense-primary-1);
-  color: var(--dense-primary-7);
 }
 
 .workbench-page__table-host {
@@ -907,12 +811,6 @@ watch(uiScenario, () => {
 
 .table-cap-tool {
   color: var(--color-text-3);
-}
-
-.table-sort-context {
-  color: var(--color-text-3);
-  font-size: var(--dense-font-aux);
-  white-space: nowrap;
 }
 
 .selection-tip {
@@ -973,9 +871,10 @@ watch(uiScenario, () => {
   word-break: break-all;
 }
 
-@media (max-width: 1279px) {
-  .flow-bar__queue-label {
+@media (max-width: 1199px) {
+  .table-command-label--optional {
     display: none;
   }
 }
+
 </style>

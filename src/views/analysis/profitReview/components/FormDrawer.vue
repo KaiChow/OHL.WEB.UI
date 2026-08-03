@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue';
+import { compactVerticalFormLabelStyle } from '../../../../design-system/formLayout';
 import type { ProfitReviewRow } from '../types';
 import { REVIEW_STATUS_META } from '../displayMeta';
 
@@ -65,7 +66,7 @@ const handleCancel = () => {
         <span class="edit-context__meta">{{ row.customer }}</span>
       </div>
       <a-alert v-if="serverError" type="error" class="edit-server-error">{{ serverError }}</a-alert>
-      <a-form layout="vertical" size="small" class="edit-form">
+      <a-form layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="edit-form">
         <a-row :gutter="[16, 0]">
           <a-col :span="12">
             <a-form-item

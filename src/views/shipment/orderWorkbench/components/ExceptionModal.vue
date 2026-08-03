@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
+import { compactVerticalFormLabelStyle } from '../../../../design-system/formLayout';
 
 export interface ExceptionFormPayload {
   exceptionType: string;
@@ -102,7 +103,7 @@ const beforeOk = () => {
       订单 {{ targetOrderNos[0] }} 将被标记为异常并进入异常队列。
     </a-alert>
     <a-alert v-if="serverError" type="error" class="exception-modal-context">{{ serverError }}</a-alert>
-    <a-form :model="form" layout="vertical" size="small" class="detail-form">
+    <a-form :model="form" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="detail-form">
       <a-row :gutter="16">
         <a-col :span="12">
           <a-form-item

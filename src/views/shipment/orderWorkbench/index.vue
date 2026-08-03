@@ -23,6 +23,8 @@ import {
 } from '@arco-design/web-vue/es/icon';
 import { downloadCsvFile } from '../../../utils/mock-actions';
 import { formatLocalMinute } from '../../../utils/date-time';
+import { compactVerticalFormLabelStyle } from '../../../design-system/formLayout';
+import WorkflowStateSelector from '../../../components/workbench/WorkflowStateSelector.vue';
 import ExceptionModal from './components/ExceptionModal.vue';
 import type { ExceptionFormPayload } from './components/ExceptionModal.vue';
 import { shipmentWorkbenchRows } from './mockData';
@@ -31,7 +33,7 @@ import type {
   ShipmentOrderQuery,
   ShipmentStatusKey,
   ShipmentWorkbenchRow,
-  StatusTabStat,
+  WorkflowStateStat,
 } from './types';
 import type { ShipmentStatusTransition } from '../featureContracts';
 import { getOrderStatusTransitions, resolveShipmentUiScenario } from '../featureContracts';
@@ -133,7 +135,7 @@ const KEYWORD_OPTIONS: { label: string; value: ShipmentKeywordType }[] = [
 
 const BUSINESS_TYPE_OPTIONS = ['FCL', 'LCL'];
 
-const STATUS_TABS: { key: ShipmentStatusKey; label: string; tone?: 'danger' | 'warn' }[] = [
+const WORKFLOW_STATE_OPTIONS: { key: ShipmentStatusKey; label: string; tone?: 'danger' | 'warn' }[] = [
   { key: 'all', label: '全部' },
   { key: 'waitBooking', label: '订舱处理' },
   { key: 'waitRelease', label: '待放舱' },
@@ -187,7 +189,7 @@ const query = reactive<ShipmentOrderQuery>(defaultQuery());
 const advancedQuery = reactive<ShipmentOrderQuery>(defaultQuery());
 const uiScenario = computed(() => resolveShipmentUiScenario(route.query.uiState));
 const appliedQuery = ref<ShipmentOrderQuery>(cloneQuery(defaultQuery()));
-const activeStatusTab = ref<ShipmentStatusKey>('all');
+const activeWorkflowState = ref<ShipmentStatusKey>('all');
 const activeWorkScope = ref<WorkScope>('all');
 const advancedFilterVisible = ref(false);
 const advancedApplying = ref(false);
@@ -337,14 +339,14 @@ const queryBaseRows = computed(() => scenarioRows.value
   .filter((row) => rowMatchesQuery(row, appliedQuery.value, activeWorkScope.value)));
 
 const filteredRows = computed(() =>
-  queryBaseRows.value.filter((row) => activeStatusTab.value === 'all' || row.quickStatus.includes(activeStatusTab.value)),
+  queryBaseRows.value.filter((row) => activeWorkflowState.value === 'all' || row.quickStatus.includes(activeWorkflowState.value)),
 );
 
 const advancedPreviewCount = computed(() => {
   if (['empty', 'permission'].includes(uiScenario.value)) return 0;
   return scenarioRows.value.filter((row) => (
     rowMatchesQuery(row, advancedQuery, activeWorkScope.value)
-    && (activeStatusTab.value === 'all' || row.quickStatus.includes(activeStatusTab.value))
+    && (activeWorkflowState.value === 'all' || row.quickStatus.includes(activeWorkflowState.value))
   )).length;
 });
 
@@ -354,19 +356,19 @@ const pagedRows = computed(() => {
   return filteredRows.value.slice(start, start + page.size);
 });
 
-const statusTabStats = computed<StatusTabStat[]>(() =>
-  STATUS_TABS.map((tab) => {
-    const rows = tab.key === 'all'
+const workflowStateOptions = computed<WorkflowStateStat[]>(() =>
+  WORKFLOW_STATE_OPTIONS.map((state) => {
+    const rows = state.key === 'all'
       ? queryBaseRows.value
-      : queryBaseRows.value.filter((row) => row.quickStatus.includes(tab.key));
+      : queryBaseRows.value.filter((row) => row.quickStatus.includes(state.key));
 
     return {
-      key: tab.key,
-      label: tab.label,
+      key: state.key,
+      label: state.label,
       count: rows.length,
       todayNew: rows.filter((row) => row.todayNew).length,
       overdue: rows.filter((row) => row.isOverdue).length,
-      tone: tab.tone,
+      tone: state.tone,
     };
   }),
 );
@@ -395,7 +397,7 @@ const hasActiveFilter = computed(() => {
     || q.updatedRange.length
     || q.isOverdue
     || activeWorkScope.value !== 'all'
-    || activeStatusTab.value !== 'all',
+    || activeWorkflowState.value !== 'all',
   );
 });
 
@@ -592,7 +594,7 @@ const handleSearch = async () => {
 const handleReset = () => {
   Object.assign(query, defaultQuery());
   appliedQuery.value = cloneQuery(defaultQuery());
-  activeStatusTab.value = 'all';
+  activeWorkflowState.value = 'all';
   activeWorkScope.value = 'all';
   advancedFilterVisible.value = false;
   page.current = 1;
@@ -688,14 +690,14 @@ const applyAdvancedFilters = async () => {
   }
 };
 
-const onStatusTabClick = (key: ShipmentStatusKey) => {
-  activeStatusTab.value = key;
+const onWorkflowStateSelect = (key: ShipmentStatusKey) => {
+  activeWorkflowState.value = key;
   page.current = 1;
   clearSelection();
 };
 
-const onStatusTabChange = (key: string | number) => {
-  onStatusTabClick(key as ShipmentStatusKey);
+const onWorkflowStateChange = (key: string | number) => {
+  onWorkflowStateSelect(key as ShipmentStatusKey);
 };
 
 const onWorkScopeChange = (value: string | number | boolean) => {
@@ -983,7 +985,7 @@ watch(uiScenario, () => {
         :body-style="{ padding: 0 }"
       >
         <div class="filter-panel">
-          <a-form :model="query" layout="vertical" size="small" class="filter-panel__form">
+          <a-form :model="query" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="filter-panel__form">
             <a-row :gutter="[12, 0]" align="end">
               <a-col :xs="24" :sm="24" :md="7" :lg="7" :xl="6">
                 <a-form-item label="单号检索">
@@ -1061,34 +1063,11 @@ watch(uiScenario, () => {
             </a-row>
           </a-form>
         </div>
-        <div class="flow-bar">
-          <div v-if="canOperate" class="flow-bar__actions">
-            <a-button size="small" type="primary" :loading="creating" @click="handleCreateOrder">
-              <template #icon><icon-plus /></template>
-              新增订单
-            </a-button>
-            <a-button size="small" @click="handleExport">
-              <template #icon><icon-download /></template>
-              导出
-            </a-button>
-            <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-              <a-button size="small" :disabled="!selectedCount" :loading="batchSubmitting">
-                批量处理<icon-down />
-              </a-button>
-              <template #content>
-                <a-doption @click="openBatchAssignment(CURRENT_OPERATOR)">分配给我</a-doption>
-                <a-doption @click="openBatchAssignment('')">指定操作人员…</a-doption>
-                <a-doption @click="handleBatchNotify">发送通知</a-doption>
-              </template>
-            </a-dropdown>
-          </div>
-
-          <a-divider v-if="canOperate" direction="vertical" class="flow-bar__divider" />
-
-          <div class="flow-bar__scope" data-workbench-scope="ownership">
-            <span class="flow-bar__scope-label">工作范围</span>
+        <div class="workflow-filter-bar">
+          <div class="workflow-filter-bar__scope" data-workbench-scope="ownership">
             <a-radio-group
               v-model="activeWorkScope"
+              aria-label="工作范围"
               type="button"
               size="small"
               @change="onWorkScopeChange"
@@ -1098,33 +1077,16 @@ watch(uiScenario, () => {
             </a-radio-group>
           </div>
 
-          <a-divider direction="vertical" class="flow-bar__divider" />
+          <a-divider direction="vertical" class="workflow-filter-bar__divider" />
 
-          <div class="flow-bar__queues">
-            <span class="flow-bar__queue-label">处理队列</span>
-            <a-tabs
-              v-model:active-key="activeStatusTab"
-              type="line"
-              size="small"
-              class="workbench-status-tabs"
-              @change="onStatusTabChange"
-            >
-              <a-tab-pane v-for="tab in statusTabStats" :key="tab.key">
-                <template #title>
-                  <span class="workbench-tab-title">
-                    {{ tab.label }}
-                    <span
-                      class="workbench-tab-count"
-                      :class="{
-                        'workbench-tab-count--warn': tab.tone === 'warn',
-                        'workbench-tab-count--danger': tab.tone === 'danger',
-                      }"
-                    >{{ tab.count }}</span>
-                  </span>
-                </template>
-              </a-tab-pane>
-            </a-tabs>
-          </div>
+          <WorkflowStateSelector
+            class="workflow-filter-bar__state"
+            :model-value="activeWorkflowState"
+            label="处理队列"
+            :show-label="false"
+            :options="workflowStateOptions"
+            @change="onWorkflowStateChange"
+          />
         </div>
       </a-card>
 
@@ -1137,20 +1099,42 @@ watch(uiScenario, () => {
       >
         <template #title>
           <div class="table-cap-start">
+            <div v-if="canOperate" class="table-command-group">
+              <a-button size="small" type="primary" :loading="creating" @click="handleCreateOrder">
+                <template #icon><icon-plus /></template>
+                新增订单
+              </a-button>
+              <a-tooltip content="导出当前结果">
+                <a-button size="small" aria-label="导出当前结果" @click="handleExport">
+                  <template #icon><icon-download /></template>
+                  <span class="table-command-label--optional">导出</span>
+                </a-button>
+              </a-tooltip>
+              <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+                <a-button size="small" :disabled="!selectedCount" :loading="batchSubmitting">
+                  批量处理<template v-if="selectedCount">（{{ selectedCount }}）</template><icon-down />
+                </a-button>
+                <template #content>
+                  <a-doption @click="openBatchAssignment(CURRENT_OPERATOR)">分配给我</a-doption>
+                  <a-doption @click="openBatchAssignment('')">指定操作人员…</a-doption>
+                  <a-doption @click="handleBatchNotify">发送通知</a-doption>
+                  <a-doption @click="clearSelection">清空选择</a-doption>
+                </template>
+              </a-dropdown>
+            </div>
+            <div v-if="selectedCount > 0" class="selection-context">
+              <span class="selection-tip">已选 <b>{{ selectedCount }}</b> 条</span>
+              <a-button size="small" type="text" @click="clearSelection">清空</a-button>
+            </div>
+          </div>
+        </template>
+        <template #extra>
+          <a-space :size="8">
             <a-tooltip content="刷新">
               <a-button size="small" type="text" class="table-cap-tool" title="刷新" aria-label="刷新" :loading="loading || forcedLoading" @click="fetchList">
                 <template #icon><icon-refresh /></template>
               </a-button>
             </a-tooltip>
-            <span v-if="!tableError && uiScenario !== 'permission'" class="table-sort-context">按更新时间倒序</span>
-            <template v-if="selectedCount > 0">
-              <span class="selection-tip">已选 <b>{{ selectedCount }}</b> 条</span>
-              <a-button size="small" type="text" @click="clearSelection">清空</a-button>
-            </template>
-          </div>
-        </template>
-        <template #extra>
-          <a-space :size="8">
             <a-pagination
               :current="page.current"
               :page-size="page.size"
@@ -1375,7 +1359,7 @@ watch(uiScenario, () => {
           <a-badge v-if="advancedDraftDirty" class="advanced-filter-title__dirty" status="processing" text="待应用" />
         </div>
       </template>
-      <a-form class="advanced-filter-form" layout="vertical" size="small" :model="advancedQuery">
+      <a-form class="advanced-filter-form" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" :model="advancedQuery">
         <section class="advanced-filter-section" aria-labelledby="route-document-filter-title">
           <div class="advanced-filter-section__head">
             <a-space :size="6">
@@ -1625,7 +1609,7 @@ watch(uiScenario, () => {
       <a-alert type="info" class="modal-context-alert">
         本次将分配 {{ selectedCount }} 条订单；成功订单会取消选中，失败订单保留选中。
       </a-alert>
-      <a-form :model="batchAssignForm" layout="vertical" size="small" class="detail-form">
+      <a-form :model="batchAssignForm" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="detail-form">
         <a-form-item
           field="operator"
           label="操作人员"
@@ -1658,7 +1642,7 @@ watch(uiScenario, () => {
       :cancel-button-props="{ size: 'small' }"
       :on-before-ok="confirmStatusChange"
     >
-      <a-form :model="statusForm" layout="vertical" size="small" class="detail-form">
+      <a-form :model="statusForm" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="detail-form">
         <a-row :gutter="16">
           <a-col :span="12">
             <a-form-item label="当前状态">
@@ -1786,7 +1770,7 @@ watch(uiScenario, () => {
   flex: 0 0 12px;
 }
 
-.flow-bar {
+.workflow-filter-bar {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1796,108 +1780,21 @@ watch(uiScenario, () => {
   border-top: 1px solid var(--color-border-1);
 }
 
-.flow-bar__actions {
+.workflow-filter-bar__scope {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
   gap: 8px;
 }
 
-.flow-bar__scope {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 8px;
-}
-
-.flow-bar__divider {
+.workflow-filter-bar__divider {
   flex: 0 0 auto;
   height: 24px;
   margin: 0;
 }
 
-.flow-bar__scope-label {
-  color: var(--color-text-3);
-  font-size: var(--dense-font-aux);
+.workflow-filter-bar__scope :deep(.arco-radio-group-button) {
   white-space: nowrap;
-}
-
-.flow-bar__scope :deep(.arco-radio-group-button) {
-  white-space: nowrap;
-}
-
-.flow-bar__queues {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.flow-bar__queue-label {
-  flex: 0 0 auto;
-  color: var(--color-text-3);
-  font-size: var(--dense-font-aux);
-  white-space: nowrap;
-}
-
-.workbench-status-tabs :deep(.arco-tabs-content) {
-  display: none;
-}
-
-.workbench-status-tabs {
-  flex: 1;
-  min-width: 0;
-}
-
-.workbench-status-tabs :deep(.arco-tabs-nav) {
-  margin-bottom: 0;
-}
-
-.workbench-status-tabs :deep(.arco-tabs-nav-tab) {
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.workbench-status-tabs :deep(.arco-tabs-nav-tab::-webkit-scrollbar) {
-  display: none;
-}
-
-.workbench-status-tabs :deep(.arco-tabs-nav::before) {
-  display: none;
-}
-
-.workbench-tab-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.workbench-tab-count {
-  min-width: 18px;
-  padding: 0 5px;
-  border-radius: 10px;
-  background: var(--color-fill-3);
-  color: var(--color-text-2);
-  font-size: var(--dense-font-micro);
-  font-weight: var(--dense-weight-nav-active);
-  line-height: 16px;
-  text-align: center;
-}
-
-.workbench-tab-count--warn {
-  background: var(--dense-warning-1);
-  color: var(--dense-warning-7);
-}
-
-.workbench-tab-count--danger {
-  background: var(--dense-danger-1);
-  color: var(--dense-danger-7);
-}
-
-.workbench-status-tabs :deep(.arco-tabs-tab-active .workbench-tab-count) {
-  background: var(--dense-primary-1);
-  color: var(--dense-primary-7);
 }
 
 .workbench-page__table-host {
@@ -1928,14 +1825,15 @@ watch(uiScenario, () => {
   min-width: 0;
 }
 
-.table-cap-tool {
-  color: var(--color-text-3);
+.table-command-group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
 }
 
-.table-sort-context {
+.table-cap-tool {
   color: var(--color-text-3);
-  font-size: var(--dense-font-aux);
-  white-space: nowrap;
 }
 
 .workbench-empty {
@@ -2116,6 +2014,12 @@ watch(uiScenario, () => {
   color: var(--color-text-3);
 }
 
+.selection-context {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .decision-cell {
   display: flex;
   flex-direction: column;
@@ -2154,13 +2058,6 @@ watch(uiScenario, () => {
   line-height: 20px;
 }
 
-@media (max-width: 1279px) {
-  .flow-bar__scope-label,
-  .flow-bar__queue-label {
-    display: none;
-  }
-}
-
 @media (max-width: 1199px) {
   .filter-panel__actions {
     gap: 4px;
@@ -2176,18 +2073,22 @@ watch(uiScenario, () => {
     padding-inline: 0;
   }
 
-  .flow-bar {
+  .workflow-filter-bar {
     gap: 8px;
   }
 
-  .flow-bar__actions {
+  .table-command-group {
     gap: 6px;
   }
 
-  .flow-bar__scope {
+  .workflow-filter-bar__scope {
     gap: 4px;
   }
 
+  .table-command-label--optional,
+  .selection-context {
+    display: none;
+  }
 }
 
 </style>

@@ -89,7 +89,7 @@ export interface ShipmentWorkbenchRow {
   financeLocked: boolean;
 }
 
-export interface StatusTabStat {
+export interface WorkflowStateStat {
   key: ShipmentStatusKey;
   label: string;
   count: number;

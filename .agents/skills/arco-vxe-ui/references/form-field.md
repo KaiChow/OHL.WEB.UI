@@ -10,7 +10,7 @@
 ## 原则
 
 1. 模板统一 `size="small"`（见 `component-size.md`）
-2. 先使用 Arco 原生控件、props、插槽与表单布局；不以全局 CSS 修正框架内部字号或皮肤
+2. 先使用 Arco 原生控件、props、插槽与表单布局；垂直表单通过共享 `label-col-style` 公共配置使用 `--dense-gap-label`，不以全局 CSS 修正框架内部字号或皮肤
 3. 控件外观由 GI 负责；`filter-field` / `detail-form` / `detail-drawer` 等布局 class 只管理排列、间距和宽度
 4. 布局 class（`filter-field`、`detail-form-grid`）只管 **排列与栅格**，不管控件皮肤
 5. **同一 Arco 组件在任意业务场景使用同一原生 small 层级**：不得因为它出现在列表筛选、弹窗表单、详情编辑或查询抽屉里就覆盖内部字号
@@ -40,7 +40,7 @@
 | `.filter-field__label` | 页面局部语义 hook；只管理标签布局，不建立组件皮肤 |
 | `a-form-item` 的 `label` prop/slot | `a-form layout="vertical"` 内置 label |
 
-手写业务标签使用 F4 token；`a-form-item` 标签保持 GI 原生层级。两者靠结构、间距和明确分组保持一致，不通过全局内部选择器强制同字号。
+手写业务标签使用 F4 token；`a-form-item` 标签保持 GI 原生层级。垂直表单统一通过共享 `compactVerticalFormLabelStyle` 将 label 到控件设为 `--dense-gap-label`，不得逐页写内部选择器或设为 0。两者靠结构、间距和明确分组保持一致，不通过全局内部选择器强制同字号。
 
 ## 使用场景（Scenario）
 
@@ -83,6 +83,10 @@ Do not create page-local variants such as “drawer select uses 13px” or “to
 ## 模板示例
 
 ```vue
+<script setup lang="ts">
+import { compactVerticalFormLabelStyle } from '@/design-system/formLayout';
+</script>
+
 <!-- 手写 label + 控件：任意场景相同 -->
 <div class="filter-field">
   <label class="filter-field__label">客户名称</label>
@@ -90,7 +94,7 @@ Do not create page-local variants such as “drawer select uses 13px” or “to
 </div>
 
 <!-- Arco Form：控件仍走同一套 Default -->
-<a-form class="detail-form" layout="vertical" size="small" :model="form">
+<a-form class="detail-form" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" :model="form">
   <a-form-item field="name" label="客户名称">
     <a-input v-model="form.name" size="small" />
   </a-form-item>
@@ -107,6 +111,7 @@ Do not create page-local variants such as “drawer select uses 13px” or “to
 ## Release Gate
 
 - [ ] Business controls inherit the app-wide `small`; GI owns control chrome, typography, hover, focus, disabled, and error states.
+- [ ] Every vertical Arco Form uses the shared public label-column style; measured label-to-control gap resolves to `--dense-gap-label`, never a page-local value.
 - [ ] Labels remain visible, associated with controls, and do not rely on placeholder text.
 - [ ] Pickers/selects fill their form-item through public props/layout, not internal-selector overrides.
 - [ ] Long labels, 1.3-2x translated copy, validation messages, disabled/read-only values, keyboard focus, and 200% zoom remain usable.

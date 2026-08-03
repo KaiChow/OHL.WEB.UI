@@ -26,16 +26,17 @@ export interface PesdpListSpec {
   frame: 'standard-list-v1';
   profile: PesdpListProfile;
   commandSurface: 'none' | 'compact' | 'workbench';
-  tableTop: 'none' | 'utility-cap' | 'context-cap';
+  tableTop: 'none' | 'utility-cap' | 'workbench-toolbar';
   selection: 'none' | 'conditional' | 'batch';
   workScope: 'none' | 'conditional' | 'required';
   statusQueues: 'none' | 'conditional' | 'required';
   views: {
     pageMode: 'none' | 'segmented' | 'tabs' | 'select';
     pageModeCount: number;
-    status: 'none' | 'tabs' | 'select';
-    statusCount: number;
-    statusOverflow: 'none' | 'local-scroll';
+    workflowState: 'none' | 'line-tabs' | 'select';
+    workflowStateCount: number;
+    workflowStatePlacement: 'none' | 'query-row' | 'workflow-row' | 'dedicated-row';
+    workflowStateOverflow: 'none' | 'local-scroll';
   };
 }
 

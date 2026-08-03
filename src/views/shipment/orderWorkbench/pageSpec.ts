@@ -8,16 +8,17 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
     frame: 'standard-list-v1',
     profile: 'operations-workbench',
     commandSurface: 'workbench',
-    tableTop: 'context-cap',
+    tableTop: 'workbench-toolbar',
     selection: 'batch',
     workScope: 'required',
     statusQueues: 'required',
     views: {
       pageMode: 'none',
       pageModeCount: 0,
-      status: 'tabs',
-      statusCount: 12,
-      statusOverflow: 'local-scroll',
+      workflowState: 'line-tabs',
+      workflowStateCount: 12,
+      workflowStatePlacement: 'workflow-row',
+      workflowStateOverflow: 'local-scroll',
     },
   },
   business: {
@@ -31,10 +32,12 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   },
   pesdp: {
     professional: {
-      decisions: ['Use sea-export order vocabulary, ownership scope, operational queues, and the next freight action; separate locate, workflow, queue, and table-utility jobs into readable zones instead of one continuous control strip; use a standard grouped admin navigation shell without inventing unavailable modules or routes; every row-changing action must expose a complete result.'],
+      decisions: ['Use sea-export order vocabulary, ownership scope, operational queues, and the next freight action; treat processing queue as a high-frequency workflow-state query dimension rather than page navigation or a mutation; separate locate, workflow, queue, and table-utility jobs into readable zones instead of one continuous control strip; use a standard grouped admin navigation shell without inventing unavailable modules or routes; every row-changing action must expose a complete result.'],
       acceptance: [
         'Rendered columns must expose order identity, owner, route, status, and next action without generic task wording.',
         'The first viewport makes query, new/batch workflow, ownership scope, processing queue, and table utilities distinguishable without decorative cards or duplicate labels.',
+        'Ownership scope and processing queue share one mutation-free state row below query; create, export, and batch commands live in the table toolbar below that row and immediately above the rows they affect.',
+        'Self-explanatory scope and queue options do not repeat visible group captions; their Radio/Tabs controls retain business-specific accessible names.',
         'No context sentence may repeat work-scope or queue labels that are already selected in controls.',
         'The current route remains visible in a compact, grouped navigation menu without workspace-card chrome competing with the workbench.',
       ],
@@ -49,7 +52,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       ],
     },
     structured: {
-      decisions: ['Command surface owns a bounded query cluster and separate workflow/queue groups; data surface owns table context, selection, utilities, and pagination.'],
+      decisions: ['Query surface owns a bounded query cluster followed by a mutation-free ownership/workflow-state row; data surface owns table business commands, selection context, utilities, pagination, and rows.'],
       acceptance: [
         'Totals must appear in pagination and queue counts only; table context must not repeat the total, active scope, active queue, or risk count.',
         'Advanced query, status change, batch assignment, and column settings each have one explicit overlay owner.',
@@ -59,7 +62,8 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       decisions: ['Keep business type, identifier, customer, and responsible operator as four daily locate fields on one stable row; edit fourteen secondary route, schedule, status/risk, document, and settlement conditions in a right-side D1 drawer using two readable columns and one native scroll owner.'],
       acceptance: [
         'At 1366, 1024 split, and wide viewports, the query row does not create a separate action band and the table remains the dominant work surface.',
-        'At 1024, the identifier query keeps the largest field allocation, ports stay readable, reset/advanced-filter collapse to named icon tools, and the 12 processing queues scroll only inside their own lane.',
+        'Vertical query and overlay forms use the shared 4px label-to-control rhythm through the Arco public label-column style.',
+        'At 1024, the identifier query keeps the largest field allocation, ports stay readable, reset/advanced-filter collapse to named icon tools, and the 12 processing queues move to a deterministic second workflow line where they scroll only inside their own lane.',
         'The advanced filter opens from the right at the shared D1 width, renders two field columns, and keeps the native Drawer body as its only vertical scroll owner.',
         'Drawer content and footer remain horizontally contained at 1024, 1366, and wide desktop viewports.',
       ],
@@ -78,9 +82,9 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   },
   surfaces: [
     { id: 'app-navigation', role: 'supporting', owns: ['module-navigation', 'route-identity'], implementation: 'arco' },
-    { id: 'command', role: 'command', owns: ['query', 'create', 'export', 'ownership-scope', 'status-queues'], primaryAction: 'export-order-create', implementation: 'arco' },
+    { id: 'command', role: 'command', owns: ['query', 'ownership-scope', 'status-queues'], primaryAction: 'export-order-query', implementation: 'arco' },
     { id: 'advanced-query', role: 'supporting', owns: ['right-drawer-grid', 'advanced-query-draft', 'freight-business-grouping', 'group-active-counts', 'group-reset', 'live-result-preview', 'draft-dirty-state', 'cancel-apply-state'], primaryAction: 'export-order-query', implementation: 'arco' },
-    { id: 'orders', role: 'data', owns: ['table-data', 'selection', 'batch-result', 'column-settings', 'density', 'pagination', 'total-count', 'table-feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'Freight list grids require the shared VXE workbench wrapper and public density, fixed-column, overflow, loading, and preference configuration.' },
+    { id: 'orders', role: 'data', owns: ['create', 'export', 'batch-actions', 'table-data', 'selection', 'batch-result', 'column-settings', 'density', 'pagination', 'total-count', 'table-feedback'], primaryAction: 'export-order-create', implementation: 'shared-pattern', whyArcoNotEnough: 'Freight list grids require the shared VXE workbench wrapper and public density, fixed-column, overflow, loading, and preference configuration.' },
   ],
   query: {
     totalFields: 18,
@@ -115,7 +119,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   detail: { mode: 'none', focus: [], milestones: [] },
   actions: [
     { id: 'export-order-query', scope: 'query', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'export-order-query', successOwner: 'orders', failureOwner: 'orders' },
-    { id: 'export-order-create', scope: 'command', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'export-order-create', successOwner: 'command', failureOwner: 'command' },
+    { id: 'export-order-create', scope: 'command', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'export-order-create', successOwner: 'orders', failureOwner: 'orders' },
     { id: 'export-order-batch-action', scope: 'selection', frequency: 'regular', risk: 'medium', presentation: 'dropdown', contract: 'export-order-batch-action', successOwner: 'orders', failureOwner: 'orders' },
     { id: 'export-order-status-transition', scope: 'row', frequency: 'regular', risk: 'medium', presentation: 'dropdown', contract: 'export-order-status-transition', successOwner: 'orders', failureOwner: 'orders' },
     { id: 'export-order-column-preferences', scope: 'data-utilities', frequency: 'regular', risk: 'low', presentation: 'text', contract: 'export-order-column-preferences', successOwner: 'orders', failureOwner: 'orders' },

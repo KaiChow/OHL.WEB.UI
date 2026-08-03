@@ -229,6 +229,24 @@ for (const file of files) {
 for (const file of files.filter((file) => file.endsWith('.vue'))) {
   const source = readFileSync(file, 'utf8');
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
+  for (const match of source.matchAll(/<a-form\b[^>]*\blayout=["']vertical["'][^>]*>/g)) {
+    if (/:label-col-style=/.test(match[0])) continue;
+    violations.push({
+      rule: '垂直 Arco Form 必须使用共享 label-col-style，统一 label 到控件的语义间距',
+      file: relPath,
+      line: source.slice(0, match.index).split('\n').length,
+      content: match[0].replace(/\s+/g, ' ').slice(0, 120),
+    });
+  }
+  for (const match of source.matchAll(/<div\b[^>]*data-workbench-scope[^>]*>[\s\S]*?<a-radio-group\b([^>]*)>/g)) {
+    if (/\baria-label=/.test(match[1])) continue;
+    violations.push({
+      rule: '工作台范围选择即使省略可见组名，也必须保留业务 aria-label',
+      file: relPath,
+      line: source.slice(0, match.index).split('\n').length,
+      content: match[0].replace(/\s+/g, ' ').slice(0, 120),
+    });
+  }
   const hasAdvancedFilterDrawer = /<a-drawer\b[\s\S]*?data-ui-surface=["']advanced-filter(?:-wide)?["']/.test(source);
   for (const ruleMatch of source.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
     const selector = ruleMatch[1];
@@ -627,9 +645,10 @@ for (const specFile of pageSpecFiles) {
     const views = getObjectLiteralProperty(list, 'views');
     const pageMode = getStringProperty(views, 'pageMode');
     const pageModeCount = Number(getObjectProperty(views, 'pageModeCount')?.initializer?.text);
-    const statusView = getStringProperty(views, 'status');
-    const statusCount = Number(getObjectProperty(views, 'statusCount')?.initializer?.text);
-    const statusOverflow = getStringProperty(views, 'statusOverflow');
+    const workflowState = getStringProperty(views, 'workflowState');
+    const workflowStateCount = Number(getObjectProperty(views, 'workflowStateCount')?.initializer?.text);
+    const workflowStatePlacement = getStringProperty(views, 'workflowStatePlacement');
+    const workflowStateOverflow = getStringProperty(views, 'workflowStateOverflow');
     if (frame !== 'standard-list-v1') {
       violations.push({
         rule: '列表 pageSpec 必须使用 standard-list-v1 共享 UI/UX 框架，禁止页面另起一套列表风格',
@@ -648,19 +667,19 @@ for (const specFile of pageSpecFiles) {
     }
     const invalidSimpleQuery = listProfile === 'simple-query' && (
       commandSurface === 'workbench'
-      || tableTop === 'context-cap'
+      || tableTop === 'workbench-toolbar'
       || selection !== 'none'
       || workScope !== 'none'
       || statusQueues !== 'none'
     );
     const invalidManagement = listProfile === 'management' && (
       commandSurface === 'workbench'
-      || tableTop === 'context-cap'
+      || tableTop === 'workbench-toolbar'
       || workScope !== 'none'
       || statusQueues !== 'none'
     );
     const invalidWorkbench = listProfile === 'operations-workbench' && (
-      commandSurface !== 'workbench' || tableTop !== 'context-cap'
+      commandSurface !== 'workbench' || tableTop !== 'workbench-toolbar'
     );
     if (invalidSimpleQuery || invalidManagement || invalidWorkbench) {
       violations.push({
@@ -674,21 +693,21 @@ for (const specFile of pageSpecFiles) {
       || (pageMode === 'none' && pageModeCount !== 0)
       || (pageMode !== 'none' && pageModeCount < 2)
       || ((pageMode === 'tabs' || pageMode === 'segmented') && pageModeCount > 5);
-    const invalidStatusView = !Number.isInteger(statusCount)
-      || (statusView === 'none' && (statusCount !== 0 || statusOverflow !== 'none'))
-      || (statusView !== 'none' && statusCount < 2)
-      || (statusView === 'tabs' && statusCount > 12)
-      || (statusView === 'tabs' && statusCount > 8 && statusOverflow !== 'local-scroll')
-      || (statusView === 'tabs' && statusCount <= 8 && statusOverflow !== 'none')
-      || (statusView === 'select' && statusOverflow !== 'none')
-      || (statusQueues === 'none' && statusView !== 'none')
-      || (statusQueues !== 'none' && statusView === 'none');
-    if (invalidPageMode || invalidStatusView) {
+    const invalidWorkflowState = !Number.isInteger(workflowStateCount)
+      || (workflowState === 'none' && (workflowStateCount !== 0 || workflowStatePlacement !== 'none' || workflowStateOverflow !== 'none'))
+      || (workflowState !== 'none' && (workflowStateCount < 2 || workflowStatePlacement === 'none'))
+      || (workflowState === 'line-tabs' && workflowStateCount > 12)
+      || (workflowState === 'line-tabs' && workflowStateCount > 8 && workflowStateOverflow !== 'local-scroll')
+      || (workflowState === 'line-tabs' && workflowStateCount <= 8 && workflowStateOverflow !== 'none')
+      || (workflowState === 'select' && workflowStateOverflow !== 'none')
+      || (statusQueues === 'none' && workflowState !== 'none')
+      || (statusQueues !== 'none' && workflowState === 'none');
+    if (invalidPageMode || invalidWorkflowState) {
       violations.push({
-        rule: '列表 pageSpec 必须声明页面模式与状态队列的 Tab/Select 数量和溢出策略，禁止无边界堆叠 Tab',
+        rule: '列表 pageSpec 必须区分页面模式与工作流状态选择，并声明状态控件、数量、层级和溢出策略',
         file: relPath,
         line: 1,
-        content: `mode=${pageMode}/${pageModeCount}; status=${statusView}/${statusCount}/${statusOverflow}; queues=${statusQueues}`,
+        content: `mode=${pageMode}/${pageModeCount}; workflowState=${workflowState}/${workflowStateCount}/${workflowStatePlacement}/${workflowStateOverflow}; queues=${statusQueues}`,
       });
     }
   }
