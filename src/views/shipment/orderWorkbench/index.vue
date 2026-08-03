@@ -1072,8 +1072,9 @@ watch(uiScenario, () => {
               size="small"
               @change="onWorkScopeChange"
             >
-              <a-radio value="all">全部在手</a-radio>
+              <a-radio value="all">全部</a-radio>
               <a-radio value="mine">我的订单</a-radio>
+              <a-radio value="others">权限单</a-radio>
             </a-radio-group>
           </div>
 
