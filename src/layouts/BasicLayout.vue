@@ -9,6 +9,7 @@ const route = useRoute();
 const router = useRouter();
 const menuKeyword = ref('');
 const selectedMenuKeys = ref<string[]>([]);
+const openMenuKeys = ref<string[]>([]);
 const isCompactShell = ref(false);
 let compactShellMedia: MediaQueryList | undefined;
 
@@ -86,6 +87,10 @@ watch(
     if (!isSameKeys(selectedMenuKeys.value, next)) {
       selectedMenuKeys.value = next;
     }
+    const activeGroup = availableMenus.value.find((group) => group.children?.some((item) => item.key === key));
+    if (activeGroup && !openMenuKeys.value.includes(activeGroup.key)) {
+      openMenuKeys.value = [...openMenuKeys.value, activeGroup.key];
+    }
   },
   { immediate: true },
 );
@@ -102,20 +107,15 @@ const onMenuItemClick = (key: string) => {
     <a-layout-sider
       class="app-layout__sider"
       :class="{ 'app-layout__sider--compact': isCompactShell }"
-      :width="isCompactShell ? 176 : 204"
+      :width="isCompactShell ? 184 : 220"
       :collapsible="false"
     >
-      <div class="app-layout__brand">
+      <div class="app-layout__brand" aria-label="OHL Freight 导航">
         <a-avatar :size="28" shape="square" class="app-layout__logo">OHL</a-avatar>
         <div class="app-layout__brand-text">
           <div class="app-layout__brand-title">OHL Freight</div>
           <div class="app-layout__brand-sub">Operations OS</div>
         </div>
-      </div>
-
-      <div class="app-layout__workspace">
-        <span>当前工作区</span>
-        <strong>华南操作中心</strong>
       </div>
 
       <div v-if="availableMenuCount >= 6" class="app-layout__search">
@@ -125,16 +125,19 @@ const onMenuItemClick = (key: string) => {
       </div>
 
       <a-menu
+        v-model:open-keys="openMenuKeys"
         class="app-layout__menu"
         :selected-keys="selectedMenuKeys"
+        accordion
         @menu-item-click="onMenuItemClick"
       >
-        <a-menu-item-group v-for="group in filteredMenus" :key="group.key" :title="group.title">
+        <a-sub-menu v-for="group in filteredMenus" :key="group.key">
+          <template #icon><ship theme="outline" :size="16" /></template>
+          <template #title>{{ group.title }}</template>
           <a-menu-item v-for="item in group.children" :key="item.key">
-            <template #icon><ship theme="outline" :size="16" /></template>
             {{ item.title }}
           </a-menu-item>
-        </a-menu-item-group>
+        </a-sub-menu>
       </a-menu>
 
       <div class="app-layout__footer">
@@ -236,10 +239,6 @@ const onMenuItemClick = (key: string) => {
   display: none;
 }
 
-.app-layout__sider--compact .app-layout__workspace {
-  padding-inline: 10px;
-}
-
 .app-layout__sider--compact .app-layout__search {
   padding-inline: 8px;
 }
@@ -253,32 +252,6 @@ const onMenuItemClick = (key: string) => {
   border-bottom: 1px solid var(--color-border-1);
 }
 
-.app-layout__workspace {
-  padding: 11px 14px 10px;
-  border-bottom: 1px solid var(--color-border-1);
-}
-
-.app-layout__workspace span,
-.app-layout__workspace strong {
-  display: block;
-}
-
-.app-layout__workspace span {
-  color: var(--color-text-3);
-  font-size: var(--dense-font-micro);
-  line-height: 16px;
-}
-
-.app-layout__workspace strong {
-  overflow: hidden;
-  color: var(--color-text-1);
-  font-size: var(--dense-font-data);
-  font-weight: var(--dense-weight-title);
-  line-height: 20px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .app-layout__search :deep(.arco-input-wrapper) {
   background: var(--color-bg-card);
 }
@@ -287,43 +260,8 @@ const onMenuItemClick = (key: string) => {
   flex: 1;
   overflow: auto;
   border-right: none;
-  padding: 8px 6px;
+  padding: 8px;
   margin-top: 0;
-}
-
-.app-layout__menu :deep(.arco-menu) {
-  background: transparent;
-}
-
-.app-layout__menu :deep(.arco-menu-item) {
-  height: 34px;
-  margin-bottom: 2px;
-  border-radius: 4px;
-  padding-left: 10px !important;
-  color: var(--color-text-2);
-  font-size: var(--dense-font-nav);
-  font-weight: var(--dense-weight-nav);
-  line-height: 34px;
-}
-
-.app-layout__menu :deep(.arco-menu-group-title) {
-  height: auto;
-  padding: 8px 10px 5px !important;
-  color: var(--color-text-3);
-  font-size: var(--dense-font-micro);
-  font-weight: var(--dense-weight-title);
-  line-height: 16px;
-}
-
-.app-layout__menu :deep(.arco-menu-selected) {
-  background: var(--color-fill-1);
-  color: var(--dense-primary-7);
-  font-weight: var(--dense-weight-title);
-  box-shadow: inset 2px 0 0 var(--dense-primary-6);
-}
-
-.app-layout__menu :deep(.arco-menu-item:hover) {
-  background: var(--color-fill-1);
 }
 
 .app-layout__footer {

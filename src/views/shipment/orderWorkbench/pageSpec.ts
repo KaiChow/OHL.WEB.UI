@@ -15,10 +15,11 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   },
   pesdp: {
     professional: {
-      decisions: ['Use sea-export order vocabulary, ownership scope, operational queues, and the next freight action; every row-changing action must expose a complete result.'],
+      decisions: ['Use sea-export order vocabulary, ownership scope, operational queues, and the next freight action; use a standard grouped admin navigation shell without inventing unavailable modules or routes; every row-changing action must expose a complete result.'],
       acceptance: [
         'Rendered columns must expose order identity, owner, route, status, and next action without generic task wording.',
         'No context sentence may repeat work-scope or queue labels that are already selected in controls.',
+        'The current route remains visible in a compact, grouped navigation menu without workspace-card chrome competing with the workbench.',
       ],
     },
     efficient: {
@@ -57,6 +58,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
     },
   },
   surfaces: [
+    { id: 'app-navigation', role: 'supporting', owns: ['module-navigation', 'route-identity'], implementation: 'arco' },
     { id: 'command', role: 'command', owns: ['query', 'create', 'export', 'ownership-scope', 'status-queues'], primaryAction: 'export-order-create', implementation: 'arco' },
     { id: 'advanced-query', role: 'supporting', owns: ['right-drawer-grid', 'advanced-query-draft', 'freight-business-grouping', 'group-active-counts', 'group-reset', 'live-result-preview', 'draft-dirty-state', 'cancel-apply-state'], primaryAction: 'export-order-query', implementation: 'arco' },
     { id: 'orders', role: 'data', owns: ['table-data', 'selection', 'batch-result', 'column-settings', 'density', 'pagination', 'total-count', 'table-feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'Freight list grids require the shared VXE workbench wrapper and public density, fixed-column, overflow, loading, and preference configuration.' },

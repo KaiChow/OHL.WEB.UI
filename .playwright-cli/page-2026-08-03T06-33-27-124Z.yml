@@ -1,0 +1,654 @@
+- generic [ref=f1e3]:
+  - generic [ref=f1e5]:
+    - generic "OHL Freight 导航" [ref=f1e6]:
+      - generic [ref=f1e7]: OHL
+      - generic [ref=f1e9]:
+        - generic [ref=f1e10]: OHL Freight
+        - generic [ref=f1e11]: Operations OS
+    - generic [ref=f1e14]:
+      - generic [ref=f1e15] [cursor=pointer]: 海运业务
+      - generic [ref=f1e26]: 出口订单
+    - generic [ref=f1e30]:
+      - generic [ref=f1e31]: 中国区 · CN
+      - generic [ref=f1e32]: v0.1
+  - generic [ref=f1e33]:
+    - generic [ref=f1e34]:
+      - generic [ref=f1e36]:
+        - generic [ref=f1e37]: 海运业务
+        - strong [ref=f1e38]: 海运出口订单
+      - generic [ref=f1e39]:
+        - button "刷新" [ref=f1e41] [cursor=pointer]
+        - button [ref=f1e46] [cursor=pointer]
+    - main [ref=f1e53]:
+      - generic [ref=f1e55]:
+        - generic [ref=f1e57]:
+          - generic [ref=f1e60]:
+            - generic [ref=f1e62]:
+              - generic [ref=f1e63]: 单号检索
+              - generic [ref=f1e68]:
+                - generic "业务单号" [ref=f1e69] [cursor=pointer]:
+                  - textbox
+                - textbox "请输入业务单号 / 提单号 / 订舱号" [ref=f1e76]
+            - generic [ref=f1e78]:
+              - generic [ref=f1e79]: 客户名称
+              - textbox "请输入客户名称" [ref=f1e85]
+            - generic [ref=f1e87]:
+              - generic [ref=f1e88]: 起运港
+              - textbox "港口代码 / 名称" [ref=f1e94]
+            - generic [ref=f1e96]:
+              - generic [ref=f1e97]: 目的港
+              - textbox "港口代码 / 名称" [ref=f1e103]
+            - generic [ref=f1e105]:
+              - button [ref=f1e106] [cursor=pointer]
+              - button "重置查询条件" [ref=f1e110] [cursor=pointer]:
+                - generic [ref=f1e114]: 重置
+              - button "高级筛选" [ref=f1e116] [cursor=pointer]:
+                - generic [ref=f1e120]: 筛选
+          - generic [ref=f1e121]:
+            - generic [ref=f1e122]:
+              - button [ref=f1e123] [cursor=pointer]
+              - button [ref=f1e127] [cursor=pointer]
+              - button "已选 0 条" [disabled] [ref=f1e131]
+            - separator [ref=f1e134]
+            - generic [ref=f1e136]:
+              - generic [ref=f1e137] [cursor=pointer]:
+                - radio "全部在手" [checked]
+                - generic [ref=f1e138]: 全部在手
+              - generic [ref=f1e139] [cursor=pointer]:
+                - radio "我的订单"
+                - generic [ref=f1e140]: 我的订单
+            - separator [ref=f1e141]
+            - generic [ref=f1e149]:
+              - generic [ref=f1e152] [cursor=pointer]:
+                - text: 全部
+                - generic [ref=f1e153]: "24"
+              - generic [ref=f1e156] [cursor=pointer]:
+                - text: 订舱处理
+                - generic [ref=f1e157]: "6"
+              - generic [ref=f1e160] [cursor=pointer]:
+                - text: 待放舱
+                - generic [ref=f1e161]: "3"
+              - generic [ref=f1e164] [cursor=pointer]:
+                - text: 待拖车
+                - generic [ref=f1e165]: "6"
+              - generic [ref=f1e168] [cursor=pointer]:
+                - text: 待报关
+                - generic [ref=f1e169]: "6"
+              - generic [ref=f1e172] [cursor=pointer]:
+                - text: 待装柜
+                - generic [ref=f1e173]: "3"
+              - generic [ref=f1e176] [cursor=pointer]:
+                - text: 已开船
+                - generic [ref=f1e177]: "3"
+              - generic [ref=f1e180] [cursor=pointer]:
+                - text: 待补料
+                - generic [ref=f1e181]: "3"
+              - generic [ref=f1e184] [cursor=pointer]:
+                - text: 待提单确认
+                - generic [ref=f1e185]: "3"
+              - generic [ref=f1e188] [cursor=pointer]:
+                - text: 缺文件
+                - generic [ref=f1e189]: "6"
+              - generic [ref=f1e192] [cursor=pointer]:
+                - text: 待费用
+                - generic [ref=f1e193]: "6"
+              - generic [ref=f1e196] [cursor=pointer]:
+                - text: 异常
+                - generic [ref=f1e197]: "6"
+        - generic [ref=f1e203]:
+          - generic [ref=f1e204]:
+            - generic [ref=f1e206]:
+              - button "刷新" [ref=f1e207] [cursor=pointer]
+              - generic [ref=f1e211]: 按更新时间倒序
+            - generic [ref=f1e213]:
+              - generic [ref=f1e215]:
+                - generic [ref=f1e216]: 共 24 条
+                - list [ref=f1e217]:
+                  - generic [ref=f1e218]: .
+                  - listitem [ref=f1e221] [cursor=pointer]: "1"
+                  - generic [ref=f1e222]: .
+                - generic "50 条/页" [ref=f1e226] [cursor=pointer]:
+                  - textbox
+                - generic [ref=f1e232]:
+                  - generic [ref=f1e233]: 前往
+                  - spinbutton [ref=f1e235]
+              - button "表格密度" [ref=f1e237] [cursor=pointer]
+              - button "列设置" [ref=f1e242] [cursor=pointer]
+          - generic [ref=f1e249]:
+            - generic [ref=f1e250]:
+              - generic [ref=f1e251]:
+                - table [ref=f1e254]:
+                  - rowgroup [ref=f1e269]:
+                    - row [ref=f1e270]:
+                      - columnheader "责任操作" [ref=f1e271]
+                      - columnheader "客户名称" [ref=f1e274]
+                      - columnheader "业务类型" [ref=f1e277]
+                      - columnheader "船名航次" [ref=f1e280]
+                      - columnheader "ETA" [ref=f1e283]
+                      - columnheader "截关时间" [ref=f1e286]
+                      - columnheader "订舱号" [ref=f1e289]
+                      - columnheader "提单号" [ref=f1e292]
+                      - columnheader "柜型柜量" [ref=f1e295]
+                - table [ref=f1e301]:
+                  - rowgroup [ref=f1e316]:
+                    - row "张操作 深圳华贸进出口有限公司 FCL COSCO SHIPPING / 028W 2026-07-28 2026-07-05 12:00 2×40HQ" [ref=f1e317]:
+                      - cell "张操作" [ref=f1e318]
+                      - cell "深圳华贸进出口有限公司" [ref=f1e320]
+                      - cell "FCL" [ref=f1e322]
+                      - cell "COSCO SHIPPING / 028W" [ref=f1e324]
+                      - cell "2026-07-28" [ref=f1e326]
+                      - cell "2026-07-05 12:00" [ref=f1e328]
+                      - cell [ref=f1e330]
+                      - cell [ref=f1e332]
+                      - cell "2×40HQ" [ref=f1e334]
+                    - row [ref=f1e336]:
+                      - cell "李操作" [ref=f1e337]
+                      - cell "宁波远洋贸易集团" [ref=f1e339]
+                      - cell "FCL" [ref=f1e341]
+                      - cell "EVER GOLDEN / 115E" [ref=f1e343]
+                      - cell "2026-08-02" [ref=f1e345]
+                      - cell "2026-07-09 18:00" [ref=f1e347]
+                      - cell "BK2026068801" [ref=f1e349]
+                      - cell "EGLV123456789" [ref=f1e351]
+                      - cell "1×40HQ + 1×20GP" [ref=f1e353]
+                    - row [ref=f1e355]:
+                      - cell "王操作" [ref=f1e356]
+                      - cell "广州宏达电子科技" [ref=f1e358]
+                      - cell "LCL" [ref=f1e360]
+                      - cell "MSC OSCAR / 044W" [ref=f1e362]
+                      - cell "2026-07-25" [ref=f1e364]
+                      - cell "2026-06-30 17:00" [ref=f1e366]
+                      - cell "BK2026067702" [ref=f1e368]
+                      - cell "MSCU998877665" [ref=f1e370]
+                      - cell "3×40HQ" [ref=f1e372]
+                    - row [ref=f1e374]:
+                      - cell "赵操作" [ref=f1e375]
+                      - cell "上海瑞联物流" [ref=f1e377]
+                      - cell "FCL" [ref=f1e379]
+                      - cell "CMA CGM MARCO POLO / 88W" [ref=f1e381]
+                      - cell "2026-07-18" [ref=f1e383]
+                      - cell "2026-06-25 12:00" [ref=f1e385]
+                      - cell "BK2026066603" [ref=f1e387]
+                      - cell "CMAU556677889" [ref=f1e389]
+                      - cell "2×40GP" [ref=f1e391]
+                    - row "张操作 青岛海盛实业 FCL OOCL HONG KONG / 201E 2026-07-28 2026-07-12 10:00 BK2026065504 1×40HQ" [ref=f1e393]:
+                      - cell "张操作" [ref=f1e394]
+                      - cell "青岛海盛实业" [ref=f1e396]
+                      - cell "FCL" [ref=f1e398]
+                      - cell "OOCL HONG KONG / 201E" [ref=f1e400]
+                      - cell "2026-07-28" [ref=f1e402]
+                      - cell "2026-07-12 10:00" [ref=f1e404]
+                      - cell "BK2026065504" [ref=f1e406]
+                      - cell [ref=f1e408]
+                      - cell "1×40HQ" [ref=f1e410]
+                    - row [ref=f1e412]:
+                      - cell "李操作" [ref=f1e413]
+                      - cell "厦门建发供应链" [ref=f1e415]
+                      - cell "FCL" [ref=f1e417]
+                      - cell "YANG MING / 332W" [ref=f1e419]
+                      - cell "2026-07-16" [ref=f1e421]
+                      - cell "2026-07-01 08:00" [ref=f1e423]
+                      - cell "BK2026064405" [ref=f1e425]
+                      - cell "YMLU445566778" [ref=f1e427]
+                      - cell "2×20GP" [ref=f1e429]
+                    - row [ref=f1e431]:
+                      - cell "王操作" [ref=f1e432]
+                      - cell "天津港联国际" [ref=f1e434]
+                      - cell "FCL" [ref=f1e436]
+                      - cell "HMM ALGECIRAS / 009E" [ref=f1e438]
+                      - cell "2026-06-02" [ref=f1e440]
+                      - cell "2026-05-17 16:00" [ref=f1e442]
+                      - cell "BK2026053301" [ref=f1e444]
+                      - cell "HMMU334455667" [ref=f1e446]
+                      - cell "1×40HQ" [ref=f1e448]
+                    - row "赵操作 东莞精密制造 FCL ONE INNOVATION / 077W 2026-08-10 2026-07-17 14:00 BK2026062208 4×40HQ" [ref=f1e450]:
+                      - cell "赵操作" [ref=f1e451]
+                      - cell "东莞精密制造" [ref=f1e453]
+                      - cell "FCL" [ref=f1e455]
+                      - cell "ONE INNOVATION / 077W" [ref=f1e457]
+                      - cell "2026-08-10" [ref=f1e459]
+                      - cell "2026-07-17 14:00" [ref=f1e461]
+                      - cell "BK2026062208" [ref=f1e463]
+                      - cell [ref=f1e465]
+                      - cell "4×40HQ" [ref=f1e467]
+                    - row "张操作 深圳华贸进出口有限公司 FCL COSCO SHIPPING / 028W 2026-07-28 2026-07-05 12:00 2×40HQ" [ref=f1e469]:
+                      - cell "张操作" [ref=f1e470]
+                      - cell "深圳华贸进出口有限公司" [ref=f1e472]
+                      - cell "FCL" [ref=f1e474]
+                      - cell "COSCO SHIPPING / 028W" [ref=f1e476]
+                      - cell "2026-07-28" [ref=f1e478]
+                      - cell "2026-07-05 12:00" [ref=f1e480]
+                      - cell [ref=f1e482]
+                      - cell [ref=f1e484]
+                      - cell "2×40HQ" [ref=f1e486]
+                    - row [ref=f1e488]:
+                      - cell "李操作" [ref=f1e489]
+                      - cell "宁波远洋贸易集团" [ref=f1e491]
+                      - cell "FCL" [ref=f1e493]
+                      - cell "EVER GOLDEN / 115E" [ref=f1e495]
+                      - cell "2026-08-02" [ref=f1e497]
+                      - cell "2026-07-09 18:00" [ref=f1e499]
+                      - cell "BK2026068801" [ref=f1e501]
+                      - cell "EGLV123456789" [ref=f1e503]
+                      - cell "1×40HQ + 1×20GP" [ref=f1e505]
+                    - row [ref=f1e507]:
+                      - cell "王操作" [ref=f1e508]
+                      - cell "广州宏达电子科技" [ref=f1e510]
+                      - cell "LCL" [ref=f1e512]
+                      - cell "MSC OSCAR / 044W" [ref=f1e514]
+                      - cell "2026-07-25" [ref=f1e516]
+                      - cell "2026-06-30 17:00" [ref=f1e518]
+                      - cell "BK2026067702" [ref=f1e520]
+                      - cell "MSCU998877665" [ref=f1e522]
+                      - cell "3×40HQ" [ref=f1e524]
+                    - row [ref=f1e526]:
+                      - cell "赵操作" [ref=f1e527]
+                      - cell "上海瑞联物流" [ref=f1e529]
+                      - cell "FCL" [ref=f1e531]
+                      - cell "CMA CGM MARCO POLO / 88W" [ref=f1e533]
+                      - cell "2026-07-18" [ref=f1e535]
+                      - cell "2026-06-25 12:00" [ref=f1e537]
+                      - cell "BK2026066603" [ref=f1e539]
+                      - cell "CMAU556677889" [ref=f1e541]
+                      - cell "2×40GP" [ref=f1e543]
+                    - row "张操作 青岛海盛实业 FCL OOCL HONG KONG / 201E 2026-07-28 2026-07-12 10:00 BK2026065504 1×40HQ" [ref=f1e545]:
+                      - cell "张操作" [ref=f1e546]
+                      - cell "青岛海盛实业" [ref=f1e548]
+                      - cell "FCL" [ref=f1e550]
+                      - cell "OOCL HONG KONG / 201E" [ref=f1e552]
+                      - cell "2026-07-28" [ref=f1e554]
+                      - cell "2026-07-12 10:00" [ref=f1e556]
+                      - cell "BK2026065504" [ref=f1e558]
+                      - cell [ref=f1e560]
+                      - cell "1×40HQ" [ref=f1e562]
+                    - row [ref=f1e564]:
+                      - cell "李操作" [ref=f1e565]
+                      - cell "厦门建发供应链" [ref=f1e567]
+                      - cell "FCL" [ref=f1e569]
+                      - cell "YANG MING / 332W" [ref=f1e571]
+                      - cell "2026-07-16" [ref=f1e573]
+                      - cell "2026-07-01 08:00" [ref=f1e575]
+                      - cell "BK2026064405" [ref=f1e577]
+                      - cell "YMLU445566778" [ref=f1e579]
+                      - cell "2×20GP" [ref=f1e581]
+                    - row [ref=f1e583]:
+                      - cell "王操作" [ref=f1e584]
+                      - cell "天津港联国际" [ref=f1e586]
+                      - cell "FCL" [ref=f1e588]
+                      - cell "HMM ALGECIRAS / 009E" [ref=f1e590]
+                      - cell "2026-06-02" [ref=f1e592]
+                      - cell "2026-05-17 16:00" [ref=f1e594]
+                      - cell "BK2026053301" [ref=f1e596]
+                      - cell "HMMU334455667" [ref=f1e598]
+                      - cell "1×40HQ" [ref=f1e600]
+                    - row "赵操作 东莞精密制造 FCL ONE INNOVATION / 077W 2026-08-10 2026-07-17 14:00 BK2026062208 4×40HQ" [ref=f1e602]:
+                      - cell "赵操作" [ref=f1e603]
+                      - cell "东莞精密制造" [ref=f1e605]
+                      - cell "FCL" [ref=f1e607]
+                      - cell "ONE INNOVATION / 077W" [ref=f1e609]
+                      - cell "2026-08-10" [ref=f1e611]
+                      - cell "2026-07-17 14:00" [ref=f1e613]
+                      - cell "BK2026062208" [ref=f1e615]
+                      - cell [ref=f1e617]
+                      - cell "4×40HQ" [ref=f1e619]
+                    - row "王操作 深圳华贸进出口有限公司 FCL COSCO SHIPPING / 028W 2026-07-28 2026-07-05 12:00 2×40HQ" [ref=f1e621]:
+                      - cell "王操作" [ref=f1e622]
+                      - cell "深圳华贸进出口有限公司" [ref=f1e624]
+                      - cell "FCL" [ref=f1e626]
+                      - cell "COSCO SHIPPING / 028W" [ref=f1e628]
+                      - cell "2026-07-28" [ref=f1e630]
+                      - cell "2026-07-05 12:00" [ref=f1e632]
+                      - cell [ref=f1e634]
+                      - cell [ref=f1e636]
+                      - cell "2×40HQ" [ref=f1e638]
+                    - row [ref=f1e640]:
+                      - cell "赵操作" [ref=f1e641]
+                      - cell "宁波远洋贸易集团" [ref=f1e643]
+                      - cell "FCL" [ref=f1e645]
+                      - cell "EVER GOLDEN / 115E" [ref=f1e647]
+                      - cell "2026-08-02" [ref=f1e649]
+                      - cell "2026-07-09 18:00" [ref=f1e651]
+                      - cell "BK2026068801" [ref=f1e653]
+                      - cell "EGLV123456789" [ref=f1e655]
+                      - cell "1×40HQ + 1×20GP" [ref=f1e657]
+                    - row [ref=f1e659]:
+                      - cell "张操作" [ref=f1e660]
+                      - cell "广州宏达电子科技" [ref=f1e662]
+                      - cell "LCL" [ref=f1e664]
+                      - cell "MSC OSCAR / 044W" [ref=f1e666]
+                      - cell "2026-07-25" [ref=f1e668]
+                      - cell "2026-06-30 17:00" [ref=f1e670]
+                      - cell "BK2026067702" [ref=f1e672]
+                      - cell "MSCU998877665" [ref=f1e674]
+                      - cell "3×40HQ" [ref=f1e676]
+                    - row [ref=f1e678]:
+                      - cell "李操作" [ref=f1e679]
+                      - cell "上海瑞联物流" [ref=f1e681]
+                      - cell "FCL" [ref=f1e683]
+                      - cell "CMA CGM MARCO POLO / 88W" [ref=f1e685]
+                      - cell "2026-07-18" [ref=f1e687]
+                      - cell "2026-06-25 12:00" [ref=f1e689]
+                      - cell "BK2026066603" [ref=f1e691]
+                      - cell "CMAU556677889" [ref=f1e693]
+                      - cell "2×40GP" [ref=f1e695]
+                    - row "王操作 青岛海盛实业 FCL OOCL HONG KONG / 201E 2026-07-28 2026-07-12 10:00 BK2026065504 1×40HQ" [ref=f1e697]:
+                      - cell "王操作" [ref=f1e698]
+                      - cell "青岛海盛实业" [ref=f1e700]
+                      - cell "FCL" [ref=f1e702]
+                      - cell "OOCL HONG KONG / 201E" [ref=f1e704]
+                      - cell "2026-07-28" [ref=f1e706]
+                      - cell "2026-07-12 10:00" [ref=f1e708]
+                      - cell "BK2026065504" [ref=f1e710]
+                      - cell [ref=f1e712]
+                      - cell "1×40HQ" [ref=f1e714]
+                    - row [ref=f1e716]:
+                      - cell "赵操作" [ref=f1e717]
+                      - cell "厦门建发供应链" [ref=f1e719]
+                      - cell "FCL" [ref=f1e721]
+                      - cell "YANG MING / 332W" [ref=f1e723]
+                      - cell "2026-07-16" [ref=f1e725]
+                      - cell "2026-07-01 08:00" [ref=f1e727]
+                      - cell "BK2026064405" [ref=f1e729]
+                      - cell "YMLU445566778" [ref=f1e731]
+                      - cell "2×20GP" [ref=f1e733]
+                    - row [ref=f1e735]:
+                      - cell "张操作" [ref=f1e736]
+                      - cell "天津港联国际" [ref=f1e738]
+                      - cell "FCL" [ref=f1e740]
+                      - cell "HMM ALGECIRAS / 009E" [ref=f1e742]
+                      - cell "2026-06-02" [ref=f1e744]
+                      - cell "2026-05-17 16:00" [ref=f1e746]
+                      - cell "BK2026053301" [ref=f1e748]
+                      - cell "HMMU334455667" [ref=f1e750]
+                      - cell "1×40HQ" [ref=f1e752]
+                    - row "李操作 东莞精密制造 FCL ONE INNOVATION / 077W 2026-08-10 2026-07-17 14:00 BK2026062208 4×40HQ" [ref=f1e754]:
+                      - cell "李操作" [ref=f1e755]
+                      - cell "东莞精密制造" [ref=f1e757]
+                      - cell "FCL" [ref=f1e759]
+                      - cell "ONE INNOVATION / 077W" [ref=f1e761]
+                      - cell "2026-08-10" [ref=f1e763]
+                      - cell "2026-07-17 14:00" [ref=f1e765]
+                      - cell "BK2026062208" [ref=f1e767]
+                      - cell [ref=f1e769]
+                      - cell "4×40HQ" [ref=f1e771]
+              - generic:
+                - generic [ref=f1e773]:
+                  - table [ref=f1e775]:
+                    - rowgroup [ref=f1e790]:
+                      - row [ref=f1e791]:
+                        - columnheader "" [ref=f1e792]:
+                          - generic "全选/取消" [ref=f1e795] [cursor=pointer]: 
+                        - columnheader "订单号" [ref=f1e798]
+                        - columnheader "订单状态" [ref=f1e801]
+                  - table [ref=f1e806]:
+                    - rowgroup [ref=f1e811]:
+                      - row [ref=f1e812]:
+                        - cell "" [ref=f1e813]
+                        - cell "SEO2026060001" [ref=f1e817]
+                        - cell "订舱中" [ref=f1e819]:
+                          - generic "booking" [ref=f1e820]: 订舱中
+                      - row [ref=f1e822]:
+                        - cell "" [ref=f1e823]
+                        - cell "SEO2026060002" [ref=f1e827]
+                        - cell "已放舱" [ref=f1e829]:
+                          - generic "released" [ref=f1e830]: 已放舱
+                      - row [ref=f1e832]:
+                        - cell "" [ref=f1e833]
+                        - cell "SEO2026060003" [ref=f1e837]
+                        - cell "报关中" [ref=f1e839]:
+                          - generic "customs" [ref=f1e840]: 报关中
+                      - row [ref=f1e842]:
+                        - cell "" [ref=f1e843]
+                        - cell "SEO2026060004" [ref=f1e847]
+                        - cell "已开船" [ref=f1e849]:
+                          - generic "sailed" [ref=f1e850]: 已开船
+                      - row [ref=f1e852]:
+                        - cell "" [ref=f1e853]
+                        - cell "SEO2026060005" [ref=f1e857]
+                        - cell "拖车中" [ref=f1e859]:
+                          - generic "trucking" [ref=f1e860]: 拖车中
+                      - row [ref=f1e862]:
+                        - cell "" [ref=f1e863]
+                        - cell "SEO2026060006" [ref=f1e867]
+                        - cell "待报关" [ref=f1e869]:
+                          - generic "waitCustoms" [ref=f1e870]: 待报关
+                      - row [ref=f1e872]:
+                        - cell "" [ref=f1e873]
+                        - cell "SEO2026050028" [ref=f1e877]
+                        - cell "已完成" [ref=f1e879]:
+                          - generic "completed" [ref=f1e880]: 已完成
+                      - row [ref=f1e882]:
+                        - cell "" [ref=f1e883]
+                        - cell "SEO2026060008" [ref=f1e887]
+                        - cell "订舱中" [ref=f1e889]:
+                          - generic "booking" [ref=f1e890]: 订舱中
+                      - row [ref=f1e892]:
+                        - cell "" [ref=f1e893]
+                        - cell "SEO202606009" [ref=f1e897]
+                        - cell "订舱中" [ref=f1e899]:
+                          - generic "booking" [ref=f1e900]: 订舱中
+                      - row [ref=f1e902]:
+                        - cell "" [ref=f1e903]
+                        - cell "SEO202606010" [ref=f1e907]
+                        - cell "已放舱" [ref=f1e909]:
+                          - generic "released" [ref=f1e910]: 已放舱
+                      - row [ref=f1e912]:
+                        - cell "" [ref=f1e913]
+                        - cell "SEO202606011" [ref=f1e917]
+                        - cell "报关中" [ref=f1e919]:
+                          - generic "customs" [ref=f1e920]: 报关中
+                      - row [ref=f1e922]:
+                        - cell "" [ref=f1e923]
+                        - cell "SEO202606012" [ref=f1e927]
+                        - cell "已开船" [ref=f1e929]:
+                          - generic "sailed" [ref=f1e930]: 已开船
+                      - row [ref=f1e932]:
+                        - cell "" [ref=f1e933]
+                        - cell "SEO202606013" [ref=f1e937]
+                        - cell "拖车中" [ref=f1e939]:
+                          - generic "trucking" [ref=f1e940]: 拖车中
+                      - row [ref=f1e942]:
+                        - cell "" [ref=f1e943]
+                        - cell "SEO202606014" [ref=f1e947]
+                        - cell "待报关" [ref=f1e949]:
+                          - generic "waitCustoms" [ref=f1e950]: 待报关
+                      - row [ref=f1e952]:
+                        - cell "" [ref=f1e953]
+                        - cell "SEO202606015" [ref=f1e957]
+                        - cell "已完成" [ref=f1e959]:
+                          - generic "completed" [ref=f1e960]: 已完成
+                      - row [ref=f1e962]:
+                        - cell "" [ref=f1e963]
+                        - cell "SEO202606016" [ref=f1e967]
+                        - cell "订舱中" [ref=f1e969]:
+                          - generic "booking" [ref=f1e970]: 订舱中
+                      - row [ref=f1e972]:
+                        - cell "" [ref=f1e973]
+                        - cell "SEO202605017" [ref=f1e977]
+                        - cell "已放舱" [ref=f1e979]:
+                          - generic "released" [ref=f1e980]: 已放舱
+                      - row [ref=f1e982]:
+                        - cell "" [ref=f1e983]
+                        - cell "SEO202605018" [ref=f1e987]
+                        - cell "待订舱" [ref=f1e989]:
+                          - generic "waitBooking" [ref=f1e990]: 待订舱
+                      - row [ref=f1e992]:
+                        - cell "" [ref=f1e993]
+                        - cell "SEO202605019" [ref=f1e997]
+                        - cell "已放舱" [ref=f1e999]:
+                          - generic "released" [ref=f1e1000]: 已放舱
+                      - row [ref=f1e1002]:
+                        - cell "" [ref=f1e1003]
+                        - cell "SEO202605020" [ref=f1e1007]
+                        - cell "待订舱" [ref=f1e1009]:
+                          - generic "waitBooking" [ref=f1e1010]: 待订舱
+                      - row [ref=f1e1012]:
+                        - cell "" [ref=f1e1013]
+                        - cell "SEO202605021" [ref=f1e1017]
+                        - cell "已放舱" [ref=f1e1019]:
+                          - generic "released" [ref=f1e1020]: 已放舱
+                      - row [ref=f1e1022]:
+                        - cell "" [ref=f1e1023]
+                        - cell "SEO202605022" [ref=f1e1027]
+                        - cell "待订舱" [ref=f1e1029]:
+                          - generic "waitBooking" [ref=f1e1030]: 待订舱
+                      - row [ref=f1e1032]:
+                        - cell "" [ref=f1e1033]
+                        - cell "SEO202605023" [ref=f1e1037]
+                        - cell "已放舱" [ref=f1e1039]:
+                          - generic "released" [ref=f1e1040]: 已放舱
+                      - row [ref=f1e1042]:
+                        - cell "" [ref=f1e1043]
+                        - cell "SEO202605024" [ref=f1e1047]
+                        - cell "待订舱" [ref=f1e1049]:
+                          - generic "waitBooking" [ref=f1e1050]: 待订舱
+                - generic [ref=f1e1052]:
+                  - table [ref=f1e1054]:
+                    - rowgroup [ref=f1e1069]:
+                      - row [ref=f1e1070]:
+                        - columnheader "操作" [ref=f1e1071]
+                  - table [ref=f1e1076]:
+                    - rowgroup [ref=f1e1079]:
+                      - row [ref=f1e1080]:
+                        - cell [ref=f1e1081]:
+                          - generic [ref=f1e1083]:
+                            - button "修改状态" [ref=f1e1084] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1085] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1086] [cursor=pointer]
+                      - row [ref=f1e1090]:
+                        - cell [ref=f1e1091]:
+                          - generic [ref=f1e1093]:
+                            - button "修改状态" [ref=f1e1094] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1095] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1096] [cursor=pointer]
+                      - row [ref=f1e1100]:
+                        - cell [ref=f1e1101]:
+                          - generic [ref=f1e1103]:
+                            - button "修改状态" [ref=f1e1104] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1105] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1106] [cursor=pointer]
+                      - row [ref=f1e1110]:
+                        - cell [ref=f1e1111]:
+                          - generic [ref=f1e1113]:
+                            - button "修改状态" [ref=f1e1114] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1115] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1116] [cursor=pointer]
+                      - row [ref=f1e1120]:
+                        - cell [ref=f1e1121]:
+                          - generic [ref=f1e1123]:
+                            - button "修改状态" [ref=f1e1124] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1125] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1126] [cursor=pointer]
+                      - row [ref=f1e1130]:
+                        - cell [ref=f1e1131]:
+                          - generic [ref=f1e1133]:
+                            - button "修改状态" [ref=f1e1134] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1135] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1136] [cursor=pointer]
+                      - row [ref=f1e1140]:
+                        - cell [ref=f1e1141]:
+                          - generic [ref=f1e1143]:
+                            - button "分配给我" [ref=f1e1144] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1145] [cursor=pointer]
+                      - row [ref=f1e1149]:
+                        - cell [ref=f1e1150]:
+                          - generic [ref=f1e1152]:
+                            - button "修改状态" [ref=f1e1153] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1154] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1155] [cursor=pointer]
+                      - row [ref=f1e1159]:
+                        - cell [ref=f1e1160]:
+                          - generic [ref=f1e1162]:
+                            - button "修改状态" [ref=f1e1163] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1164] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1165] [cursor=pointer]
+                      - row [ref=f1e1169]:
+                        - cell [ref=f1e1170]:
+                          - generic [ref=f1e1172]:
+                            - button "修改状态" [ref=f1e1173] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1174] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1175] [cursor=pointer]
+                      - row [ref=f1e1179]:
+                        - cell [ref=f1e1180]:
+                          - generic [ref=f1e1182]:
+                            - button "修改状态" [ref=f1e1183] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1184] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1185] [cursor=pointer]
+                      - row [ref=f1e1189]:
+                        - cell [ref=f1e1190]:
+                          - generic [ref=f1e1192]:
+                            - button "修改状态" [ref=f1e1193] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1194] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1195] [cursor=pointer]
+                      - row [ref=f1e1199]:
+                        - cell [ref=f1e1200]:
+                          - generic [ref=f1e1202]:
+                            - button "修改状态" [ref=f1e1203] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1204] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1205] [cursor=pointer]
+                      - row [ref=f1e1209]:
+                        - cell [ref=f1e1210]:
+                          - generic [ref=f1e1212]:
+                            - button "修改状态" [ref=f1e1213] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1214] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1215] [cursor=pointer]
+                      - row [ref=f1e1219]:
+                        - cell [ref=f1e1220]:
+                          - generic [ref=f1e1222]:
+                            - button "分配给我" [ref=f1e1223] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1224] [cursor=pointer]
+                      - row [ref=f1e1228]:
+                        - cell [ref=f1e1229]:
+                          - generic [ref=f1e1231]:
+                            - button "修改状态" [ref=f1e1232] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1233] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1234] [cursor=pointer]
+                      - row [ref=f1e1238]:
+                        - cell [ref=f1e1239]:
+                          - generic [ref=f1e1241]:
+                            - button "修改状态" [ref=f1e1242] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1243] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1244] [cursor=pointer]
+                      - row [ref=f1e1248]:
+                        - cell [ref=f1e1249]:
+                          - generic [ref=f1e1251]:
+                            - button "修改状态" [ref=f1e1252] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1253] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1254] [cursor=pointer]
+                      - row [ref=f1e1258]:
+                        - cell [ref=f1e1259]:
+                          - generic [ref=f1e1261]:
+                            - button "修改状态" [ref=f1e1262] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1263] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1264] [cursor=pointer]
+                      - row [ref=f1e1268]:
+                        - cell [ref=f1e1269]:
+                          - generic [ref=f1e1271]:
+                            - button "修改状态" [ref=f1e1272] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1273] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1274] [cursor=pointer]
+                      - row [ref=f1e1278]:
+                        - cell [ref=f1e1279]:
+                          - generic [ref=f1e1281]:
+                            - button "修改状态" [ref=f1e1282] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1283] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1284] [cursor=pointer]
+                      - row [ref=f1e1288]:
+                        - cell [ref=f1e1289]:
+                          - generic [ref=f1e1291]:
+                            - button "修改状态" [ref=f1e1292] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1293] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1294] [cursor=pointer]
+                      - row [ref=f1e1298]:
+                        - cell [ref=f1e1299]:
+                          - generic [ref=f1e1301]:
+                            - button "修改状态" [ref=f1e1302] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1303] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1304] [cursor=pointer]
+                      - row [ref=f1e1308]:
+                        - cell [ref=f1e1309]:
+                          - generic [ref=f1e1311]:
+                            - button "修改状态" [ref=f1e1312] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1313] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1314] [cursor=pointer]
+            - text: 
