@@ -131,6 +131,8 @@ const KEYWORD_OPTIONS: { label: string; value: ShipmentKeywordType }[] = [
   { label: '订舱号', value: 'bookingNo' },
 ];
 
+const BUSINESS_TYPE_OPTIONS = ['FCL', 'LCL'];
+
 const STATUS_TABS: { key: ShipmentStatusKey; label: string; tone?: 'danger' | 'warn' }[] = [
   { key: 'all', label: '全部' },
   { key: 'waitBooking', label: '订舱处理' },
@@ -400,13 +402,13 @@ const hasActiveFilter = computed(() => {
 const tableTotal = computed(() => ['empty', 'permission'].includes(uiScenario.value) || tableError.value ? 0 : filteredRows.value.length);
 
 const advancedConditionSnapshot = (source: ShipmentOrderQuery) => ({
+  pol: source.pol.trim(),
+  pod: source.pod.trim(),
   carrier: source.carrier,
   vesselVoyage: source.vesselVoyage.trim(),
   blNo: source.blNo.trim(),
   bookingNo: source.bookingNo.trim(),
   orderStatus: source.orderStatus,
-  operator: source.operator,
-  businessType: source.businessType,
   hasException: source.hasException,
   etdRange: [...source.etdRange],
   closingRange: [...source.closingRange],
@@ -420,15 +422,12 @@ const countConditions = (conditions: unknown[]) => conditions.filter(Boolean).le
 
 const advancedDraftGroupCounts = computed(() => ({
   routeDocuments: countConditions([
+    advancedQuery.pol.trim(),
+    advancedQuery.pod.trim(),
     advancedQuery.carrier,
     advancedQuery.vesselVoyage.trim(),
     advancedQuery.blNo.trim(),
     advancedQuery.bookingNo.trim(),
-  ]),
-  executionOwnership: countConditions([
-    advancedQuery.orderStatus,
-    advancedQuery.operator,
-    advancedQuery.businessType,
   ]),
   schedule: countConditions([
     advancedQuery.etdRange.length === 2,
@@ -436,6 +435,7 @@ const advancedDraftGroupCounts = computed(() => ({
     advancedQuery.updatedRange.length === 2,
   ]),
   risk: countConditions([
+    advancedQuery.orderStatus,
     advancedQuery.hasException,
     advancedQuery.isOverdue,
     advancedQuery.fileStatus,
@@ -453,13 +453,13 @@ const advancedDraftDirty = computed(() => (
 const advancedActiveCount = computed(() => {
   let count = 0;
 
+  if (query.pol.trim()) count += 1;
+  if (query.pod.trim()) count += 1;
   if (query.vesselVoyage.trim()) count += 1;
   if (query.carrier) count += 1;
   if (query.blNo.trim()) count += 1;
   if (query.bookingNo.trim()) count += 1;
   if (query.orderStatus) count += 1;
-  if (query.operator) count += 1;
-  if (query.businessType) count += 1;
   if (query.hasException) count += 1;
   if (query.etdRange.length === 2) count += 1;
   if (query.closingRange.length === 2) count += 1;
@@ -634,13 +634,13 @@ const cancelAdvancedFilters = () => {
 };
 
 const clearAdvancedFilters = () => {
+  advancedQuery.pol = '';
+  advancedQuery.pod = '';
   advancedQuery.carrier = undefined;
   advancedQuery.vesselVoyage = '';
   advancedQuery.blNo = '';
   advancedQuery.bookingNo = '';
   advancedQuery.orderStatus = undefined;
-  advancedQuery.operator = undefined;
-  advancedQuery.businessType = '';
   advancedQuery.etdRange = [];
   advancedQuery.closingRange = [];
   advancedQuery.hasException = '';
@@ -650,20 +650,16 @@ const clearAdvancedFilters = () => {
   advancedQuery.isOverdue = '';
 };
 
-type AdvancedDraftGroup = 'routeDocuments' | 'executionOwnership' | 'schedule' | 'risk';
+type AdvancedDraftGroup = 'routeDocuments' | 'schedule' | 'risk';
 
 const clearAdvancedGroup = (group: AdvancedDraftGroup) => {
   if (group === 'routeDocuments') {
+    advancedQuery.pol = '';
+    advancedQuery.pod = '';
     advancedQuery.carrier = undefined;
     advancedQuery.vesselVoyage = '';
     advancedQuery.blNo = '';
     advancedQuery.bookingNo = '';
-    return;
-  }
-  if (group === 'executionOwnership') {
-    advancedQuery.orderStatus = undefined;
-    advancedQuery.operator = undefined;
-    advancedQuery.businessType = '';
     return;
   }
   if (group === 'schedule') {
@@ -672,6 +668,7 @@ const clearAdvancedGroup = (group: AdvancedDraftGroup) => {
     advancedQuery.updatedRange = [];
     return;
   }
+  advancedQuery.orderStatus = undefined;
   advancedQuery.hasException = '';
   advancedQuery.isOverdue = '';
   advancedQuery.fileStatus = undefined;
@@ -1010,6 +1007,15 @@ watch(uiScenario, () => {
                   </a-input-group>
                 </a-form-item>
               </a-col>
+              <a-col :xs="24" :sm="12" :md="3" :lg="3" :xl="3">
+                <a-form-item label="业务类型">
+                  <a-select v-model="query.businessType" size="small" allow-clear placeholder="全部类型">
+                    <a-option v-for="businessType in BUSINESS_TYPE_OPTIONS" :key="businessType" :value="businessType">
+                      {{ businessType }}
+                    </a-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
               <a-col :xs="24" :sm="12" :md="5" :lg="5" :xl="4">
                 <a-form-item label="客户名称">
                   <a-input
@@ -1022,25 +1028,12 @@ watch(uiScenario, () => {
                 </a-form-item>
               </a-col>
               <a-col :xs="24" :sm="12" :md="3" :lg="3" :xl="3">
-                <a-form-item label="起运港">
-                  <a-input
-                    v-model="query.pol"
-                    size="small"
-                    allow-clear
-                    placeholder="港口代码 / 名称"
-                    @press-enter="handleSearch"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :xs="24" :sm="12" :md="3" :lg="3" :xl="3">
-                <a-form-item label="目的港">
-                  <a-input
-                    v-model="query.pod"
-                    size="small"
-                    allow-clear
-                    placeholder="港口代码 / 名称"
-                    @press-enter="handleSearch"
-                  />
+                <a-form-item label="责任操作">
+                  <a-select v-model="query.operator" size="small" allow-clear allow-search placeholder="全部人员">
+                    <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
+                      {{ operator }}
+                    </a-option>
+                  </a-select>
                 </a-form-item>
               </a-col>
               <a-col :xs="24" :sm="24" :md="6" :lg="6" :xl="3" class="filter-panel__action-col">
@@ -1401,6 +1394,16 @@ watch(uiScenario, () => {
           </div>
           <a-row :gutter="[16, 0]">
             <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="pol" label="起运港">
+                <a-input v-model="advancedQuery.pol" size="small" allow-clear placeholder="港口代码 / 名称" @press-enter="applyAdvancedFilters" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="pod" label="目的港">
+                <a-input v-model="advancedQuery.pod" size="small" allow-clear placeholder="港口代码 / 名称" @press-enter="applyAdvancedFilters" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
               <a-form-item field="carrier" label="船公司">
                 <a-select v-model="advancedQuery.carrier" size="small" allow-clear allow-search placeholder="请选择船公司">
                   <a-option v-for="carrier in carrierOptions" :key="carrier" :value="carrier">
@@ -1422,64 +1425,6 @@ watch(uiScenario, () => {
             <a-col :span="12" :xs="24" :sm="12">
               <a-form-item field="bookingNo" label="订舱号">
                 <a-input v-model="advancedQuery.bookingNo" size="small" allow-clear placeholder="请输入订舱号" @press-enter="applyAdvancedFilters" />
-              </a-form-item>
-            </a-col>
-          </a-row>
-        </section>
-
-        <section class="advanced-filter-section" aria-labelledby="execution-filter-title">
-          <div class="advanced-filter-section__head">
-            <a-space :size="6">
-              <h3 id="execution-filter-title" class="advanced-filter-section__title">执行与归属</h3>
-              <span v-if="advancedDraftGroupCounts.executionOwnership" class="advanced-filter-section__count">
-                已选 {{ advancedDraftGroupCounts.executionOwnership }}
-              </span>
-            </a-space>
-            <a-button
-              v-if="advancedDraftGroupCounts.executionOwnership"
-              size="small"
-              type="text"
-              title="清空执行与归属条件"
-              @click="clearAdvancedGroup('executionOwnership')"
-            >清空本组</a-button>
-          </div>
-          <a-row :gutter="[16, 0]">
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="orderStatus" label="订单状态">
-                <a-select v-model="advancedQuery.orderStatus" size="small" allow-clear placeholder="请选择">
-                  <a-option value="waitBooking">待订舱</a-option>
-                  <a-option value="booking">订舱中</a-option>
-                  <a-option value="released">已放舱</a-option>
-                  <a-option value="waitTruck">待拖车</a-option>
-                  <a-option value="trucking">拖车中</a-option>
-                  <a-option value="waitCustoms">待报关</a-option>
-                  <a-option value="customs">报关中</a-option>
-                  <a-option value="sailed">已开船</a-option>
-                  <a-option value="completed">已完成</a-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="operator" label="操作人员">
-                <a-select v-model="advancedQuery.operator" size="small" allow-clear allow-search placeholder="请选择">
-                  <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
-                    {{ operator }}
-                  </a-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="businessType" label="业务类型">
-                <a-radio-group
-                  v-model="advancedQuery.businessType"
-                  type="button"
-                  size="small"
-                  class="advanced-filter-choice"
-                >
-                  <a-radio value="">全部</a-radio>
-                  <a-radio value="FCL">FCL</a-radio>
-                  <a-radio value="LCL">LCL</a-radio>
-                </a-radio-group>
               </a-form-item>
             </a-col>
           </a-row>
@@ -1538,7 +1483,7 @@ watch(uiScenario, () => {
         <section class="advanced-filter-section" aria-labelledby="risk-filter-title">
           <div class="advanced-filter-section__head">
             <a-space :size="6">
-              <h3 id="risk-filter-title" class="advanced-filter-section__title">风险与结算</h3>
+              <h3 id="risk-filter-title" class="advanced-filter-section__title">状态、风险与结算</h3>
               <span v-if="advancedDraftGroupCounts.risk" class="advanced-filter-section__count">
                 已选 {{ advancedDraftGroupCounts.risk }}
               </span>
@@ -1547,11 +1492,26 @@ watch(uiScenario, () => {
               v-if="advancedDraftGroupCounts.risk"
               size="small"
               type="text"
-              title="清空风险与结算条件"
+              title="清空状态、风险与结算条件"
               @click="clearAdvancedGroup('risk')"
             >清空本组</a-button>
           </div>
           <a-row :gutter="[16, 0]">
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item field="orderStatus" label="订单状态">
+                <a-select v-model="advancedQuery.orderStatus" size="small" allow-clear placeholder="请选择">
+                  <a-option value="waitBooking">待订舱</a-option>
+                  <a-option value="booking">订舱中</a-option>
+                  <a-option value="released">已放舱</a-option>
+                  <a-option value="waitTruck">待拖车</a-option>
+                  <a-option value="trucking">拖车中</a-option>
+                  <a-option value="waitCustoms">待报关</a-option>
+                  <a-option value="customs">报关中</a-option>
+                  <a-option value="sailed">已开船</a-option>
+                  <a-option value="completed">已完成</a-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
             <a-col :span="12" :xs="24" :sm="12">
               <a-form-item field="hasException" label="是否异常">
                 <a-radio-group

@@ -618,6 +618,7 @@ for (const specFile of pageSpecFiles) {
     });
   }
   if (list) {
+    const frame = getStringProperty(list, 'frame');
     const commandSurface = getStringProperty(list, 'commandSurface');
     const tableTop = getStringProperty(list, 'tableTop');
     const selection = getStringProperty(list, 'selection');
@@ -629,6 +630,14 @@ for (const specFile of pageSpecFiles) {
     const statusView = getStringProperty(views, 'status');
     const statusCount = Number(getObjectProperty(views, 'statusCount')?.initializer?.text);
     const statusOverflow = getStringProperty(views, 'statusOverflow');
+    if (frame !== 'standard-list-v1') {
+      violations.push({
+        rule: '列表 pageSpec 必须使用 standard-list-v1 共享 UI/UX 框架，禁止页面另起一套列表风格',
+        file: relPath,
+        line: 1,
+        content: `frame=${frame ?? '(empty)'}`,
+      });
+    }
     if (listProfile !== expectedListProfile) {
       violations.push({
         rule: '列表 archetype 与 list profile 必须一一对应，禁止用工作台模板伪装轻量查询页',
@@ -746,6 +755,14 @@ for (const specFile of pageSpecFiles) {
       file: relPath,
       line: 1,
       content: `profile=${listProfile}, table.kind=${tableKind ?? '(empty)'}`,
+    });
+  }
+  if (list && routeView && !/<vxe-table\b/.test(readFileSync(routeView, 'utf8'))) {
+    violations.push({
+      rule: '标准列表框架必须以 vxe-table 承载主数据面，禁止页面改用另一套表格语言',
+      file: toRelativePath(routeView),
+      line: 1,
+      content: 'missing vxe-table for declared list page',
     });
   }
 

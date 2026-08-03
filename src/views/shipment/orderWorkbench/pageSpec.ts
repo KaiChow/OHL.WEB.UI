@@ -5,6 +5,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   target: 'sellable-saas-grade',
   archetype: 'list-workbench',
   list: {
+    frame: 'standard-list-v1',
     profile: 'operations-workbench',
     commandSurface: 'workbench',
     tableTop: 'context-cap',
@@ -55,7 +56,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       ],
     },
     dense: {
-      decisions: ['Keep four daily locate fields on one stable row; edit fourteen compact advanced conditions in a right-side D1 drawer using two readable columns and one native scroll owner.'],
+      decisions: ['Keep business type, identifier, customer, and responsible operator as four daily locate fields on one stable row; edit fourteen secondary route, schedule, status/risk, document, and settlement conditions in a right-side D1 drawer using two readable columns and one native scroll owner.'],
       acceptance: [
         'At 1366, 1024 split, and wide viewports, the query row does not create a separate action band and the table remains the dominant work surface.',
         'At 1024, the identifier query keeps the largest field allocation, ports stay readable, reset/advanced-filter collapse to named icon tools, and the 12 processing queues scroll only inside their own lane.',
@@ -82,15 +83,15 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   query: {
     totalFields: 18,
     strategy: 's3-drawer',
-    visibleFields: ['keyword', 'customerName', 'pol', 'pod'],
+    visibleFields: ['businessType', 'keyword', 'customerName', 'operator'],
     advancedFields: [
+      'pol',
+      'pod',
       'carrier',
       'vesselVoyage',
       'blNo',
       'bookingNo',
       'orderStatus',
-      'operator',
-      'businessType',
       'hasException',
       'etdRange',
       'closingRange',

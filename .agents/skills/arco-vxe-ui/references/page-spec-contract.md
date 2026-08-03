@@ -12,6 +12,7 @@ export const PAGE_SPEC = definePageSpec({
   target: 'sellable-saas-grade',
   archetype: 'list-management',
   list: {
+    frame: 'standard-list-v1',
     profile: 'management',
     commandSurface: 'compact',
     tableTop: 'utility-cap',
@@ -86,7 +87,7 @@ Every business action references an existing feature contract and declares frequ
 
 ## Page-Specific Contracts
 
-- List: every list page declares one `archetype` and matching `list.profile`. `list-query` is for locating/inspecting, `list-management` is for master-data maintenance, and `list-workbench` is for repeated operational processing. Record whether the page owns a command surface, table cap, selection, work scope, status queues, page-mode switch, and status-view overflow; do not infer these from a copied template.
+- List: every list page declares `frame: 'standard-list-v1'`, one `archetype`, and matching `list.profile`. The frame fixes shared UI/UX language; the profile controls only business complexity. `list-query` is for locating/inspecting, `list-management` is for master-data maintenance, and `list-workbench` is for repeated operational processing. Record whether the page owns a command surface, table cap, selection, work scope, status queues, page-mode switch, and status-view overflow; do not infer these from a copied template.
 - Query: record all fields, visible vs advanced ownership, and selected strategy. The query strategy describes field complexity; the list archetype describes the user's job. They are independent decisions.
 - Table: `query-list`, `management-list`, and `workbench` must match `list.profile`. Classify identity, decision, supporting, composite, fixed, and density roles before columns are coded.
 - Object detail: default mode, current risk/next work, real milestones, edit scope, save/cancel owner, and local failure owner.

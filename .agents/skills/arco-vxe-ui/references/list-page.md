@@ -14,6 +14,26 @@ Every list `pageSpec.ts` declares exactly one matching pair:
 | `list-management` / `management` | Maintain master data: create, edit, activate, import/export | Compact query plus a compact command group only when mutations/output actually exist. One primary create action at most. | Optional utility cap; it owns pagination and table preferences, never business create/import actions. | Operational ownership scope, workflow queues, or batch selection without a real batch action. |
 | `list-workbench` / `operations-workbench` | Repeatedly prioritize, assign, progress, and recover operational records | Query, real daily business commands, and only the scope/queues the operator uses to process work. | Context cap required when it owns refresh, selection context, pagination, density, or columns. | A dashboard title band, decorative KPI strip, duplicated totals, or hidden daily queues/actions. |
 
+## Standard List Frame V1
+
+Every list page declares `frame: 'standard-list-v1'`. This is the shared UI/UX frame, not a CSS class and not a visual theme to be copied by hand. Arco/GI owns the controls and surfaces; VXE owns the main grid; profile-specific business content fills the fixed roles below.
+
+| Zone | Shared UI rule | UX rule |
+|---|---|---|
+| Query | One top query surface using Arco Form/Grid at `small` density. One primary `查询`; reset and advanced entry are text tools. | Query, Enter, reset, and advanced apply have stable placement and reset page to 1. No empty filter bar. |
+| Command | Zero or one compact business-command group below query. One primary action at most in this scope. | Only real create/output/batch contracts appear. Low-frequency or risky work enters `More` and confirmation. |
+| Scope / queue | Optional, but when present it follows the command group after a separator. Scope and queue use different native controls. | A switch changes one query dimension, clears selection when results can change, and updates counts/table together. |
+| Table context | Optional utility cap for query/management; required context cap for workbench. It is neutral and table-owned. | Refresh, selection feedback, pagination, density, and column preferences preserve query context. Never put business commands here. |
+| Data | One dominant VXE grid with the global `mini`, bordered, striped baseline. | Identity, state, decision data, and row actions stay in the same column order and behavior across lists. |
+| Feedback | Empty, loading, permission, error, and partial batch feedback live with the owning query/table surface. | Conditions and current result context survive a recoverable failure. |
+
+Non-negotiable visual invariants:
+
+- GI is the only palette; no page-local control, card, tab, or table skin. Use one primary action per scope, neutral structural surfaces, and semantic status pills.
+- The zone order never changes: query -> business commands -> scope/queue -> table context -> data. An absent zone disappears; it is never replaced by blank decoration.
+- Spacing, control density, typography, table header, row behavior, icon-only utility rules, focus treatment, and overflow ownership come from the shared Arco/VXE contracts. A page may not create a different list "style" to appear distinctive.
+- Differences between pages are limited to business fields, available actions, statuses, columns, and the declared query scenario. They do not justify another toolbar hierarchy, colored header, bespoke table wrapper, or a second filter layout language.
+
 No page-level title/description band is added to operational lists. Search, command, scope, and status are logical zones, not mandatory cards. They may share one Arco command surface only when ownership stays clear, neutral separators distinguish different jobs, the combined height passes `existing-project-modernization.md`, and the table remains dominant.
 
 ## Operations Workbench Required Structure

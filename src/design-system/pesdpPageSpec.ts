@@ -23,6 +23,7 @@ export type PesdpListProfile =
   | 'operations-workbench';
 
 export interface PesdpListSpec {
+  frame: 'standard-list-v1';
   profile: PesdpListProfile;
   commandSurface: 'none' | 'compact' | 'workbench';
   tableTop: 'none' | 'utility-cap' | 'context-cap';
