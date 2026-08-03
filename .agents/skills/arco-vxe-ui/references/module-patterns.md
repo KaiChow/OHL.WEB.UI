@@ -56,16 +56,26 @@ Then select the page authority through [`domain-routing.md`](domain-routing.md).
 
 ## Page Slot Contract
 
-### List / Workbench
+### List Archetype Selection
+
+Choose the list surface from the user's job before assigning slots. A query-field count alone must not turn a simple lookup page into a workbench.
+
+| Archetype | User job | Required / forbidden structure |
+|---|---|---|
+| `list-query` | Locate, inspect, and occasionally export a known record | One stable query surface and dominant table. No work scope, status queues, batch selection, or table context cap unless a real table utility needs a compact cap. |
+| `list-management` | Maintain master data: create, edit, enable/disable, import/export | Compact command area when actual mutations exist; optional selection only with real batch behavior; table utility cap is allowed. Do not add operational queues or ownership scope. |
+| `list-workbench` | Repeatedly prioritize, assign, progress, and recover operational records | Business command group, real work scope/status queues when the workflow uses them, selection/batch feedback when available, and a table context cap. |
+
+### List / Workbench Slots
 
 | Slot | Role |
 |------|------|
 | `segment` | Optional scope (mode, warehouse, bill type) |
 | `filter` | High-frequency filters first; advanced by business group |
 | `toolbar` | 1× primary · secondary · grouped low-freq · utilities |
-| `status` | Tabs only when they change the query result |
+| `status` | Workbench only: tabs when operators repeatedly process the queue by state |
 | `table` | Identity · state · working columns · next-decision · actions |
-| `pagination` | `table-card-cap` on the right |
+| `pagination` | Table top only when it owns real context, pagination, or utilities; otherwise stay in the compact list command path |
 
 Implementation: [`list-page.md`](list-page.md) · [`table.md`](table.md) · [`actions.md`](actions.md).
 

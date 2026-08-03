@@ -1043,7 +1043,7 @@ watch(uiScenario, () => {
                   />
                 </a-form-item>
               </a-col>
-              <a-col :xs="24" :sm="24" :md="6" :lg="6" :xl="8" class="filter-panel__action-col">
+              <a-col :xs="24" :sm="24" :md="6" :lg="6" :xl="3" class="filter-panel__action-col">
                 <div class="filter-panel__actions">
                   <a-button size="small" type="primary" :loading="querying" @click="handleSearch">
                     <template #icon><icon-search /></template>
@@ -1074,18 +1074,13 @@ watch(uiScenario, () => {
               <template #icon><icon-plus /></template>
               新增订单
             </a-button>
-            <span class="optional-command">
-              <a-tooltip content="导入服务尚未配置">
-                <span><a-button size="small" type="outline" disabled>批量导入</a-button></span>
-              </a-tooltip>
-            </span>
-            <a-button size="small" type="outline" @click="handleExport">
+            <a-button size="small" @click="handleExport">
               <template #icon><icon-download /></template>
               导出
             </a-button>
             <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-              <a-button size="small" type="outline" :disabled="!selectedCount" :loading="batchSubmitting">
-                已选 {{ selectedCount }} 条<icon-down />
+              <a-button size="small" :disabled="!selectedCount" :loading="batchSubmitting">
+                批量处理<icon-down />
               </a-button>
               <template #content>
                 <a-doption @click="openBatchAssignment(CURRENT_OPERATOR)">分配给我</a-doption>
@@ -1112,28 +1107,31 @@ watch(uiScenario, () => {
 
           <a-divider direction="vertical" class="flow-bar__divider" />
 
-          <a-tabs
-            v-model:active-key="activeStatusTab"
-            type="line"
-            size="small"
-            class="workbench-status-tabs"
-            @change="onStatusTabChange"
-          >
-            <a-tab-pane v-for="tab in statusTabStats" :key="tab.key">
-              <template #title>
-                <span class="workbench-tab-title">
-                  {{ tab.label }}
-                  <span
-                    class="workbench-tab-count"
-                    :class="{
-                      'workbench-tab-count--warn': tab.tone === 'warn',
-                      'workbench-tab-count--danger': tab.tone === 'danger',
-                    }"
-                  >{{ tab.count }}</span>
-                </span>
-              </template>
-            </a-tab-pane>
-          </a-tabs>
+          <div class="flow-bar__queues">
+            <span class="flow-bar__queue-label">处理队列</span>
+            <a-tabs
+              v-model:active-key="activeStatusTab"
+              type="line"
+              size="small"
+              class="workbench-status-tabs"
+              @change="onStatusTabChange"
+            >
+              <a-tab-pane v-for="tab in statusTabStats" :key="tab.key">
+                <template #title>
+                  <span class="workbench-tab-title">
+                    {{ tab.label }}
+                    <span
+                      class="workbench-tab-count"
+                      :class="{
+                        'workbench-tab-count--warn': tab.tone === 'warn',
+                        'workbench-tab-count--danger': tab.tone === 'danger',
+                      }"
+                    >{{ tab.count }}</span>
+                  </span>
+                </template>
+              </a-tab-pane>
+            </a-tabs>
+          </div>
         </div>
       </a-card>
 
@@ -1795,12 +1793,12 @@ watch(uiScenario, () => {
 }
 
 .filter-panel {
-  padding: 8px 12px;
+  padding: 10px 12px 8px;
 }
 
 .filter-panel__form {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1240px;
 }
 
 .filter-panel__form :deep(.arco-form-item) {
@@ -1810,7 +1808,7 @@ watch(uiScenario, () => {
 .filter-panel__actions {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 6px;
   padding-bottom: 1px;
   white-space: nowrap;
@@ -1831,10 +1829,9 @@ watch(uiScenario, () => {
 .flow-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  gap: 10px;
   min-width: 0;
-  min-height: 40px;
+  min-height: 42px;
   padding: 0 12px;
   border-top: 1px solid var(--color-border-1);
 }
@@ -1866,6 +1863,21 @@ watch(uiScenario, () => {
 }
 
 .flow-bar__scope :deep(.arco-radio-group-button) {
+  white-space: nowrap;
+}
+
+.flow-bar__queues {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.flow-bar__queue-label {
+  flex: 0 0 auto;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
   white-space: nowrap;
 }
 
@@ -2190,9 +2202,9 @@ watch(uiScenario, () => {
   line-height: 20px;
 }
 
-@media (max-width: 1439px) {
+@media (max-width: 1279px) {
   .flow-bar__scope-label,
-  .optional-command {
+  .flow-bar__queue-label {
     display: none;
   }
 }

@@ -4,6 +4,21 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   id: 'shipment-export-order-workbench',
   target: 'sellable-saas-grade',
   archetype: 'list-workbench',
+  list: {
+    profile: 'operations-workbench',
+    commandSurface: 'workbench',
+    tableTop: 'context-cap',
+    selection: 'batch',
+    workScope: 'required',
+    statusQueues: 'required',
+    views: {
+      pageMode: 'none',
+      pageModeCount: 0,
+      status: 'tabs',
+      statusCount: 12,
+      statusOverflow: 'local-scroll',
+    },
+  },
   business: {
     object: 'sea-export-order',
     primaryUser: 'freight-operator',
@@ -15,24 +30,25 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   },
   pesdp: {
     professional: {
-      decisions: ['Use sea-export order vocabulary, ownership scope, operational queues, and the next freight action; use a standard grouped admin navigation shell without inventing unavailable modules or routes; every row-changing action must expose a complete result.'],
+      decisions: ['Use sea-export order vocabulary, ownership scope, operational queues, and the next freight action; separate locate, workflow, queue, and table-utility jobs into readable zones instead of one continuous control strip; use a standard grouped admin navigation shell without inventing unavailable modules or routes; every row-changing action must expose a complete result.'],
       acceptance: [
         'Rendered columns must expose order identity, owner, route, status, and next action without generic task wording.',
+        'The first viewport makes query, new/batch workflow, ownership scope, processing queue, and table utilities distinguishable without decorative cards or duplicate labels.',
         'No context sentence may repeat work-scope or queue labels that are already selected in controls.',
         'The current route remains visible in a compact, grouped navigation menu without workspace-card chrome competing with the workbench.',
       ],
     },
     efficient: {
-      decisions: ['Keep daily query fields, ownership scope, status queues, assignment, notification, and batch entry directly reachable.'],
+      decisions: ['Keep daily query fields, ownership scope, status queues, assignment, notification, and batch entry directly reachable; do not render disabled placeholder actions without a feature contract.'],
       acceptance: [
-        'At 1366x768 the command path must remain one compact surface and the table must own at least 70% of usable height.',
+        'At 1366x768 the command path must remain one compact surface, query actions must sit with the query cluster, and the table must own at least 70% of usable height.',
         'Batch assignment and notification must update the selected orders instead of only showing a toast.',
         'Query and every mutation must expose a stable pending state and preserve user context on failure.',
         'Advanced boolean conditions use direct three-state controls and every business group can clear only its own draft values.',
       ],
     },
     structured: {
-      decisions: ['Command surface owns query/actions/queues; data surface owns table context, selection, utilities, and pagination.'],
+      decisions: ['Command surface owns a bounded query cluster and separate workflow/queue groups; data surface owns table context, selection, utilities, and pagination.'],
       acceptance: [
         'Totals must appear in pagination and queue counts only; table context must not repeat the total, active scope, active queue, or risk count.',
         'Advanced query, status change, batch assignment, and column settings each have one explicit overlay owner.',
@@ -42,7 +58,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       decisions: ['Keep four daily locate fields on one stable row; edit fourteen compact advanced conditions in a right-side D1 drawer using two readable columns and one native scroll owner.'],
       acceptance: [
         'At 1366, 1024 split, and wide viewports, the query row does not create a separate action band and the table remains the dominant work surface.',
-        'At 1024, the identifier query keeps the largest field allocation, ports stay readable, and reset/advanced-filter collapse to named icon tools so the action cluster cannot overlap fields.',
+        'At 1024, the identifier query keeps the largest field allocation, ports stay readable, reset/advanced-filter collapse to named icon tools, and the 12 processing queues scroll only inside their own lane.',
         'The advanced filter opens from the right at the shared D1 width, renders two field columns, and keeps the native Drawer body as its only vertical scroll owner.',
         'Drawer content and footer remain horizontally contained at 1024, 1366, and wide desktop viewports.',
       ],

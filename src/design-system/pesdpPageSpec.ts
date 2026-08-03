@@ -4,13 +4,39 @@ export type PesdpPageGoal =
   | 'customer-facing-product'
   | 'sellable-saas-grade';
 
+export type PesdpListArchetype =
+  | 'list-query'
+  | 'list-management'
+  | 'list-workbench';
+
 export type PesdpPageArchetype =
-  | 'list-workbench'
+  | PesdpListArchetype
   | 'object-detail'
   | 'focused-overlay'
   | 'full-page-form'
   | 'master-detail'
   | 'dashboard';
+
+export type PesdpListProfile =
+  | 'simple-query'
+  | 'management'
+  | 'operations-workbench';
+
+export interface PesdpListSpec {
+  profile: PesdpListProfile;
+  commandSurface: 'none' | 'compact' | 'workbench';
+  tableTop: 'none' | 'utility-cap' | 'context-cap';
+  selection: 'none' | 'conditional' | 'batch';
+  workScope: 'none' | 'conditional' | 'required';
+  statusQueues: 'none' | 'conditional' | 'required';
+  views: {
+    pageMode: 'none' | 'segmented' | 'tabs' | 'select';
+    pageModeCount: number;
+    status: 'none' | 'tabs' | 'select';
+    statusCount: number;
+    statusOverflow: 'none' | 'local-scroll';
+  };
+}
 
 export type NonEmptyStrings = readonly [string, ...string[]];
 
@@ -39,10 +65,9 @@ export interface PesdpActionSpec {
   failureOwner: string;
 }
 
-export interface PesdpPageSpec {
+interface PesdpPageSpecBase {
   id: string;
   target: PesdpPageGoal;
-  archetype: PesdpPageArchetype;
   business: {
     object: string;
     primaryUser: string;
@@ -67,7 +92,7 @@ export interface PesdpPageSpec {
     advancedFields: readonly string[];
   };
   table: {
-    kind: 'none' | 'workbench' | 'detail-editable' | 'detail-readonly' | 'summary';
+    kind: 'none' | 'query-list' | 'management-list' | 'workbench' | 'detail-editable' | 'detail-readonly' | 'summary';
     identityColumns: readonly string[];
     decisionColumns: readonly string[];
     supportingColumns: readonly string[];
@@ -95,6 +120,17 @@ export interface PesdpPageSpec {
   authorities: NonEmptyStrings;
   verification: NonEmptyStrings;
 }
+
+export type PesdpPageSpec = PesdpPageSpecBase & (
+  {
+    archetype: PesdpListArchetype;
+    list: PesdpListSpec;
+  }
+  | {
+    archetype: Exclude<PesdpPageArchetype, PesdpListArchetype>;
+    list?: never;
+  }
+);
 
 export function definePesdpPageSpec<const T extends PesdpPageSpec>(spec: T): T {
   return spec;

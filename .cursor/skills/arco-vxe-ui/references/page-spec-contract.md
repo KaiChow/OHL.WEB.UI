@@ -2,7 +2,7 @@
 
 Typed `pageSpec.ts` is the compact decision record between a UI request and Vue code. It binds business facts, surface ownership, actions, states, and verification. It is not a design essay and cannot certify its own quality.
 
-Every new page, rewrite, or material layout/interaction change declares a typed page spec through the project's shared `definePageSpec` helper before the Vue template is edited.
+Every new page, rewrite, or material layout/interaction change declares a typed page spec through the project's shared `definePesdpPageSpec` helper before the Vue template is edited.
 
 ## Required Shape
 
@@ -10,7 +10,22 @@ Every new page, rewrite, or material layout/interaction change declares a typed 
 export const PAGE_SPEC = definePageSpec({
   id: 'domain-object-surface',
   target: 'sellable-saas-grade',
-  archetype: 'list-workbench',
+  archetype: 'list-management',
+  list: {
+    profile: 'management',
+    commandSurface: 'compact',
+    tableTop: 'utility-cap',
+    selection: 'conditional',
+    workScope: 'none',
+    statusQueues: 'none',
+    views: {
+      pageMode: 'none',
+      pageModeCount: 0,
+      status: 'none',
+      statusCount: 0,
+      statusOverflow: 'none',
+    },
+  },
   business: {
     object: 'contract',
     primaryUser: 'account-manager',
@@ -20,7 +35,7 @@ export const PAGE_SPEC = definePageSpec({
     mainWorkingData: ['customer', 'amount', 'owner'],
     supportingData: ['updatedAt'],
   },
-  quality: {
+  pesdp: {
     professional: { decisions: ['Use object-owned business terms and state.'], acceptance: ['Rendered labels/actions match the object contract.'] },
     efficient: { decisions: ['Keep repeated query and next action directly reachable.'], acceptance: ['Primary job path and preserved context are exercised.'] },
     structured: { decisions: ['Command and data facts have one visible owner.'], acceptance: ['No total, action, feedback, or state has duplicate ownership.'] },
@@ -32,7 +47,7 @@ export const PAGE_SPEC = definePageSpec({
     { id: 'data', role: 'data', owns: ['table', 'pagination', 'feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'VXE workbench behavior needs the shared bridge.' },
   ],
   query: { totalFields: 2, strategy: 's1-inline', visibleFields: ['keyword', 'customer'], advancedFields: [] },
-  table: { kind: 'workbench', identityColumns: ['contractNo', 'status'], decisionColumns: ['nextAction'], supportingColumns: ['updatedAt'] },
+  table: { kind: 'management-list', identityColumns: ['contractNo', 'status'], decisionColumns: ['nextAction'], supportingColumns: ['updatedAt'] },
   detail: { mode: 'none', focus: [], milestones: [] },
   actions: [
     { id: 'object-create', scope: 'command', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'object-create', successOwner: 'data', failureOwner: 'command' },
@@ -71,8 +86,9 @@ Every business action references an existing feature contract and declares frequ
 
 ## Page-Specific Contracts
 
-- Query: record all fields, visible vs advanced ownership, and selected strategy.
-- Workbench table: classify identity, decision, supporting, composite, fixed, and density roles before columns are coded.
+- List: every list page declares one `archetype` and matching `list.profile`. `list-query` is for locating/inspecting, `list-management` is for master-data maintenance, and `list-workbench` is for repeated operational processing. Record whether the page owns a command surface, table cap, selection, work scope, status queues, page-mode switch, and status-view overflow; do not infer these from a copied template.
+- Query: record all fields, visible vs advanced ownership, and selected strategy. The query strategy describes field complexity; the list archetype describes the user's job. They are independent decisions.
+- Table: `query-list`, `management-list`, and `workbench` must match `list.profile`. Classify identity, decision, supporting, composite, fixed, and density roles before columns are coded.
 - Object detail: default mode, current risk/next work, real milestones, edit scope, save/cancel owner, and local failure owner.
 - States: include only applicable states, but every listed state needs a deterministic trigger and recovery check. Omitting an applicable state to shorten the spec is a release defect.
 - Accessibility: record the page-specific keyboard path and accessible-name scope; `zoom` is fixed at `200%`. Arco ownership does not waive checks for VXE, custom shared patterns, or icon-only actions.

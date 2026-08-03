@@ -33,11 +33,14 @@ Every list page selects one primary query scenario. Do not combine a full flat q
 
 | Total query fields | Scenario | Default visible | Secondary surface | Selection rule |
 |--------------------|----------|-----------------|-------------------|----------------|
-| `1-8` | **S1** | all daily Locate/Narrow fields | none | every field is used frequently enough to justify permanent space |
-| `9-16` | **S2** | 1-2 rows, usually 6-12 fields | inline expand/collapse | secondary fields are still Narrow and users scan-adjust them in the same session |
-| `17-20` | **S2** or **S3** | 1-2 core rows | expand or drawer | S2 only for a specialist workbench when all hidden fields are regular Narrow conditions |
-| `21-32` | **S3** | one core row, usually 3-8 fields | grouped advanced-filter drawer | hidden conditions span several concepts or contain Investigate fields |
-| `33-50` | **S3 wide** | core row | wide drawer with group anchors | occasional conditions remain composable in one query session |
+| `0` | **S0** | none | none | Do not render an empty filter bar. The list starts with its actual command or data surface. |
+| `1-3` | **S1 compact** | all | none | Known-record lookup; keep the query action attached to the fields and do not create an extra command row. |
+| `4-8` | **S1** | all daily Locate/Narrow fields | none | One row preferred. A second aligned row is allowed only when every field is daily and table data stays in the first viewport. |
+| `9-16` | **S2** | 1-2 rows, usually 6-12 fields | inline expand/collapse | Secondary fields are still Narrow and users scan-adjust them in the same session. |
+| `17-20` | **S2** or **S3** | 1-2 core rows | expand or drawer | S2 only for a specialist workbench when all hidden fields are regular Narrow conditions. |
+| `21-32` | **S3** | one core row, usually 3-8 fields | grouped advanced-filter drawer | Hidden conditions span several concepts or contain Investigate fields. |
+| `33-50` | **S3 wide** | core row | wide drawer with group anchors | Occasional conditions remain composable in one query session. |
+| `50+` | **S4** | saved-query entry plus core fields | saved-query workspace | Do not build a larger drawer. Users need named, permission-aware saved query views and explicit apply/reset ownership. |
 
 Boundary overrides:
 
@@ -46,6 +49,12 @@ Boundary overrides:
 3. A page moves to S3 when hidden conditions require four or more visible rows, contain nine or more Investigate fields, or make the query actions move while editing.
 
 ## Scenario Contracts
+
+### S0: No Query Surface
+
+- Render no empty query card, divider, placeholder controls, or disabled `查询` button.
+- The first visible surface is the actual command surface when it has real actions; otherwise it is the table and its meaningful table utilities.
+- When the data is intentionally pre-scoped by the route or parent object, show that scope once as page/table context instead of inventing a filter control.
 
 ### S1: Full Inline
 
@@ -73,6 +82,22 @@ Boundary overrides:
 - `应用筛选` commits the draft, closes the drawer, resets pagination to page 1, and runs the query.
 - Closing with the drawer close affordance follows cancel semantics; do not partially apply hidden fields.
 - When the drawer contains portaled Select or Date popups, set Drawer `esc-to-close="false"`: Escape belongs to the active popup, while drawer close and cancel remain explicit. An orphan popup after the drawer closes is a release blocker.
+
+### S4: Saved Query Workspace
+
+- `50+` conditions require named saved queries or views with an explicit current-view owner. Do not replace the missing interaction model with a fullscreen drawer, a multi-row filter wall, or arbitrary URL parameters.
+- The core Locate fields remain directly reachable. Saved-query selection, edit, duplicate, permission, default, apply, reset, and failure behavior need real product/API contracts before implementation.
+- A saved view may combine conditions; it must never silently overwrite unsaved draft edits. Ask the user to apply, discard, or save the draft before switching views.
+- Do not claim S4 from static frontend fixtures. If saved-query persistence, sharing, or permissions are not implemented, select S3 and state the field boundary instead.
+
+## Query Interaction Invariants
+
+- Query button and Enter submit the same applied condition set. Select/radio auto-query is allowed only for a low-cost, single-dimension change such as queue or scope; text, range, and multi-field conditions wait for explicit query.
+- A new query, reset, mode change, queue change, scope change, and advanced apply reset pagination to page 1. They clear selection only when the record set can change.
+- Only the owning trigger shows pending. The form stays readable, duplicate submits are blocked, and a newer request wins over any late response from an older request.
+- Failure preserves visible fields, advanced applied fields, page context, and the last useful table result whenever it is safe to retain it. Local error/retry belongs beside the data it failed to refresh; a toast only summarizes.
+- A dependent condition can clear only the values that become invalid. For example, changing a business mode may clear its incompatible status or date filter; the UI must make that reset visible and must not erase unrelated customer or identifier conditions.
+- Applied condition feedback has one owner: the controls themselves, the advanced-filter entry count, and justified queue/scope controls. Do not repeat it in an always-visible chip wall.
 
 ## Advanced Filter Overlay Contract
 

@@ -592,6 +592,98 @@ for (const specFile of pageSpecFiles) {
     });
   }
 
+  const archetype = getStringProperty(spec, 'archetype');
+  const list = getObjectLiteralProperty(spec, 'list');
+  const listProfile = getStringProperty(list, 'profile');
+  const listArchetypeProfiles = {
+    'list-query': 'simple-query',
+    'list-management': 'management',
+    'list-workbench': 'operations-workbench',
+  };
+  const expectedListProfile = listArchetypeProfiles[archetype];
+  if (expectedListProfile && !list) {
+    violations.push({
+      rule: '列表 pageSpec 必须声明 list 原型，明确命令区、表格顶栏、选择、范围与队列行为',
+      file: relPath,
+      line: 1,
+      content: `missing list for ${archetype}`,
+    });
+  }
+  if (!expectedListProfile && list) {
+    violations.push({
+      rule: '非列表 pageSpec 不得声明 list 原型，避免把列表行为复制到详情或表单',
+      file: relPath,
+      line: 1,
+      content: `unexpected list for ${archetype ?? '(empty)'}`,
+    });
+  }
+  if (list) {
+    const commandSurface = getStringProperty(list, 'commandSurface');
+    const tableTop = getStringProperty(list, 'tableTop');
+    const selection = getStringProperty(list, 'selection');
+    const workScope = getStringProperty(list, 'workScope');
+    const statusQueues = getStringProperty(list, 'statusQueues');
+    const views = getObjectLiteralProperty(list, 'views');
+    const pageMode = getStringProperty(views, 'pageMode');
+    const pageModeCount = Number(getObjectProperty(views, 'pageModeCount')?.initializer?.text);
+    const statusView = getStringProperty(views, 'status');
+    const statusCount = Number(getObjectProperty(views, 'statusCount')?.initializer?.text);
+    const statusOverflow = getStringProperty(views, 'statusOverflow');
+    if (listProfile !== expectedListProfile) {
+      violations.push({
+        rule: '列表 archetype 与 list profile 必须一一对应，禁止用工作台模板伪装轻量查询页',
+        file: relPath,
+        line: 1,
+        content: `archetype=${archetype}, profile=${listProfile ?? '(empty)'}`,
+      });
+    }
+    const invalidSimpleQuery = listProfile === 'simple-query' && (
+      commandSurface === 'workbench'
+      || tableTop === 'context-cap'
+      || selection !== 'none'
+      || workScope !== 'none'
+      || statusQueues !== 'none'
+    );
+    const invalidManagement = listProfile === 'management' && (
+      commandSurface === 'workbench'
+      || tableTop === 'context-cap'
+      || workScope !== 'none'
+      || statusQueues !== 'none'
+    );
+    const invalidWorkbench = listProfile === 'operations-workbench' && (
+      commandSurface !== 'workbench' || tableTop !== 'context-cap'
+    );
+    if (invalidSimpleQuery || invalidManagement || invalidWorkbench) {
+      violations.push({
+        rule: '列表原型与其命令、表格顶栏、选择、范围和状态队列边界不一致',
+        file: relPath,
+        line: 1,
+        content: `profile=${listProfile}; command=${commandSurface}; top=${tableTop}; selection=${selection}; scope=${workScope}; queues=${statusQueues}`,
+      });
+    }
+    const invalidPageMode = !Number.isInteger(pageModeCount)
+      || (pageMode === 'none' && pageModeCount !== 0)
+      || (pageMode !== 'none' && pageModeCount < 2)
+      || ((pageMode === 'tabs' || pageMode === 'segmented') && pageModeCount > 5);
+    const invalidStatusView = !Number.isInteger(statusCount)
+      || (statusView === 'none' && (statusCount !== 0 || statusOverflow !== 'none'))
+      || (statusView !== 'none' && statusCount < 2)
+      || (statusView === 'tabs' && statusCount > 12)
+      || (statusView === 'tabs' && statusCount > 8 && statusOverflow !== 'local-scroll')
+      || (statusView === 'tabs' && statusCount <= 8 && statusOverflow !== 'none')
+      || (statusView === 'select' && statusOverflow !== 'none')
+      || (statusQueues === 'none' && statusView !== 'none')
+      || (statusQueues !== 'none' && statusView === 'none');
+    if (invalidPageMode || invalidStatusView) {
+      violations.push({
+        rule: '列表 pageSpec 必须声明页面模式与状态队列的 Tab/Select 数量和溢出策略，禁止无边界堆叠 Tab',
+        file: relPath,
+        line: 1,
+        content: `mode=${pageMode}/${pageModeCount}; status=${statusView}/${statusCount}/${statusOverflow}; queues=${statusQueues}`,
+      });
+    }
+  }
+
   const query = getObjectLiteralProperty(spec, 'query');
   const declaredTotal = Number(getObjectProperty(query, 'totalFields')?.initializer?.text);
   const declaredVisible = getStringArrayProperty(query, 'visibleFields') ?? [];
@@ -625,6 +717,35 @@ for (const specFile of pageSpecFiles) {
       file: relPath,
       line: 1,
       content: `strategy=${queryStrategy}, total=${declaredTotal}, advanced=${declaredAdvanced.length}`,
+    });
+  }
+  const invalidSimpleQueryFields = listProfile === 'simple-query' && (
+    (declaredTotal > 0 && queryStrategy !== 's1-inline')
+    || declaredTotal > 8
+    || declaredAdvanced.length > 0
+  );
+  if (invalidSimpleQueryFields) {
+    violations.push({
+      rule: '轻量查询列表默认只能使用 1-8 个 S1 内联查询项；复杂条件必须升级为管理或运营工作台原型',
+      file: relPath,
+      line: 1,
+      content: `strategy=${queryStrategy}, total=${declaredTotal}, advanced=${declaredAdvanced.length}`,
+    });
+  }
+
+  const table = getObjectLiteralProperty(spec, 'table');
+  const tableKind = getStringProperty(table, 'kind');
+  const expectedTableKinds = {
+    'simple-query': 'query-list',
+    management: 'management-list',
+    'operations-workbench': 'workbench',
+  };
+  if (listProfile && tableKind !== expectedTableKinds[listProfile]) {
+    violations.push({
+      rule: '列表原型必须声明匹配的 table.kind，避免轻量查询、管理维护与运营工作台共用含混表格语义',
+      file: relPath,
+      line: 1,
+      content: `profile=${listProfile}, table.kind=${tableKind ?? '(empty)'}`,
     });
   }
 

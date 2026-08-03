@@ -1,0 +1,211 @@
+- generic [ref=f1e3]:
+  - generic [ref=f1e5]:
+    - generic "OHL Freight 导航" [ref=f1e6]:
+      - generic [ref=f1e7]: OHL
+      - generic [ref=f1e9]: OHL Freight
+    - generic [ref=f1e14]:
+      - generic [ref=f1e15] [cursor=pointer]: 海运业务
+      - generic [ref=f1e26]: 出口订单
+    - generic [ref=f1e30]:
+      - generic [ref=f1e31]: 中国区 · CN
+      - generic [ref=f1e32]: v0.1
+  - generic [ref=f1e33]:
+    - generic [ref=f1e34]:
+      - generic [ref=f1e36]:
+        - generic [ref=f1e37]: 海运业务
+        - strong [ref=f1e38]: 海运出口订单
+      - generic [ref=f1e39]:
+        - button "刷新" [ref=f1e41] [cursor=pointer]
+        - button [ref=f1e46] [cursor=pointer]
+    - main [ref=f1e53]:
+      - generic [ref=f1e55]:
+        - generic [ref=f1e57]:
+          - generic [ref=f1e60]:
+            - generic [ref=f1e62]:
+              - generic [ref=f1e63]: 单号检索
+              - generic [ref=f1e68]:
+                - generic "业务单号" [ref=f1e69] [cursor=pointer]:
+                  - textbox
+                - textbox "请输入业务单号 / 提单号 / 订舱号" [ref=f1e76]
+            - generic [ref=f1e78]:
+              - generic [ref=f1e79]: 客户名称
+              - textbox "请输入客户名称" [ref=f1e85]
+            - generic [ref=f1e87]:
+              - generic [ref=f1e88]: 起运港
+              - textbox "港口代码 / 名称" [ref=f1e94]
+            - generic [ref=f1e96]:
+              - generic [ref=f1e97]: 目的港
+              - textbox "港口代码 / 名称" [ref=f1e103]
+            - generic [ref=f1e105]:
+              - button [ref=f1e106] [cursor=pointer]
+              - button "重置查询条件" [ref=f1e110] [cursor=pointer]
+              - button "高级筛选" [ref=f1e116] [cursor=pointer]
+          - generic [ref=f1e121]:
+            - generic [ref=f1e122]:
+              - button [ref=f1e123] [cursor=pointer]
+              - button [ref=f1e127] [cursor=pointer]
+              - button "批量处理" [disabled] [ref=f1e131]
+            - separator [ref=f1e134]
+            - generic [ref=f1e137]:
+              - generic [ref=f1e138] [cursor=pointer]:
+                - radio "全部在手" [checked]
+                - generic [ref=f1e139]: 全部在手
+              - generic [ref=f1e140] [cursor=pointer]:
+                - radio "我的订单"
+                - generic [ref=f1e141]: 我的订单
+            - separator [ref=f1e142]
+            - generic [ref=f1e152]:
+              - generic [ref=f1e155] [cursor=pointer]:
+                - text: 全部
+                - generic [ref=f1e156]: "24"
+              - generic [ref=f1e159] [cursor=pointer]:
+                - text: 订舱处理
+                - generic [ref=f1e160]: "6"
+              - generic [ref=f1e163] [cursor=pointer]:
+                - text: 待放舱
+                - generic [ref=f1e164]: "3"
+              - generic [ref=f1e167] [cursor=pointer]:
+                - text: 待拖车
+                - generic [ref=f1e168]: "6"
+              - generic [ref=f1e171] [cursor=pointer]:
+                - text: 待报关
+                - generic [ref=f1e172]: "6"
+              - generic [ref=f1e175] [cursor=pointer]:
+                - text: 待装柜
+                - generic [ref=f1e176]: "3"
+              - generic [ref=f1e179] [cursor=pointer]:
+                - text: 已开船
+                - generic [ref=f1e180]: "3"
+              - generic [ref=f1e183] [cursor=pointer]:
+                - text: 待补料
+                - generic [ref=f1e184]: "3"
+              - generic [ref=f1e187] [cursor=pointer]:
+                - text: 待提单确认
+                - generic [ref=f1e188]: "3"
+              - generic [ref=f1e191] [cursor=pointer]:
+                - text: 缺文件
+                - generic [ref=f1e192]: "6"
+              - generic [ref=f1e195] [cursor=pointer]:
+                - text: 待费用
+                - generic [ref=f1e196]: "6"
+              - generic [ref=f1e199] [cursor=pointer]:
+                - text: 异常
+                - generic [ref=f1e200]: "6"
+        - generic [ref=f1e206]:
+          - generic [ref=f1e207]:
+            - generic [ref=f1e209]:
+              - button "刷新" [ref=f1e210] [cursor=pointer]
+              - generic [ref=f1e214]: 按更新时间倒序
+            - generic [ref=f1e216]:
+              - generic [ref=f1e218]:
+                - generic [ref=f1e219]: 共 3 条
+                - list [ref=f1e220]:
+                  - generic [ref=f1e221]: .
+                  - listitem [ref=f1e224] [cursor=pointer]: "1"
+                  - generic [ref=f1e225]: .
+                - generic "50 条/页" [ref=f1e229] [cursor=pointer]:
+                  - textbox
+                - generic [ref=f1e235]:
+                  - generic [ref=f1e236]: 前往
+                  - spinbutton [ref=f1e238]
+              - button "表格密度" [ref=f1e240] [cursor=pointer]
+              - button "列设置" [ref=f1e245] [cursor=pointer]
+          - generic [ref=f1e252]:
+            - generic [ref=f1e253]:
+              - generic [ref=f1e254]:
+                - table [ref=f1e257]:
+                  - rowgroup [ref=f1e273]:
+                    - row [ref=f1e274]:
+                      - columnheader "责任操作" [ref=f1e275]
+                      - columnheader "客户名称" [ref=f1e278]
+                      - columnheader "业务类型" [ref=f1e281]
+                      - columnheader "船名航次" [ref=f1e284]
+                      - columnheader "ETA" [ref=f1e287]
+                      - columnheader "截关时间" [ref=f1e290]
+                      - columnheader "订舱号" [ref=f1e293]
+                      - columnheader "提单号" [ref=f1e296]
+                      - columnheader "柜型柜量" [ref=f1e299]
+                - table [ref=f1e306]:
+                  - rowgroup [ref=f1e321]:
+                    - row [ref=f1e1327]:
+                      - cell "李操作" [ref=f1e1328]
+                      - cell "宁波远洋贸易集团" [ref=f1e1330]
+                      - cell "FCL" [ref=f1e327]
+                      - cell "EVER GOLDEN / 115E" [ref=f1e1332]
+                      - cell "2026-08-02" [ref=f1e1334]
+                      - cell "2026-07-09 18:00" [ref=f1e1336]
+                      - cell "BK2026068801" [ref=f1e1338]
+                      - cell "EGLV123456789" [ref=f1e1340]
+                      - cell "1×40HQ + 1×20GP" [ref=f1e1342]
+                    - row [ref=f1e341]:
+                      - cell "李操作" [ref=f1e342]
+                      - cell "宁波远洋贸易集团" [ref=f1e344]
+                      - cell "FCL" [ref=f1e346]
+                      - cell "EVER GOLDEN / 115E" [ref=f1e348]
+                      - cell "2026-08-02" [ref=f1e350]
+                      - cell "2026-07-09 18:00" [ref=f1e352]
+                      - cell "BK2026068801" [ref=f1e354]
+                      - cell "EGLV123456789" [ref=f1e356]
+                      - cell "1×40HQ + 1×20GP" [ref=f1e358]
+                    - row [ref=f1e1344]:
+                      - cell "赵操作" [ref=f1e1345]
+                      - cell "宁波远洋贸易集团" [ref=f1e1347]
+                      - cell "FCL" [ref=f1e1349]
+                      - cell "EVER GOLDEN / 115E" [ref=f1e1351]
+                      - cell "2026-08-02" [ref=f1e1353]
+                      - cell "2026-07-09 18:00" [ref=f1e1355]
+                      - cell "BK2026068801" [ref=f1e1357]
+                      - cell "EGLV123456789" [ref=f1e1359]
+                      - cell "1×40HQ + 1×20GP" [ref=f1e1361]
+              - generic:
+                - generic [ref=f1e778]:
+                  - table [ref=f1e780]:
+                    - rowgroup [ref=f1e796]:
+                      - row [ref=f1e797]:
+                        - columnheader "" [ref=f1e798]:
+                          - generic "全选/取消" [ref=f1e801] [cursor=pointer]: 
+                        - columnheader "订单号" [ref=f1e804]
+                        - columnheader "订单状态" [ref=f1e807]
+                  - table [ref=f1e813]:
+                    - rowgroup [ref=f1e818]:
+                      - row [ref=f1e1363]:
+                        - cell "" [ref=f1e820]
+                        - cell "SEO2026060002" [ref=f1e1364]
+                        - cell "已放舱" [ref=f1e1366]:
+                          - generic "released" [ref=f1e1367]: 已放舱
+                      - row [ref=f1e1368]:
+                        - cell "" [ref=f1e830]
+                        - cell "SEO202606010" [ref=f1e1369]
+                        - cell "已放舱" [ref=f1e836]:
+                          - generic "released" [ref=f1e837]: 已放舱
+                      - row [ref=f1e1371]:
+                        - cell "" [ref=f1e840]
+                        - cell "SEO202605018" [ref=f1e1372]
+                        - cell "待订舱" [ref=f1e1374]:
+                          - generic "waitBooking" [ref=f1e1375]: 待订舱
+                - generic [ref=f1e1059]:
+                  - table [ref=f1e1061]:
+                    - rowgroup [ref=f1e1077]:
+                      - row [ref=f1e1078]:
+                        - columnheader "操作" [ref=f1e1079]
+                  - table [ref=f1e1085]:
+                    - rowgroup [ref=f1e1088]:
+                      - row [ref=f1e1089]:
+                        - cell [ref=f1e1090]:
+                          - generic [ref=f1e1092]:
+                            - button "修改状态" [ref=f1e1093] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1094] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1095] [cursor=pointer]
+                      - row [ref=f1e1099]:
+                        - cell [ref=f1e1100]:
+                          - generic [ref=f1e1102]:
+                            - button "修改状态" [ref=f1e1103] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1104] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1105] [cursor=pointer]
+                      - row [ref=f1e1109]:
+                        - cell [ref=f1e1110]:
+                          - generic [ref=f1e1112]:
+                            - button "修改状态" [ref=f1e1113] [cursor=pointer]
+                            - button "分配给我" [ref=f1e1114] [cursor=pointer]
+                            - button "更多操作" [ref=f1e1115] [cursor=pointer]
+            - text: 
