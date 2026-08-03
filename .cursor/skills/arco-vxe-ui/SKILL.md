@@ -59,19 +59,19 @@ Any failed applicable item blocks `sellable-saas-grade`; a target in `pageSpec.t
 ## Hard Constraints
 
 - GI is the only Arco baseline/palette; no theme adapter or page-local component skin.
-- Global CSS must not target `.arco-*`, `.vxe-*`, framework data attributes, or declare `--vxe-*` variables. Use public props/slots/configuration and scoped layout CSS.
+- vxe-table appearance is owned by `src/styles/vxe-theme/` (business tokens injected into official `--vxe-*` variables) plus the global `border`/`stripe` defaults in `main.ts`; that directory is the only place allowed to declare `--vxe-*` variables or touch `.vxe-*` selectors. Outside it, Global CSS must not target `.arco-*`, `.vxe-*`, framework data attributes, or declare `--vxe-*` variables. Use public props/slots/configuration and scoped layout CSS.
 - Use `vxe-table`, never `a-table`.
-- Main list grid: `workbench-table`; detail child grid: `detail-mini-vxe` with density modifier.
+- Main-list and child-table roles are declared by the page specification and VXE public configuration, never a prescribed CSS class name. Table look (borders, stripe, row height, colors) comes from the global theme and the `size` prop; the global default size is `mini` (high-density system), so pages omit `size` unless a documented override (`small` detail rows, `medium` standard lists) is needed; pages must not set `border="none"`, row heights, or any table appearance CSS.
 - Status: `.s-pill[data-s]`; never color the whole row by status or rely on color alone.
-- Business controls use explicit `size="small"`; one `type="primary"` per action scope.
-- Row actions use compact text for core workflow verbs or icon + Tooltip + business `aria-label` for familiar utilities. Keep at most two directly visible by default; lower-frequency and list danger actions move to More, with danger confirmation.
+- Arco form and business controls inherit the app-wide `small` default; Arco controls rendered inside `vxe-table` rows must explicitly use `size="mini"` (the mini row content box is 24px — `small` clips); one `type="primary"` per action scope.
+- Row actions are text buttons carrying business verbs (no icon-only guessing); keep at most two directly visible by default; lower-frequency and list danger actions move to the `···` More menu, with danger confirmation. The `···` trigger is the only icon-only button in the column.
 - Business object and user job decide fields; never transplant fields across unrelated modules.
 - Do not implement a business action until its smallest complete feature contract exists.
 - Do not claim UI quality from source inspection alone.
 
 ## Reference Implementation
 
-`--dense-*` tokens, `workbench-table`, `detail-mini-vxe`, `.s-pill[data-s]`, typed `pageSpec.ts` and feature-contract infrastructure, and `scripts/check-spec.js` are this repository's reference implementation of the contract. The rules are the contract; the symbols are replaceable. A project adopting this skill must provide equivalent infrastructure: a semantic token layer, main/child table contract components, typed page-spec and feature-contract helpers, and a static checker that gates routed pages.
+`--dense-*` tokens, `.s-pill[data-s]`, typed `pageSpec.ts` and feature-contract infrastructure, and `scripts/check-spec.js` are this repository's reference implementation of the contract. The rules are the contract; the symbols are replaceable. A project adopting this skill must provide equivalent infrastructure: a semantic token layer, VXE public configuration for the applicable table role, typed page-spec and feature-contract helpers, and a static checker that gates routed pages.
 
 ## Verification
 

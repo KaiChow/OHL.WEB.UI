@@ -23,7 +23,6 @@ Need an overlay?
 |- confirmation, short state change, or compact form -> Modal
 |- advanced list conditions that must preserve list context -> Drawer D1/D2
 |- record detail, long form, tabs, or mini tables -> Drawer D3/D4
-`- 50+ query conditions with saved/recent schemes -> query workspace, not an overlay
 ```
 
 ## Dimension Tokens
@@ -151,7 +150,6 @@ Only dense object-level operational drawers with large editable child tables may
 | 33-50 advanced conditions with anchors | Drawer | D2 |
 | Read-only record with few sections | Drawer | D3 |
 | Tabs, child tables, and footer workflow | Drawer | D4 |
-| 50+ query conditions and scheme management | Query workspace | page-owned |
 
 ## Verification
 

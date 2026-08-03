@@ -24,7 +24,6 @@ Classify every available condition before choosing a layout.
 | Locate | Find a known record or very small result set | Always-visible query row |
 | Narrow | Repeatedly reduce the current work queue | Visible row when used daily; page expansion when used regularly |
 | Investigate | Diagnose occasional attributes, ranges, flags, or audit conditions | Advanced-filter drawer |
-| Reuse | Reapply a complex condition set across sessions | Saved query scheme/workspace |
 
 The default row answers: "What does the target operator enter first to find the object now?" Do not promote a field merely because it exists in the API.
 
@@ -38,15 +37,13 @@ Every list page selects one primary query scenario. Do not combine a full flat q
 | `9-16` | **S2** | 1-2 rows, usually 6-12 fields | inline expand/collapse | secondary fields are still Narrow and users scan-adjust them in the same session |
 | `17-20` | **S2** or **S3** | 1-2 core rows | expand or drawer | S2 only for a specialist workbench when all hidden fields are regular Narrow conditions |
 | `21-32` | **S3** | one core row, usually 3-8 fields | grouped advanced-filter drawer | hidden conditions span several concepts or contain Investigate fields |
-| `33-50` | **S3 wide** | core row plus optional scheme entry | wide drawer with group anchors | occasional conditions remain composable in one query session |
-| `50+` | **workspace** | quick query plus saved-scheme entry | dedicated saved-query workspace | condition reuse and navigation are more important than a larger overlay |
+| `33-50` | **S3 wide** | core row | wide drawer with group anchors | occasional conditions remain composable in one query session |
 
 Boundary overrides:
 
 1. A `9-16` field page may use S3 when Investigate fields dominate and opening them is uncommon.
 2. A `17-20` field specialist page may use S2 only when the table still owns the first viewport and expanded fields are used several times per week.
 3. A page moves to S3 when hidden conditions require four or more visible rows, contain nine or more Investigate fields, or make the query actions move while editing.
-4. A page moves to the workspace model when users need saved/shared schemes, recent queries, version migration, and group navigation together.
 
 ## Scenario Contracts
 
@@ -55,7 +52,7 @@ Boundary overrides:
 - Compose fields with Arco Form/Grid and keep query actions at a stable row end.
 - Use one primary `查询` action and one text `重置` action.
 - One row is preferred; two aligned rows are allowed when all fields are daily and the table remains visible in the first viewport.
-- Do not add expand, drawer, hidden active count, or saved-scheme chrome when there is no hidden state.
+- Do not add expand, drawer, or hidden active count chrome when there is no hidden state.
 
 ### S2: Inline Expand
 
@@ -63,7 +60,7 @@ Boundary overrides:
 - Expansion adds rows below the permanent fields; it does not move the query/reset action group.
 - The trigger states `展开 (+N)` and `收起`, where `N` is the hidden field count.
 - When collapsed fields contain values, show an active count on the trigger.
-- Remember expansion state locally when useful; do not persist query values without a saved-query contract.
+- Remember expansion state locally when useful; do not persist query values across sessions.
 - Expanded query content must not become a four-row default wall.
 
 ### S3: Advanced Filter Drawer
@@ -170,25 +167,6 @@ The section class names below are local hooks. They are not a mandatory shared D
 - Provide `清空本组` only when group-level reset is implemented and distinguish it from `清空全部`.
 - Do not make a wide filter drawer fullscreen.
 
-## Saved Query Workspace: 50+ Fields
-
-Use a dedicated query workspace, not a giant drawer.
-
-Required capabilities:
-
-- The normal page keeps quick Locate fields and the current scheme entry visible.
-- Saved schemes define personal/shared ownership, persistence, default behavior, rename, update, duplicate, delete, permission, conflict handling, and condition-version migration.
-- Recent queries and applied-condition summaries use business groups instead of one long comma-separated string.
-- Provide clear-current-group and clear-all as distinct commands.
-- The group navigation should be anchors over all condition modules, not exclusive tabs that hide other groups.
-
-Alignment contract:
-
-- Use one `--query-ws-pad-x` outer inset for the workspace header, saved-scheme rail, group-anchor rail, and editor.
-- Use fixed rails plus `minmax(0, 1fr)` for the editor; rails must not force page-level horizontal scrolling.
-- Use the project 8px spacing rhythm. Avoid unrelated per-column padding values.
-- Active indicators stay inside their item and do not shift the text start line.
-
 ## Connected Identifier Search
 
 `filter-combo` is a connected control, not two unrelated controls placed beside each other.
@@ -205,7 +183,7 @@ Alignment contract:
 - The advanced entry shows hidden applied count, not temporary draft count.
 - Query and apply requests show loading on the triggering action and block duplicate submissions.
 - Failure preserves all conditions and leaves the user in the same context.
-- Reset has one documented target: the active default scheme or the system default. It never silently retains hidden conditions.
+- Reset has one documented target: the system default (all conditions cleared). It never silently retains hidden conditions.
 - URL or route persistence is optional, but when implemented it must serialize visible and advanced state consistently.
 
 ## Verification Gate
@@ -238,7 +216,6 @@ Verify the selected scenario against real content at `1024x768`, `1366x768`, and
 - Yes/no/all conditions hidden in Select without an option-count, search, or label-length reason.
 - `50+` conditions in one drawer or in a page wall above the table.
 - Exclusive group tabs that prevent users from combining conditions across concepts.
-- A fake saved-scheme button backed only by temporary component state.
 
 ## Related References
 

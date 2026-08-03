@@ -1,0 +1,38 @@
+/**
+ * =====================================================
+ * Typography
+ * =====================================================
+ */
+
+@vxe-font-family: "PingFang SC", "Segoe UI", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+
+@vxe-font-size-xs: 12px;
+
+@vxe-font-size-sm: 13px;
+
+@vxe-font-size-md: 14px;
+
+@vxe-font-size-lg: 16px;
+
+@vxe-font-weight-normal: 400;
+
+@vxe-font-weight-medium: 500;
+
+@vxe-font-weight-bold: 600;
+
+/**
+ * 业务语义字体（系统栈，不引入 webfont）
+ * - id：单号等宽，便于扫读比对
+ * - money：金额等宽对齐
+ * - number：沿用 UI 字体 + tabular-nums（见 business/type）
+ * - log：日志等宽偏技术感
+ */
+
+@vxe-id-font: "Cascadia Mono", "Sarasa Mono SC", Consolas, "Courier New", monospace;
+
+@vxe-money-font: "Roboto Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
+
+/* 保留别名：历史引用；普通数字改走 UI + tabular，不再强制等宽 */
+@vxe-number-font: @vxe-font-family;
+
+@vxe-log-font: Consolas, "Cascadia Mono", "SF Mono", Menlo, monospace;

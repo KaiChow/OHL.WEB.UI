@@ -1,0 +1,70 @@
+/**
+ * =====================================================
+ * Business Status
+ * =====================================================
+ */
+
+.biz-status {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  font-size: 12px;
+}
+
+.biz-status::before {
+  content: "";
+
+  width: 6px;
+
+  height: 6px;
+
+  border-radius: 50%;
+}
+
+/**
+ * 等待 / 警告
+
+ */
+
+.biz-wait::before {
+  background: @vxe-warning;
+}
+
+/**
+ * 中性 / 草稿
+
+ */
+
+.biz-neutral::before {
+  background: @vxe-text-3;
+}
+
+/**
+ * 正常
+
+ */
+
+.biz-success::before {
+  background: @vxe-success;
+}
+
+/**
+ * 处理中
+
+ */
+
+.biz-processing::before {
+  background: @vxe-primary;
+}
+
+/**
+ * 异常
+
+ */
+
+.biz-error::before {
+  background: @vxe-danger;
+}

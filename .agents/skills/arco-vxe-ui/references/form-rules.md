@@ -24,8 +24,8 @@ Arco `<a-form>` 有自己的校验绑定机制。写法错误会导致校验失�
 | `ref="formRef"` | **必须** | 用于调用 `validate()` / `resetFields()` / `clearValidate()` |
 | `:model="form"` | **必须** | 告诉 Arco 校验哪个数据对象；缺少则所有 `field` 绑定失效 |
 | `layout="vertical"` | **必须** | 项目统一竖排标签；禁止 `horizontal` / `inline` 在详情表单内 |
-| `size="small"` | **必须** | 向下传递给所有子控件；禁止每个控件单独写 `size="small"` 而 form 不写 |
-| `class="detail-form"` | **必须** | 表单 **布局**（栅格 / form-item）；控件皮肤见 `form-field.md` § Arco Form Controls |
+| `size="small"` | 可选 | 应用 ConfigProvider 已提供 `small` 默认值；仅在局部需要显式表达时声明，禁止改为 `medium` / `large` |
+| 局部布局 class | 可选 | 仅在表单需要局部栅格/间距时添加；名称不属于规范 API，控件皮肤见 `form-field.md` § Arco Form Controls |
 
 ---
 

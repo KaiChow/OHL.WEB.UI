@@ -9,7 +9,7 @@ Use this logical order:
 1. Optional page-mode segment using an Arco segmented or tab control.
 2. Query row using Arco Form, Grid, Input/Select and Button.
 3. Business actions and scope/status queue controls.
-4. Dominant data surface containing table context, pagination/settings, and `vxe-table.workbench-table`.
+4. Dominant data surface containing table context, pagination/settings, and the main-list `vxe-table`.
 
 Search and scope/status/actions are logical zones, not mandatory separate floating cards. They may share one Arco workbench command surface when their ownership remains clear, a neutral divider separates the rows, the combined height passes the rendered layout gate in `existing-project-modernization.md`, and no card is nested inside another card. The table remains its own dominant surface.
 
@@ -179,7 +179,7 @@ When records are repeatedly divided by ownership as well as workflow state, expo
 - Scope change updates status counts, pagination, selection, empty-state copy, and table context together.
 - Default scope must be explicit and persistent when the business defines a personal default; do not silently filter to “mine” while the visible control says all.
 - The workflow row keeps the order `business actions -> work scope -> status queues`; each role has a visible separator or spacing boundary.
-- Do not add a scope control when the data has no ownership split. Do not duplicate the same mine/all choice in saved-query schemes, visible filters, and the workflow row unless each surface has a distinct persistence purpose.
+- Do not add a scope control when the data has no ownership split. Do not duplicate the same mine/all choice in visible filters and the workflow row unless each surface has a distinct purpose.
 
 ## Table Column Selection
 

@@ -1,0 +1,51 @@
+/**
+ * =====================================================
+ * Size Scale · 仅注入官方尺寸变量
+ * =====================================================
+ */
+
+/* 用普通 import：Vite HMR 并发时 reference 偶发拿不到变量 */
+@import "./size-token.less";
+
+:root {
+  --vxe-font-size: @{vxe-size-default-font};
+  --vxe-font-size-medium: @{vxe-size-medium-font};
+  --vxe-font-size-small: @{vxe-size-small-font};
+  --vxe-font-size-mini: @{vxe-size-mini-font};
+
+  --vxe-table-row-height-default: @{vxe-size-default-row};
+  --vxe-table-row-height-medium: @{vxe-size-medium-row};
+  --vxe-table-row-height-small: @{vxe-size-small-row};
+  --vxe-table-row-height-mini: @{vxe-size-mini-row};
+
+  --vxe-table-row-line-height: 22px;
+
+  --vxe-table-column-padding-default: @{vxe-size-default-column-padding};
+  --vxe-table-column-padding-medium: @{vxe-size-medium-column-padding};
+  --vxe-table-column-padding-small: @{vxe-size-small-column-padding};
+  --vxe-table-column-padding-mini: @{vxe-size-mini-column-padding};
+
+  --vxe-table-cell-padding-left: @{vxe-size-default-padding-x};
+  --vxe-table-cell-padding-right: @{vxe-size-default-padding-x};
+
+  --vxe-table-cell-input-height-default: @{vxe-size-default-input};
+  --vxe-table-cell-input-height-medium: @{vxe-size-medium-input};
+  --vxe-table-cell-input-height-small: @{vxe-size-small-input};
+  --vxe-table-cell-input-height-mini: @{vxe-size-mini-input};
+}
+
+/* 不同 size 档位：只改官方 cell padding 变量 */
+.vxe-table.size--medium {
+  --vxe-table-cell-padding-left: @{vxe-size-medium-padding-x};
+  --vxe-table-cell-padding-right: @{vxe-size-medium-padding-x};
+}
+
+.vxe-table.size--small {
+  --vxe-table-cell-padding-left: @{vxe-size-small-padding-x};
+  --vxe-table-cell-padding-right: @{vxe-size-small-padding-x};
+}
+
+.vxe-table.size--mini {
+  --vxe-table-cell-padding-left: @{vxe-size-mini-padding-x};
+  --vxe-table-cell-padding-right: @{vxe-size-mini-padding-x};
+}

@@ -1,0 +1,5 @@
+[    1200ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:4173/favicon.ico:0
+[    1518ms] [ERROR] [vxe-table v4.5.21] 缺少必要的 "id" 参数，这可能会导致出现错误 @ http://127.0.0.1:4173/node_modules/.vite/deps/vxe-table.js?v=eae5055d:5781
+[    1710ms] [ERROR] [vxe-table v4.5.21] 缺少必要的 "id" 参数，这可能会导致出现错误 @ http://127.0.0.1:4173/node_modules/.vite/deps/vxe-table.js?v=eae5055d:5781
+[  147682ms] [ERROR] [vxe-table v4.5.21] 缺少必要的 "id" 参数，这可能会导致出现错误 @ http://127.0.0.1:4173/node_modules/.vite/deps/vxe-table.js?v=eae5055d:5781
+[  147767ms] [ERROR] [vxe-table v4.5.21] 缺少必要的 "id" 参数，这可能会导致出现错误 @ http://127.0.0.1:4173/node_modules/.vite/deps/vxe-table.js?v=eae5055d:5781

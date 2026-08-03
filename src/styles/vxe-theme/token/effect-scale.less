@@ -1,0 +1,57 @@
+/**
+ * =====================================================
+ * Effect Scale
+ * 官方变量缺口（极少）：
+ * 1) round：父级裁切 + 轻阴影（官方只给子层 radius，背景会露方角）
+ * 2) 表头底部分割线 → 结构清晰
+ * 3) 排序/筛选：辅色 hover + 略缩小（不动布局）
+ * =====================================================
+ */
+
+@import (reference) "./shadow-token.less";
+@import (reference) "./color-token.less";
+
+.vxe-table--render-default.is--round {
+  border-radius: var(--vxe-table-border-radius);
+  box-shadow: @vxe-shadow-sm;
+
+  /*
+   * 官方 round：radius 打在 header/body/border-line 上，根节点不裁切。
+   * 表体背景仍是方角，会从圆角「底下」露出来。
+   * 只裁 .vxe-table--render-wrapper：筛选面板是其兄弟节点，不会被裁掉。
+   */
+  >.vxe-table--render-wrapper {
+    border-radius: inherit;
+    overflow: hidden;
+  }
+}
+
+.vxe-table .vxe-table--header-wrapper {
+  box-shadow: inset 0 -1px 0 @vxe-header-border;
+}
+
+.vxe-table {
+
+  /* 默认 icon 约 1.1em，略收到贴近标题字号 */
+  .vxe-cell--sort-vertical-layout {
+    height: 1.45em;
+
+    .vxe-sort--asc-btn,
+    .vxe-sort--desc-btn {
+      height: 0.55em;
+      font-size: 0.85em;
+    }
+  }
+
+  .vxe-filter--btn {
+    font-size: 0.95em;
+  }
+
+  .vxe-sort--asc-btn,
+  .vxe-sort--desc-btn,
+  .vxe-filter--btn {
+    &:hover {
+      color: var(--vxe-table-column-icon-border-hover-color);
+    }
+  }
+}

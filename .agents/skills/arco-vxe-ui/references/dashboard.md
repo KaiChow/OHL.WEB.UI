@@ -68,8 +68,8 @@ User job is **analyze**, not scan-edit loops. Spacing may be slightly looser tha
       <div class="detail-section">
         <div class="detail-section__head"><h4 class="detail-section__title">明细</h4></div>
         <div class="detail-section__body detail-section__body--table">
-          <vxe-table border="none" size="small" class="compact workbench-table" height="auto"
-            :row-config="{ isHover: true, keyField: 'Id', height: 36 }" :data="drillRows">
+          <vxe-table size="small" height="auto"
+            :row-config="{ isHover: true, keyField: 'Id' }" :data="drillRows">
             <!-- drill-down columns -->
           </vxe-table>
         </div>
@@ -112,7 +112,7 @@ Treat `db-*` names as page-scoped semantic hooks. Repeated dashboard composition
 Every KPI or chart segment that promises detail must link to:
 
 - Filtered **Archetype A** list, or
-- `workbench-table` section below on same page.
+- A main-list table section below on the same page.
 
 Do not trap users in chart-only views without table path.
 
@@ -137,5 +137,5 @@ Do not trap users in chart-only views without table path.
 
 - [ ] `db-wrap` + `db-kpi-row` + `db-content`
 - [ ] KPI uses `kpi-card` / `kpi-value` tokens
-- [ ] Drill table uses `workbench-table` + `border="none"`
+- [ ] Drill table uses the global border/stripe defaults
 - [ ] Chart container has min-height and resize handling

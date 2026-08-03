@@ -1,0 +1,87 @@
+/**
+ * =====================================================
+ * State Token
+ * 只引用 color / shadow token，不写散落 hex
+ * =====================================================
+ */
+
+/******************************
+ * Disabled
+ ******************************/
+
+@vxe-disabled-opacity: 0.45;
+@vxe-disabled-bg: @vxe-row-disabled-bg;
+@vxe-disabled-text: @vxe-text-disabled;
+
+/******************************
+ * Icon Affordance
+ ******************************/
+
+@vxe-icon-opacity-idle: 0.72;
+@vxe-icon-opacity-hover: 0.85;
+@vxe-icon-opacity-active: 1;
+@vxe-action-hover-opacity: 0.75;
+@vxe-resizable-opacity: 0.8;
+
+/******************************
+ * Focus / Accent
+ ******************************/
+
+@vxe-focus-ring: 0 0 0 2px @vxe-primary-ring;
+@vxe-accent-bar: 2px solid @vxe-primary;
+
+/******************************
+ * Edit
+ ******************************/
+
+@vxe-edit-border: @vxe-primary;
+@vxe-edit-bg: @vxe-primary-soft;
+@vxe-edit-cell-bg: @vxe-primary-soft;
+@vxe-edit-input-bg: @vxe-surface;
+@vxe-edit-shadow: @vxe-focus-ring;
+
+/******************************
+ * Dirty / Changed
+ ******************************/
+
+@vxe-dirty-update: @vxe-warning;
+@vxe-dirty-insert: @vxe-success;
+@vxe-dirty-width: 3px;
+
+/******************************
+ * Validate
+ ******************************/
+
+@vxe-valid-error: @vxe-danger;
+@vxe-valid-error-bg: @vxe-danger-bg;
+@vxe-valid-error-border: fade(@vxe-danger, 45%);
+@vxe-valid-error-ring: 0 0 0 2px fade(@vxe-danger, 8%);
+
+@vxe-valid-tip-bg: @vxe-surface;
+@vxe-valid-tip-text: @vxe-danger;
+@vxe-valid-tip-border: fade(@vxe-danger, 30%);
+@vxe-valid-tip-shadow: @vxe-shadow-md;
+
+/******************************
+ * Loading
+ ******************************/
+
+@vxe-loading-bg: fade(@vxe-surface, 72%);
+@vxe-loading-color: @vxe-primary;
+
+/******************************
+ * Tooltip
+ ******************************/
+
+@vxe-tooltip-bg: @vxe-text-1;
+@vxe-tooltip-text: @vxe-text-inverse;
+@vxe-tooltip-shadow: @vxe-shadow-md;
+
+/******************************
+ * Scrollbar
+ ******************************/
+
+@vxe-scrollbar-size: 8px;
+@vxe-scrollbar-thumb: @vxe-border-dark;
+@vxe-scrollbar-thumb-hover: @vxe-border-strong;
+@vxe-scrollbar-track: transparent;

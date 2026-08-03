@@ -51,7 +51,7 @@
 | **Textarea 多行** | Textarea props | 不固定 28px 高；按内容与行数配置 |
 | **Disabled / 只读** | `disabled` / read-only display pattern | 保持原生状态，同时保证业务值可辨识 |
 | **Form-item 列宽** | Arco Grid + component width prop/style | 控件填满所属列，不穿透内部结构 |
-| **表格行内编辑** | `.detail-mini-vxe` | 控件使用原生 small 外观；单元格内只读值勿用 `link-text`（见 `table.md`） |
+| **表格行内编辑** | Editable-detail table role | 控件使用原生 small 外观；单元格内只读值勿用 `link-text`（见 `table.md`） |
 | **组合控件** | `.filter-combo` / `.detail-combo` | 多控件拼接圆角（布局 struct，非模块） |
 | **分页跳转等** | `.table-card-cap__pager` | 分页专用（非表单字段） |
 
@@ -106,7 +106,7 @@ Do not create page-local variants such as “drawer select uses 13px” or “to
 
 ## Release Gate
 
-- [ ] Every business control declares `size="small"`; GI owns control chrome, typography, hover, focus, disabled, and error states.
+- [ ] Business controls inherit the app-wide `small`; GI owns control chrome, typography, hover, focus, disabled, and error states.
 - [ ] Labels remain visible, associated with controls, and do not rely on placeholder text.
 - [ ] Pickers/selects fill their form-item through public props/layout, not internal-selector overrides.
 - [ ] Long labels, 1.3-2x translated copy, validation messages, disabled/read-only values, keyboard focus, and 200% zoom remain usable.

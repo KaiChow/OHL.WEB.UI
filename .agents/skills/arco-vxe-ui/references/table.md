@@ -29,43 +29,43 @@ A main freight workbench table is accepted only when all of these are demonstrat
 
 ## Unified Table Surface
 
-List workbench tables and detail nested tables use one **public VXE configuration contract**, not a global CSS skin.
+List workbench tables and detail nested tables use one **public VXE configuration contract**. Table appearance (colors, row heights, borders, stripe) is owned globally by `src/styles/vxe-theme/` tokens plus the `border`/`stripe` defaults in `main.ts`; pages never write table appearance CSS.
 
-| Contract | List (`workbench-table`) | Detail (`detail-mini-vxe`) |
+| Contract | Main list | Detail child table |
 |----------|--------------------------|----------------------------|
-| Framework size | `size="small"` | `size="small"` |
-| Border | `border="none"` | `border="none"` |
+| Framework size | global default `mini` (set in `main.ts`); `medium` for standard lists | `size="small"` override |
+| Border / stripe | global default (`border` + `stripe` set in `main.ts`) | global default |
 | Hover | `row-config.isHover` | `row-config.isHover` |
 | Stable identity | `row-config.keyField` | `row-config.keyField` |
-| Density | `row-config.height` when virtualization/density switching requires it | Native small row; controls must be verified unclipped |
+| Density | `size` prop only; never `row-config.height` or CSS | theme-owned small row; controls must be verified unclipped |
 | Overflow tooltip | `show-overflow="title"` | Omit for editable child rows |
 
 Shared rules:
 
-- Every operational VXE table uses `workbench-table` or `detail-mini-vxe` as a semantic/checker hook. The hook must not depend on global selectors targeting VXE internals.
-- Configure header, border, hover, selection, fixed columns, loading, overflow, density, and row identity through VXE props/config only.
-- Do not declare `--vxe-*` / `--vxe-ui-*` variables or target `.vxe-*` internals in global CSS.
-- Detail-only differences: omit overflow clipping for editable rows, omit checkbox without a batch toolbar, and verify native small rows contain small Arco controls.
-- **Borders:** `border="none"` + no vertical lines + weak horizontal row separators — see **Border Policy**.
+- The table role comes from the routed page's `pageSpec.ts` and the VXE public configuration. Do not require or infer a role from a CSS class name.
+- Configure header, hover, selection, fixed columns, loading, overflow, and row identity through VXE props/config only.
+- Do not declare `--vxe-*` / `--vxe-ui-*` variables or target `.vxe-*` internals anywhere outside `src/styles/vxe-theme/`.
+- Pages must not set `border`/`stripe` attributes; the global defaults apply — see **Border Policy**.
+- Detail-only differences: omit overflow clipping for editable rows, omit checkbox without a batch toolbar, and verify small rows contain small Arco controls.
 - **Sequence:** see **Sequence Column (序号)** — width `52`, detail editable tables require it; list tables usually omit.
 
 ## Required Setup
 
 ```vue
 <vxe-table
-  border="none"
-  size="small"
-  class="compact workbench-table"
+  id="stable-table-id"
   height="100%"
   show-overflow="title"
-  :row-config="{ isHover: true, keyField: 'Id', height: 36 }"
+  :row-config="{ isHover: true, keyField: 'Id' }"
 >
 </vxe-table>
 ```
 
 Use VXE for data grids. A native table is allowed only for a very small static layout table with no sorting, selection, fixed column, virtualization, or resizing needs.
 
-Use `workbench-table` only for the primary list table of an operational page. Do not use it for nested detail tables, mini tables, summary tables, or file tables.
+When `custom-config` persists table preferences, provide a stable VXE `id`. The identifier is component configuration, not a CSS selector or styling hook.
+
+The primary list table is the only table that receives the workbench contract. Nested detail, editable, summary, and file tables follow their own role-specific configuration.
 
 ## Row Height Standard
 
@@ -73,56 +73,53 @@ Main workbench tables must be compact enough for all-day operation, but not comp
 
 | Table type | Body row | Rule |
 |------------|--------|----------|------|
-| Workbench compact list | 36px via `row-config.height` | Default for order, customer, finance, warehouse, and operation lists |
-| Workbench standard list | 44px via `row-config.height` | Only for review pages or rows with two-line cells |
-| Detail editable line table | Native VXE small | Must contain `size="small"` controls without clipping |
-| Detail readonly line table | Native VXE small | Use for documents, file status, logs, and status rows |
-| Summary/read-only mini table | Native VXE small | Use for short totals, no action column unless necessary |
+| Workbench compact list | 36px — global default `mini` | Default for order, customer, finance, warehouse, and operation lists |
+| Workbench standard list | 44px via `size="medium"` | Only for review pages or rows with two-line cells |
+| Detail editable line table | `size="small"` | Must contain `size="small"` controls without clipping |
+| Detail readonly line table | `size="small"` | Use for documents, file status, logs, and status rows |
+| Summary/read-only mini table | `size="small"` | Use for short totals, no action column unless necessary |
 
 Rules:
 
-- Project default tokens are `--dense-header-h: 32px` and `--dense-row-h: 36px`.
-- Main list VXE tables use `class="compact"` unless the page has a documented reason to use `standard`.
-- Do not use 40px as the default workbench row height; it reduces first-screen data density.
-- Main-list density switching sets `row-config.height` (`36` compact / `44` standard); CSS-only row height is forbidden because VXE scroll calculations use configuration.
-- Detail variants remain semantic job markers and use native `size="small"` unless a tested shared Vue wrapper exposes a public density prop.
+- Row heights come from the `src/styles/vxe-theme` size scale (`mini` 36 / `small` 40 / `medium` 44 / `default` 48). `main.ts` sets the global default to `mini` because this is a high-density system. Pages never set `row-config.height` or row-height CSS.
+- Main list VXE tables keep the global default `mini` (omit the `size` attribute) unless the page has a documented reason to use `medium`.
+- Do not use `small` (40px) as the default workbench row height; it reduces first-screen data density.
+- Main-list density switching toggles the `size` prop (`mini` compact / `medium` standard); CSS-only row height is forbidden because VXE scroll calculations use configuration.
+- Detail variants remain semantic job markers and use `size="small"`.
 - Do not apply editable density to read-only documents, attachments, logs, or status-only rows. Density is chosen by the row job, not by the surrounding drawer.
-- Do not push main list rows below 34px; checkbox, status pill, icon actions, and text line-height begin to clip.
-- If row content requires more than 36px, first reduce column complexity or move secondary information to detail, then consider `standard`.
+- Do not push main list rows below `mini` (36px); checkbox, status pill, icon actions, and text line-height begin to clip.
+- If row content requires more than 36px, first reduce column complexity or move secondary information to detail, then consider `medium`.
 - Row height must be paired with readable typography: body F1 12px, header F3 12px / 600.
 
 ## Border Policy
 
 ### Decision (PESDP)
 
-Freight workbench tables are **scan surfaces**, not Excel grids. The project default is:
+The project default is the globally themed bordered + striped table: `main.ts` sets `VXETable.setup({ table: { border: true, stripe: true } })`, and `src/styles/vxe-theme` owns the line and stripe colors.
 
-| Line type | Default | Public control | Why |
-|-----------|---------|----------------|-----|
-| **Vertical column borders** | Off | VXE `border` prop | Multi-column horizontal scan; vertical lines create spreadsheet noise and steal density |
-| **Horizontal row borders** | Native/default | VXE `border` prop | Do not synthesize separators through internal cell selectors |
-| **Header / body separation** | Native | VXE header configuration | Structure comes from column labels and native contrast, not a custom header skin |
-| **Outer table frame** | Off | `border="none"` on `<vxe-table>` | The owning work surface already defines containment |
-| **Zebra stripe** | Off | VXE stripe prop | Hover and selection are usually enough; stripe plus borders becomes muddy |
+| Line type | Default | Owner | Why |
+|-----------|---------|-------|-----|
+| **Vertical + horizontal borders** | On (global default) | `main.ts` setup + `vxe-theme` tokens | One consistent grid; no per-page drift |
+| **Header / body separation** | Theme | `vxe-theme` header tokens | Structure comes from the themed header, not a page skin |
+| **Zebra stripe** | On (global default) | `main.ts` setup + `vxe-theme` tokens | Stable row tracking across wide tables |
 
-**Do not** switch to a full grid on operational list or detail mini tables. `inner`/`full` borders are allowed only for a finance or comparison matrix where column tracking materially improves; record the reason in `pageSpec`.
+Pages must not set `border` or `stripe` attributes and must not restyle grid lines. A different border mode (for example a borderless dashboard drill table) requires a recorded reason in `pageSpec`.
 
 ### Implementation (mandatory)
 
 ```vue
-<vxe-table border="none" class="compact workbench-table" ... />
-<vxe-table border="none" class="detail-mini-vxe detail-mini-vxe--editable" ... />
+<vxe-table ... />
+<vxe-table size="small" ... />
 ```
 
-| Surface | `border` attr | Stripe | Notes |
-|---------|---------------|--------|-------|
-| List `workbench-table` | `none` | off | native header, hover, and selection behavior |
-| Detail `detail-mini-vxe` | `none` | off | native small-density behavior |
-| Finance comparison exception | `inner` or `full` | normally off | only with a recorded comparison need |
+| Surface | `border`/`stripe` attr | Notes |
+|---------|------------------------|-------|
+| Main list | omit (global default) | themed header, hover, and selection behavior |
+| Detail child table | `size="small"` when the role needs readable detail rows | themed small-density behavior |
 
 Rules:
 
-- Never use VXE default bordered skin on production pages.
+- Never set `border="none"` or `stripe="false"` on production tables.
 - Never add page-scoped `border-right` / `border-bottom` on `.vxe-body--column`.
 - Hover/selection uses VXE's public state configuration; do not repaint fixed and scrollable cells through internal selectors.
 - Editable cell validation may use Arco field border; that is control chrome, not table grid lines.
@@ -302,7 +299,7 @@ The examples above describe classes of independent dimensions, not mandatory fie
 
 - Hover and selected states must cover fixed columns consistently.
 - Hover and selection must remain visibly different through VXE's public configuration and native theme states.
-- Zebra stripes are optional and must remain low contrast. Prefer no visible stripe for dense workbench pages when row separators already provide scan rhythm.
+- Zebra stripe is on by default (global `main.ts` setup); its contrast is owned by `vxe-theme` tokens, not by pages.
 - Do not merge cells for the main list unless the business explicitly requires grouped display.
 - Editable row hover must not hide validation borders.
 - Fixed-column boundaries use VXE native behavior; do not add page-level shadow skins.
@@ -311,9 +308,8 @@ The examples above describe classes of independent dimensions, not mandatory fie
 
 See **Border Policy** above for the full contract. Short form:
 
-- `border="none"` on every operational `vxe-table`.
-- No vertical column lines on normal operational lists.
-- Keep the native header/body distinction; do not introduce a project table-header token.
+- Grid lines and stripe come from the global defaults (`main.ts` setup + `vxe-theme` tokens); pages omit `border`/`stripe` attributes on every operational `vxe-table`.
+- Keep the themed header/body distinction; do not introduce a page-level table-header skin.
 - Selection/hover use VXE's public state behavior, not stronger grid lines or internal-selector CSS.
 
 ## Table Bottom Boundary
@@ -392,54 +388,53 @@ const applyColumnSettings = async () => {
 
 ## Row Actions
 
-Applies to **`workbench-table` list operation columns** unless noted. Menu order / danger styling → [`actions.md`](actions.md) §6.
+Applies to **main-list operation columns** unless noted. Menu order / danger styling → [`actions.md`](actions.md) §6.
 
 ### Action classes (classify before layout)
 
 | Class | Examples | Direct exposure on list |
 |-------|----------|-------------------------|
-| **A · Primary** | 查看、编辑（按行状态互斥时占 **同一槽位**） | 最多 1 个直出 |
-| **B · Secondary** | 第二高频可逆动作（如「复制单行」「下载附件」） | 仅当整行 **恰好 2 个非危险** 动作时与 A 并列直出 |
-| **C · Workflow** | 转移、推送、分配、打印 | 收入 `···` |
-| **D · Danger** | 删除、废弃、作废 | **列表主表永远进 `···`**，禁止直出 danger icon |
+| **A · Primary** | 修改状态、编辑（按行状态互斥时占 **同一槽位**） | 最多 1 个直出 |
+| **B · Secondary** | 第二高频可逆动作（如「分配给我」「复制单行」） | 与 A 并列直出（直出槽位总共 ≤2） |
+| **C · Workflow** | 生成费用、发送通知、打印 | 收入 `···` |
+| **D · Danger** | 删除、废弃、作废 | **列表主表永远进 `···`**，禁止直出 danger |
 
 Counting rules:
 
 - Mutually exclusive actions (e.g. 草稿→编辑 / 已发布→查看) count as **one** slot before applying the matrix.
 - If the primary identifier column already opens detail (link-text), the operation column may show edit or `···` only — matrix unchanged.
-- Low-frequency actions must not steal a direct slot just because only two verbs exist; if one verb is **D**, pattern is `[A] + ···`, not two flat icons.
+- Low-frequency actions must not steal a direct slot just because only two verbs exist; if one verb is **D**, pattern is `[A] + ···`, not two direct buttons.
 
 ### Display matrix (1–N)
 
 | Effective actions* | Contains D? | Visible pattern | Column `width` |
 |--------------------|-------------|-----------------|----------------|
 | 0 | — | Remove operation column | — |
-| 1 | No | `[A]` | `56` |
-| 1 | Yes | `[A]` + `···(D)` | `88` |
-| 2 | No (both A/B daily) | `[A][B]` — two tooltips, **no** `···` | `88` |
-| 2 | Yes | `[A]` + `···(B and/or D)` | `88` |
-| ≥3 | Any | `[A]` + `···(B+C+D)` | `88` |
+| 1 | No | `[A]` 文字按钮 | `88` |
+| 1 | Yes | `[A]` + `···(D)` | `120` |
+| 2 | No (both A/B daily) | `[A][B]` 两个文字按钮，**无** `···` | `176` |
+| 2 | Yes | `[A]` + `···(B and/or D)` | `120` |
+| ≥3 | Any | `[A][B]` + `···(C+D)` | `176` |
 
-\*After merging mutually exclusive verbs. **Hard limits:** operation column shows **at most 2 affordances** (icon buttons including `···` trigger); **never** `width` > `88`; **never** three flat icons.
+\*After merging mutually exclusive verbs. **Hard limits:** operation column shows **at most 2 direct text buttons** plus the `···` trigger; **never** `width` > `200`; **never** three direct buttons.
 
 Decision flow:
 
 ```
 count effective actions (merge exclusive A verbs)
 ├─ 0 → no column
-├─ 1 & no D → [A] width 56
-├─ 1 & has D → [A] + ··· width 88
-├─ 2 & no D → [A][B] width 88
-└─ else → [A] + ··· width 88
+├─ 1 & no D → [A] width 88
+├─ 1 & has D → [A] + ··· width 120
+├─ 2 & no D → [A][B] width 176
+└─ else → [A][B] + ··· width 176
 ```
 
 ### Implementation contract
 
-- Use `a-tooltip` + `a-button type="text" class="row-action-btn"`.
+- Direct actions: `a-button size="mini" type="text" class="row-action-btn"` carrying a business verb — text needs no tooltip.
 - Wrap in `row-actions` (alignment only — no border/background/capsule chrome).
-- Primary direct action: `row-action-btn row-action-btn--primary` (eye / edit).
-- More trigger: icon-only `row-action-btn row-action-btn--more` with the native Arco Dropdown popup.
-- Row action icons stay visible in default state; no permanent borders on buttons.
+- More trigger: icon-only `row-action-btn row-action-btn--more` (`icon-more` + `aria-label="更多操作"` + Tooltip) with the native Arco Dropdown popup; it is the only icon-only button allowed in the column.
+- No permanent borders on buttons.
 - Danger in `···`: Arco Divider then `a-doption.danger-opt`; its click stores the target and opens a separate business Modal or `Modal.confirm` after the dropdown closes. Never nest `a-popconfirm` in Dropdown and never expose flat `status="danger"` on list rows.
 - Keep VXE native focus/selection behavior; do not suppress it with global or page-local internal selectors.
 
@@ -447,54 +442,41 @@ count effective actions (merge exclusive A verbs)
 
 ```vue
 <!-- N=1：仅主操作 -->
-<vxe-column title="操作" width="56" fixed="right" align="center">
+<vxe-column title="操作" width="88" fixed="right" align="center">
   <template #default="{ row }">
     <div class="row-actions">
-      <a-tooltip content="查看详情">
-        <a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="handleView(row)">
-          <template #icon><icon-eye /></template>
-        </a-button>
-      </a-tooltip>
+      <a-button size="mini" type="text" class="row-action-btn" @click="handleEdit(row)">编辑</a-button>
     </div>
   </template>
 </vxe-column>
 
-<!-- N=2：两个日常可逆动作，并列直出 -->
-<vxe-column title="操作" width="88" fixed="right" align="center">
+<!-- N=2：两个日常可逆动作，文字按钮并列直出 -->
+<vxe-column title="操作" width="176" fixed="right" align="center">
   <template #default="{ row }">
     <div class="row-actions">
-      <a-tooltip content="查看">
-        <a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="handleView(row)">
-          <template #icon><icon-eye /></template>
-        </a-button>
-      </a-tooltip>
-      <a-tooltip content="编辑">
-        <a-button size="small" type="text" class="row-action-btn" @click="handleEdit(row)">
-          <template #icon><icon-edit /></template>
-        </a-button>
-      </a-tooltip>
+      <a-button size="mini" type="text" class="row-action-btn" @click="openStatusModal(row)">修改状态</a-button>
+      <a-button size="mini" type="text" class="row-action-btn" @click="handleAssign(row)">分配给我</a-button>
     </div>
   </template>
 </vxe-column>
 
-<!-- N≥3 或含危险：主操作 + ··· -->
-<vxe-column title="操作" width="88" fixed="right" align="center">
+<!-- N≥3 或含危险：两个核心动词 + ··· -->
+<vxe-column title="操作" width="176" fixed="right" align="center">
   <template #default="{ row }">
     <div class="row-actions">
-      <a-tooltip content="查看详情">
-        <a-button size="small" type="text" class="row-action-btn row-action-btn--primary" @click="handleView(row)">
-          <template #icon><icon-eye /></template>
-        </a-button>
-      </a-tooltip>
+      <a-button size="mini" type="text" class="row-action-btn" @click="openStatusModal(row)">修改状态</a-button>
+      <a-button size="mini" type="text" class="row-action-btn" @click="handleAssign(row)">分配给我</a-button>
       <a-dropdown trigger="click" position="br">
-        <a-button size="small" type="text" class="row-action-btn row-action-btn--more" title="更多操作">
-          <template #icon><icon-more /></template>
-        </a-button>
+        <a-tooltip content="更多操作">
+          <a-button size="mini" type="text" class="row-action-btn row-action-btn--more" aria-label="更多操作">
+            <template #icon><icon-more /></template>
+          </a-button>
+        </a-tooltip>
         <template #content>
-          <a-doption @click="handleEdit(row)">编辑</a-doption>
+          <a-doption @click="handleFee(row)">生成费用</a-doption>
           <a-doption @click="handlePrint(row)">打印</a-doption>
           <a-divider />
-          <a-doption class="danger-opt" @click="requestVoid(row)">废弃</a-doption>
+          <a-doption class="danger-opt" @click="requestVoid(row)">作废</a-doption>
         </template>
       </a-dropdown>
     </div>
@@ -504,17 +486,17 @@ count effective actions (merge exclusive A verbs)
 
 `requestVoid(row)` stores the row and opens an independent confirmation Modal. The Modal performs the irreversible action only after explicit confirmation.
 
-### `detail-mini-vxe` exception
+### Detail editable-table exception
 
-Editable detail subtables (`detail-mini-vxe--editable`) may expose **one** delete icon directly (`status="danger"` + `a-popconfirm`) when the row job is inline line editing. Same matrix limits apply (max 2 affordances; no third flat icon). Read-only detail subtables follow the list matrix — danger stays in menu if present.
+Editable detail subtables may expose **one** delete icon directly (`status="danger"` + `a-popconfirm`) when the row job is inline line editing. Same matrix limits apply (max 2 affordances; no third flat icon). Read-only detail subtables follow the list matrix — danger stays in menu if present.
 
 ### Anti-patterns
 
-- Three flat icons (e.g. edit + view + delete) or `width="120"`.
+- Three direct buttons (e.g. 修改状态 + 分配给我 + 生成费用) or `width` > `200`.
 - Hiding a daily **B** action inside `···` when the row only has two non-danger verbs.
 - Flat danger delete on workbench list rows.
-- Loose icons outside `row-actions`.
-- Text buttons («查看») in operation columns — icon + tooltip only.
+- Loose buttons outside `row-actions`.
+- Icon-only action buttons in operation columns — use text verbs; `···` is the only icon trigger.
 
 ## Detail And Nested Tables
 
@@ -528,15 +510,15 @@ Detail tables must look like part of the module, not a full page table pasted in
 - Keep operation column compact and rightmost.
 - Do not use pagination inside nested detail tables unless the row count is genuinely large.
 - Do not use large table captions for child tables; use the parent module/child head for identity.
-- For nested editable line rows, use `detail-mini-vxe detail-mini-vxe--editable`, native small density, small Arco controls, and fixed right operation when needed.
+- Nested editable line rows use native small density, explicit `size="mini"` Arco controls (the in-row content box clips anything taller), and a fixed-right operation column when needed.
 - For nested read-only and summary rows, use the matching semantic modifier, native small density, and no visible controls by default.
 - Detail mini tables without batch toolbar must **not** include a `type="checkbox"` column (VXE default checkbox reads as a solid blue square and has no batch action in detail sub-tables).
 - Do not fake detail density with global VXE variables or internal selectors. Verify editable rows on the real route for control clipping and horizontal alignment.
 - Wrap detail-section embedded tables with `detail-section__body detail-section__body--table` (padding 0, horizontal scroll). Do not use page-scoped `overflow: hidden` wrappers around wide child tables.
-- Do **not** set `show-overflow` on `detail-mini-vxe` tables. It adds `col--ellipsis`, clips numbers/inputs, and can desync header/body columns (especially with `fixed="right"`). List/workbench tables still use `show-overflow="title"`.
+- Do **not** set `show-overflow` on editable detail tables. It adds `col--ellipsis`, clips numbers/inputs, and can desync header/body columns (especially with `fixed="right"`). Main list tables still use `show-overflow="title"`.
 - Do not patch internal VXE cell padding; choose column widths and public table density instead.
 - Native `<table>` is not allowed for editable detail line rows with hover, fixed operations, empty state, or repeated inputs. Use VXE so table behavior and density remain project-wide.
-- In `detail-mini-vxe` cells, **do not** use `link-text` for plain read-only values. Keep it only on real actions (`a`, `a-button`).
+- In detail-table cells, **do not** use `link-text` for plain read-only values. Keep it only on real actions (`a`, `a-button`).
 
 ## Editable Table Rules
 

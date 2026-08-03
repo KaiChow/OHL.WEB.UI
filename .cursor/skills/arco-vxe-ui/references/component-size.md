@@ -1,19 +1,19 @@
 # Arco Component Size Contract
 
-Arco exposes `size?: 'mini' | 'small' | 'medium' | 'large'`. **Omitting `size` defaults to `medium` (14px body, taller controls)** — that leaks consumer-SaaS density into this freight ops product.
+Arco exposes `size?: 'mini' | 'small' | 'medium' | 'large'`. The application-level ConfigProvider sets the inherited default to `small`, so operational form controls do not fall back to Arco's standalone `medium` default.
 
-This project uses **one business density**. Map Arco `size` explicitly in templates; use public component configuration for stable table row heights.
+This project uses **one business density**. Form and ordinary business controls inherit `small`; use public component configuration for stable table row heights.
 
 ## Global Rule
 
 | Arco `size` | Business modules | Why |
 |-------------|------------------|-----|
-| **`small`** | **Required default** — all operational UI | Matches PESDP dense ops UI |
+| **`small`** | **Required default** — all operational UI outside tables | Matches PESDP dense ops UI |
 | `medium` | **Forbidden** in `src/views/**` | Arco default; 14px text breaks typography contract |
 | `large` | **Forbidden** in app business area | Marketing/landing only |
-| `mini` | **Do not set in templates** | Leave framework-owned internal surfaces unchanged |
+| `mini` | **Only inside `vxe-table` rows**（行操作按钮、可编辑单元格控件） | mini 行内容盒 24px，`small` 28px 会裁切 |
 
-**Write `size="small"` explicitly** on inputs, selects, date pickers, textareas, buttons (with label), pagination, tabs, steps, tags.
+Form and ordinary business controls inherit `small` from `App.vue` (`<a-config-provider size="small">`). An explicit `size="small"` is optional documentation, not a requirement. **Arco controls rendered inside a `vxe-table` row write `size="mini"`**, because the table's compact row box does not inherit the page-control density safely.
 
 ## Form Controls（组件规范，非模块规范）
 
@@ -31,12 +31,12 @@ This project uses **one business density**. Map Arco `size` explicitly in templa
 
 | 用途 | Token / class | 高度 |
 |------|---------------|------|
-| Table row icon | `.row-action-btn` | 24×24px minimum target with a 14px icon |
-| VXE 主表行 | `row-config.height` + `workbench-table` hook | 36px compact / 44px standard |
-| VXE 详情子表行 | `size="small"` + `detail-mini-vxe` job hook | VXE native small; verify editable controls are unclipped |
+| Table row action | `.row-action-btn` | 24×24px minimum target；直出为文字按钮（业务动词），`···` 为唯一 icon 触发器 |
+| VXE 主表行 | 全局默认 `mini`（main.ts） | `mini`（36px）compact / `medium`（44px）standard override |
+| VXE 详情子表行 | `size="small"` when its row job needs readable detail editing | theme-owned small row; verify editable controls are unclipped |
 | Modal / Drawer 标题 | Arco native title slot | GI-owned |
 
-## Must use `size="small"`
+## Inherited `small` surfaces
 
 ```
 a-button (with visible label)
@@ -44,7 +44,15 @@ a-input / a-textarea / a-input-number
 a-select / a-tree-select / a-cascader
 a-date-picker / a-time-picker
 a-pagination / a-tabs / a-steps
-vxe-table (list + detail mini)
+```
+
+The controls above inherit `small`; declare it only when an explicit local override improves clarity.
+
+## Must use `size="mini"`（仅限 vxe-table 行内）
+
+```
+行操作 a-button（row-actions 内）
+可编辑单元格内的 a-input / a-select / a-date-picker
 ```
 
 ## Forbidden
@@ -52,6 +60,7 @@ vxe-table (list + detail mini)
 ```
 ❌ <a-input /> without size="small"
 ❌ size="medium" | size="large" in views
+❌ vxe-table 行内出现 size="small" 或更大的 Arco 控件（mini 行内容盒 24px，会裁切）
 ❌ Per-module CSS for control height ( .detail-form .arco-input { height: … } )
 ❌ Row action target below 24×24px
 ```

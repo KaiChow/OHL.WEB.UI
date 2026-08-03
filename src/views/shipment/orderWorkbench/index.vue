@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { Message, Modal } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
@@ -11,7 +11,6 @@ import {
   IconDownload,
   IconDown,
   IconEdit,
-  IconEye,
   IconFullscreen,
   IconFullscreenExit,
   IconMore,
@@ -19,13 +18,11 @@ import {
   IconInfoCircle,
   IconLock,
   IconEmpty,
-  IconHistory,
   IconLayout,
   IconCheck,
 } from '@arco-design/web-vue/es/icon';
-import { buildDateStamp, downloadCsvFile } from '../../../utils/mock-actions';
+import { downloadCsvFile } from '../../../utils/mock-actions';
 import { formatLocalMinute } from '../../../utils/date-time';
-import ShipmentOrderDetailDrawer from '../orderDetail/ShipmentOrderDetailDrawer.vue';
 import ExceptionModal from './components/ExceptionModal.vue';
 import type { ExceptionFormPayload } from './components/ExceptionModal.vue';
 import { shipmentWorkbenchRows } from './mockData';
@@ -36,36 +33,16 @@ import type {
   ShipmentWorkbenchRow,
   StatusTabStat,
 } from './types';
-import type { ShipmentOrderDetailRecord } from '../orderDetail/types';
-import { getShipmentOrderMock } from '../orderDetail/mockData';
 import type { ShipmentStatusTransition } from '../featureContracts';
 import { getOrderStatusTransitions, resolveShipmentUiScenario } from '../featureContracts';
 
 const route = useRoute();
-const router = useRouter();
 
 const CURRENT_OPERATOR = '张操作';
-const QUERY_SCHEME_STORAGE_KEY = 'ohl.shipment.export-order.query-schemes.v2';
-const LEGACY_QUERY_SCHEME_STORAGE_KEY = 'ohl.shipment.export-order.query-schemes.v1';
 const COLUMN_SETTING_STORAGE_KEY = 'ohl.shipment.export-order.visible-columns.v3';
 
 type TableDensity = 'compact' | 'standard';
 type WorkScope = 'all' | 'mine';
-
-interface SavedQueryScheme {
-  id: string;
-  name: string;
-  query: ShipmentOrderQuery;
-  statusTab: ShipmentStatusKey;
-  version: 2;
-  revision: number;
-  owner: 'system' | 'personal' | 'shared';
-  isDefault: boolean;
-  updatedAt: string;
-  isSystem?: boolean;
-}
-
-type SchemeModalMode = 'create' | 'rename' | 'duplicate';
 
 type ColumnSettingField = keyof ShipmentWorkbenchRow | 'nextAction';
 
@@ -204,78 +181,6 @@ const createWorkbenchRows = () => shipmentWorkbenchRows.map((row) => ({
   quickStatus: [...row.quickStatus],
 }));
 
-// 系统预置查询方案（PRD 4.5）：只读、可复制，不可重命名/删除/设默认。
-// 拖拽排序暂不实现：纯前端 mock 无方案服务，排序语义待真实后端落地后再评估。
-// 演示口径的「今日」锚定 mock 数据集最新更新时间，保证预置方案在演示数据上有结果。
-const getMockReferenceToday = () => shipmentWorkbenchRows
-  .reduce((latest, row) => (row.updatedAt.slice(0, 10) > latest ? row.updatedAt.slice(0, 10) : latest), '');
-
-const getSystemQuerySchemes = (): SavedQueryScheme[] => {
-  const today = getMockReferenceToday() || buildDateStamp();
-  const weekEnd = buildDateStamp(new Date(new Date(`${today}T00:00:00`).getTime() + 6 * 24 * 60 * 60 * 1000));
-  const systemScheme = (
-    id: string,
-    name: string,
-    schemeQuery: ShipmentOrderQuery,
-    statusTab: ShipmentStatusKey,
-  ): SavedQueryScheme => ({
-    id,
-    name,
-    query: schemeQuery,
-    statusTab,
-    version: 2,
-    revision: 1,
-    owner: 'system',
-    isDefault: false,
-    updatedAt: '2026-06-30T00:00:00.000Z',
-    isSystem: true,
-  });
-  return [
-    systemScheme('sys-my-pending', '我的待处理', { ...defaultQuery(), operator: CURRENT_OPERATOR }, 'all'),
-    systemScheme('sys-today-closing', '今日截关', { ...defaultQuery(), closingRange: [today, today] }, 'all'),
-    systemScheme('sys-week-sailing', '本周开船', { ...defaultQuery(), etdRange: [today, weekEnd] }, 'all'),
-    systemScheme('sys-fee-unconfirmed', '费用未确认', { ...defaultQuery(), feeStatus: 'pending' }, 'feeUnconfirmed'),
-    systemScheme('sys-file-missing', '文件缺失', { ...defaultQuery(), fileStatus: 'missing' }, 'fileMissing'),
-    systemScheme('sys-exception-open', '异常待处理', { ...defaultQuery(), hasException: 'yes' }, 'exception'),
-  ];
-};
-
-const loadCustomQuerySchemes = (): SavedQueryScheme[] => {
-  try {
-    const raw = window.localStorage.getItem(QUERY_SCHEME_STORAGE_KEY)
-      ?? window.localStorage.getItem(LEGACY_QUERY_SCHEME_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as Array<Partial<SavedQueryScheme>>;
-    if (!Array.isArray(parsed)) return [];
-
-    const seenIds = new Set<string>();
-    const normalized = parsed.flatMap((item) => {
-      if (!item?.id || !item?.name || !item?.query || item.isSystem || seenIds.has(item.id)) return [];
-      seenIds.add(item.id);
-      return [{
-        id: item.id,
-        name: item.name.slice(0, 20),
-        query: cloneQuery({ ...defaultQuery(), ...item.query }),
-        statusTab: item.statusTab ?? 'all',
-        version: 2 as const,
-        revision: Math.max(1, Number(item.revision) || 1),
-        owner: item.owner === 'shared' ? 'shared' as const : 'personal' as const,
-        isDefault: Boolean(item.isDefault),
-        updatedAt: item.updatedAt ?? new Date().toISOString(),
-      }];
-    });
-    let hasDefault = false;
-    normalized.forEach((item) => {
-      if (!item.isDefault) return;
-      if (hasDefault) item.isDefault = false;
-      hasDefault = true;
-    });
-    return normalized;
-  } catch {
-    return [];
-  }
-};
-
 const query = reactive<ShipmentOrderQuery>(defaultQuery());
 const advancedQuery = reactive<ShipmentOrderQuery>(defaultQuery());
 const uiScenario = computed(() => resolveShipmentUiScenario(route.query.uiState));
@@ -295,8 +200,7 @@ const activeBatchKeys = new Set<string>();
 const batchFeedback = ref<{
   label: string;
   success: number;
-  failed: Array<{ orderNo: string; reason: string }>;
-  skippedOrderNos: string[];
+  failedOrderNos: string[];
 } | null>(null);
 const batchAssignVisible = ref(false);
 const batchAssignForm = reactive({ operator: CURRENT_OPERATOR });
@@ -308,8 +212,6 @@ const visibleColumnFields = ref<ColumnSettingField[]>(loadVisibleColumnFields())
 const columnSettingDraft = ref<ColumnSettingField[]>([...visibleColumnFields.value]);
 const selectedRows = ref<ShipmentWorkbenchRow[]>([]);
 const allRows = ref<ShipmentWorkbenchRow[]>(createWorkbenchRows());
-const drawerVisible = ref(false);
-const currentDetail = ref<ShipmentOrderDetailRecord | null>(null);
 const statusModalVisible = ref(false);
 const statusForm = reactive({ targetStatus: undefined as string | undefined, reason: '', notify: true, createNode: true });
 const statusErrors = reactive({ targetStatus: '', reason: '' });
@@ -326,35 +228,15 @@ const voidTargetRow = ref<ShipmentWorkbenchRow | null>(null);
 const voidModalVisible = ref(false);
 const voidSubmitting = ref(false);
 const voidError = ref('');
-const tableDensity = ref<TableDensity>('standard');
-const customQuerySchemes = ref<SavedQueryScheme[]>(loadCustomQuerySchemes());
-const activeQuerySchemeId = ref<string>();
-const schemeModalVisible = ref(false);
-const deleteSchemeModalVisible = ref(false);
-const schemeModalMode = ref<SchemeModalMode>('create');
-const schemeForm = reactive({ name: '', owner: 'personal' as 'personal' | 'shared' });
-const schemeNameError = ref('');
+const tableDensity = ref<TableDensity>('compact');
 
 const page = reactive({ current: 1, size: 50 });
 
 const operatorOptions = Array.from(new Set(shipmentWorkbenchRows.map((row) => row.operator)));
 const carrierOptions = Array.from(new Set(shipmentWorkbenchRows.map((row) => row.carrier)));
-const querySchemes = computed(() => [...getSystemQuerySchemes(), ...customQuerySchemes.value]);
-const activeQueryScheme = computed(() => querySchemes.value.find((item) => item.id === activeQuerySchemeId.value));
-const canDeleteActiveScheme = computed(() => Boolean(activeQueryScheme.value && !activeQueryScheme.value.isSystem));
-const activeSchemeDirty = computed(() => Boolean(
-  activeQueryScheme.value
-  && (JSON.stringify(activeQueryScheme.value.query) !== JSON.stringify(cloneQuery(query))
-    || activeQueryScheme.value.statusTab !== activeStatusTab.value),
-));
 const canOperate = computed(() => uiScenario.value !== 'permission');
 const forcedLoading = computed(() => uiScenario.value === 'loading');
 const tableError = computed(() => loadError.value);
-const schemeModalTitle = computed(() => ({
-  create: '保存查询方案',
-  rename: '重命名查询方案',
-  duplicate: '复制查询方案',
-})[schemeModalMode.value]);
 const statusTransitionOptions = computed(() => {
   const rows = statusTargetRows.value;
   if (rows.length <= 1) return getOrderStatusTransitions(rows[0]?.orderStatus ?? '');
@@ -370,7 +252,6 @@ const statusTransitionOptions = computed(() => {
 const tableRowConfig = computed(() => ({
   isHover: true,
   keyField: 'id',
-  height: tableDensity.value === 'compact' ? 36 : 44,
 }));
 
 const isColumnVisible = (field: ColumnSettingField) => visibleColumnFields.value.includes(field);
@@ -709,138 +590,13 @@ const handleSearch = async () => {
 };
 
 const handleReset = () => {
-  const defaultScheme = customQuerySchemes.value.find((item) => item.isDefault);
-  if (defaultScheme) {
-    applyQueryScheme(defaultScheme);
-    return;
-  }
   Object.assign(query, defaultQuery());
   appliedQuery.value = cloneQuery(defaultQuery());
   activeStatusTab.value = 'all';
   activeWorkScope.value = 'all';
-  activeQuerySchemeId.value = undefined;
   advancedFilterVisible.value = false;
   page.current = 1;
   clearSelection();
-};
-
-const persistCustomQuerySchemes = () => {
-  try {
-    window.localStorage.setItem(QUERY_SCHEME_STORAGE_KEY, JSON.stringify(customQuerySchemes.value));
-    window.localStorage.removeItem(LEGACY_QUERY_SCHEME_STORAGE_KEY);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const applyQueryScheme = (scheme: SavedQueryScheme) => {
-  Object.assign(query, cloneQuery(scheme.query));
-  appliedQuery.value = cloneQuery(scheme.query);
-  activeStatusTab.value = scheme.statusTab;
-  activeQuerySchemeId.value = scheme.id;
-  advancedFilterVisible.value = false;
-  page.current = 1;
-  clearSelection();
-};
-
-const openSchemeModal = (mode: SchemeModalMode = 'create') => {
-  schemeModalMode.value = mode;
-  if (mode === 'rename') {
-    schemeForm.name = activeQueryScheme.value?.name ?? '';
-    schemeForm.owner = activeQueryScheme.value?.owner === 'shared' ? 'shared' : 'personal';
-  } else if (mode === 'duplicate') {
-    schemeForm.name = activeQueryScheme.value ? `${activeQueryScheme.value.name} - 副本` : '';
-    schemeForm.owner = activeQueryScheme.value?.owner === 'shared' ? 'shared' : 'personal';
-  } else {
-    schemeForm.name = '';
-    schemeForm.owner = 'personal';
-  }
-  schemeNameError.value = '';
-  schemeModalVisible.value = true;
-};
-
-const saveCurrentQueryScheme = () => {
-  const name = schemeForm.name.trim();
-  if (!name) {
-    schemeNameError.value = '请填写方案名称';
-    return false;
-  }
-  if (name.length > 20) {
-    schemeNameError.value = '方案名称不能超过 20 个字符';
-    return false;
-  }
-  const ignoredId = schemeModalMode.value === 'rename' ? activeQuerySchemeId.value : undefined;
-  if (querySchemes.value.some((item) => item.name === name && item.id !== ignoredId)) {
-    schemeNameError.value = '已存在同名查询方案';
-    return false;
-  }
-
-  if (schemeModalMode.value === 'rename' && activeQueryScheme.value && !activeQueryScheme.value.isSystem) {
-    const target = customQuerySchemes.value.find((item) => item.id === activeQuerySchemeId.value);
-    if (!target) return false;
-    target.name = name;
-    target.owner = schemeForm.owner;
-    target.revision += 1;
-    target.updatedAt = new Date().toISOString();
-    const persisted = persistCustomQuerySchemes();
-    if (persisted) Message.success(`查询方案已重命名为“${name}”`);
-    else Message.warning('浏览器存储不可用，本次修改仅在当前会话生效');
-    return true;
-  }
-
-  const source = schemeModalMode.value === 'duplicate' && activeQueryScheme.value
-    ? activeQueryScheme.value
-    : undefined;
-  const next: SavedQueryScheme = {
-    id: `custom-${Date.now()}`,
-    name,
-    query: cloneQuery(source?.query ?? query),
-    statusTab: source?.statusTab ?? activeStatusTab.value,
-    version: 2,
-    revision: 1,
-    owner: schemeForm.owner,
-    isDefault: false,
-    updatedAt: new Date().toISOString(),
-  };
-  customQuerySchemes.value.push(next);
-  const persisted = persistCustomQuerySchemes();
-  activeQuerySchemeId.value = next.id;
-  if (persisted) Message.success(`查询方案“${name}”已${schemeModalMode.value === 'duplicate' ? '复制' : '保存'}`);
-  else Message.warning('浏览器存储不可用，查询方案仅在本次会话保留');
-  return true;
-};
-
-const updateActiveQueryScheme = () => {
-  if (!activeQueryScheme.value || activeQueryScheme.value.isSystem) return;
-  const target = customQuerySchemes.value.find((item) => item.id === activeQuerySchemeId.value);
-  if (!target) return;
-  target.query = cloneQuery(query);
-  target.statusTab = activeStatusTab.value;
-  target.revision += 1;
-  target.updatedAt = new Date().toISOString();
-  persistCustomQuerySchemes();
-  Message.success(`查询方案“${target.name}”已更新`);
-};
-
-const toggleDefaultQueryScheme = () => {
-  if (!activeQueryScheme.value || activeQueryScheme.value.isSystem) return;
-  const nextDefault = !activeQueryScheme.value.isDefault;
-  customQuerySchemes.value.forEach((item) => {
-    item.isDefault = nextDefault && item.id === activeQuerySchemeId.value;
-  });
-  persistCustomQuerySchemes();
-  Message.success(nextDefault ? `已将“${activeQueryScheme.value.name}”设为默认方案` : '已取消默认查询方案');
-};
-
-const deleteActiveQueryScheme = () => {
-  if (!activeQueryScheme.value || activeQueryScheme.value.isSystem) return;
-  const deletedName = activeQueryScheme.value.name;
-  customQuerySchemes.value = customQuerySchemes.value.filter((item) => item.id !== activeQuerySchemeId.value);
-  persistCustomQuerySchemes();
-  activeQuerySchemeId.value = undefined;
-  deleteSchemeModalVisible.value = false;
-  Message.success(`查询方案“${deletedName}”已删除`);
 };
 
 const setTableDensity = (density: TableDensity) => {
@@ -1004,16 +760,6 @@ const applyColumnSettings = async () => {
   return true;
 };
 
-const openDetailDrawer = (row: ShipmentWorkbenchRow) => {
-  currentDetail.value = getShipmentOrderMock(row.orderNo);
-  drawerVisible.value = true;
-};
-
-const openFullDetail = (orderNo: string, tab = 'overview') => {
-  drawerVisible.value = false;
-  router.push({ name: 'ShipmentOrderDetail', query: { orderNo, tab } });
-};
-
 const handleCreateOrder = async () => {
   if (creating.value) return;
   creating.value = true;
@@ -1023,7 +769,8 @@ const handleCreateOrder = async () => {
     creating.value = false;
     return;
   }
-  openFullDetail(`NEW${Date.now()}`, 'overview');
+  // 详情编辑模块已下线，草稿初始化结果暂以消息反馈。
+  Message.success(`订单草稿 NEW${Date.now()} 已初始化`);
   creating.value = false;
 };
 
@@ -1045,7 +792,7 @@ const handleGenerateRowFee = (row: ShipmentWorkbenchRow) => runRowMutation(
 );
 
 const openStatusModal = (row: ShipmentWorkbenchRow) => {
-  statusTargetRow.value = row;
+  statusTargetRows.value = [row];
   statusForm.targetStatus = undefined;
   statusForm.reason = '';
   statusForm.notify = true;
@@ -1058,7 +805,7 @@ const openStatusModal = (row: ShipmentWorkbenchRow) => {
 const confirmStatusChange = async () => {
   statusErrors.targetStatus = statusForm.targetStatus ? '' : '请选择目标状态';
   statusErrors.reason = statusForm.reason.trim() ? '' : '请填写修改原因';
-  if (statusErrors.targetStatus || statusErrors.reason || !statusTargetRow.value) return false;
+  if (statusErrors.targetStatus || statusErrors.reason || statusTargetRows.value.length === 0) return false;
 
   const nextStatus = statusTransitionOptions.value.find((item) => item.value === statusForm.targetStatus);
   if (!nextStatus) {
@@ -1066,7 +813,7 @@ const confirmStatusChange = async () => {
     return false;
   }
 
-  const row = statusTargetRow.value;
+  const row = statusTargetRows.value[0];
   statusSubmitting.value = true;
   const changed = await runRowMutation(
     row,
@@ -1298,55 +1045,6 @@ watch(uiScenario, () => {
               </a-col>
               <a-col :xs="24" :sm="24" :md="6" :lg="6" :xl="8" class="filter-panel__action-col">
                 <div class="filter-panel__actions">
-                  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-                    <a-button
-                      size="small"
-                      type="text"
-                      class="query-scheme-trigger filter-tool-button"
-                      title="查询方案"
-                      aria-label="查询方案"
-                    >
-                      <template #icon><icon-history /></template>
-                      <span class="query-scheme-trigger__label">{{ activeQueryScheme?.name ?? '查询方案' }}{{ activeSchemeDirty ? ' *' : '' }}</span>
-                      <icon-down class="query-scheme-trigger__chevron" />
-                    </a-button>
-                    <template #content>
-                      <a-doption v-if="!querySchemes.length" disabled>暂无已保存方案</a-doption>
-                      <a-doption
-                        v-for="scheme in querySchemes"
-                        :key="scheme.id"
-                        @click="applyQueryScheme(scheme)"
-                      >
-                        <span class="query-scheme-option">
-                          <icon-check v-if="activeQuerySchemeId === scheme.id" />
-                          <span v-else class="query-scheme-option__placeholder" />
-                          {{ scheme.name }}
-                          <small v-if="scheme.isDefault">默认</small>
-                          <small v-else-if="scheme.owner === 'shared'">共享</small>
-                        </span>
-                      </a-doption>
-                      <a-divider class="action-menu__divider" />
-                      <a-doption @click="openSchemeModal('create')">保存为新方案</a-doption>
-                      <a-doption
-                        v-if="canDeleteActiveScheme"
-                        :disabled="!activeSchemeDirty"
-                        @click="updateActiveQueryScheme"
-                      >更新当前方案</a-doption>
-                      <a-doption v-if="canDeleteActiveScheme" @click="openSchemeModal('rename')">重命名</a-doption>
-                      <a-doption v-if="activeQueryScheme" @click="openSchemeModal('duplicate')">复制方案</a-doption>
-                      <a-doption v-if="canDeleteActiveScheme" @click="toggleDefaultQueryScheme">
-                        {{ activeQueryScheme?.isDefault ? '取消默认方案' : '设为默认方案' }}
-                      </a-doption>
-                      <a-divider v-if="canDeleteActiveScheme" class="action-menu__divider" />
-                      <a-doption
-                        v-if="canDeleteActiveScheme"
-                        class="danger-opt"
-                        @click="deleteSchemeModalVisible = true"
-                      >
-                        删除当前方案
-                      </a-doption>
-                    </template>
-                  </a-dropdown>
                   <a-button size="small" type="primary" :loading="querying" @click="handleSearch">
                     <template #icon><icon-search /></template>
                     查询
@@ -1518,14 +1216,12 @@ watch(uiScenario, () => {
         <div class="workbench-table-frame">
           <vxe-table
             ref="tableRef"
-            id="shipment-export-orders-v2"
-            :class="[tableDensity, 'workbench-table']"
-            size="small"
+            id="shipment-export-orders"
+            :size="tableDensity === 'standard' ? 'medium' : undefined"
             style="width: 100%"
             height="100%"
             auto-resize
             fit
-            border="none"
             show-overflow="title"
             :loading="loading || querying || forcedLoading"
             :data="pagedRows"
@@ -1540,7 +1236,7 @@ watch(uiScenario, () => {
 
             <vxe-column field="orderNo" title="订单号" min-width="168" fixed="left" :visible="isColumnVisible('orderNo')">
               <template #default="{ row }">
-                <span class="link-text link-text--strong mono" @click="openDetailDrawer(row)">{{ row.orderNo }}</span>
+                <span class="mono">{{ row.orderNo }}</span>
               </template>
             </vxe-column>
 
@@ -1597,18 +1293,28 @@ watch(uiScenario, () => {
               <template #default="{ row }">{{ row.isOverdue ? '已超期' : '未超期' }}</template>
             </vxe-column>
 
-            <vxe-column title="操作" width="88" fixed="right" align="center">
+            <vxe-column title="操作" width="176" fixed="right" align="center">
               <template #default="{ row }">
                 <div class="row-actions">
-                  <a-tooltip content="详情">
-                    <a-button aria-label="查看订单详情" size="small" type="text" class="row-action-btn row-action-btn--primary" @click="openDetailDrawer(row)">
-                      <icon-eye />
-                    </a-button>
-                  </a-tooltip>
+                  <a-button
+                    v-if="canTransitionOrder(row)"
+                    size="mini"
+                    type="text"
+                    class="row-action-btn"
+                    :disabled="isRowPending(row)"
+                    @click="openStatusModal(row)"
+                  >修改状态</a-button>
+                  <a-button
+                    size="mini"
+                    type="text"
+                    class="row-action-btn"
+                    :disabled="isRowPending(row)"
+                    @click="handleAssignOperator(row)"
+                  >分配给我</a-button>
                   <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--row">
                     <a-tooltip content="更多操作">
                       <a-button
-                        size="small"
+                        size="mini"
                         type="text"
                         class="row-action-btn row-action-btn--more"
                         aria-label="更多操作"
@@ -1619,13 +1325,8 @@ watch(uiScenario, () => {
                       </a-button>
                     </a-tooltip>
                     <template #content>
-                      <a-doption @click="openFullDetail(row.orderNo, 'overview')">编辑</a-doption>
-                      <a-doption v-if="canTransitionOrder(row)" @click="openStatusModal(row)">修改状态</a-doption>
-                      <a-doption @click="handleAssignOperator(row)">分配给我</a-doption>
                       <a-doption @click="handleGenerateRowFee(row)">生成费用</a-doption>
-                      <a-doption @click="openFullDetail(row.orderNo, 'files')">上传文件</a-doption>
                       <a-doption @click="handleRowNotify(row)">发送通知</a-doption>
-                      <a-doption @click="openFullDetail(row.orderNo, 'collaboration')">查看日志</a-doption>
                       <a-divider class="action-menu__divider" />
                       <a-doption class="danger-opt" @click="openVoidModal(row)">作废订单</a-doption>
                     </template>
@@ -2003,7 +1704,7 @@ watch(uiScenario, () => {
         <a-row :gutter="16">
           <a-col :span="12">
             <a-form-item label="当前状态">
-              <span>{{ statusTargetRow?.orderStatusLabel }}</span>
+              <span>{{ statusTargetRows[0]?.orderStatusLabel }}</span>
             </a-form-item>
           </a-col>
           <a-col :span="12">
@@ -2059,48 +1760,6 @@ watch(uiScenario, () => {
     </a-modal>
 
     <a-modal
-      v-model:visible="schemeModalVisible"
-      :title="schemeModalTitle"
-      :width="480"
-      :mask-closable="false"
-      :ok-button-props="{ size: 'small' }"
-      :cancel-button-props="{ size: 'small' }"
-      :on-before-ok="saveCurrentQueryScheme"
-    >
-      <a-form :model="schemeForm" layout="vertical" size="small" class="detail-form">
-        <a-form-item
-          field="name"
-          label="方案名称"
-          required
-          :validate-status="schemeNameError ? 'error' : undefined"
-          :help="schemeNameError"
-        >
-          <a-input
-            v-model="schemeForm.name"
-            size="small"
-            allow-clear
-            :max-length="20"
-            show-word-limit
-            placeholder="例如：华南区本周待放舱"
-            @input="schemeNameError = ''"
-          />
-        </a-form-item>
-      </a-form>
-    </a-modal>
-
-    <a-modal
-      v-model:visible="deleteSchemeModalVisible"
-      title="删除查询方案"
-      :width="420"
-      :mask-closable="false"
-      :ok-button-props="{ status: 'danger', size: 'small' }"
-      :cancel-button-props="{ size: 'small' }"
-      @ok="deleteActiveQueryScheme"
-    >
-      确认删除查询方案“{{ activeQueryScheme?.name }}”？删除后不可恢复。
-    </a-modal>
-
-    <a-modal
       v-model:visible="voidModalVisible"
       title="作废订单"
       :width="420"
@@ -2114,12 +1773,6 @@ watch(uiScenario, () => {
       <p class="modal-confirm-copy">确认作废订单 {{ voidTargetRow?.orderNo }}？此操作不可撤销，并会保留操作日志。</p>
       <a-alert v-if="voidError" type="error">{{ voidError }}</a-alert>
     </a-modal>
-
-    <shipment-order-detail-drawer
-      v-model:visible="drawerVisible"
-      :record="currentDetail"
-      @open-full="openFullDetail"
-    />
   </div>
 </template>
 
@@ -2163,17 +1816,6 @@ watch(uiScenario, () => {
   white-space: nowrap;
 }
 
-.query-scheme-trigger {
-  max-width: 142px;
-}
-
-.query-scheme-trigger__label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.query-scheme-option,
 .density-option {
   display: inline-flex;
   align-items: center;
@@ -2181,16 +1823,9 @@ watch(uiScenario, () => {
   min-width: 112px;
 }
 
-.query-scheme-option__placeholder,
 .density-option__placeholder {
   width: 12px;
   flex: 0 0 12px;
-}
-
-.query-scheme-option small {
-  margin-left: auto;
-  color: var(--color-text-3);
-  font-size: var(--dense-font-micro);
 }
 
 .flow-bar {
@@ -2312,19 +1947,6 @@ watch(uiScenario, () => {
   min-height: 260px;
   overflow: hidden;
   background: var(--color-bg-card);
-}
-
-.workbench-table-frame :deep(.vxe-table) {
-  flex: 1;
-  width: 100%;
-  min-width: 0;
-}
-
-.workbench-table-frame :deep(.vxe-table--render-wrapper),
-.workbench-table-frame :deep(.vxe-table--main-wrapper),
-.workbench-table-frame :deep(.vxe-table--header-wrapper),
-.workbench-table-frame :deep(.vxe-table--body-wrapper) {
-  width: 100%;
 }
 
 .table-cap-start {
@@ -2580,15 +2202,6 @@ watch(uiScenario, () => {
     gap: 4px;
   }
 
-  .query-scheme-trigger {
-    max-width: none;
-  }
-
-  .query-scheme-trigger__label {
-    display: none;
-  }
-
-  .query-scheme-trigger__chevron,
   .filter-tool-label {
     display: none;
   }

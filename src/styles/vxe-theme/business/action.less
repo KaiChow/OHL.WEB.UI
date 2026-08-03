@@ -1,0 +1,25 @@
+/**
+ * =====================================================
+ * Table Action（业务层）
+ * =====================================================
+ */
+
+.table-action {
+  display: flex;
+  align-items: center;
+  gap: @vxe-spacing-md;
+}
+
+.table-action-item {
+  color: @vxe-primary;
+  cursor: pointer;
+  font-size: var(--vxe-theme-font-size, @vxe-font-size-table);
+}
+
+.table-action-item:hover {
+  opacity: @vxe-action-hover-opacity;
+}
+
+.table-action-danger {
+  color: @vxe-danger;
+}

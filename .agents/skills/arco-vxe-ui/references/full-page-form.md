@@ -51,7 +51,7 @@ Prefer **drawer** when user must keep list context. Use **full page** when creat
 - **Must** use `a-form` + `class="detail-form"` + `a-form-item` — see `form-rules.md`.
 - **Forbidden** raw `<label class="xf-label">` + custom error div (legacy skeleton only).
 - Grid: use Arco `a-row` / `a-col`; four columns by default, then reduce by content and `responsive.md`.
-- Sub-entity tables use `detail-mini-vxe` inside an unframed owning section.
+- Sub-entity tables use the detail-table VXE configuration inside an unframed owning section.
 
 ## Footer (workflow)
 

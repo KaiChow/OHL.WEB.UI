@@ -1,0 +1,92 @@
+/**
+ * =====================================================
+ * Color Scale · 仅注入官方 CSS 变量
+ * =====================================================
+ */
+
+@import (reference) "./base-token.less";
+@import (reference) "./color-token.less";
+@import (reference) "./typography-token.less";
+@import (reference) "./shadow-token.less";
+@import (reference) "./state-token.less";
+
+:root {
+  /* 通用 */
+  --vxe-primary-color: @{vxe-primary};
+  --vxe-primary-lighten-color: @{vxe-primary-hover};
+  --vxe-primary-darken-color: @{vxe-primary-active};
+  --vxe-success-color: @{vxe-success};
+  --vxe-warning-color: @{vxe-warning};
+  --vxe-danger-color: @{vxe-danger};
+  --vxe-info-color: @{vxe-info};
+
+  --vxe-font-family: @{vxe-font-family};
+  --vxe-font-color: @{vxe-text-1};
+  --vxe-font-lighten-color: @{vxe-text-2};
+  --vxe-font-darken-color: @{vxe-text-1};
+  --vxe-font-disabled-color: @{vxe-text-disabled};
+  --vxe-border-radius: @{vxe-radius-sm};
+
+  /* 表格 */
+  --vxe-table-border-color: @{vxe-border};
+  --vxe-table-border-radius: @{vxe-radius-md};
+  --vxe-table-header-background-color: @{vxe-header-bg};
+  --vxe-table-header-font-color: @{vxe-header-text};
+  --vxe-table-header-font-weight: @{vxe-font-weight-bold};
+  --vxe-table-body-background-color: @{vxe-surface};
+  --vxe-table-footer-background-color: @{vxe-surface-muted};
+  --vxe-table-footer-font-color: @{vxe-text-2};
+
+  --vxe-table-row-hover-background-color: @{vxe-row-hover};
+  --vxe-table-row-striped-background-color: @{vxe-row-stripe};
+  --vxe-table-row-hover-striped-background-color: @{vxe-row-hover-stripe};
+  --vxe-table-row-current-background-color: @{vxe-row-current};
+  --vxe-table-row-hover-current-background-color: @{vxe-row-current-hover};
+  --vxe-table-row-checkbox-checked-background-color: @{vxe-row-selected};
+  --vxe-table-row-hover-checkbox-checked-background-color: @{vxe-row-selected-hover};
+  --vxe-table-row-radio-checked-background-color: @{vxe-row-selected};
+  --vxe-table-row-hover-radio-checked-background-color: @{vxe-row-selected-hover};
+
+  --vxe-table-column-hover-background-color: @{vxe-primary-soft};
+  --vxe-table-column-current-background-color: @{vxe-edit-cell-bg};
+  --vxe-table-column-icon-border-color: @{vxe-text-3};
+  --vxe-table-column-icon-border-hover-color: @{vxe-primary};
+
+  --vxe-table-cell-dirty-update-color: @{vxe-dirty-update};
+  --vxe-table-cell-dirty-insert-color: @{vxe-dirty-insert};
+  --vxe-table-cell-dirty-width: @{vxe-dirty-width};
+  --vxe-table-cell-placeholder-color: @{vxe-text-3};
+
+  --vxe-table-validate-error-color: @{vxe-valid-tip-text};
+  --vxe-table-validate-error-background-color: @{vxe-valid-tip-bg};
+
+  --vxe-table-fixed-left-scrolling-box-shadow: @{vxe-shadow-left};
+  --vxe-table-fixed-right-scrolling-box-shadow: @{vxe-shadow-right};
+
+  --vxe-table-resizable-line-color: fade(@vxe-primary, 45%);
+  --vxe-table-resizable-drag-line-color: @{vxe-primary};
+
+  --vxe-table-tree-node-line-color: @{vxe-border-dark};
+  --vxe-table-filter-panel-background-color: @{vxe-surface};
+
+  /* Loading / Toolbar / Pager / Tooltip */
+  --vxe-loading-color: @{vxe-primary};
+  --vxe-loading-background-color: fade(@vxe-surface, 72%);
+
+  --vxe-toolbar-background-color: @{vxe-surface};
+  --vxe-toolbar-panel-background-color: @{vxe-surface};
+  --vxe-toolbar-custom-active-background-color: @{vxe-surface-muted};
+
+  --vxe-pager-background-color: @{vxe-surface};
+  --vxe-pager-perfect-background-color: @{vxe-surface};
+  --vxe-pager-perfect-button-background-color: @{vxe-surface-muted};
+
+  --vxe-tooltip-dark-color: @{vxe-text-inverse};
+  --vxe-tooltip-dark-background-color: @{vxe-text-1};
+  --vxe-tooltip-light-background-color: @{vxe-surface};
+
+  /* 预览页色板（仅 CSS 变量，非 class） */
+  --vxe-theme-header-bg: @{vxe-header-bg};
+  --vxe-theme-header-bg-hover: @{vxe-header-bg-hover};
+  --vxe-theme-row-bg: @{vxe-row-bg};
+}

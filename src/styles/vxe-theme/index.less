@@ -1,0 +1,28 @@
+/**
+ * =====================================================
+ * vxe-table Theme
+ *
+ * 只定制 token → 注入官方 CSS 变量
+ * 业务语义 class 可选（business/）
+ * 禁止再对 .vxe-* 写 table 观感覆盖
+ * =====================================================
+ */
+
+/* 1. Token */
+
+@import "./token/base-token.less";
+@import "./token/color-token.less";
+@import "./token/size-token.less";
+@import "./token/typography-token.less";
+@import "./token/shadow-token.less";
+@import "./token/state-token.less";
+
+/* 2. Scale → 官方 --vxe-* */
+
+@import "./token/size-scale.less";
+@import "./token/color-scale.less";
+@import "./token/effect-scale.less";
+
+/* 3. Business（可选语义类，与 table 主题解耦） */
+
+@import "./business/index.less";

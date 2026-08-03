@@ -227,7 +227,7 @@ Detail pages must expose hierarchy across the whole vertical stack:
 - Detail field groups remain unframed inside one owning Arco surface. Boundary, shadow, radius, and component chrome stay GI-owned; primary tint is reserved for active/focused/selected state.
 - `form-subgroup` owns an internal concept. It is an unframed heading plus related fields, not another card or decorative sub-surface.
 - `detail-module-summary--inline` owns module-level totals. Keep totals adjacent to the owning identity and distinguish them through labels, alignment, and numeric typography.
-- `detail-mini-vxe` uses VXE native small density and public configuration; it does not inherit a custom list-table skin.
+- Detail tables use VXE native small density and public configuration; they do not inherit a custom list-table skin.
 - Avoid repeated title markers, dots, and rails. Add an accent only when it communicates current, selected, expanded, risk, or another real state.
 
 ## Dark Color Boundaries

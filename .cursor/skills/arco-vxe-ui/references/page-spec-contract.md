@@ -71,7 +71,7 @@ Every business action references an existing feature contract and declares frequ
 
 ## Page-Specific Contracts
 
-- Query: record all fields, visible vs advanced ownership, selected strategy, and saved schemes only when real.
+- Query: record all fields, visible vs advanced ownership, and selected strategy.
 - Workbench table: classify identity, decision, supporting, composite, fixed, and density roles before columns are coded.
 - Object detail: default mode, current risk/next work, real milestones, edit scope, save/cancel owner, and local failure owner.
 - States: include only applicable states, but every listed state needs a deterministic trigger and recovery check. Omitting an applicable state to shorten the spec is a release defect.

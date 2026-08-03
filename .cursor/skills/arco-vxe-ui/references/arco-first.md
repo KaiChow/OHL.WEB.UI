@@ -73,7 +73,7 @@ Shared project CSS may own only these categories:
 |----------|----------|------------------------------|
 | Freight business semantics | `.s-pill[data-s]`, milestone semantics, risk / next-action patterns | Arco Tag/Badge has no freight status vocabulary |
 | Workbench archetype | Shared Vue workbench/detail components with named slots | Repeated freight list/detail workflows need stable ownership |
-| Table semantics | `workbench-table`, `detail-mini-vxe` hooks plus VXE public props/config | Main and child tables need distinct jobs without internal selector overrides |
+| Table semantics | Table-role page specification plus VXE public props/config | Main and child tables need distinct jobs without internal selector overrides |
 
 These are **structural slots**, not replacements for Arco controls inside them.
 

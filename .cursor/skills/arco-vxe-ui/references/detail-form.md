@@ -518,17 +518,15 @@ Anti-patterns:
 - Child title shown as plain body text with no visual hierarchy.
 - Add/delete actions placed at the wrong level, such as line add in parent head or child delete in line table.
 
-### Inline Editable Table Visual Rules (`detail-mini-vxe`)
+### Inline Editable Table Visual Rules
 
-When a detail section contains a VXE table with editable cells (`a-input`, `a-select`, `a-date-picker` inside columns), use class `detail-mini-vxe` as a semantic/checker hook. Controls keep GI native small styling.
+When a detail section contains a VXE table with editable cells (`a-input`, `a-select`, `a-date-picker` inside columns), record its editable-detail role in `pageSpec.ts` and configure it through VXE public props. Controls keep GI native small styling.
 
 Container:
 
 ```vue
 <div class="detail-section__body detail-section__body--table">
   <vxe-table
-    class="detail-mini-vxe detail-mini-vxe--editable"
-    border="none"
     size="small"
     :data="rows"
     :row-config="{ isHover: true, keyField: 'id' }"
@@ -540,20 +538,19 @@ Container:
 
 Required:
 
-- Always add `class="detail-mini-vxe"` to VXE tables embedded in `detail-section__body` that contain editable controls.
 - Use `detail-section__body--table` on the section body (or `detail-child-pane__table` for nested child panes).
-- Use `detail-mini-vxe--editable`; rely on VXE native small density and verify that GI small controls are not clipped.
+- Rely on VXE native small density and verify that explicit `mini` row controls are not clipped.
 - In a Drawer or intrinsic-height pane, omit the VXE `height` prop. `height="auto"` is forbidden because pinned VXE 4.5 can feed the measured parent height back into its own content height and grow indefinitely.
 - Business columns use `min-width`; only checkbox / seq / operation use fixed `width` (see `table.md` width policy).
 
 Forbidden:
 
-- `show-overflow` / `show-header-overflow` on `detail-mini-vxe` (causes clipping and header/body misalignment).
+- `show-overflow` / `show-header-overflow` on editable detail tables (causes clipping and header/body misalignment).
 - `detail-child-pane__desc` when the child title and field labels already explain the block (no redundant module copy).
 - Page-scoped wrappers with `overflow: hidden` around wide detail tables.
 - `height="auto"` on an embedded VXE table whose Drawer body or detail pane already owns vertical scrolling.
 - Styling VXE `td` / cell internals to force density.
-- Forgetting `class="detail-mini-vxe"` — the semantic table job becomes invisible to review and automated checks.
+- Inferring the table role from a CSS class instead of recording it in the page specification and public VXE configuration.
 
 Form grid in detail drawers:
 

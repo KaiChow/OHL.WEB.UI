@@ -1,0 +1,34 @@
+/**
+ * =====================================================
+ * Type · 业务语义字体
+ * 单号 / 金额 / 数字 / 日志 — 按需挂 class，不自动套列
+ * =====================================================
+ */
+
+/* 单号 / 用例编号 */
+.biz-id {
+  font-family: @vxe-id-font;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* 金额（可与 .biz-income / .biz-cost 等组合） */
+.biz-money {
+  font-family: @vxe-money-font;
+  font-variant-numeric: tabular-nums;
+  font-weight: @vxe-font-weight-medium;
+}
+
+/* 普通数字 / 计数：UI 字体对齐位数，与金额等宽区分 */
+.biz-number {
+  font-family: @vxe-font-family;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 日志 / 技术字段 */
+.biz-log {
+  font-family: @vxe-log-font;
+  font-size: @vxe-font-size-xs;
+  color: @vxe-text-3;
+  line-height: 1.45;
+}

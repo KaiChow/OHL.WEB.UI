@@ -14,9 +14,10 @@ The executable UI contract is `.agents/skills/arco-vxe-ui/SKILL.md`. Keep this f
 ## Hard constraints
 
 - GI owns the Arco baseline/palette; do not add a theme adapter or page-local skin.
-- Use `vxe-table`, never `a-table`; use `workbench-table` for list grids and `detail-mini-vxe` for child grids.
+- vxe-table look is owned by `src/styles/vxe-theme/` tokens (official `--vxe-*` variables) plus global defaults in `main.ts` (`border`, `stripe`, `size: 'mini'` — high-density system); pages never write custom table styles — density overrides via the `size` prop only.
+- Use `vxe-table`, never `a-table`; classify each table by its business role (main list, detail child, editable line, file, or summary), not by a prescribed CSS class name.
 - Use `.s-pill[data-s]` for status; never color the whole row by status.
-- Use explicit `size="small"` for business controls and one `type="primary"` per action scope.
+- Arco form and business controls inherit the app-wide `small` default; Arco controls inside `vxe-table` rows must explicitly use `size="mini"`; one `type="primary"` per action scope.
 - Use Arco icons for common actions; use IconPark only for business/menu/empty/module semantics.
 - Complete feature contracts before implementing clicks, requests, permissions, mutations, or state transitions.
 - For screenshot/prototype input, complete artifact intake and prototype translation before coding.

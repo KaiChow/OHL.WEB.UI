@@ -118,7 +118,7 @@ Use **Arco** icons only.
 Rules:
 
 - follow `table.md` row-action matrix
-- row actions are icon-only + tooltip
+- row actions are text buttons with business verbs; `···` is the only icon trigger (tooltip + aria-label)
 - primary view/edit use `icon-eye` / `icon-edit`
 - more menu uses `icon-more`
 - list delete stays inside the row More menu as a text danger option; do not direct-expose a delete icon on workbench tables
@@ -200,7 +200,7 @@ Rules:
 | Toolbar primary create | icon + text | Arco | `icon-plus` etc. |
 | Toolbar utilities | icon-only + tooltip | Arco | compact utility |
 | Toolbar business workflow | text-only by default | none | text |
-| Row actions | icon-only + tooltip | Arco | `eye/edit/more` |
+| Row actions | 文字按钮（业务动词）；仅 `···` icon + tooltip | Arco | `more` |
 | Detail/module title | semantic icon + text | IconPark | left icon |
 | Status pill | text-only | none | no icon by default |
 | Dropdown options | text-only | none | no icons by default |
@@ -233,7 +233,7 @@ Need an icon?
 | Reference | Why |
 |-----------|-----|
 | `actions.md` | button content form and action scope |
-| `table.md` | row-action icon matrix |
+| `table.md` | row-action matrix |
 | `detail-form.md` | section/module structure |
 | `feedback.md` | empty state and warning surfaces |
 | `visual-system.md` | icon color hierarchy and restraint |

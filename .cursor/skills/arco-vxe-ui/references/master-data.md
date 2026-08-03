@@ -38,8 +38,8 @@ Category/tree on the left; list or form on the right. Implement `md-layout` as p
         </div>
       </div>
       <div class="table-wrap">
-        <vxe-table border="none" size="small" class="compact workbench-table" height="100%" show-overflow="title"
-          :row-config="{ isHover: true, keyField: 'Id', height: 36 }" :data="rows">
+        <vxe-table height="100%" show-overflow="title"
+          :row-config="{ isHover: true, keyField: 'Id' }" :data="rows">
           <!-- identity, 启用状态, 更新时间, 操作 -->
         </vxe-table>
       </div>
@@ -106,6 +106,6 @@ No shipment-specific columns (ETD, MBL, 柜量) on master-data pages.
 ## Verification
 
 - [ ] `md-layout` + `md-layout__tree` + `md-layout__main`
-- [ ] `workbench-table` + `border="none"` when right side is table
+- [ ] Main list VXE table uses the global border/stripe defaults when right side is table
 - [ ] Enable state uses `s-pill`, not row background color
 - [ ] Labels from `domain-language` master-data row

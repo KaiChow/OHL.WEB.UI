@@ -65,7 +65,6 @@ export interface PesdpPageSpec {
     strategy: 'none' | 's1-inline' | 's2-expand' | 's3-drawer' | 's4-workspace';
     visibleFields: readonly string[];
     advancedFields: readonly string[];
-    savedSchemes?: boolean;
   };
   table: {
     kind: 'none' | 'workbench' | 'detail-editable' | 'detail-readonly' | 'summary';

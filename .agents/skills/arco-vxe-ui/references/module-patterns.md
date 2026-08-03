@@ -154,7 +154,7 @@ Detail UI rules: [`detail-form.md` → Parent-Child](detail-form.md#parent-child
 | Type | Use for | Implementation |
 |------|---------|----------------|
 | Attachment | B/L, customs docs, images | `detail-form.md` → Attachments |
-| Line table | Fees, cargo, stock | `detail-mini-vxe` — [`table.md`](table.md) |
+| Line table | Fees, cargo, stock | Detail-table VXE configuration — [`table.md`](table.md) |
 | Party / contact | Shipper, consignee, owner | Chips or compact rows; name = `color-text-1` |
 | Timeline | Ops log, audit | Dense list, no per-item cards |
 | Exception | Risk, variance | `s-pill`; no row background fill |

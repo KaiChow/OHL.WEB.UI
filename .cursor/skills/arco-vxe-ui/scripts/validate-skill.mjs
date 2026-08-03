@@ -118,7 +118,7 @@ export function validateUiSkill() {
     [/Table row icon[^\n]*22×22px/, 'obsolete 22px row-action target'],
     [/Status pill[^\n]*F6 Micro[^\n]*10px/, 'obsolete 10px status-pill typography'],
     [/must set `outline: none`/, 'unsafe focus removal restored'],
-    [/global CSS bridge|workbench-table bridge|Normalize in `global\.css`|`global\.css` overrides/, 'global framework-skin authority restored'],
+    [/global CSS bridge|table bridge|Normalize in `global\.css`|`global\.css` overrides/, 'global framework-skin authority restored'],
     [/subtle (?:top\/inset|left\/inset) primary anchor|uses a primary rail/, 'decorative primary rail restored'],
     [/--dense-table-(?:header|col|row)|--dense-workbench-hover-bg|--dense-vxe-surface/, 'global VXE skin token restored'],
   ];

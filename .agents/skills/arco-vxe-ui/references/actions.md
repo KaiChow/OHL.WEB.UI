@@ -8,9 +8,9 @@ Arco `a-button` has **5 types** and **4 statuses**. Status can combine with any 
 <a-button type="primary" status="danger">...</a-button>
 ```
 
-All operational pages use `size="small"` unless a documented hero/empty-state exception exists. Full mapping: `references/component-size.md`.
+All operational pages inherit `size="small"` from the application ConfigProvider unless a documented hero/empty-state exception exists. Full mapping: `references/component-size.md`.
 
-**Never omit `size` on form controls** — Arco defaults to `medium` (14px). **Never use `size="medium"` or `size="large"`** in `src/views`.
+**Do not override form controls to `size="medium"` or `size="large"`** in `src/views`; table-row controls remain the explicit `size="mini"` exception.
 
 ---
 
@@ -57,7 +57,7 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 | 模块添加 | `outline` + normal | — |
 | 空状态添加行 | `dashed` + normal | — |
 | 重置/刷新/复制 | `text` + normal | — |
-| 行内删除（`detail-mini-vxe--editable`） | `text` + `danger` + `row-action-btn` | `a-popconfirm` |
+| 详情可编辑表的行内删除 | `text` + `danger` + `row-action-btn` | `a-popconfirm` |
 | 列表行删除 | row More menu + final `danger-opt` | 独立 `Modal.confirm` / business Modal |
 | 吸底废弃 | `text` + `danger` | `Modal.confirm` |
 | 弹窗确定删除 | `primary` + `danger`（仅 confirm 弹窗内） | 已在 Modal 中 |
@@ -183,7 +183,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 | Scope | Default content form | Examples |
 |-------|----------------------|----------|
-| Filter | 查询保留 icon + text；宽度不足时查询方案/重置/高级筛选可收成 icon-only | `查询`, history, refresh, filter |
+| Filter | 查询保留 icon + text；宽度不足时重置/高级筛选可收成 icon-only | `查询`, history, refresh, filter |
 | Toolbar primary create | Icon + text | `+ 新建工单` |
 | Toolbar direct business action | Text-only or icon + text if universal | `打印工单`, `导出` |
 | Toolbar utility | Icon-only + tooltip | refresh, column settings |
@@ -345,30 +345,31 @@ Footer 布局与完整示例见 `modal.md`；本节只约束按钮层级。
 
 | 场景 | 直出 | 危险操作 |
 |------|------|----------|
-| **列表主表** `workbench-table` | 最多 2 个 affordance；N≥3 或含 D → `[A] + ···` | 永远在 `···` 内 + `danger-opt`，点击后打开独立确认 Modal |
-| **详情可编辑子表** `detail-mini-vxe--editable` | 同上上限 | 允许 1 个直出 danger icon + `a-popconfirm`（行编辑场景） |
+| **列表主表** | 文字按钮最多 2 个（核心业务动词）；N≥3 或含 D → `[A][B] + ···` | 永远在 `···` 内 + `danger-opt`，点击后打开独立确认 Modal |
+| **详情可编辑子表** | 同上上限 | 允许 1 个直出 danger icon + `a-popconfirm`（行编辑场景） |
 
 ```vue
-<!-- 列表：主操作 + 更多（含删除） -->
+<!-- 列表：两个核心动词文字按钮 + 更多（含危险项） -->
 <div class="row-actions">
-  <a-tooltip content="查看">
-    <a-button type="text" class="row-action-btn row-action-btn--primary" @click="openDetail(row)"><icon-eye /></a-button>
-  </a-tooltip>
+  <a-button size="mini" type="text" class="row-action-btn" @click="openStatusModal(row)">修改状态</a-button>
+  <a-button size="mini" type="text" class="row-action-btn" @click="handleAssign(row)">分配给我</a-button>
   <a-dropdown trigger="click">
-    <a-button type="text" class="row-action-btn row-action-btn--more" title="更多操作"><icon-more /></a-button>
+    <a-button size="mini" type="text" class="row-action-btn row-action-btn--more" aria-label="更多操作"><icon-more /></a-button>
     <template #content>
+      <a-doption @click="handleFee(row)">生成费用</a-doption>
       <a-divider />
-      <a-doption class="danger-opt" @click="openRemoveConfirm(row)">删除</a-doption>
+      <a-doption class="danger-opt" @click="openVoidConfirm(row)">作废订单</a-doption>
     </template>
   </a-dropdown>
 </div>
 ```
 
-- 行内禁止文字按钮（「查看」「编辑」字样）
-- 操作列内按钮必须放在 `row-actions` 中；主操作 `row-action-btn--primary`，更多 `row-action-btn--more`
+- 直出用**文字按钮**（业务动词，无学习成本）；`···` 是操作列唯一允许的 icon-only 触发器（配 `aria-label="更多操作"` + Tooltip）
+- 行内控件必须 `size="mini"`（mini 行内容盒 24px，small 28px 会裁切）
+- 操作列内按钮必须放在 `row-actions` 中；更多 `row-action-btn--more`
 - `row-actions` 只是对齐容器，不画常驻边框/背景/阴影
-- 列表主表禁止直出 `status="danger"` 删除 icon；禁止 `outline` 铺满操作列
-- 列宽：`56`（1  affordance）/ `88`（2 affordance）；禁止 `>88`
+- 列表主表禁止直出 `status="danger"`；禁止 `outline` 铺满操作列
+- 列宽：`88`（1 直出）/ `120`（1 直出 + ···）/ `176`（2 直出 ± ···）；禁止 `>200`
 
 ---
 

@@ -126,7 +126,7 @@ Modal.confirm({
 
 ## Content Density Inside Modal
 
-- Use `size="small"` on all Arco controls inside the modal form.
+- Modal-form controls inherit the app-wide `small`; declare it only when an explicit local override improves clarity.
 - Use `layout="vertical"` on the form — horizontal labels compress too much at modal widths.
 - Use `class="detail-form"` only as a local form-layout hook; GI owns label/control styling.
 - Use Arco `a-row` / `a-col` for multi-column layouts. Page-local grid is allowed only for a proven relationship Arco Grid cannot express.

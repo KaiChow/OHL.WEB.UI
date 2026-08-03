@@ -349,6 +349,20 @@ if (mainTs.includes('./styles/theme.css') || existsSync(join(ROOT, 'src/styles/t
     content: 'project theme adapter detected',
   });
 }
+const globalVxeSetup = mainTs.match(/VXETable\.setup\(\{([\s\S]*?)\}\);/)?.[1] || '';
+for (const [setting, pattern] of [
+  ['border: true', /\bborder\s*:\s*true\b/],
+  ['stripe: true', /\bstripe\s*:\s*true\b/],
+  ["size: 'mini'", /\bsize\s*:\s*['"]mini['"]/],
+]) {
+  if (pattern.test(globalVxeSetup)) continue;
+  violations.push({
+    rule: 'VXE 全局默认必须统一 border、stripe 与 mini 密度；页面不得各自覆盖表格外观',
+    file: 'src/main.ts',
+    line: 1,
+    content: `missing ${setting}`,
+  });
+}
 const officialTokensInGlobal = globalCss.match(/^\s*--(?:primary-\d+|color-(?:bg|fill|text|border)-\d+)\s*:/gm) || [];
 if (officialTokensInGlobal.length) {
   violations.push({
@@ -734,21 +748,27 @@ if (!globalCss.includes('.s-pill[data-s="wait"]')) {
     content: 'missing s-pill freight semantics',
   });
 }
-// 业务控件必须显式使用项目唯一密度，避免遗漏 size 后回退到 Arco medium。
+// 控件密度两层规则：表外 Arco 控件继承 App ConfigProvider 的 small；vxe-table 块内（行内操作/可编辑单元格）必须 mini（mini 行内容盒 24px，small 28px 会裁切）。
 const operationalComponentPattern = /<a-(input-number|tree-select|date-picker|time-picker|pagination|textarea|cascader|button|input|select|tabs|steps)(?![\w-])[\s\S]*?>/g;
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = toRelativePath(file);
   const content = readFileSync(file, 'utf8');
+  const vxeColumnBlocks = (content.match(/<vxe-column\b(?![^>]*\/>)[\s\S]*?<\/vxe-column>/g) || [])
+    .map((block) => ({ start: content.indexOf(block), end: content.indexOf(block) + block.length }));
+  const isInsideVxeTable = (index) => vxeColumnBlocks.some(({ start, end }) => index >= start && index <= end);
   for (const match of content.matchAll(operationalComponentPattern)) {
     const tag = match[0];
-    if (/\bsize=(['"])small\1/.test(tag)) continue;
-    violations.push({
-      rule: '业务 Arco 控件必须显式声明 size="small"，禁止遗漏或使用其他密度',
-      file: relPath,
-      line: getLineNumber(content, match.index),
-      content: tag.replace(/\s+/g, ' ').slice(0, 140),
-    });
+    if (isInsideVxeTable(match.index)) {
+      if (/\bsize=(['"])mini\1/.test(tag)) continue;
+      violations.push({
+        rule: '表格行内 Arco 控件必须显式声明 size="mini"（mini 行内容盒 24px，small 会裁切）',
+        file: relPath,
+        line: getLineNumber(content, match.index),
+        content: tag.replace(/\s+/g, ' ').slice(0, 140),
+      });
+      continue;
+    }
   }
 
   for (const match of content.matchAll(/<a-button\b([^>]*)>([\s\S]*?)<\/a-button>/g)) {
@@ -815,7 +835,7 @@ for (const file of files) {
   const content = readFileSync(file, 'utf8');
   if (!content.includes('title="操作"')) continue;
   const opColumnPattern = /<vxe-column\b[^>]*title="操作"[^>]*>[\s\S]*?<\/vxe-column>/g;
-  const isWorkbenchList = content.includes('workbench-table');
+  const isWorkbenchList = /<vxe-table\b[\s\S]*?\bshow-overflow=(['"])title\1/.test(content);
   for (const match of content.matchAll(opColumnPattern)) {
     const block = match[0];
     if (!block.includes('class="row-actions"')) {
@@ -829,9 +849,9 @@ for (const file of files) {
     }
     if (!isWorkbenchList) continue;
     const widthMatch = block.match(/\bwidth="(\d+)"/);
-    if (widthMatch && Number(widthMatch[1]) > 88) {
+    if (widthMatch && Number(widthMatch[1]) > 200) {
       violations.push({
-        rule: '列表操作列 width 不得超过 88（见 table.md Row Actions 矩阵）',
+        rule: '列表操作列 width 不得超过 200（文字按钮 ≤2 直出 + ···，见 table.md Row Actions 矩阵）',
         file: relPath,
         line: getLineNumber(content, match.index),
         content: block.split('\n')[0].trim().slice(0, 140),
@@ -841,7 +861,7 @@ for (const file of files) {
     const hasMoreMenu = block.includes('row-action-btn--more') || block.includes('<a-dropdown');
     if (directBtnCount >= 3) {
       violations.push({
-        rule: '列表操作列禁止 3 个及以上直出 icon；N≥3 须主操作 + ···（table.md Row Actions）',
+        rule: '列表操作列禁止 3 个及以上直出按钮；N≥3 须 ≤2 直出 + ···（table.md Row Actions）',
         file: relPath,
         line: getLineNumber(content, match.index),
         content: `直出 ${directBtnCount} 个 row-action-btn`,
@@ -849,7 +869,7 @@ for (const file of files) {
     }
     if (directBtnCount >= 2 && !hasMoreMenu && /status="danger"/.test(block)) {
       violations.push({
-        rule: '列表操作列含危险动作时禁止双 icon 直出；危险项须收入 ···',
+        rule: '列表操作列含危险动作时禁止双直出；危险项须收入 ···',
         file: relPath,
         line: getLineNumber(content, match.index),
         content: block.split('\n').slice(0, 5).join(' ').trim().slice(0, 140),
@@ -872,7 +892,7 @@ for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
   const content = readFileSync(file, 'utf8');
-  if (!content.includes('workbench-table') || !content.includes('title="列设置"')) continue;
+  if (!content.includes('<vxe-table') || !content.includes('title="列设置"')) continue;
   if (content.includes('openCustom?.')) {
     violations.push({
       rule: '列设置禁止调用不存在的 openCustom 可选 API；必须提供真实配置面板',
@@ -953,7 +973,7 @@ for (const file of files) {
   }
 }
 
-// VXE 行高：主列表 compact=36（可提供 44 舒适档）；详情默认使用 VXE native small density。
+// VXE 外观：边框/斑马纹/行高由全局主题统一（main.ts 默认 border+stripe+size mini），页面禁止覆盖。
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
@@ -962,50 +982,23 @@ for (const file of files) {
   for (const block of blocks) {
     const blockIndex = content.indexOf(block);
     const firstLine = block.split('\n').slice(0, 10).join(' ');
-    if (/class=(["'])[^"']*\bworkbench-table\b[^"']*\1/.test(firstLine) && !/\bborder=(["'])none\1/.test(block)) {
+    if (/\bborder=(["'])none\1/.test(block) || /\b:?stripe=(["'])false\1/.test(block)) {
       violations.push({
-        rule: 'workbench-table 必须使用 border="none"（无全网格线，仅弱横线分隔行）',
+        rule: '表格边框/斑马纹由全局默认（border+stripe）统一，页面禁止设置 border="none" 或 stripe="false"',
         file: relPath,
         line: getLineNumber(content, blockIndex),
         content: firstLine.trim().slice(0, 140),
       });
     }
-    if (/\bdetail-mini-vxe\b/.test(firstLine) && !/\bborder=(["'])none\1/.test(block)) {
+    if (/:row-config=(["'])[\s\S]*?height\s*:\s*\d/.test(block)) {
       violations.push({
-        rule: 'detail-mini-vxe 必须使用 border="none"（与列表表同一边框策略）',
+        rule: '表格行高由全局主题 size 档位统一（默认 mini），禁止页面用 row-config.height 建立第二套密度',
         file: relPath,
         line: getLineNumber(content, blockIndex),
         content: firstLine.trim().slice(0, 140),
       });
     }
-    const hasStaticCompactRowHeight = /:row-config=(["'])[\s\S]*?height:\s*36[\s\S]*?\1/.test(block);
-    const hasDensityRowConfig = /:row-config=(["'])tableRowConfig\1/.test(block)
-      && /const\s+tableRowConfig\s*=\s*computed[\s\S]*?compact[\s\S]*?36[\s\S]*?44/.test(content);
-    if (/class=(["'])[^"']*\bworkbench-table\b[^"']*\1/.test(firstLine) && !hasStaticCompactRowHeight && !hasDensityRowConfig) {
-      violations.push({
-        rule: 'workbench-table 必须声明 compact=36 的 row-config；提供密度切换时舒适档统一为 44',
-        file: relPath,
-        line: getLineNumber(content, blockIndex),
-        content: firstLine.trim().slice(0, 140),
-      });
-    }
-    if (/\bdetail-mini-vxe\b/.test(firstLine) && !/\bdetail-mini-vxe--(editable|readonly|summary)\b/.test(firstLine)) {
-      violations.push({
-        rule: 'detail-mini-vxe 必须声明密度 modifier：editable / readonly / summary',
-        file: relPath,
-        line: getLineNumber(content, blockIndex),
-        content: firstLine.trim().slice(0, 140),
-      });
-    }
-    if (/\bdetail-mini-vxe\b/.test(firstLine) && /:row-config=(["'])[\s\S]*?height\s*:/.test(firstLine)) {
-      violations.push({
-        rule: 'detail-mini-vxe 默认使用 VXE native small density；禁止页面用 row-config.height 建立第二套详情表密度',
-        file: relPath,
-        line: getLineNumber(content, blockIndex),
-        content: firstLine.trim().slice(0, 140),
-      });
-    }
-    if (/class=(["'])[^"']*\bworkbench-table\b[^"']*\1/.test(firstLine)) {
+    if (/\bshow-overflow=(['"])title\1/.test(block)) {
       for (const genericComposite of block.matchAll(/class=(["'])[^"']*\bcell-two-line\b[^"']*\1/g)) {
         violations.push({
           rule: '主列表禁止通用 cell-two-line；复合单元格必须声明合法角色与直接依赖证据',
@@ -1066,6 +1059,14 @@ for (const file of files) {
         }
       }
     }
+    if (/:custom-config=/.test(block) && !/\bid=(['"])[^'"]+\1/.test(firstLine)) {
+      violations.push({
+        rule: '启用 VXE custom-config 的表格必须提供稳定 id，避免偏好持久化与运行时警告失效',
+        file: relPath,
+        line: getLineNumber(content, blockIndex),
+        content: firstLine.trim().slice(0, 140),
+      });
+    }
     for (const column of block.matchAll(/<vxe-column\b[^>]*\btype=(["'])seq\1[^>]*>/g)) {
       const tag = column[0];
       if (/\bwidth=(["'])52\1/.test(tag)) continue;
@@ -1096,24 +1097,6 @@ for (const file of files) {
       file: relPath,
       line: i + 1,
       content: tag.slice(0, 140),
-    });
-  }
-}
-
-// detail-mini-vxe 禁止 show-overflow（整块匹配，避免表头表体错位）
-for (const file of files) {
-  if (!file.endsWith('.vue')) continue;
-  const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
-  const content = readFileSync(file, 'utf8');
-  const blocks = content.match(/<vxe-table[\s\S]*?<\/vxe-table>/g) || [];
-  for (const block of blocks) {
-    if (!/class="[^"]*detail-mini-vxe/.test(block)) continue;
-    if (!/show-(?:header-)?overflow/.test(block)) continue;
-    violations.push({
-      rule: 'detail-mini-vxe 禁止 show-overflow / show-header-overflow',
-      file: relPath,
-      line: 1,
-      content: block.split('\n').find((l) => /show-(?:header-)?overflow/.test(l))?.trim().slice(0, 120) ?? '<vxe-table ...>',
     });
   }
 }
