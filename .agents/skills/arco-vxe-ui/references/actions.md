@@ -22,7 +22,7 @@ All operational pages inherit `size="small"` from the application ConfigProvider
 | **secondary** | 不写 `type`（默认） | 中性按钮 | 次要正向、取消、关闭、存草稿 |
 | **dashed** | `type="dashed"` | 虚线边框 | 「继续添加 / 上传 / 占位引导」类扩容量操作 |
 | **outline** | `type="outline"` | 线框主色 | 需要比 secondary 更显眼、但又不是主操作的流程/模块操作 |
-| **text** | `type="text"` | 无边框文字/图标 | 工具、降权辅助、行内 icon、重置/刷新 |
+| **text** | `type="text"` | 无边框文字/图标 | 工具、降权辅助、行内业务动词、重置/刷新 |
 
 ### Type Selection Rules
 
@@ -31,7 +31,7 @@ primary   → 每作用域最多 1 个：查询、新建、保存、提交、弹
 secondary → 中性次要：导出、取消、关闭、存草稿、批量（非主流程）
 outline   → 模块/流程次要：提交审批、打印、发送、模块内「添加联系人」
 dashed    → 空状态/表格内「添加一行」「继续上传」；禁止做全局提交
-text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
+text      → 重置、刷新、列设置、复制、清除；行内业务动词操作
 ```
 
 **层级口诀**：`primary` 定锚点 → `outline` / `secondary` 承业务 → `text` 承工具 → `dashed` 承扩容。
@@ -147,11 +147,11 @@ text      → 重置、刷新、列设置、复制、清除；行内 icon 操作
 | 详情页头 | — | — | 复制/归档/更多 | — | 关闭 |
 | 详情模块头 | — | 模块主操作（添加） | — | — | 复制、清除 |
 | 子表/子面板头 | — | 添加明细、添加行 | — | 空状态「添加」 | — |
-| 表格行内 | 行编辑保存 ×1 | — | 行编辑取消 | — | 查看/编辑/删除 icon |
+| 表格行内 | 行编辑保存 ×1 | — | 行编辑取消 | — | 主列表业务动词文字按钮；仅 `···` 为 icon-only |
 | 详情吸底 | 保存 ×1 | — | 提交审核、发布、输出 | — | 废弃 danger |
 | 弹窗 footer | 确定 ×1 | — | 取消 | — | 删除 danger（左侧） |
 
-**同一作用域内**：primary ≤ 1；简单平铺按钮通常 ≤ 3。生产作业台的高频可逆动作可以超过 3，但必须分成业务命令与工具两组且不能换行。高密度主表操作列最多 2 个 affordance，第三个开始使用 More。危险、低频、不可逆动作收入 dropdown 或确认流。
+**同一作用域内**：primary ≤ 1；简单平铺按钮通常 ≤ 3。生产作业台的高频可逆动作可以超过 3，但必须分成业务命令与工具两组且不能换行。高密度主表操作列最多 2 个直出文字按钮；其余操作通过 `···` More 承载。危险、低频、不可逆动作收入 dropdown 或确认流。
 
 ---
 
@@ -161,14 +161,14 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 | Content form | Use when | Required pattern | Forbidden |
 |--------------|----------|------------------|-----------|
-| Icon-only | row actions, toolbar utilities, compact fixed-width tools | Arco icon + Tooltip + business-specific `aria-label`; `type="text"` except documented row dock variants; target ≥28×28px normally, ≥24×24px inside dense table rows | icon-only for module add/save/submit or business workflow verbs; Tooltip without an accessible name |
+| Icon-only | row `···` More trigger, toolbar utilities, compact fixed-width tools | Arco icon + Tooltip + business-specific `aria-label`; `type="text"`; target ≥28×28px normally, ≥24×24px inside dense table rows | icon-only for direct row business verbs or module add/save/submit; Tooltip without an accessible name |
 | Icon + text | primary creation, additive module actions, upload/import/export/download/print when the icon has a universal metaphor | icon first, text second, `size="small"`; trailing down icon only for dropdown trigger | forcing icons on every workflow action |
 | Text-only | business workflow verbs, footer workflow, drawer head actions, modal footer, dropdown options | concise object/action text; stable button type by scope | adding vague icons when no precise metaphor exists |
 | Text + trailing chevron | dropdown trigger such as `更多`, `导出`, `输出`, `流转` | text + `<icon-down />`; native Arco popup | standalone chevron without text except row `···` menu |
 
 ### Content Decision Rules
 
-- Row operation column: icon-only + tooltip. It is a repeated dense column; text buttons make the table noisy and wide.
+- Row operation column: expose at most two concise business-verb text buttons. The `···` More trigger is the only icon-only control in the column and requires Tooltip plus a business-specific `aria-label`.
 - Every icon-only button also declares a concise business-specific `aria-label`; Tooltip is visual help and does not replace the accessible name.
 - Toolbar utility actions: icon-only when the command is a familiar utility (`刷新`, `列设置`, `密度`, `全屏`). Add tooltip. Do not use framed outline buttons for utilities.
 - Primary creation: icon + text when the action adds a new object (`新建`, `添加`, `上传`). Use plus/upload icon only when the metaphor is exact.
@@ -176,7 +176,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 - Business workflow actions: text-only unless the icon is universally precise. Examples: `提交审核`, `发起审批`, `同步数据`, `发布`. These should not get decorative icons.
 - Footer workflow actions are text-only in an Arco Space/Flex group; only dropdown triggers get a trailing chevron.
 - Dropdown options: text-only by default. Do not add icons per option. Use an option icon only when it is a strong system metaphor and the whole menu stays visually even.
-- Danger actions: row danger is icon-only + tooltip + confirm; footer/header danger is text-only `text + danger` with confirm; dropdown danger is text-only `danger-opt` in final group.
+- Danger actions: main-list row danger is a text-only `danger-opt` in the final `···` group and opens an independent confirmation; the editable-detail-row exception may use one danger icon with Tooltip + `aria-label` + `a-popconfirm`; footer/header danger is text-only `text + danger` with confirmation.
 - If an action has no precise icon, use text-only. Ambiguous icons increase recognition cost in an 8-hour operational system.
 
 ### Content Form By Scope
@@ -191,7 +191,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 | Detail module head | Icon + text for add; text-only for workflow; text for auxiliary | `+ 添加明细`, `同步数据`, `客户档案` |
 | Child/table local add | Icon + text; dashed only in empty state | `+ 添加明细行` |
 | Detail footer | Text-only secondary + one primary | `保存草稿`, `提交审核` |
-| Row action | Icon-only + tooltip | view/edit/delete/more |
+| Row action | Business-verb text buttons; only More is icon-only + tooltip | `编辑`, `分配给我`, `···` |
 | Dropdown option | Text-only | `批量关闭`, `一键下载`, `批量删除` |
 
 ---
@@ -482,8 +482,8 @@ Danger rules:
 
 可见性与收纳
 □ 高频、低风险、可逆动作直接可见；低频动作进入 dropdown；危险动作隔离到末组
-□ 高密度主表默认最多 2 个直出操作；第 3 个及以后进入 More；确需 3 个核心流程文字动作时必须有 pageSpec 频率依据并验证列宽
-□ 核心业务流程可用紧凑文字按钮；重复密集的操作列默认 icon-only
+□ 高密度主表最多 2 个直出文字操作；第 3 个及以后进入 More；不存在 pageSpec 可豁免的 3 个直出按钮
+□ 核心业务流程使用紧凑业务动词文字按钮；操作列只有 `···` More 触发器允许 icon-only
 □ 窄工作区先把熟悉工具图标化，再收纳低频动作；不得隐藏 Primary 或造成控件重叠/换行
 
 内容与可访问性

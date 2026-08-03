@@ -1,1 +1,2 @@
 [     307ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:4173/favicon.ico:0
+[  519945ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:4173/src/router/modules/analysis.ts:0

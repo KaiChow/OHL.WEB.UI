@@ -407,26 +407,28 @@ Counting rules:
 
 ### Display matrix (1–N)
 
-| Effective actions* | Contains D? | Visible pattern | Column `width` |
-|--------------------|-------------|-----------------|----------------|
-| 0 | — | Remove operation column | — |
-| 1 | No | `[A]` 文字按钮 | `88` |
-| 1 | Yes | `[A]` + `···(D)` | `120` |
-| 2 | No (both A/B daily) | `[A][B]` 两个文字按钮，**无** `···` | `176` |
-| 2 | Yes | `[A]` + `···(B and/or D)` | `120` |
-| ≥3 | Any | `[A][B]` + `···(C+D)` | `176` |
+Count actions after merging mutually exclusive verbs, then separate direct candidates (A/B) from menu actions (C/D).
 
-\*After merging mutually exclusive verbs. **Hard limits:** operation column shows **at most 2 direct text buttons** plus the `···` trigger; **never** `width` > `200`; **never** three direct buttons.
+| Direct A/B candidates | Has C/D menu actions? | Visible pattern | Column `width` |
+|-----------------------|-----------------------|-----------------|----------------|
+| 0 | No | Remove operation column | — |
+| 0 | Yes | `···(C/D)` | `56` |
+| 1 | No | `[A]` 文字按钮 | `88` |
+| 1 | Yes | `[A] + ···(C/D)` | `120` |
+| ≥2 | No | `[A][B]` 两个日常可逆文字按钮 | `176` |
+| ≥2 | Yes | `[A][B] + ···(C/D)` | `176` |
+
+**Hard limits:** operation column shows **at most 2 direct text buttons** plus the `···` trigger; **never** `width` > `200`; **never** three direct buttons. A low-frequency B may also move into More when it does not qualify for a direct slot.
 
 Decision flow:
 
 ```
-count effective actions (merge exclusive A verbs)
-├─ 0 → no column
-├─ 1 & no D → [A] width 88
-├─ 1 & has D → [A] + ··· width 120
-├─ 2 & no D → [A][B] width 176
-└─ else → [A][B] + ··· width 176
+merge mutually exclusive verbs; classify A/B/C/D
+├─ no actions → no column
+├─ only C/D → ··· width 56
+├─ one A/B, no C/D → [A] width 88
+├─ one A/B + C/D → [A] + ··· width 120
+└─ two or more A/B → [A][B] ± ··· width 176
 ```
 
 ### Implementation contract

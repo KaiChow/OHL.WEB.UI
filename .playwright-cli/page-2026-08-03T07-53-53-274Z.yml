@@ -1,0 +1,30 @@
+- main [ref=e3]:
+  - region "Jira 登录" [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: DO
+      - generic [ref=e7]:
+        - strong [ref=e8]: DevOps
+        - text: 研发效能工作台
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - paragraph [ref=e11]: 连接 Jira
+        - heading "登录" [level=1] [ref=e12]
+      - generic: Jira
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]: "*Jira 地址"
+        - textbox "*Jira 地址" [ref=e23]: https://task.ptponclick.com
+      - generic [ref=e24]:
+        - generic [ref=e25]: "*账号"
+        - textbox "*账号" [ref=e33]
+      - generic [ref=e34]:
+        - generic [ref=e35]: "*密码"
+        - textbox "*密码" [ref=e44]
+      - generic [ref=e45]:
+        - generic [ref=e46] [cursor=pointer]:
+          - generic [ref=e47]:
+            - checkbox "记住账号密码" [checked]
+          - generic [ref=e49]: 记住账号密码
+        - button "清除记录" [ref=e50] [cursor=pointer]
+      - button "登录并同步部门" [ref=e55] [cursor=pointer]
+    - generic [ref=e57]: 凭据保存在本机浏览器，用于后续 Jira 数据抓取。
