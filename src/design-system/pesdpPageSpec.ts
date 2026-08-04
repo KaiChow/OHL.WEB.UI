@@ -80,9 +80,72 @@ export interface PesdpActionSpec {
   failureOwner: string;
 }
 
+export type PesdpMetricKind = 'count' | 'quantity' | 'amount' | 'progress' | 'exception' | 'status-breakdown';
+
+export interface PesdpMetricSpec {
+  id: string;
+  kind: PesdpMetricKind;
+  source: 'api' | 'derived' | 'local-state';
+  aggregation: 'none' | 'count' | 'sum' | 'ratio' | 'breakdown';
+  format: 'number' | 'unit' | 'currency' | 'percent' | 'status';
+  placement: 'page-facts' | 'module-summary' | 'child-head' | 'table-cap';
+}
+
+export type PesdpModuleChildrenSpec =
+  | { kind: 'none' }
+  | {
+    kind: 'repeated';
+    identity: NonEmptyStrings;
+    body: NonEmptyStrings;
+    metrics: readonly PesdpMetricSpec[];
+    actions: {
+      child: readonly string[];
+      table: readonly string[];
+      row: readonly string[];
+    };
+    defaultOpen: 'first' | 'first-and-error' | 'current-and-error' | 'none';
+    table: 'none' | 'detail-editable' | 'detail-readonly';
+  };
+
+export interface PesdpModuleSpec {
+  id: string;
+  kind: 'field-group' | 'line-table' | 'parent-child' | 'document-checklist' | 'timeline' | 'exception';
+  priority: 'core' | 'supporting' | 'audit';
+  mode: 'display' | 'edit' | 'mixed' | 'row-edit' | 'read-only';
+  owns: NonEmptyStrings;
+  metrics: readonly PesdpMetricSpec[];
+  actions: {
+    module: readonly string[];
+    table: readonly string[];
+    row: readonly string[];
+  };
+  collapse: 'always-open' | 'open-first' | 'open-current-and-errors' | 'collapsed-by-default';
+  children: PesdpModuleChildrenSpec;
+}
+
+export type PesdpDetailSpec =
+  | { mode: 'none'; focus: readonly string[]; milestones: readonly string[] }
+  | {
+    mode: 'display-first' | 'edit-first' | 'staged-form';
+    focus: readonly string[];
+    milestones: readonly string[];
+    scroll: {
+      verticalOwner: 'page' | 'drawer-body' | 'overlay-body';
+      horizontalOverflow: 'table-only';
+      stickyActionOwner: 'none' | 'page-footer' | 'drawer-footer';
+    };
+    modules: readonly [PesdpModuleSpec, ...PesdpModuleSpec[]];
+  };
+
 interface PesdpPageSpecBase {
   id: string;
   target: PesdpPageGoal;
+  input: {
+    path: 'artifact' | 'requirement';
+    artifacts: readonly string[];
+    unresolvedBusinessDecisions: readonly string[];
+    recommendations: readonly string[];
+  };
   business: {
     object: string;
     primaryUser: string;
@@ -117,11 +180,7 @@ interface PesdpPageSpecBase {
     fixed?: readonly string[];
     densityReason?: string;
   };
-  detail: {
-    mode: 'none' | 'display-first' | 'edit-first' | 'staged-form';
-    focus: readonly string[];
-    milestones: readonly string[];
-  };
+  detail: PesdpDetailSpec;
   actions: readonly [PesdpActionSpec, ...PesdpActionSpec[]];
   states: NonEmptyStrings;
   responsive: {

@@ -1,6 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
 
 export const uiAcceptanceRoutes: RouteRecordRaw[] = [
+  { path: 'ui-acceptance/detail-modules/complex', name: 'DetailModuleComplex', component: () => import('../../views/uiAcceptance/detailModules/index.vue'), meta: { menuKey: 'detail-module-complex', title: '复杂详情模块', titleKey: 'routes.detailModuleComplex' } },
   { path: 'ui-acceptance/query-scenarios/s0', name: 'QueryScenarioS0', component: () => import('../../views/uiAcceptance/queryScenarios/index.vue'), props: { initialScenario: 's0' }, meta: { menuKey: 'query-scenario-s0', title: '无查询场景', titleKey: 'routes.queryS0' } },
   { path: 'ui-acceptance/query-scenarios/s1-compact', name: 'QueryScenarioS1Compact', component: () => import('../../views/uiAcceptance/queryScenarios/index.vue'), props: { initialScenario: 's1-compact' }, meta: { menuKey: 'query-scenario-s1-compact', title: '2项紧凑查询', titleKey: 'routes.queryS1Compact' } },
   { path: 'ui-acceptance/query-scenarios/s1-inline', name: 'QueryScenarioS1Inline', component: () => import('../../views/uiAcceptance/queryScenarios/index.vue'), props: { initialScenario: 's1-inline' }, meta: { menuKey: 'query-scenario-s1-inline', title: '6项内联查询', titleKey: 'routes.queryS1Inline' } },

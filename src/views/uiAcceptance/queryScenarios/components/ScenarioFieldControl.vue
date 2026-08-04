@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BatchValueQuery from '../../../../components/workbench/BatchValueQuery.vue';
+import { denseFormItemStyle } from '../../../../design-system/formLayout';
 import type { ScenarioField } from '../scenarioFields';
 
 const props = defineProps<{
@@ -36,7 +37,7 @@ const keywordTypeValue = computed({
 </script>
 
 <template>
-  <a-form-item :label="fieldLabel">
+  <a-form-item :label="fieldLabel" :style="denseFormItemStyle">
     <a-input-group v-if="field.kind === 'composite'">
       <a-select v-model="keywordTypeValue" size="small" :style="{ width: '104px' }">
         <a-option value="orderNo">{{ t('queryScenario.keywordType') }}</a-option>

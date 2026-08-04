@@ -1,12 +1,14 @@
 # Module Patterns
 
-Structural slots for freight SaaS pages. **No field names here** — use [`domain-language.md`](domain-language.md) for Chinese labels, statuses, and module naming.
+Structural slots for freight SaaS pages. **No business module names or field names are prescribed here** — use [`domain-language.md`](domain-language.md) for labels and `pageSpec.ts` for the actual business composition.
 
 ## Purpose
 
 Define **where** information and actions live, not **which** business fields every page copies.
 
 Do not hard-code one page (e.g. shipment order) and paste it into every menu.
+
+This reference is a component-usage, layout, UI, and UX grammar. It does not define a fixed inventory such as cargo, container, fee, or document modules. Those are page-owned instances selected from requirements; the shared grammar only determines how any chosen module expresses hierarchy, statistics, actions, editing, disclosure, feedback, density, and responsive behavior.
 
 ## Specification Granularity Rule
 
@@ -87,7 +89,7 @@ Implementation: [`list-page.md`](list-page.md) · [`table.md`](table.md) · [`ac
 | `facts` | 3–6 key facts by object type (`dds-hero`) |
 | `milestone` | Optional; only if the object has a real process |
 | `sections` | Business groups in operation order |
-| `sub_entities` | Repeated cargo, fees, files, parties, declarations |
+| `sub_entities` | Repeated child entities owned by the current business object |
 | `footer` | Danger left · workflow secondary · 1× primary save |
 
 Implementation: [`detail-form.md`](detail-form.md) · [`actions.md`](actions.md).
@@ -123,8 +125,36 @@ module
 ```
 
 **Header rule:** left = module name only; right = module actions only. No counts, status, or helper text in the title row.
-
+Modules are sections inside one owning detail canvas, not repeated cards. `field-group`, `parent-child`, `line-table`, `document-checklist`, and `timeline` must use different internal compositions; sharing a head/body primitive does not authorize rendering every kind as the same framed box. Core editing modules stay open without redundant collapse controls. Supporting and audit modules may collapse; a local anchor rail appears only when proven page length or module count makes direct scrolling materially inefficient.
 **Action labels:** object-specific (`Add shipper`, not bare `Add`). Wording: [`domain-language.md`](domain-language.md).
+
+## Typed Module Manifest
+Complex pages are assembled from reusable module roles, not an exhaustive catalog of business scenarios. Before template work, every non-list detail surface declares this manifest in `pageSpec.ts`:
+
+- Page: default mode, vertical scroll owner, and sticky action owner.
+- Module: stable id, semantic kind, priority, display/edit mode, owned facts, and collapse rule; priority controls disclosure, not decorative color.
+- Statistics: metric id, semantic kind, source, aggregation, format, and single placement; use `metrics: []` when none.
+- Actions: feature-contract ids split into explicit module/child/table/row arrays; keep each array empty when that scope has none.
+- Children: `none`, or repeated identity/body/default-open rule and optional child-owned table role.
+
+The manifest is a decision record and validation boundary, not a universal JSON renderer. Vue still composes Arco, VXE, and proven shared primitives according to the declared roles.
+### Configuration Boundary
+
+- `pageSpec.ts` owns every business module id/name, field set, metric, action, editability rule, and data source.
+- Shared module components own only structural slots and interaction behavior. They accept content through typed props/slots and must not contain business labels, default fields, assumed statistics, or object-specific action names.
+- A module omits unneeded summary/actions/children/table/disclosure slots. New scenarios create manifest compositions; add a shared primitive only for reusable interaction structure. Acceptance examples prove the grammar, never mandatory templates or default module sets.
+
+### Metric Ownership
+
+Metrics exist only when they help a decision and have a provable source. `count`, `quantity`, `amount`, `progress`, `exception`, and `status-breakdown` are semantic kinds; source is `api`, `derived`, or `local-state`; aggregation is `none`, `count`, `sum`, `ratio`, or `breakdown`; format is `number`, `unit`, `currency`, `percent`, or `status`.
+
+- Page facts answer object-level decisions; module summaries answer module-level decisions; child heads distinguish repeated children; table caps describe the table dataset.
+- One fact has one visible owner; module titles contain names only, statistics use the summary slot, and status uses `.s-pill[data-s]` beside its object.
+- Never invent a metric because a surface looks empty; declare `metrics: []` when none helps a decision.
+
+### Action Ownership
+
+Page actions own object workflow/edit/save/output; module actions own whole-module add/import/refresh; child actions own duplicate/delete; table actions own lines and utilities; row actions own one row. Place each at its owning head/cap/footer. Every business action references a complete feature contract; presentation toggles do not. One primary is allowed per scope and destructive actions stay separated and confirmed.
 
 ## Module Type Picker
 
@@ -139,7 +169,7 @@ module
 
 ## Parent–Child Module
 
-When one parent entity owns repeated line rows (party → cargo lines, fee group → lines):
+When one parent entity owns repeated line rows (`parent entity -> owned lines`):
 
 ```text
 detail-module
@@ -156,6 +186,7 @@ Rules:
 - One parent surface; children separated by dividers/tinted heads, not nested cards.
 - Actions scoped by level: module / child / row — never duplicate the same total in summary, child head, and table cap.
 - Default: expand first child + children with errors.
+- Nesting stops at `page -> module -> child -> child-owned pane/table`. A second recursive child-module level requires a new page/workspace boundary; never solve depth with cards inside cards.
 
 Detail UI rules: [`detail-form.md` → Parent-Child](detail-form.md#parent-child-nested-modules).
 
@@ -164,37 +195,13 @@ Detail UI rules: [`detail-form.md` → Parent-Child](detail-form.md#parent-child
 | Type | Use for | Implementation |
 |------|---------|----------------|
 | Attachment | B/L, customs docs, images | `detail-form.md` → Attachments |
-| Line table | Fees, cargo, stock | Detail-table VXE configuration — [`table.md`](table.md) |
-| Party / contact | Shipper, consignee, owner | Chips or compact rows; name = `color-text-1` |
+| Line table | Any flat repeated records | Detail-table VXE configuration — [`table.md`](table.md) |
+| Party / contact | Any named organization or person | Chips or compact rows; name = `color-text-1` |
 | Timeline | Ops log, audit | Dense list, no per-item cards |
 | Exception | Risk, variance | `s-pill`; no row background fill |
 
-## Hard-Coding Checks
-
-Reject before ship:
-
-- Finance page showing route/ETD because order detail does.
-- Customer page with shipment milestones because the drawer has steps.
-- Same columns/actions on every module.
-- Structural class treated as business requirement (`dds-hero` ≠ must show route).
-- Spec text that uses one business module name as the rule itself instead of an example of a reusable slot.
-- New global CSS class whose name encodes a single backend field or page-specific module when a slot class already exists.
-
 ## Pre-Implementation Mapping
-
-Write this block (English keys; labels from `domain-language.md`):
-
-```text
-archetype:
-business_object:
-user_job:
-primary_identity:
-key_state:
-main_fields:
-repeated_modules:
-primary_action:
-grouped_actions:
-```
+Record in `pageSpec.ts`: `input_path`, unresolved business decisions, archetype, business object/job/identity/state, main fields, repeated modules, action groups, each module's `id | kind | owns | metrics | actions | children | collapse`, and the page scroll owner. Labels come from `domain-language.md`.
 
 Then implement in this order: Arco built-ins -> tokens -> documented business patterns -> minimal page-local CSS.
 

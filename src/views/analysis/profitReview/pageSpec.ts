@@ -4,6 +4,7 @@ export const PROFIT_REVIEW_SPEC = definePesdpPageSpec({
   id: 'order-profit-review-workbench',
   target: 'strong-internal-product',
   archetype: 'list-workbench',
+  input: { path: 'requirement', artifacts: [], unresolvedBusinessDecisions: ['production permission and review-transition sources'], recommendations: ['retain repository-backed local contracts until production sources are supplied'] },
   list: {
     frame: 'standard-list-v1', profile: 'operations-workbench', commandSurface: 'workbench', tableTop: 'workbench-toolbar', selection: 'batch', workScope: 'none', statusQueues: 'required',
     views: { pageMode: 'none', pageModeCount: 0, workflowState: 'line-tabs', workflowStateCount: 5, workflowStatePlacement: 'workflow-row', workflowStateOverflow: 'none' },
@@ -37,7 +38,17 @@ export const PROFIT_REVIEW_SPEC = definePesdpPageSpec({
     advancedFields: [],
   },
   table: { kind: 'workbench', identityColumns: ['sequence', 'orderNo', 'reviewStatus'], decisionColumns: ['riskLevel', 'grossMarginRate', 'owner'], supportingColumns: ['updatedAt'], fixed: ['checkbox', 'sequence', 'orderNo', 'operations'], densityReason: 'Profit review is a repeated operator queue with scan-first rows and continuous row references.' },
-  detail: { mode: 'display-first', focus: ['riskItems', 'reviewNote', 'timeline'], milestones: ['entered-review', 'review-submitted', 'review-outcome'] },
+  detail: {
+    mode: 'display-first',
+    focus: ['riskItems', 'reviewNote', 'timeline'],
+    milestones: ['entered-review', 'review-submitted', 'review-outcome'],
+    scroll: { verticalOwner: 'drawer-body', horizontalOverflow: 'table-only', stickyActionOwner: 'none' },
+    modules: [
+      { id: 'profit-facts', kind: 'field-group', priority: 'core', mode: 'read-only', owns: ['amount', 'grossMarginRate', 'owner'], metrics: [], actions: { module: [], table: [], row: [] }, collapse: 'always-open', children: { kind: 'none' } },
+      { id: 'risk-items', kind: 'exception', priority: 'core', mode: 'read-only', owns: ['riskItems'], metrics: [], actions: { module: [], table: [], row: [] }, collapse: 'always-open', children: { kind: 'none' } },
+      { id: 'review-timeline', kind: 'timeline', priority: 'audit', mode: 'read-only', owns: ['reviewTimeline'], metrics: [], actions: { module: [], table: [], row: [] }, collapse: 'always-open', children: { kind: 'none' } },
+    ],
+  },
   actions: [
     { id: 'profit-review-query', scope: 'query', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'profit-review-query', successOwner: 'reviews', failureOwner: 'reviews' },
     { id: 'profit-review-batch-submit', scope: 'command', frequency: 'regular', risk: 'medium', presentation: 'primary', contract: 'profit-review-batch-submit', successOwner: 'reviews', failureOwner: 'reviews' },

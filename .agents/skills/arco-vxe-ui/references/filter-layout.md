@@ -172,7 +172,7 @@ Boundary overrides:
 - When the same local predicate or a real count endpoint can produce a preview without another invented API, show the matching-object count in the footer and update it with the draft. Do not fake a preview from static copy.
 - Section headings are quiet structural text. A colored rail, icon, card background, and shadow are not all required; use only the minimum hierarchy that makes scanning clear.
 - Consecutive advanced sections must keep a grouping rhythm: at least `16px` separation plus one quiet hairline, with the F3 section title at least `8px` above the first control. Title text alone is not enough when many Investigate fields are present.
-- High density means packed fields using `--dense-gap-field-row`, `--dense-gap-field-col`, and `--dense-gap-label`. Do not create empty-looking forms with oversized vertical padding, sticky chrome bands, or consumer SaaS air gaps; grouping rhythm is not decorative whitespace.
+- High density means packed fields using the shared dense-form configuration from `form-field.md`: 12px column gutter, 8px row gutter, 4px label gap, and zero `form-item` margin because the grid is the sole spacing owner. Do not create empty-looking forms with oversized vertical padding, sticky chrome bands, consumer SaaS air gaps, or a second margin layer; grouping rhythm is not decorative whitespace.
 - A D2 anchor rail uses a quieter fill than the editor and a stable active marker (`fill` plus an inset indicator). The active state must not shift the text start line.
 - A final odd field stays aligned to the left grid track. Do not stretch it across two columns only to fill space.
 
@@ -207,14 +207,14 @@ The section class names below are local hooks. They are not a mandatory shared D
   <a-form layout="vertical" size="small" :model="draftQuery">
     <section class="advanced-filter-section" aria-labelledby="identity-filter-title">
       <h3 id="identity-filter-title" class="advanced-filter-section__title">识别条件</h3>
-      <a-row :gutter="[16, 0]">
+      <a-row :gutter="denseFormGridGutter">
         <a-col :span="12" :xs="24" :sm="12">
-          <a-form-item field="identifier" label="对象标识">
+          <a-form-item field="identifier" label="对象标识" :style="denseFormItemStyle">
             <a-input v-model="draftQuery.identifier" size="small" allow-clear />
           </a-form-item>
         </a-col>
         <a-col :span="12" :xs="24" :sm="12">
-          <a-form-item field="owner" label="负责人">
+          <a-form-item field="owner" label="负责人" :style="denseFormItemStyle">
             <a-select v-model="draftQuery.owner" size="small" allow-clear />
           </a-form-item>
         </a-col>

@@ -40,7 +40,7 @@
 | `.filter-field__label` | 页面局部语义 hook；只管理标签布局，不建立组件皮肤 |
 | `a-form-item` 的 `label` prop/slot | `a-form layout="vertical"` 内置 label |
 
-手写业务标签使用 F4 token；`a-form-item` 标签保持 GI 原生层级。垂直表单统一通过共享 `compactVerticalFormLabelStyle` 将 label 到控件设为 `--dense-gap-label`，不得逐页写内部选择器或设为 0。两者靠结构、间距和明确分组保持一致，不通过全局内部选择器强制同字号。
+手写业务标签使用 F4 token；`a-form-item` 标签保持 GI 原生层级。垂直表单统一通过共享 `compactVerticalFormLabelStyle` 将 label 到控件设为 `--dense-gap-label`，不得逐页写内部选择器或设为 0。查询区、高级筛选、抽屉和 Modal 中承担相同高密度字段录入角色的垂直栅格表单，必须再复用 `denseFormGridGutter`（12px 列/8px 行）与 `denseFormItemStyle`（`margin-bottom: 0`），由栅格唯一管理字段行距；不得把 Arco 默认 `form-item` 外边距与 gutter/row-gap 叠加。正常单行字段内部预算为 `28px label + 4px gap + 28px control = 60px`，相邻字段行净距 8px、行节奏 68px；校验、帮助文案、Textarea 和多行标签可自然增高当前行，禁止固定高度或裁切。单列布局保持相同净距，业务组间距另由 surface authority 管理；相同角色必须一致，但表格行内控件仍用 `mini`，只读详情不伪装成表单，高风险确认不压缩必要说明。
 
 ## 使用场景（Scenario）
 
@@ -84,7 +84,7 @@ Do not create page-local variants such as “drawer select uses 13px” or “to
 
 ```vue
 <script setup lang="ts">
-import { compactVerticalFormLabelStyle } from '@/design-system/formLayout';
+import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '@/design-system/formLayout';
 </script>
 
 <!-- 手写 label + 控件：任意场景相同 -->
@@ -95,9 +95,9 @@ import { compactVerticalFormLabelStyle } from '@/design-system/formLayout';
 
 <!-- Arco Form：控件仍走同一套 Default -->
 <a-form class="detail-form" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" :model="form">
-  <a-form-item field="name" label="客户名称">
-    <a-input v-model="form.name" size="small" />
-  </a-form-item>
+  <a-row :gutter="denseFormGridGutter"><a-col :span="12">
+    <a-form-item field="name" label="客户名称" :style="denseFormItemStyle"><a-input v-model="form.name" size="small" /></a-form-item>
+  </a-col></a-row>
 </a-form>
 ```
 
@@ -111,7 +111,7 @@ import { compactVerticalFormLabelStyle } from '@/design-system/formLayout';
 ## Release Gate
 
 - [ ] Business controls inherit the app-wide `small`; GI owns control chrome, typography, hover, focus, disabled, and error states.
-- [ ] Every vertical Arco Form uses the shared public label-column style; measured label-to-control gap resolves to `--dense-gap-label`, never a page-local value.
+- [ ] Every vertical Arco Form uses the shared public label-column style; every dense vertical grid uses the shared 12px/8px gutter and zero form-item margin; a normal single-line field measures 60px internally with a 4px label gap and 8px net gap to the next row, never page-local values.
 - [ ] Labels remain visible, associated with controls, and do not rely on placeholder text.
 - [ ] Pickers/selects fill their form-item through public props/layout, not internal-selector overrides.
 - [ ] Long labels, 1.3-2x translated copy, validation messages, disabled/read-only values, keyboard focus, and 200% zoom remain usable.

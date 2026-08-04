@@ -22,7 +22,7 @@ import {
 } from '@arco-design/web-vue/es/icon';
 import { downloadCsvFile } from '../../../utils/mock-actions';
 import { formatLocalMinute } from '../../../utils/date-time';
-import { compactVerticalFormLabelStyle } from '../../../design-system/formLayout';
+import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '../../../design-system/formLayout';
 import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
 import WorkbenchTableToolbar from '../../../components/workbench/WorkbenchTableToolbar.vue';
@@ -1334,9 +1334,9 @@ watch(uiScenario, () => {
               @click="clearAdvancedGroup('routeDocuments')"
             >{{ t('shipment.advanced.clearGroup') }}</a-button>
           </div>
-          <a-row :gutter="[16, 0]">
+          <a-row :gutter="denseFormGridGutter">
             <a-col v-if="!showInlineOperator" :span="12" :xs="24" :sm="12">
-              <a-form-item field="operator" :label="t('shipment.fields.operator')">
+              <a-form-item field="operator" :label="t('shipment.fields.operator')" :style="denseFormItemStyle">
                 <a-select v-model="advancedQuery.operator" size="small" allow-clear allow-search :placeholder="t('shipment.placeholders.operator')">
                   <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
                     {{ operator }}
@@ -1345,17 +1345,17 @@ watch(uiScenario, () => {
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="pol" :label="t('shipment.columns.pol')">
+              <a-form-item field="pol" :label="t('shipment.columns.pol')" :style="denseFormItemStyle">
                 <a-input v-model="advancedQuery.pol" size="small" allow-clear :placeholder="t('shipment.advanced.portPlaceholder')" @press-enter="applyAdvancedFilters" />
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="pod" :label="t('shipment.columns.pod')">
+              <a-form-item field="pod" :label="t('shipment.columns.pod')" :style="denseFormItemStyle">
                 <a-input v-model="advancedQuery.pod" size="small" allow-clear :placeholder="t('shipment.advanced.portPlaceholder')" @press-enter="applyAdvancedFilters" />
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="carrier" :label="t('shipment.columns.carrier')">
+              <a-form-item field="carrier" :label="t('shipment.columns.carrier')" :style="denseFormItemStyle">
                 <a-select v-model="advancedQuery.carrier" size="small" allow-clear allow-search :placeholder="t('shipment.advanced.carrierPlaceholder')">
                   <a-option v-for="carrier in carrierOptions" :key="carrier" :value="carrier">
                     {{ carrier }}
@@ -1364,17 +1364,17 @@ watch(uiScenario, () => {
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="vesselVoyage" :label="t('shipment.columns.vesselVoyage')">
+              <a-form-item field="vesselVoyage" :label="t('shipment.columns.vesselVoyage')" :style="denseFormItemStyle">
                 <a-input v-model="advancedQuery.vesselVoyage" size="small" allow-clear :placeholder="t('shipment.advanced.vesselPlaceholder')" @press-enter="applyAdvancedFilters" />
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="blNo" :label="t('shipment.columns.blNo')">
+              <a-form-item field="blNo" :label="t('shipment.columns.blNo')" :style="denseFormItemStyle">
                 <a-input v-model="advancedQuery.blNo" size="small" allow-clear :placeholder="t('shipment.advanced.blPlaceholder')" @press-enter="applyAdvancedFilters" />
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="bookingNo" :label="t('shipment.columns.bookingNo')">
+              <a-form-item field="bookingNo" :label="t('shipment.columns.bookingNo')" :style="denseFormItemStyle">
                 <a-input v-model="advancedQuery.bookingNo" size="small" allow-clear :placeholder="t('shipment.advanced.bookingPlaceholder')" @press-enter="applyAdvancedFilters" />
               </a-form-item>
             </a-col>
@@ -1397,9 +1397,9 @@ watch(uiScenario, () => {
               @click="clearAdvancedGroup('schedule')"
             >{{ t('shipment.advanced.clearGroup') }}</a-button>
           </div>
-          <a-row :gutter="[16, 0]">
+          <a-row :gutter="denseFormGridGutter">
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="etdRange" :label="t('shipment.advanced.sailingDate')">
+              <a-form-item field="etdRange" :label="t('shipment.advanced.sailingDate')" :style="denseFormItemStyle">
                 <a-range-picker
                   v-model="advancedQuery.etdRange"
                   v-model:popup-visible="advancedDatePopupVisible.etd"
@@ -1409,7 +1409,7 @@ watch(uiScenario, () => {
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="closingRange" :label="t('shipment.advanced.closingDate')">
+              <a-form-item field="closingRange" :label="t('shipment.advanced.closingDate')" :style="denseFormItemStyle">
                 <a-range-picker
                   v-model="advancedQuery.closingRange"
                   v-model:popup-visible="advancedDatePopupVisible.closing"
@@ -1419,7 +1419,7 @@ watch(uiScenario, () => {
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="updatedRange" :label="t('shipment.columns.updatedAt')">
+              <a-form-item field="updatedRange" :label="t('shipment.columns.updatedAt')" :style="denseFormItemStyle">
                 <a-range-picker
                   v-model="advancedQuery.updatedRange"
                   v-model:popup-visible="advancedDatePopupVisible.updated"
@@ -1447,16 +1447,16 @@ watch(uiScenario, () => {
               @click="clearAdvancedGroup('risk')"
             >{{ t('shipment.advanced.clearGroup') }}</a-button>
           </div>
-          <a-row :gutter="[16, 0]">
+          <a-row :gutter="denseFormGridGutter">
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="orderStatus" :label="t('shipment.columns.orderStatus')">
+              <a-form-item field="orderStatus" :label="t('shipment.columns.orderStatus')" :style="denseFormItemStyle">
                 <a-select v-model="advancedQuery.orderStatus" size="small" allow-clear :placeholder="t('shipment.advanced.select')">
                   <a-option v-for="status in ['waitBooking', 'booking', 'released', 'waitTruck', 'trucking', 'waitCustoms', 'customs', 'sailed', 'completed']" :key="status" :value="status">{{ t(`shipment.statuses.${status}`) }}</a-option>
                 </a-select>
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="hasException" :label="t('shipment.advanced.hasException')">
+              <a-form-item field="hasException" :label="t('shipment.advanced.hasException')" :style="denseFormItemStyle">
                 <a-radio-group
                   v-model="advancedQuery.hasException"
                   type="button"
@@ -1470,7 +1470,7 @@ watch(uiScenario, () => {
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="isOverdue" :label="t('shipment.columns.isOverdue')">
+              <a-form-item field="isOverdue" :label="t('shipment.columns.isOverdue')" :style="denseFormItemStyle">
                 <a-radio-group
                   v-model="advancedQuery.isOverdue"
                   type="button"
@@ -1484,7 +1484,7 @@ watch(uiScenario, () => {
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="fileStatus" :label="t('shipment.columns.fileStatus')">
+              <a-form-item field="fileStatus" :label="t('shipment.columns.fileStatus')" :style="denseFormItemStyle">
                 <a-select v-model="advancedQuery.fileStatus" size="small" allow-clear :placeholder="t('shipment.advanced.select')">
                   <a-option value="missing">{{ t('shipment.advanced.missing') }}</a-option>
                   <a-option value="pending">{{ t('shipment.fileStatus.pending') }}</a-option>
@@ -1493,7 +1493,7 @@ watch(uiScenario, () => {
               </a-form-item>
             </a-col>
             <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="feeStatus" :label="t('shipment.columns.feeStatus')">
+              <a-form-item field="feeStatus" :label="t('shipment.columns.feeStatus')" :style="denseFormItemStyle">
                 <a-select v-model="advancedQuery.feeStatus" size="small" allow-clear :placeholder="t('shipment.advanced.select')">
                   <a-option value="none">{{ t('shipment.feeStatus.none') }}</a-option>
                   <a-option value="pending">{{ t('shipment.feeStatus.pending') }}</a-option>
@@ -1939,10 +1939,6 @@ watch(uiScenario, () => {
   font-size: var(--dense-font-title);
   font-weight: var(--dense-weight-title);
   line-height: 18px;
-}
-
-.advanced-filter-form :deep(.arco-form-item) {
-  margin-bottom: 10px;
 }
 
 .advanced-filter-choice {

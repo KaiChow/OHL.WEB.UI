@@ -60,32 +60,32 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 
 ## Object Workspace Mode Contract
 
-A full business-detail route defaults to an **object workspace**, not an always-editable form. Its first viewport must answer: which object, current state, workflow position, blocking risk, next action, owner, and latest relevant change.
-
-Required modes:
+A full business-detail route is an **object workspace**. Operational create, maintain, continuous-entry, and correction jobs default to editing; review/audit/approval routes use display only when the business job proves it. The page does not add a generic view/edit switch: every module declares `edit`, `row-edit`, or `read-only` from its business contract. The first viewport must still answer: which object, current state, workflow position, blocking risk, next action, owner, and latest relevant change.
+Supported workspace modes:
 
 | Mode | Default | Surface | Footer |
 |------|---------|---------|--------|
-| `display` | yes | readable identity, execution focus, read-only facts, contextual row/module actions | hidden unless a real object-level workflow action must remain sticky |
-| `editing` | explicit user action only | Arco form controls for the fields owned by the edit session | cancel/discard + one primary save |
+| `display` | default for review/audit/approval jobs | readable identity, execution focus, read-only facts, contextual row/module actions | hidden unless a real object-level workflow action must remain sticky |
+| `editing` | default for operational maintain/entry jobs | Arco form controls for editable modules; business read-only modules remain display surfaces | discard/reset + one primary save |
 | `row-editing` | explicit row action | only the active detail-table row renders controls | row-local save/cancel; object footer does not replace it |
 
 Rules:
 
-- Annotate the root work area with a stable business-object role such as `data-detail-workspace="<business-object>"`; keep an explicit reactive edit state such as `isDetailEditing`.
+- Annotate the root work area with a stable business-object role such as `data-detail-workspace="<business-object>"`; module modes come from the typed manifest, not a visual toggle.
 - The overview tab must provide a compact execution-focus block before passive field groups. It owns one current decision, its blocking context, owner/deadline, and links to the owning risk/file/fee surface.
-- The default overview must render business values as read-only fields/text. Rendering the full overview as visible inputs before the user selects Edit is forbidden.
+- The page specification declares `display-first` or `edit-first` and ties it to the repeated job; every module separately declares `edit`, `row-edit`, or `read-only`.
+- An edit-first workspace renders editable modules as controls immediately while identity, state, risk, and next action remain readable outside the form. Read-only support/audit modules never become fake inputs merely because the page is edit-first.
 - Display sections use Arco `a-descriptions` before custom read-grid markup. A local semantic class may own spacing only; editable controls replace the same business fields inside the explicit edit session.
-- Entering edit mode preserves the same section order and field ownership; controls replace values without moving the user to an unrelated page.
-- Save success returns to display mode and refreshes only the object surfaces named by the feature contract. Save failure keeps editing mode and user input.
-- Cancel/discard restores the last saved snapshot and returns to display mode. Route leave during an edit session requires an unsaved-change confirmation.
-- Header actions do not duplicate footer save/cancel actions. Object-level edit is a neutral detail-head action; the editing footer owns the single primary Save.
+- A generic page-level view/edit segmented control is forbidden unless the business explicitly requires a preview or comparison mode.
+- Save success in an edit-first workspace refreshes the saved snapshot and remains editable; failure keeps all input. Discard restores that snapshot without changing the module modes. Route leave requires unsaved-change confirmation.
+- Header actions do not duplicate footer save/reset actions; the editing footer owns the single primary Save.
 - A process-bearing freight object uses a lightweight, domain-named milestone bar. Normal detail pages must not use a large vertical-label step banner or generic numbered steps.
 - File/fee/risk counts have one visible owner in navigation or the execution-focus block. Do not repeat the same counts as a KPI strip in the identity band.
 
 Forbidden fallbacks:
 
 - default detail route with a wall of editable inputs;
+- generic view/edit switch used to decide all module modes;
 - `保存` footer visible while the page is not in an edit session;
 - business status, next action, and milestone pointing to different workflow stages;
 - a decorative KPI strip between identity and the work surface;
@@ -455,14 +455,7 @@ Do not add attachment modules to pages that do not manage files.
 
 ## Repeated Modules
 
-Choose repeated modules from the object model:
-
-- Cargo/containers for shipment/order pages.
-- Fee lines for finance pages.
-- Contact/person rows for customer and permission pages.
-- Warehouse stock lines for warehouse pages.
-- Delivery rows for trucking/delivery pages.
-- Declaration rows for customs pages.
+Choose repeated modules from the page's object model, cardinality, and ownership graph. The skill does not prescribe named business modules. A page creates a repeated module only when its requirements contain a real collection, and records that module's name, rows, metrics, actions, editability, and data source in `pageSpec.ts`.
 
 Use `detail-module` and mini VXE/table patterns when the module has repeated rows. Use a simple `detail-section` when the module has only one compact form group.
 
@@ -606,7 +599,7 @@ Rules:
 
 ## Release Gate
 
-- [ ] Display mode is the default for object detail; identity, key state, blocking risk, next action, owner, and current workflow position are coherent.
+- [ ] The default mode matches the declared `user_job`; identity, key state, blocking risk, next action, owner, and current workflow position remain coherent in both modes.
 - [ ] Edit mode replaces the same owned fields without reordering sections; cancel restores the saved snapshot and failure preserves input.
 - [ ] Each count, summary, error, and action has one owner; no nested cards, duplicate KPI strips, or repeated header/footer actions.
 - [ ] The active pane/Drawer body has one vertical scroll owner; embedded VXE tables do not create height feedback or clipped controls.

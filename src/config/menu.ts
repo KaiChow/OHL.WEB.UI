@@ -19,6 +19,7 @@ export const appMenus: AppMenuItem[] = [
     key: 'ui-acceptance',
     title: 'UI验收', titleKey: 'menu.uiAcceptance',
     children: [
+      { key: 'detail-module-complex', title: '复杂详情模块', titleKey: 'menu.detailModuleComplex', routeName: 'DetailModuleComplex' },
       { key: 'query-scenario-s0', title: '无查询', titleKey: 'menu.queryS0', routeName: 'QueryScenarioS0' },
       { key: 'query-scenario-s1-compact', title: '2项紧凑查询', titleKey: 'menu.queryS1Compact', routeName: 'QueryScenarioS1Compact' },
       { key: 'query-scenario-s1-inline', title: '6项内联查询', titleKey: 'menu.queryS1Inline', routeName: 'QueryScenarioS1Inline' },

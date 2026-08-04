@@ -4,6 +4,12 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
   id: 'ui-acceptance-query-scenarios',
   target: 'internal-system',
   archetype: 'list-management',
+  input: {
+    path: 'artifact',
+    artifacts: ['user-provided query-layout screenshots and iterative acceptance feedback'],
+    unresolvedBusinessDecisions: ['saved-query persistence, sharing, permissions, and backend batch-value limits'],
+    recommendations: ['keep saved-query behavior outside L2 acceptance until its persistence and permission contracts are proven'],
+  },
   list: {
     frame: 'standard-list-v1',
     profile: 'management',
@@ -44,8 +50,8 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
       acceptance: ['No scenario combines a flat query wall with a drawer, and query actions keep one stable owner.'],
     },
     dense: {
-      decisions: ['Use one container-owned semantic-grid-v1 track model: bounded field roles, query actions adjacent to the permanent field cluster, and no left-pinned page-wide cap; reserve localized action width before promoting fields, moving the lowest-priority S2/S3 Narrow field into its existing expand/drawer surface at compact width.'],
-      acceptance: ['At 1024, 1366, 1440, and 1920 widths, role order remains stable; search/reset/expand/filter labels remain visible without clipping in zh-CN and en-US, pagination uses mini density, and the field-to-action gap stays at one shared gutter when S2 expands.'],
+      decisions: ['Use one container-owned semantic-grid-v1 track model: bounded field roles, query actions adjacent to the permanent field cluster, and no left-pinned page-wide cap; reserve localized action width before promoting fields, moving the lowest-priority S2/S3 Narrow field into its existing expand/drawer surface at compact width.', 'Use the shared dense vertical-form rhythm in grouped drawers: 4px label gap, 12px column gap, 8px row gap, and zero form-item margin because the grid owns inter-row spacing.'],
+      acceptance: ['At 1024, 1366, 1440, and 1920 widths, role order remains stable; search/reset/expand/filter labels remain visible without clipping in zh-CN and en-US, pagination uses mini density, and the field-to-action gap stays at one shared gutter when S2 expands.', 'In S3 and S4 drawers, a normal single-line field measures 60px internally and adjacent rows have an 8px net gap; Arco default form-item margin never adds a second spacing layer.'],
     },
     premium: {
       decisions: ['Use GI-native Arco controls, grouped native drawers, and the global VXE mini table without page-local skins.'],

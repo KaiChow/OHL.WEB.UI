@@ -23,12 +23,13 @@ Use the smallest path that covers the task:
 
 1. Any UI: read `references/arco-first.md` and `references/theme-contract.md`.
 2. New page, page rewrite, or material layout/interaction change: create/update typed `pageSpec.ts` from `references/page-spec-contract.md` before Vue template work.
-3. Existing page without a visual artifact: read `references/existing-project-modernization.md` and one primary page authority.
+3. Requirement-only input: inspect the repository and business request, confirm only unresolved business semantics that would materially change the result, then design the UI/UX through the selected page authority. Do not ask the user to choose spacing, component, or layout decisions already owned by this skill.
 4. New menu or uncertain archetype: use `references/domain-routing.md`, then select one primary authority: `list-page.md`, `detail-form.md`, `full-page-form.md`, `master-data.md`, or `dashboard.md`.
 5. Click, request, permission, mutation, or state transition: read `references/feature-delivery-contract.md` plus only the affected surface authority.
-6. Screenshot, Figma, or prototype: complete `references/prototype-to-ui-contract.md` before steps 2-5.
+6. Screenshot, Figma, or prototype: complete `references/prototype-to-ui-contract.md` before steps 2-5; translate it into a professional proposal instead of copying it, and surface unresolved business decisions with a recommended default.
 7. Financing, sales, demo, productization, `高级感`, `质感`, or `设计感`: read `references/visual-system.md` Design Sense Gate; for commercial release claims also apply `references/product-grade-evaluation.md` as a blocking gate.
-8. Read helpers such as `filter-layout.md`, `table.md`, `actions.md`, `feedback.md`, `icons.md`, `typography.md`, and `overlay-dimensions.md` only when that surface is present.
+8. Any detail, create/edit, master-detail, or complex business workspace: read `references/module-patterns.md`; its typed module manifest is required even when the page has no visual artifact.
+9. Read helpers such as `filter-layout.md`, `table.md`, `actions.md`, `feedback.md`, `icons.md`, `typography.md`, and `overlay-dimensions.md` only when that surface is present.
 
 If business object, user job, legal action, API behavior, or permission source cannot be proven from the repository or user input, do not invent it. Preserve the boundary visibly and report the missing contract.
 

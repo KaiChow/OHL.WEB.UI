@@ -50,7 +50,7 @@ export const PAGE_SPEC = definePageSpec({
   ],
   query: { totalFields: 2, strategy: 's1-inline', visibleFields: ['keyword', 'customer'], advancedFields: [] },
   table: { kind: 'management-list', identityColumns: ['contractNo', 'status'], decisionColumns: ['nextAction'], supportingColumns: ['updatedAt'] },
-  detail: { mode: 'none', focus: [], milestones: [] },
+  detail: { mode: 'none', focus: [], milestones: [] }, // non-none detail must also declare scroll ownership and typed modules
   actions: [
     { id: 'object-create', scope: 'command', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'object-create', successOwner: 'data', failureOwner: 'command' },
   ],
@@ -91,7 +91,7 @@ Every business action references an existing feature contract and declares frequ
 - List: every list page declares `frame: 'standard-list-v1'`, one `archetype`, and matching `list.profile`. The frame fixes shared UI/UX language; the profile controls only business complexity. `list-query` is for locating/inspecting, `list-management` is for master-data maintenance, and `list-workbench` is for repeated operational processing. Record whether the page owns a command surface, table cap, selection, work scope, status queues, page-mode switch, and the workflow-state control/count/placement/overflow; do not infer these from a copied template or call every selector a Tab.
 - Query: record all fields, visible vs advanced ownership, and selected strategy. The query strategy describes field complexity; the list archetype describes the user's job. They are independent decisions.
 - Table: `query-list`, `management-list`, and `workbench` must match `list.profile`. Classify identity, decision, supporting, composite, fixed, and density roles before columns are coded.
-- Object detail: default mode, current risk/next work, real milestones, edit scope, save/cancel owner, and local failure owner.
+- Object detail: default mode, current risk/next work, real milestones, edit scope, save/cancel owner, local failure owner, one vertical scroll owner, and a typed module manifest. Every module declares semantic kind, owned facts, statistics with source/aggregation/placement, scoped action arrays, collapse rule, and `children: { kind: 'none' }` or a bounded repeated-child contract. Empty metrics/action-scope arrays are explicit decisions; arbitrary recursive module nesting is forbidden.
 - States: include only applicable states, but every listed state needs a deterministic trigger and recovery check. Omitting an applicable state to shorten the spec is a release defect.
 - Accessibility: record the page-specific keyboard path and accessible-name scope; `zoom` is fixed at `200%`. Arco ownership does not waive checks for VXE, custom shared patterns, or icon-only actions.
 - Authorities: name one primary page authority plus only surfaces actually touched. Numeric mechanics stay in those authorities.
@@ -102,7 +102,7 @@ The five quality dimensions, state coverage, surface ownership, and accessibilit
 
 ## Generation Sequence
 
-1. Prove business object, user job, behavior to preserve, and artifact/no-artifact path.
+1. Prove business object, user job, behavior to preserve, and artifact/requirement path; record unresolved business decisions and recommended defaults without delegating professional layout choices to the user.
 2. Create/update `pageSpec.ts`.
 3. Read only its primary and affected surface authorities.
 4. Create/update smallest complete feature contracts for business actions.

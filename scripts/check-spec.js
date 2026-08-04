@@ -627,6 +627,24 @@ for (const specFile of pageSpecFiles) {
   }
 
   const archetype = getStringProperty(spec, 'archetype');
+  const input = getObjectLiteralProperty(spec, 'input');
+  const inputPath = getStringProperty(input, 'path');
+  const inputArtifacts = getStringArrayProperty(input, 'artifacts');
+  const unresolvedBusinessDecisions = getStringArrayProperty(input, 'unresolvedBusinessDecisions');
+  const inputRecommendations = getStringArrayProperty(input, 'recommendations');
+  if (!['artifact', 'requirement'].includes(inputPath)
+    || inputArtifacts === undefined
+    || unresolvedBusinessDecisions === undefined
+    || inputRecommendations === undefined
+    || (inputPath === 'artifact' && inputArtifacts.length === 0)
+    || (unresolvedBusinessDecisions.length > 0 && inputRecommendations.length === 0)) {
+    violations.push({
+      rule: 'pageSpec 必须记录 artifact/requirement 输入路径、证据、未决业务问题和建议默认值',
+      file: relPath,
+      line: 1,
+      content: `input=${inputPath ?? '(empty)'}, artifacts=${inputArtifacts?.length ?? '-'}, unresolved=${unresolvedBusinessDecisions?.length ?? '-'}, recommendations=${inputRecommendations?.length ?? '-'}`,
+    });
+  }
   const list = getObjectLiteralProperty(spec, 'list');
   const listProfile = getStringProperty(list, 'profile');
   const listArchetypeProfiles = {
@@ -725,6 +743,113 @@ for (const specFile of pageSpecFiles) {
         line: 1,
         content: `mode=${pageMode}/${pageModeCount}; workflowState=${workflowState}/${workflowStateCount}/${workflowStatePlacement}/${workflowStateOverflow}; queues=${statusQueues}`,
       });
+    }
+  }
+
+  const detail = getObjectLiteralProperty(spec, 'detail');
+  const detailMode = getStringProperty(detail, 'mode');
+  const detailModules = getObjectArrayProperty(detail, 'modules');
+  if (detailMode === 'none' && detailModules !== undefined) {
+    violations.push({
+      rule: '无详情页面不得声明模块清单，避免把隐藏详情当成已实现能力',
+      file: relPath,
+      line: 1,
+      content: 'detail.mode=none with modules',
+    });
+  }
+  if (detailMode && detailMode !== 'none') {
+    const scroll = getObjectLiteralProperty(detail, 'scroll');
+    const verticalOwner = getStringProperty(scroll, 'verticalOwner');
+    const horizontalOverflow = getStringProperty(scroll, 'horizontalOverflow');
+    const stickyActionOwner = getStringProperty(scroll, 'stickyActionOwner');
+    if (!['page', 'drawer-body', 'overlay-body'].includes(verticalOwner)
+      || horizontalOverflow !== 'table-only'
+      || !['none', 'page-footer', 'drawer-footer'].includes(stickyActionOwner)) {
+      violations.push({
+        rule: '详情 pageSpec 必须声明唯一纵向滚动所有者、table-only 横向溢出和粘性动作所有者',
+        file: relPath,
+        line: 1,
+        content: `scroll=${verticalOwner ?? '-'}/${horizontalOverflow ?? '-'}/${stickyActionOwner ?? '-'}`,
+      });
+    }
+    if (!detailModules?.length) {
+      violations.push({
+        rule: '非 none 详情必须声明 typed 模块清单，禁止只用 focus 文本代替结构契约',
+        file: relPath,
+        line: 1,
+        content: `detail.mode=${detailMode}, modules=0`,
+      });
+    } else {
+      const declaredActionIds = new Set((getObjectArrayProperty(spec, 'actions') ?? []).map((action) => getStringProperty(action, 'id')));
+      const moduleIds = new Set();
+      const metricIds = new Set();
+      for (const module of detailModules) {
+        const moduleId = getStringProperty(module, 'id');
+        const owns = getStringArrayProperty(module, 'owns');
+        const metrics = getObjectArrayProperty(module, 'metrics');
+        const moduleActionScopes = getObjectLiteralProperty(module, 'actions');
+        const moduleActions = moduleActionScopes
+          ? ['module', 'table', 'row'].flatMap((scope) => getStringArrayProperty(moduleActionScopes, scope) ?? [])
+          : undefined;
+        const children = getObjectLiteralProperty(module, 'children');
+        if (!moduleId || moduleIds.has(moduleId) || !owns?.length || metrics === undefined || moduleActions === undefined
+          || ['module', 'table', 'row'].some((scope) => getStringArrayProperty(moduleActionScopes, scope) === undefined)
+          || !children) {
+          violations.push({
+            rule: '每个详情模块必须有唯一 id、非空 owns，并显式声明 metrics、actions 和 children',
+            file: relPath,
+            line: 1,
+            content: `module=${moduleId ?? '(empty)'}`,
+          });
+        }
+        if (moduleId) moduleIds.add(moduleId);
+        const childKind = getStringProperty(children, 'kind');
+        const childMetrics = childKind === 'repeated' ? getObjectArrayProperty(children, 'metrics') : [];
+        const childActionScopes = childKind === 'repeated' ? getObjectLiteralProperty(children, 'actions') : undefined;
+        const childActions = childKind === 'repeated' && childActionScopes
+          ? ['child', 'table', 'row'].flatMap((scope) => getStringArrayProperty(childActionScopes, scope) ?? [])
+          : (childKind === 'repeated' ? undefined : []);
+        if (!['none', 'repeated'].includes(childKind)
+          || (childKind === 'repeated' && (!(getStringArrayProperty(children, 'identity')?.length)
+            || !(getStringArrayProperty(children, 'body')?.length)
+            || childMetrics === undefined
+            || childActions === undefined
+            || ['child', 'table', 'row'].some((scope) => getStringArrayProperty(childActionScopes, scope) === undefined)))) {
+          violations.push({
+            rule: '模块 children 必须显式为 none，或声明有身份、正文、统计与动作的 bounded repeated contract',
+            file: relPath,
+            line: 1,
+            content: `module=${moduleId ?? '(empty)'}, children=${childKind ?? '(empty)'}`,
+          });
+        }
+        for (const metric of [...(metrics ?? []), ...(childMetrics ?? [])]) {
+          const metricId = getStringProperty(metric, 'id');
+          const complete = metricId
+            && getStringProperty(metric, 'kind')
+            && getStringProperty(metric, 'source')
+            && getStringProperty(metric, 'aggregation')
+            && getStringProperty(metric, 'format')
+            && getStringProperty(metric, 'placement');
+          if (!complete || metricIds.has(metricId)) {
+            violations.push({
+              rule: '详情统计必须有唯一 id，并声明 kind、source、aggregation、format 与单一 placement',
+              file: relPath,
+              line: 1,
+              content: `metric=${metricId ?? '(empty)'}`,
+            });
+          }
+          if (metricId) metricIds.add(metricId);
+        }
+        for (const actionId of [...(moduleActions ?? []), ...(childActions ?? [])]) {
+          if (declaredActionIds.has(actionId)) continue;
+          violations.push({
+            rule: '模块和子模块动作必须引用同一 pageSpec 中的完整业务 action',
+            file: relPath,
+            line: 1,
+            content: `module=${moduleId ?? '(empty)'}, action=${actionId}`,
+          });
+        }
+      }
     }
   }
 

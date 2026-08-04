@@ -3,7 +3,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { IconDown, IconFilter, IconSearch } from '@arco-design/web-vue/es/icon';
-import { compactVerticalFormLabelStyle } from '../../../design-system/formLayout';
+import { compactVerticalFormLabelStyle, denseFormGridGutter } from '../../../design-system/formLayout';
 import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
 import ScenarioFieldControl from './components/ScenarioFieldControl.vue';
@@ -287,7 +287,7 @@ watch(() => props.initialScenario, (value) => {
       <a-form :model="draftValues" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
         <section v-for="group in advancedGroups" :key="group.name" class="advanced-section">
           <h3>{{ group.name }}</h3>
-          <a-row :gutter="[16, 0]">
+          <a-row :gutter="denseFormGridGutter">
             <a-col v-for="field in group.fields" :key="field.key" :span="12" :xs="24" :sm="12">
               <ScenarioFieldControl v-model="draftValues[field.key]" :field="field" />
             </a-col>
@@ -321,7 +321,7 @@ watch(() => props.initialScenario, (value) => {
           <a-form :model="draftValues" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
             <section v-for="group in advancedGroups" :id="group.id" :key="group.name" class="advanced-section">
               <h3>{{ group.name }}（{{ group.fields.length }}）</h3>
-              <a-row :gutter="[16, 0]">
+              <a-row :gutter="denseFormGridGutter">
                 <a-col v-for="field in group.fields" :key="field.key" :span="8" :xs="24" :sm="12" :lg="8">
                   <ScenarioFieldControl v-model="draftValues[field.key]" :field="field" />
                 </a-col>
