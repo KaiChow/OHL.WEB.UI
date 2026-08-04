@@ -63,7 +63,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       acceptance: [
         'At 1366, 1024 split, and wide viewports, the query row does not create a separate action band and the table remains the dominant work surface.',
         'Vertical query and overlay forms use the shared 4px label-to-control rhythm through the Arco public label-column style.',
-        'At 1024, the identifier query keeps the largest field allocation, ports stay readable, reset/advanced-filter collapse to named icon tools, and the 12 processing queues move to a deterministic second workflow line where they scroll only inside their own lane.',
+        'At 1024, the identifier query keeps the largest field allocation, reset and advanced-filter keep visible labels, and the 12 processing queues move to a deterministic second workflow line where they scroll only inside their own lane.',
         'The advanced filter opens from the right at the shared D1 width, renders two field columns, and keeps the native Drawer body as its only vertical scroll owner.',
         'Drawer content and footer remain horizontally contained at 1024, 1366, and wide desktop viewports.',
       ],
@@ -73,10 +73,11 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       acceptance: [
         'The advanced drawer exposes route/document, execution/ownership, schedule, and risk groups with local active counts, local reset, and a live matching-order count without a page-local component skin.',
         'The default advanced-filter interaction preserves the list beside a stable right-side drawer and never changes to a top overlay.',
-        'Computed theme tokens, normal/error/empty/permission states, long text, column settings, and density behavior must be inspected on the real route.',
+        'Computed theme tokens, normal/error/empty/permission states, long text, and column settings must be inspected on the real route.',
         'The route must not depend on global selectors or theme-variable bridges that rewrite Arco or VXE internals.',
         'Row actions must not render as an all-blue command strip: status transition is the emphasized next action, self-assignment and More are neutral at rest, and irreversible actions are danger-styled only inside the final menu group.',
         'The operation column must contain its longest legal localized action set without cell-level horizontal scrolling; focusing More must not shift the row-action origin.',
+        'Refresh and column settings remain one icon group before a divider; the rightmost pagination uses Arco mini density and no page-local typography override.',
       ],
     },
   },
@@ -84,7 +85,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
     { id: 'app-navigation', role: 'supporting', owns: ['module-navigation', 'route-identity'], implementation: 'arco' },
     { id: 'command', role: 'command', owns: ['query', 'ownership-scope', 'status-queues'], primaryAction: 'export-order-query', implementation: 'arco' },
     { id: 'advanced-query', role: 'supporting', owns: ['right-drawer-grid', 'advanced-query-draft', 'freight-business-grouping', 'group-active-counts', 'group-reset', 'live-result-preview', 'draft-dirty-state', 'cancel-apply-state'], primaryAction: 'export-order-query', implementation: 'arco' },
-    { id: 'orders', role: 'data', owns: ['create', 'export', 'batch-actions', 'table-data', 'selection', 'batch-result', 'column-settings', 'density', 'pagination', 'total-count', 'table-feedback'], primaryAction: 'export-order-create', implementation: 'shared-pattern', whyArcoNotEnough: 'Freight list grids require the shared VXE workbench wrapper and public density, fixed-column, overflow, loading, and preference configuration.' },
+    { id: 'orders', role: 'data', owns: ['create', 'export', 'batch-actions', 'table-data', 'selection', 'batch-result', 'column-settings', 'pagination', 'total-count', 'table-feedback'], primaryAction: 'export-order-create', implementation: 'shared-pattern', whyArcoNotEnough: 'Freight list grids require the shared VXE workbench wrapper and public fixed-column, overflow, loading, and preference configuration.' },
   ],
   query: {
     totalFields: 18,
@@ -119,9 +120,8 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
     identityColumns: ['sequence', 'orderNo', 'status'],
     decisionColumns: ['nextAction', 'operator', 'customerName', 'route', 'documentState', 'feeState', 'exceptionState'],
     supportingColumns: ['updatedAt'],
-    compositeColumns: ['next-action-decision-context'],
     fixed: ['checkbox', 'sequence', 'orderNo', 'operations'],
-    densityReason: 'Standard rows retain the auxiliary decision line; compact mode intentionally renders one line.',
+    densityReason: 'The global mini density keeps the repeated operational list compact and consistent across workbenches.',
   },
   detail: { mode: 'none', focus: [], milestones: [] },
   actions: [

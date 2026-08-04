@@ -9,7 +9,7 @@ export const QUERY_GRID_ITEM_SPANS: Record<QueryGridItemRole, number> = {
   composite: 6,
   range: 6,
   actions: 5,
-  'actions-wide': 6,
+  'actions-wide': 8,
 };
 
 export const getQueryGridTrackCount = (containerWidth: number) => {

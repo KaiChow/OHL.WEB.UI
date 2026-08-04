@@ -45,7 +45,7 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
     },
     dense: {
       decisions: ['Use one container-owned semantic-grid-v1 track model: bounded field roles, query actions adjacent to the permanent field cluster, and no left-pinned page-wide cap.'],
-      acceptance: ['At 1024, 1366, 1440, and 1920 widths, role order remains stable; the wide grid owns at least 80% of its full-width query surface, controls stay bounded, and the field-to-action gap stays at one shared gutter when S2 expands.'],
+      acceptance: ['At 1024, 1366, 1440, and 1920 widths, role order remains stable; reset/filter labels remain visible, pagination uses mini density, and the field-to-action gap stays at one shared gutter when S2 expands.'],
     },
     premium: {
       decisions: ['Use GI-native Arco controls, grouped native drawers, and the global VXE mini table without page-local skins.'],

@@ -19,8 +19,6 @@ import {
   IconInfoCircle,
   IconLock,
   IconEmpty,
-  IconLayout,
-  IconCheck,
 } from '@arco-design/web-vue/es/icon';
 import { downloadCsvFile } from '../../../utils/mock-actions';
 import { formatLocalMinute } from '../../../utils/date-time';
@@ -40,12 +38,11 @@ import type { ShipmentStatusTransition } from '../featureContracts';
 import { getOrderStatusTransitions, resolveShipmentUiScenario } from '../featureContracts';
 
 const route = useRoute();
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
 const CURRENT_OPERATOR = '张操作';
 const COLUMN_SETTING_STORAGE_KEY = 'ohl.shipment.export-order.visible-columns.v3';
 
-type TableDensity = 'compact' | 'standard';
 type WorkScope = 'all' | 'mine' | 'others';
 
 type ColumnSettingField = keyof ShipmentWorkbenchRow | 'nextAction';
@@ -232,7 +229,6 @@ const voidTargetRow = ref<ShipmentWorkbenchRow | null>(null);
 const voidModalVisible = ref(false);
 const voidSubmitting = ref(false);
 const voidError = ref('');
-const tableDensity = ref<TableDensity>('compact');
 
 const page = reactive({ current: 1, size: 50 });
 
@@ -485,17 +481,6 @@ const getNextActionLabel = (row: ShipmentWorkbenchRow) => {
   return t('shipment.nextActions.track');
 };
 
-const getNextActionMeta = (row: ShipmentWorkbenchRow) => {
-  if (row.exceptionStatus === 'open') return locale.value === 'zh-CN' && row.riskFlags.length ? row.riskFlags.join(' / ') : t('shipment.nextMeta.exception');
-  if (row.fileStatus === 'missing') return t('shipment.nextMeta.files');
-  if (row.orderStatus === 'waitBooking' || row.orderStatus === 'booking') return t('shipment.nextMeta.booking');
-  if (row.orderStatus === 'released' || row.orderStatus === 'waitTruck' || row.orderStatus === 'trucking') return t('shipment.nextMeta.trucking');
-  if (row.orderStatus === 'waitCustoms' || row.orderStatus === 'customs') return t('shipment.nextMeta.customs');
-  if (row.orderStatus === 'sailed') return t('shipment.nextMeta.bl');
-  if (row.feeStatus === 'none' || row.feeStatus === 'pending') return t('shipment.nextMeta.fee');
-  return t('shipment.nextMeta.track');
-};
-
 const fileStatusMeta: Record<ShipmentWorkbenchRow['fileStatus'], { label: string; tone: 'acc' | 'wait' | 'rej' }> = {
   complete: { label: '文件齐全', tone: 'acc' },
   pending: { label: '待确认', tone: 'wait' },
@@ -600,10 +585,6 @@ const handleReset = () => {
   advancedFilterVisible.value = false;
   page.current = 1;
   clearSelection();
-};
-
-const setTableDensity = (density: TableDensity) => {
-  tableDensity.value = density;
 };
 
 const closeAdvancedDatePopups = () => {
@@ -1045,17 +1026,12 @@ watch(uiScenario, () => {
                     <template #icon><icon-search /></template>
                     {{ t('common.search') }}
                   </a-button>
-                  <a-tooltip :content="t('common.reset')">
-                    <a-button size="small" type="text" class="filter-tool-button" :title="t('common.reset')" :aria-label="t('common.reset')" :disabled="querying" @click="handleReset">
-                      <template #icon><icon-refresh /></template>
-                      <span class="filter-tool-label">{{ t('common.reset') }}</span>
-                    </a-button>
-                  </a-tooltip>
+                  <a-button size="small" type="text" :disabled="querying" @click="handleReset">{{ t('common.reset') }}</a-button>
                   <a-badge :count="advancedActiveCount" :offset="[-4, 4]">
                     <a-tooltip :content="t('shipment.actions.advanced')">
-                      <a-button size="small" type="text" class="filter-tool-button" :title="t('shipment.actions.advanced')" :aria-label="t('shipment.actions.advanced')" @click="openAdvancedFilters">
+                      <a-button size="small" type="text" :title="t('shipment.actions.advanced')" :aria-label="t('shipment.actions.advanced')" @click="openAdvancedFilters">
                         <template #icon><icon-filter /></template>
-                        <span class="filter-tool-label">{{ t('common.filter') }}</span>
+                        {{ t('common.filter') }}
                       </a-button>
                     </a-tooltip>
                   </a-badge>
@@ -1132,11 +1108,19 @@ watch(uiScenario, () => {
         </template>
         <template #extra>
           <a-space :size="8">
-            <a-tooltip :content="t('common.refresh')">
-              <a-button size="small" type="text" class="table-cap-tool" :title="t('common.refresh')" :aria-label="t('common.refresh')" :loading="loading || forcedLoading" @click="fetchList">
-                <template #icon><icon-refresh /></template>
-              </a-button>
-            </a-tooltip>
+            <a-space :size="4">
+              <a-tooltip :content="t('common.refresh')">
+                <a-button size="small" type="text" class="table-cap-tool" :title="t('common.refresh')" :aria-label="t('common.refresh')" :loading="loading || forcedLoading" @click="fetchList">
+                  <template #icon><icon-refresh /></template>
+                </a-button>
+              </a-tooltip>
+              <a-tooltip :content="t('shipment.actions.columns')">
+                <a-button size="small" type="text" class="table-cap-tool" :title="t('shipment.actions.columns')" :aria-label="t('shipment.actions.columns')" @click="openColumnSettings">
+                  <template #icon><icon-settings /></template>
+                </a-button>
+              </a-tooltip>
+            </a-space>
+            <a-divider direction="vertical" :margin="0" />
             <a-pagination
               :current="page.current"
               :page-size="page.size"
@@ -1149,34 +1133,6 @@ watch(uiScenario, () => {
               @change="onPageChange"
               @page-size-change="onPageSizeChange"
             />
-            <a-dropdown trigger="click" position="br" content-class="action-menu action-menu--toolbar">
-              <a-tooltip :content="t('shipment.actions.density')">
-                <a-button size="small" type="text" class="table-cap-tool" :title="t('shipment.actions.density')" :aria-label="t('shipment.actions.density')">
-                  <template #icon><icon-layout /></template>
-                </a-button>
-              </a-tooltip>
-              <template #content>
-                <a-doption @click="setTableDensity('compact')">
-                  <span class="density-option">
-                    <icon-check v-if="tableDensity === 'compact'" />
-                    <span v-else class="density-option__placeholder" />
-                    {{ t('shipment.actions.compact') }}
-                  </span>
-                </a-doption>
-                <a-doption @click="setTableDensity('standard')">
-                  <span class="density-option">
-                    <icon-check v-if="tableDensity === 'standard'" />
-                    <span v-else class="density-option__placeholder" />
-                    {{ t('shipment.actions.comfortable') }}
-                  </span>
-                </a-doption>
-              </template>
-            </a-dropdown>
-            <a-tooltip :content="t('shipment.actions.columns')">
-              <a-button size="small" type="text" class="table-cap-tool" :title="t('shipment.actions.columns')" :aria-label="t('shipment.actions.columns')" @click="openColumnSettings">
-                <template #icon><icon-settings /></template>
-              </a-button>
-            </a-tooltip>
           </a-space>
         </template>
 
@@ -1194,7 +1150,6 @@ watch(uiScenario, () => {
           <vxe-table
             ref="tableRef"
             id="shipment-export-orders"
-            :size="tableDensity === 'standard' ? 'medium' : undefined"
             style="width: 100%"
             height="100%"
             auto-resize
@@ -1227,9 +1182,8 @@ watch(uiScenario, () => {
 
             <vxe-column field="nextAction" :title="t('shipment.columns.nextAction')" min-width="230" :visible="isColumnVisible('nextAction')">
               <template #default="{ row }">
-                <div class="decision-cell" data-cell-role="decision-context">
+                <div class="decision-cell">
                   <span class="decision-cell__main">{{ getNextActionLabel(row) }}</span>
-                  <span v-if="tableDensity === 'standard'" class="decision-cell__context">{{ getNextActionMeta(row) }}</span>
                 </div>
               </template>
             </vxe-column>
@@ -1753,28 +1707,6 @@ watch(uiScenario, () => {
   white-space: nowrap;
 }
 
-.filter-tool-label {
-  display: none;
-}
-
-.filter-tool-button {
-  width: 28px;
-  min-width: 28px;
-  padding-inline: 0;
-}
-
-.density-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 112px;
-}
-
-.density-option__placeholder {
-  width: 12px;
-  flex: 0 0 12px;
-}
-
 .workflow-filter-bar {
   display: flex;
   align-items: center;
@@ -2033,8 +1965,7 @@ watch(uiScenario, () => {
   min-width: 0;
 }
 
-.decision-cell__main,
-.decision-cell__context {
+.decision-cell__main {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2043,14 +1974,8 @@ watch(uiScenario, () => {
 .decision-cell__main {
   color: var(--color-text-1);
   font-size: var(--dense-font-data);
-  font-weight: var(--dense-weight-title);
+  font-weight: var(--dense-weight-control);
   line-height: 15px;
-}
-
-.decision-cell__context {
-  color: var(--color-text-3);
-  font-size: var(--dense-font-aux);
-  line-height: 14px;
 }
 
 .modal-context-alert {

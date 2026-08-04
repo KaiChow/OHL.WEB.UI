@@ -516,11 +516,14 @@ watch(uiScenario, () => {
         </template>
         <template #extra>
           <a-space :size="8">
-            <a-tooltip :content="t('common.refresh')">
-              <a-button size="small" type="text" class="table-cap-tool" :title="t('common.refresh')" :aria-label="t('common.refresh')" :loading="loading || forcedLoading" @click="fetchList">
-                <template #icon><icon-refresh /></template>
-              </a-button>
-            </a-tooltip>
+            <a-space :size="4">
+              <a-tooltip :content="t('common.refresh')">
+                <a-button size="small" type="text" class="table-cap-tool" :title="t('common.refresh')" :aria-label="t('common.refresh')" :loading="loading || forcedLoading" @click="fetchList">
+                  <template #icon><icon-refresh /></template>
+                </a-button>
+              </a-tooltip>
+            </a-space>
+            <a-divider direction="vertical" :margin="0" />
             <a-pagination
               :current="page.current"
               :page-size="page.size"

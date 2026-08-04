@@ -52,7 +52,7 @@ A full-width bordered query surface with a left-pinned capped grid and an unowne
 
 ### Shared Track Model
 
-Use one shared responsive track model so wider containers gain tracks instead of wider controls. A logical track stays roughly `40-56px` across supported desktop profiles at 100% zoom: `compact` spans 3 tracks, `standard` 4, and `wide` / `composite` / `range` 6. The normal and wide action slots span only the tracks required by their localized commands.
+Use one shared responsive track model so wider containers gain tracks instead of wider controls. A logical track stays roughly `40-56px` across supported desktop profiles at 100% zoom: `compact` spans 3 tracks, `standard` 4, and `wide` / `composite` / `range` 6. The normal action slot spans 5 tracks; the wide slot spans 8 so query, reset, and expand/filter labels remain visible.
 
 - Derive track count from the **query container's inner width**, not the browser width. Keep enough tracks for the supported 1024px desktop and add tracks as the container grows through 1440px and 1920px evidence.
 - Controls fill their semantic item, but the shared grid bounds the effective track size. Do not make a customer Select 400px wide merely because the monitor is wide.
@@ -63,7 +63,7 @@ Use one shared responsive track model so wider containers gain tracks instead of
 - Advanced drawers keep their documented two-column/one-column composition; list-row tracks do not leak into the drawer.
 
 Start with Arco Grid when its 24 columns satisfy all supported widths. When a fixed 24-column grid would either stretch fields or require a narrow left-pinned `max-width` on wide desktop, the shared `QueryFieldGrid` may use CSS Grid for layout only. Record the reusable gap as: `Arco's fixed 24-column model cannot preserve bounded semantic field widths while adding wide-desktop capacity.` Arco continues to own Form, controls, validation, focus, and component chrome.
-Reference algorithm: derive a shared track count from container inner width and the profile's target track; map roles to `3/4/6` spans; append the `5/6`-track action item after the permanent field cluster and reserve that capacity before promoting optional fields; then verify wrapping and DOM/focus order. Implement it once in the shared component, not in pages.
+Reference algorithm: derive a shared track count from container inner width and the profile's target track; map roles to `3/4/6` spans; append the `5/8`-track action item after the permanent field cluster and reserve that capacity before promoting optional fields; then verify wrapping and DOM/focus order. Implement it once in the shared component, not in pages.
 
 ### Space-Use Decision
 

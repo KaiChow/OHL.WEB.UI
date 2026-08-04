@@ -2,7 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { IconDown, IconFilter, IconRefresh, IconSearch } from '@arco-design/web-vue/es/icon';
+import { IconDown, IconFilter, IconSearch } from '@arco-design/web-vue/es/icon';
 import { compactVerticalFormLabelStyle } from '../../../design-system/formLayout';
 import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
@@ -201,12 +201,7 @@ watch(() => props.initialScenario, (value) => {
                 <a-button size="small" type="primary" :loading="querying" @click="handleSearch">
                   <template #icon><icon-search /></template>{{ t('common.search') }}
                 </a-button>
-                <a-tooltip :content="t('common.reset')">
-                  <a-button size="small" type="text" class="filter-icon-action" :title="t('common.reset')" :aria-label="t('common.reset')" @click="resetValues">
-                    <template #icon><icon-refresh /></template>
-                    <span v-if="!isExpandScenario && !isDrawerScenario">{{ t('common.reset') }}</span>
-                  </a-button>
-                </a-tooltip>
+                <a-button size="small" type="text" @click="resetValues">{{ t('common.reset') }}</a-button>
                 <a-tooltip v-if="isExpandScenario" :content="expanded ? t('common.collapse') : t('common.expand', { count: collapsibleSecondaryFields.length })">
                   <a-badge :count="hiddenActiveCount" :offset="[-2, 2]">
                     <a-button size="small" type="text" class="filter-expand-action" :aria-label="expanded ? t('common.collapse') : t('common.expand', { count: collapsibleSecondaryFields.length })" @click="expanded = !expanded">
@@ -242,7 +237,7 @@ watch(() => props.initialScenario, (value) => {
     >
       <template #title><span>{{ t('queryScenario.results') }}</span></template>
       <template #extra>
-        <a-pagination v-model:current="page.current" v-model:page-size="page.size" :total="filteredRows.length" size="small" show-total show-page-size />
+        <a-pagination v-model:current="page.current" v-model:page-size="page.size" :total="filteredRows.length" size="mini" show-total show-page-size />
       </template>
       <div class="scenario-table-frame">
         <vxe-table :data="filteredRows" height="100%" auto-resize show-overflow="title" :seq-config="{ startIndex: (page.current - 1) * page.size }">
@@ -443,19 +438,6 @@ watch(() => props.initialScenario, (value) => {
     height: auto;
     min-height: 28px;
     white-space: normal;
-  }
-}
-
-@media (max-width: 1199px) {
-  .expand-action-label {
-    display: none;
-  }
-
-  .filter-icon-action,
-  .filter-expand-action {
-    width: 28px;
-    min-width: 28px;
-    padding-inline: 0;
   }
 }
 
