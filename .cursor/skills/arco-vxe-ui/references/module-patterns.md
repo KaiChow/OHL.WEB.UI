@@ -111,13 +111,13 @@ Implementation: [`detail-form.md`](detail-form.md) · [`actions.md`](actions.md)
 ## Module Surface
 | Level | Height / type | Body rhythm | Action rule |
 |---|---|---|---|
-| Top-level module | 36px head · F2 13/600 | 8px start · 12px inline/end | title left; at most one outline add action right |
-| Repeated child | 36px head · F3 12/600 | 10px block · 12px inline | child metrics beside identity; auxiliary icon tools right |
+| Top-level module | 36px head · optional 28-32px summary | 8px start · 12px inline/end | title/state left; at most one outline add action right |
+| Repeated child | 36-40px head · F3 12/600 | 10px block · 12px inline | identity + neutral role attribute; child metrics and auxiliary tools right |
 | Child table cap | 32px · F3 12/600 | directly precedes the table | one outline add action; no duplicate module totals |
 | Body data | F1/F4 12px; F5 11px metadata | field rows 8px; columns 12px | controls/actions follow component-size/actions authorities |
 Always-open module titles and bodies share the 12px inline origin and never reserve a phantom disclosure slot; only genuinely collapsible modules own a visible disclosure control. Collapsed supporting/audit modules consume only their 36px head and never retain phantom body spacing. That 36px is the rendered border-box height including padding/dividers; verify the bounding box, not only the token declaration.
 Modules are sections inside one owning detail canvas, not repeated cards. Module kinds use distinct internal compositions; core editing modules stay open without redundant collapse controls, while supporting/audit modules may collapse.
-Top-level modules use one neutral header fill, one subtle divider, and a 4-8px neutral inter-module gap; they stay full-width and never receive card shadows or repeated decorative color bars. Place compact statistics between title and actions, never in a detached row, and wrap the group as one unit when narrow.
+Top-level modules use one neutral header fill, one subtle divider, and a 4-8px neutral inter-module gap; they stay full-width and never receive card shadows or decorative bars. The 36px head owns title, real module state, and actions. When metrics exist, render one adjacent 28-32px summary row below the head; omit it when empty and never stretch it into KPI tiles.
 Repeated child business objects may use one neutral 1px boundary and the shared small radius because each child is a genuine repeated unit. Keep its head on `color-fill-1`, its body white, and never add a shadow.
 A table cap exists only for a real subordinate table title. Additive/workflow actions live in the header of the module or child they mutate; never repeat the parent module title merely to carry an action.
 For at least five modules or more than two viewport heights of content, a scroll-aware section index is allowed only with at least 1440px available canvas width. Use a compact 144-192px track, hide it below the threshold without creating a second navigation pattern, and keep the existing scroll owner. Items may show active location plus completion/exception only when module contracts provide real state; never infer a check mark from non-empty UI or invent a count. The active item uses one centered 16px indicator, never a full-height/full-row rail. Detail canvases use all remaining width without arbitrary page/form `max-width` gutters.
@@ -144,7 +144,7 @@ The manifest is a decision record and validation boundary, not a universal JSON 
 
 Metrics exist only when they help a decision and have a provable source. `count`, `quantity`, `amount`, `progress`, `exception`, and `status-breakdown` are semantic kinds; source is `api`, `derived`, or `local-state`; aggregation is `none`, `count`, `sum`, `ratio`, or `breakdown`; format is `number`, `unit`, `currency`, `percent`, or `status`.
 
-- Page facts answer object-level decisions; module summaries answer module-level decisions; child heads distinguish repeated children; table caps describe the table dataset.
+- Page facts answer object-level decisions; top-level module summary rows answer module-level decisions; child heads keep identity, role, and child-only metrics together; table caps describe the table dataset.
 - One fact has one visible owner; module titles contain names only, statistics use the summary slot, and status uses `.s-pill[data-s]` beside its object.
 - Never invent a metric because a surface looks empty; declare `metrics: []` when none helps a decision.
 

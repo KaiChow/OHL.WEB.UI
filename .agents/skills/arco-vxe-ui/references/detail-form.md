@@ -51,8 +51,8 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 
 `dds-head` and `dds-hero` are the working identity band for business users. They must make the object immediately recognizable during daily operation.
 
-- `dds-head` fills object-level slots: `key_state`, `primary_identity`, `business_context`, `owner`, and `view_tools`. The primary identity uses the project primary text role; context and owner use readable business-value roles, not helper/disabled color.
-- `dds-hero` fills 3-6 `key_facts` owned by the object. A key fact is any value users need before choosing the next operation, such as lane, schedule, counterparty, amount, risk, stock, location, or due date depending on object type.
+- `dds-head` is an identity cluster: `primary_identity` is first, with `key_state` and object type adjacent; `business_context` sits directly below or beside it. Object identity must be easier to find than every fact label.
+- `dds-hero` fills 3-6 `key_facts` owned by the next decision, such as lane, ETD/ETA, counterparty, amount, owner, risk, stock, location, or due date. Passive update metadata does not displace a decision fact.
 - The lead fact is selected from the object's user job. Example: work-order users often scan by state + priority first, while invoice users may scan by counterparty + amount, and customer users may scan by owner + last follow-up.
 - Lead facts gain emphasis through grouping, order, and 600 weight. Primary tint is reserved for an interactive/current state, not a passive fact background.
 - `color-text-4` is forbidden for `primary_identity`, `business_context`, `owner`, or any `key_fact` used to decide the next operation.
@@ -197,7 +197,7 @@ Span rules:
 
 ### Form Subgroups
 
-When one `detail-section` contains multiple business sub-concepts, use `form-subgroup` blocks to divide them without creating new top-level sections. A subgroup is a compact operational panel with a head and one field grid. It is not a card, not a new module, and not a decorative left rail.
+When one `detail-section` contains multiple business sub-concepts, use `form-subgroup` blocks to divide them without creating new top-level sections. In this repository, `BusinessFieldGroup.vue` is the shared unframed head/body primitive for that role; it is not a card, new module, or decorative rail.
 
 ```vue
 <a-form class="detail-form" layout="vertical" :model="form">
@@ -396,7 +396,7 @@ Use structured option groups for service items, attribute types, object flags, a
 
 ## Module Header Rule
 
-The header has four semantic slots: `title | compact summary | state | actions`. The title slot contains only the module name; the action slot contains only module-owned commands. A compact decision metric/status may stay inline between them when it fits one 36px row and has this module as its sole owner. Otherwise move the summary into the first body row; never create a detached report band or repeat the same metric in child/table headers.
+The top-level header owns `title | state | actions`; its title slot contains only the module name and its action slot only module-owned commands. Sourced metrics use one adjacent 28-32px summary row below the 36px head, omitted when empty. Repeated-child heads keep child identity, a neutral role/attribute marker, child-only metrics, and child actions together. Never repeat a metric in module, child, and table levels.
 
 ## Attachments
 
@@ -591,8 +591,8 @@ Rules:
 - Submit/confirm is primary.
 - Save draft is default/outline.
 - Abandon/delete is danger and confirmed.
-- Footer is sticky and always visible.
-- Use the Drawer footer slot with an Arco Space/Flex layout: optional danger action on the left, cancel and one primary action on the right (see `actions.md`).
+- Footer is sticky and always visible. Its left side owns persistent `saved | dirty count | saving | recoverable failure`; do not use a transient Message as the only dirty/error signal.
+- Use Arco Space/Flex: status and optional danger remain left; cancel/discard and one primary commit stay right. Disable no-op discard/save when no changes exist (see `actions.md`).
 
 ## Release Gate
 

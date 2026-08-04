@@ -33,9 +33,12 @@ const emit = defineEmits<{
         </a-tooltip>
         <h2 :id="`${id}-title`" class="business-detail-module__title">{{ title }}</h2>
       </div>
-      <div v-if="$slots.summary" class="business-detail-module__summary"><slot name="summary" /></div>
-      <div v-if="$slots.actions" class="business-detail-module__actions"><slot name="actions" /></div>
+      <div class="business-detail-module__commands">
+        <div v-if="$slots.state" class="business-detail-module__state"><slot name="state" /></div>
+        <div v-if="$slots.actions" class="business-detail-module__actions"><slot name="actions" /></div>
+      </div>
     </header>
+    <div v-if="$slots.summary" v-show="expanded" class="business-detail-module__summary"><slot name="summary" /></div>
     <div v-show="expanded" class="business-detail-module__body"><slot /></div>
   </section>
 </template>
@@ -58,11 +61,14 @@ const emit = defineEmits<{
   align-items: center;
   justify-content: space-between;
   gap: var(--dense-gap-inline);
-  background: var(--color-fill-1);
+  background: var(--color-bg-1);
+  border-top: 1px solid var(--dense-card-border);
   border-bottom: 1px solid var(--dense-border-subtle);
 }
 
 .business-detail-module__identity,
+.business-detail-module__commands,
+.business-detail-module__state,
 .business-detail-module__summary,
 .business-detail-module__actions {
   display: flex;
@@ -71,7 +77,14 @@ const emit = defineEmits<{
 }
 
 .business-detail-module__identity { gap: 4px; }
-.business-detail-module__summary { flex: 1 1 auto; margin-left: var(--dense-gap-inline); }
+.business-detail-module__commands { flex: 0 0 auto; gap: var(--dense-gap-inline); }
+.business-detail-module__summary {
+  box-sizing: border-box;
+  min-height: 30px;
+  padding: 4px var(--dense-pad-section-x);
+  border-bottom: 1px solid var(--dense-border-subtle);
+  background: var(--color-fill-1);
+}
 .business-detail-module__actions { flex: 0 0 auto; gap: var(--dense-gap-inline); }
 
 .business-detail-module__collapse {
@@ -103,7 +116,7 @@ const emit = defineEmits<{
 
 @media (max-width: 1180px) {
   .business-detail-module__head { align-items: center; }
-  .business-detail-module__summary { overflow: hidden; }
+  .business-detail-module__commands { min-width: 0; }
   .business-detail-module__actions { flex-wrap: wrap; justify-content: flex-end; }
 }
 </style>

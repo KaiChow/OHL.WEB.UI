@@ -2,8 +2,10 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Message } from '@arco-design/web-vue';
 import {
+  IconCheck,
   IconCopy,
   IconDelete,
+  IconExclamationCircle,
   IconPlus,
   IconSave,
 } from '@arco-design/web-vue/es/icon';
@@ -11,6 +13,7 @@ import { useI18n } from 'vue-i18n';
 import BusinessActivityList, { type BusinessActivityItem } from '../../../components/workbench/BusinessActivityList.vue';
 import BusinessDetailChild from '../../../components/workbench/BusinessDetailChild.vue';
 import BusinessDetailModule from '../../../components/workbench/BusinessDetailModule.vue';
+import BusinessFieldGroup from '../../../components/workbench/BusinessFieldGroup.vue';
 import BusinessMetricStrip, { type BusinessMetricItem } from '../../../components/workbench/BusinessMetricStrip.vue';
 import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '../../../design-system/formLayout';
 import { DETAIL_MODULES_SPEC } from './pageSpec';
@@ -114,6 +117,8 @@ const documents = [
   { id: 'invoice', nameKey: 'detailModules.documents.invoice', owner: 'Mia Hoffmann', statusKey: 'complete', tone: 'acc', updatedAt: '2026-08-03 16:50' },
 ] as const;
 
+const pendingDocumentCount = computed(() => documents.filter((document) => document.statusKey === 'pending').length);
+
 const activities = [
   { id: 1, eventKey: 'detailModules.activityItems.bookingUpdated', actor: 'Zhang Ya', time: '2026-08-04 10:16' },
   { id: 2, eventKey: 'detailModules.activityItems.customsRequested', actor: 'Liu Wen', time: '2026-08-04 09:42' },
@@ -128,11 +133,21 @@ const activityItems = computed<BusinessActivityItem[]>(() => activities.map((ite
 })));
 
 const moduleNavItems = computed(() => [
-  { id: 'shipment-overview', label: t('detailModules.modules.overview') },
-  { id: 'cargo-parties', label: t('detailModules.modules.cargo') },
-  { id: 'containers', label: t('detailModules.modules.containers') },
-  { id: 'documents', label: t('detailModules.modules.documents') },
-  { id: 'activity', label: t('detailModules.modules.activity') },
+  {
+    id: 'shipment-overview', label: t('detailModules.modules.overview'),
+    meta: overview.value.customer.trim()
+      ? { kind: 'complete', text: '', label: t('detailModules.nav.complete') }
+      : { kind: 'warning', text: '1', label: t('detailModules.nav.issues', { count: 1 }) },
+  },
+  { id: 'cargo-parties', label: t('detailModules.modules.cargo'), meta: { kind: 'count', text: String(cargoParties.value.length), label: t('detailModules.nav.items', { count: cargoParties.value.length }) } },
+  { id: 'containers', label: t('detailModules.modules.containers'), meta: { kind: 'count', text: String(containers.value.length), label: t('detailModules.nav.items', { count: containers.value.length }) } },
+  {
+    id: 'documents', label: t('detailModules.modules.documents'),
+    meta: pendingDocumentCount.value
+      ? { kind: 'warning', text: String(pendingDocumentCount.value), label: t('detailModules.nav.issues', { count: pendingDocumentCount.value }) }
+      : { kind: 'complete', text: '', label: t('detailModules.nav.complete') },
+  },
+  { id: 'activity', label: t('detailModules.modules.activity'), meta: null },
 ]);
 
 const updateActiveModule = () => {
@@ -170,7 +185,7 @@ type DraftSnapshot = {
   cargoParties: CargoParty[];
   containers: ContainerLine[];
 };
-let snapshot: DraftSnapshot | null = null;
+const snapshot = ref<DraftSnapshot | null>(null);
 
 const cargoTotals = computed(() => cargoParties.value.reduce(
   (totals, party) => party.lines.reduce((lineTotals, line) => ({
@@ -193,6 +208,7 @@ const containerMetrics = computed<BusinessMetricItem[]>(() => [
 const childMetrics = (party: CargoParty): BusinessMetricItem[] => [
   { id: `lines-${party.id}`, label: t('detailModules.metrics.cargoLines'), value: String(party.lines.length) },
   { id: `weight-${party.id}`, label: t('detailModules.metrics.weight'), value: `${party.lines.reduce((total, line) => total + Number(line.grossWeight || 0), 0).toLocaleString()} KG` },
+  { id: `volume-${party.id}`, label: t('detailModules.metrics.volume'), value: `${party.lines.reduce((total, line) => total + Number(line.volume || 0), 0).toFixed(1)} CBM` },
 ];
 
 const cloneDraft = (): DraftSnapshot => JSON.parse(JSON.stringify({
@@ -201,15 +217,36 @@ const cloneDraft = (): DraftSnapshot => JSON.parse(JSON.stringify({
   containers: containers.value,
 })) as DraftSnapshot;
 
-snapshot = cloneDraft();
+const countDraftChanges = (current: unknown, saved: unknown): number => {
+  if (Object.is(current, saved)) return 0;
+  if (Array.isArray(current) && Array.isArray(saved)) {
+    const shared = Math.min(current.length, saved.length);
+    let changed = Math.abs(current.length - saved.length);
+    for (let index = 0; index < shared; index += 1) changed += countDraftChanges(current[index], saved[index]);
+    return changed;
+  }
+  if (current && saved && typeof current === 'object' && typeof saved === 'object') {
+    const keys = new Set([...Object.keys(current), ...Object.keys(saved)]);
+    let changed = 0;
+    keys.forEach((key) => {
+      if (key === 'expanded' || key.startsWith('_X_')) return;
+      changed += countDraftChanges((current as Record<string, unknown>)[key], (saved as Record<string, unknown>)[key]);
+    });
+    return changed;
+  }
+  return 1;
+};
+
+snapshot.value = cloneDraft();
+const dirtyCount = computed(() => (snapshot.value ? countDraftChanges(cloneDraft(), snapshot.value) : 0));
 
 const cancelEdit = () => {
-  if (snapshot) {
-    overview.value = snapshot.overview;
-    cargoParties.value = snapshot.cargoParties;
-    containers.value = snapshot.containers;
+  if (snapshot.value) {
+    overview.value = snapshot.value.overview;
+    cargoParties.value = snapshot.value.cargoParties;
+    containers.value = snapshot.value.containers;
   }
-  snapshot = cloneDraft();
+  snapshot.value = cloneDraft();
 };
 
 const saveDraft = async () => {
@@ -221,7 +258,7 @@ const saveDraft = async () => {
   isSaving.value = true;
   await new Promise((resolve) => setTimeout(resolve, 360));
   isSaving.value = false;
-  snapshot = cloneDraft();
+  snapshot.value = cloneDraft();
   Message.success(t('detailModules.messages.saved'));
 };
 
@@ -268,24 +305,31 @@ const removeContainer = (containerId: number) => {
 <template>
   <main class="detail-acceptance" data-pesdp-page="ui-acceptance-complex-detail-modules" data-detail-workspace="sea-export-shipment-working-draft">
     <header class="object-band">
-      <div class="object-band__head">
+      <div class="object-band__primary">
         <div class="object-band__identity">
-          <span class="s-pill" data-s="op">{{ t('detailModules.status.booking') }}</span>
-          <h1 class="object-band__number mono">SEO2026080001</h1>
-          <span class="object-band__type">{{ t('detailModules.identity.serviceType') }}</span>
+          <div class="object-band__identity-line">
+            <h1 class="object-band__number mono">SEO2026080001</h1>
+            <span class="s-pill" data-s="op">{{ t('detailModules.status.booking') }}</span>
+            <span class="object-band__type">{{ t('detailModules.identity.serviceType') }}</span>
+          </div>
+          <strong class="object-band__context" :title="overview.customer">{{ overview.customer }}</strong>
+          <div class="object-band__owner">
+            <span>{{ t('detailModules.fields.owner') }}</span>
+            <strong>{{ overview.owner }}</strong>
+          </div>
         </div>
-      </div>
-      <div class="object-band__body">
-        <div class="object-band__facts">
-          <div class="object-fact"><span>{{ t('detailModules.fields.customer') }}</span><strong :title="overview.customer">{{ overview.customer }}</strong></div>
-          <div class="object-fact"><span>{{ t('detailModules.fields.route') }}</span><strong :title="overview.route">{{ overview.route }}</strong></div>
-          <div class="object-fact"><span>{{ t('detailModules.fields.owner') }}</span><strong :title="overview.owner">{{ overview.owner }}</strong></div>
-          <div class="object-fact"><span>{{ t('detailModules.fields.updatedAt') }}</span><strong class="tabular" title="2026-08-04 10:16">2026-08-04 10:16</strong></div>
+        <div class="object-band__route">
+          <span class="object-band__route-label">{{ t('detailModules.fields.route') }}</span>
+          <strong :title="overview.route">{{ overview.route }}</strong>
+          <div class="object-band__schedule">
+            <span>ETD <b class="tabular">{{ overview.etd }}</b></span>
+            <span>ETA <b class="tabular">{{ overview.eta }}</b></span>
+          </div>
         </div>
         <div class="object-band__decision">
           <div class="object-decision object-decision--risk">
             <span class="object-decision__label">{{ t('detailModules.identity.currentRisk') }}</span>
-            <span class="s-pill" data-s="wait">{{ t('detailModules.identity.riskValue') }}</span>
+            <span class="s-pill" data-s="wait">{{ t('detailModules.identity.riskValue', { count: pendingDocumentCount }) }}</span>
           </div>
           <div class="object-decision object-decision--next">
             <span class="object-decision__label">{{ t('detailModules.identity.nextAction') }}</span>
@@ -305,8 +349,16 @@ const removeContainer = (containerId: number) => {
           :class="{ 'detail-outline__link--active': activeModuleId === item.id }"
           :href="`#${item.id}`"
           :aria-current="activeModuleId === item.id ? 'location' : undefined"
+          :aria-label="item.meta ? `${item.label}, ${item.meta.label}` : item.label"
           @click.prevent="navigateToModule(item.id)"
-        >{{ item.label }}</a>
+        >
+          <span class="detail-outline__text">{{ item.label }}</span>
+          <span v-if="item.meta" class="detail-outline__meta" :data-kind="item.meta.kind" :title="item.meta.label" aria-hidden="true">
+            <icon-check v-if="item.meta.kind === 'complete'" />
+            <icon-exclamation-circle v-else-if="item.meta.kind === 'warning'" />
+            <span v-if="item.meta.text">{{ item.meta.text }}</span>
+          </span>
+        </a>
       </nav>
 
       <div ref="scrollContainerRef" class="detail-acceptance__scroll">
@@ -319,16 +371,24 @@ const removeContainer = (containerId: number) => {
         :collapse-label="t('detailModules.aria.toggleModule', { module: t('detailModules.modules.overview') })"
       >
         <a-form class="detail-form detail-form--overview" :model="overview" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
-          <a-row :gutter="denseFormGridGutter">
-            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.serviceType')" :style="denseFormItemStyle"><a-input v-model="overview.serviceType" /></a-form-item></a-col>
-            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.customer')" required :style="denseFormItemStyle"><a-input v-model="overview.customer" /></a-form-item></a-col>
-            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.route')" :style="denseFormItemStyle"><a-input v-model="overview.route" /></a-form-item></a-col>
-            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.vesselVoyage')" :style="denseFormItemStyle"><a-input v-model="overview.vesselVoyage" /></a-form-item></a-col>
-            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.etd')" :style="denseFormItemStyle"><a-input v-model="overview.etd" class="tabular" /></a-form-item></a-col>
-            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.eta')" :style="denseFormItemStyle"><a-input v-model="overview.eta" class="tabular" /></a-form-item></a-col>
-            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.owner')" :style="denseFormItemStyle"><a-input v-model="overview.owner" /></a-form-item></a-col>
-            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.customerReference')" :style="denseFormItemStyle"><a-input v-model="overview.reference" class="mono" /></a-form-item></a-col>
-          </a-row>
+          <div class="overview-field-groups">
+            <BusinessFieldGroup :title="t('detailModules.groups.businessContext')">
+              <a-row :gutter="denseFormGridGutter">
+                <a-col :xs="24" :sm="12"><a-form-item :label="t('detailModules.fields.serviceType')" :style="denseFormItemStyle"><a-input v-model="overview.serviceType" /></a-form-item></a-col>
+                <a-col :xs="24" :sm="12"><a-form-item :label="t('detailModules.fields.owner')" :style="denseFormItemStyle"><a-input v-model="overview.owner" /></a-form-item></a-col>
+                <a-col :xs="24" :sm="12"><a-form-item :label="t('detailModules.fields.customer')" required :style="denseFormItemStyle"><a-input v-model="overview.customer" /></a-form-item></a-col>
+                <a-col :xs="24" :sm="12"><a-form-item :label="t('detailModules.fields.customerReference')" :style="denseFormItemStyle"><a-input v-model="overview.reference" class="mono" /></a-form-item></a-col>
+              </a-row>
+            </BusinessFieldGroup>
+            <BusinessFieldGroup :title="t('detailModules.groups.transportPlan')">
+              <a-row :gutter="denseFormGridGutter">
+                <a-col :xs="24" :sm="12"><a-form-item :label="t('detailModules.fields.route')" :style="denseFormItemStyle"><a-input v-model="overview.route" /></a-form-item></a-col>
+                <a-col :xs="24" :sm="12"><a-form-item :label="t('detailModules.fields.vesselVoyage')" :style="denseFormItemStyle"><a-input v-model="overview.vesselVoyage" /></a-form-item></a-col>
+                <a-col :xs="24" :sm="12"><a-form-item :label="t('detailModules.fields.etd')" :style="denseFormItemStyle"><a-input v-model="overview.etd" class="tabular" /></a-form-item></a-col>
+                <a-col :xs="24" :sm="12"><a-form-item :label="t('detailModules.fields.eta')" :style="denseFormItemStyle"><a-input v-model="overview.eta" class="tabular" /></a-form-item></a-col>
+              </a-row>
+            </BusinessFieldGroup>
+          </div>
         </a-form>
       </BusinessDetailModule>
 
@@ -444,6 +504,7 @@ const removeContainer = (containerId: number) => {
         :title="t('detailModules.modules.documents')"
         :collapse-label="t('detailModules.aria.toggleModule', { module: t('detailModules.modules.documents') })"
       >
+        <template #state><span class="s-pill" data-s="wait">{{ t('detailModules.nav.issues', { count: pendingDocumentCount }) }}</span></template>
         <div class="document-list" role="list">
           <div class="document-list__head" aria-hidden="true">
             <span>{{ t('detailModules.fields.documentName') }}</span>
@@ -473,10 +534,13 @@ const removeContainer = (containerId: number) => {
     </div>
 
     <footer class="detail-footer">
-      <span class="detail-footer__hint">{{ t('detailModules.identity.editHint') }}</span>
+      <div class="detail-footer__status" aria-live="polite">
+        <span v-if="dirtyCount" class="s-pill" data-s="wait">{{ t('detailModules.footer.dirty', { count: dirtyCount }) }}</span>
+        <span v-else class="detail-footer__hint">{{ t('detailModules.footer.saved') }}</span>
+      </div>
       <a-space :size="8">
-        <a-button size="small" :disabled="isSaving" @click="cancelEdit">{{ t('detailModules.actions.resetDraft') }}</a-button>
-        <a-button size="small" type="primary" :loading="isSaving" @click="saveDraft"><template #icon><icon-save /></template>{{ t('common.save') }}</a-button>
+        <a-button size="small" :disabled="isSaving || !dirtyCount" @click="cancelEdit">{{ t('detailModules.actions.resetDraft') }}</a-button>
+        <a-button size="small" type="primary" :disabled="!dirtyCount" :loading="isSaving" @click="saveDraft"><template #icon><icon-save /></template>{{ t('common.save') }}</a-button>
       </a-space>
     </footer>
   </main>
@@ -501,12 +565,12 @@ const removeContainer = (containerId: number) => {
 
 .object-band {
   flex: 0 0 auto;
-  padding: 10px 14px 11px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--dense-card-border);
 }
 
-.object-band__head,
 .object-band__identity,
+.object-band__identity-line,
 .child-table-cap,
 .child-table-cap__identity {
   display: flex;
@@ -514,8 +578,16 @@ const removeContainer = (containerId: number) => {
   min-width: 0;
 }
 
-.object-band__head { justify-content: space-between; gap: 16px; }
-.object-band__identity { gap: 8px; }
+.object-band__primary {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(260px, .72fr) minmax(300px, .9fr);
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+}
+
+.object-band__identity { flex-direction: column; align-items: flex-start; gap: 3px; }
+.object-band__identity-line { gap: 8px; }
 
 .object-band__number {
   margin: 0;
@@ -528,34 +600,68 @@ const removeContainer = (containerId: number) => {
 
 .object-band__type { color: var(--color-text-2); font-size: var(--dense-font-data); }
 
-.object-band__body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, .52fr);
-  gap: 18px;
-  margin-top: 9px;
-  padding-top: 9px;
-  border-top: 1px solid var(--dense-border-subtle);
-}
-
-.object-band__facts {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px 18px;
-  min-width: 0;
-}
-
-.object-fact { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.object-fact > span,
-.object-decision__label { color: var(--color-text-3); font-size: var(--dense-font-aux); line-height: 16px; }
-.object-fact > strong {
+.object-band__context {
+  max-width: 100%;
   overflow: hidden;
   color: var(--color-text-1);
   font-size: var(--dense-font-data);
-  font-weight: var(--dense-weight-control);
+  font-weight: var(--dense-weight-title);
   line-height: 18px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.object-band__owner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  line-height: 16px;
+}
+
+.object-band__owner strong {
+  overflow: hidden;
+  color: var(--color-text-1);
+  font-size: var(--dense-font-data);
+  font-weight: var(--dense-weight-control);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.object-band__route {
+  min-width: 0;
+  padding-inline: 20px;
+  border-inline: 1px solid var(--dense-border-subtle);
+}
+
+.object-band__route-label,
+.object-decision__label { color: var(--color-text-3); font-size: var(--dense-font-aux); line-height: 16px; }
+
+.object-band__route > strong {
+  display: block;
+  overflow: hidden;
+  color: var(--color-text-1);
+  font-size: var(--dense-font-hero);
+  font-weight: var(--dense-weight-title);
+  line-height: 22px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.object-band__schedule {
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  line-height: 16px;
+}
+
+.object-band__schedule span { min-width: 0; white-space: nowrap; }
+.object-band__schedule b { margin-left: 4px; color: var(--color-text-1); font-weight: var(--dense-weight-control); }
 
 .object-band__decision {
   display: grid;
@@ -563,8 +669,6 @@ const removeContainer = (containerId: number) => {
   align-content: center;
   gap: 6px;
   min-width: 0;
-  padding-left: 18px;
-  border-left: 1px solid var(--dense-border-subtle);
 }
 
 .object-decision {
@@ -616,13 +720,41 @@ const removeContainer = (containerId: number) => {
   box-sizing: border-box;
   height: 32px;
   padding: 6px 10px 6px 12px;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
+  gap: 6px;
   color: var(--color-text-2);
   font-size: var(--dense-font-data);
   line-height: 20px;
   text-decoration: none;
 }
+
+.detail-outline__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-outline__meta {
+  box-sizing: border-box;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 9px;
+  background: var(--color-fill-2);
+  color: var(--color-text-3);
+  font-size: var(--dense-font-micro);
+  font-weight: var(--dense-weight-title);
+  line-height: 18px;
+}
+
+.detail-outline__meta[data-kind='complete'] { padding: 0; background: transparent; color: var(--dense-success-7); }
+.detail-outline__meta[data-kind='warning'] { background: var(--dense-warning-1); color: var(--dense-warning-7); }
 
 .detail-outline__link:hover {
   background: var(--color-fill-1);
@@ -657,6 +789,11 @@ const removeContainer = (containerId: number) => {
 }
 
 .detail-acceptance__scroll > section { scroll-margin-top: 0; }
+.overview-field-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
 .child-table-cap { justify-content: space-between; gap: var(--dense-gap-inline); min-height: 32px; margin-top: var(--dense-gap-zone); }
 .child-table-cap:first-child { margin-top: 0; }
 .child-table-cap strong { font-size: var(--dense-font-title); font-weight: var(--dense-weight-title); }
@@ -695,13 +832,35 @@ const removeContainer = (containerId: number) => {
 }
 
 .detail-footer__hint { color: var(--color-text-3); font-size: var(--dense-font-aux); }
+.detail-footer__status { display: flex; align-items: center; min-width: 0; }
 
 @media (max-width: 1180px) {
-  .object-band__body { gap: 12px; }
-  .object-band__facts { gap: 8px 12px; }
-  .object-band__decision { padding-left: 12px; }
+  .object-band__primary { gap: 12px; }
+  .object-band__route { padding-inline: 12px; }
+  .overview-field-groups { gap: 14px; }
   .document-list__head,
   .document-row { grid-template-columns: minmax(160px, 1fr) 88px 110px 138px; gap: 8px; }
+}
+
+@container (max-width: 760px) {
+  .object-band__primary { grid-template-columns: minmax(0, 1fr) minmax(230px, .8fr); }
+  .object-band__route {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding: 6px 0 0;
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    border-top: 1px solid var(--dense-border-subtle);
+  }
+  .object-band__route > strong { font-size: var(--dense-font-data); line-height: 18px; }
+  .object-band__schedule { margin-top: 0; }
+}
+
+@container (max-width: 680px) {
+  .overview-field-groups { grid-template-columns: minmax(0, 1fr); gap: var(--dense-gap-zone); }
 }
 
 @container (max-width: 1439px) {

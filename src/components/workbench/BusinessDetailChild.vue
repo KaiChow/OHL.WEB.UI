@@ -25,7 +25,7 @@ const emit = defineEmits<{
         </a-tooltip>
         <div class="business-detail-child__text">
           <h3 :id="`${id}-title`" class="business-detail-child__title" :title="title">{{ title }}</h3>
-          <span v-if="subtitle" class="business-detail-child__subtitle">{{ subtitle }}</span>
+          <a-tag v-if="subtitle" size="small" class="business-detail-child__role">{{ subtitle }}</a-tag>
         </div>
       </div>
       <div class="business-detail-child__aside">
@@ -56,8 +56,11 @@ const emit = defineEmits<{
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: var(--color-fill-1);
+  background: var(--color-bg-1);
 }
+
+.business-detail-child[data-expanded='true'] .business-detail-child__head { background: var(--color-fill-1); }
+.business-detail-child[data-expanded='true'] .business-detail-child__title { color: var(--dense-primary-7); }
 
 .business-detail-child__identity,
 .business-detail-child__aside,
@@ -83,13 +86,7 @@ const emit = defineEmits<{
   letter-spacing: 0;
 }
 
-.business-detail-child__subtitle {
-  overflow: hidden;
-  color: var(--color-text-3);
-  font-size: var(--dense-font-aux);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.business-detail-child__role { flex: 0 0 auto; }
 
 .business-detail-child__body {
   padding: var(--dense-pad-section-y) var(--dense-pad-section-x);

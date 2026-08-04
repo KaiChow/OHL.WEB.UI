@@ -33,7 +33,7 @@ Form and ordinary business controls inherit `small` from `App.vue` (`<a-config-p
 |------|---------------|------|
 | Table row action | `.row-action-btn` | 24×24px minimum target；直出为文字按钮（业务动词），`···` 为唯一 icon 触发器 |
 | VXE 主表行 | 全局默认 `mini`（main.ts） | `mini`（36px）compact / `medium`（44px）standard override |
-| VXE 详情子表行 | `size="small"` when its row job needs readable detail editing | theme-owned small row; verify editable controls are unclipped |
+| VXE 详情子表行 | `size="mini"` | shared mini row; row controls explicitly use mini and must remain unclipped |
 | Modal / Drawer 标题 | Arco native title slot | GI-owned |
 
 ## Inherited `small` surfaces
