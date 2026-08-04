@@ -58,38 +58,42 @@ Only use a right side panel when it has a distinct purpose such as anchors, exce
 - `color-text-4` is forbidden for `primary_identity`, `business_context`, `owner`, or any `key_fact` used to decide the next operation.
 - Long business values must remain readable with ellipsis plus `title`/tooltip. Do not weaken them to gray text to hide overflow.
 
-## Object Workspace Mode Contract
+## Business Object Workspace Contract
 
-A full business-detail route is an **object workspace**. Operational create, maintain, continuous-entry, and correction jobs default to editing; review/audit/approval routes use display only when the business job proves it. The page does not add a generic view/edit switch: every module declares `edit`, `row-edit`, or `read-only` from its business contract. The first viewport must still answer: which object, current state, workflow position, blocking risk, next action, owner, and latest relevant change.
-Supported workspace modes:
+`Business Object Workspace` is the shared design system for business-object routes and drawers; it is not one rigid page template. Select the archetype from the user's repeated job:
 
-| Mode | Default | Surface | Footer |
-|------|---------|---------|--------|
-| `display` | default for review/audit/approval jobs | readable identity, execution focus, read-only facts, contextual row/module actions | hidden unless a real object-level workflow action must remain sticky |
-| `editing` | default for operational maintain/entry jobs | Arco form controls for editable modules; business read-only modules remain display surfaces | discard/reset + one primary save |
-| `row-editing` | explicit row action | only the active detail-table row renders controls | row-local save/cancel; object footer does not replace it |
+| Archetype | Use when | Default module mode | Typical action owner |
+|---|---|---|---|
+| `operational-workspace` | continuously create, maintain, correct, or advance an object | core modules `edit`; support/audit stay `read-only` | sticky page/drawer footer |
+| `reference-workspace` | inspect stable customer/master/reference data with occasional maintenance | `display` or explicitly editable modules | header or module scope |
+| `review-workspace` | audit, compare, approve, or decide from evidence | `read-only` plus explicit row/module decision controls | owning review surface |
 
-Rules:
+Every non-list detail `pageSpec.ts` declares `workspace.archetype`, the identity-band slots, navigation policy, and three task checks. The root exposes a stable role such as `data-detail-workspace="<business-object>"`; the manifest, not a generic visual toggle, decides each module's mode.
 
-- Annotate the root work area with a stable business-object role such as `data-detail-workspace="<business-object>"`; module modes come from the typed manifest, not a visual toggle.
-- The overview tab must provide a compact execution-focus block before passive field groups. It owns one current decision, its blocking context, owner/deadline, and links to the owning risk/file/fee surface.
-- The page specification declares `display-first` or `edit-first` and ties it to the repeated job; every module separately declares `edit`, `row-edit`, or `read-only`.
-- An edit-first workspace renders editable modules as controls immediately while identity, state, risk, and next action remain readable outside the form. Read-only support/audit modules never become fake inputs merely because the page is edit-first.
-- Display sections use Arco `a-descriptions` before custom read-grid markup. A local semantic class may own spacing only; editable controls replace the same business fields inside the explicit edit session.
-- A generic page-level view/edit segmented control is forbidden unless the business explicitly requires a preview or comparison mode.
-- Save success in an edit-first workspace refreshes the saved snapshot and remains editable; failure keeps all input. Discard restores that snapshot without changing the module modes. Route leave requires unsaved-change confirmation.
-- Header actions do not duplicate footer save/reset actions; the editing footer owns the single primary Save.
-- A process-bearing freight object uses a lightweight, domain-named milestone bar. Normal detail pages must not use a large vertical-label step banner or generic numbered steps.
-- File/fee/risk counts have one visible owner in navigation or the execution-focus block. Do not repeat the same counts as a KPI strip in the identity band.
+### Required Composition
 
-Forbidden fallbacks:
+1. **Object identity band**: identity + state, 3-6 decision-relevant facts, real risk/blocker when applicable, next legal action, and object-level tools.
+2. **Workspace body**: optional section index plus one content canvas whose modules follow the user's operation order.
+3. **Action owner**: header, module/row, or sticky footer according to scope; the same Save/Submit action never appears in two regions.
 
-- default detail route with a wall of editable inputs;
-- generic view/edit switch used to decide all module modes;
-- `保存` footer visible while the page is not in an edit session;
-- business status, next action, and milestone pointing to different workflow stages;
-- a decorative KPI strip between identity and the work surface;
-- hiding risk/next-action context inside a later tab with no first-viewport signal.
+The identity band targets 72-112px and must stay at or below 120px in the normal state. Height follows owned content, not blank filler. It uses the available canvas width and may wrap into a compact second row; do not impose an arbitrary page `max-width` or stretch facts into report-like KPI tiles.
+
+The first viewport must answer which object, current state, owner, blocking risk, next action, and current workflow position. A compact execution-focus block may link risk or missing data to its owning module. Counts and facts keep one visible owner.
+
+### Editing And Decision Rules
+
+- Operational maintenance defaults to `edit-first`; review/audit defaults to `display-first`. Every module still declares `edit`, `row-edit`, or `read-only` from business truth.
+- Edit-first means editable core controls are immediately available. It does not turn computed, permission-locked, support, or audit values into disabled inputs.
+- Decision-critical fields gain priority through grouping, order, required/validation state, and help text, not a custom border or second control skin.
+- Repeated or structurally complex data uses VXE row editing. Row-local save/cancel/error does not silently commit through the object footer.
+- A page-level view/edit switch is forbidden unless preview/comparison is a real business mode.
+- Save success refreshes the snapshot and remains editable; failure preserves input. Discard restores the snapshot; dirty route leave requires confirmation.
+
+### Task-Time Acceptance
+
+Treat `3s / 10s / 30s` as scenario targets, not unsupported promises: identify object/state/risk/next work in about 3 seconds; locate the module owning a known issue in about 10 seconds; complete one named high-frequency edit or workflow action in about 30 seconds when backend behavior allows it. `workspace.usability` names the three tasks; real-route testing records evidence.
+
+Forbidden: a wall of inputs, duplicated header/footer commits, decorative KPI strips, invented completion marks, hidden risk context, contradictory state/milestone/next action, or a universal layout copied into unrelated object types.
 
 ## Detail Sections
 
@@ -153,17 +157,18 @@ Rules:
 - `a-form-item` carries the label, required marker, and validation message. Never write a custom label `<div>` above an input — use `a-form-item`.
 - Controls inside `a-form-item` must be `size="small"`; set `style="width: 100%"` on pickers or component props where Arco does not naturally fill the form-item.
 
-### Column Count Rules
+### Adaptive Field Matrix
 
-| Grid class | Columns | Use when |
-|------------|---------|----------|
-| `detail-form-grid--3` | 3 | Narrow section or few fields; labels are long (≥ 6 chars) |
-| `detail-form-grid--4` | 4 | Standard detail section on ≥ 1280px drawer |
-| `detail-form-grid--6` | 6 | Dense sections with many short fields (amounts, dates, codes) |
+“Four-column dense layout” means at most four **field tracks** per row, where one field owns its label, control, help, and validation. It never means eight rigid label/value columns. Select tracks from the measured content canvas and the widest localized field, not viewport width alone.
 
-Do not use 4-column for sections where most labels exceed 8 characters — labels will be truncated. Prefer 3-column.
+| Profile | Typical capacity | Use when |
+|---|---|---|
+| compact | 1-2 tracks | narrow drawer/split window, long translated labels, or complex controls |
+| standard | 3 tracks | normal 1024-1439px work canvas with standard fields |
+| wide | up to 4 tracks | wide canvas and fields preserve their tested minimum width |
+| code-dense | up to 6 tracks | exceptional short code/amount/date sets only; never the page default |
 
-Do not use 6-column as a default for all forms — it compresses label width to the point where long freight labels clip.
+Use container-responsive Arco Grid or a shared grid primitive. Every track needs `min-width: 0`; controls fill the track. At 1.3-2x translated copy and 200% zoom, reduce tracks before truncating labels, shrinking typography, or creating browser-level overflow.
 
 ### Span Usage
 
@@ -186,9 +191,9 @@ Do not use 6-column as a default for all forms — it compresses label width to 
 
 Span rules:
 
-- Use `__span2` for textarea, multi-line text, or address fields that need more width.
-- Use `__span3` / `__span4` only for full-width fields like long remarks, declaration content, or file upload areas.
-- Do not span a single-line input just to make it look prominent.
+- Standard input/select/code is one track; a range picker, batch input, code+name composite, long party name, or address is normally two tracks.
+- Textarea, declaration content, file field, and structurally complex editor may span the whole row.
+- Span is based on interaction/content width, not visual prominence. Reflow spans at compact widths instead of squeezing child controls.
 
 ### Form Subgroups
 
@@ -328,17 +333,11 @@ Do not put read-only fields in a separate grid below the editable grid unless th
 
 ## Long Forms
 
-- Use vertical labels for dense enterprise forms.
-- Detail form labels, input values, select values, textarea values, placeholders, and read-only field values use the shared F4 Control 12px layer.
-- Use color and weight for hierarchy: labels use `color-text-2`/500, real values use `color-text-1`/500, placeholders use `color-text-3`/400.
-- Do not allow Arco default 14px labels or a second business-content size inside editable/detail form fields.
-- Use 4-column grid on wide screens, reduce at 1280px.
-- Long labels should not truncate important meaning:
-  - Prefer label width/vertical label.
-  - For terms like `大船船名/航次`, keep full label visible.
-  - If a label is too long, split by business grouping rather than abbreviation.
-- Required mark stays close to label, not inside placeholder.
-- Use the smallest grid that preserves meaning. Dense does not mean every form must use 6 columns.
+- Use vertical labels for variable freight vocabulary and multilingual forms; they preserve scanning and avoid unstable label columns. Use horizontal label/value pairs only for a proven short-label, repetitive task and test every locale.
+- Labels and editable/read-only values follow the shared F4 Control layer. Labels use `color-text-2`/500, values `color-text-1`/500, placeholders `color-text-3`/400.
+- Keep full business meaning visible. Reduce the adaptive field matrix or span the field before abbreviating or truncating a label.
+- Required marks stay with labels; help and validation remain under their owning control and may increase only that row.
+- Group by user decision and operation order, never backend field order. Dense means less unowned space, not more columns than content can support.
 
 ## Internal Form Groups
 
@@ -354,7 +353,7 @@ Rules:
 
 - Keep the outer module title as the primary section title.
 - Internal group title is a low-weight scan label, not another module title.
-- Use compact group labels with subtle tint or left accent; avoid full-width heavy divider lines.
+- Use compact group labels, spacing, and alignment; avoid decorative tint, rails, or full-width heavy divider lines.
 - Group labels must not create large vertical gaps.
 - Group by operation meaning, not by backend field order.
 - If a group has only one or two fields and no scanning value, merge it with the previous group.
@@ -397,10 +396,7 @@ Use structured option groups for service items, attribute types, object flags, a
 
 ## Module Header Rule
 
-Module header left can only show the module name.
-Module header right can only show module-level actions.
-
-Do not show total count, weight, CBM, status, helper text, or upload state in the module title line. Put that information inside a module summary row/body.
+The header has four semantic slots: `title | compact summary | state | actions`. The title slot contains only the module name; the action slot contains only module-owned commands. A compact decision metric/status may stay inline between them when it fits one 36px row and has this module as its sole owner. Otherwise move the summary into the first body row; never create a detached report band or repeat the same metric in child/table headers.
 
 ## Attachments
 
@@ -519,7 +515,7 @@ Container:
 ```vue
 <div class="detail-section__body detail-section__body--table">
   <vxe-table
-    size="small"
+    size="mini"
     :stripe="false"
     :data="rows"
     :row-config="{ isHover: true, keyField: 'id' }"
@@ -533,7 +529,7 @@ Required:
 
 - Use `detail-section__body--table` on the section body (or `detail-child-pane__table` for nested child panes).
 - Declare `table.rowBanding: 'plain'` for always-editable line tables and set VXE's public `:stripe="false"`; input, validation, hover, and selection remain the row-state owners.
-- Rely on VXE native small density and verify that explicit `mini` row controls are not clipped.
+- Use the project VXE `mini` density and explicit `mini` row controls; verify controls, validation, hover, and fixed actions are not clipped.
 - In a Drawer or intrinsic-height pane, omit the VXE `height` prop. `height="auto"` is forbidden because pinned VXE 4.5 can feed the measured parent height back into its own content height and grow indefinitely.
 - Business columns use `min-width`; only checkbox / seq / operation use fixed `width` (see `table.md` width policy).
 

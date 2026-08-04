@@ -758,13 +758,42 @@ for (const specFile of pageSpecFiles) {
     });
   }
   if (detailMode && detailMode !== 'none') {
+    const workspace = getObjectLiteralProperty(detail, 'workspace');
+    const workspaceArchetype = getStringProperty(workspace, 'archetype');
+    const identityBand = getObjectLiteralProperty(workspace, 'identityBand');
+    const identity = getStringArrayProperty(identityBand, 'identity');
+    const keyFacts = getStringArrayProperty(identityBand, 'keyFacts');
+    const decision = getStringArrayProperty(identityBand, 'decision');
+    const actionOwner = getStringProperty(identityBand, 'actionOwner');
+    const navigation = getObjectLiteralProperty(workspace, 'navigation');
+    const navigationMode = getStringProperty(navigation, 'mode');
+    const navigationItemState = getStringProperty(navigation, 'itemState');
+    const usability = getObjectLiteralProperty(workspace, 'usability');
+    const usabilityTasks = ['identify', 'locateIssue', 'completeFrequentAction']
+      .map((task) => getStringArrayProperty(usability, task));
+    if (!['operational-workspace', 'reference-workspace', 'review-workspace'].includes(workspaceArchetype)
+      || !identity?.length || !keyFacts?.length || decision === undefined
+      || !['header', 'page-footer', 'drawer-footer', 'none'].includes(actionOwner)
+      || !['none', 'conditional-section-index'].includes(navigationMode)
+      || !['active-only', 'contract-derived'].includes(navigationItemState)
+      || (navigationMode === 'none' && navigationItemState !== 'active-only')
+      || usabilityTasks.some((tasks) => !tasks?.length)) {
+      violations.push({
+        rule: '详情 pageSpec 必须声明工作台类型、身份决策带、条件导航和 identify/locate/act 可测任务',
+        file: relPath,
+        line: 1,
+        content: `workspace=${workspaceArchetype ?? '-'}/${actionOwner ?? '-'}, navigation=${navigationMode ?? '-'}/${navigationItemState ?? '-'}`,
+      });
+    }
     const scroll = getObjectLiteralProperty(detail, 'scroll');
     const verticalOwner = getStringProperty(scroll, 'verticalOwner');
     const horizontalOverflow = getStringProperty(scroll, 'horizontalOverflow');
     const stickyActionOwner = getStringProperty(scroll, 'stickyActionOwner');
     if (!['page', 'drawer-body', 'overlay-body'].includes(verticalOwner)
       || horizontalOverflow !== 'table-only'
-      || !['none', 'page-footer', 'drawer-footer'].includes(stickyActionOwner)) {
+      || !['none', 'page-footer', 'drawer-footer'].includes(stickyActionOwner)
+      || (['page-footer', 'drawer-footer'].includes(actionOwner) && stickyActionOwner !== actionOwner)
+      || (['page-footer', 'drawer-footer'].includes(stickyActionOwner) && actionOwner !== stickyActionOwner)) {
       violations.push({
         rule: '详情 pageSpec 必须声明唯一纵向滚动所有者、table-only 横向溢出和粘性动作所有者',
         file: relPath,

@@ -9,11 +9,11 @@
 
 ## 原则
 
-1. 模板统一 `size="small"`（见 `component-size.md`）
+1. 页面、Drawer 与 Modal 表单统一 `size="small"`；`vxe-table` 行内控件显式 `size="mini"`（见 `component-size.md`）
 2. 先使用 Arco 原生控件、props、插槽与表单布局；垂直表单通过共享 `label-col-style` 公共配置使用 `--dense-gap-label`，不以全局 CSS 修正框架内部字号或皮肤
 3. 控件外观由 GI 负责；`filter-field` / `detail-form` / `detail-drawer` 等布局 class 只管理排列、间距和宽度
 4. 布局 class（`filter-field`、`detail-form-grid`）只管 **排列与栅格**，不管控件皮肤
-5. **同一 Arco 组件在任意业务场景使用同一原生 small 层级**：不得因为它出现在列表筛选、弹窗表单、详情编辑或查询抽屉里就覆盖内部字号
+5. **同一 Arco 组件在页面表单场景使用同一原生 small 层级**；VXE 行内编辑是唯一密度例外，使用原生 mini，不覆盖内部字号
 6. **自定义业务文字使用项目角色 token**：业务值、页面标签和表格链接遵循 typography 角色；按钮、Tab、分页触发器保持 GI 原生 small 排版
 
 ## Token
@@ -51,7 +51,7 @@
 | **Textarea 多行** | Textarea props | 不固定 28px 高；按内容与行数配置 |
 | **Disabled / 只读** | `disabled` / read-only display pattern | 保持原生状态，同时保证业务值可辨识 |
 | **Form-item 列宽** | Arco Grid + component width prop/style | 控件填满所属列，不穿透内部结构 |
-| **表格行内编辑** | Editable-detail table role | 控件使用原生 small 外观；单元格内只读值勿用 `link-text`（见 `table.md`） |
+| **表格行内编辑** | Editable-detail table role | 控件显式使用原生 `mini`；单元格内只读值勿用 `link-text`（见 `table.md`） |
 | **组合控件** | `.filter-combo` / `.detail-combo` | 多控件拼接圆角（布局 struct，非模块） |
 | **分页跳转等** | `.table-card-cap__pager` | 分页专用（非表单字段） |
 
@@ -60,8 +60,8 @@
 | Role | Token | Size |
 |------|-------|------|
 | Field label | `--dense-font-field` | 12px |
-| Editable control value | GI native small typography | framework-owned |
-| Editable control placeholder | GI native small typography | framework-owned |
+| Editable control value | GI native small/mini typography by surface | framework-owned |
+| Editable control placeholder | GI native small/mini typography by surface | framework-owned |
 | Read-only detail value (`.detail-field__val`) | `--dense-font-control` | 12px |
 | Table cell / link text | `--dense-font-data` | 12px |
 | Button / tab / pager trigger | GI native small typography | framework-owned |
@@ -110,7 +110,7 @@ import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle 
 
 ## Release Gate
 
-- [ ] Business controls inherit the app-wide `small`; GI owns control chrome, typography, hover, focus, disabled, and error states.
+- [ ] Business form controls inherit app-wide `small`; controls inside VXE rows explicitly use `mini`; GI owns chrome, typography, hover, focus, disabled, and error states.
 - [ ] Every vertical Arco Form uses the shared public label-column style; every dense vertical grid uses the shared 12px/8px gutter and zero form-item margin; a normal single-line field measures 60px internally with a 4px label gap and 8px net gap to the next row, never page-local values.
 - [ ] Labels remain visible, associated with controls, and do not rely on placeholder text.
 - [ ] Pickers/selects fill their form-item through public props/layout, not internal-selector overrides.

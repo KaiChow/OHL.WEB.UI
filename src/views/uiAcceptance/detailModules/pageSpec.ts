@@ -33,7 +33,7 @@ export const DETAIL_MODULES_SPEC = definePesdpPageSpec({
       acceptance: ['Identity, form sections, parent-child lines, supporting documents, audit, and commit actions read as one hierarchy rather than assembled cards; the section index reflects and locates the current module without creating another content workspace.'],
     },
     dense: {
-      decisions: ['Use one page-body vertical scroll owner, a full-width adaptive detail canvas, the shared 36px module rhythm, Arco small page forms, mini table-row controls, VXE small detail tables, content-height activity rows, and table-only horizontal overflow.'],
+      decisions: ['Use one page-body vertical scroll owner, a full-width adaptive detail canvas, the shared 36px module rhythm, Arco small page forms, VXE mini detail tables and row controls, content-height activity rows, and table-only horizontal overflow.'],
       acceptance: ['At 1024, 1366, and 1920 widths, the canvas uses available width without artificial side gutters, always-open module titles and bodies share one origin, module heads align to one rhythm, commands remain adjacent to their owners, and the page does not gain a second vertical scrollbar.'],
     },
     premium: {
@@ -60,9 +60,24 @@ export const DETAIL_MODULES_SPEC = definePesdpPageSpec({
     mode: 'edit-first',
     focus: ['currentRisk', 'nextAction', 'cargo-parties', 'containers', 'documents'],
     milestones: [],
+    workspace: {
+      archetype: 'operational-workspace',
+      identityBand: {
+        identity: ['orderStatus', 'orderNo', 'serviceType'],
+        keyFacts: ['customer', 'route', 'owner', 'updatedAt'],
+        decision: ['currentRisk', 'nextAction'],
+        actionOwner: 'page-footer',
+      },
+      navigation: { mode: 'conditional-section-index', itemState: 'active-only' },
+      usability: {
+        identify: ['Identify the shipment, state, risk, owner, and next action from the first viewport.'],
+        locateIssue: ['Use the section index and decision band to reach the module that owns the current issue.'],
+        completeFrequentAction: ['Edit one core field or line and reach reset/save without changing page mode.'],
+      },
+    },
     scroll: { verticalOwner: 'page', horizontalOverflow: 'table-only', stickyActionOwner: 'page-footer' },
     modules: [
-    { id: 'shipment-overview', kind: 'field-group', priority: 'core', mode: 'edit', owns: ['serviceType', 'customer', 'route', 'schedule', 'owner'], metrics: [], actions: { module: [], table: [], row: [] }, collapse: 'always-open', children: { kind: 'none' } },
+      { id: 'shipment-overview', kind: 'field-group', priority: 'core', mode: 'edit', owns: ['serviceType', 'customer', 'route', 'schedule', 'owner'], metrics: [], actions: { module: [], table: [], row: [] }, collapse: 'always-open', children: { kind: 'none' } },
       {
         id: 'cargo-parties', kind: 'parent-child', priority: 'core', mode: 'edit', owns: ['partyIdentity', 'partyContacts', 'cargoLines'],
         metrics: [

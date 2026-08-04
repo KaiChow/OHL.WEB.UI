@@ -380,7 +380,7 @@ const removeContainer = (containerId: number) => {
             <strong>{{ t('detailModules.tables.cargoLines') }}</strong>
             <a-button size="small" type="outline" @click="addCargoLine(party)"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addCargoLine') }}</a-button>
           </div>
-          <vxe-table :data="party.lines" size="small" :stripe="false" :empty-text="t('detailModules.empty.cargoLines')">
+          <vxe-table :data="party.lines" size="mini" :stripe="false" :empty-text="t('detailModules.empty.cargoLines')">
             <vxe-column type="seq" :title="t('common.sequence')" width="52" align="center" />
             <vxe-column field="name" :title="t('detailModules.columns.cargoName')" min-width="190">
               <template #default="{ row }"><a-input v-model="row.name" size="mini" /></template>
@@ -419,7 +419,7 @@ const removeContainer = (containerId: number) => {
         <template #actions>
           <a-button size="small" type="outline" @click="addContainer"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addContainer') }}</a-button>
         </template>
-        <vxe-table :data="containers" size="small" :stripe="false" :empty-text="t('detailModules.empty.containers')">
+        <vxe-table :data="containers" size="mini" :stripe="false" :empty-text="t('detailModules.empty.containers')">
           <vxe-column type="seq" :title="t('common.sequence')" width="52" align="center" />
           <vxe-column field="containerNo" :title="t('detailModules.columns.containerNo')" min-width="150">
             <template #default="{ row }"><a-input v-model="row.containerNo" size="mini" class="mono" /></template>
@@ -530,7 +530,7 @@ const removeContainer = (containerId: number) => {
 
 .object-band__body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, .52fr);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, .52fr);
   gap: 18px;
   margin-top: 9px;
   padding-top: 9px;
@@ -697,16 +697,9 @@ const removeContainer = (containerId: number) => {
 .detail-footer__hint { color: var(--color-text-3); font-size: var(--dense-font-aux); }
 
 @media (max-width: 1180px) {
-  .object-band__body { grid-template-columns: minmax(0, 1fr); gap: 9px; }
-  .object-band__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .object-band__decision {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: auto;
-    padding-top: 9px;
-    padding-left: 0;
-    border-top: 1px solid var(--dense-border-subtle);
-    border-left: 0;
-  }
+  .object-band__body { gap: 12px; }
+  .object-band__facts { gap: 8px 12px; }
+  .object-band__decision { padding-left: 12px; }
   .document-list__head,
   .document-row { grid-template-columns: minmax(160px, 1fr) 88px 110px 138px; gap: 8px; }
 }

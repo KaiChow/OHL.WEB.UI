@@ -123,12 +123,32 @@ export interface PesdpModuleSpec {
   children: PesdpModuleChildrenSpec;
 }
 
+export interface PesdpDetailWorkspaceSpec {
+  archetype: 'operational-workspace' | 'reference-workspace' | 'review-workspace';
+  identityBand: {
+    identity: NonEmptyStrings;
+    keyFacts: NonEmptyStrings;
+    decision: readonly string[];
+    actionOwner: 'header' | 'page-footer' | 'drawer-footer' | 'none';
+  };
+  navigation: {
+    mode: 'none' | 'conditional-section-index';
+    itemState: 'active-only' | 'contract-derived';
+  };
+  usability: {
+    identify: NonEmptyStrings;
+    locateIssue: NonEmptyStrings;
+    completeFrequentAction: NonEmptyStrings;
+  };
+}
+
 export type PesdpDetailSpec =
   | { mode: 'none'; focus: readonly string[]; milestones: readonly string[] }
   | {
     mode: 'display-first' | 'edit-first' | 'staged-form';
     focus: readonly string[];
     milestones: readonly string[];
+    workspace: PesdpDetailWorkspaceSpec;
     scroll: {
       verticalOwner: 'page' | 'drawer-body' | 'overlay-body';
       horizontalOverflow: 'table-only';

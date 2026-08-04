@@ -42,6 +42,21 @@ export const PROFIT_REVIEW_SPEC = definePesdpPageSpec({
     mode: 'display-first',
     focus: ['riskItems', 'reviewNote', 'timeline'],
     milestones: ['entered-review', 'review-submitted', 'review-outcome'],
+    workspace: {
+      archetype: 'review-workspace',
+      identityBand: {
+        identity: ['orderNo', 'reviewStatus'],
+        keyFacts: ['amount', 'grossMarginRate', 'owner'],
+        decision: ['riskLevel', 'riskItems'],
+        actionOwner: 'none',
+      },
+      navigation: { mode: 'none', itemState: 'active-only' },
+      usability: {
+        identify: ['Identify the reviewed order, state, risk, margin, and owner before opening a module.'],
+        locateIssue: ['Reach the owning risk item directly from the review focus without scanning passive history.'],
+        completeFrequentAction: ['Review the risk facts and return to the work queue without losing list context.'],
+      },
+    },
     scroll: { verticalOwner: 'drawer-body', horizontalOverflow: 'table-only', stickyActionOwner: 'none' },
     modules: [
       { id: 'profit-facts', kind: 'field-group', priority: 'core', mode: 'read-only', owns: ['amount', 'grossMarginRate', 'owner'], metrics: [], actions: { module: [], table: [], row: [] }, collapse: 'always-open', children: { kind: 'none' } },

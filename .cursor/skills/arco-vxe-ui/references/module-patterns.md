@@ -75,16 +75,16 @@ Choose the list surface from the user's job before assigning slots. A query-fiel
 
 Implementation: [`list-page.md`](list-page.md) · [`table.md`](table.md) · [`actions.md`](actions.md).
 
-### Detail / Drawer
+### Business Object Workspace / Drawer
 
 | Slot | Role |
 |------|------|
-| `identity` | Status · primary no/name · company/context |
-| `facts` | 3–6 key facts by object type (`dds-hero`) |
+| `identity_band` | Object identity/state · 3–6 key facts · risk/next decision · object tools |
+| `section_index` | Conditional navigation for long workspaces; active plus contract-derived state only |
 | `milestone` | Optional; only if the object has a real process |
-| `sections` | Business groups in operation order |
+| `modules` | Full-width section surfaces in operation order; not universal cards |
 | `sub_entities` | Repeated child entities owned by the current business object |
-| `footer` | Danger left · workflow secondary · 1× primary save |
+| `action_owner` | Header/module/row/footer by scope; one primary per scope and no duplicated commit |
 
 Implementation: [`detail-form.md`](detail-form.md) · [`actions.md`](actions.md).
 
@@ -120,14 +120,15 @@ Modules are sections inside one owning detail canvas, not repeated cards. Module
 Top-level modules use one neutral header fill, one subtle divider, and a 4-8px neutral inter-module gap; they stay full-width and never receive card shadows or repeated decorative color bars. Place compact statistics between title and actions, never in a detached row, and wrap the group as one unit when narrow.
 Repeated child business objects may use one neutral 1px boundary and the shared small radius because each child is a genuine repeated unit. Keep its head on `color-fill-1`, its body white, and never add a shadow.
 A table cap exists only for a real subordinate table title. Additive/workflow actions live in the header of the module or child they mutate; never repeat the parent module title merely to carry an action.
-For at least five modules or more than two viewport heights of content, show a scroll-aware section index only with at least 1440px available width; hide it below that threshold and keep the existing scroll owner. The active item uses one text-centered 16px indicator, never a full-row rail. Detail canvases use all available width; responsive columns and table-owned overflow adapt content without arbitrary page/form max-width gutters.
+For at least five modules or more than two viewport heights of content, a scroll-aware section index is allowed only with at least 1440px available canvas width. Use a compact 144-192px track, hide it below the threshold without creating a second navigation pattern, and keep the existing scroll owner. Items may show active location plus completion/exception only when module contracts provide real state; never infer a check mark from non-empty UI or invent a count. The active item uses one centered 16px indicator, never a full-height/full-row rail. Detail canvases use all remaining width without arbitrary page/form `max-width` gutters.
 **Action labels:** object-specific (`Add shipper`, not bare `Add`). Wording: [`domain-language.md`](domain-language.md).
 
 ## Typed Module Manifest
 Complex pages are assembled from reusable module roles, not an exhaustive catalog of business scenarios. Before template work, every non-list detail surface declares this manifest in `pageSpec.ts`:
 
 - Page: default mode, vertical scroll owner, sticky action owner, and table row-banding role.
-- Module: stable id, semantic kind, priority, display/edit mode, owned facts, and collapse rule; priority controls disclosure, not decorative color.
+- Workspace: operational/reference/review archetype, identity/key-fact/decision slots, one action owner, conditional navigation policy, and named identify/locate/act checks.
+- Module: stable id, semantic kind, priority, display/edit mode, owned facts, and collapse rule; priority controls disclosure, not decorative color. Core editing/decision modules are `always-open`; supporting/audit modules may collapse; any module owning a blocking validation error opens automatically.
 - Statistics: metric id, semantic kind, source, aggregation, format, and single placement; use `metrics: []` when none.
 - Actions: feature-contract ids split into explicit module/child/table/row arrays; keep each array empty when that scope has none.
 - Children: `none`, or repeated identity/body/default-open rule and optional child-owned table role.
