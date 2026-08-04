@@ -48,7 +48,7 @@ font-family:
   sans-serif;
 ```
 
-Use a mono stack only for identifiers, codes, and aligned technical values:
+Use a mono stack only for opaque identifiers, codes, and machine-oriented values whose characters must be compared exactly:
 
 ```css
 font-family:
@@ -120,9 +120,9 @@ Design for 1.3–2× text expansion compared with Chinese.
 
 | Value | Rule |
 |-------|------|
-| Order no, HBL, MBL, SO, PO, container no | `.mono` or mono stack; full value in tooltip/title |
-| Amount, qty, weight, volume | `font-variant-numeric: tabular-nums`; right align in tables |
-| Dates/times | Tabular numbers; one display format per page |
+| Order/document/container/tracking/reference IDs, hashes, API keys, checksums, IP/MAC, raw logs/code | `.mono`: family + tabular glyphs only; original case, zero letter spacing, full value in Tooltip/title, copy affordance when frequent; apply only to the token/editor value |
+| Amount, percentage, qty, weight, volume, phone | UI sans + `font-variant-numeric: tabular-nums`; right align numeric table values; never `.mono` |
+| Dates/times | UI sans + tabular numbers; one display format per page; never `.mono` |
 | Long customer/company names | Normal sans; ellipsis with title |
 
 ## Detail Header Typography

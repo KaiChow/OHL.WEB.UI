@@ -593,13 +593,13 @@ watch(uiScenario, () => {
 
             <vxe-column field="orderAmount" :title="t('profit.columns.amount')" min-width="112" align="right">
               <template #default="{ row }">
-                <span class="mono">{{ formatOrderAmount(row.orderAmount) }}</span>
+                <span class="biz-number">{{ formatOrderAmount(row.orderAmount) }}</span>
               </template>
             </vxe-column>
 
             <vxe-column field="grossMarginRate" :title="t('profit.columns.margin')" min-width="104" align="right">
               <template #default="{ row }">
-                <span class="mono" :class="{ 'margin-negative': row.grossMarginRate < 0 }">{{ formatMarginRate(row.grossMarginRate) }}</span>
+                <span class="biz-number" :class="{ 'margin-negative': row.grossMarginRate < 0 }">{{ formatMarginRate(row.grossMarginRate) }}</span>
               </template>
             </vxe-column>
 

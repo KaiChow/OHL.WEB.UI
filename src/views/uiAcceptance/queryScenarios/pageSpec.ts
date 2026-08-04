@@ -44,8 +44,8 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
       acceptance: ['No scenario combines a flat query wall with a drawer, and query actions keep one stable owner.'],
     },
     dense: {
-      decisions: ['Use one container-owned semantic-grid-v1 track model: bounded field roles, query actions adjacent to the permanent field cluster, and no left-pinned page-wide cap.'],
-      acceptance: ['At 1024, 1366, 1440, and 1920 widths, role order remains stable; reset/filter labels remain visible, pagination uses mini density, and the field-to-action gap stays at one shared gutter when S2 expands.'],
+      decisions: ['Use one container-owned semantic-grid-v1 track model: bounded field roles, query actions adjacent to the permanent field cluster, and no left-pinned page-wide cap; reserve localized action width before promoting fields, moving the lowest-priority S2/S3 Narrow field into its existing expand/drawer surface at compact width.'],
+      acceptance: ['At 1024, 1366, 1440, and 1920 widths, role order remains stable; search/reset/expand/filter labels remain visible without clipping in zh-CN and en-US, pagination uses mini density, and the field-to-action gap stays at one shared gutter when S2 expands.'],
     },
     premium: {
       decisions: ['Use GI-native Arco controls, grouped native drawers, and the global VXE mini table without page-local skins.'],
@@ -68,7 +68,7 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
       { field: 'businessType', width: 'compact' },
     ],
     advancedFields: [
-      'owner', 'orderStatus', 'updatedRange', 'hblNo', 'mblNo', 'bookingNo', 'containerNo', 'customerReference', 'externalReference',
+      'owner', 'orderStatus', 'updatedRange', 'batchValues', 'hblNo', 'mblNo', 'bookingNo', 'containerNo', 'customerReference',
       'pol', 'pod', 'transitPort', 'carrier', 'vesselName', 'voyageNo', 'serviceRoute', 'etdRange', 'etaRange', 'closingRange',
       'customsDeadlineRange', 'truckingDateRange', 'warehouseDateRange', 'createdRange', 'documentOwner', 'customerService', 'salesperson',
       'operationDepartment', 'branch', 'bookingStatus', 'customsStatus', 'truckingStatus', 'documentStatus', 'feeStatus', 'settlementStatus',
@@ -91,7 +91,7 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
   states: ['loading', 'empty', 'no-permission', 'network-error', 'success'],
   responsive: { release: ['1366x768'], split: '1024x768', wide: '1920x1080' },
   accessibility: {
-    keyboard: ['Reach visible fields, scenario-specific secondary controls, query actions, drawer or workspace controls, and pagination in order.'],
+    keyboard: ['Type or paste one batch value directly; paste multiple non-empty values without confirmation; read normalized values and count; clear committed values directly without opening the editor; then reach the optional editor, scenario controls, query actions, overlays, and pagination in order.'],
     naming: ['Every advanced-filter and saved-query control exposes its scenario-specific accessible name.'],
     zoom: '200%',
   },

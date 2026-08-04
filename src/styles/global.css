@@ -313,7 +313,7 @@ body {
   color: var(--dense-primary-6);
   cursor: pointer;
   font-size: var(--dense-font-data);
-  font-weight: var(--dense-weight-title);
+  font-weight: var(--dense-weight-control);
   text-decoration: none;
   transition: color .1s;
 }
@@ -326,9 +326,9 @@ body {
 .link-text--strong {
   /* F1 数据链接：与单元格同字号同字重，仅语义色区分 */
   font-size: var(--dense-font-data);
-  font-weight: var(--dense-weight-title);
+  font-weight: var(--dense-weight-control);
   color: var(--dense-primary-7);
-  letter-spacing: .01em;
+  letter-spacing: 0;
 }
 
 .link-text--strong:hover {
@@ -347,8 +347,7 @@ body {
 
 .mono {
   font-family: "SF Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
-  font-size: var(--dense-font-data);
-  font-weight: var(--dense-weight-title);
-  letter-spacing: .01em;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
 }
 

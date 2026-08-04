@@ -46,8 +46,8 @@ const draftValues = reactive<Record<string, string | string[]>>({});
 const appliedValues = ref<Record<string, string | string[]>>({});
 
 for (const field of SCENARIO_FIELDS) {
-  queryValues[field.key] = field.kind === 'range' ? [] : '';
-  draftValues[field.key] = field.kind === 'range' ? [] : '';
+  queryValues[field.key] = ['range', 'batch'].includes(field.kind) ? [] : '';
+  draftValues[field.key] = ['range', 'batch'].includes(field.kind) ? [] : '';
 }
 
 const rows: ScenarioRow[] = [
@@ -80,14 +80,33 @@ const secondaryFields = computed(() => {
 const isExpandScenario = computed(() => activeScenarioKey.value === 's2-expand');
 const isDrawerScenario = computed(() => ['s3-drawer', 's3-wide', 's4-drawer'].includes(activeScenarioKey.value));
 const isWideDrawer = computed(() => activeScenarioKey.value === 's3-wide' || activeScenarioKey.value === 's4-drawer');
-const actionColumnRole = computed<QueryGridItemRole>(() => isExpandScenario.value || isDrawerScenario.value ? 'actions-wide' : 'actions');
+const actionColumnRole = computed<QueryGridItemRole>(() => {
+  if (isExpandScenario.value) return 'actions-expanded';
+  return isDrawerScenario.value ? 'actions-wide' : 'actions';
+});
+const permanentVisibleFields = computed(() => {
+  if (!isExpandScenario.value && !isDrawerScenario.value) return visibleFields.value;
+  let availableTracks = primaryGridTrackCount.value - QUERY_GRID_ITEM_SPANS[actionColumnRole.value];
+  const fields: ScenarioField[] = [];
+  for (const field of visibleFields.value) {
+    const span = QUERY_GRID_ITEM_SPANS[field.width];
+    if (span > availableTracks) break;
+    fields.push(field);
+    availableTracks -= span;
+  }
+  return fields;
+});
+const responsiveSecondaryFields = computed(() => [
+  ...visibleFields.value.slice(permanentVisibleFields.value.length),
+  ...secondaryFields.value,
+]);
 const promotedSecondaryFields = computed(() => {
   if (!isExpandScenario.value) return [];
   let availableTracks = primaryGridTrackCount.value
     - QUERY_GRID_ITEM_SPANS[actionColumnRole.value]
-    - visibleFields.value.reduce((total, field) => total + QUERY_GRID_ITEM_SPANS[field.width], 0);
+    - permanentVisibleFields.value.reduce((total, field) => total + QUERY_GRID_ITEM_SPANS[field.width], 0);
   const promoted: ScenarioField[] = [];
-  for (const field of secondaryFields.value) {
+  for (const field of responsiveSecondaryFields.value) {
     const span = QUERY_GRID_ITEM_SPANS[field.width];
     if (span > availableTracks) break;
     promoted.push(field);
@@ -95,7 +114,7 @@ const promotedSecondaryFields = computed(() => {
   }
   return promoted;
 });
-const collapsibleSecondaryFields = computed(() => secondaryFields.value.slice(promotedSecondaryFields.value.length));
+const collapsibleSecondaryFields = computed(() => responsiveSecondaryFields.value.slice(promotedSecondaryFields.value.length));
 const hiddenActiveCount = computed(() => collapsibleSecondaryFields.value.filter((field) => {
   const value = queryValues[field.key];
   return Array.isArray(value) ? value.length > 0 : Boolean(value);
@@ -107,8 +126,8 @@ const groupFields = (fields: ScenarioField[]) => {
   return [...groups].map(([name, items], index) => ({ id: `advanced-group-${index}`, name: t(`queryScenario.groups.${groupMessageKeys[name]}`), fields: items }));
 };
 
-const advancedGroups = computed(() => groupFields(secondaryFields.value));
-const activeAdvancedCount = computed(() => secondaryFields.value.filter((field) => {
+const advancedGroups = computed(() => groupFields(responsiveSecondaryFields.value));
+const activeAdvancedCount = computed(() => responsiveSecondaryFields.value.filter((field) => {
   const value = appliedValues.value[field.key];
   return Array.isArray(value) ? value.length > 0 : Boolean(value);
 }).length);
@@ -116,14 +135,16 @@ const activeAdvancedCount = computed(() => secondaryFields.value.filter((field) 
 const filteredRows = computed(() => {
   const keyword = String(appliedValues.value.keyword ?? '').trim().toLowerCase();
   const customer = String(appliedValues.value.customerName ?? '').trim().toLowerCase();
+  const batchValues = Array.isArray(appliedValues.value.batchValues) ? appliedValues.value.batchValues : [];
   return rows.filter((row) => (!keyword || row.orderNo.toLowerCase().includes(keyword))
-    && (!customer || row.customerName.toLowerCase().includes(customer)));
+    && (!customer || row.customerName.toLowerCase().includes(customer))
+    && (!batchValues.length || batchValues.includes(row.orderNo)));
 });
 
 const cloneValue = (value: string | string[]) => Array.isArray(value) ? [...value] : value;
 
 const resetValues = () => {
-  for (const field of SCENARIO_FIELDS) queryValues[field.key] = field.kind === 'range' ? [] : '';
+  for (const field of SCENARIO_FIELDS) queryValues[field.key] = ['range', 'batch'].includes(field.kind) ? [] : '';
   appliedValues.value = {};
   expanded.value = false;
   page.current = 1;
@@ -137,16 +158,16 @@ const handleSearch = () => {
 };
 
 const openAdvanced = () => {
-  for (const field of secondaryFields.value) draftValues[field.key] = cloneValue(queryValues[field.key]);
+  for (const field of responsiveSecondaryFields.value) draftValues[field.key] = cloneValue(queryValues[field.key]);
   drawerVisible.value = true;
 };
 
 const clearAdvancedDraft = () => {
-  for (const field of secondaryFields.value) draftValues[field.key] = field.kind === 'range' ? [] : '';
+  for (const field of responsiveSecondaryFields.value) draftValues[field.key] = ['range', 'batch'].includes(field.kind) ? [] : '';
 };
 
 const applyAdvanced = () => {
-  for (const field of secondaryFields.value) queryValues[field.key] = cloneValue(draftValues[field.key]);
+  for (const field of responsiveSecondaryFields.value) queryValues[field.key] = cloneValue(draftValues[field.key]);
   drawerVisible.value = false;
   handleSearch();
 };
@@ -190,7 +211,7 @@ watch(() => props.initialScenario, (value) => {
       <div class="filter-panel">
         <a-form :model="queryValues" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="filter-panel__form">
           <QueryFieldGrid @track-count-change="primaryGridTrackCount = $event">
-            <QueryFieldCol v-for="field in visibleFields" :key="field.key" :role="field.width">
+            <QueryFieldCol v-for="field in permanentVisibleFields" :key="field.key" :role="field.width">
               <ScenarioFieldControl v-model="queryValues[field.key]" v-model:keyword-type="keywordType" :field="field" @submit="handleSearch" />
             </QueryFieldCol>
             <QueryFieldCol v-for="field in promotedSecondaryFields" :key="field.key" :role="field.width">

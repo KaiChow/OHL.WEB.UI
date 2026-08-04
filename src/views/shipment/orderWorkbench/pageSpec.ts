@@ -59,12 +59,12 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       ],
     },
     dense: {
-      decisions: ['Keep business type, identifier, customer, and responsible operator as four daily locate fields on one stable row; edit fourteen secondary route, schedule, status/risk, document, and settlement conditions in a right-side D1 drawer using two readable columns and one native scroll owner.'],
+      decisions: ['Keep identifier, business type, customer, and responsible operator as daily locate fields; at compact query-container width, reserve the localized three-command slot first and move operator into the same D1 advanced drawer, while release/wide profiles keep all four inline. Edit secondary route, schedule, status/risk, document, and settlement conditions in that drawer using two readable columns and one native scroll owner.'],
       acceptance: [
         'At 1366, 1024 split, and wide viewports, the query row does not create a separate action band and the table remains the dominant work surface.',
         'At compact table-toolbar width, create and batch remain reachable, optional export text collapses, pagination hides jumper then page-size, and total plus page navigation remain visible on one line.',
         'Vertical query and overlay forms use the shared 4px label-to-control rhythm through the Arco public label-column style.',
-        'At 1024, the identifier query keeps the largest field allocation, reset and advanced-filter keep visible labels, and the 12 processing queues move to a deterministic second workflow line where they scroll only inside their own lane.',
+        'At 1024, the identifier query keeps the largest field allocation, reset and advanced-filter keep visible labels, operator remains editable in the advanced drawer, and the 12 processing queues move to a deterministic second workflow line where they scroll only inside their own lane.',
         'The advanced filter opens from the right at the shared D1 width, renders two field columns, and keeps the native Drawer body as its only vertical scroll owner.',
         'Drawer content and footer remain horizontally contained at 1024, 1366, and wide desktop viewports.',
       ],

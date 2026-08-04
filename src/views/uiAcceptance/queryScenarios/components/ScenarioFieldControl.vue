@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import BatchValueQuery from '../../../../components/workbench/BatchValueQuery.vue';
 import type { ScenarioField } from '../scenarioFields';
 
 const props = defineProps<{
@@ -45,6 +46,7 @@ const keywordTypeValue = computed({
       <a-input v-model="textValue" size="small" allow-clear :placeholder="t('queryScenario.inputNumber')" @press-enter="emit('submit')" />
     </a-input-group>
     <a-range-picker v-else-if="field.kind === 'range'" v-model="rangeValue" size="small" style="width: 100%" />
+    <BatchValueQuery v-else-if="field.kind === 'batch'" v-model="rangeValue" :label="fieldLabel" @submit="emit('submit')" />
     <a-select v-else-if="field.kind === 'select'" v-model="textValue" size="small" allow-clear :placeholder="t('queryScenario.all')">
       <a-option value="option-a">{{ t('queryScenario.optionA') }}</a-option>
       <a-option value="option-b">{{ t('queryScenario.optionB') }}</a-option>

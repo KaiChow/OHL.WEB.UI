@@ -27,7 +27,8 @@ export type PesdpQueryFieldWidthRole =
   | 'standard'
   | 'wide'
   | 'composite'
-  | 'range';
+  | 'range'
+  | 'batch';
 
 export interface PesdpQueryFieldLayout {
   field: string;

@@ -9,17 +9,17 @@
 .biz-id {
   font-family: @vxe-id-font;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
 }
 
 /* 金额（可与 .biz-income / .biz-cost 等组合） */
 .biz-money {
-  font-family: @vxe-money-font;
+  font-family: @vxe-font-family;
   font-variant-numeric: tabular-nums;
   font-weight: @vxe-font-weight-medium;
 }
 
-/* 普通数字 / 计数：UI 字体对齐位数，与金额等宽区分 */
+/* 普通数字 / 计数：UI 字体 + tabular-nums */
 .biz-number {
   font-family: @vxe-font-family;
   font-variant-numeric: tabular-nums;

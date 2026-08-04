@@ -75,7 +75,7 @@ const profitFacts = computed(() => {
           <a-timeline-item v-for="item in row.timeline" :key="`${item.time}-${item.label}`">
             <div class="timeline-item">
               <span class="timeline-item__label">{{ item.label }}</span>
-              <span class="timeline-item__time mono">{{ item.time }}</span>
+              <span class="timeline-item__time biz-number">{{ item.time }}</span>
             </div>
           </a-timeline-item>
         </a-timeline>

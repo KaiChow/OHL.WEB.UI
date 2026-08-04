@@ -13,7 +13,7 @@ export interface ScenarioField {
   key: string;
   label: string;
   group: string;
-  kind: 'input' | 'select' | 'range' | 'composite';
+  kind: 'input' | 'select' | 'range' | 'composite' | 'batch';
   width: PesdpQueryFieldWidthRole;
 }
 
@@ -24,12 +24,12 @@ export const SCENARIO_FIELDS: ScenarioField[] = [
   { key: 'owner', label: '责任操作', group: '执行与归属', kind: 'select', width: 'compact' },
   { key: 'orderStatus', label: '订单状态', group: '状态与风险', kind: 'select', width: 'compact' },
   { key: 'updatedRange', label: '更新时间', group: '时间计划', kind: 'range', width: 'range' },
+  { key: 'batchValues', label: '批量检索值', group: '识别条件', kind: 'batch', width: 'batch' },
   { key: 'hblNo', label: 'HBL', group: '识别条件', kind: 'input', width: 'standard' },
   { key: 'mblNo', label: 'MBL', group: '识别条件', kind: 'input', width: 'standard' },
   { key: 'bookingNo', label: '订舱号', group: '识别条件', kind: 'input', width: 'standard' },
   { key: 'containerNo', label: '柜号', group: '识别条件', kind: 'input', width: 'standard' },
   { key: 'customerReference', label: '客户参考号', group: '识别条件', kind: 'input', width: 'standard' },
-  { key: 'externalReference', label: '外部参考号', group: '识别条件', kind: 'input', width: 'standard' },
   { key: 'pol', label: '起运港', group: '航线与运输', kind: 'select', width: 'compact' },
   { key: 'pod', label: '目的港', group: '航线与运输', kind: 'select', width: 'compact' },
   { key: 'transitPort', label: '中转港', group: '航线与运输', kind: 'select', width: 'compact' },
@@ -76,7 +76,7 @@ const compactVisible = ['keyword', 'businessType'];
 const inlineVisible = ['customerName', 'businessType', 'owner', 'orderStatus', 'branch', 'source'];
 const expandVisible = ['customerName', 'businessType', 'owner', 'orderStatus', 'branch'];
 const coreVisible = ['keyword', 'customerName', 'businessType', 'owner'];
-const expandSecondary = ['hblNo', 'mblNo', 'bookingNo', 'source', 'pol', 'pod', 'carrier'];
+const expandSecondary = ['batchValues', 'mblNo', 'bookingNo', 'source', 'pol', 'pod', 'carrier'];
 
 export const QUERY_SCENARIOS = [
   { key: 's0', routeName: 'QueryScenarioS0', labelKey: 'queryScenario.scenarios.s0', total: 0, visible: [] },

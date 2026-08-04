@@ -28,8 +28,7 @@ Classify every available condition before choosing a layout.
 The default row answers: "What does the target operator enter first to find the object now?" Do not promote a field merely because it exists in the API.
 
 ## Semantic Width Grid
-
-Visible query fields use the shared `semantic-grid-v1` capability around Arco Form controls. Pages declare field meaning; they do not invent breakpoints, spans, fixed input widths, or page-wide caps independently.
+Visible query fields use the shared `semantic-grid-v1` capability around Arco Form controls. Pages declare field meaning; they do not invent breakpoints, spans, fixed input widths, or page-wide caps independently. Treat `standard` as one allocation (`4` tracks), `range` / `composite` as paired controls (`6`), and `batch` as two allocations (`8`) for values plus clear/edit affordances.
 
 | Width role | Use for | Do not use for |
 |------------|---------|----------------|
@@ -38,6 +37,7 @@ Visible query fields use the shared `semantic-grid-v1` capability around Arco Fo
 | `wide` | A proven long-label or long-option field that needs more scan width | Making an ordinary field look important |
 | `composite` | One connected selector + input identifier control | Two unrelated conditions grouped together |
 | `range` | Date/time or numeric range with two visible endpoints | A single date or short enum |
+| `batch` | Hybrid multi-value query: direct single value; multi-paste commits immediately, keeps normalized values visible and count on the editor affordance; provide direct one-click clear outside the editor; normalize Unicode width/quotes/separators, de-duplicate in first-seen order, and open Popover only for over-limit/business-validator errors or review; preserve case and accept every non-empty token unless contracted otherwise | Built-in ID regex/case conversion, count without values, clear only inside editor, mandatory editor, tags/raw lines in the row, silent discard |
 
 ### Four Width Decisions
 
@@ -52,18 +52,18 @@ A full-width bordered query surface with a left-pinned capped grid and an unowne
 
 ### Shared Track Model
 
-Use one shared responsive track model so wider containers gain tracks instead of wider controls. A logical track stays roughly `40-56px` across supported desktop profiles at 100% zoom: `compact` spans 3 tracks, `standard` 4, and `wide` / `composite` / `range` 6. The normal action slot spans 5 tracks; the wide slot spans 8 so query, reset, and expand/filter labels remain visible.
+Use one shared responsive track model so wider containers gain tracks instead of wider controls. A logical track stays roughly `40-56px` across supported desktop profiles at 100% zoom: `compact` spans 3, `standard` 4, `wide` / `composite` / `range` 6, and `batch` 8 tracks. The normal action slot spans 5 tracks, the wide three-command slot 9, and the expanded slot 10 when a localized dynamic label such as `Expand (+N)` must remain visible.
 
 - Derive track count from the **query container's inner width**, not the browser width. Keep enough tracks for the supported 1024px desktop and add tracks as the container grows through 1440px and 1920px evidence.
 - Controls fill their semantic item, but the shared grid bounds the effective track size. Do not make a customer Select 400px wide merely because the monitor is wide.
-- Place query actions immediately after the last permanent visible field, separated by one shared column gutter. Stability means a deterministic position after the field sequence, not flush-right alignment across the query surface.
+- Place query actions immediately after the last permanent visible field, separated by one shared column gutter. Stability means a deterministic position after the field sequence, not flush-right alignment across the query surface. Reserve the action slot first; at a compact profile, demote the lowest-priority Narrow field into the existing expand/drawer surface before allowing actions to wrap, clip, shrink, or iconify.
 - At the same container width, the same ordered roles and action set produce the same widths, wrapping, and action alignment across routes.
 - A business difference changes the semantic role or field priority in `pageSpec.ts`; it never introduces page-local spans.
 - Only a connected control's internal selector may use a stable bounded width based on its longest legal option.
 - Advanced drawers keep their documented two-column/one-column composition; list-row tracks do not leak into the drawer.
 
 Start with Arco Grid when its 24 columns satisfy all supported widths. When a fixed 24-column grid would either stretch fields or require a narrow left-pinned `max-width` on wide desktop, the shared `QueryFieldGrid` may use CSS Grid for layout only. Record the reusable gap as: `Arco's fixed 24-column model cannot preserve bounded semantic field widths while adding wide-desktop capacity.` Arco continues to own Form, controls, validation, focus, and component chrome.
-Reference algorithm: derive a shared track count from container inner width and the profile's target track; map roles to `3/4/6` spans; append the `5/8`-track action item after the permanent field cluster and reserve that capacity before promoting optional fields; then verify wrapping and DOM/focus order. Implement it once in the shared component, not in pages.
+Reference algorithm: derive a shared track count from container inner width and the profile's target track; map fields to `3/4/6/8` spans; append the `5/9/10`-track action item after the permanent field cluster and reserve that capacity before promoting optional fields; then verify wrapping and DOM/focus order. Implement it once in the shared component, not in pages.
 
 ### Space-Use Decision
 

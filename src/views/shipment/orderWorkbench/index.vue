@@ -194,6 +194,8 @@ const appliedQuery = ref<ShipmentOrderQuery>(cloneQuery(defaultQuery()));
 const activeWorkflowState = ref<ShipmentStatusKey>('all');
 const activeWorkScope = ref<WorkScope>('all');
 const advancedFilterVisible = ref(false);
+const primaryGridTrackCount = ref(24);
+const showInlineOperator = computed(() => primaryGridTrackCount.value >= 28);
 const advancedApplying = ref(false);
 const advancedDatePopupVisible = reactive({ etd: false, closing: false, updated: false });
 const loading = ref(false);
@@ -416,6 +418,7 @@ const advancedConditionSnapshot = (source: ShipmentOrderQuery) => ({
   isOverdue: source.isOverdue,
   fileStatus: source.fileStatus,
   feeStatus: source.feeStatus,
+  operator: showInlineOperator.value ? undefined : source.operator,
 });
 
 const countConditions = (conditions: unknown[]) => conditions.filter(Boolean).length;
@@ -428,6 +431,7 @@ const advancedDraftGroupCounts = computed(() => ({
     advancedQuery.vesselVoyage.trim(),
     advancedQuery.blNo.trim(),
     advancedQuery.bookingNo.trim(),
+    !showInlineOperator.value && advancedQuery.operator,
   ]),
   schedule: countConditions([
     advancedQuery.etdRange.length === 2,
@@ -467,6 +471,7 @@ const advancedActiveCount = computed(() => {
   if (query.feeStatus) count += 1;
   if (query.updatedRange.length === 2) count += 1;
   if (query.isOverdue) count += 1;
+  if (!showInlineOperator.value && query.operator) count += 1;
 
   return count;
 });
@@ -633,6 +638,7 @@ const clearAdvancedFilters = () => {
   advancedQuery.feeStatus = undefined;
   advancedQuery.updatedRange = [];
   advancedQuery.isOverdue = '';
+  if (!showInlineOperator.value) advancedQuery.operator = undefined;
 };
 
 type AdvancedDraftGroup = 'routeDocuments' | 'schedule' | 'risk';
@@ -645,6 +651,7 @@ const clearAdvancedGroup = (group: AdvancedDraftGroup) => {
     advancedQuery.vesselVoyage = '';
     advancedQuery.blNo = '';
     advancedQuery.bookingNo = '';
+    if (!showInlineOperator.value) advancedQuery.operator = undefined;
     return;
   }
   if (group === 'schedule') {
@@ -969,7 +976,7 @@ watch(uiScenario, () => {
       >
         <div class="filter-panel">
           <a-form :model="query" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="filter-panel__form">
-            <QueryFieldGrid>
+            <QueryFieldGrid @track-count-change="primaryGridTrackCount = $event">
               <QueryFieldCol role="composite">
                 <a-form-item :label="t('shipment.fields.keyword')">
                   <a-input-group>
@@ -1012,7 +1019,7 @@ watch(uiScenario, () => {
                   />
                 </a-form-item>
               </QueryFieldCol>
-              <QueryFieldCol role="compact">
+              <QueryFieldCol v-if="showInlineOperator" role="compact">
                 <a-form-item :label="t('shipment.fields.operator')">
                   <a-select v-model="query.operator" size="small" allow-clear allow-search :placeholder="t('shipment.placeholders.operator')">
                     <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
@@ -1314,7 +1321,7 @@ watch(uiScenario, () => {
         <section class="advanced-filter-section" aria-labelledby="route-document-filter-title">
           <div class="advanced-filter-section__head">
             <a-space :size="6">
-              <h3 id="route-document-filter-title" class="advanced-filter-section__title">{{ t('shipment.advanced.routeDocs') }}</h3>
+              <h3 id="route-document-filter-title" class="advanced-filter-section__title">{{ t(showInlineOperator ? 'shipment.advanced.routeDocs' : 'shipment.advanced.routeDocsOwnership') }}</h3>
               <span v-if="advancedDraftGroupCounts.routeDocuments" class="advanced-filter-section__count">
                 {{ t('shipment.advanced.selected', { count: advancedDraftGroupCounts.routeDocuments }) }}
               </span>
@@ -1328,6 +1335,15 @@ watch(uiScenario, () => {
             >{{ t('shipment.advanced.clearGroup') }}</a-button>
           </div>
           <a-row :gutter="[16, 0]">
+            <a-col v-if="!showInlineOperator" :span="12" :xs="24" :sm="12">
+              <a-form-item field="operator" :label="t('shipment.fields.operator')">
+                <a-select v-model="advancedQuery.operator" size="small" allow-clear allow-search :placeholder="t('shipment.placeholders.operator')">
+                  <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
+                    {{ operator }}
+                  </a-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
             <a-col :span="12" :xs="24" :sm="12">
               <a-form-item field="pol" :label="t('shipment.columns.pol')">
                 <a-input v-model="advancedQuery.pol" size="small" allow-clear :placeholder="t('shipment.advanced.portPlaceholder')" @press-enter="applyAdvancedFilters" />
