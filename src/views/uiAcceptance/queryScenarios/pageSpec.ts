@@ -44,8 +44,8 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
       acceptance: ['No scenario combines a flat query wall with a drawer, and query actions keep one stable owner.'],
     },
     dense: {
-      decisions: ['Use semantic-grid-v1 field roles and the shared query grid for the 52-field capability boundary.'],
-      acceptance: ['The same role sequence produces intentional wrap points at 1024, 1366, and wide desktop routes in both zh-CN and en-US without locale-specific spans.'],
+      decisions: ['Use one container-owned semantic-grid-v1 track model: bounded field roles, query actions adjacent to the permanent field cluster, and no left-pinned page-wide cap.'],
+      acceptance: ['At 1024, 1366, 1440, and 1920 widths, role order remains stable; the wide grid owns at least 80% of its full-width query surface, controls stay bounded, and the field-to-action gap stays at one shared gutter when S2 expands.'],
     },
     premium: {
       decisions: ['Use GI-native Arco controls, grouped native drawers, and the global VXE mini table without page-local skins.'],
@@ -53,7 +53,7 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
     },
   },
   surfaces: [
-    { id: 'query-scenario', role: 'command', owns: ['query-mode', 'visible-query', 'expand-query'], primaryAction: 'query-scenario-apply', implementation: 'shared-pattern', whyArcoNotEnough: 'Cross-route query acceptance needs one shared semantic field-width mapping around Arco Form and Grid.' },
+    { id: 'query-scenario', role: 'command', owns: ['query-mode', 'visible-query', 'expand-query'], primaryAction: 'query-scenario-apply', implementation: 'shared-pattern', whyArcoNotEnough: "Arco's fixed 24-column model cannot preserve bounded semantic field widths while adding wide-desktop capacity." },
     { id: 'advanced-query', role: 'supporting', owns: ['grouped-drawer', 'wide-drawer', 'draft-query'], implementation: 'arco' },
     { id: 'scenario-results', role: 'data', owns: ['table-data', 'pagination', 'total-count'], implementation: 'shared-pattern', whyArcoNotEnough: 'The result comparison uses the project VXE table baseline.' },
   ],
@@ -96,5 +96,5 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
     zoom: '200%',
   },
   authorities: ['list-page.md', 'filter-layout.md', 'table.md', 'actions.md', 'overlay-dimensions.md', 'feedback.md'],
-  verification: ['node scripts/check-spec.js', 'npm run build', 'zh-CN and en-US scenario routes at split/release/wide viewports'],
+  verification: ['node scripts/check-spec.js', 'npm run build', 'zh-CN and en-US scenario routes at 1024x768, 1366x768, 1440x900, and 1920x1080 with query/grid/action rectangles recorded'],
 });

@@ -30,9 +30,11 @@ This is split-window desktop support, not tablet or mobile support. Product-grad
 
 ## Wide Desktop Rules
 
-- Wider viewports expose more columns, status items, and table rows.
+- Use the actual work-surface/container width, not viewport width alone, to select the layout profile.
+- Wider containers expose more bounded query tracks, table columns/rows, and applicable status items before they create unowned blank surface.
 - Do not scale fonts or controls with viewport width.
-- Do not stretch field widths until labels and controls lose grouping; use weighted columns and bounded widths where needed.
+- Do not stretch field widths until labels and controls lose grouping; add shared tracks and keep semantic widths bounded.
+- Do not cap a left-aligned query grid inside a full-width bordered surface unless the remaining region has a documented visible owner; apply the wide composition gate in `filter-layout.md`.
 - Do not add decorative whitespace, KPI bands, or extra cards merely because space is available.
 
 ## Multi-Window Target
@@ -75,4 +77,4 @@ That extension belongs to the consuming project. Widths below 1024px must not be
 - [ ] No command wraps, overlaps a neighboring field, or overflows its Grid/Flex owner.
 - [ ] Status/navigation overflow is local; table overflow belongs to VXE; browser-level horizontal overflow is absent.
 - [ ] Icon-only compact tools retain Tooltip, business-specific `aria-label`, and at least 28x28px target.
-- [ ] At wide desktop, fields remain bounded and controls do not stretch merely to consume space.
+- [ ] At wide desktop, fields remain bounded, the query grid uses its owned surface, and controls do not stretch merely to consume space.

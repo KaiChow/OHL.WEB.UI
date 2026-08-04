@@ -9,6 +9,7 @@ import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
 import ScenarioFieldControl from './components/ScenarioFieldControl.vue';
 import { QUERY_SCENARIOS, SCENARIO_FIELDS } from './scenarioFields';
 import type { QueryScenarioKey, ScenarioField } from './scenarioFields';
+import { QUERY_GRID_ITEM_SPANS } from '../../../design-system/queryLayout';
 import type { QueryGridItemRole } from '../../../design-system/queryLayout';
 import { QUERY_SCENARIO_FEATURE_CONTRACTS } from '../featureContracts';
 
@@ -36,6 +37,7 @@ const activeScenarioKey = ref<QueryScenarioKey>(props.initialScenario);
 const expanded = ref(false);
 const drawerVisible = ref(false);
 const querying = ref(false);
+const primaryGridTrackCount = ref(24);
 const page = reactive({ current: 1, size: 20 });
 const keywordType = ref('orderNo');
 const wideFilterEditor = ref<HTMLElement>();
@@ -79,6 +81,25 @@ const isExpandScenario = computed(() => activeScenarioKey.value === 's2-expand')
 const isDrawerScenario = computed(() => ['s3-drawer', 's3-wide', 's4-drawer'].includes(activeScenarioKey.value));
 const isWideDrawer = computed(() => activeScenarioKey.value === 's3-wide' || activeScenarioKey.value === 's4-drawer');
 const actionColumnRole = computed<QueryGridItemRole>(() => isExpandScenario.value || isDrawerScenario.value ? 'actions-wide' : 'actions');
+const promotedSecondaryFields = computed(() => {
+  if (!isExpandScenario.value) return [];
+  let availableTracks = primaryGridTrackCount.value
+    - QUERY_GRID_ITEM_SPANS[actionColumnRole.value]
+    - visibleFields.value.reduce((total, field) => total + QUERY_GRID_ITEM_SPANS[field.width], 0);
+  const promoted: ScenarioField[] = [];
+  for (const field of secondaryFields.value) {
+    const span = QUERY_GRID_ITEM_SPANS[field.width];
+    if (span > availableTracks) break;
+    promoted.push(field);
+    availableTracks -= span;
+  }
+  return promoted;
+});
+const collapsibleSecondaryFields = computed(() => secondaryFields.value.slice(promotedSecondaryFields.value.length));
+const hiddenActiveCount = computed(() => collapsibleSecondaryFields.value.filter((field) => {
+  const value = queryValues[field.key];
+  return Array.isArray(value) ? value.length > 0 : Boolean(value);
+}).length);
 
 const groupFields = (fields: ScenarioField[]) => {
   const groups = new Map<string, ScenarioField[]>();
@@ -168,9 +189,12 @@ watch(() => props.initialScenario, (value) => {
     >
       <div class="filter-panel">
         <a-form :model="queryValues" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="filter-panel__form">
-          <QueryFieldGrid>
+          <QueryFieldGrid @track-count-change="primaryGridTrackCount = $event">
             <QueryFieldCol v-for="field in visibleFields" :key="field.key" :role="field.width">
-              <ScenarioFieldControl v-model="queryValues[field.key]" v-model:keyword-type="keywordType" :field="field" />
+              <ScenarioFieldControl v-model="queryValues[field.key]" v-model:keyword-type="keywordType" :field="field" @submit="handleSearch" />
+            </QueryFieldCol>
+            <QueryFieldCol v-for="field in promotedSecondaryFields" :key="field.key" :role="field.width">
+              <ScenarioFieldControl v-model="queryValues[field.key]" :field="field" @submit="handleSearch" />
             </QueryFieldCol>
             <QueryFieldCol :role="actionColumnRole">
               <div class="filter-actions">
@@ -183,10 +207,12 @@ watch(() => props.initialScenario, (value) => {
                     <span v-if="!isExpandScenario && !isDrawerScenario">{{ t('common.reset') }}</span>
                   </a-button>
                 </a-tooltip>
-                <a-tooltip v-if="isExpandScenario" :content="expanded ? t('common.collapse') : t('common.expand', { count: secondaryFields.length })">
-                  <a-button size="small" type="text" class="filter-expand-action" :aria-label="expanded ? t('common.collapse') : t('common.expand', { count: secondaryFields.length })" @click="expanded = !expanded">
-                    <span class="expand-action-label">{{ expanded ? t('common.collapse') : t('common.expand', { count: secondaryFields.length }) }}</span><icon-down />
-                  </a-button>
+                <a-tooltip v-if="isExpandScenario" :content="expanded ? t('common.collapse') : t('common.expand', { count: collapsibleSecondaryFields.length })">
+                  <a-badge :count="hiddenActiveCount" :offset="[-2, 2]">
+                    <a-button size="small" type="text" class="filter-expand-action" :aria-label="expanded ? t('common.collapse') : t('common.expand', { count: collapsibleSecondaryFields.length })" @click="expanded = !expanded">
+                      <span class="expand-action-label">{{ expanded ? t('common.collapse') : t('common.expand', { count: collapsibleSecondaryFields.length }) }}</span><icon-down />
+                    </a-button>
+                  </a-badge>
                 </a-tooltip>
                 <a-badge v-if="isDrawerScenario" :count="activeAdvancedCount" :offset="[-3, 3]">
                   <a-button size="small" type="text" :aria-label="t('common.moreFilters')" @click="openAdvanced">
@@ -198,8 +224,8 @@ watch(() => props.initialScenario, (value) => {
           </QueryFieldGrid>
 
           <QueryFieldGrid v-if="isExpandScenario && expanded" class="expanded-query-grid">
-            <QueryFieldCol v-for="field in secondaryFields" :key="field.key" :role="field.width">
-              <ScenarioFieldControl v-model="queryValues[field.key]" :field="field" />
+            <QueryFieldCol v-for="field in collapsibleSecondaryFields" :key="field.key" :role="field.width">
+              <ScenarioFieldControl v-model="queryValues[field.key]" :field="field" @submit="handleSearch" />
             </QueryFieldCol>
           </QueryFieldGrid>
         </a-form>
@@ -242,7 +268,7 @@ watch(() => props.initialScenario, (value) => {
       :mask-closable="false"
       :esc-to-close="false"
     >
-      <a-form layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
+      <a-form :model="draftValues" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
         <section v-for="group in advancedGroups" :key="group.name" class="advanced-section">
           <h3>{{ group.name }}</h3>
           <a-row :gutter="[16, 0]">
@@ -276,7 +302,7 @@ watch(() => props.initialScenario, (value) => {
           </a-button>
         </nav>
         <div ref="wideFilterEditor" class="wide-filter-editor">
-          <a-form layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
+          <a-form :model="draftValues" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
             <section v-for="group in advancedGroups" :id="group.id" :key="group.name" class="advanced-section">
               <h3>{{ group.name }}（{{ group.fields.length }}）</h3>
               <a-row :gutter="[16, 0]">

@@ -1,17 +1,28 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { QUERY_GRID_COLUMN_PROPS } from '../../design-system/queryLayout';
+import { QUERY_GRID_ITEM_SPANS } from '../../design-system/queryLayout';
 import type { QueryGridItemRole } from '../../design-system/queryLayout';
 
 const props = defineProps<{
   role: QueryGridItemRole;
 }>();
 
-const columnProps = computed(() => QUERY_GRID_COLUMN_PROPS[props.role]);
+const span = computed(() => QUERY_GRID_ITEM_SPANS[props.role]);
 </script>
 
 <template>
-  <a-col v-bind="columnProps" :data-query-width="role">
+  <div
+    class="query-field-col"
+    :data-query-width="role"
+    :style="{ '--query-field-span': span }"
+  >
     <slot />
-  </a-col>
+  </div>
 </template>
+
+<style scoped>
+.query-field-col {
+  grid-column: span var(--query-field-span);
+  min-width: 0;
+}
+</style>

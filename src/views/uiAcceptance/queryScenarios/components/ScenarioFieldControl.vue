@@ -15,6 +15,7 @@ const fieldLabel = computed(() => t(`queryScenario.fields.${props.field.key}`));
 const emit = defineEmits<{
   'update:modelValue': [value: string | string[]];
   'update:keywordType': [value: string];
+  submit: [];
 }>();
 
 const textValue = computed({
@@ -41,7 +42,7 @@ const keywordTypeValue = computed({
         <a-option value="hblNo">HBL</a-option>
         <a-option value="mblNo">MBL</a-option>
       </a-select>
-      <a-input v-model="textValue" size="small" allow-clear :placeholder="t('queryScenario.inputNumber')" />
+      <a-input v-model="textValue" size="small" allow-clear :placeholder="t('queryScenario.inputNumber')" @press-enter="emit('submit')" />
     </a-input-group>
     <a-range-picker v-else-if="field.kind === 'range'" v-model="rangeValue" size="small" style="width: 100%" />
     <a-select v-else-if="field.kind === 'select'" v-model="textValue" size="small" allow-clear :placeholder="t('queryScenario.all')">
@@ -49,6 +50,6 @@ const keywordTypeValue = computed({
       <a-option value="option-b">{{ t('queryScenario.optionB') }}</a-option>
       <a-option value="option-c">{{ t('queryScenario.optionC') }}</a-option>
     </a-select>
-    <a-input v-else v-model="textValue" size="small" allow-clear :placeholder="t('queryScenario.inputField', { label: fieldLabel })" />
+    <a-input v-else v-model="textValue" size="small" allow-clear :placeholder="t('queryScenario.inputField', { label: fieldLabel })" @press-enter="emit('submit')" />
   </a-form-item>
 </template>

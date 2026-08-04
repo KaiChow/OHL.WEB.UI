@@ -29,7 +29,7 @@ The default row answers: "What does the target operator enter first to find the 
 
 ## Semantic Width Grid
 
-Visible query fields use the shared `semantic-grid-v1` Arco Grid capability. Pages declare field meaning; they do not invent `xs/sm/md/lg/xl` spans or fixed input widths independently.
+Visible query fields use the shared `semantic-grid-v1` capability around Arco Form controls. Pages declare field meaning; they do not invent breakpoints, spans, fixed input widths, or page-wide caps independently.
 
 | Width role | Use for | Do not use for |
 |------------|---------|----------------|
@@ -39,15 +39,42 @@ Visible query fields use the shared `semantic-grid-v1` Arco Grid capability. Pag
 | `composite` | One connected selector + input identifier control | Two unrelated conditions grouped together |
 | `range` | Date/time or numeric range with two visible endpoints | A single date or short enum |
 
-Rules:
+### Four Width Decisions
 
-- The shared grid owns breakpoint spans, gutter, maximum readable row width, and the query-action column. A page only selects a width role in `pageSpec.ts` and renders it through the shared query-grid components.
-- The normal action slot fits query plus one secondary command. Use the shared wide action slot only when an S2/S3 surface adds an expand or advanced-filter entry; keep reset as a named icon command when translated labels would compete with the primary query action.
-- At the same viewport, the same ordered width roles and action set must produce the same field widths, wrap points, and action alignment across routes.
-- A business difference is expressed by changing the semantic role in `pageSpec.ts`, not by adding page-local column spans. Long content alone does not justify arbitrary width; verify the longest legal localized label/value.
-- Controls fill their semantic column. Only a connected control's bounded internal selector may use a stable width based on its longest option.
-- Query actions keep their shared stable column. Do not resize fields to consume accidental leftover space or stretch the final field merely to fill the row.
-- Advanced-filter drawers keep their documented two-column/one-column grid; the list-row width roles do not leak into drawer composition.
+Do not collapse these into one `max-width`:
+
+1. **Surface width**: the query surface normally follows the list/table work surface.
+2. **Grid width**: the field grid consumes the surface inner width unless another visible region owns the remainder.
+3. **Field width**: semantic roles bound control width and prevent stretched chrome.
+4. **Visibility**: Locate/Narrow/Investigate priority decides whether a field is visible; free space alone does not promote an Investigate field.
+
+A full-width bordered query surface with a left-pinned capped grid and an unowned blank region is a layout defect, not breathing room. A grid cap is allowed only when it is centered with the whole work surface or the remaining width is visibly owned by context, help, preview, or another documented region.
+
+### Shared Track Model
+
+Use one shared responsive track model so wider containers gain tracks instead of wider controls. A logical track stays roughly `40-56px` across supported desktop profiles at 100% zoom: `compact` spans 3 tracks, `standard` 4, and `wide` / `composite` / `range` 6. The normal and wide action slots span only the tracks required by their localized commands.
+
+- Derive track count from the **query container's inner width**, not the browser width. Keep enough tracks for the supported 1024px desktop and add tracks as the container grows through 1440px and 1920px evidence.
+- Controls fill their semantic item, but the shared grid bounds the effective track size. Do not make a customer Select 400px wide merely because the monitor is wide.
+- Place query actions immediately after the last permanent visible field, separated by one shared column gutter. Stability means a deterministic position after the field sequence, not flush-right alignment across the query surface.
+- At the same container width, the same ordered roles and action set produce the same widths, wrapping, and action alignment across routes.
+- A business difference changes the semantic role or field priority in `pageSpec.ts`; it never introduces page-local spans.
+- Only a connected control's internal selector may use a stable bounded width based on its longest legal option.
+- Advanced drawers keep their documented two-column/one-column composition; list-row tracks do not leak into the drawer.
+
+Start with Arco Grid when its 24 columns satisfy all supported widths. When a fixed 24-column grid would either stretch fields or require a narrow left-pinned `max-width` on wide desktop, the shared `QueryFieldGrid` may use CSS Grid for layout only. Record the reusable gap as: `Arco's fixed 24-column model cannot preserve bounded semantic field widths while adding wide-desktop capacity.` Arco continues to own Form, controls, validation, focus, and component chrome.
+Reference algorithm: derive a shared track count from container inner width and the profile's target track; map roles to `3/4/6` spans; append the `5/6`-track action item after the permanent field cluster and reserve that capacity before promoting optional fields; then verify wrapping and DOM/focus order. Implement it once in the shared component, not in pages.
+
+### Space-Use Decision
+
+After placing bounded fields, inspect unused space in this order:
+
+1. Keep all proven Locate and daily Narrow fields directly reachable.
+2. Use added wide-container tracks to reduce avoidable wrapping or expose another proven regular Narrow field without exceeding the command-height budget.
+3. Keep Investigate fields in the advanced surface even when space exists.
+4. Accept only the normal tail of the final field row; do not stretch the last field or invent decoration.
+
+Measure `grid width / query-surface inner width` at wide desktop. Below `80%` fails when the surface is full-width, left-aligned, and the remainder has no documented owner. This is a project composition gate, not a universal screen-filling target; field occupancy inside the grid may remain lower because semantic widths and field count still govern it.
 
 ## Scenario Decision
 
@@ -80,15 +107,16 @@ Boundary overrides:
 
 ### S1: Full Inline
 
-- Compose fields with Arco Form/Grid and keep query actions at a stable row end.
+- Compose fields with Arco Form/Grid and keep query actions adjacent to the final visible field in the stable field sequence.
 - Use one primary `查询` action and one text `重置` action.
 - One row is preferred; two aligned rows are allowed when all fields are daily and the table remains visible in the first viewport.
 - Do not add expand, drawer, or hidden active count chrome when there is no hidden state.
 
 ### S2: Inline Expand
 
-- Keep the permanent grid and collapsed grid inside one query surface so columns share the same start lines.
-- Expansion adds rows below the permanent fields; it does not move the query/reset action group.
+- Keep permanent and conditional fields inside one query surface and one shared track model.
+- Expansion adds conditional fields after the permanent query path; it does not move the query/reset action anchor or change permanent-field order.
+- A wider container may promote proven regular Narrow fields into the permanent row; keep their order stable and make `+N` count only the fields still hidden at that profile.
 - The trigger states `展开 (+N)` and `收起`, where `N` is the hidden field count.
 - When collapsed fields contain values, show an active count on the trigger.
 - Remember expansion state locally when useful; do not persist query values across sessions.
@@ -237,9 +265,12 @@ The section class names below are local hooks. They are not a mandatory shared D
 
 ## Verification Gate
 
-Verify the selected scenario against real content at `1024x768`, `1366x768`, and `1440x900`:
+Verify the selected scenario against real content at `1024x768`, `1366x768`, `1440x900`, and `1920x1080`:
 
-- [ ] Query actions stay in a stable position when S2 expands or S3 opens/closes.
+- [ ] The gap from the final permanent field to query actions equals the shared column gutter, and action order stays stable when S2 expands or S3 opens/closes.
+- [ ] At `1920x1080`, record query-surface width, grid width, ratio, row count, and action rectangle; a full-width left-pinned grid with less than `80%` coverage has a documented owner or fails.
+- [ ] Wide layout adds track capacity without scaling type or making ordinary controls visibly oversized.
+- [ ] Permanent field order and keyboard order stay coherent when conditional fields appear, disappear, or wrap.
 - [ ] The advanced entry shows the number of applied hidden conditions.
 - [ ] A non-empty advanced group shows its local count; clearing that group preserves conditions in every other group.
 - [ ] Direct three-state conditions have a visible selected value in default, edited, and reopened states.
