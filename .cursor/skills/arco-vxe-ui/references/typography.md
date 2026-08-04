@@ -155,7 +155,7 @@ Every zone has a fixed font tier. Do not deviate.
 | | Primary identifiers | F1 Data | 12px | 500 | `color-text-1` |
 | | Column header | F3 Title | 12px | 600 | `color-text-2` |
 | | Status pill | F5 Aux | 11px | 600 | semantic |
-| **Pagination** | Summary, page info | F5 Aux | 11px | 400 | `color-text-3` |
+| **Pagination** | Entire Arco pagination | GI native mini | framework-owned | framework-owned | framework-owned |
 | **Detail read-only** | Field label (`.detail-field__label`) | F4 Field | 12px | 500 | `color-text-3` |
 | | Field value (`.detail-field__val`) | F4 Control | 12px | 400/500 | `color-text-1` |
 | | Section title | F3 Title | 12px | 600 | `color-text-1` |
@@ -170,8 +170,8 @@ The same component type must not change text size because it appears in a differ
 - `a-input` / `a-select` / `a-date-picker` / `a-input-number` / `a-textarea` keep GI native small typography in filter rows, modal forms, drawer forms, and advanced query drawers.
 - `a-form-item` labels keep GI native typography; page-authored `.filter-field__label` uses F4.
 - Read-only `.detail-field__val` stays F4 Control 12px everywhere (same as editable controls).
-- Buttons, tabs, segmented controls, pager triggers, and drawer footer buttons keep GI native small typography everywhere.
-- Pager total/helper/meta stays F5 Aux 11px everywhere.
+- Buttons, tabs, segmented controls, and drawer footer buttons keep GI native small typography everywhere; table-owned pagination uses GI native `mini`.
+- Page-authored selection summaries and toolbar metadata stay F5 Aux; all text inside `a-pagination` remains framework-owned and is never forced to F5 through internal selectors.
 
 Do not justify a second size system by saying a component is in a drawer, a detail panel, a table cap, or a specific page.
 
@@ -197,7 +197,8 @@ Use this table as the fast lookup for implementation and review.
 | `.filter-field__label` | field label | `--dense-font-field` | 12px |
 | `.detail-field__label` | readonly field label | `--dense-font-field` | 12px |
 | `.detail-field__val` | detail field value (read-only) | `--dense-font-control` | 12px |
-| Arco buttons / tabs / segmented / pager | navigation/action | GI native small | framework-owned |
+| Arco buttons / tabs / segmented | navigation/action | GI native small | framework-owned |
+| Table-owned `a-pagination` | result navigation | GI native mini | framework-owned |
 | `detail-section__title` | structure title | `--dense-font-title` | 12px |
 | Advanced-filter section heading | structure title | `--dense-font-title` | 12px |
 | `form-subgroup__title` | structure title | `--dense-font-title` | 12px |

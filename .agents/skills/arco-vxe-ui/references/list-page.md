@@ -207,11 +207,10 @@ The strip directly above a VXE table is a data-context surface, not a second too
 
 Never place row-specific workflow verbs in the table toolbar; they belong in the row operation column or detail. Table-owned `新建`, `导入`, `导出`, and `批量处理` belong in the left command group when they act on the listed object, filtered result, or current selection.
 
-- Pagination belongs in `table-card-cap` at the top-right of the table card when the cap is already part of the table structure. For compact pages without a meaningful cap, use `toolbar-pager` in `toolbar-aside` so pagination remains visible without adding an empty horizontal band.
+- Pagination belongs at the table surface's top-right. Use actual toolbar-container width: keep total and page navigation, hide jumper first and page-size next as width contracts, and show jumper only when page count and space justify it; do not wrap the toolbar or shrink type.
 - Total count is shown by the pagination component (`show-total`) when needed.
 - Do not repeat the same total as a separate left-side `共 N 条` summary when pagination already shows it.
-- Refresh, column settings, density, and pagination live on the right utility group; business commands and selected-row context live on the left. Preserve this ownership as labels collapse or commands enter overflow.
-- Inside the right side, keep refresh/density/column settings as one icon-tool group, then one divider, then a rightmost `a-pagination size="mini"`; do not split tools around pagination or override pagination internals.
+- Business commands and selection context live left; available refresh/column/density tools form one right icon group, then one divider and a rightmost `a-pagination size="mini"`. Density requires an explicit page contract; never split tools around pagination or override its internals.
 - Do not render an empty `table-card-cap` between the toolbar and table header. If it only contains one or two utility icons and no pagination/context, it creates a dead horizontal band and should be removed.
 - The left side of a query/management utility cap stays empty unless it adds non-duplicated context. The left side of a workbench toolbar owns applicable business commands and selected-row feedback.
 - Do not use table cap for page titles, instructions, KPI summaries, or duplicated status counts.

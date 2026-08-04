@@ -426,13 +426,12 @@ Danger rules:
 
 ## 7. Toolbar Rules (summary)
 
-- Left: business actions.
 - Left: business actions and the adjacent selected-row context when selection exists.
 - Right: pagination and table utilities.
 - No more than one `primary` per toolbar.
 - More than four visible actions → group by workflow. Daily reversible actions may remain visible as neutral buttons/dropdown triggers; low-frequency or risky actions go into dropdown.
 - Refresh / settings / column config = `text` icon-only.
-- Keep refresh, density, and column settings in one utility group; separate that group from one rightmost `size="mini"` pagination cluster instead of splitting utilities around pagination.
+- Keep available refresh/column/density tools in one group; render density only with an explicit page contract, then separate tools from one rightmost `size="mini"` pagination cluster.
 
 ---
 

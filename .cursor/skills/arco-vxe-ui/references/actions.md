@@ -183,7 +183,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 | Scope | Default content form | Examples |
 |-------|----------------------|----------|
-| Filter | 查询保留 icon + text；宽度不足时重置/高级筛选可收成 icon-only | `查询`, history, refresh, filter |
+| Filter | 查询用搜索 icon + text；重置固定 text-only；高级筛选用 filter icon + text | `查询`, `重置`, `筛选` |
 | Toolbar primary create | Icon + text | `+ 新建工单` |
 | Toolbar direct business action | Text-only or icon + text if universal | `打印工单`, `导出` |
 | Toolbar utility | Icon-only + tooltip | refresh, column settings |
@@ -206,7 +206,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 ```
 
 - 查询 = `primary`
-- 重置 = `text`（禁止 `outline`）；窄工作区可变为 refresh icon-only，但必须保留 Tooltip 与业务化 `aria-label`
+- 重置 = `text`（禁止 `outline`），始终保留文字且不使用 refresh icon；重置会清空条件，不能与“刷新当前结果”共用图形语义
 
 ### 5.2 列表页工具栏
 
@@ -426,12 +426,12 @@ Danger rules:
 
 ## 7. Toolbar Rules (summary)
 
-- Left: business actions.
 - Left: business actions and the adjacent selected-row context when selection exists.
 - Right: pagination and table utilities.
 - No more than one `primary` per toolbar.
 - More than four visible actions → group by workflow. Daily reversible actions may remain visible as neutral buttons/dropdown triggers; low-frequency or risky actions go into dropdown.
 - Refresh / settings / column config = `text` icon-only.
+- Keep available refresh/column/density tools in one group; render density only with an explicit page contract, then separate tools from one rightmost `size="mini"` pagination cluster.
 
 ---
 

@@ -25,6 +25,7 @@ import { formatLocalMinute } from '../../../utils/date-time';
 import { compactVerticalFormLabelStyle } from '../../../design-system/formLayout';
 import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
+import WorkbenchTableToolbar from '../../../components/workbench/WorkbenchTableToolbar.vue';
 import WorkflowStateSelector from '../../../components/workbench/WorkflowStateSelector.vue';
 import { shipmentWorkbenchRows } from './mockData';
 import type {
@@ -1076,39 +1077,46 @@ watch(uiScenario, () => {
         :body-style="{ minHeight: 0, padding: 0, display: 'flex', flexDirection: 'column', flex: 1 }"
       >
         <template #title>
-          <div class="table-cap-start">
-            <div v-if="canOperate" class="table-command-group">
-              <a-button size="small" type="primary" :loading="creating" @click="handleCreateOrder">
-                <template #icon><icon-plus /></template>
-                {{ t('shipment.actions.create') }}
-              </a-button>
-              <a-tooltip :content="t('shipment.actions.exportCurrent')">
-                <a-button size="small" :aria-label="t('shipment.actions.exportCurrent')" @click="handleExport">
-                  <template #icon><icon-download /></template>
-                  <span class="table-command-label--optional">{{ t('common.export') }}</span>
-                </a-button>
-              </a-tooltip>
-              <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-                <a-button size="small" :disabled="!selectedCount" :loading="batchSubmitting">
-                  {{ t('shipment.actions.batch') }}<icon-down />
-                </a-button>
-                <template #content>
-                  <a-doption @click="openBatchAssignment(CURRENT_OPERATOR)">{{ t('shipment.actions.assignMe') }}</a-doption>
-                  <a-doption @click="openBatchAssignment('')">{{ t('shipment.actions.assignOperator') }}</a-doption>
-                  <a-doption @click="handleBatchNotify">{{ t('shipment.actions.notify') }}</a-doption>
-                  <a-doption @click="clearSelection">{{ t('shipment.actions.clearSelection') }}</a-doption>
-                </template>
-              </a-dropdown>
-            </div>
-            <div v-if="selectedCount > 0" class="selection-context">
-              <span class="selection-tip">{{ t('common.selected', { count: selectedCount }) }}</span>
-              <a-button size="small" type="text" @click="clearSelection">{{ t('common.clear') }}</a-button>
-            </div>
-          </div>
-        </template>
-        <template #extra>
-          <a-space :size="8">
-            <a-space :size="4">
+          <WorkbenchTableToolbar
+            :current="page.current"
+            :page-size="page.size"
+            :total="tableTotal"
+            :page-size-options="[20, 50, 100, 200]"
+            @change="onPageChange"
+            @page-size-change="onPageSizeChange"
+          >
+            <template #commands>
+              <div class="table-cap-start">
+                <div v-if="canOperate" class="table-command-group">
+                  <a-button size="small" type="primary" :loading="creating" @click="handleCreateOrder">
+                    <template #icon><icon-plus /></template>
+                    {{ t('shipment.actions.create') }}
+                  </a-button>
+                  <a-tooltip :content="t('shipment.actions.exportCurrent')">
+                    <a-button size="small" class="table-command--compact-icon" :aria-label="t('shipment.actions.exportCurrent')" @click="handleExport">
+                      <template #icon><icon-download /></template>
+                      <span class="table-command-label--optional">{{ t('common.export') }}</span>
+                    </a-button>
+                  </a-tooltip>
+                  <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
+                    <a-button size="small" :disabled="!selectedCount" :loading="batchSubmitting">
+                      {{ t('shipment.actions.batch') }}<icon-down />
+                    </a-button>
+                    <template #content>
+                      <a-doption @click="openBatchAssignment(CURRENT_OPERATOR)">{{ t('shipment.actions.assignMe') }}</a-doption>
+                      <a-doption @click="openBatchAssignment('')">{{ t('shipment.actions.assignOperator') }}</a-doption>
+                      <a-doption @click="handleBatchNotify">{{ t('shipment.actions.notify') }}</a-doption>
+                      <a-doption @click="clearSelection">{{ t('shipment.actions.clearSelection') }}</a-doption>
+                    </template>
+                  </a-dropdown>
+                </div>
+                <div v-if="selectedCount > 0" class="selection-context">
+                  <span class="selection-tip">{{ t('common.selected', { count: selectedCount }) }}</span>
+                  <a-button size="small" type="text" @click="clearSelection">{{ t('common.clear') }}</a-button>
+                </div>
+              </div>
+            </template>
+            <template #utilities>
               <a-tooltip :content="t('common.refresh')">
                 <a-button size="small" type="text" class="table-cap-tool" :title="t('common.refresh')" :aria-label="t('common.refresh')" :loading="loading || forcedLoading" @click="fetchList">
                   <template #icon><icon-refresh /></template>
@@ -1119,21 +1127,8 @@ watch(uiScenario, () => {
                   <template #icon><icon-settings /></template>
                 </a-button>
               </a-tooltip>
-            </a-space>
-            <a-divider direction="vertical" :margin="0" />
-            <a-pagination
-              :current="page.current"
-              :page-size="page.size"
-              :total="tableTotal"
-              :page-size-options="[20, 50, 100, 200]"
-              size="mini"
-              show-total
-              show-page-size
-              show-jumper
-              @change="onPageChange"
-              @page-size-change="onPageSizeChange"
-            />
-          </a-space>
+            </template>
+          </WorkbenchTableToolbar>
         </template>
 
         <a-alert
@@ -1182,9 +1177,7 @@ watch(uiScenario, () => {
 
             <vxe-column field="nextAction" :title="t('shipment.columns.nextAction')" min-width="230" :visible="isColumnVisible('nextAction')">
               <template #default="{ row }">
-                <div class="decision-cell">
-                  <span class="decision-cell__main">{{ getNextActionLabel(row) }}</span>
-                </div>
+                <span class="next-action-value">{{ getNextActionLabel(row) }}</span>
               </template>
             </vxe-column>
 
@@ -1957,21 +1950,11 @@ watch(uiScenario, () => {
   gap: 2px;
 }
 
-.decision-cell {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1px;
-  min-width: 0;
-}
-
-.decision-cell__main {
+.next-action-value {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.decision-cell__main {
   color: var(--color-text-1);
   font-size: var(--dense-font-data);
   font-weight: var(--dense-weight-control);
@@ -2005,7 +1988,6 @@ watch(uiScenario, () => {
     gap: 4px;
   }
 
-  .table-command-label--optional,
   .selection-context {
     display: none;
   }

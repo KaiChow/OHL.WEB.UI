@@ -18,6 +18,7 @@ import { formatLocalMinute } from '../../../utils/date-time';
 import { compactVerticalFormLabelStyle } from '../../../design-system/formLayout';
 import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
+import WorkbenchTableToolbar from '../../../components/workbench/WorkbenchTableToolbar.vue';
 import WorkflowStateSelector from '../../../components/workbench/WorkflowStateSelector.vue';
 import DetailDrawer from './components/DetailDrawer.vue';
 import FormDrawer from './components/FormDrawer.vue';
@@ -490,53 +491,47 @@ watch(uiScenario, () => {
         :body-style="{ minHeight: 0, padding: 0, display: 'flex', flexDirection: 'column', flex: 1 }"
       >
         <template #title>
-          <div class="table-cap-start">
-            <div v-if="canOperate" class="table-command-group">
-              <a-tooltip :content="submittableRows.length > 0 ? t('profit.actions.submitSelected') : t('profit.actions.selectEligible')">
-                <a-button
-                  size="small"
-                  type="primary"
-                  :disabled="submittableRows.length === 0"
-                  :loading="batchSubmitting"
-                  @click="openBatchConfirm"
-                >{{ t('profit.actions.batchSubmit') }}</a-button>
-              </a-tooltip>
-              <a-tooltip :content="t('profit.actions.exportCurrent')">
-                <a-button size="small" :aria-label="t('profit.actions.exportCurrent')" :loading="exporting" :disabled="Boolean(tableError)" @click="handleExport">
-                  <template #icon><icon-download /></template>
-                  <span class="table-command-label--optional">{{ t('common.export') }}</span>
-                </a-button>
-              </a-tooltip>
-            </div>
-            <template v-if="selectedCount > 0">
-              <span class="selection-tip">{{ t('common.selected', { count: selectedCount }) }}</span>
-              <a-button size="small" type="text" @click="clearSelection">{{ t('common.clear') }}</a-button>
+          <WorkbenchTableToolbar
+            :current="page.current"
+            :page-size="page.size"
+            :total="tableTotal"
+            :page-size-options="[20, 50, 100]"
+            @change="onPageChange"
+            @page-size-change="onPageSizeChange"
+          >
+            <template #commands>
+              <div class="table-cap-start">
+                <div v-if="canOperate" class="table-command-group">
+                  <a-tooltip :content="submittableRows.length > 0 ? t('profit.actions.submitSelected') : t('profit.actions.selectEligible')">
+                    <a-button
+                      size="small"
+                      type="primary"
+                      :disabled="submittableRows.length === 0"
+                      :loading="batchSubmitting"
+                      @click="openBatchConfirm"
+                    >{{ t('profit.actions.batchSubmit') }}</a-button>
+                  </a-tooltip>
+                  <a-tooltip :content="t('profit.actions.exportCurrent')">
+                    <a-button size="small" class="table-command--compact-icon" :aria-label="t('profit.actions.exportCurrent')" :loading="exporting" :disabled="Boolean(tableError)" @click="handleExport">
+                      <template #icon><icon-download /></template>
+                      <span class="table-command-label--optional">{{ t('common.export') }}</span>
+                    </a-button>
+                  </a-tooltip>
+                </div>
+                <template v-if="selectedCount > 0">
+                  <span class="selection-tip">{{ t('common.selected', { count: selectedCount }) }}</span>
+                  <a-button size="small" type="text" @click="clearSelection">{{ t('common.clear') }}</a-button>
+                </template>
+              </div>
             </template>
-          </div>
-        </template>
-        <template #extra>
-          <a-space :size="8">
-            <a-space :size="4">
+            <template #utilities>
               <a-tooltip :content="t('common.refresh')">
                 <a-button size="small" type="text" class="table-cap-tool" :title="t('common.refresh')" :aria-label="t('common.refresh')" :loading="loading || forcedLoading" @click="fetchList">
                   <template #icon><icon-refresh /></template>
                 </a-button>
               </a-tooltip>
-            </a-space>
-            <a-divider direction="vertical" :margin="0" />
-            <a-pagination
-              :current="page.current"
-              :page-size="page.size"
-              :total="tableTotal"
-              :page-size-options="[20, 50, 100]"
-              size="mini"
-              show-total
-              show-page-size
-              show-jumper
-              @change="onPageChange"
-              @page-size-change="onPageSizeChange"
-            />
-          </a-space>
+            </template>
+          </WorkbenchTableToolbar>
         </template>
 
         <a-alert
@@ -881,12 +876,6 @@ watch(uiScenario, () => {
   font-size: var(--dense-font-aux);
   line-height: 18px;
   word-break: break-all;
-}
-
-@media (max-width: 1199px) {
-  .table-command-label--optional {
-    display: none;
-  }
 }
 
 </style>

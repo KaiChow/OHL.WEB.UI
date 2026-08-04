@@ -78,7 +78,7 @@ This is not a status filter. It is a compact segmented control:
 - `list-management` follows the field-count scenario in `filter-layout.md`; use S2/S3 only when the maintenance job really needs those conditions.
 - `list-workbench` follows the same field-count scenario, then keeps its daily scope/queue controls outside the query form because they answer a different question.
 - Query button is primary.
-- Reset is text at normal release widths; compact desktop may use a refresh/reset icon-only tool with Tooltip and business-specific `aria-label`.
+- Reset is always a visible text action. Never reuse the refresh icon for reset; supported desktop layouts reserve enough action width for query, reset, and any advanced entry.
 - Select S1/S2/S3 from `filter-layout.md`. Regular Narrow fields may expand in-page; occasional Investigate fields use an advanced-filter drawer. Do not choose a surface from visual preference alone.
 
 ### Filter Actions Recipe
@@ -117,7 +117,7 @@ Rules:
 
 - All three controls use the same Arco `size` and align to the same baseline; do not hand-set a second control skin.
 - Query uses `type="primary"` plus search icon.
-- Reset uses `type="text"`; compact desktop may replace its visible label with a familiar reset icon when the accessible name and Tooltip remain.
+- Reset uses `type="text"` with a visible label at every supported desktop width; the refresh icon belongs only to result refresh.
 - More filters uses `type="text"` plus filter icon and opens the advanced filter drawer.
 - Advanced filters are grouped by business meaning inside the drawer, not random field order.
 - Do not show a separate “selected filters” strip. Current values are visible in controls/tabs.
@@ -142,7 +142,7 @@ List-page rules that stay in this file:
 - Two visible rows are allowed only for the S1 daily-filter case defined in `filter-layout.md`.
 - 30+/40+ filters use grouped/wide drawer patterns. 50+ filters use a saved query workspace, not a larger drawer.
 - Query actions must be internationalization-safe. Do not size them by Chinese labels; use min/max or `clamp()`, allow 1.3-2x text expansion, and give secondary actions tooltip/title/aria labels when text may ellipsize.
-- If secondary query actions cannot fit translated text, use icon + accessible label or move the actions to a horizontal command row. Do not silently clip action meaning.
+- If translated query actions cannot fit, reserve a wider semantic action span, promote fewer optional fields, or use a horizontal command row. Do not iconify reset/filter or silently clip action meaning.
 - For international freight pages, field examples should use domain identifiers such as order no, business no, HBL, MBL, container no, customer, port, and warehouse no.
 - Combined keyword filters such as `field type + keyword` are allowed only when they reduce repeated identifier inputs. Use Arco Input Group with one bounded selector, one flexible input, one control size, and one clear label such as `单号检索`. Do not place unrelated query fields into one visual field.
 - A combined keyword filter must list related identifiers only, such as 业务单号 / 业务编号 / HBL / MBL / 柜号. Do not mix unrelated filters such as customer, staff, port, date, and status into the same combo.
@@ -207,10 +207,10 @@ The strip directly above a VXE table is a data-context surface, not a second too
 
 Never place row-specific workflow verbs in the table toolbar; they belong in the row operation column or detail. Table-owned `新建`, `导入`, `导出`, and `批量处理` belong in the left command group when they act on the listed object, filtered result, or current selection.
 
-- Pagination belongs in `table-card-cap` at the top-right of the table card when the cap is already part of the table structure. For compact pages without a meaningful cap, use `toolbar-pager` in `toolbar-aside` so pagination remains visible without adding an empty horizontal band.
+- Pagination belongs at the table surface's top-right. Use actual toolbar-container width: keep total and page navigation, hide jumper first and page-size next as width contracts, and show jumper only when page count and space justify it; do not wrap the toolbar or shrink type.
 - Total count is shown by the pagination component (`show-total`) when needed.
 - Do not repeat the same total as a separate left-side `共 N 条` summary when pagination already shows it.
-- Refresh, column settings, density, and pagination live on the right utility group; business commands and selected-row context live on the left. Preserve this ownership as labels collapse or commands enter overflow.
+- Business commands and selection context live left; available refresh/column/density tools form one right icon group, then one divider and a rightmost `a-pagination size="mini"`. Density requires an explicit page contract; never split tools around pagination or override its internals.
 - Do not render an empty `table-card-cap` between the toolbar and table header. If it only contains one or two utility icons and no pagination/context, it creates a dead horizontal band and should be removed.
 - The left side of a query/management utility cap stays empty unless it adds non-duplicated context. The left side of a workbench toolbar owns applicable business commands and selected-row feedback.
 - Do not use table cap for page titles, instructions, KPI summaries, or duplicated status counts.
