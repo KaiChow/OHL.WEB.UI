@@ -43,14 +43,15 @@ const emit = defineEmits<{
 <style scoped>
 .business-detail-module {
   min-width: 0;
-  border-bottom: 1px solid var(--dense-card-border);
 }
 
-.business-detail-module:last-child { border-bottom: 0; }
+.business-detail-module + .business-detail-module {
+  border-top: 1px solid var(--dense-card-border);
+}
 
 .business-detail-module__head {
-  min-height: 40px;
-  padding: 4px var(--dense-pad-section-x);
+  min-height: 44px;
+  padding: 6px var(--dense-pad-section-x) 4px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -77,7 +78,7 @@ const emit = defineEmits<{
   margin: 0;
   overflow: hidden;
   color: var(--color-text-1);
-  font-size: var(--dense-font-title);
+  font-size: var(--dense-font-overlay);
   font-weight: var(--dense-weight-title);
   line-height: 20px;
   text-overflow: ellipsis;
@@ -91,11 +92,11 @@ const emit = defineEmits<{
 }
 
 .business-detail-module__summary {
-  padding: 0 var(--dense-pad-section-x) 8px;
+  padding: 0 var(--dense-pad-section-x) 10px;
 }
 
 .business-detail-module__body {
-  padding: 4px var(--dense-pad-section-x) 14px;
+  padding: 6px var(--dense-pad-section-x) 18px;
   min-width: 0;
 }
 

@@ -109,7 +109,7 @@ export type PesdpModuleChildrenSpec =
 
 export interface PesdpModuleSpec {
   id: string;
-  kind: 'field-group' | 'line-table' | 'parent-child' | 'document-checklist' | 'timeline' | 'exception';
+  kind: 'field-group' | 'line-table' | 'parent-child' | 'document-checklist' | 'activity-log' | 'timeline' | 'exception';
   priority: 'core' | 'supporting' | 'audit';
   mode: 'display' | 'edit' | 'mixed' | 'row-edit' | 'read-only';
   owns: NonEmptyStrings;
@@ -173,6 +173,7 @@ interface PesdpPageSpecBase {
   };
   table: {
     kind: 'none' | 'query-list' | 'management-list' | 'workbench' | 'detail-editable' | 'detail-readonly' | 'summary';
+    rowBanding: 'striped' | 'plain';
     identityColumns: readonly string[];
     decisionColumns: readonly string[];
     supportingColumns: readonly string[];

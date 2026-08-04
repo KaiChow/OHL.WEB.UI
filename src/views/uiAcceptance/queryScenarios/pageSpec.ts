@@ -84,6 +84,7 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
   },
   table: {
     kind: 'management-list',
+    rowBanding: 'striped',
     identityColumns: ['sequence', 'orderNo', 'orderStatus'],
     decisionColumns: ['customerName', 'owner'],
     supportingColumns: ['businessType', 'updatedAt'],

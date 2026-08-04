@@ -512,7 +512,6 @@ Anti-patterns:
 - Add/delete actions placed at the wrong level, such as line add in parent head or child delete in line table.
 
 ### Inline Editable Table Visual Rules
-
 When a detail section contains a VXE table with editable cells (`a-input`, `a-select`, `a-date-picker` inside columns), record its editable-detail role in `pageSpec.ts` and configure it through VXE public props. Controls keep GI native small styling.
 
 Container:
@@ -521,6 +520,7 @@ Container:
 <div class="detail-section__body detail-section__body--table">
   <vxe-table
     size="small"
+    :stripe="false"
     :data="rows"
     :row-config="{ isHover: true, keyField: 'id' }"
   >
@@ -532,6 +532,7 @@ Container:
 Required:
 
 - Use `detail-section__body--table` on the section body (or `detail-child-pane__table` for nested child panes).
+- Declare `table.rowBanding: 'plain'` for always-editable line tables and set VXE's public `:stripe="false"`; input, validation, hover, and selection remain the row-state owners.
 - Rely on VXE native small density and verify that explicit `mini` row controls are not clipped.
 - In a Drawer or intrinsic-height pane, omit the VXE `height` prop. `height="auto"` is forbidden because pinned VXE 4.5 can feed the measured parent height back into its own content height and grow indefinitely.
 - Business columns use `min-width`; only checkbox / seq / operation use fixed `width` (see `table.md` width policy).

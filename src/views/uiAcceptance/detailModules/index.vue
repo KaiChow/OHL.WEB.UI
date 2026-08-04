@@ -8,6 +8,7 @@ import {
   IconSave,
 } from '@arco-design/web-vue/es/icon';
 import { useI18n } from 'vue-i18n';
+import BusinessActivityList, { type BusinessActivityItem } from '../../../components/workbench/BusinessActivityList.vue';
 import BusinessDetailChild from '../../../components/workbench/BusinessDetailChild.vue';
 import BusinessDetailModule from '../../../components/workbench/BusinessDetailModule.vue';
 import BusinessMetricStrip, { type BusinessMetricItem } from '../../../components/workbench/BusinessMetricStrip.vue';
@@ -115,6 +116,13 @@ const activities = [
   { id: 2, eventKey: 'detailModules.activityItems.customsRequested', actor: 'Liu Wen', time: '2026-08-04 09:42' },
   { id: 3, eventKey: 'detailModules.activityItems.partyUpdated', actor: 'Mia Hoffmann', time: '2026-08-03 17:25' },
 ] as const;
+
+const activityItems = computed<BusinessActivityItem[]>(() => activities.map((item) => ({
+  id: item.id,
+  title: t(item.eventKey),
+  actor: item.actor,
+  time: item.time,
+})));
 
 type DraftSnapshot = {
   overview: typeof overview.value;
@@ -228,10 +236,10 @@ const removeContainer = (containerId: number) => {
       </div>
       <div class="object-band__body">
         <div class="object-band__facts">
-          <div class="object-fact"><span>{{ t('detailModules.fields.customer') }}</span><strong>{{ overview.customer }}</strong></div>
-          <div class="object-fact"><span>{{ t('detailModules.fields.route') }}</span><strong class="mono">{{ overview.route }}</strong></div>
-          <div class="object-fact"><span>{{ t('detailModules.fields.owner') }}</span><strong>{{ overview.owner }}</strong></div>
-          <div class="object-fact"><span>{{ t('detailModules.fields.updatedAt') }}</span><strong class="mono">2026-08-04 10:16</strong></div>
+          <div class="object-fact"><span>{{ t('detailModules.fields.customer') }}</span><strong :title="overview.customer">{{ overview.customer }}</strong></div>
+          <div class="object-fact"><span>{{ t('detailModules.fields.route') }}</span><strong :title="overview.route">{{ overview.route }}</strong></div>
+          <div class="object-fact"><span>{{ t('detailModules.fields.owner') }}</span><strong :title="overview.owner">{{ overview.owner }}</strong></div>
+          <div class="object-fact"><span>{{ t('detailModules.fields.updatedAt') }}</span><strong class="tabular" title="2026-08-04 10:16">2026-08-04 10:16</strong></div>
         </div>
         <div class="object-band__decision">
           <div class="object-decision object-decision--risk">
@@ -240,7 +248,7 @@ const removeContainer = (containerId: number) => {
           </div>
           <div class="object-decision object-decision--next">
             <span class="object-decision__label">{{ t('detailModules.identity.nextAction') }}</span>
-            <strong>{{ t('detailModules.identity.nextValue') }}</strong>
+            <strong :title="t('detailModules.identity.nextValue')">{{ t('detailModules.identity.nextValue') }}</strong>
           </div>
         </div>
       </div>
@@ -259,10 +267,10 @@ const removeContainer = (containerId: number) => {
           <a-row :gutter="denseFormGridGutter">
             <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.serviceType')" :style="denseFormItemStyle"><a-input v-model="overview.serviceType" /></a-form-item></a-col>
             <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.customer')" required :style="denseFormItemStyle"><a-input v-model="overview.customer" /></a-form-item></a-col>
-            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.route')" :style="denseFormItemStyle"><a-input v-model="overview.route" class="mono" /></a-form-item></a-col>
+            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.route')" :style="denseFormItemStyle"><a-input v-model="overview.route" /></a-form-item></a-col>
             <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.vesselVoyage')" :style="denseFormItemStyle"><a-input v-model="overview.vesselVoyage" /></a-form-item></a-col>
-            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.etd')" :style="denseFormItemStyle"><a-input v-model="overview.etd" class="mono" /></a-form-item></a-col>
-            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.eta')" :style="denseFormItemStyle"><a-input v-model="overview.eta" class="mono" /></a-form-item></a-col>
+            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.etd')" :style="denseFormItemStyle"><a-input v-model="overview.etd" class="tabular" /></a-form-item></a-col>
+            <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.eta')" :style="denseFormItemStyle"><a-input v-model="overview.eta" class="tabular" /></a-form-item></a-col>
             <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.owner')" :style="denseFormItemStyle"><a-input v-model="overview.owner" /></a-form-item></a-col>
             <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.customerReference')" :style="denseFormItemStyle"><a-input v-model="overview.reference" class="mono" /></a-form-item></a-col>
           </a-row>
@@ -308,7 +316,7 @@ const removeContainer = (containerId: number) => {
               <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.partyRole')" :style="denseFormItemStyle"><a-select v-model="party.roleKey"><a-option value="shipper">{{ t('detailModules.partyRoles.shipper') }}</a-option><a-option value="supplier">{{ t('detailModules.partyRoles.supplier') }}</a-option></a-select></a-form-item></a-col>
               <a-col :xs="24" :sm="12" :md="16" :xl="12"><a-form-item :label="t('detailModules.fields.partyName')" :style="denseFormItemStyle"><a-input v-model="party.name" /></a-form-item></a-col>
               <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.contact')" :style="denseFormItemStyle"><a-input v-model="party.contact" /></a-form-item></a-col>
-              <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.phone')" :style="denseFormItemStyle"><a-input v-model="party.phone" class="mono" /></a-form-item></a-col>
+              <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.phone')" :style="denseFormItemStyle"><a-input v-model="party.phone" class="tabular" /></a-form-item></a-col>
               <a-col :xs="24" :sm="12" :md="16" :xl="18"><a-form-item :label="t('detailModules.fields.address')" :style="denseFormItemStyle"><a-input v-model="party.address" /></a-form-item></a-col>
             </a-row>
           </a-form>
@@ -317,7 +325,7 @@ const removeContainer = (containerId: number) => {
             <strong>{{ t('detailModules.tables.cargoLines') }}</strong>
             <a-button type="text" @click="addCargoLine(party)"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addCargoLine') }}</a-button>
           </div>
-          <vxe-table :data="party.lines" size="small" :empty-text="t('detailModules.empty.cargoLines')">
+          <vxe-table :data="party.lines" size="small" :stripe="false" :empty-text="t('detailModules.empty.cargoLines')">
             <vxe-column type="seq" :title="t('common.sequence')" width="52" align="center" />
             <vxe-column field="name" :title="t('detailModules.columns.cargoName')" min-width="190">
               <template #default="{ row }"><a-input v-model="row.name" size="mini" /></template>
@@ -359,7 +367,7 @@ const removeContainer = (containerId: number) => {
           </div>
           <a-button type="text" @click="addContainer"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addContainer') }}</a-button>
         </div>
-        <vxe-table :data="containers" size="small" :empty-text="t('detailModules.empty.containers')">
+        <vxe-table :data="containers" size="small" :stripe="false" :empty-text="t('detailModules.empty.containers')">
           <vxe-column type="seq" :title="t('common.sequence')" width="52" align="center" />
           <vxe-column field="containerNo" :title="t('detailModules.columns.containerNo')" min-width="150">
             <template #default="{ row }"><a-input v-model="row.containerNo" size="mini" class="mono" /></template>
@@ -395,7 +403,7 @@ const removeContainer = (containerId: number) => {
             <strong>{{ t(document.nameKey) }}</strong>
             <span class="s-pill" :data-s="document.tone">{{ t(`detailModules.documentStatus.${document.statusKey}`) }}</span>
             <span>{{ document.owner }}</span>
-            <span class="mono">{{ document.updatedAt }}</span>
+            <span class="tabular">{{ document.updatedAt }}</span>
           </div>
         </div>
       </BusinessDetailModule>
@@ -407,11 +415,7 @@ const removeContainer = (containerId: number) => {
         :title="t('detailModules.modules.activity')"
         :collapse-label="t('detailModules.aria.toggleModule', { module: t('detailModules.modules.activity') })"
       >
-        <a-timeline>
-          <a-timeline-item v-for="item in activities" :key="item.id">
-            <div class="activity-row"><span>{{ t(item.eventKey) }}</span><span>{{ item.actor }}</span><span class="mono">{{ item.time }}</span></div>
-          </a-timeline-item>
-        </a-timeline>
+        <BusinessActivityList :items="activityItems" :empty-text="t('detailModules.empty.activity')" />
       </BusinessDetailModule>
       </div>
 
@@ -448,8 +452,7 @@ const removeContainer = (containerId: number) => {
 .object-band__head,
 .object-band__identity,
 .child-table-cap,
-.child-table-cap__identity,
-.activity-row {
+.child-table-cap__identity {
   display: flex;
   align-items: center;
   min-width: 0;
@@ -525,6 +528,8 @@ const removeContainer = (containerId: number) => {
   white-space: nowrap;
 }
 
+.object-decision .s-pill { justify-self: start; }
+
 .detail-acceptance__scroll {
   flex: 1 1 auto;
   min-height: 0;
@@ -559,10 +564,6 @@ const removeContainer = (containerId: number) => {
 .document-row:last-child { border-bottom: 0; }
 .document-row strong { font-size: var(--dense-font-data); font-weight: var(--dense-weight-control); }
 .document-row > span:not(.s-pill) { color: var(--color-text-2); }
-
-.activity-row { justify-content: space-between; gap: 16px; }
-.activity-row > :first-child { flex: 1; color: var(--color-text-1); }
-.activity-row > :not(:first-child) { flex: 0 0 auto; color: var(--color-text-3); font-size: var(--dense-font-aux); }
 
 .detail-footer {
   flex: 0 0 auto;

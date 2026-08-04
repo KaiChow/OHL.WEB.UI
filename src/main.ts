@@ -11,8 +11,8 @@ import '@icon-park/vue-next/styles/index.css';
 import './styles/vxe-theme/index.less';
 import './styles/global.css';
 
-// Table look is owned globally: default border + stripe + mini density
-// (high-density system), no page-level table CSS.
+// The global workbench baseline owns border, stripe, and mini density.
+// Typed detail roles may disable stripe through the VXE public prop; CSS never owns banding.
 VXETable.setup({
   table: {
     border: true,

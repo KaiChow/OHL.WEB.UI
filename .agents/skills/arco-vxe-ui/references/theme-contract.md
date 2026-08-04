@@ -10,7 +10,7 @@ The current product direction is explicit: keep the color palette from `@arco-th
 
 1. `@arco-design/web-vue` owns component implementation, props, slots, behavior, and TypeScript types.
 2. `@arco-themes/vue-gi-demo/css/arco.css` is the only Arco component stylesheet and the only palette owner.
-3. `src/styles/vxe-theme/` owns the vxe-table appearance: business tokens injected into official `--vxe-*` variables, plus the global `border`/`stripe` defaults in `main.ts`. It is the only file set allowed to declare `--vxe-*` variables or style `.vxe-*` selectors.
+3. `src/styles/vxe-theme/` owns the vxe-table appearance: business tokens injected into official `--vxe-*` variables, plus the global workbench `border`/`stripe` defaults in `main.ts`. Typed roles may select stable row banding through VXE's public `stripe` prop. Only `vxe-theme` may declare `--vxe-*` variables or style `.vxe-*` selectors.
 4. `src/styles/global.css` may expose `--dense-*` semantic aliases that directly reference the effective GI/Arco variables and own framework-neutral freight status semantics.
 5. Shared business patterns own reusable freight structure only when Arco props and layout primitives are insufficient.
 6. Page-scoped CSS owns local flex/grid relationships, overflow, and stable dimensions only.

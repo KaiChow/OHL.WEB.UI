@@ -29,12 +29,12 @@ A main freight workbench table is accepted only when all of these are demonstrat
 
 ## Unified Table Surface
 
-List workbench tables and detail nested tables use one **public VXE configuration contract**. Table appearance (colors, row heights, borders, stripe) is owned globally by `src/styles/vxe-theme/` tokens plus the `border`/`stripe` defaults in `main.ts`; pages never write table appearance CSS.
+List workbench tables and detail nested tables use one **public VXE configuration contract**. Colors, row heights, and borders are owned globally by `src/styles/vxe-theme/` plus `main.ts`; stable row banding is selected by the typed table role through VXE's public `stripe` prop. Pages never write table appearance CSS.
 
 | Contract | Main list | Detail child table |
 |----------|--------------------------|----------------------------|
 | Framework size | global default `mini` (set in `main.ts`); `medium` for standard lists | `size="small"` override |
-| Border / stripe | global default (`border` + `stripe` set in `main.ts`) | global default |
+| Border / stripe | global border + striped workbench default | global border + typed `rowBanding`; editable/summary tables are plain by default |
 | Hover | `row-config.isHover` | `row-config.isHover` |
 | Stable identity | `row-config.keyField` | `row-config.keyField` |
 | Density | `size` prop only; never `row-config.height` or CSS | theme-owned small row; controls must be verified unclipped |
@@ -45,7 +45,7 @@ Shared rules:
 - The table role comes from the routed page's `pageSpec.ts` and the VXE public configuration. Do not require or infer a role from a CSS class name.
 - Configure header, hover, selection, fixed columns, loading, overflow, and row identity through VXE props/config only.
 - Do not declare `--vxe-*` / `--vxe-ui-*` variables or target `.vxe-*` internals anywhere outside `src/styles/vxe-theme/`.
-- Pages must not set `border`/`stripe` attributes; the global defaults apply — see **Border Policy**.
+- Pages never override borders. They omit `stripe` for striped workbenches and set `:stripe="false"` only for a typed plain role — see **Border And Row-Banding Policy**.
 - Detail-only differences: omit overflow clipping for editable rows, omit checkbox without a batch toolbar, and verify small rows contain small Arco controls.
 - **Sequence:** see **Sequence Column (序号)** — width `52`; this product includes it in paginated business lists and editable detail tables.
 
@@ -64,8 +64,6 @@ Shared rules:
 Use VXE for data grids. A native table is allowed only for a very small static layout table with no sorting, selection, fixed column, virtualization, or resizing needs.
 
 When `custom-config` persists table preferences, provide a stable VXE `id`. The identifier is component configuration, not a CSS selector or styling hook.
-
-The primary list table is the only table that receives the workbench contract. Nested detail, editable, summary, and file tables follow their own role-specific configuration.
 
 ## Row Height Standard
 
@@ -91,35 +89,37 @@ Rules:
 - If row content requires more than 36px, first reduce column complexity or move secondary information to detail, then consider `medium`.
 - Row height must be paired with readable typography: body F1 12px, header F3 12px / 600.
 
-## Border Policy
-
+## Border And Row-Banding Policy
 ### Decision (PESDP)
 
-The project default is the globally themed bordered + striped table: `main.ts` sets `VXETable.setup({ table: { border: true, stripe: true } })`, and `src/styles/vxe-theme` owns the line and stripe colors.
+The global fallback is a bordered + striped workbench table: `main.ts` sets `VXETable.setup({ table: { border: true, stripe: true } })`, and `src/styles/vxe-theme` owns line and stripe colors. Detail roles may disable banding through the public prop without creating another table skin.
 
 | Line type | Default | Owner | Why |
 |-----------|---------|-------|-----|
 | **Vertical + horizontal borders** | On (global default) | `main.ts` setup + `vxe-theme` tokens | One consistent grid; no per-page drift |
 | **Header / body separation** | Theme | `vxe-theme` header tokens | Structure comes from the themed header, not a page skin |
-| **Zebra stripe** | On (global default) | `main.ts` setup + `vxe-theme` tokens | Stable row tracking across wide tables |
+| **Zebra stripe** | On for workbench/list roles | `main.ts` setup + `vxe-theme` tokens | Stable row tracking across repeated wide records |
+| **Plain rows** | Default for always-editable detail and summary roles | typed `rowBanding` + VXE `stripe` prop | Keeps inputs, validation, hover, selection, and totals visually unambiguous |
 
-Pages must not set `border` or `stripe` attributes and must not restyle grid lines. A different border mode (for example a borderless dashboard drill table) requires a recorded reason in `pageSpec`.
+Every page specification declares `table.rowBanding: 'striped' | 'plain'`. The choice is stable for the table role and expected scanning job; it must not toggle from the current row count, loading state, or viewport. Pages must not restyle grid lines or band colors.
 
 ### Implementation (mandatory)
 
 ```vue
 <vxe-table ... />
-<vxe-table size="small" ... />
+<vxe-table size="small" :stripe="false" ... />
 ```
 
 | Surface | `border`/`stripe` attr | Notes |
 |---------|------------------------|-------|
-| Main list | omit (global default) | themed header, hover, and selection behavior |
-| Detail child table | `size="small"` when the role needs readable detail rows | themed small-density behavior |
+| Main list / workbench | omit (global striped default) | repeated scanning across many records |
+| Editable detail line | `size="small" :stripe="false"` | plain rows; controls and validation own edit affordance |
+| Read-only detail/file | follow declared role | stripe for sustained row tracking; plain for compact lookup/status content |
+| Summary | `size="small" :stripe="false"` | totals are compared by alignment, not alternating fills |
 
 Rules:
 
-- Never set `border="none"` or `stripe="false"` on production tables.
+- Never set `border="none"`. `:stripe="false"` is legal only when the nearest typed page specification declares `rowBanding: 'plain'`; never decide banding from `rows.length` because appearance must not change as data loads or rows are added.
 - Never add page-scoped `border-right` / `border-bottom` on `.vxe-body--column`.
 - Hover/selection uses VXE's public state configuration; do not repaint fixed and scrollable cells through internal selectors.
 - Editable cell validation may use Arco field border; that is control chrome, not table grid lines.
@@ -299,16 +299,15 @@ The examples above describe classes of independent dimensions, not mandatory fie
 
 - Hover and selected states must cover fixed columns consistently.
 - Hover and selection must remain visibly different through VXE's public configuration and native theme states.
-- Zebra stripe is on by default (global `main.ts` setup); its contrast is owned by `vxe-theme` tokens, not by pages.
+- Zebra stripe is the workbench/list default; typed detail roles may be plain. Banding contrast remains owned by `vxe-theme`, never pages.
 - Do not merge cells for the main list unless the business explicitly requires grouped display.
 - Editable row hover must not hide validation borders.
 - Fixed-column boundaries use VXE native behavior; do not add page-level shadow skins.
 
 ## Grid Lines
+See **Border And Row-Banding Policy** above for the full contract. Short form:
 
-See **Border Policy** above for the full contract. Short form:
-
-- Grid lines and stripe come from the global defaults (`main.ts` setup + `vxe-theme` tokens); pages omit `border`/`stripe` attributes on every operational `vxe-table`.
+- Grid lines and band colors come from global ownership. Workbenches inherit stripe; typed plain roles disable it only through VXE's public prop.
 - Keep the themed header/body distinction; do not introduce a page-level table-header skin.
 - Selection/hover use VXE's public state behavior, not stronger grid lines or internal-selector CSS.
 
@@ -476,6 +475,7 @@ Detail tables must look like part of the module, not a full page table pasted in
 - Place the table directly under its module/child toolbar.
 - Use compact header height and low-contrast borders.
 - Keep editable input height aligned with row height.
+- Always-editable line tables and compact summary tables use plain rows; read-only child/file tables use stripe only when sustained cross-column row tracking is the primary scan task. The role is stable in `pageSpec.ts`, never the current row count.
 - Provide an explicit empty state when no rows exist.
 - Use add-row action near the table it affects.
 - Keep operation column compact and rightmost.

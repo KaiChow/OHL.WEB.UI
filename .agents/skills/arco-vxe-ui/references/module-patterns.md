@@ -3,7 +3,6 @@
 Structural slots for freight SaaS pages. **No business module names or field names are prescribed here** — use [`domain-language.md`](domain-language.md) for labels and `pageSpec.ts` for the actual business composition.
 
 ## Purpose
-
 Define **where** information and actions live, not **which** business fields every page copies.
 
 Do not hard-code one page (e.g. shipment order) and paste it into every menu.
@@ -11,13 +10,12 @@ Do not hard-code one page (e.g. shipment order) and paste it into every menu.
 This reference is a component-usage, layout, UI, and UX grammar. It does not define a fixed inventory such as cargo, container, fee, or document modules. Those are page-owned instances selected from requirements; the shared grammar only determines how any chosen module expresses hierarchy, statistics, actions, editing, disclosure, feedback, density, and responsive behavior.
 
 ## Specification Granularity Rule
-
 Project UI rules must describe a **reusable class of business surface**, not a single screen, module name, or backend field set.
 
 Write rules at this level:
 
 - business object slot: identity, state, key facts, working data, supporting data, sub-entity, action scope;
-- reusable surface: list workbench, detail identity band, query drawer, repeated line module, document checklist, timeline, exception panel;
+- reusable surface: list workbench, detail identity band, query drawer, repeated line module, document checklist, milestone, activity log, causal timeline, exception panel;
 - component contract: class name, DOM relationship, Arco/VXE component, token, density, state, forbidden fallback;
 - object examples: shown only to explain how slots are filled for a domain object.
 
@@ -38,7 +36,6 @@ Bad: every `dds-hero` must show the same field list copied from one shipment scr
 If a proposed rule cannot be expressed as slot + surface + token/state + forbidden fallback, it is too page-specific and must be rewritten before coding.
 
 ## Design Order
-
 Fill these slots **before** choosing layout or components:
 
 | # | Slot | Question |
@@ -57,9 +54,7 @@ Then select the page authority through [`domain-routing.md`](domain-routing.md).
 **Domain examples** (identity / facts / status per object type): [`domain-language.md` → Object examples](domain-language.md#object-identity-examples).
 
 ## Page Slot Contract
-
 ### List Archetype Selection
-
 Choose the list surface from the user's job before assigning slots. A query-field count alone must not turn a simple lookup page into a workbench.
 
 | Archetype | User job | Required / forbidden structure |
@@ -69,7 +64,6 @@ Choose the list surface from the user's job before assigning slots. A query-fiel
 | `list-workbench` | Repeatedly prioritize, assign, progress, and recover operational records | Business command group, real work scope/status queues when the workflow uses them, selection/batch feedback when available, and a table context cap. |
 
 ### List / Workbench Slots
-
 | Slot | Role |
 |------|------|
 | `segment` | Optional scope (mode, warehouse, bill type) |
@@ -125,13 +119,13 @@ module
 ```
 
 **Header rule:** left = module name only; right = module actions only. No counts, status, or helper text in the title row.
-Modules are sections inside one owning detail canvas, not repeated cards. `field-group`, `parent-child`, `line-table`, `document-checklist`, and `timeline` must use different internal compositions; sharing a head/body primitive does not authorize rendering every kind as the same framed box. Core editing modules stay open without redundant collapse controls. Supporting and audit modules may collapse; a local anchor rail appears only when proven page length or module count makes direct scrolling materially inefficient.
+Modules are sections inside one owning detail canvas, not repeated cards. `field-group`, `parent-child`, `line-table`, `document-checklist`, `activity-log`, and `timeline` must use different internal compositions; sharing a head/body primitive does not authorize rendering every kind as the same framed box. Core editing modules stay open without redundant collapse controls. Supporting and audit modules may collapse; a local anchor rail appears only when proven page length or module count makes direct scrolling materially inefficient.
 **Action labels:** object-specific (`Add shipper`, not bare `Add`). Wording: [`domain-language.md`](domain-language.md).
 
 ## Typed Module Manifest
 Complex pages are assembled from reusable module roles, not an exhaustive catalog of business scenarios. Before template work, every non-list detail surface declares this manifest in `pageSpec.ts`:
 
-- Page: default mode, vertical scroll owner, and sticky action owner.
+- Page: default mode, vertical scroll owner, sticky action owner, and table row-banding role.
 - Module: stable id, semantic kind, priority, display/edit mode, owned facts, and collapse rule; priority controls disclosure, not decorative color.
 - Statistics: metric id, semantic kind, source, aggregation, format, and single placement; use `metrics: []` when none.
 - Actions: feature-contract ids split into explicit module/child/table/row arrays; keep each array empty when that scope has none.
@@ -164,7 +158,7 @@ Page actions own object workflow/edit/save/output; module actions own whole-modu
 | Repeated rows, flat | `detail-module` + line table |
 | Parent owns child lines | parent-child module — see below |
 | Files / compliance docs | attachment module — [`detail-form.md`](detail-form.md) |
-| Audit / history | timeline module |
+| Audit / history | `activity-log` by default; causal `timeline` only when chronology itself is the reading task |
 | Exceptions | exception module; state in `s-pill` only |
 
 ## Parent–Child Module
@@ -190,15 +184,20 @@ Rules:
 
 Detail UI rules: [`detail-form.md` → Parent-Child](detail-form.md#parent-child-nested-modules).
 
-## Sub-Entity Module Types
+## Sequence, Progress, And Activity
 
-| Type | Use for | Implementation |
-|------|---------|----------------|
-| Attachment | B/L, customs docs, images | `detail-form.md` → Attachments |
-| Line table | Any flat repeated records | Detail-table VXE configuration — [`table.md`](table.md) |
-| Party / contact | Any named organization or person | Chips or compact rows; name = `color-text-1` |
-| Timeline | Ops log, audit | Dense list, no per-item cards |
-| Exception | Risk, variance | `s-pill`; no row background fill |
+| User question | Surface | Required behavior |
+|---|---|---|
+| Where is the object in a real business flow? | Compact milestone strip | Completed/current/upcoming states, current owner or blocker, and next legal action agree with object status. |
+| How much is complete? | Arco Progress or compact owned metric | Show exact percent or completed/total, source and owning module; never invent progress from unrelated statuses. |
+| What changed recently? | `activity-log` | Newest first, content-height 32-40px rows, event first and actor/time in one bounded reading cluster. |
+| Why did this outcome occur over time? | Arco Timeline | Use only when temporal causality, duration, or cross-stage handoff is the primary reading task. |
+
+- Activity/history does not become Timeline merely because records have timestamps. Timeline is exceptional, not the audit default.
+- Milestone, Progress, and Activity must never stretch rows or connector lines to fill spare module/page height.
+- Do not place event text at the far left and actor/time at the far right of a wide surface; bound the row reading width and keep metadata adjacent.
+- Long histories use pagination, “load more”, or an independently justified bounded region; never make the whole detail module an unbounded timeline.
+- Workflow state, milestone current node, progress value, blocker, and next action must not contradict one another.
 
 ## Pre-Implementation Mapping
 Record in `pageSpec.ts`: `input_path`, unresolved business decisions, archetype, business object/job/identity/state, main fields, repeated modules, action groups, each module's `id | kind | owns | metrics | actions | children | collapse`, and the page scroll owner. Labels come from `domain-language.md`.

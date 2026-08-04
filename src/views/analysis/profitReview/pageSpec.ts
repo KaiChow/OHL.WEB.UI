@@ -37,7 +37,7 @@ export const PROFIT_REVIEW_SPEC = definePesdpPageSpec({
     ],
     advancedFields: [],
   },
-  table: { kind: 'workbench', identityColumns: ['sequence', 'orderNo', 'reviewStatus'], decisionColumns: ['riskLevel', 'grossMarginRate', 'owner'], supportingColumns: ['updatedAt'], fixed: ['checkbox', 'sequence', 'orderNo', 'operations'], densityReason: 'Profit review is a repeated operator queue with scan-first rows and continuous row references.' },
+  table: { kind: 'workbench', rowBanding: 'striped', identityColumns: ['sequence', 'orderNo', 'reviewStatus'], decisionColumns: ['riskLevel', 'grossMarginRate', 'owner'], supportingColumns: ['updatedAt'], fixed: ['checkbox', 'sequence', 'orderNo', 'operations'], densityReason: 'Profit review is a repeated operator queue with scan-first rows and continuous row references.' },
   detail: {
     mode: 'display-first',
     focus: ['riskItems', 'reviewNote', 'timeline'],
@@ -46,7 +46,7 @@ export const PROFIT_REVIEW_SPEC = definePesdpPageSpec({
     modules: [
       { id: 'profit-facts', kind: 'field-group', priority: 'core', mode: 'read-only', owns: ['amount', 'grossMarginRate', 'owner'], metrics: [], actions: { module: [], table: [], row: [] }, collapse: 'always-open', children: { kind: 'none' } },
       { id: 'risk-items', kind: 'exception', priority: 'core', mode: 'read-only', owns: ['riskItems'], metrics: [], actions: { module: [], table: [], row: [] }, collapse: 'always-open', children: { kind: 'none' } },
-      { id: 'review-timeline', kind: 'timeline', priority: 'audit', mode: 'read-only', owns: ['reviewTimeline'], metrics: [], actions: { module: [], table: [], row: [] }, collapse: 'always-open', children: { kind: 'none' } },
+      { id: 'review-timeline', kind: 'activity-log', priority: 'audit', mode: 'read-only', owns: ['reviewTimeline'], metrics: [], actions: { module: [], table: [], row: [] }, collapse: 'always-open', children: { kind: 'none' } },
     ],
   },
   actions: [

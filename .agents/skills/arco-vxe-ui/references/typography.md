@@ -18,7 +18,7 @@ Professional dense B2B UI uses a **fixed typographic ladder**, not ad-hoc sizes 
 6. **Token boundary** — page-authored text uses `var(--dense-font-*)`; tokens never authorize global `.arco-*` or `.vxe-*` overrides.
 
 ```
-F0 Overlay chrome   14px / 600   Modal title, Popover title, page form head
+F0 Major structure  14px / 600   Top-level detail module, Modal/Popover title, page form head
 F1 Data             12px / 400-500   Table body, key links, identifiers
 F2 Nav              13px / 500-600   Custom navigation labels and compact chips
 F3 Structure title  12px / 600   Section title, VXE column header
@@ -29,7 +29,6 @@ F6 Micro            10px / 500   Badge, pill, seq
 ```
 
 ## Font Family
-
 Use a system-first font stack. Do not introduce web fonts unless the product explicitly ships them.
 
 Recommended stack:
@@ -67,7 +66,7 @@ Use the global tokens. Do not hard-code page-specific font sizes.
 | Level | Token | Size | Weight | Use |
 |-------|-------|------|--------|-----|
 | Hero | `--dense-font-hero` | 16px | 600 max | One object/route identity in a full detail context or standard detail drawer |
-| F0 | `--dense-font-overlay` | 14px | 600 | Page-authored overlay heading or full-page form head (`xf-head`) |
+| F0 | `--dense-font-overlay` | 14px | 600 | Top-level detail module, page-authored overlay heading, or full-page form head (`xf-head`) |
 | F1 | `--dense-font-data` | 12px | 400/500 | Table cells, core links, business identifiers |
 | F2 | `--dense-font-nav` | 13px | 500/600 active | Custom navigation labels and compact business chips |
 | F3 | `--dense-font-title` | 12px | 600 | Section titles, VXE column headers, subgroup headings |
@@ -186,7 +185,6 @@ These are limited exceptions and should stay rare:
 Outside these cases, prefer tokens over hard-coded `10px/11px/12px/13px`.
 
 ## Component Typography Map
-
 Use this table as the fast lookup for implementation and review.
 
 | Component / surface | Text role | Token | Size |
@@ -199,6 +197,8 @@ Use this table as the fast lookup for implementation and review.
 | `.detail-field__val` | detail field value (read-only) | `--dense-font-control` | 12px |
 | Arco buttons / tabs / segmented | navigation/action | GI native small | framework-owned |
 | Table-owned `a-pagination` | result navigation | GI native mini | framework-owned |
+| `BusinessDetailModule` top-level title | major structure | `--dense-font-overlay` | 14px |
+| `BusinessDetailChild` repeated-child title | nested identity | `--dense-font-nav` | 13px |
 | `detail-section__title` | structure title | `--dense-font-title` | 12px |
 | Advanced-filter section heading | structure title | `--dense-font-title` | 12px |
 | `form-subgroup__title` | structure title | `--dense-font-title` | 12px |

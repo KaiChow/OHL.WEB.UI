@@ -24,7 +24,7 @@ const emit = defineEmits<{
           </a-button>
         </a-tooltip>
         <div class="business-detail-child__text">
-          <h3 :id="`${id}-title`" class="business-detail-child__title">{{ title }}</h3>
+          <h3 :id="`${id}-title`" class="business-detail-child__title" :title="title">{{ title }}</h3>
           <span v-if="subtitle" class="business-detail-child__subtitle">{{ subtitle }}</span>
         </div>
       </div>
@@ -47,8 +47,8 @@ const emit = defineEmits<{
 .business-detail-child + .business-detail-child { margin-top: 8px; }
 
 .business-detail-child__head {
-  min-height: 34px;
-  padding: 3px 10px;
+  min-height: 38px;
+  padding: 4px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -78,7 +78,7 @@ const emit = defineEmits<{
 .business-detail-child__title {
   margin: 0;
   color: var(--color-text-1);
-  font-size: var(--dense-font-title);
+  font-size: var(--dense-font-nav);
   font-weight: var(--dense-weight-title);
   line-height: 20px;
   letter-spacing: 0;
@@ -93,7 +93,7 @@ const emit = defineEmits<{
 }
 
 .business-detail-child__body {
-  padding: 10px 12px 12px;
+  padding: 12px;
   border-top: 1px solid var(--dense-border-subtle);
   min-width: 0;
 }

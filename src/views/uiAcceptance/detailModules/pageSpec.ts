@@ -22,7 +22,7 @@ export const DETAIL_MODULES_SPEC = definePesdpPageSpec({
   pesdp: {
     professional: {
       decisions: ['Translate the legacy screenshot into an object workspace with explicit identity, state, next work, module ownership, and bounded parent-child structure.'],
-      acceptance: ['The first viewport identifies the shipment, risk, next action, and module navigation without copying the screenshot field wall.'],
+      acceptance: ['The first viewport identifies the shipment, risk, next action, and first working module without copying the screenshot field wall.'],
     },
     efficient: {
       decisions: ['Default the maintenance workspace to editing, keep core edit modules open, keep support/audit modules read-only, and place actions at page/module/child/table/row ownership.'],
@@ -33,12 +33,12 @@ export const DETAIL_MODULES_SPEC = definePesdpPageSpec({
       acceptance: ['Identity, form sections, parent-child lines, supporting documents, audit, and commit actions read as one hierarchy rather than assembled cards or a secondary navigation workspace.'],
     },
     dense: {
-      decisions: ['Use one page-body vertical scroll owner, compact module rhythm, Arco small forms, VXE small detail tables, and table-only horizontal overflow.'],
-      acceptance: ['At 1024, 1366, and 1920 widths, module commands remain adjacent to their owners, detail rows remain readable, and the page does not gain a second vertical scrollbar.'],
+      decisions: ['Use one page-body vertical scroll owner, compact module rhythm, Arco small forms, VXE small detail tables, content-height activity rows, and table-only horizontal overflow.'],
+      acceptance: ['At 1024, 1366, and 1920 widths, module commands remain adjacent to their owners, detail and activity rows remain readable without flex-filling spare height, and the page does not gain a second vertical scrollbar.'],
     },
     premium: {
-      decisions: ['Use a strong object decision band, a quiet anchored workspace, restrained semantic status, and stable shared detail primitives without page-local component skins.'],
-      acceptance: ['Default-edit and view states, long data, destructive confirmation, save feedback, bilingual labels, and 200% zoom retain a clear primary/secondary hierarchy.'],
+      decisions: ['Use one system-first sans stack, mono only for opaque identifiers, a strong object decision band, restrained semantic status, and stable shared detail primitives without page-local component skins.'],
+      acceptance: ['Editable and read-only module states, long data, destructive confirmation, save feedback, bilingual labels, and 200% zoom retain a clear object/module/child/data hierarchy without unrelated font-family changes.'],
     },
   },
   surfaces: [
@@ -49,11 +49,12 @@ export const DETAIL_MODULES_SPEC = definePesdpPageSpec({
   query: { totalFields: 0, strategy: 'none', layout: 'none', visibleFields: [], visibleFieldLayout: [], advancedFields: [] },
   table: {
     kind: 'detail-editable',
+    rowBanding: 'plain',
     identityColumns: ['cargoName', 'containerNo', 'documentName'],
     decisionColumns: ['quantity', 'grossWeight', 'volume', 'documentStatus'],
     supportingColumns: ['packageType', 'sealNo', 'updatedAt'],
     fixed: ['operations'],
-    densityReason: 'Child lines contain mini controls and need small detail rows; document and audit modules remain read-only.',
+    densityReason: 'Child lines contain mini controls and use a plain row surface so input, validation, hover, and selection states remain unambiguous; document and audit modules remain read-only.',
   },
   detail: {
     mode: 'edit-first',
@@ -90,7 +91,7 @@ export const DETAIL_MODULES_SPEC = definePesdpPageSpec({
         metrics: [],
         actions: { module: [], table: [], row: [] }, collapse: 'open-current-and-errors', children: { kind: 'none' },
       },
-      { id: 'activity', kind: 'timeline', priority: 'audit', mode: 'read-only', owns: ['actor', 'event', 'occurredAt'], metrics: [], actions: { module: [], table: [], row: [] }, collapse: 'collapsed-by-default', children: { kind: 'none' } },
+      { id: 'activity', kind: 'activity-log', priority: 'audit', mode: 'read-only', owns: ['actor', 'event', 'occurredAt'], metrics: [], actions: { module: [], table: [], row: [] }, collapse: 'collapsed-by-default', children: { kind: 'none' } },
     ],
   },
   actions: [

@@ -381,7 +381,7 @@ for (const [setting, pattern] of [
 ]) {
   if (pattern.test(globalVxeSetup)) continue;
   violations.push({
-    rule: 'VXE 全局默认必须统一 border、stripe 与 mini 密度；页面不得各自覆盖表格外观',
+    rule: 'VXE 全局工作台基线必须包含 border、stripe 与 mini；详情行带仅允许按 typed rowBanding 使用公共属性覆盖',
     file: 'src/main.ts',
     line: 1,
     content: `missing ${setting}`,
@@ -1324,18 +1324,40 @@ for (const file of files) {
   }
 }
 
-// VXE 外观：边框/斑马纹/行高由全局主题统一（main.ts 默认 border+stripe+size mini），页面禁止覆盖。
+// VXE 外观：主题统一边框/颜色/行高；工作台继承 stripe，typed plain 详情可用公共属性关闭行带。
 for (const file of files) {
   if (!file.endsWith('.vue')) continue;
   const relPath = file.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/');
   const content = readFileSync(file, 'utf8');
+  let specDir = dirname(file);
+  let nearestPageSpec = '';
+  const viewsRoot = join(ROOT, 'src/views');
+  while (specDir.startsWith(viewsRoot)) {
+    const candidate = join(specDir, 'pageSpec.ts');
+    if (existsSync(candidate)) {
+      nearestPageSpec = readFileSync(candidate, 'utf8');
+      break;
+    }
+    const parent = dirname(specDir);
+    if (parent === specDir) break;
+    specDir = parent;
+  }
+  const allowsPlainRowBanding = /\browBanding\s*:\s*['"]plain['"]/.test(nearestPageSpec);
   const blocks = content.match(/<vxe-table[\s\S]*?<\/vxe-table>/g) || [];
   for (const block of blocks) {
     const blockIndex = content.indexOf(block);
     const firstLine = block.split('\n').slice(0, 10).join(' ');
-    if (/\bborder=(["'])none\1/.test(block) || /\b:?stripe=(["'])false\1/.test(block)) {
+    if (/\bborder=(["'])none\1/.test(block)) {
       violations.push({
-        rule: '表格边框/斑马纹由全局默认（border+stripe）统一，页面禁止设置 border="none" 或 stripe="false"',
+        rule: '表格边框由全局主题统一，页面禁止设置 border="none"',
+        file: relPath,
+        line: getLineNumber(content, blockIndex),
+        content: firstLine.trim().slice(0, 140),
+      });
+    }
+    if (/(?:^|\s):?stripe=(["'])false\1/.test(block) && !allowsPlainRowBanding) {
+      violations.push({
+        rule: '仅 typed pageSpec 声明 rowBanding: plain 的详情/汇总表可通过 VXE 公共属性关闭 stripe',
         file: relPath,
         line: getLineNumber(content, blockIndex),
         content: firstLine.trim().slice(0, 140),

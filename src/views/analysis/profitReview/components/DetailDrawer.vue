@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import BusinessActivityList, { type BusinessActivityItem } from '../../../../components/workbench/BusinessActivityList.vue';
 import type { ProfitReviewRow } from '../types';
 import { REVIEW_STATUS_META, RISK_LEVEL_META, formatOrderAmount, formatMarginRate } from '../displayMeta';
 
@@ -37,6 +38,12 @@ const profitFacts = computed(() => {
     { label: t('profit.detail.note'), value: row.reviewNote || '—', span: 2 },
   ];
 });
+
+const reviewActivities = computed<BusinessActivityItem[]>(() => (props.row?.timeline ?? []).map((item) => ({
+  id: `${item.time}-${item.label}`,
+  title: item.label,
+  time: item.time,
+})));
 </script>
 
 <template>
@@ -71,14 +78,7 @@ const profitFacts = computed(() => {
 
       <section class="detail-section" aria-labelledby="review-timeline-title">
         <h3 id="review-timeline-title" class="detail-section__title">{{ t('profit.detail.timeline') }}</h3>
-        <a-timeline>
-          <a-timeline-item v-for="item in row.timeline" :key="`${item.time}-${item.label}`">
-            <div class="timeline-item">
-              <span class="timeline-item__label">{{ item.label }}</span>
-              <span class="timeline-item__time biz-number">{{ item.time }}</span>
-            </div>
-          </a-timeline-item>
-        </a-timeline>
+        <BusinessActivityList :items="reviewActivities" :empty-text="t('profit.detail.noTimeline')" />
       </section>
     </div>
   </a-drawer>
@@ -139,23 +139,4 @@ const profitFacts = computed(() => {
   line-height: 18px;
 }
 
-.timeline-item {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  min-width: 0;
-}
-
-.timeline-item__label {
-  color: var(--color-text-1);
-  font-size: var(--dense-font-data);
-  line-height: 18px;
-}
-
-.timeline-item__time {
-  flex-shrink: 0;
-  color: var(--color-text-3);
-  font-size: var(--dense-font-aux);
-}
 </style>

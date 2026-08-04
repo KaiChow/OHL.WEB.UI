@@ -14,7 +14,7 @@ The executable UI contract is `.agents/skills/arco-vxe-ui/SKILL.md`. Keep this f
 ## Hard constraints
 
 - GI owns the Arco baseline/palette; do not add a theme adapter or page-local skin.
-- vxe-table look is owned by `src/styles/vxe-theme/` tokens (official `--vxe-*` variables) plus global defaults in `main.ts` (`border`, `stripe`, `size: 'mini'` — high-density system); pages never write custom table styles — density overrides via the `size` prop only.
+- vxe-table look is owned by `src/styles/vxe-theme/` tokens (official `--vxe-*` variables) plus global workbench defaults in `main.ts` (`border`, `stripe`, `size: 'mini'` — high-density system); pages never write custom table styles. Density uses `size`; typed detail roles may set the public `stripe` prop according to `pageSpec.table.rowBanding`.
 - Use `vxe-table`, never `a-table`; classify each table by its business role (main list, detail child, editable line, file, or summary), not by a prescribed CSS class name.
 - Use `.s-pill[data-s]` for status; never color the whole row by status.
 - Arco form and business controls inherit the app-wide `small` default; Arco controls inside `vxe-table` rows must explicitly use `size="mini"`; one `type="primary"` per action scope.

@@ -120,6 +120,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   },
   table: {
     kind: 'workbench',
+    rowBanding: 'striped',
     identityColumns: ['sequence', 'orderNo', 'status'],
     decisionColumns: ['nextAction', 'operator', 'customerName', 'route', 'documentState', 'feeState', 'exceptionState'],
     supportingColumns: ['updatedAt'],

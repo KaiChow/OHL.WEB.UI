@@ -6,7 +6,7 @@ body,
   height: 100%;
   margin: 0;
   min-width: 768px;
-  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, "Noto Sans", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
   font-size: 13px;
   -webkit-font-smoothing: antialiased;
 }
@@ -346,8 +346,12 @@ body {
 }
 
 .mono {
-  font-family: "SF Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
+  font-family: "SF Mono", "Cascadia Mono", "JetBrains Mono", Consolas, "Liberation Mono", monospace;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
