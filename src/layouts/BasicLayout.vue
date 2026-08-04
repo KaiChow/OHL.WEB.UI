@@ -14,21 +14,33 @@ const menuKeyword = ref('');
 const selectedMenuKeys = ref<string[]>([]);
 const openMenuKeys = ref<string[]>([]);
 const isCompactShell = ref(false);
+const isNarrowShell = ref(false);
 let compactShellMedia: MediaQueryList | undefined;
+let narrowShellMedia: MediaQueryList | undefined;
 
 const syncCompactShell = (source: MediaQueryList | MediaQueryListEvent) => {
   isCompactShell.value = source.matches;
 };
 
+const syncNarrowShell = (source: MediaQueryList | MediaQueryListEvent) => {
+  isNarrowShell.value = source.matches;
+};
+
 onMounted(() => {
   compactShellMedia = window.matchMedia('(max-width: 1199px)');
+  narrowShellMedia = window.matchMedia('(max-width: 767px)');
   syncCompactShell(compactShellMedia);
+  syncNarrowShell(narrowShellMedia);
   compactShellMedia.addEventListener('change', syncCompactShell);
+  narrowShellMedia.addEventListener('change', syncNarrowShell);
 });
 
 onBeforeUnmount(() => {
   compactShellMedia?.removeEventListener('change', syncCompactShell);
+  narrowShellMedia?.removeEventListener('change', syncNarrowShell);
 });
+
+const shellSiderWidth = computed(() => (isNarrowShell.value ? 56 : isCompactShell.value ? 184 : 220));
 
 const isSameKeys = (a: string[], b: string[]) =>
   a.length === b.length && a.every((k, i) => k === b[i]);
@@ -117,8 +129,8 @@ const onMenuItemClick = (key: string) => {
   <a-layout class="app-layout">
     <a-layout-sider
       class="app-layout__sider"
-      :class="{ 'app-layout__sider--compact': isCompactShell }"
-      :width="isCompactShell ? 184 : 220"
+      :class="{ 'app-layout__sider--compact': isCompactShell, 'app-layout__sider--narrow': isNarrowShell }"
+      :width="shellSiderWidth"
       :collapsible="false"
     >
       <div class="app-layout__brand" aria-label="OHL Freight 导航">
@@ -139,6 +151,7 @@ const onMenuItemClick = (key: string) => {
         v-model:open-keys="openMenuKeys"
         class="app-layout__menu"
         :selected-keys="selectedMenuKeys"
+        :collapsed="isNarrowShell"
         accordion
         @menu-item-click="onMenuItemClick"
       >
@@ -263,6 +276,17 @@ const onMenuItemClick = (key: string) => {
   padding-inline: 4px;
 }
 
+.app-layout__sider--narrow .app-layout__brand {
+  justify-content: center;
+  padding-inline: 6px;
+}
+
+.app-layout__sider--narrow .app-layout__brand-text,
+.app-layout__sider--narrow .app-layout__search,
+.app-layout__sider--narrow .app-layout__footer {
+  display: none;
+}
+
 .app-layout__search {
   padding: 10px 12px 8px;
   border-bottom: 1px solid var(--color-border-1);
@@ -359,5 +383,11 @@ const onMenuItemClick = (key: string) => {
   min-height: 0;
   overflow: hidden;
   padding: 10px 12px var(--dense-page-bottom-space);
+}
+
+@media (max-width: 767px) {
+  .app-layout__header { padding-inline: 8px; }
+  .app-layout__content { padding-inline: 8px; }
+  .app-layout__locale { width: 88px; }
 }
 </style>

@@ -23,7 +23,7 @@ const emit = defineEmits<{
           <a-button
             class="business-detail-module__collapse"
             type="text"
-            size="mini"
+            size="small"
             :aria-label="collapseLabel"
             :aria-expanded="expanded"
             @click="emit('update:expanded', !expanded)"
@@ -33,9 +33,9 @@ const emit = defineEmits<{
         </a-tooltip>
         <h2 :id="`${id}-title`" class="business-detail-module__title">{{ title }}</h2>
       </div>
+      <div v-if="$slots.summary" class="business-detail-module__summary"><slot name="summary" /></div>
       <div v-if="$slots.actions" class="business-detail-module__actions"><slot name="actions" /></div>
     </header>
-    <div v-if="$slots.summary" class="business-detail-module__summary"><slot name="summary" /></div>
     <div v-show="expanded" class="business-detail-module__body"><slot /></div>
   </section>
 </template>
@@ -43,31 +43,36 @@ const emit = defineEmits<{
 <style scoped>
 .business-detail-module {
   min-width: 0;
+  background: var(--color-bg-1);
 }
 
 .business-detail-module + .business-detail-module {
-  border-top: 1px solid var(--dense-card-border);
+  margin-top: var(--dense-gap-inline);
 }
 
 .business-detail-module__head {
-  min-height: 44px;
-  padding: 6px var(--dense-pad-section-x) 4px;
+  box-sizing: border-box;
+  min-height: var(--dense-bar-h);
+  padding: 3px var(--dense-pad-section-x);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--dense-gap-inline);
-  background: var(--color-bg-1);
+  background: var(--color-fill-1);
+  border-bottom: 1px solid var(--dense-border-subtle);
 }
 
 .business-detail-module__identity,
+.business-detail-module__summary,
 .business-detail-module__actions {
   display: flex;
   align-items: center;
   min-width: 0;
 }
 
-.business-detail-module__identity { gap: 2px; }
-.business-detail-module__actions { flex: 0 0 auto; gap: 6px; }
+.business-detail-module__identity { gap: 4px; }
+.business-detail-module__summary { flex: 1 1 auto; margin-left: var(--dense-gap-inline); }
+.business-detail-module__actions { flex: 0 0 auto; gap: var(--dense-gap-inline); }
 
 .business-detail-module__collapse {
   flex: 0 0 auto;
@@ -78,7 +83,7 @@ const emit = defineEmits<{
   margin: 0;
   overflow: hidden;
   color: var(--color-text-1);
-  font-size: var(--dense-font-overlay);
+  font-size: var(--dense-font-nav);
   font-weight: var(--dense-weight-title);
   line-height: 20px;
   text-overflow: ellipsis;
@@ -91,17 +96,14 @@ const emit = defineEmits<{
   color: var(--color-text-2);
 }
 
-.business-detail-module__summary {
-  padding: 0 var(--dense-pad-section-x) 10px;
-}
-
 .business-detail-module__body {
-  padding: 6px var(--dense-pad-section-x) 18px;
+  padding: var(--dense-gap-zone) var(--dense-pad-section-x) var(--dense-gap-module);
   min-width: 0;
 }
 
 @media (max-width: 1180px) {
-  .business-detail-module__head { align-items: flex-start; }
+  .business-detail-module__head { align-items: center; }
+  .business-detail-module__summary { overflow: hidden; }
   .business-detail-module__actions { flex-wrap: wrap; justify-content: flex-end; }
 }
 </style>

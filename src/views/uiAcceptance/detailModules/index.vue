@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Message } from '@arco-design/web-vue';
 import {
   IconCopy,
@@ -52,6 +52,9 @@ interface ContainerLine {
 
 const { t } = useI18n();
 const isSaving = ref(false);
+const scrollContainerRef = ref<HTMLElement | null>(null);
+const activeModuleId = ref('shipment-overview');
+let navigationUnlockTimer: number | undefined;
 const moduleExpanded = ref<Record<string, boolean>>({
   overview: true,
   cargo: true,
@@ -123,6 +126,44 @@ const activityItems = computed<BusinessActivityItem[]>(() => activities.map((ite
   actor: item.actor,
   time: item.time,
 })));
+
+const moduleNavItems = computed(() => [
+  { id: 'shipment-overview', label: t('detailModules.modules.overview') },
+  { id: 'cargo-parties', label: t('detailModules.modules.cargo') },
+  { id: 'containers', label: t('detailModules.modules.containers') },
+  { id: 'documents', label: t('detailModules.modules.documents') },
+  { id: 'activity', label: t('detailModules.modules.activity') },
+]);
+
+const updateActiveModule = () => {
+  if (navigationUnlockTimer !== undefined) return;
+  const container = scrollContainerRef.value;
+  if (!container) return;
+  if (container.scrollTop > 0 && container.scrollTop + container.clientHeight >= container.scrollHeight - 2) {
+    activeModuleId.value = moduleNavItems.value[moduleNavItems.value.length - 1]?.id || activeModuleId.value;
+    return;
+  }
+  const containerTop = container.getBoundingClientRect().top;
+  let currentId = moduleNavItems.value[0]?.id || '';
+  moduleNavItems.value.forEach((item) => {
+    const section = document.getElementById(item.id);
+    if (section && section.getBoundingClientRect().top - containerTop <= 44) currentId = item.id;
+  });
+  activeModuleId.value = currentId;
+};
+
+const navigateToModule = (moduleId: string) => {
+  if (navigationUnlockTimer !== undefined) window.clearTimeout(navigationUnlockTimer);
+  activeModuleId.value = moduleId;
+  document.getElementById(moduleId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  navigationUnlockTimer = window.setTimeout(() => { navigationUnlockTimer = undefined; }, 700);
+};
+
+onMounted(() => scrollContainerRef.value?.addEventListener('scroll', updateActiveModule, { passive: true }));
+onBeforeUnmount(() => {
+  scrollContainerRef.value?.removeEventListener('scroll', updateActiveModule);
+  if (navigationUnlockTimer !== undefined) window.clearTimeout(navigationUnlockTimer);
+});
 
 type DraftSnapshot = {
   overview: typeof overview.value;
@@ -254,7 +295,21 @@ const removeContainer = (containerId: number) => {
       </div>
     </header>
 
-    <div class="detail-acceptance__scroll">
+    <div class="detail-acceptance__workspace">
+      <nav class="detail-outline" :aria-label="t('detailModules.nav.label')">
+        <span class="detail-outline__label">{{ t('detailModules.nav.label') }}</span>
+        <a
+          v-for="item in moduleNavItems"
+          :key="item.id"
+          class="detail-outline__link"
+          :class="{ 'detail-outline__link--active': activeModuleId === item.id }"
+          :href="`#${item.id}`"
+          :aria-current="activeModuleId === item.id ? 'location' : undefined"
+          @click.prevent="navigateToModule(item.id)"
+        >{{ item.label }}</a>
+      </nav>
+
+      <div ref="scrollContainerRef" class="detail-acceptance__scroll">
       <BusinessDetailModule
         id="shipment-overview"
         priority="core"
@@ -263,7 +318,7 @@ const removeContainer = (containerId: number) => {
         :title="t('detailModules.modules.overview')"
         :collapse-label="t('detailModules.aria.toggleModule', { module: t('detailModules.modules.overview') })"
       >
-        <a-form :model="overview" layout="vertical" :label-col-style="compactVerticalFormLabelStyle">
+        <a-form class="detail-form detail-form--overview" :model="overview" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
           <a-row :gutter="denseFormGridGutter">
             <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.serviceType')" :style="denseFormItemStyle"><a-input v-model="overview.serviceType" /></a-form-item></a-col>
             <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.customer')" required :style="denseFormItemStyle"><a-input v-model="overview.customer" /></a-form-item></a-col>
@@ -286,7 +341,7 @@ const removeContainer = (containerId: number) => {
         :collapse-label="t('detailModules.aria.toggleModule', { module: t('detailModules.modules.cargo') })"
       >
         <template #actions>
-          <a-button type="text" @click="addParty"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addParty') }}</a-button>
+          <a-button size="small" type="outline" @click="addParty"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addParty') }}</a-button>
         </template>
         <template #summary><BusinessMetricStrip :items="cargoMetrics" /></template>
 
@@ -302,16 +357,16 @@ const removeContainer = (containerId: number) => {
           <template #metrics><BusinessMetricStrip :items="childMetrics(party)" /></template>
           <template #actions>
             <a-tooltip :content="t('detailModules.actions.duplicateParty')">
-              <a-button type="text" :aria-label="t('detailModules.actions.duplicateParty')" @click="duplicateParty(party)"><template #icon><icon-copy /></template></a-button>
+              <a-button size="small" type="text" :aria-label="t('detailModules.actions.duplicateParty')" @click="duplicateParty(party)"><template #icon><icon-copy /></template></a-button>
             </a-tooltip>
             <a-popconfirm :content="t('detailModules.confirm.removeParty')" @ok="removeParty(party.id)">
               <a-tooltip :content="t('detailModules.actions.removeParty')">
-                <a-button type="text" status="danger" :aria-label="t('detailModules.actions.removeParty')" :disabled="cargoParties.length <= 1"><template #icon><icon-delete /></template></a-button>
+                <a-button size="small" type="text" status="danger" :aria-label="t('detailModules.actions.removeParty')" :disabled="cargoParties.length <= 1"><template #icon><icon-delete /></template></a-button>
               </a-tooltip>
             </a-popconfirm>
           </template>
 
-          <a-form :model="party" layout="vertical" :label-col-style="compactVerticalFormLabelStyle">
+          <a-form class="detail-form detail-form--party" :model="party" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
             <a-row :gutter="denseFormGridGutter">
               <a-col :xs="24" :sm="12" :md="8" :xl="6"><a-form-item :label="t('detailModules.fields.partyRole')" :style="denseFormItemStyle"><a-select v-model="party.roleKey"><a-option value="shipper">{{ t('detailModules.partyRoles.shipper') }}</a-option><a-option value="supplier">{{ t('detailModules.partyRoles.supplier') }}</a-option></a-select></a-form-item></a-col>
               <a-col :xs="24" :sm="12" :md="16" :xl="12"><a-form-item :label="t('detailModules.fields.partyName')" :style="denseFormItemStyle"><a-input v-model="party.name" /></a-form-item></a-col>
@@ -323,7 +378,7 @@ const removeContainer = (containerId: number) => {
 
           <div class="child-table-cap">
             <strong>{{ t('detailModules.tables.cargoLines') }}</strong>
-            <a-button type="text" @click="addCargoLine(party)"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addCargoLine') }}</a-button>
+            <a-button size="small" type="outline" @click="addCargoLine(party)"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addCargoLine') }}</a-button>
           </div>
           <vxe-table :data="party.lines" size="small" :stripe="false" :empty-text="t('detailModules.empty.cargoLines')">
             <vxe-column type="seq" :title="t('common.sequence')" width="52" align="center" />
@@ -345,8 +400,8 @@ const removeContainer = (containerId: number) => {
             <vxe-column field="volume" :title="t('detailModules.columns.volume')" min-width="104" align="right">
               <template #default="{ row }"><a-input-number v-model="row.volume" size="mini" :min="0" :precision="1" /></template>
             </vxe-column>
-            <vxe-column :title="t('common.operations')" width="88" fixed="right">
-              <template #default="{ row }"><a-space class="row-actions" :size="4"><a-popconfirm :content="t('detailModules.confirm.removeLine')" @ok="removeCargoLine(party, row.id)"><a-button type="text" status="danger" size="mini">{{ t('detailModules.actions.removeLine') }}</a-button></a-popconfirm></a-space></template>
+            <vxe-column :title="t('common.operations')" width="64" fixed="right" align="center">
+              <template #default="{ row }"><a-space class="row-actions" :size="2"><a-popconfirm :content="t('detailModules.confirm.removeLine')" @ok="removeCargoLine(party, row.id)"><a-tooltip :content="t('detailModules.actions.removeLine')"><a-button class="row-action-btn" type="text" status="danger" size="mini" :aria-label="t('detailModules.actions.removeLine')"><template #icon><icon-delete /></template></a-button></a-tooltip></a-popconfirm></a-space></template>
             </vxe-column>
           </vxe-table>
         </BusinessDetailChild>
@@ -360,13 +415,10 @@ const removeContainer = (containerId: number) => {
         :title="t('detailModules.modules.containers')"
         :collapse-label="t('detailModules.aria.toggleModule', { module: t('detailModules.modules.containers') })"
       >
-        <div class="child-table-cap">
-          <div class="child-table-cap__identity">
-            <strong>{{ t('detailModules.tables.containerLines') }}</strong>
-            <BusinessMetricStrip :items="containerMetrics" />
-          </div>
-          <a-button type="text" @click="addContainer"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addContainer') }}</a-button>
-        </div>
+        <template #summary><BusinessMetricStrip :items="containerMetrics" /></template>
+        <template #actions>
+          <a-button size="small" type="outline" @click="addContainer"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addContainer') }}</a-button>
+        </template>
         <vxe-table :data="containers" size="small" :stripe="false" :empty-text="t('detailModules.empty.containers')">
           <vxe-column type="seq" :title="t('common.sequence')" width="52" align="center" />
           <vxe-column field="containerNo" :title="t('detailModules.columns.containerNo')" min-width="150">
@@ -381,7 +433,7 @@ const removeContainer = (containerId: number) => {
           <vxe-column field="packageCount" :title="t('detailModules.columns.packageCount')" min-width="96" align="right"><template #default="{ row }"><a-input-number v-model="row.packageCount" size="mini" :min="0" /></template></vxe-column>
           <vxe-column field="grossWeight" :title="t('detailModules.columns.grossWeight')" min-width="116" align="right"><template #default="{ row }"><a-input-number v-model="row.grossWeight" size="mini" :min="0" /></template></vxe-column>
           <vxe-column field="volume" :title="t('detailModules.columns.volume')" min-width="104" align="right"><template #default="{ row }"><a-input-number v-model="row.volume" size="mini" :min="0" :precision="1" /></template></vxe-column>
-          <vxe-column :title="t('common.operations')" width="88" fixed="right"><template #default="{ row }"><a-space class="row-actions" :size="4"><a-popconfirm :content="t('detailModules.confirm.removeContainer')" @ok="removeContainer(row.id)"><a-button type="text" status="danger" size="mini">{{ t('detailModules.actions.removeLine') }}</a-button></a-popconfirm></a-space></template></vxe-column>
+          <vxe-column :title="t('common.operations')" width="64" fixed="right" align="center"><template #default="{ row }"><a-space class="row-actions" :size="2"><a-popconfirm :content="t('detailModules.confirm.removeContainer')" @ok="removeContainer(row.id)"><a-tooltip :content="t('detailModules.actions.removeLine')"><a-button class="row-action-btn" type="text" status="danger" size="mini" :aria-label="t('detailModules.actions.removeLine')"><template #icon><icon-delete /></template></a-button></a-tooltip></a-popconfirm></a-space></template></vxe-column>
         </vxe-table>
       </BusinessDetailModule>
 
@@ -418,12 +470,13 @@ const removeContainer = (containerId: number) => {
         <BusinessActivityList :items="activityItems" :empty-text="t('detailModules.empty.activity')" />
       </BusinessDetailModule>
       </div>
+    </div>
 
     <footer class="detail-footer">
       <span class="detail-footer__hint">{{ t('detailModules.identity.editHint') }}</span>
       <a-space :size="8">
-        <a-button :disabled="isSaving" @click="cancelEdit">{{ t('detailModules.actions.resetDraft') }}</a-button>
-        <a-button type="primary" :loading="isSaving" @click="saveDraft"><template #icon><icon-save /></template>{{ t('common.save') }}</a-button>
+        <a-button size="small" :disabled="isSaving" @click="cancelEdit">{{ t('detailModules.actions.resetDraft') }}</a-button>
+        <a-button size="small" type="primary" :loading="isSaving" @click="saveDraft"><template #icon><icon-save /></template>{{ t('common.save') }}</a-button>
       </a-space>
     </footer>
   </main>
@@ -431,6 +484,7 @@ const removeContainer = (containerId: number) => {
 
 <style scoped>
 .detail-acceptance {
+  width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -441,6 +495,8 @@ const removeContainer = (containerId: number) => {
   border-radius: var(--dense-radius);
   background: var(--color-bg-1);
   box-shadow: var(--dense-shadow-card);
+  margin-inline: auto;
+  container-type: inline-size;
 }
 
 .object-band {
@@ -530,18 +586,79 @@ const removeContainer = (containerId: number) => {
 
 .object-decision .s-pill { justify-self: start; }
 
-.detail-acceptance__scroll {
+.detail-acceptance__workspace {
   flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 144px minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--color-fill-2);
+}
+
+.detail-outline {
+  min-width: 0;
+  padding: 10px 8px;
+  border-right: 1px solid var(--dense-border-subtle);
+  background: var(--color-bg-1);
+}
+
+.detail-outline__label {
+  display: block;
+  padding: 0 10px 7px;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  line-height: 18px;
+}
+
+.detail-outline__link {
+  position: relative;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 6px 10px 6px 12px;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-2);
+  font-size: var(--dense-font-data);
+  line-height: 20px;
+  text-decoration: none;
+}
+
+.detail-outline__link:hover {
+  background: var(--color-fill-1);
+  color: var(--color-text-1);
+}
+
+.detail-outline__link--active {
+  background: var(--color-fill-1);
+  color: var(--dense-primary-7);
+  font-weight: var(--dense-weight-title);
+}
+
+.detail-outline__link--active::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 2px;
+  height: 16px;
+  border-radius: 1px;
+  background: var(--dense-primary-6);
+  content: '';
+  transform: translateY(-50%);
+}
+
+.detail-acceptance__scroll {
   min-height: 0;
   min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
   scroll-behavior: smooth;
+  background: var(--color-fill-2);
 }
 
 .detail-acceptance__scroll > section { scroll-margin-top: 0; }
-.child-table-cap { justify-content: space-between; gap: 8px; min-height: 30px; margin-top: 8px; }
-.child-table-cap__identity { gap: 14px; }
+.child-table-cap { justify-content: space-between; gap: var(--dense-gap-inline); min-height: 32px; margin-top: var(--dense-gap-zone); }
+.child-table-cap:first-child { margin-top: 0; }
 .child-table-cap strong { font-size: var(--dense-font-title); font-weight: var(--dense-weight-title); }
 
 .document-list { border: 1px solid var(--dense-border-subtle); }
@@ -574,7 +691,7 @@ const removeContainer = (containerId: number) => {
   justify-content: space-between;
   gap: 12px;
   border-top: 1px solid var(--dense-card-border);
-  background: var(--color-bg-1);
+  background: var(--color-fill-1);
 }
 
 .detail-footer__hint { color: var(--color-text-3); font-size: var(--dense-font-aux); }
@@ -592,5 +709,10 @@ const removeContainer = (containerId: number) => {
   }
   .document-list__head,
   .document-row { grid-template-columns: minmax(160px, 1fr) 88px 110px 138px; gap: 8px; }
+}
+
+@container (max-width: 1439px) {
+  .detail-acceptance__workspace { grid-template-columns: minmax(0, 1fr); }
+  .detail-outline { display: none; }
 }
 </style>

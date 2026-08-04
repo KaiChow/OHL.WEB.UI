@@ -1,6 +1,7 @@
 import { defineFeatureContracts } from '../../../design-system/featureContract';
 
 export const DETAIL_MODULE_FEATURE_CONTRACTS = defineFeatureContracts([
+  { id: 'detail-module-navigate', actorRoles: ['ui.acceptance.viewer'], visibleWhen: '宽屏复杂详情包含多个业务模块', enabledWhen: '目标模块存在于当前详情画布', request: '在当前详情滚动容器内定位到所选业务模块', successResult: '滚动到目标模块并同步当前模块指示', errorResult: '保留当前滚动位置且不改变编辑数据', refreshScope: '详情模块索引与当前滚动位置' },
   { id: 'detail-workspace-save', actorRoles: ['ui.acceptance.editor'], visibleWhen: '页面为默认编辑工作态', enabledWhen: '表单可提交且未在保存中', request: '保存本地验收页当前详情草稿', successResult: '提交当前编辑值、刷新已保存快照、保持各模块业务模式并显示对象级成功反馈', errorResult: '保留全部编辑值并在固定页脚显示可恢复失败', refreshScope: '对象头、受影响模块和固定页脚' },
   { id: 'detail-cargo-add-party', actorRoles: ['ui.acceptance.editor'], visibleWhen: '货物与发货方模块可编辑', enabledWhen: '未达到本地验收上限', request: '向本地货物模块增加一个发货方草稿', successResult: '新增子模块并展开到新发货方', errorResult: '保留已有子模块并在货物模块显示错误', refreshScope: '货物模块统计与子模块列表' },
   { id: 'detail-cargo-duplicate-party', actorRoles: ['ui.acceptance.editor'], visibleWhen: '当前发货方允许复制', enabledWhen: '页面处于编辑模式', request: '复制当前发货方及其本地货物行', successResult: '新增复制项、更新统计并展开复制项', errorResult: '保留原发货方与货物行并显示局部错误', refreshScope: '货物模块统计与子模块列表' },

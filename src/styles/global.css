@@ -5,7 +5,7 @@ body,
 #app {
   height: 100%;
   margin: 0;
-  min-width: 768px;
+  min-width: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, "Noto Sans", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
   font-size: 13px;
   -webkit-font-smoothing: antialiased;
@@ -49,7 +49,7 @@ body,
   /* F1 数据正文：表格单元格、链接单号（与 F4 Control 同 12px，靠字重/颜色区分） */
   --dense-weight-data: 400;
   --dense-font-nav: 13px;
-  /* F2 导航交互：Tab、chip、按钮（唯一 13px 正文档） */
+  /* F2 一级模块/导航交互：详情模块标题、Tab、chip（唯一 13px 正文档） */
   --dense-weight-nav: 500;
   --dense-weight-nav-active: 600;
   --dense-font-title: var(--dense-font-field);

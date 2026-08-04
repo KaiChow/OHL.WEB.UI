@@ -18,9 +18,9 @@ Professional dense B2B UI uses a **fixed typographic ladder**, not ad-hoc sizes 
 6. **Token boundary** — page-authored text uses `var(--dense-font-*)`; tokens never authorize global `.arco-*` or `.vxe-*` overrides.
 
 ```
-F0 Major structure  14px / 600   Top-level detail module, Modal/Popover title, page form head
+F0 Major structure  14px / 600   Modal/Popover title, page/full-form head
 F1 Data             12px / 400-500   Table body, key links, identifiers
-F2 Nav              13px / 500-600   Custom navigation labels and compact chips
+F2 Nav/module       13px / 500-600   Top-level detail module, custom navigation, compact chips
 F3 Structure title  12px / 600   Section title, VXE column header
 F4 Form label       12px / 500   Filter label, form label
 F4 Control          12px / 400-500   Input/select value, placeholder, detail val
@@ -66,9 +66,9 @@ Use the global tokens. Do not hard-code page-specific font sizes.
 | Level | Token | Size | Weight | Use |
 |-------|-------|------|--------|-----|
 | Hero | `--dense-font-hero` | 16px | 600 max | One object/route identity in a full detail context or standard detail drawer |
-| F0 | `--dense-font-overlay` | 14px | 600 | Top-level detail module, page-authored overlay heading, or full-page form head (`xf-head`) |
+| F0 | `--dense-font-overlay` | 14px | 600 | Page-authored overlay heading or full-page form head (`xf-head`) |
 | F1 | `--dense-font-data` | 12px | 400/500 | Table cells, core links, business identifiers |
-| F2 | `--dense-font-nav` | 13px | 500/600 active | Custom navigation labels and compact business chips |
+| F2 | `--dense-font-nav` | 13px | 500/600 active | Top-level detail module, custom navigation labels, compact business chips |
 | F3 | `--dense-font-title` | 12px | 600 | Section titles, VXE column headers, subgroup headings |
 | F4 | `--dense-font-field` | 12px | 500 | Page-authored field/filter labels |
 | F4 Control | `--dense-font-control` | 12px | 400/500 | Page-authored read-only values such as `.detail-field__val` |
@@ -197,8 +197,8 @@ Use this table as the fast lookup for implementation and review.
 | `.detail-field__val` | detail field value (read-only) | `--dense-font-control` | 12px |
 | Arco buttons / tabs / segmented | navigation/action | GI native small | framework-owned |
 | Table-owned `a-pagination` | result navigation | GI native mini | framework-owned |
-| `BusinessDetailModule` top-level title | major structure | `--dense-font-overlay` | 14px |
-| `BusinessDetailChild` repeated-child title | nested identity | `--dense-font-nav` | 13px |
+| `BusinessDetailModule` top-level title | module structure | `--dense-font-nav` | 13px |
+| `BusinessDetailChild` repeated-child title | nested identity | `--dense-font-title` | 12px |
 | `detail-section__title` | structure title | `--dense-font-title` | 12px |
 | Advanced-filter section heading | structure title | `--dense-font-title` | 12px |
 | `form-subgroup__title` | structure title | `--dense-font-title` | 12px |

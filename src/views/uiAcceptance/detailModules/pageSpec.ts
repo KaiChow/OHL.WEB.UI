@@ -29,21 +29,21 @@ export const DETAIL_MODULES_SPEC = definePesdpPageSpec({
       acceptance: ['Users land directly in editable core data and can reach module, child, line, reset, and save actions without a page-level mode switch or unrelated overlays.'],
     },
     structured: {
-      decisions: ['Use one continuous record-editor canvas with page -> module -> child -> child-owned pane/table as the maximum depth; each module kind owns a distinct internal composition.'],
-      acceptance: ['Identity, form sections, parent-child lines, supporting documents, audit, and commit actions read as one hierarchy rather than assembled cards or a secondary navigation workspace.'],
+      decisions: ['Use one continuous record-editor canvas with page -> module -> child -> child-owned pane/table as the maximum depth; each module kind owns a distinct internal composition, with a wide-screen section index for long records.'],
+      acceptance: ['Identity, form sections, parent-child lines, supporting documents, audit, and commit actions read as one hierarchy rather than assembled cards; the section index reflects and locates the current module without creating another content workspace.'],
     },
     dense: {
-      decisions: ['Use one page-body vertical scroll owner, compact module rhythm, Arco small forms, VXE small detail tables, content-height activity rows, and table-only horizontal overflow.'],
-      acceptance: ['At 1024, 1366, and 1920 widths, module commands remain adjacent to their owners, detail and activity rows remain readable without flex-filling spare height, and the page does not gain a second vertical scrollbar.'],
+      decisions: ['Use one page-body vertical scroll owner, a full-width adaptive detail canvas, the shared 36px module rhythm, Arco small page forms, mini table-row controls, VXE small detail tables, content-height activity rows, and table-only horizontal overflow.'],
+      acceptance: ['At 1024, 1366, and 1920 widths, the canvas uses available width without artificial side gutters, always-open module titles and bodies share one origin, module heads align to one rhythm, commands remain adjacent to their owners, and the page does not gain a second vertical scrollbar.'],
     },
     premium: {
-      decisions: ['Use one system-first sans stack, mono only for opaque identifiers, a strong object decision band, restrained semantic status, and stable shared detail primitives without page-local component skins.'],
-      acceptance: ['Editable and read-only module states, long data, destructive confirmation, save feedback, bilingual labels, and 200% zoom retain a clear object/module/child/data hierarchy without unrelated font-family changes.'],
+      decisions: ['Use one system-first sans stack, mono only for opaque identifiers, the F2/F3 detail-title ladder, neutral full-width business bands without repeated decorative color bars, inline owning metrics, scope-owned button types, a strong object decision band, and stable shared detail primitives without page-local component skins.'],
+      acceptance: ['Editable and read-only module states, module/table/row actions, long data, destructive confirmation, save feedback, bilingual labels, and 200% zoom retain a clear object/module/child/data hierarchy without unrelated size or font-family changes.'],
     },
   },
   surfaces: [
     { id: 'detail-identity', role: 'identity', owns: ['identity', 'status', 'risk', 'next-action'], implementation: 'arco' },
-    { id: 'detail-workspace', role: 'detail', owns: ['business-modules', 'module-feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'Arco provides controls but not bounded business-module, metric-ownership, and parent-child composition semantics.' },
+    { id: 'detail-workspace', role: 'detail', owns: ['module-navigation', 'business-modules', 'module-feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'Arco provides controls but not bounded business-module, metric-ownership, parent-child composition, and scroll-aware module navigation semantics.' },
     { id: 'detail-footer', role: 'command', owns: ['save', 'cancel', 'save-feedback'], primaryAction: 'detail-workspace-save', implementation: 'arco' },
   ],
   query: { totalFields: 0, strategy: 'none', layout: 'none', visibleFields: [], visibleFieldLayout: [], advancedFields: [] },
@@ -83,8 +83,8 @@ export const DETAIL_MODULES_SPEC = definePesdpPageSpec({
       },
       {
         id: 'containers', kind: 'line-table', priority: 'core', mode: 'row-edit', owns: ['containerNo', 'containerType', 'sealNo', 'packageCount', 'weight', 'volume'],
-        metrics: [{ id: 'container-count', kind: 'count', source: 'local-state', aggregation: 'count', format: 'number', placement: 'table-cap' }],
-        actions: { module: [], table: ['detail-container-add'], row: ['detail-container-remove'] }, collapse: 'always-open', children: { kind: 'none' },
+        metrics: [{ id: 'container-count', kind: 'count', source: 'local-state', aggregation: 'count', format: 'number', placement: 'module-summary' }],
+        actions: { module: ['detail-container-add'], table: [], row: ['detail-container-remove'] }, collapse: 'always-open', children: { kind: 'none' },
       },
       {
         id: 'documents', kind: 'document-checklist', priority: 'supporting', mode: 'read-only', owns: ['documentName', 'documentStatus', 'owner', 'updatedAt'],
@@ -101,7 +101,7 @@ export const DETAIL_MODULES_SPEC = definePesdpPageSpec({
     { id: 'detail-cargo-remove-party', scope: 'child:cargo-party', frequency: 'rare', risk: 'high', presentation: 'dropdown', contract: 'detail-cargo-remove-party', successOwner: 'detail-workspace', failureOwner: 'detail-workspace' },
     { id: 'detail-cargo-add-line', scope: 'table:cargo-lines', frequency: 'regular', risk: 'low', presentation: 'secondary', contract: 'detail-cargo-add-line', successOwner: 'detail-workspace', failureOwner: 'detail-workspace' },
     { id: 'detail-cargo-remove-line', scope: 'row:cargo-line', frequency: 'rare', risk: 'high', presentation: 'row-action', contract: 'detail-cargo-remove-line', successOwner: 'detail-workspace', failureOwner: 'detail-workspace' },
-    { id: 'detail-container-add', scope: 'table:containers', frequency: 'regular', risk: 'low', presentation: 'secondary', contract: 'detail-container-add', successOwner: 'detail-workspace', failureOwner: 'detail-workspace' },
+    { id: 'detail-container-add', scope: 'module:containers', frequency: 'regular', risk: 'low', presentation: 'secondary', contract: 'detail-container-add', successOwner: 'detail-workspace', failureOwner: 'detail-workspace' },
     { id: 'detail-container-remove', scope: 'row:container', frequency: 'rare', risk: 'high', presentation: 'row-action', contract: 'detail-container-remove', successOwner: 'detail-workspace', failureOwner: 'detail-workspace' },
   ],
   states: ['loading', 'empty', 'no-permission', 'validation-error', 'network-error', 'success'],

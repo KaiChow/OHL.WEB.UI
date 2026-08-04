@@ -109,17 +109,18 @@ Implementation: [`detail-form.md`](detail-form.md) · [`actions.md`](actions.md)
 | `drill_down` | VXE table behind metrics |
 
 ## Module Surface
-
-```text
-module
-├── head        title (left) · actions (right) only
-├── summary?    counts/totals/progress — not in title
-├── body        form and/or table
-└── empty?      explicit state + next action
-```
-
-**Header rule:** left = module name only; right = module actions only. No counts, status, or helper text in the title row.
-Modules are sections inside one owning detail canvas, not repeated cards. `field-group`, `parent-child`, `line-table`, `document-checklist`, `activity-log`, and `timeline` must use different internal compositions; sharing a head/body primitive does not authorize rendering every kind as the same framed box. Core editing modules stay open without redundant collapse controls. Supporting and audit modules may collapse; a local anchor rail appears only when proven page length or module count makes direct scrolling materially inefficient.
+| Level | Height / type | Body rhythm | Action rule |
+|---|---|---|---|
+| Top-level module | 36px head · F2 13/600 | 8px start · 12px inline/end | title left; at most one outline add action right |
+| Repeated child | 36px head · F3 12/600 | 10px block · 12px inline | child metrics beside identity; auxiliary icon tools right |
+| Child table cap | 32px · F3 12/600 | directly precedes the table | one outline add action; no duplicate module totals |
+| Body data | F1/F4 12px; F5 11px metadata | field rows 8px; columns 12px | controls/actions follow component-size/actions authorities |
+Always-open module titles and bodies share the 12px inline origin and never reserve a phantom disclosure slot; only genuinely collapsible modules own a visible disclosure control. Collapsed supporting/audit modules consume only their 36px head and never retain phantom body spacing. That 36px is the rendered border-box height including padding/dividers; verify the bounding box, not only the token declaration.
+Modules are sections inside one owning detail canvas, not repeated cards. Module kinds use distinct internal compositions; core editing modules stay open without redundant collapse controls, while supporting/audit modules may collapse.
+Top-level modules use one neutral header fill, one subtle divider, and a 4-8px neutral inter-module gap; they stay full-width and never receive card shadows or repeated decorative color bars. Place compact statistics between title and actions, never in a detached row, and wrap the group as one unit when narrow.
+Repeated child business objects may use one neutral 1px boundary and the shared small radius because each child is a genuine repeated unit. Keep its head on `color-fill-1`, its body white, and never add a shadow.
+A table cap exists only for a real subordinate table title. Additive/workflow actions live in the header of the module or child they mutate; never repeat the parent module title merely to carry an action.
+For at least five modules or more than two viewport heights of content, show a scroll-aware section index only with at least 1440px available width; hide it below that threshold and keep the existing scroll owner. The active item uses one text-centered 16px indicator, never a full-row rail. Detail canvases use all available width; responsive columns and table-owned overflow adapt content without arbitrary page/form max-width gutters.
 **Action labels:** object-specific (`Add shipper`, not bare `Add`). Wording: [`domain-language.md`](domain-language.md).
 
 ## Typed Module Manifest

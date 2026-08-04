@@ -2,7 +2,7 @@
 
 Arco exposes `size?: 'mini' | 'small' | 'medium' | 'large'`. The application-level ConfigProvider sets the inherited default to `small`, so operational form controls do not fall back to Arco's standalone `medium` default.
 
-This project uses **one business density**. Form and ordinary business controls inherit `small`; use public component configuration for stable table row heights.
+This project uses **one business density**, not one literal size prop. Form and ordinary controls inherit `small`; controls inside compact VXE rows use `mini` so their rendered box fits the row. Forcing both surfaces to the same prop either clips table controls or makes page controls too small.
 
 ## Global Rule
 
