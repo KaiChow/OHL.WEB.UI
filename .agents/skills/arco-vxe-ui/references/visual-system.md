@@ -129,15 +129,6 @@ Arco Tabs, Radio Group, Checkbox, Segmented, Select, and Tree keep GI native sel
 
 The RGB-channel pitfall, alias scope, and global CSS boundary are owned by `theme-contract.md`. In page, component, and skill CSS, consume `var(--dense-*)` semantic aliases or official neutral surface tokens; never compose colors from raw `rgb(var(--primary-6))` channel values.
 
-## Gray Budget
-
-- Do not let gray occupy the page without a primary anchor.
-- `color-text-4` is only for empty value, disabled state, timestamps, or helper text.
-- `color-fill-1/2` is only for secondary containers or disabled controls.
-- Main business values use `color-text-1`.
-- Interactive values use `--dense-primary-6` or another project semantic alias.
-- Page-level gray is allowed only as a quiet base. If the viewport reads as gray/white after active navigation, primary operation, selected state, core links, and status pills are visible, the surface fails the theme requirement.
-
 ## Main Surface Standard
 
 Business users spend long sessions in list and detail pages. The interface must not become a gray ERP sheet or a blue-tinted grid. Use this main surface model:
@@ -297,11 +288,11 @@ Fail Design Sense when any of these appear:
 
 Advanced-filter grouping rhythm is owned by `filter-layout.md`. Commercial release still requires every applicable gate in `product-grade-evaluation.md`.
 
-## Hard Bans
+## Motion Contract
 
-- No standalone hex colors in new UI CSS.
-- No large gray panels that do not carry hierarchy.
-- No decorative blue gradients on page background, normal card heads, table headers, or table caps.
-- No `font-weight: 700/800` in business UI.
-- No negative letter spacing.
-- No large-radius consumer SaaS styling unless Arco default component radius produces it.
+- Arco owns Drawer, Modal, Dropdown, Tooltip, Message, collapse, and focus transitions. Do not replace native motion with page-local keyframes.
+- Hover, focus, selection, loading, sorting, filtering, and row updates must not shift layout, resize controls, change row height, or block the next legal action.
+- Use immediate feedback for button pending and validation. Longer local work keeps its owner visible with loading state and stable labels; never hide the whole page for a table refresh.
+- Custom motion is allowed only for a real spatial/state relationship; keep it short, interruptible, layout-stable, and never use continuous, bouncing, pulsing, parallax, card-lift, gradient, or attention-seeking status animation.
+- Smooth scrolling is allowed for an explicit section-navigation action; focus moves to or is restored within the destination workflow when needed.
+- Respect `prefers-reduced-motion` and verify rapid repeat, interrupted close/open, keyboard focus, loading completion, reduced motion, and no cumulative layout shift on the real route.

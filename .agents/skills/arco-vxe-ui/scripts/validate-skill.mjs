@@ -49,6 +49,9 @@ export function validateUiSkill() {
     [references.get('feature-delivery-contract.md') || '', '## Smallest Complete Contract', 'feature-delivery-contract.md: missing smallest complete contract'],
     [references.get('page-spec-contract.md') || '', 'It is not a design essay', 'page-spec-contract.md: missing decision-record boundary'],
     [references.get('visual-system.md') || '', '## Design Sense Gate', 'visual-system.md: missing design-sense gate'],
+    [references.get('visual-system.md') || '', '## Motion Contract', 'visual-system.md: missing restrained motion contract'],
+    [references.get('arco-first.md') || '', '## Shared Component Governance', 'arco-first.md: missing shared-component governance'],
+    [references.get('domain-language.md') || '', '## Internationalization Contract', 'domain-language.md: missing internationalization contract'],
     [references.get('product-grade-evaluation.md') || '', '## Six Blocking Gates', 'product-grade-evaluation.md: missing commercial release gates'],
     [references.get('product-grade-evaluation.md') || '', '200% zoom', 'product-grade-evaluation.md: missing accessible rendered gate'],
     [references.get('component-size.md') || '', '24×24px minimum target', 'component-size.md: missing row-action target authority'],
@@ -63,6 +66,8 @@ export function validateUiSkill() {
     [references.get('permissions.md') || '', 'Loading, no-role-selected, no-access, read-only, editable, save-pending, save-failure, and dirty-leave states', 'permissions.md: missing complete permission-state gate'],
     [references.get('existing-project-modernization.md') || '', 'Preserve unrelated API endpoints', 'existing-project-modernization.md: missing scope-integrity boundary'],
     [references.get('typography.md') || '', 'Translate complete messages instead of concatenating sentence fragments.', 'typography.md: missing complete-message i18n boundary'],
+    [skill, '## Specification Coverage', 'SKILL.md: missing final UI/UX specification map'],
+    [skill, '## AI Generation Contract', 'SKILL.md: missing AI generation contract'],
   ];
   for (const [source, fragment, message] of requiredFragments) {
     if (!source.includes(fragment)) errors.push(message);

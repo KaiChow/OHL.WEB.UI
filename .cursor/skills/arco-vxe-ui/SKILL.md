@@ -33,6 +33,33 @@ Use the smallest path that covers the task:
 
 If business object, user job, legal action, API behavior, or permission source cannot be proven from the repository or user input, do not invent it. Preserve the boundary visibly and report the missing contract.
 
+## Specification Coverage
+
+The final back-office UI/UX standard is routed through these existing authorities; do not create a parallel handbook:
+
+| Topic | Authority |
+| --- | --- |
+| Design principles | this file, `arco-first.md`, `theme-contract.md`, `visual-system.md` |
+| Page layout and page types | `domain-routing.md`, the selected page authority, `module-patterns.md` |
+| Query, table, form, and button | `filter-layout.md`, `table.md`, form authorities, `actions.md` |
+| Shared components | `arco-first.md`, `component-size.md`, `icons.md`, overlay/upload authorities |
+| State and exception feedback | `page-spec-contract.md`, `feedback.md`, `feature-delivery-contract.md` |
+| Permission | `permissions.md` plus the applicable feature contract |
+| Internationalization | `domain-language.md`, `typography.md`, `responsive.md` |
+| Responsive behavior | `responsive.md` plus the selected page authority |
+| Motion | `visual-system.md`; Arco owns standard component motion |
+| AI generation | the AI Generation Contract below plus the Before Code flow |
+| Page acceptance | Commercial Definition Of Done, `product-grade-evaluation.md`, adversarial review, and executable checks |
+
+## AI Generation Contract
+
+- Inspect repository facts before generating fields, actions, permissions, states, or copy; unsupported behavior remains explicitly out of scope.
+- Generate the typed page/feature contract before material UI, then follow Arco -> tokens -> proven shared component -> minimal local layout CSS.
+- Reuse a shared component only when its documented job and ownership match; visual similarity alone is insufficient.
+- Generated controls are complete or absent: no dead buttons, placeholder menu options, success-only mutations, invented metrics, or documentation standing in for behavior.
+- Preserve current business behavior and unrelated user changes; do not broaden the task into theme or architecture work without evidence.
+- Finish with static checks and real-route evidence appropriate to the claimed quality level; generated prose and screenshots cannot self-certify acceptance.
+
 ## Implementation Order
 
 1. Arco props, slots, layout, and native behavior.

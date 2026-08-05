@@ -10,7 +10,7 @@ import ts from 'typescript';
 import { validateUiSkill } from '../.agents/skills/arco-vxe-ui/scripts/validate-skill.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1');
-const SCAN_DIRS = ['src/views', 'src/components'];
+const SCAN_DIRS = ['src/views', 'src/components', 'src/layouts'];
 const EXTS = ['.vue', '.ts', '.css'];
 
 // ─── 规则定义 ────────────────────────────────────────────────────────────────
@@ -31,6 +31,11 @@ const RULES = [
   {
     desc: '禁止直接使用 <a-upload> — 业务上传必须走已实现的共享上传契约',
     pattern: /<a-upload[\s>]/,
+    fileFilter: /\.vue$/,
+  },
+  {
+    desc: 'Action menu options must execute a declared interaction; remove placeholder doptions',
+    pattern: /<a-doption\b(?![^>]*@click)[^>]*>/,
     fileFilter: /\.vue$/,
   },
 

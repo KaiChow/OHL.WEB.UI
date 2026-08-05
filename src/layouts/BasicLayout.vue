@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { IconRefresh, IconSearch, IconUser, IconDown, IconLanguage } from '@arco-design/web-vue/es/icon';
+import { IconSearch, IconUser, IconLanguage } from '@arco-design/web-vue/es/icon';
 import { Ship } from '@icon-park/vue-next';
 import { appMenus } from '../config/menu';
 import { setAppLocale, type AppLocale } from '../i18n';
@@ -180,26 +180,15 @@ const onMenuItemClick = (key: string) => {
         </div>
 
         <a-space class="app-layout__header-actions" :size="8">
-          <a-button size="small" type="text" class="app-layout__icon-action" :title="t('common.refresh')" @click="router.go(0)">
-            <template #icon><icon-refresh /></template>
-          </a-button>
           <a-select class="app-layout__locale" size="small" :model-value="locale" :aria-label="t('shell.language')" @change="handleLocaleChange">
             <template #prefix><icon-language /></template>
             <a-option value="zh-CN">{{ t('shell.chinese') }}</a-option>
             <a-option value="en-US">{{ t('shell.english') }}</a-option>
           </a-select>
-          <a-dropdown trigger="click" content-class="action-menu action-menu--toolbar">
-            <a-button size="small" class="app-layout__user">
-              <template #icon><icon-user /></template>
-              admin
-              <icon-down />
-            </a-button>
-            <template #content>
-              <a-doption>{{ t('shell.personalSettings') }}</a-doption>
-              <a-doption>{{ t('shell.switchWorkspace') }}</a-doption>
-              <a-doption>{{ t('shell.logout') }}</a-doption>
-            </template>
-          </a-dropdown>
+          <div class="app-layout__user" aria-label="admin">
+            <icon-user />
+            <span>admin</span>
+          </div>
         </a-space>
       </a-layout-header>
 
@@ -368,15 +357,11 @@ const onMenuItemClick = (key: string) => {
   width: 104px;
 }
 
-.app-layout__icon-action {
-  color: var(--color-text-3);
-}
-
 .app-layout__user {
-  border-color: var(--color-border-1);
-  background: var(--color-bg-card);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--color-text-2);
-  box-shadow: none;
 }
 
 .app-layout__content {

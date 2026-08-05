@@ -164,6 +164,17 @@ Preferred field labels:
 - Error messages should mention the failed business object: `业务单提交失败`, `附件上传失败`, `报关资料缺失`.
 - Avoid playful tone, emoji, marketing adjectives, and decorative slogans.
 
+## Internationalization Contract
+
+- All visible copy, accessible names, validation, empty/error text, option labels, and confirmation verbs use locale keys; industry-standard abbreviations may remain literal.
+- Translate complete messages, never concatenate fragments or depend on Chinese word order. Interpolation names the business object, count, amount, or identifier.
+- Reserve 1.3-2x label/action expansion. Reflow tracks, widen the semantic slot, or move optional fields before clipping, iconifying a business verb, or shrinking typography.
+- Locale fallback is deterministic: requested locale -> project default -> visible development key; production must not silently render blank text.
+- Dates and times use one project formatter and explicit timezone policy; numbers use locale separators; money always carries currency; units remain adjacent to values.
+- Plural/count copy uses the i18n library, not manual suffixes. Business codes, user input, and backend-like identifiers are never translated.
+- Switching locale preserves route, filters, selection, dirty input, open overlay, and current workflow state unless the user explicitly resets them.
+- Verify supported locales with longest table headers, buttons, query actions, menus, overlays, validation messages, 1024px layout, and 200% zoom. RTL is unsupported unless a project contract explicitly adds and verifies it.
+
 ## Platform & Corporate Modules
 
 Use these module names and labels outside shipment operations. Do not reuse 业务单/ETD/MBL columns on these pages.

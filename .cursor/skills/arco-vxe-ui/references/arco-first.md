@@ -102,16 +102,17 @@ Layout archetypes use Arco structure plus small scoped shell CSS. Reused layout 
 
 New layout patterns start as **Arco components** or **Vue scoped CSS**. Promote proven reuse to a shared Vue component.
 
-## What `global.css` Is NOT
+## Shared Component Governance
 
-`global.css` must **not**:
+Shared components package repeated ownership or interaction, not a second component library.
 
-- restyle every Arco control as if Arco were not present
-- become the primary decision layer for buttons, inputs, tabs, or overlays
-- define behavior that should be Arco props
-- create undeclared side effects that pages depend on implicitly
+| Decision | Rule |
+| --- | --- |
+| Discover/adopt | Search `src/components` and real routes; reuse only when role, state ownership, slots, density, and responsive behavior match. |
+| Extend/promote | Add typed APIs only for proven reuse; keep object content in pages and extract only repeated structural jobs. |
+| Retire | Remove superseded variants and migrate consumers; do not keep aliases that create two UI languages. |
 
-If removing a `global.css` rule would break standard Arco surfaces (button, input, tab, modal), that rule is probably wrong scope.
+Each shared component documents its job, required props/slots/events, owned states, size and accessibility behavior, Arco gap, and at least one real consumer. Pages may compose shared primitives but may not override their internal skin or copy their scoped CSS. The component inventory is the grep-proven `src/components` tree plus its typed exports; markdown names never make an implementation real.
 
 ## Anti-Patterns
 
