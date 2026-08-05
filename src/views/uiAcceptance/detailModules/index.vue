@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Message } from '@arco-design/web-vue';
+import { Box, Delivery, FileText, History, Order } from '@icon-park/vue-next';
 import {
   IconCheck,
   IconCopy,
@@ -370,6 +371,7 @@ const removeContainer = (containerId: number) => {
         :title="t('detailModules.modules.overview')"
         :collapse-label="t('detailModules.aria.toggleModule', { module: t('detailModules.modules.overview') })"
       >
+        <template #icon><Order theme="outline" size="14" :stroke-width="2.5" /></template>
         <a-form class="detail-form detail-form--overview" :model="overview" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
           <div class="overview-field-groups">
             <BusinessFieldGroup :title="t('detailModules.groups.businessContext')">
@@ -400,6 +402,7 @@ const removeContainer = (containerId: number) => {
         :title="t('detailModules.modules.cargo')"
         :collapse-label="t('detailModules.aria.toggleModule', { module: t('detailModules.modules.cargo') })"
       >
+        <template #icon><Delivery theme="outline" size="14" :stroke-width="2.5" /></template>
         <template #actions>
           <a-button size="small" type="outline" @click="addParty"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addParty') }}</a-button>
         </template>
@@ -475,6 +478,7 @@ const removeContainer = (containerId: number) => {
         :title="t('detailModules.modules.containers')"
         :collapse-label="t('detailModules.aria.toggleModule', { module: t('detailModules.modules.containers') })"
       >
+        <template #icon><Box theme="outline" size="14" :stroke-width="2.5" /></template>
         <template #summary><BusinessMetricStrip :items="containerMetrics" /></template>
         <template #actions>
           <a-button size="small" type="outline" @click="addContainer"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addContainer') }}</a-button>
@@ -504,6 +508,7 @@ const removeContainer = (containerId: number) => {
         :title="t('detailModules.modules.documents')"
         :collapse-label="t('detailModules.aria.toggleModule', { module: t('detailModules.modules.documents') })"
       >
+        <template #icon><FileText theme="outline" size="14" :stroke-width="2.5" /></template>
         <template #state><span class="s-pill" data-s="wait">{{ t('detailModules.nav.issues', { count: pendingDocumentCount }) }}</span></template>
         <div class="document-list" role="list">
           <div class="document-list__head" aria-hidden="true">
@@ -528,6 +533,7 @@ const removeContainer = (containerId: number) => {
         :title="t('detailModules.modules.activity')"
         :collapse-label="t('detailModules.aria.toggleModule', { module: t('detailModules.modules.activity') })"
       >
+        <template #icon><History theme="outline" size="14" :stroke-width="2.5" /></template>
         <BusinessActivityList :items="activityItems" :empty-text="t('detailModules.empty.activity')" />
       </BusinessDetailModule>
       </div>

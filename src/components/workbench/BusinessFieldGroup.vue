@@ -23,17 +23,16 @@ const headingTag = computed(() => `h${props.headingLevel}`);
 .business-field-group { min-width: 0; }
 
 .business-field-group__head {
-  min-height: 26px;
+  min-height: 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--dense-gap-inline);
-  border-bottom: 1px solid var(--dense-border-subtle);
 }
 
 .business-field-group__title {
   margin: 0;
-  color: var(--color-text-2);
+  color: var(--color-text-1);
   font-size: var(--dense-font-title);
   font-weight: var(--dense-weight-title);
   line-height: 20px;
@@ -48,6 +47,6 @@ const headingTag = computed(() => `h${props.headingLevel}`);
 
 .business-field-group__body {
   min-width: 0;
-  padding-top: var(--dense-gap-zone);
+  padding-top: 6px;
 }
 </style>

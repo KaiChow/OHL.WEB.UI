@@ -37,7 +37,7 @@ export const DETAIL_MODULES_SPEC = definePesdpPageSpec({
       acceptance: ['At 1024, 1366, and 1920 widths, the canvas uses available width without artificial side gutters, always-open module titles and bodies share one origin, module heads align to one rhythm, commands remain adjacent to their owners, and the page does not gain a second vertical scrollbar.'],
     },
     premium: {
-      decisions: ['Use one system-first sans stack, mono only for opaque identifiers, a three-zone object header with one lead business fact, neutral full-width module bands, unframed semantic field groups, role-visible child identities, scope-owned actions, and persistent dirty-state feedback without page-local component skins.'],
+      decisions: ['Use one system-first sans stack, mono only for opaque identifiers, a three-zone object header with one lead business fact, semantic first-level module icons, single-divider full-width module bands, unframed field groups, role-visible child identities, scope-owned actions, and persistent dirty-state feedback without page-local component skins.'],
       acceptance: ['At scan distance the object, route, risk, grouped working data, module/table/row actions, long data, destructive confirmation, save feedback, bilingual labels, and 200% zoom remain distinct without decorative rails or unrelated font-family changes.'],
     },
   },

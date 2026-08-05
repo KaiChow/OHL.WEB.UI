@@ -31,6 +31,7 @@ const emit = defineEmits<{
             <template #icon><icon-down v-if="expanded" /><icon-right v-else /></template>
           </a-button>
         </a-tooltip>
+        <span v-if="$slots.icon" class="business-detail-module__icon" aria-hidden="true"><slot name="icon" /></span>
         <h2 :id="`${id}-title`" class="business-detail-module__title">{{ title }}</h2>
       </div>
       <div class="business-detail-module__commands">
@@ -62,11 +63,11 @@ const emit = defineEmits<{
   justify-content: space-between;
   gap: var(--dense-gap-inline);
   background: var(--color-bg-1);
-  border-top: 1px solid var(--dense-card-border);
   border-bottom: 1px solid var(--dense-border-subtle);
 }
 
 .business-detail-module__identity,
+.business-detail-module__icon,
 .business-detail-module__commands,
 .business-detail-module__state,
 .business-detail-module__summary,
@@ -77,6 +78,11 @@ const emit = defineEmits<{
 }
 
 .business-detail-module__identity { gap: 4px; }
+.business-detail-module__icon {
+  flex: 0 0 auto;
+  color: var(--color-text-2);
+  line-height: 1;
+}
 .business-detail-module__commands { flex: 0 0 auto; gap: var(--dense-gap-inline); }
 .business-detail-module__summary {
   box-sizing: border-box;
