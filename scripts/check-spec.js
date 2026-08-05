@@ -1381,6 +1381,23 @@ for (const file of files) {
   for (const block of blocks) {
     const blockIndex = content.indexOf(block);
     const firstLine = block.split('\n').slice(0, 10).join(' ');
+    const openingTag = block.match(/^<vxe-table\b[^>]*>/)?.[0] || '';
+    if (!/:row-config=/.test(openingTag)) {
+      violations.push({
+        rule: '所有 VXE 表格必须通过 row-config 声明统一 hover 与稳定行标识',
+        file: relPath,
+        line: getLineNumber(content, blockIndex),
+        content: firstLine.trim().slice(0, 140),
+      });
+    }
+    if (/\bsize=(["'])mini\1/.test(openingTag)) {
+      violations.push({
+        rule: 'VXE 主列表继承全局 mini；详情/编辑表使用 size="small"，禁止页面显式建立 mini 变体',
+        file: relPath,
+        line: getLineNumber(content, blockIndex),
+        content: firstLine.trim().slice(0, 140),
+      });
+    }
     if (/\bborder=(["'])none\1/.test(block)) {
       violations.push({
         rule: '表格边框由全局主题统一，页面禁止设置 border="none"',

@@ -20,6 +20,7 @@ import {
 import { downloadCsvFile } from '../../../utils/mock-actions';
 import { formatLocalMinute } from '../../../utils/date-time';
 import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '../../../design-system/formLayout';
+import { stableTableRowConfig } from '../../../design-system/tableConfig';
 import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
 import StandardListFrame from '../../../components/workbench/StandardListFrame.vue';
@@ -251,11 +252,6 @@ const statusTransitionOptions = computed(() => {
   });
   return Array.from(merged.values());
 });
-const tableRowConfig = computed(() => ({
-  isHover: true,
-  keyField: 'id',
-}));
-
 const isColumnVisible = (field: ColumnSettingField) => visibleColumnFields.value.includes(field);
 
 const matchText = (value: string, keyword: string) =>
@@ -1073,7 +1069,6 @@ watch(uiScenario, () => {
             :current="page.current"
             :page-size="page.size"
             :total="tableTotal"
-            :page-size-options="[20, 50, 100, 200]"
             @change="onPageChange"
             @page-size-change="onPageSizeChange"
           >
@@ -1148,7 +1143,7 @@ watch(uiScenario, () => {
             :seq-config="{ startIndex: (page.current - 1) * page.size }"
             :column-config="{ resizable: true }"
             :custom-config="{ storage: true }"
-            :row-config="tableRowConfig"
+            :row-config="stableTableRowConfig"
             :checkbox-config="{ highlight: true }"
             @checkbox-change="onSelectionChange"
             @checkbox-all="onSelectionChange"

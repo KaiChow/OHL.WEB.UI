@@ -33,8 +33,8 @@ export const DETAIL_MODULES_SPEC = definePesdpPageSpec({
       acceptance: ['Identity, lead route, status/risk, grouped working fields, module summary, child identity, fields/tables, and commit feedback form visibly different levels; navigation counts and warnings match their owning module data.'],
     },
     dense: {
-      decisions: ['Use one page-body vertical scroll owner, a full-width adaptive detail canvas, the shared 36px module rhythm, Arco small page forms, VXE mini detail tables and row controls, content-height activity rows, and table-only horizontal overflow.'],
-      acceptance: ['At 1024, 1366, and 1920 widths, the canvas uses available width without artificial side gutters, always-open module titles and bodies share one origin, module heads align to one rhythm, commands remain adjacent to their owners, and the page does not gain a second vertical scrollbar.'],
+      decisions: ['Use one page-body vertical scroll owner, a full-width adaptive detail canvas, the shared 36px module rhythm, Arco small page forms, VXE small plain detail tables with mini in-row controls, content-height activity rows, and table-only horizontal overflow.'],
+      acceptance: ['At 1024, 1366, and 1920 widths, the canvas uses available width without artificial side gutters, always-open module titles and bodies share one origin, module heads align to one rhythm, commands remain adjacent to their owners, and the page does not gain a second vertical scrollbar.', 'Editable child rows use stable identity and shared hover without introducing zebra banding or obscuring input validation.'],
     },
     premium: {
       decisions: ['Use one system-first sans stack, mono only for opaque identifiers, a three-zone object header with one lead business fact, semantic first-level module icons, single-divider full-width module bands, unframed field groups, role-visible child identities, scope-owned actions, and persistent dirty-state feedback without page-local component skins.'],

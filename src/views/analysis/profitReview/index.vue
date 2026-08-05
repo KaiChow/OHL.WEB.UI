@@ -13,6 +13,7 @@ import {
 import { downloadCsvFile, buildTimestampSuffix } from '../../../utils/mock-actions';
 import { formatLocalMinute } from '../../../utils/date-time';
 import { compactVerticalFormLabelStyle } from '../../../design-system/formLayout';
+import { stableTableRowConfig } from '../../../design-system/tableConfig';
 import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
 import StandardListFrame from '../../../components/workbench/StandardListFrame.vue';
@@ -97,8 +98,6 @@ const ownerOptions = Array.from(new Set(profitReviewRows.map((row) => row.owner)
 const canOperate = computed(() => uiScenario.value !== 'permission');
 const forcedLoading = computed(() => uiScenario.value === 'loading');
 const tableError = computed(() => loadError.value);
-const tableRowConfig = computed(() => ({ isHover: true, keyField: 'id' }));
-
 const matchText = (value: string, keyword: string) =>
   !keyword.trim() || value.toLowerCase().includes(keyword.trim().toLowerCase());
 
@@ -480,7 +479,6 @@ watch(uiScenario, () => {
             :current="page.current"
             :page-size="page.size"
             :total="tableTotal"
-            :page-size-options="[20, 50, 100]"
             @change="onPageChange"
             @page-size-change="onPageSizeChange"
           >
@@ -503,10 +501,10 @@ watch(uiScenario, () => {
                     </a-button>
                   </a-tooltip>
                 </div>
-                <template v-if="selectedCount > 0">
+                <div v-if="selectedCount > 0" class="selection-context">
                   <span class="selection-tip">{{ t('common.selected', { count: selectedCount }) }}</span>
                   <a-button size="small" type="text" @click="clearSelection">{{ t('common.clear') }}</a-button>
-                </template>
+                </div>
               </div>
             </template>
             <template #utilities>
@@ -542,7 +540,7 @@ watch(uiScenario, () => {
             :data="pagedRows"
             :seq-config="{ startIndex: (page.current - 1) * page.size }"
             :column-config="{ resizable: true }"
-            :row-config="tableRowConfig"
+            :row-config="stableTableRowConfig"
             :checkbox-config="{ highlight: true }"
             @checkbox-change="onSelectionChange"
             @checkbox-all="onSelectionChange"

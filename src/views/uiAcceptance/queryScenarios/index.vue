@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { IconDown, IconFilter, IconSearch } from '@arco-design/web-vue/es/icon';
 import { compactVerticalFormLabelStyle, denseFormGridGutter } from '../../../design-system/formLayout';
+import { stableTableRowConfig } from '../../../design-system/tableConfig';
 import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
 import StandardListFrame from '../../../components/workbench/StandardListFrame.vue';
@@ -41,7 +42,7 @@ const expanded = ref(false);
 const drawerVisible = ref(false);
 const querying = ref(false);
 const primaryGridTrackCount = ref(24);
-const page = reactive({ current: 1, size: 20 });
+const page = reactive({ current: 1, size: 50 });
 const keywordType = ref('orderNo');
 const wideFilterEditor = ref<HTMLElement>();
 const queryValues = reactive<Record<string, string | string[]>>({});
@@ -267,16 +268,13 @@ watch(() => props.initialScenario, (value) => {
         :current="page.current"
         :page-size="page.size"
         :total="filteredRows.length"
-        :page-size-options="[20, 50, 100]"
         @change="onPageChange"
         @page-size-change="onPageSizeChange"
-      >
-        <template #commands><span>{{ t('queryScenario.results') }}</span></template>
-      </WorkbenchTableToolbar>
+      />
     </template>
 
     <template #table>
-        <vxe-table :data="pagedRows" height="100%" auto-resize fit show-overflow="title" :seq-config="{ startIndex: (page.current - 1) * page.size }">
+        <vxe-table :data="pagedRows" height="100%" auto-resize fit show-overflow="title" :row-config="stableTableRowConfig" :seq-config="{ startIndex: (page.current - 1) * page.size }">
           <vxe-column type="seq" :title="t('common.sequence')" width="52" fixed="left" align="center" />
           <vxe-column field="orderNo" :title="t('queryScenario.columns.orderNo')" min-width="160" fixed="left" class-name="mono" />
           <vxe-column field="orderStatus" :title="t('queryScenario.columns.status')" min-width="112">

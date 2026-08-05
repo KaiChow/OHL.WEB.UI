@@ -17,6 +17,7 @@ import BusinessDetailModule from '../../../components/workbench/BusinessDetailMo
 import BusinessFieldGroup from '../../../components/workbench/BusinessFieldGroup.vue';
 import BusinessMetricStrip, { type BusinessMetricItem } from '../../../components/workbench/BusinessMetricStrip.vue';
 import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '../../../design-system/formLayout';
+import { stableTableRowConfig } from '../../../design-system/tableConfig';
 import { DETAIL_MODULES_SPEC } from './pageSpec';
 import { DETAIL_MODULE_FEATURE_CONTRACTS } from './featureContracts';
 
@@ -443,7 +444,7 @@ const removeContainer = (containerId: number) => {
             <strong>{{ t('detailModules.tables.cargoLines') }}</strong>
             <a-button size="small" type="outline" @click="addCargoLine(party)"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addCargoLine') }}</a-button>
           </div>
-          <vxe-table :data="party.lines" size="mini" :stripe="false" :empty-text="t('detailModules.empty.cargoLines')">
+          <vxe-table :data="party.lines" size="small" :stripe="false" :row-config="stableTableRowConfig" :empty-text="t('detailModules.empty.cargoLines')">
             <vxe-column type="seq" :title="t('common.sequence')" width="52" align="center" />
             <vxe-column field="name" :title="t('detailModules.columns.cargoName')" min-width="190">
               <template #default="{ row }"><a-input v-model="row.name" size="mini" /></template>
@@ -483,7 +484,7 @@ const removeContainer = (containerId: number) => {
         <template #actions>
           <a-button size="small" type="outline" @click="addContainer"><template #icon><icon-plus /></template>{{ t('detailModules.actions.addContainer') }}</a-button>
         </template>
-        <vxe-table :data="containers" size="mini" :stripe="false" :empty-text="t('detailModules.empty.containers')">
+        <vxe-table :data="containers" size="small" :stripe="false" :row-config="stableTableRowConfig" :empty-text="t('detailModules.empty.containers')">
           <vxe-column type="seq" :title="t('common.sequence')" width="52" align="center" />
           <vxe-column field="containerNo" :title="t('detailModules.columns.containerNo')" min-width="150">
             <template #default="{ row }"><a-input v-model="row.containerNo" size="mini" class="mono" /></template>
