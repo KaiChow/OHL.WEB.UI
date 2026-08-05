@@ -77,5 +77,7 @@ For each non-trivial feature, exercise the applicable cases instead of writing a
 - duplicate click or repeated submission;
 - exact refresh scope and preserved data/context;
 - validation, stale revision, partial batch failure, cancel/close, or route leave when applicable.
+- browser refresh and route leave/re-entry, proving that filters, defaults, drafts, selection, and open surfaces preserve or reset exactly as the contract states;
+- repeated query, pagination, and overlay open/close cycles, proving there is no duplicated feedback, stale validation, orphan overlay, or focus loss.
 
 If a case cannot be triggered deterministically, report it as unverified. A mocked success click is not a completed feature.

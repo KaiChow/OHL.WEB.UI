@@ -28,35 +28,21 @@ Tier selection criteria and width values: **`overlay-dimensions.md`**.
 
 Set `:width` explicitly on every `<a-modal>` to one declared tier. Choose the smallest tier that preserves readable labels, validation, and footer actions without horizontal overflow. **Hard max 860px.**
 
-## Modal Structure
+## Overlay Intent And Close Policy
 
-```vue
-<a-modal
-  v-model:visible="visible"
-  title="添加联系人"
-  :width="560"
-  :mask-closable="false"
-  :on-before-ok="handleBeforeOk"
-  @cancel="handleCancel"
->
-  <a-form
-    ref="formRef"
-    :model="form"
-    layout="vertical"
-    size="small"
-    class="detail-form"
-  >
-    <a-row :gutter="[16, 8]">
-      <a-col :span="12"><a-form-item field="name" label="姓名" :rules="[{ required: true }]">
-        <a-input v-model="form.name" size="small" placeholder="请输入姓名" />
-      </a-form-item></a-col>
-      <a-col :span="12"><a-form-item field="phone" label="电话">
-        <a-input v-model="form.phone" size="small" placeholder="请输入电话" />
-      </a-form-item></a-col>
-    </a-row>
-  </a-form>
-</a-modal>
-```
+Declare every Modal or Drawer as one interaction intent before choosing close behavior. The intent is a contract; a component name or wrapper is not required.
+
+| Intent | Mask close | Escape | Footer | Close contract |
+| --- | --- | --- | --- | --- |
+| Confirm | No | Yes | Cancel + named confirm/danger action | Cancel leaves the underlying state unchanged; destructive confirm focuses the safer action first |
+| View | Yes | Yes | Close only, or no footer when the native close control is sufficient | Closing returns focus and list context to the trigger |
+| Edit | No | No | Cancel + one primary save/submit | Pending blocks every close path; dirty cancel, close, and route leave require discard confirmation |
+
+Use `unmount-on-close` for task overlays unless a documented state-preservation contract requires otherwise. Validation or persistence failure keeps an Edit overlay open with its values and error owner intact. Advanced-filter drawers follow `filter-layout.md`: Escape must not close the drawer while a portaled picker owns the key event, and unapplied draft conditions require an explicit apply/discard decision.
+
+Custom interactive overlays may be at most two layers deep. A Drawer may open one selector or confirmation Modal; a third layer requires restructuring into one Drawer, tabs/steps, fullscreen, or a routed page. Closing the second layer returns focus to the control that opened it inside the first layer.
+
+## Modal Submit Contract
 
 `handleBeforeOk` must return `true` only after validation and persistence succeed. Return `false` for validation, business rejection, or request failure so the modal remains open with the user's input preserved.
 
@@ -145,5 +131,6 @@ Modal.confirm({
 - [ ] Width comes from the declared tier and remains within the viewport inset without internal horizontal overflow.
 - [ ] Form submit uses `on-before-ok`, one primary action, button loading, duplicate-submit protection, and preserved input on failure.
 - [ ] Destructive confirmation names the object, action, and consequence; batch confirmation includes the affected count.
-- [ ] Open focuses a useful control, validation focuses the first invalid field, close returns focus to the trigger, and dirty close is confirmed.
+- [ ] Confirm, View, or Edit intent is explicit; mask, Escape, pending-close, dirty-close, footer, and focus-return behavior match the intent.
+- [ ] Open focuses a useful control, validation focuses the first invalid field, close returns focus to the trigger, and nested overlays never exceed two interactive layers.
 - [ ] GI owns modal chrome; no page/global selector rewrites header, body, footer, radius, shadow, or typography.

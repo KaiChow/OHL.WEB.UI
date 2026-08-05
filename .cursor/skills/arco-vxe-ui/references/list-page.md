@@ -281,6 +281,7 @@ When records are repeatedly divided by ownership as well as workflow state, expo
 - Table utilities: refresh reloads only the table data; density and columns preserve current query, page, and selection unless the business contract states otherwise. Pagination changes the displayed page without silently changing filters or status scope.
 - Selection: render checkbox selection only when an available batch operation consumes it. While rows are selected, expose selected count and clear in the table context; after a batch attempt, keep failed rows selected and return local recovery feedback.
 - Management and workbench mutations: every action has visibility, enablement, pending lock, success feedback, failure preservation, refresh ownership, and risk confirmation where applicable. A disabled placeholder is not an implemented action.
+- Paginated removal: after a successful delete, void, or other action removes the final visible row, reconcile the page before showing the result. If records still exist and the current page is greater than one, move to the nearest previous valid page and then update that page; do not leave a false empty page while the total indicates remaining records. Preserve the applied query, scope, sort, and unrelated selection.
 - Queues and ownership: use them only when they change the working set. A change resets pagination and selection, updates the table and counts together, and preserves unrelated query values.
 
 ## Table Column Selection
@@ -334,4 +335,5 @@ Use them to choose equivalent identity, status, next-decision, and supporting fi
 - [ ] The command surface passes the rendered height budget and the table remains dominant at 1366x768 and 1024x768.
 - [ ] Compact controls do not wrap or overlap; status and table overflow stay local rather than creating browser-level overflow.
 - [ ] Loading, no rows, no match, permission, network/slow, long text, extreme value, and partial batch failure are reproducible and recoverable.
+- [ ] Removing the final row on a non-first page returns to a valid preceding page without clearing the applied list context.
 - [ ] Keyboard order reaches query, workflow controls, table utilities, row actions, pagination, and opened overlays with named controls and visible focus.

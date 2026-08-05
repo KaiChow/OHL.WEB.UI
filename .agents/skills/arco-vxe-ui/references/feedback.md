@@ -58,6 +58,12 @@ For Arco Modal validation, bind `:on-before-ok="submit"` and return `false` when
 | Panel refresh | Arco Spin on the owning panel only |
 | Button async | `:loading` on that button |
 
+Pending ownership starts immediately: disable or lock the triggering action as soon as work begins. When work remains unresolved beyond about 300ms, the owning surface must expose a stable loading indicator or placeholder instead of appearing inert.
+
+First load and refresh are different states. First load may use a skeleton or empty table loading surface. Refresh, pagination retry, or local reload preserves the last useful content and current query/context while showing local pending feedback; if refresh fails, keep that content visible with a local stale/error explanation and retry action. Never replace useful rows with a blank empty state during refresh.
+
+Async feedback belongs to the lifetime of its visible owner unless the feature contract explicitly transfers ownership to an app-level background job. When a route or owning overlay/section is closed or unmounted, owner-local completion must be cancelled or ignored: it must not mutate a destroyed surface, reopen UI, or emit a late success/error Message for work the user has already left.
+
 Forbidden: full-screen spinner that hides filter + toolbar on every refresh.
 
 ## Empty States
@@ -73,14 +79,6 @@ Use Arco Empty or a small local empty-state layout. Do not assume a shared empty
 | Tree | no nodes | Arco Empty in the tree pane |
 | Permission | no role selected | `请选择左侧角色` |
 
-```vue
-<div v-if="!loading && rows.length === 0" class="state-center--in-table">
-  <icon-empty class="state-empty-icon" />
-  <span>暂无通知</span>
-  <a-button size="small" type="primary" @click="openCreate">新建通知</a-button>
-</div>
-```
-
 ## Confirmation
 
 | Risk | Pattern |
@@ -94,14 +92,7 @@ Use `okButtonProps: { status: 'danger', size: 'small' }` for destructive confirm
 
 ## Batch Selection Guard
 
-```ts
-if (!selectedCount) {
-  Message.warning('请先选择记录')
-  return
-}
-```
-
-Toolbar shows `bulk-hint` — `已选 N 条` when `selectedCount > 0`.
+When nothing is selected, stop the batch action and show an object-specific `Message.warning`; when selection exists, the toolbar exposes `已选 N 条` in its owned selection context.
 
 ## Workbench Inline Notices（工具栏常驻提示）
 
@@ -129,5 +120,7 @@ List/workbench 内数据异常或持续操作说明使用 compact Arco `a-alert`
 - [ ] Danger → `Modal.confirm`
 - [ ] Validation, business rejection, network failure, timeout, permission loss, and partial batch failure each have an owner-local state and recovery action
 - [ ] Failed submit preserves entered values, selection, scroll context, and the open modal/drawer when the job is incomplete
+- [ ] Refresh preserves the last useful content and distinguishes pending, stale/error, and true empty states
+- [ ] Closing or leaving an async owner cannot produce late UI updates or orphan Messages
 - [ ] Retry affects only the owning field, row, section, or request; unrelated work remains usable
 - [ ] Message/Notification is never the sole owner of a persistent or actionable failure

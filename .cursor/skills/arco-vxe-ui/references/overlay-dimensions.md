@@ -25,6 +25,17 @@ Need an overlay?
 |- record detail, long form, tabs, or mini tables -> Drawer D3/D4
 ```
 
+Container selection must also account for task continuity, not field count alone:
+
+| Signal | Default container decision |
+| --- | --- |
+| Focused task expected to finish in about 30 seconds, with no child editor or list-context dependency | Modal |
+| Task expected to take about 30 seconds to 3 minutes, or the user must inspect/edit while retaining the list | Drawer |
+| Task expected to take more than about 3 minutes, requires a bookmarkable URL, browser history, or parallel tabs/windows | Full page |
+| Two interactive comparison panes, multiple editable child tables, or a document-plus-editor workspace | D4 with an explicit fullscreen mode, or full page |
+
+Any stronger continuity signal escalates the container even when the field count is small. These time ranges are workflow heuristics to verify with the named user job, not performance promises. Do not keep a long or navigable workflow in an overlay merely because its initial step is short.
+
 ## Dimension Tokens
 
 | Token | Value | Use |
