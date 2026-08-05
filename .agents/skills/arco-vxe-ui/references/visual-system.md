@@ -265,7 +265,43 @@ A status must be visually recognizable, but a leading dot is not the default req
 - Keep long-term reading comfortable: no heavy contrast blocks, no saturated full-width backgrounds.
 - Use whitespace as grouping rhythm, not as decorative emptiness.
 - If a page feels "plain", first improve hierarchy and business grouping, then adjust token-based color accents.
-- If a page feels "too gray", first check active navigation, the current scope's primary action, selected rows, key links, and status pills. Do not add decorative top borders, gray fills, or colored workflow buttons.
+
+## Spacing Rhythm Standard
+
+Grouping quality comes from a fixed relationship-to-band mapping, not from page-authored margins. The ladder lives in the reference token layer (`--dense-gap-*`, `--dense-pad-*`); this table is the usage contract.
+
+| Relationship | Band | Reference token |
+|--------------|------|-----------------|
+| Label to its control | 4px | `--dense-gap-label` |
+| Items inside one inline control group | 8px | `--dense-gap-inline` |
+| Field rows inside one group | 8px | `--dense-gap-field-row` |
+| Field columns inside one row | 12px | `--dense-gap-field-col` |
+| Zones inside one workbench surface | 8px | `--dense-gap-zone` |
+| Sibling modules/surfaces on one page | 12px | `--dense-gap-module` |
+
+Rules:
+
+- Tighter ownership always uses the smaller band. Never invert the ladder: two fields of one group must sit closer than two separate groups. If rendered gaps read equal or inverted, grouping is illegible and Design Sense item 2 scores 0.
+- Do not mix ad-hoc pixel margins with ladder bands on one surface. A layout need outside the ladder is a token-layer change, not a page-local value.
+- Do not compress below a band to fit more content on one screen; use scroll ownership, advanced-field ownership, or pagination instead.
+- `presentationTarget: 'demo'` may scale identity/hero surfaces up one band; workbench list/form density never scales down, and daily work paths keep the ladder.
+
+## Surface Elevation Model
+
+Three levels, each with exactly one boundary signal:
+
+| Level | Surface | Boundary signal |
+|-------|---------|-----------------|
+| L0 Page base | `--dense-page-bg` | none — no border, no shadow |
+| L1 Working surface | GI card / `--color-bg-1` owned content | GI-native border or shadow, exactly as shipped |
+| L2 Overlay | Arco Modal/Drawer/Dropdown portals | Arco-native elevation only |
+
+Rules:
+
+- Elevation means "temporarily above the workbench", never "important". A page section earns attention through placement, typography, and action priority, not through shadow.
+- Nested elevation is a release defect: no shadowed or framed surface inside another shadowed or framed surface. A module that needs separation inside an L1 surface uses spacing rhythm and F3 titles, not a second box.
+- Page CSS never paints custom shadows or elevation tints. An L1 surface keeps the GI card chrome as shipped; pages do not add or remove its shadow or border.
+- Overlay stacking beyond a menu/tooltip inside one overlay needs a workflow reason recorded in the page spec.
 
 ## Design Sense Gate (`设计感`)
 
@@ -279,6 +315,12 @@ A surface passes Design Sense only when all of the following are true on the rea
 4. **Location is obvious** — when anchors, tabs, or segments exist, the current location is marked without shifting text start lines or overpowering content.
 5. **Dense operations preserved** — compact controls and short paths remain; consumer SaaS padding or oversized chrome must not fake premium.
 6. **Color stays semantic** — GI primary marks interaction/selection; semantic colors mark state/risk; neutrals carry structure.
+
+Score each of the six items on the real route: 0 = absent or broken, 1 = partially verifiable, 2 = fully verifiable with screenshot evidence.
+
+- `sellable-saas-grade` requires a total of at least 10 with no zero item.
+- `presentationTarget: 'demo'` requires 12 of 12.
+- A score without viewport screenshots (recorded per `product-grade-evaluation.md`) is self-certification and counts as 0.
 
 Fail Design Sense when any of these appear:
 
@@ -296,3 +338,19 @@ Advanced-filter grouping rhythm is owned by `filter-layout.md`. Commercial relea
 - Custom motion is allowed only for a real spatial/state relationship; keep it short, interruptible, layout-stable, and never use continuous, bouncing, pulsing, parallax, card-lift, gradient, or attention-seeking status animation.
 - Smooth scrolling is allowed for an explicit section-navigation action; focus moves to or is restored within the destination workflow when needed.
 - Respect `prefers-reduced-motion` and verify rapid repeat, interrupted close/open, keyboard focus, loading completion, reduced motion, and no cumulative layout shift on the real route.
+
+## Presentation Target Exceptions
+
+`pageSpec.ts` declares `presentationTarget: 'daily-ops' | 'demo'`; the default is `daily-ops`. A `demo` target exists for financing, sales, and customer-facing review surfaces and unlocks exactly these exceptions:
+
+- Display typography tier (`--dense-font-display`, see `typography.md`) for one object identity, hero, or first-run empty state per route.
+- Spacing scaled up one band on identity/hero surfaces only (see Spacing Rhythm Standard).
+- A narrow motion whitelist: numeric or key-fact value change transitions up to 200ms and skeleton-to-content fades up to 150ms. Every whitelisted effect stays interruptible, layout-stable, and respects `prefers-reduced-motion`.
+
+A demo target never waives:
+
+- GI palette and token ownership, semantic color rules, or the dark-color boundaries.
+- Density of daily work surfaces: list workbenches, filters, forms, and tables keep the compact ladder even in a demo. The exceptions apply to identity, hero, and onboarding surfaces, not the working grid.
+- State completeness, interaction closure, or any `product-grade-evaluation.md` gate; a demo that hides failure states fails gate 4 like any other page.
+
+An exception not declared in `pageSpec.ts` is a contract violation, not a style choice.

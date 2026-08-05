@@ -10,6 +10,7 @@ Every new page, rewrite, or material layout/interaction change declares a typed 
 export const PAGE_SPEC = definePageSpec({
   id: 'domain-object-surface',
   target: 'sellable-saas-grade',
+  presentationTarget: 'daily-ops',
   archetype: 'list-management',
   list: {
     frame: 'standard-list-v1',
@@ -91,6 +92,7 @@ Every business action references an existing feature contract and declares frequ
 - Query: record all fields, visible vs advanced ownership, and selected strategy. The query strategy describes field complexity; the list archetype describes the user's job. They are independent decisions.
 - Table: `query-list`, `management-list`, and `workbench` must match `list.profile`. Classify identity, decision, supporting, composite, fixed, density, and stable `rowBanding` roles before columns are coded; never derive banding from the current result count.
 - Object detail: declare `workspace.archetype` (`operational-workspace`, `reference-workspace`, or `review-workspace`), identity-band identity/key-fact/decision slots, the single object action owner, navigation policy, named identify/locate/act usability tasks, default edit mode, real milestones, one scroll owner, and a typed module manifest. Every module declares semantic kind, owned facts, sourced statistics with one placement, scoped actions, collapse rule, and `children: { kind: 'none' }` or one bounded repeated-child contract. Empty metrics/actions are explicit; arbitrary recursion, invented nav completion, and duplicated action/fact ownership are forbidden.
+- Presentation target: `presentationTarget` defaults to `daily-ops`. `demo` is for financing, sales, and customer-review surfaces and unlocks only the exceptions in `visual-system.md` Presentation Target Exceptions; every daily-work gate still applies.
 - States: include only applicable states, but every listed state needs a deterministic trigger and recovery check. Omitting an applicable state to shorten the spec is a release defect.
 - Accessibility: record the page-specific keyboard path and accessible-name scope; `zoom` is fixed at `200%`. Arco ownership does not waive checks for VXE, custom shared patterns, or icon-only actions.
 - Authorities: name one primary page authority plus only surfaces actually touched. Numeric mechanics stay in those authorities.

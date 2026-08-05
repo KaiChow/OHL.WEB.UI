@@ -43,7 +43,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect());
   display: grid;
   grid-template-columns: repeat(var(--query-grid-tracks), minmax(0, 1fr));
   align-items: end;
-  gap: 10px 12px;
+  gap: var(--dense-gap-field-row) var(--dense-gap-field-col);
   width: 100%;
 }
 </style>

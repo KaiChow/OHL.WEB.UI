@@ -82,7 +82,7 @@ withDefaults(defineProps<{
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 6px;
+  gap: var(--dense-gap-inline);
   padding-bottom: 1px;
   white-space: nowrap;
 }
@@ -149,10 +149,6 @@ withDefaults(defineProps<{
 }
 
 @media (max-width: 1199px) {
-  .standard-list-frame__query :deep(.query-actions) {
-    gap: 2px;
-  }
-
   .standard-list-frame__workflow,
   .standard-list-frame :deep(.table-command-group) {
     gap: 6px;

@@ -560,6 +560,8 @@ const downloadFeedback = () => Message.success(t('interactionAcceptance.feedback
 }
 
 .scenario-toolbar__identity {
+  flex: 1 1 auto;
+  flex-wrap: wrap;
   gap: 8px;
   min-width: 0;
 }
@@ -609,27 +611,29 @@ const downloadFeedback = () => Message.success(t('interactionAcceptance.feedback
   font-size: var(--dense-font-aux);
 }
 
-.behavior-select {
+:deep(.behavior-select) {
+  flex: 0 0 116px;
   width: 116px;
 }
 
-.feedback-state-select {
+:deep(.feedback-state-select) {
+  flex: 0 0 156px;
   width: 156px;
 }
 
-.row-actions {
+:deep(.row-actions) {
   white-space: nowrap;
 }
 
-.row-action-btn {
+:deep(.row-action-btn) {
   padding-inline: 5px;
 }
 
-.row-action-btn--secondary {
+:deep(.row-action-btn--secondary) {
   color: var(--color-text-2);
 }
 
-.row-action-btn--more {
+:deep(.row-action-btn--more) {
   width: 24px;
   padding-inline: 0;
   color: var(--color-text-3);
@@ -639,7 +643,7 @@ const downloadFeedback = () => Message.success(t('interactionAcceptance.feedback
   padding: 12px;
 }
 
-.feedback-spin {
+:deep(.feedback-spin) {
   display: block;
   min-height: 320px;
   padding: 20px;
@@ -673,7 +677,7 @@ const downloadFeedback = () => Message.success(t('interactionAcceptance.feedback
   border-bottom: 1px solid var(--color-border-1);
 }
 
-.overlay-error {
+:deep(.overlay-error) {
   margin-bottom: 12px;
 }
 

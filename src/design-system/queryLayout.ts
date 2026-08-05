@@ -15,7 +15,6 @@ export const QUERY_GRID_ITEM_SPANS: Record<QueryGridItemRole, number> = {
 };
 
 export const getQueryGridTrackCount = (containerWidth: number) => {
-  if (containerWidth >= 1840) return 36;
   if (containerWidth >= 1600) return 32;
   if (containerWidth >= 1040) return 28;
   return 24;

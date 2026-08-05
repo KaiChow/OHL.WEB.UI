@@ -31,21 +31,32 @@ F6 Micro            10px / 500   Badge, pill, seq
 ## Font Family
 Use a system-first font stack. Do not introduce web fonts unless the product explicitly ships them.
 
-Recommended stack:
+Declaration owners and stack:
+
+The UI stack has exactly two declaration owners: the base rule in `global.css` and the mirrored `@vxe-font-family` token in `src/styles/vxe-theme/`. Pages, shared components, and scoped CSS never declare `font-family`; the only exception is the mono stack on machine-compared identifier values.
 
 ```css
 font-family:
+  system-ui,
   -apple-system,
-  BlinkMacSystemFont,
   "Segoe UI",
+  Roboto,
   "Inter",
-  "Noto Sans",
-  "Noto Sans CJK SC",
   "PingFang SC",
+  "Hiragino Sans GB",
+  "HarmonyOS Sans SC",
+  "Source Han Sans SC",
+  "Noto Sans CJK SC",
   "Microsoft YaHei",
-  Arial,
   sans-serif;
 ```
+
+Ordering rules:
+
+- Latin/UI families come first so digits, codes, and Latin words inside Chinese sentences keep one consistent rhythm; the first CJK-capable family then renders the Chinese glyphs.
+- CJK candidates are ordered by small-size clarity at 11-13px: PingFang/Hiragino on macOS, HarmonyOS Sans SC / Source Han Sans / Noto CJK where installed, then Microsoft YaHei as the guaranteed Windows family.
+- A CJK family must always precede the generic `sans-serif`; without one, Chinese text can fall back to legacy bitmap-class rendering (for example SimSun), which fails the clarity requirement at dense sizes.
+- Do not reorder to prefer a Latin family over CJK rendering, do not append project families, and do not set per-module fonts to fix look; report readability problems against this stack instead.
 
 Use a mono stack only for opaque identifiers, codes, and machine-oriented values whose characters must be compared exactly:
 
@@ -66,6 +77,7 @@ Use the global tokens. Do not hard-code page-specific font sizes.
 | Level | Token | Size | Weight | Use |
 |-------|-------|------|--------|-----|
 | Hero | `--dense-font-hero` | 16px | 600 max | One object/route identity in a full detail context or standard detail drawer |
+| Display | `--dense-font-display` | 20px | 600 max | One hero identity or first-run empty state, only on a route declaring `presentationTarget: 'demo'` |
 | F0 | `--dense-font-overlay` | 14px | 600 | Page-authored overlay heading or full-page form head (`xf-head`) |
 | F1 | `--dense-font-data` | 12px | 400/500 | Table cells, core links, business identifiers |
 | F2 | `--dense-font-nav` | 13px | 500/600 active | Top-level detail module, custom navigation labels, compact business chips |
@@ -83,6 +95,7 @@ Aliases:
 Exceptions:
 
 - A true page/detail hero may use the shared `--dense-font-hero` token, max **16px/600**, only when visually separated from normal fact rows. Do not create page-local hero size values.
+- The Display tier (`--dense-font-display`, max **20px/600**) exists only on routes declaring `presentationTarget: 'demo'`: one hero identity or first-run empty state per route, never inside table, form, filter, or list rows, and never to rescue weak hierarchy on a `daily-ops` page.
 - In a dense `dds-hero` key-facts row, all fact values use F1 12px. Stronger lead facts use weight/placement, not a larger size inside the same row.
 - Brand/logo shell may use larger text; never copy shell typography into business modules.
 - Icons use `--dense-icon-action` (14px graphic), not text tokens.
@@ -275,6 +288,7 @@ Modal / drawer form:
 ## Hard Bans
 
 - No hardcoded `14px` / `15px` / `16px` in custom page text — use tokens; framework-native typography remains untouched.
+- No display-tier (`--dense-font-display`) text outside a route declaring `presentationTarget: 'demo'`.
 - No `font-weight: 700/800` in business UI.
 - No implicit medium controls in business forms — always declare `size="small"`.
 - No form/filter label-value-placeholder drift (12/13/11 in one row).

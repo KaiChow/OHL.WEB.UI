@@ -81,3 +81,5 @@ For each non-trivial feature, exercise the applicable cases instead of writing a
 - repeated query, pagination, and overlay open/close cycles, proving there is no duplicated feedback, stale validation, orphan overlay, or focus loss.
 
 If a case cannot be triggered deterministically, report it as unverified. A mocked success click is not a completed feature.
+
+The deterministic trigger for every page-spec state and every contract error path is declared before behavior code: fixture, request interception, QA-only route or query, or component test. A state no one can reproduce on demand counts as unverified, and an unverified applicable state blocks delivery the same way a failed one does.

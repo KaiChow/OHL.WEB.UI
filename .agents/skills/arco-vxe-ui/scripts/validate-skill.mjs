@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const SKILL_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const REFERENCES = join(SKILL_ROOT, 'references');
 const MAX_REFERENCE_FILES = 30;
-const MAX_REFERENCE_LINES = 6100;
+const MAX_REFERENCE_LINES = 6300;
 const MAX_SINGLE_REFERENCE_LINES = 700;
 const KEY_DOCUMENT_BUDGETS = new Map([
   ['existing-project-modernization.md', 150],
@@ -50,6 +50,11 @@ export function validateUiSkill() {
     [references.get('page-spec-contract.md') || '', 'It is not a design essay', 'page-spec-contract.md: missing decision-record boundary'],
     [references.get('visual-system.md') || '', '## Design Sense Gate', 'visual-system.md: missing design-sense gate'],
     [references.get('visual-system.md') || '', '## Motion Contract', 'visual-system.md: missing restrained motion contract'],
+    [references.get('visual-system.md') || '', '## Spacing Rhythm Standard', 'visual-system.md: missing spacing rhythm authority'],
+    [references.get('visual-system.md') || '', '## Presentation Target Exceptions', 'visual-system.md: missing presentation-target exception contract'],
+    [references.get('page-spec-contract.md') || '', 'presentationTarget', 'page-spec-contract.md: missing presentation target field'],
+    [references.get('product-grade-evaluation.md') || '', 'docs/ui-acceptance', 'product-grade-evaluation.md: missing screenshot evidence convention'],
+    [references.get('typography.md') || '', '--dense-font-display', 'typography.md: missing display tier authority'],
     [references.get('arco-first.md') || '', '## Shared Component Governance', 'arco-first.md: missing shared-component governance'],
     [references.get('domain-language.md') || '', '## Internationalization Contract', 'domain-language.md: missing internationalization contract'],
     [references.get('product-grade-evaluation.md') || '', '## Six Blocking Gates', 'product-grade-evaluation.md: missing commercial release gates'],

@@ -380,7 +380,7 @@ watch(() => props.initialScenario, (value) => {
 }
 
 .expanded-query-grid {
-  margin-top: 10px;
+  margin-top: var(--dense-gap-field-row);
 }
 
 .advanced-section + .advanced-section {

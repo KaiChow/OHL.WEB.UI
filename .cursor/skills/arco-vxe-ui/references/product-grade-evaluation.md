@@ -17,6 +17,10 @@ Use for financing, sales, customer, leader, or investor demos and requests such 
 
 Any failed applicable gate blocks `sellable-saas-grade`.
 
+## Design Sense Scoring
+
+Visual hierarchy claims use the scored Design Sense Gate in `visual-system.md`: six items scored 0/1/2 on the real route, at least 10 of 12 with no zero item for `sellable-saas-grade`, and 12 of 12 for a declared `presentationTarget: 'demo'` route. A score without screenshot evidence counts as 0.
+
 ## Evidence Scope
 
 For a single-page claim, inspect the changed route and every overlay/detail surface it opens. For a product-level claim, inspect a representative list workbench, object detail, focused overlay/form, and shared shell.
@@ -29,6 +33,8 @@ Required viewports:
 - one wide desktop viewport.
 
 Required scenario set is page-specific, but every applicable state must have a deterministic trigger through fixtures, request interception, component tests, or a QA-only route/query. A sentence in `pageSpec.ts` and a transient message are not evidence.
+
+Store viewport and state screenshots under `docs/ui-acceptance/<route-or-feature>/` and reference them from the Release Record. A screenshot without a stated route, viewport, and scenario is not evidence.
 
 ## Review Sequence
 

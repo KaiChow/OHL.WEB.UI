@@ -60,9 +60,9 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       ],
     },
     dense: {
-      decisions: ['Keep identifier, business type, customer, and responsible operator as daily locate fields; at compact query-container width, reserve the localized three-command slot first and move operator into the same D1 advanced drawer, while release/wide profiles keep all four inline. Edit secondary route, schedule, status/risk, document, and settlement conditions in that drawer using two readable columns and one native scroll owner.'],
+      decisions: ['Keep identifier, business type, customer, and responsible operator as daily locate fields; render search, reset, and advanced-filter entry as one stable action group with a shared inline rhythm; at compact query-container width, reserve that localized three-command slot first and move operator into the same D1 advanced drawer, while release/wide profiles keep all four inline. Edit secondary route, schedule, status/risk, document, and settlement conditions in that drawer using two readable columns and one native scroll owner.'],
       acceptance: [
-        'At 1366, 1024 split, and wide viewports, the query row does not create a separate action band and the table remains the dominant work surface.',
+        'At 1366, 1024 split, and wide viewports, the query row does not create a separate action band, adjacent query-action boxes keep the same 8px gap, and the table remains the dominant work surface.',
         'At compact table-toolbar width, create and batch remain reachable, optional export text collapses, pagination hides jumper then page-size, and total plus page navigation remain visible on one line.',
         'Vertical query and overlay forms use the shared 4px label-to-control rhythm through the Arco public label-column style.',
         'The advanced-filter grid uses the shared 12px column and 8px row gutter with zero form-item margin, so no page-local spacing layer enlarges the dense form rhythm.',
