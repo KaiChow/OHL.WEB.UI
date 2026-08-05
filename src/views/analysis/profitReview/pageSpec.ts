@@ -15,12 +15,12 @@ export const PROFIT_REVIEW_SPEC = definePesdpPageSpec({
   pesdp: {
     professional: { decisions: ['Use order-profit vocabulary, review status, risk level, margin, and owned risk items.'], acceptance: ['The table makes order identity, risk, review status, amount, margin, owner, and update time scannable.'] },
     efficient: { decisions: ['Keep five daily locate conditions and five review queues directly reachable.'], acceptance: ['Query and status changes reset pagination and refresh the current result set without duplicate status filters.'] },
-    structured: { decisions: ['The query surface owns query and a mutation-free review-state row; the table toolbar owns export, conditional batch submit, selection context, one table-utility group, and rightmost pagination.'], acceptance: ['Review-state selection is visually above commands; refresh is separated from the rightmost mini pagination, and every count has one owner.'] },
+    structured: { decisions: ['Use the shared standard-list frame so query, review state, table toolbar, feedback, and data keep the same ownership and order as other routed lists; the query surface owns query and a mutation-free review-state row; the table toolbar owns export, conditional batch submit, selection context, one table-utility group, and rightmost pagination.'], acceptance: ['Review-state selection is visually above commands; refresh is separated from the rightmost mini pagination, every count has one owner, and page-local CSS does not duplicate the standard list shell.'] },
     dense: { decisions: ['Use S1 inline query, shared vertical-form rhythm, VXE global mini density, and container-responsive mini pagination.'], acceptance: ['At 1366x768 and 1024x768 no command band wraps; compact pagination keeps total/navigation and hides jumper then page-size before business commands compress.'] },
     premium: { decisions: ['Use GI/Arco native surfaces, VXE global appearance, and local mock states rather than a second page skin.'], acceptance: ['Detail/edit drawers, confirm flows, loading, empty, error, and partial-result feedback are reachable without blank demo controls.'] },
   },
   surfaces: [
-    { id: 'command', role: 'command', owns: ['query', 'review-queues'], primaryAction: 'profit-review-query', implementation: 'arco' },
+    { id: 'command', role: 'command', owns: ['query', 'review-queues'], primaryAction: 'profit-review-query', implementation: 'shared-pattern', whyArcoNotEnough: 'The routed list pages need one reusable owner for query, workflow, table, and overflow height relationships while Arco continues to own each surface.' },
     { id: 'reviews', role: 'data', owns: ['export', 'batch-submit', 'table-data', 'selection', 'pagination', 'table-feedback', 'detail', 'edit'], implementation: 'shared-pattern', whyArcoNotEnough: 'The list uses VXE fixed columns, selection, and local table context.' },
   ],
   query: {

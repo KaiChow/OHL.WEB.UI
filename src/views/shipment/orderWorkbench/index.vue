@@ -16,15 +16,14 @@ import {
   IconFullscreenExit,
   IconMore,
   IconSettings,
-  IconInfoCircle,
-  IconLock,
-  IconEmpty,
 } from '@arco-design/web-vue/es/icon';
 import { downloadCsvFile } from '../../../utils/mock-actions';
 import { formatLocalMinute } from '../../../utils/date-time';
 import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '../../../design-system/formLayout';
 import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
+import StandardListFrame from '../../../components/workbench/StandardListFrame.vue';
+import WorkbenchEmptyState from '../../../components/workbench/WorkbenchEmptyState.vue';
 import WorkbenchTableToolbar from '../../../components/workbench/WorkbenchTableToolbar.vue';
 import WorkflowStateSelector from '../../../components/workbench/WorkflowStateSelector.vue';
 import { shipmentWorkbenchRows } from './mockData';
@@ -966,16 +965,9 @@ watch(uiScenario, () => {
 </script>
 
 <template>
-  <div class="workbench-page" data-pesdp-page="shipment-export-order-workbench">
-    <div class="workbench-stack">
-      <a-card
-        size="small"
-        :bordered="true"
-        class="workbench-page__command"
-        :body-style="{ padding: 0 }"
-      >
-        <div class="filter-panel">
-          <a-form :model="query" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="filter-panel__form">
+  <StandardListFrame page-id="shipment-export-order-workbench" data-pesdp-page="shipment-export-order-workbench">
+    <template #query>
+          <a-form :model="query" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
             <QueryFieldGrid @track-count-change="primaryGridTrackCount = $event">
               <QueryFieldCol role="composite">
                 <a-form-item :label="t('shipment.fields.keyword')">
@@ -1029,7 +1021,7 @@ watch(uiScenario, () => {
                 </a-form-item>
               </QueryFieldCol>
               <QueryFieldCol role="actions-wide">
-                <div class="filter-panel__actions">
+                <div class="query-actions">
                   <a-button size="small" type="primary" :loading="querying" @click="handleSearch">
                     <template #icon><icon-search /></template>
                     {{ t('common.search') }}
@@ -1047,8 +1039,9 @@ watch(uiScenario, () => {
               </QueryFieldCol>
             </QueryFieldGrid>
           </a-form>
-        </div>
-        <div class="workflow-filter-bar">
+    </template>
+
+    <template #workflow>
           <div class="workflow-filter-bar__scope" data-workbench-scope="ownership">
             <a-radio-group
               v-model="activeWorkScope"
@@ -1073,17 +1066,9 @@ watch(uiScenario, () => {
             :options="workflowStateOptions"
             @change="onWorkflowStateChange"
           />
-        </div>
-      </a-card>
+    </template>
 
-      <a-card
-        class="workbench-page__table-host"
-        size="small"
-        :bordered="true"
-        :header-style="{ minHeight: '40px', padding: '0 12px' }"
-        :body-style="{ minHeight: 0, padding: 0, display: 'flex', flexDirection: 'column', flex: 1 }"
-      >
-        <template #title>
+    <template #toolbar>
           <WorkbenchTableToolbar
             :current="page.current"
             :page-size="page.size"
@@ -1136,8 +1121,9 @@ watch(uiScenario, () => {
               </a-tooltip>
             </template>
           </WorkbenchTableToolbar>
-        </template>
+    </template>
 
+    <template #feedback>
         <a-alert
           v-if="batchFeedback"
           type="warning"
@@ -1147,12 +1133,12 @@ watch(uiScenario, () => {
         >
           {{ t('shipment.messages.batchAlert', { action: batchFeedback.label, success: batchFeedback.success, failed: batchFeedback.failedOrderNos.length, orders: batchFeedback.failedOrderNos.join(', ') }) }}
         </a-alert>
+    </template>
 
-        <div class="workbench-table-frame">
+    <template #table>
           <vxe-table
             ref="tableRef"
             id="shipment-export-orders"
-            style="width: 100%"
             height="100%"
             auto-resize
             fit
@@ -1268,38 +1254,32 @@ watch(uiScenario, () => {
               </template>
             </vxe-column>
             <template #empty>
-              <div class="workbench-empty">
-                <icon-lock v-if="uiScenario === 'permission'" class="workbench-empty__icon" />
-                <icon-info-circle v-else-if="tableError" class="workbench-empty__icon" />
-                <icon-empty v-else class="workbench-empty__icon" />
-                <div class="workbench-empty__title">
-                  {{ uiScenario === 'permission'
-                    ? t('shipment.empty.permissionTitle')
-                    : tableError
-                      ? t('shipment.empty.errorTitle')
-                      : hasActiveFilter ? t('shipment.empty.filteredTitle') : t('shipment.empty.defaultTitle') }}
-                </div>
-                <div class="workbench-empty__desc">
-                  {{ uiScenario === 'permission'
-                    ? t('shipment.empty.permissionDesc')
-                    : tableError
-                      ? tableError
-                      : hasActiveFilter ? t('shipment.empty.filteredDesc') : t('shipment.empty.defaultDesc') }}
-                </div>
-                <div class="workbench-empty__actions">
+              <WorkbenchEmptyState
+                :kind="uiScenario === 'permission' ? 'permission' : tableError ? 'error' : 'empty'"
+                :title="uiScenario === 'permission'
+                  ? t('shipment.empty.permissionTitle')
+                  : tableError
+                    ? t('shipment.empty.errorTitle')
+                    : hasActiveFilter ? t('shipment.empty.filteredTitle') : t('shipment.empty.defaultTitle')"
+                :description="uiScenario === 'permission'
+                  ? t('shipment.empty.permissionDesc')
+                  : tableError
+                    ? tableError
+                    : hasActiveFilter ? t('shipment.empty.filteredDesc') : t('shipment.empty.defaultDesc')"
+              >
+                <template #actions>
                   <a-button v-if="tableError" size="small" type="primary" @click="fetchList">{{ t('shipment.actions.reload') }}</a-button>
                   <a-button v-else-if="hasActiveFilter && uiScenario !== 'permission'" size="small" type="text" @click="handleReset">{{ t('shipment.actions.resetFilter') }}</a-button>
                   <a-button v-else-if="uiScenario !== 'permission'" size="small" type="primary" @click="handleCreateOrder">
                     <template #icon><icon-plus /></template>
                     {{ t('shipment.actions.create') }}
                   </a-button>
-                </div>
-              </div>
+                </template>
+              </WorkbenchEmptyState>
             </template>
           </vxe-table>
-        </div>
-      </a-card>
-    </div>
+    </template>
+  </StandardListFrame>
 
     <a-drawer
       v-model:visible="advancedFilterVisible"
@@ -1674,58 +1654,9 @@ watch(uiScenario, () => {
       <p class="modal-confirm-copy">{{ t('shipment.modal.voidCopy', { orderNo: voidTargetRow?.orderNo }) }}</p>
       <a-alert v-if="voidError" type="error">{{ voidError }}</a-alert>
     </a-modal>
-  </div>
 </template>
 
 <style scoped>
-.workbench-page {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.workbench-stack {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 8px;
-  min-height: 0;
-}
-
-.filter-panel {
-  padding: 10px 12px 8px;
-}
-
-.filter-panel__form {
-  width: 100%;
-}
-
-.filter-panel__form :deep(.arco-form-item) {
-  margin-bottom: 0;
-}
-
-.filter-panel__actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 6px;
-  padding-bottom: 1px;
-  white-space: nowrap;
-}
-
-.workflow-filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  min-height: 42px;
-  padding: 0 12px;
-  border-top: 1px solid var(--color-border-1);
-}
-
 .workflow-filter-bar__scope {
   display: flex;
   flex: 0 0 auto;
@@ -1741,80 +1672,6 @@ watch(uiScenario, () => {
 
 .workflow-filter-bar__scope :deep(.arco-radio-group-button) {
   white-space: nowrap;
-}
-
-.workbench-page__table-host {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.batch-result-alert {
-  flex-shrink: 0;
-  margin: 8px 12px;
-}
-
-.workbench-table-frame {
-  display: flex;
-  flex: 1;
-  width: 100%;
-  min-height: 260px;
-  overflow: hidden;
-  background: var(--color-bg-card);
-}
-
-.table-cap-start {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.table-command-group {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 8px;
-}
-
-.table-cap-tool {
-  color: var(--color-text-3);
-}
-
-.workbench-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 220px;
-  padding: 28px 16px;
-  color: var(--color-text-3);
-  text-align: center;
-}
-
-.workbench-empty__icon {
-  margin-bottom: 8px;
-  color: var(--color-text-4);
-  font-size: 32px;
-}
-
-.workbench-empty__title {
-  color: var(--color-text-1);
-  font-size: var(--dense-font-title);
-  font-weight: var(--dense-weight-title);
-  line-height: 20px;
-}
-
-.workbench-empty__desc {
-  max-width: 360px;
-  margin-top: 4px;
-  font-size: var(--dense-font-aux);
-  line-height: 18px;
-}
-
-.workbench-empty__actions {
-  margin-top: 12px;
 }
 
 .column-settings-summary {
@@ -1951,17 +1808,6 @@ watch(uiScenario, () => {
   text-align: center;
 }
 
-.selection-tip {
-  font-size: var(--dense-font-aux);
-  color: var(--color-text-3);
-}
-
-.selection-context {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
 .next-action-value {
   display: block;
   overflow: hidden;
@@ -1984,18 +1830,6 @@ watch(uiScenario, () => {
 }
 
 @media (max-width: 1199px) {
-  .filter-panel__actions {
-    gap: 1px;
-  }
-
-  .workflow-filter-bar {
-    gap: 8px;
-  }
-
-  .table-command-group {
-    gap: 6px;
-  }
-
   .workflow-filter-bar__scope {
     gap: 4px;
   }

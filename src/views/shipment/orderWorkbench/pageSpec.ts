@@ -53,7 +53,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       ],
     },
     structured: {
-      decisions: ['Query surface owns a bounded query cluster followed by a mutation-free ownership/workflow-state row; data surface owns table business commands, selection context, utilities, pagination, and rows.'],
+      decisions: ['Use the shared standard-list frame to keep query, workflow state, table toolbar, feedback, and data in one stable order; query surface owns a bounded query cluster followed by a mutation-free ownership/workflow-state row; data surface owns table business commands, selection context, utilities, pagination, and rows.'],
       acceptance: [
         'Totals must appear in pagination and queue counts only; table context must not repeat the total, active scope, active queue, or risk count.',
         'Advanced query, status change, batch assignment, and column settings each have one explicit overlay owner.',
@@ -86,7 +86,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   },
   surfaces: [
     { id: 'app-navigation', role: 'supporting', owns: ['module-navigation', 'route-identity'], implementation: 'arco' },
-    { id: 'command', role: 'command', owns: ['query', 'ownership-scope', 'status-queues'], primaryAction: 'export-order-query', implementation: 'arco' },
+    { id: 'command', role: 'command', owns: ['query', 'ownership-scope', 'status-queues'], primaryAction: 'export-order-query', implementation: 'shared-pattern', whyArcoNotEnough: 'The routed list pages need one reusable owner for query, workflow, table, and overflow height relationships while Arco continues to own each surface.' },
     { id: 'advanced-query', role: 'supporting', owns: ['right-drawer-grid', 'advanced-query-draft', 'freight-business-grouping', 'group-active-counts', 'group-reset', 'live-result-preview', 'draft-dirty-state', 'cancel-apply-state'], primaryAction: 'export-order-query', implementation: 'arco' },
     { id: 'orders', role: 'data', owns: ['create', 'export', 'batch-actions', 'table-data', 'selection', 'batch-result', 'column-settings', 'pagination', 'total-count', 'table-feedback'], primaryAction: 'export-order-create', implementation: 'shared-pattern', whyArcoNotEnough: 'Freight list grids require the shared VXE workbench wrapper and public fixed-column, overflow, loading, and preference configuration.' },
   ],

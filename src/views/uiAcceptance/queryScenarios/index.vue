@@ -6,6 +6,9 @@ import { IconDown, IconFilter, IconSearch } from '@arco-design/web-vue/es/icon';
 import { compactVerticalFormLabelStyle, denseFormGridGutter } from '../../../design-system/formLayout';
 import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
+import StandardListFrame from '../../../components/workbench/StandardListFrame.vue';
+import WorkbenchEmptyState from '../../../components/workbench/WorkbenchEmptyState.vue';
+import WorkbenchTableToolbar from '../../../components/workbench/WorkbenchTableToolbar.vue';
 import ScenarioFieldControl from './components/ScenarioFieldControl.vue';
 import { QUERY_SCENARIOS, SCENARIO_FIELDS } from './scenarioFields';
 import type { QueryScenarioKey, ScenarioField } from './scenarioFields';
@@ -140,6 +143,19 @@ const filteredRows = computed(() => {
     && (!customer || row.customerName.toLowerCase().includes(customer))
     && (!batchValues.length || batchValues.includes(row.orderNo)));
 });
+const pagedRows = computed(() => {
+  const start = (page.current - 1) * page.size;
+  return filteredRows.value.slice(start, start + page.size);
+});
+
+const onPageChange = (current: number) => {
+  page.current = current;
+};
+
+const onPageSizeChange = (size: number) => {
+  page.size = size;
+  page.current = 1;
+};
 
 const cloneValue = (value: string | string[]) => Array.isArray(value) ? [...value] : value;
 
@@ -191,25 +207,24 @@ watch(() => props.initialScenario, (value) => {
 </script>
 
 <template>
-  <div class="scenario-page" data-pesdp-page="ui-acceptance-query-scenarios">
-    <div class="scenario-switcher">
-      <a-select :model-value="activeScenarioKey" size="small" :aria-label="t('queryScenario.aria')" @change="onScenarioChange">
-        <a-option v-for="scenario in QUERY_SCENARIOS" :key="scenario.key" :value="scenario.key">
-          {{ t(scenario.labelKey) }}
-        </a-option>
-      </a-select>
-      <span class="scenario-count">{{ t('common.totalFields', { count: currentScenario.total }) }}</span>
-    </div>
+  <StandardListFrame
+    page-id="ui-acceptance-query-scenarios"
+    data-pesdp-page="ui-acceptance-query-scenarios"
+    :command-visible="currentScenario.total > 0"
+  >
+    <template #pageMode>
+      <div class="scenario-switcher">
+        <a-select :model-value="activeScenarioKey" size="small" :aria-label="t('queryScenario.aria')" @change="onScenarioChange">
+          <a-option v-for="scenario in QUERY_SCENARIOS" :key="scenario.key" :value="scenario.key">
+            {{ t(scenario.labelKey) }}
+          </a-option>
+        </a-select>
+        <span class="scenario-count">{{ t('common.totalFields', { count: currentScenario.total }) }}</span>
+      </div>
+    </template>
 
-    <a-card
-      v-if="currentScenario.total > 0"
-      size="small"
-      :bordered="true"
-      class="scenario-command"
-      :body-style="{ padding: 0 }"
-    >
-      <div class="filter-panel">
-        <a-form :model="queryValues" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" class="filter-panel__form">
+    <template #query>
+        <a-form :model="queryValues" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
           <QueryFieldGrid @track-count-change="primaryGridTrackCount = $event">
             <QueryFieldCol v-for="field in permanentVisibleFields" :key="field.key" :role="field.width">
               <ScenarioFieldControl v-model="queryValues[field.key]" v-model:keyword-type="keywordType" :field="field" @submit="handleSearch" />
@@ -218,7 +233,7 @@ watch(() => props.initialScenario, (value) => {
               <ScenarioFieldControl v-model="queryValues[field.key]" :field="field" @submit="handleSearch" />
             </QueryFieldCol>
             <QueryFieldCol :role="actionColumnRole">
-              <div class="filter-actions">
+              <div class="query-actions">
                 <a-button size="small" type="primary" :loading="querying" @click="handleSearch">
                   <template #icon><icon-search /></template>{{ t('common.search') }}
                 </a-button>
@@ -245,35 +260,46 @@ watch(() => props.initialScenario, (value) => {
             </QueryFieldCol>
           </QueryFieldGrid>
         </a-form>
-      </div>
+    </template>
 
-    </a-card>
+    <template #toolbar>
+      <WorkbenchTableToolbar
+        :current="page.current"
+        :page-size="page.size"
+        :total="filteredRows.length"
+        :page-size-options="[20, 50, 100]"
+        @change="onPageChange"
+        @page-size-change="onPageSizeChange"
+      >
+        <template #commands><span>{{ t('queryScenario.results') }}</span></template>
+      </WorkbenchTableToolbar>
+    </template>
 
-    <a-card
-      class="scenario-table-host"
-      size="small"
-      :bordered="true"
-      :header-style="{ minHeight: '40px', padding: '0 12px' }"
-      :body-style="{ minHeight: 0, padding: 0, display: 'flex', flexDirection: 'column', flex: 1 }"
-    >
-      <template #title><span>{{ t('queryScenario.results') }}</span></template>
-      <template #extra>
-        <a-pagination v-model:current="page.current" v-model:page-size="page.size" :total="filteredRows.length" size="mini" show-total show-page-size />
-      </template>
-      <div class="scenario-table-frame">
-        <vxe-table :data="filteredRows" height="100%" auto-resize show-overflow="title" :seq-config="{ startIndex: (page.current - 1) * page.size }">
+    <template #table>
+        <vxe-table :data="pagedRows" height="100%" auto-resize fit show-overflow="title" :seq-config="{ startIndex: (page.current - 1) * page.size }">
           <vxe-column type="seq" :title="t('common.sequence')" width="52" fixed="left" align="center" />
-          <vxe-column field="orderNo" :title="t('queryScenario.columns.orderNo')" min-width="150" fixed="left" />
-          <vxe-column field="orderStatus" :title="t('queryScenario.columns.status')">
+          <vxe-column field="orderNo" :title="t('queryScenario.columns.orderNo')" min-width="160" fixed="left" class-name="mono" />
+          <vxe-column field="orderStatus" :title="t('queryScenario.columns.status')" min-width="112">
             <template #default="{ row }"><span class="s-pill" :data-s="row.statusTone">{{ t(`queryScenario.statuses.${row.statusKey}`) }}</span></template>
           </vxe-column>
-          <vxe-column field="customerName" :title="t('queryScenario.columns.customer')" />
-          <vxe-column field="businessType" :title="t('queryScenario.columns.businessType')" />
-          <vxe-column field="owner" :title="t('queryScenario.columns.owner')" />
-          <vxe-column field="updatedAt" :title="t('queryScenario.columns.updatedAt')" />
+          <vxe-column field="customerName" :title="t('queryScenario.columns.customer')" min-width="200" />
+          <vxe-column field="businessType" :title="t('queryScenario.columns.businessType')" min-width="96" />
+          <vxe-column field="owner" :title="t('queryScenario.columns.owner')" min-width="104" />
+          <vxe-column field="updatedAt" :title="t('queryScenario.columns.updatedAt')" min-width="148" class-name="mono" />
+          <template #empty>
+            <WorkbenchEmptyState
+              kind="empty"
+              :title="t('queryScenario.empty.title')"
+              :description="t('queryScenario.empty.description')"
+            >
+              <template #actions>
+                <a-button size="small" type="text" @click="resetValues">{{ t('common.reset') }}</a-button>
+              </template>
+            </WorkbenchEmptyState>
+          </template>
         </vxe-table>
-      </div>
-    </a-card>
+    </template>
+  </StandardListFrame>
 
     <a-drawer
       v-if="!isWideDrawer"
@@ -337,18 +363,9 @@ watch(() => props.initialScenario, (value) => {
         </div>
       </template>
     </a-drawer>
-  </div>
 </template>
 
 <style scoped>
-.scenario-page {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  height: 100%;
-  min-height: 0;
-}
-
 .scenario-switcher {
   display: flex;
   align-items: center;
@@ -364,40 +381,8 @@ watch(() => props.initialScenario, (value) => {
   font-size: var(--dense-font-aux);
 }
 
-.filter-panel {
-  padding: 10px 12px 8px;
-}
-
-.filter-panel__form {
-  width: 100%;
-}
-
-.filter-panel__form :deep(.arco-form-item) {
-  margin-bottom: 0;
-}
-
-.filter-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding-bottom: 1px;
-  white-space: nowrap;
-}
-
 .expanded-query-grid {
   margin-top: 10px;
-}
-
-.scenario-table-host {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 260px;
-}
-
-.scenario-table-frame {
-  flex: 1;
-  min-height: 220px;
 }
 
 .advanced-section + .advanced-section {

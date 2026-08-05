@@ -24,6 +24,7 @@ export const messages = {
     },
     queryScenario: {
       aria: '查询数量场景', results: '订单结果', groupNav: '筛选条件分组',
+      empty: { title: '未找到匹配的订单', description: '请调整当前查询条件，或重置后查看全部验收数据。' },
       scenarios: { s0: 'S0 · 无查询', s1Compact: 'S1 · 2项紧凑', s1Inline: 'S1 · 6项内联', s2Expand: 'S2 · 12项展开', s3Drawer: 'S3 · 24项抽屉', s3Wide: 'S3 · 40项宽抽屉', s4Drawer: 'S4 · 52项分组抽屉' },
       groups: { identity: '识别条件', route: '航线与运输', schedule: '时间计划', ownership: '执行与归属', status: '状态与风险', finance: '财务条件', audit: '审计与来源', cargo: '货物与条款' },
       fields: {
@@ -114,6 +115,7 @@ export const messages = {
     },
     queryScenario: {
       aria: 'Query field count scenario', results: 'Order results', groupNav: 'Filter groups',
+      empty: { title: 'No matching orders', description: 'Adjust the current query or reset it to view all acceptance data.' },
       scenarios: { s0: 'S0 · No query', s1Compact: 'S1 · 2-field compact', s1Inline: 'S1 · 6-field inline', s2Expand: 'S2 · 12-field expandable', s3Drawer: 'S3 · 24-field drawer', s3Wide: 'S3 · 40-field wide drawer', s4Drawer: 'S4 · 52-field grouped drawer' },
       groups: { identity: 'Identifiers', route: 'Routing & Transport', schedule: 'Schedule', ownership: 'Ownership', status: 'Status & Risk', finance: 'Financial', audit: 'Audit & Source', cargo: 'Cargo & Terms' },
       fields: {
