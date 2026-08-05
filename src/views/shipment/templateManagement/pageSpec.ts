@@ -1,0 +1,108 @@
+import { definePesdpPageSpec } from '../../../design-system/pesdpPageSpec';
+
+export const TEMPLATE_MANAGEMENT_PAGE_SPEC = definePesdpPageSpec({
+  id: 'shipment-template-management',
+  target: 'strong-internal-product',
+  archetype: 'list-management',
+  input: {
+    path: 'artifact',
+    artifacts: ['user-provided OHL.Web bill-of-lading template list screenshot'],
+    unresolvedBusinessDecisions: ['template persistence, server-side permissions, and final export file contract'],
+    recommendations: ['keep this comparison page frontend-only until the product team approves the interaction model'],
+  },
+  list: {
+    frame: 'standard-list-v1',
+    profile: 'management',
+    commandSurface: 'compact',
+    tableTop: 'utility-cap',
+    selection: 'none',
+    workScope: 'none',
+    statusQueues: 'none',
+    views: {
+      pageMode: 'segmented',
+      pageModeCount: 2,
+      workflowState: 'none',
+      workflowStateCount: 0,
+      workflowStatePlacement: 'none',
+      workflowStateOverflow: 'none',
+    },
+  },
+  business: {
+    object: 'bill-of-lading-template',
+    primaryUser: 'shipping-document-operator',
+    userJob: 'find-create-copy-edit-export-and-delete-bill-of-lading-templates',
+    primaryIdentity: ['templateName'],
+    keyState: ['templateType', 'isPublic', 'isSwitchBill'],
+    mainWorkingData: ['carrier', 'contractNo', 'pol', 'pod', 'peer', 'viewers'],
+    supportingData: ['creator', 'createdAt', 'updatedAt'],
+  },
+  pesdp: {
+    professional: {
+      decisions: ['Preserve the reference page business fields and visible capabilities while removing competing permanent color actions.'],
+      acceptance: ['Users can complete query, create, copy, edit, export, delete, pagination, refresh, and column-setting tasks with local data.'],
+    },
+    efficient: {
+      decisions: ['Keep Edit and Copy as frequent row verbs; place Export and destructive Delete in More.'],
+      acceptance: ['Frequent row work remains one click away and Delete always requires explicit confirmation.'],
+    },
+    structured: {
+      decisions: ['Use one compact query surface, one result-owned toolbar, and one VXE management table.'],
+      acceptance: ['No duplicate pagination, action, or status owner appears on the page.'],
+    },
+    dense: {
+      decisions: ['Use S2 expandable query layout, mini striped VXE rows, and min-width business columns so short schemas fill the data owner without a blank right region.'],
+      acceptance: ['The page remains scannable at 1366x768; only the table owns horizontal overflow at narrower widths.'],
+    },
+    premium: {
+      decisions: ['Use GI-native Arco controls, semantic tokens, and shared workbench components without a page-local table skin.'],
+      acceptance: ['Hover, striping, status, pagination, and action hierarchy match the rest of the project.'],
+    },
+  },
+  surfaces: [
+    { id: 'template-query', role: 'command', owns: ['visible-query', 'expanded-query', 'query-actions'], primaryAction: 'template-query', implementation: 'shared-pattern', whyArcoNotEnough: 'The shared semantic grid keeps bounded field widths across shell breakpoints.' },
+    { id: 'template-results', role: 'data', owns: ['table-data', 'pagination', 'column-settings'], primaryAction: 'template-create', implementation: 'shared-pattern', whyArcoNotEnough: 'The project VXE baseline owns dense table behavior.' },
+    { id: 'template-editor', role: 'supporting', owns: ['create-form', 'edit-form'], primaryAction: 'template-save', implementation: 'arco' },
+  ],
+  query: {
+    totalFields: 9,
+    strategy: 's2-expand',
+    layout: 'semantic-grid-v1',
+    visibleFields: ['templateName', 'pol', 'pod', 'carrier', 'contractNo'],
+    visibleFieldLayout: [
+      { field: 'templateName', width: 'standard' },
+      { field: 'pol', width: 'standard' },
+      { field: 'pod', width: 'standard' },
+      { field: 'carrier', width: 'standard' },
+      { field: 'contractNo', width: 'standard' },
+    ],
+    advancedFields: ['creator', 'peer', 'createdRange', 'updatedRange'],
+  },
+  table: {
+    kind: 'management-list',
+    rowBanding: 'striped',
+    identityColumns: ['sequence', 'templateName'],
+    decisionColumns: ['carrier', 'contractNo', 'pol', 'pod', 'isPublic', 'isSwitchBill'],
+    supportingColumns: ['peer', 'creator', 'createdAt', 'updatedAt', 'viewers'],
+    fixed: ['templateName', 'operations'],
+    densityReason: 'Template operators compare many similar records and need maximum scan throughput without losing row identity.',
+  },
+  detail: { mode: 'none', focus: [], milestones: [] },
+  actions: [
+    { id: 'template-query', scope: 'query', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'template-query', successOwner: 'template-results', failureOwner: 'template-results' },
+    { id: 'template-create', scope: 'table', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'template-create', successOwner: 'template-results', failureOwner: 'template-editor' },
+    { id: 'template-save', scope: 'overlay', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'template-save', successOwner: 'template-results', failureOwner: 'template-editor' },
+    { id: 'template-copy', scope: 'row', frequency: 'daily', risk: 'low', presentation: 'row-action', contract: 'template-copy', successOwner: 'template-results', failureOwner: 'template-results' },
+    { id: 'template-export', scope: 'row', frequency: 'regular', risk: 'low', presentation: 'dropdown', contract: 'template-export', successOwner: 'template-results', failureOwner: 'template-results' },
+    { id: 'template-delete', scope: 'row', frequency: 'rare', risk: 'high', presentation: 'dropdown', contract: 'template-delete', successOwner: 'template-results', failureOwner: 'template-results' },
+    { id: 'template-column-settings', scope: 'table', frequency: 'rare', risk: 'low', presentation: 'text', contract: 'template-column-settings', successOwner: 'template-results', failureOwner: 'template-results' },
+  ],
+  states: ['loading', 'empty', 'no-permission', 'network-error', 'success'],
+  responsive: { release: ['1366x768'], split: '1024x768', wide: '1920x1080' },
+  accessibility: {
+    keyboard: ['Reach page mode, query controls, table commands, row actions, overlays, and pagination in logical order.'],
+    naming: ['Icon-only refresh, column settings, and row More buttons expose accessible names.'],
+    zoom: '200%',
+  },
+  authorities: ['list-page.md', 'filter-layout.md', 'table.md', 'actions.md', 'modal.md', 'form-rules.md'],
+  verification: ['node scripts/check-spec.js', 'npm run build', 'real route at 1024x768, 1366x768, and 1920x1080'],
+});

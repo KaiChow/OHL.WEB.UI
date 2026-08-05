@@ -13,6 +13,7 @@ export const appMenus: AppMenuItem[] = [
     title: '海运业务', titleKey: 'menu.shipment',
     children: [
       { key: 'shipment-order-workbench', title: '出口订单', titleKey: 'menu.exportOrders', routeName: 'ShipmentOrderWorkbench' },
+      { key: 'shipment-template-management', title: '提单模板管理', titleKey: 'menu.templateManagement', routeName: 'ShipmentTemplateManagement' },
     ],
   },
   {
@@ -20,6 +21,9 @@ export const appMenus: AppMenuItem[] = [
     title: 'UI验收', titleKey: 'menu.uiAcceptance',
     children: [
       { key: 'detail-module-complex', title: '复杂详情模块', titleKey: 'menu.detailModuleComplex', routeName: 'DetailModuleComplex' },
+      { key: 'interaction-form-overlays', title: '表单与弹窗', titleKey: 'menu.interactionFormOverlays', routeName: 'InteractionFormOverlays' },
+      { key: 'interaction-action-hierarchy', title: '按钮与操作', titleKey: 'menu.interactionActionHierarchy', routeName: 'InteractionActionHierarchy' },
+      { key: 'interaction-feedback-states', title: '反馈与状态', titleKey: 'menu.interactionFeedbackStates', routeName: 'InteractionFeedbackStates' },
       { key: 'query-scenario-s0', title: '无查询', titleKey: 'menu.queryS0', routeName: 'QueryScenarioS0' },
       { key: 'query-scenario-s1-compact', title: '2项紧凑查询', titleKey: 'menu.queryS1Compact', routeName: 'QueryScenarioS1Compact' },
       { key: 'query-scenario-s1-inline', title: '6项内联查询', titleKey: 'menu.queryS1Inline', routeName: 'QueryScenarioS1Inline' },
