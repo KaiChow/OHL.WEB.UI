@@ -79,7 +79,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
         'Computed theme tokens, normal/error/empty/permission states, long text, and column settings must be inspected on the real route.',
         'The route must not depend on global selectors or theme-variable bridges that rewrite Arco or VXE internals.',
         'Row actions must not render as an all-blue command strip: status transition is the emphasized next action, self-assignment and More are neutral at rest, and irreversible actions are danger-styled only inside the final menu group.',
-        'The operation column must contain its longest legal localized action set without cell-level horizontal scrolling; focusing More must not shift the row-action origin.',
+        'The order-status column must show the longest supported localized status pill in full; the operation column must contain its longest legal localized action set without cell-level horizontal scrolling, and focusing More must not shift the row-action origin.',
         'Refresh and column settings remain one icon group before a divider; the rightmost pagination uses Arco mini density and no page-local typography override.',
       ],
     },

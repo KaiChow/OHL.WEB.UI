@@ -38,13 +38,13 @@ const keywordTypeValue = computed({
 
 <template>
   <a-form-item :label="fieldLabel" :style="denseFormItemStyle">
-    <a-input-group v-if="field.kind === 'composite'">
+    <a-input-group v-if="field.kind === 'composite'" class="w100">
       <a-select v-model="keywordTypeValue" size="small" :style="{ width: '104px' }">
         <a-option value="orderNo">{{ t('queryScenario.keywordType') }}</a-option>
         <a-option value="hblNo">HBL</a-option>
         <a-option value="mblNo">MBL</a-option>
       </a-select>
-      <a-input v-model="textValue" size="small" allow-clear :placeholder="t('queryScenario.inputNumber')" @press-enter="emit('submit')" />
+      <a-input class="w100" v-model="textValue" size="small" allow-clear :placeholder="t('queryScenario.inputNumber')" @press-enter="emit('submit')" />
     </a-input-group>
     <a-range-picker v-else-if="field.kind === 'range'" v-model="rangeValue" size="small" style="width: 100%" />
     <BatchValueQuery v-else-if="field.kind === 'batch'" v-model="rangeValue" :label="fieldLabel" @submit="emit('submit')" />

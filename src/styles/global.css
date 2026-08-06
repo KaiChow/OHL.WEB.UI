@@ -230,6 +230,9 @@ body {
   --dense-shadow-card: 0 1px 2px rgba(29, 33, 41, 0.04), 0 0 0 1px var(--color-border-1);
   --dense-shadow-lift: 0 8px 24px rgba(29, 33, 41, 0.1);
 }
+.w100 {
+  width: 100%;
+}
 
 /* =================================================================
    状态 pill

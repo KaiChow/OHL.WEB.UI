@@ -43,6 +43,8 @@ const { t } = useI18n();
 
 const CURRENT_OPERATOR = '张操作';
 const COLUMN_SETTING_STORAGE_KEY = 'ohl.shipment.export-order.visible-columns.v3';
+const ORDER_STATUS_COLUMN_MIN_WIDTH = 148;
+const OPERATION_COLUMN_WIDTH = 270;
 
 type WorkScope = 'all' | 'mine' | 'others';
 
@@ -1157,7 +1159,7 @@ watch(uiScenario, () => {
               </template>
             </vxe-column>
 
-            <vxe-column field="orderStatus" :title="t('shipment.columns.orderStatus')" min-width="116" fixed="left" :visible="isColumnVisible('orderStatus')">
+            <vxe-column field="orderStatus" :title="t('shipment.columns.orderStatus')" :min-width="ORDER_STATUS_COLUMN_MIN_WIDTH" fixed="left" :visible="isColumnVisible('orderStatus')">
               <template #default="{ row }">
                 <span class="s-pill" :data-s="row.statusPill">{{ t(`shipment.statuses.${row.orderStatus}`) }}</span>
               </template>
@@ -1207,7 +1209,7 @@ watch(uiScenario, () => {
               <template #default="{ row }">{{ row.isOverdue ? t('shipment.overdue.yes') : t('shipment.overdue.no') }}</template>
             </vxe-column>
 
-            <vxe-column :title="t('common.operations')" width="220" fixed="right" align="left" header-align="center">
+            <vxe-column :title="t('common.operations')" :width="OPERATION_COLUMN_WIDTH" fixed="right" align="left" header-align="center">
               <template #default="{ row }">
                 <a-space class="row-actions" :size="2">
                   <a-button
