@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { compactVerticalFormLabelStyle } from '../../../../design-system/formLayout';
+import { compactVerticalFormLabelStyle } from '@/design-system/formLayout';
 import type { ProfitReviewRow } from '../types';
 import { REVIEW_STATUS_META } from '../displayMeta';
 

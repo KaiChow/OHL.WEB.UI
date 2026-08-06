@@ -1,5 +1,5 @@
 import type { OrderStatusKey } from './orderWorkbench/types';
-import { defineFeatureContracts } from '../../design-system/featureContract';
+import { defineFeatureContracts } from '@/design-system/featureContract';
 
 export type ShipmentUiScenario =
   | 'normal'
@@ -76,6 +76,16 @@ export const SHIPMENT_FEATURE_CONTRACTS = defineFeatureContracts([
     successResult: 'replace the workbench result set and preserve applied-condition feedback',
     errorResult: 'keep conditions, render a table-local error state, and expose retry',
     refreshScope: 'result table, queue counts, pagination, and selected rows',
+  },
+  {
+    id: 'export-order-query-preferences',
+    actorRoles: ['shipment.viewer', 'shipment.operator', 'shipment.manager'],
+    visibleWhen: 'export-order query surface is visible',
+    enabledWhen: 'the query field catalog is available and no preference save is in flight',
+    request: 'persist a versioned ordered partition of stable query-field ids into page and drawer locations in local workspace storage; no query request',
+    successResult: 'close the settings drawer and apply the page and drawer order immediately without changing query values, pagination, or selection',
+    errorResult: 'keep the settings drawer open, retain the draft placement, and show a specific save failure',
+    refreshScope: 'query field placement and order only',
   },
   {
     id: 'export-order-column-preferences',

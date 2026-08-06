@@ -1,4 +1,4 @@
-import { definePesdpPageSpec } from '../../../design-system/pesdpPageSpec';
+import { definePesdpPageSpec } from '@/design-system/pesdpPageSpec';
 
 export const DETAIL_MODULES_SPEC = definePesdpPageSpec({
   id: 'ui-acceptance-complex-detail-modules',

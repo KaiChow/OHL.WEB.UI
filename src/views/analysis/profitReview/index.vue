@@ -10,16 +10,16 @@ import {
   IconDownload,
   IconMore,
 } from '@arco-design/web-vue/es/icon';
-import { downloadCsvFile, buildTimestampSuffix } from '../../../utils/mock-actions';
-import { formatLocalMinute } from '../../../utils/date-time';
-import { compactVerticalFormLabelStyle } from '../../../design-system/formLayout';
-import { stableTableRowConfig } from '../../../design-system/tableConfig';
-import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
-import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
-import StandardListFrame from '../../../components/workbench/StandardListFrame.vue';
-import WorkbenchEmptyState from '../../../components/workbench/WorkbenchEmptyState.vue';
-import WorkbenchTableToolbar from '../../../components/workbench/WorkbenchTableToolbar.vue';
-import WorkflowStateSelector from '../../../components/workbench/WorkflowStateSelector.vue';
+import { downloadCsvFile, buildTimestampSuffix } from '@/utils/mock-actions';
+import { formatLocalMinute } from '@/utils/date-time';
+import { compactVerticalFormLabelStyle } from '@/design-system/formLayout';
+import { stableTableRowConfig } from '@/design-system/tableConfig';
+import QueryFieldCol from '@/components/workbench/QueryFieldCol.vue';
+import QueryFieldGrid from '@/components/workbench/QueryFieldGrid.vue';
+import StandardListFrame from '@/components/workbench/StandardListFrame.vue';
+import WorkbenchEmptyState from '@/components/workbench/WorkbenchEmptyState.vue';
+import WorkbenchTableToolbar from '@/components/workbench/WorkbenchTableToolbar.vue';
+import WorkflowStateSelector from '@/components/workbench/WorkflowStateSelector.vue';
 import DetailDrawer from './components/DetailDrawer.vue';
 import FormDrawer from './components/FormDrawer.vue';
 import { profitReviewRows } from './mockData';

@@ -1,4 +1,4 @@
-import { definePesdpPageSpec } from '../../../design-system/pesdpPageSpec';
+import { definePesdpPageSpec } from '@/design-system/pesdpPageSpec';
 
 export const TEMPLATE_MANAGEMENT_PAGE_SPEC = definePesdpPageSpec({
   id: 'shipment-template-management',

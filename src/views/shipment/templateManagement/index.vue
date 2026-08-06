@@ -13,14 +13,14 @@ import {
   IconSearch,
   IconSettings,
 } from '@arco-design/web-vue/es/icon';
-import StandardListFrame from '../../../components/workbench/StandardListFrame.vue';
-import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
-import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
-import WorkbenchTableToolbar from '../../../components/workbench/WorkbenchTableToolbar.vue';
-import WorkbenchEmptyState from '../../../components/workbench/WorkbenchEmptyState.vue';
-import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '../../../design-system/formLayout';
-import { stableTableRowConfig } from '../../../design-system/tableConfig';
-import { buildDateTimeStamp, buildTimestampSuffix, downloadCsvFile } from '../../../utils/mock-actions';
+import StandardListFrame from '@/components/workbench/StandardListFrame.vue';
+import QueryFieldGrid from '@/components/workbench/QueryFieldGrid.vue';
+import QueryFieldCol from '@/components/workbench/QueryFieldCol.vue';
+import WorkbenchTableToolbar from '@/components/workbench/WorkbenchTableToolbar.vue';
+import WorkbenchEmptyState from '@/components/workbench/WorkbenchEmptyState.vue';
+import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '@/design-system/formLayout';
+import { stableTableRowConfig } from '@/design-system/tableConfig';
+import { buildDateTimeStamp, buildTimestampSuffix, downloadCsvFile } from '@/utils/mock-actions';
 import { createTemplateMockRows } from './mockData';
 import { TEMPLATE_MANAGEMENT_FEATURE_CONTRACTS } from './featureContracts';
 import type { TemplateDraft, TemplateQuery, TemplateRecord, TemplateType } from './types';

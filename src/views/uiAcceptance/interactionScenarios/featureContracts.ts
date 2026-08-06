@@ -1,4 +1,4 @@
-import { defineFeatureContracts } from '../../../design-system/featureContract';
+import { defineFeatureContracts } from '@/design-system/featureContract';
 
 export const INTERACTION_SCENARIO_FEATURE_CONTRACTS = defineFeatureContracts([
   { id: 'acceptance-contact-save', actorRoles: ['ui.acceptance.reviewer'], visibleWhen: '联系人短表单弹窗可见', enabledWhen: '必填字段有效且未提交', request: '将联系人草稿保存到当前页面本地状态', successResult: '关闭弹窗并刷新联系人摘要', errorResult: '弹窗保持打开，字段值与局部错误保留', refreshScope: '联系人摘要与弹窗' },

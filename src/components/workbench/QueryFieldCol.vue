@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { QUERY_GRID_ITEM_SPANS } from '../../design-system/queryLayout';
-import type { QueryGridItemRole } from '../../design-system/queryLayout';
+import { QUERY_GRID_ITEM_SPANS } from '@/design-system/queryLayout';
+import type { QueryGridItemRole } from '@/design-system/queryLayout';
 
 const props = defineProps<{
   role: QueryGridItemRole;

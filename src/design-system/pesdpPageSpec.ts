@@ -35,6 +35,19 @@ export interface PesdpQueryFieldLayout {
   width: PesdpQueryFieldWidthRole;
 }
 
+export type PesdpQueryStrategy =
+  | 'none'
+  | 'fixed-inline'
+  | 'page-and-drawer'
+  | 'saved-query-workspace'
+  | 'saved-query-drawer-fallback'
+  // Compatibility for routed pages awaiting migration; never select these for new or materially changed work.
+  | 's1-inline'
+  | 's2-expand'
+  | 's3-drawer'
+  | 's4-drawer-fallback'
+  | 's4-workspace';
+
 export interface PesdpListSpec {
   frame: 'standard-list-v1';
   profile: PesdpListProfile;
@@ -160,6 +173,7 @@ export type PesdpDetailSpec =
 interface PesdpPageSpecBase {
   id: string;
   target: PesdpPageGoal;
+  presentationTarget?: 'daily-ops' | 'demo';
   input: {
     path: 'artifact' | 'requirement';
     artifacts: readonly string[];
@@ -185,11 +199,21 @@ interface PesdpPageSpecBase {
   surfaces: readonly [PesdpSurfaceSpec, ...PesdpSurfaceSpec[]];
   query: {
     totalFields: number;
-    strategy: 'none' | 's1-inline' | 's2-expand' | 's3-drawer' | 's4-drawer-fallback' | 's4-workspace';
+    strategy: PesdpQueryStrategy;
     layout: 'none' | 'semantic-grid-v1';
     visibleFields: readonly string[];
     visibleFieldLayout: readonly PesdpQueryFieldLayout[];
     advancedFields: readonly string[];
+    personalization?: {
+      mode: 'page-and-drawer';
+      pageRows: 1 | 2;
+      minimumTracks: number;
+      actionTracks: number;
+      capacityTracks: number;
+      requiredPageFields: readonly string[];
+      ordering: 'page-global-drawer-grouped';
+      persistence: 'local-workspace' | 'user-preference-api';
+    };
   };
   table: {
     kind: 'none' | 'query-list' | 'management-list' | 'workbench' | 'detail-editable' | 'detail-readonly' | 'summary';

@@ -1,4 +1,4 @@
-import { definePesdpPageSpec } from '../../../design-system/pesdpPageSpec';
+import { definePesdpPageSpec } from '@/design-system/pesdpPageSpec';
 
 export const INTERACTION_SCENARIO_PAGE_SPEC = definePesdpPageSpec({
   id: 'ui-acceptance-interaction-scenarios',

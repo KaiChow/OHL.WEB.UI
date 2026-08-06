@@ -32,8 +32,8 @@ withDefaults(defineProps<{
       <a-card
         class="standard-list-frame__data"
         size="small"
-        :bordered="true"
-        :header-style="{ minHeight: '40px', padding: '0 12px' }"
+        :bordered="false"
+        :header-style="{ minHeight: '40px', padding: '0 12px', borderBottom: 'none' }"
         :body-style="{ minHeight: 0, padding: 0, display: 'flex', flexDirection: 'column', flex: 1 }"
       >
         <template v-if="$slots.toolbar" #title>

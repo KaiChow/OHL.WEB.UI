@@ -49,7 +49,14 @@ export const PAGE_SPEC = definePageSpec({
     { id: 'command', role: 'command', owns: ['query', 'create'], primaryAction: 'object-create', implementation: 'arco' },
     { id: 'data', role: 'data', owns: ['table', 'pagination', 'feedback'], implementation: 'shared-pattern', whyArcoNotEnough: 'VXE workbench behavior needs the shared bridge.' },
   ],
-  query: { totalFields: 2, strategy: 's1-inline', visibleFields: ['keyword', 'customer'], advancedFields: [] },
+  query: {
+    totalFields: 2,
+    strategy: 'fixed-inline',
+    layout: 'semantic-grid-v1',
+    visibleFields: ['keyword', 'customer'],
+    visibleFieldLayout: [{ field: 'keyword', width: 'standard' }, { field: 'customer', width: 'standard' }],
+    advancedFields: [],
+  },
   table: { kind: 'management-list', rowBanding: 'striped', identityColumns: ['contractNo', 'status'], decisionColumns: ['nextAction'], supportingColumns: ['updatedAt'] },
   detail: { mode: 'none', focus: [], milestones: [] }, // non-none detail must also declare scroll ownership and typed modules
   actions: [
@@ -89,7 +96,7 @@ Every business action references an existing feature contract and declares frequ
 ## Page-Specific Contracts
 
 - List: every list page declares `frame: 'standard-list-v1'`, one `archetype`, and matching `list.profile`. The frame fixes shared UI/UX language; the profile controls only business complexity. `list-query` is for locating/inspecting, `list-management` is for master-data maintenance, and `list-workbench` is for repeated operational processing. Record whether the page owns a command surface, table cap, selection, work scope, status queues, page-mode switch, and the workflow-state control/count/placement/overflow; do not infer these from a copied template or call every selector a Tab.
-- Query: record all fields, visible vs advanced ownership, and selected strategy. The query strategy describes field complexity; the list archetype describes the user's job. They are independent decisions.
+- Query: record every permitted field, semantic width, page vs drawer ownership, and selected placement mode. For `page-and-drawer`, also declare `pageRows`, minimum/action/capacity tracks, required page fields, ordering policy, and persistence owner. Field count is descriptive only; it never selects the layout. Page and drawer arrays form one complete, duplicate-free partition, and the typed default must fit the minimum-width capacity.
 - Table: `query-list`, `management-list`, and `workbench` must match `list.profile`. Classify identity, decision, supporting, composite, fixed, density, and stable `rowBanding` roles before columns are coded; never derive banding from the current result count.
 - Object detail: declare `workspace.archetype` (`operational-workspace`, `reference-workspace`, or `review-workspace`), identity-band identity/key-fact/decision slots, the single object action owner, navigation policy, named identify/locate/act usability tasks, default edit mode, real milestones, one scroll owner, and a typed module manifest. Every module declares semantic kind, owned facts, sourced statistics with one placement, scoped actions, collapse rule, and `children: { kind: 'none' }` or one bounded repeated-child contract. Empty metrics/actions are explicit; arbitrary recursion, invented nav completion, and duplicated action/fact ownership are forbidden.
 - Presentation target: `presentationTarget` defaults to `daily-ops`. `demo` is for financing, sales, and customer-review surfaces and unlocks only the exceptions in `visual-system.md` Presentation Target Exceptions; every daily-work gate still applies.

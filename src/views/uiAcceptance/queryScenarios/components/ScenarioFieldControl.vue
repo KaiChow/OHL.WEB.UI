@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import BatchValueQuery from '../../../../components/workbench/BatchValueQuery.vue';
-import { denseFormItemStyle } from '../../../../design-system/formLayout';
+import BatchValueQuery from '@/components/workbench/BatchValueQuery.vue';
+import { denseFormItemStyle } from '@/design-system/formLayout';
 import type { ScenarioField } from '../scenarioFields';
 
 const props = defineProps<{

@@ -11,13 +11,13 @@ import {
   IconSave,
 } from '@arco-design/web-vue/es/icon';
 import { useI18n } from 'vue-i18n';
-import BusinessActivityList, { type BusinessActivityItem } from '../../../components/workbench/BusinessActivityList.vue';
-import BusinessDetailChild from '../../../components/workbench/BusinessDetailChild.vue';
-import BusinessDetailModule from '../../../components/workbench/BusinessDetailModule.vue';
-import BusinessFieldGroup from '../../../components/workbench/BusinessFieldGroup.vue';
-import BusinessMetricStrip, { type BusinessMetricItem } from '../../../components/workbench/BusinessMetricStrip.vue';
-import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '../../../design-system/formLayout';
-import { stableTableRowConfig } from '../../../design-system/tableConfig';
+import BusinessActivityList, { type BusinessActivityItem } from '@/components/workbench/BusinessActivityList.vue';
+import BusinessDetailChild from '@/components/workbench/BusinessDetailChild.vue';
+import BusinessDetailModule from '@/components/workbench/BusinessDetailModule.vue';
+import BusinessFieldGroup from '@/components/workbench/BusinessFieldGroup.vue';
+import BusinessMetricStrip, { type BusinessMetricItem } from '@/components/workbench/BusinessMetricStrip.vue';
+import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '@/design-system/formLayout';
+import { stableTableRowConfig } from '@/design-system/tableConfig';
 import { DETAIL_MODULES_SPEC } from './pageSpec';
 import { DETAIL_MODULE_FEATURE_CONTRACTS } from './featureContracts';
 

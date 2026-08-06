@@ -1,4 +1,4 @@
-import { definePesdpPageSpec } from '../../../design-system/pesdpPageSpec';
+import { definePesdpPageSpec } from '@/design-system/pesdpPageSpec';
 
 export const PROFIT_REVIEW_SPEC = definePesdpPageSpec({
   id: 'order-profit-review-workbench',
@@ -25,7 +25,7 @@ export const PROFIT_REVIEW_SPEC = definePesdpPageSpec({
   ],
   query: {
     totalFields: 5,
-    strategy: 's1-inline',
+    strategy: 'fixed-inline',
     layout: 'semantic-grid-v1',
     visibleFields: ['keyword', 'riskLevel', 'region', 'owner', 'updatedRange'],
     visibleFieldLayout: [

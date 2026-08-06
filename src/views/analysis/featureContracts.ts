@@ -1,4 +1,4 @@
-import { defineFeatureContracts } from '../../design-system/featureContract';
+import { defineFeatureContracts } from '@/design-system/featureContract';
 
 export type ProfitReviewUiScenario =
   | 'normal'

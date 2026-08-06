@@ -1,4 +1,4 @@
-import { defineFeatureContracts } from '../../design-system/featureContract';
+import { defineFeatureContracts } from '@/design-system/featureContract';
 
 export const QUERY_SCENARIO_FEATURE_CONTRACTS = defineFeatureContracts([
   {
@@ -10,6 +10,16 @@ export const QUERY_SCENARIO_FEATURE_CONTRACTS = defineFeatureContracts([
     successResult: '重置到第一页并更新场景结果表与已应用条件计数',
     errorResult: '保留全部查询条件并在结果表位置显示可恢复错误',
     refreshScope: '当前查询场景、结果表和分页',
+  },
+  {
+    id: 'query-scenario-query-preferences',
+    actorRoles: ['ui.acceptance.viewer'],
+    visibleWhen: '当前验收场景使用页面与抽屉查询项配置',
+    enabledWhen: '页面字段未超过最小宽度容量且没有保存正在执行',
+    request: '按场景将稳定查询字段 id 的页面/抽屉归属与顺序保存到本地工作区存储',
+    successResult: '立即应用字段归属和顺序，同时保留查询值、结果、分页和表格选择',
+    errorResult: '保持设置抽屉打开并保留草稿，显示可恢复的保存错误',
+    refreshScope: '当前验收场景的查询字段归属与顺序',
   },
   {
     id: 'query-scenario-refresh',

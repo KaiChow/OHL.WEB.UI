@@ -1,12 +1,13 @@
-import { definePesdpPageSpec } from '../../../design-system/pesdpPageSpec';
+import { definePesdpPageSpec } from '@/design-system/pesdpPageSpec';
 
 export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
   id: 'ui-acceptance-query-scenarios',
   target: 'internal-system',
+  presentationTarget: 'daily-ops',
   archetype: 'list-management',
   input: {
     path: 'artifact',
-    artifacts: ['user-provided query-layout screenshots, anchored column-settings screenshot, and iterative acceptance feedback'],
+    artifacts: ['user-provided query-layout screenshots, anchored column-settings screenshot, query-settings quality screenshot, and iterative acceptance feedback'],
     unresolvedBusinessDecisions: ['saved-query persistence, sharing, permissions, backend batch-value limits, and shared column-template creation'],
     recommendations: ['keep saved-query and saved column-template behavior outside L2 acceptance until persistence and permission contracts are proven'],
   },
@@ -38,34 +39,34 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
   },
   pesdp: {
     professional: {
-      decisions: ['Use one sea-export-order result model across seven routed query-count scenarios so layout differences come only from query complexity.'],
-      acceptance: ['The menu exposes S0, S1 compact, S1 inline, S2 expand, S3 drawer, S3 wide, and the S4 grouped-drawer fallback as separately addressable routes.'],
+      decisions: ['Use one sea-export-order result model across routed placement and scale scenarios so alignment, page/drawer configuration, and high-volume fallback can be compared without field-count rules selecting the DOM.'],
+      acceptance: ['The menu exposes no-query, fixed one-row, configurable page/drawer, wide-drawer, and saved-query fallback cases as separately addressable routes.'],
     },
     efficient: {
-      decisions: ['Keep scenario query, reset, expand, advanced apply, table refresh, column preference, one direct row action, overflow assignment, and pagination locally executable without inventing saved-view persistence.'],
+      decisions: ['Keep scenario query, reset, query-field placement, advanced apply, table refresh, column preference, one direct row action, overflow assignment, and pagination locally executable without inventing saved-view persistence.'],
       acceptance: ['Scenario switching preserves the route and every query, table-utility, row, and pagination action updates the local result context without dead controls.'],
     },
     structured: {
-      decisions: ['Use the shared standard-list frame for page-mode, query, table-toolbar, feedback, and data ownership; the route owns one query surface when applicable and one result-owned table surface; S0 removes the query surface and S4 uses a grouped wide drawer until saved-query persistence, sharing, and permissions exist.'],
-      acceptance: ['No scenario combines a flat query wall with a drawer; query actions keep one stable owner; the shared table toolbar owns refresh, anchored column settings, and real mini pagination; row operations stay in the fixed operation column; and an empty result keeps reset recovery in the data surface.'],
+      decisions: ['Use the shared standard-list frame for page-mode, query, table-toolbar, feedback, and data ownership; the route owns one query surface when applicable and one result-owned table surface; configurable scenarios partition every field between the aligned page row and a grouped drawer.', 'Express the asymmetric task as a stacked page-query preview followed by a full-width drawer-field catalog; never give a one-item page list equal height and weight to a 39-item catalog.'],
+      acceptance: ['No scenario uses inline expansion or responsive field promotion; query actions keep one stable owner; the shared table toolbar owns refresh, anchored column settings, and real mini pagination; row operations stay in the fixed operation column; and an empty result keeps reset recovery in the data surface.', 'The settings overlay shows page fields first in their real proportional order, then the searchable drawer catalog across the full content width; up/down icon commands with tooltips replace repeated link text.'],
     },
     dense: {
-      decisions: ['Use one container-owned semantic-grid-v1 track model: bounded field roles, query actions adjacent to the permanent field cluster, and no left-pinned page-wide cap; keep the hybrid batch query in the expanded row when promoting it would leave that row visually under-occupied, and move the lowest-priority S2/S3 Narrow field into its existing expand/drawer surface at compact width.', 'Use the shared dense vertical-form rhythm in grouped drawers: 4px label gap, 12px column gap, 8px row gap, and zero form-item margin because the grid owns inter-row spacing.', 'Keep structural table columns fixed, business columns on role-based min-width floors, and enable VXE fit so a short column set expands across the owned data surface.'],
-      acceptance: ['At 1024, 1366, 1440, and 1920 widths, role order remains stable; search/reset/expand/filter labels remain visible without clipping in zh-CN and en-US, pagination uses mini density with multiple real pages, field rows use one shared 8px rhythm, and every adjacent query-action box uses the same 8px gap.', 'In S3 and S4 drawers, a normal single-line field measures 60px internally and adjacent rows have an 8px net gap; Arco default form-item margin never adds a second spacing layer.', 'At wide desktop widths the expanded S2 rows share one track model and retain only a normal final-row tail; the result header and body consume the full table owner width without a blank right-side column region; at narrow widths only the VXE table owns horizontal overflow.', 'The management result uses the shared stable row identity and hover behavior while inheriting the striped main-list baseline; its longest localized status and direct action remain complete, and More remains visible.', 'The anchored column panel keeps one ungrouped checklist locally scrollable, protects required/minimum columns, supports show-all, restore-default, and visible drag handles, persists the saved visibility and business-column order, and applies both to the real VXE table.'],
+      decisions: ['Use one container-owned semantic-grid-v1 track model with a 15-track page-field budget after reserving nine of the minimum 24 tracks for localized actions; wider viewports never move fields without user intent.', 'Use the shared dense vertical-form rhythm in grouped drawers: 4px label gap, 12px column gap, 8px row gap, and zero form-item margin because the grid owns inter-row spacing.', 'Keep structural table columns fixed, business columns on role-based min-width floors, and enable VXE fit so a short column set expands across the owned data surface.', 'Use the wide overlay tier for high-volume placement catalogs, add local field search that never rewrites saved order, render the drawer catalog in two scan columns, and show normal capacity beside the page preview while reserving Alert for an actual over-capacity error.'],
+      acceptance: ['At 1024, 1366, 1440, and 1920 widths, saved page-field order remains stable; search/reset/filter/settings labels remain visible without clipping in zh-CN and en-US, pagination uses mini density with multiple real pages, and every adjacent query-action box uses the same 8px gap.', 'Grouped drawers keep one native scroll owner and the query settings drawer prevents over-capacity saves while preserving its draft; Save is enabled only for a valid changed draft.', 'The query settings search filters only the high-volume drawer catalog without deleting hidden matches; clearing search restores its complete order, and sorting remains available after search is cleared.', 'The result header and body consume the full table owner width without a blank right-side column region; at narrow widths only the VXE table owns horizontal overflow.', 'The management result uses the shared stable row identity and hover behavior while inheriting the striped main-list baseline; its longest localized status and direct action remain complete, and More remains visible.', 'The anchored column panel keeps one ungrouped checklist locally scrollable, protects required/minimum columns, supports show-all, restore-default, and visible drag handles, persists the saved visibility and business-column order, and applies both to the real VXE table.'],
     },
     premium: {
-      decisions: ['Use GI-native Arco controls, grouped native drawers, the shared anchored column panel, shared toolbar/pagination, and the global VXE mini table without page-local skins.'],
-      acceptance: ['Every scenario remains readable, contained, and visually comparable without duplicated summaries, decorative cards, or a page-private table-control language.'],
+      decisions: ['Use GI-native Arco controls, grouped native drawers, the shared anchored column panel, shared toolbar/pagination, and the global VXE mini table without page-local skins.', 'Create hierarchy through one proportional page preview, one searchable catalog, stable hover/drag states, and one footer primary action; do not add decorative color, cards, or custom overlay chrome.'],
+      acceptance: ['Every scenario remains readable, contained, and visually comparable without duplicated summaries, decorative cards, or a page-private table-control language.', 'The query settings overlay scores at least 10/12 on the Design Sense Gate with no zero item at the required real-route viewports.'],
     },
   },
   surfaces: [
-    { id: 'query-scenario', role: 'command', owns: ['query-mode', 'visible-query', 'expand-query'], primaryAction: 'query-scenario-apply', implementation: 'shared-pattern', whyArcoNotEnough: "Arco's fixed 24-column model cannot preserve bounded semantic field widths while adding wide-desktop capacity." },
+    { id: 'query-scenario', role: 'command', owns: ['query-mode', 'aligned-page-query', 'page-drawer-placement'], primaryAction: 'query-scenario-apply', implementation: 'shared-pattern', whyArcoNotEnough: "Arco's fixed 24-column model cannot preserve bounded semantic field widths while adding wide-desktop capacity." },
     { id: 'advanced-query', role: 'supporting', owns: ['grouped-drawer', 'wide-drawer', 'draft-query'], implementation: 'arco' },
     { id: 'scenario-results', role: 'data', owns: ['table-data', 'refresh', 'column-preferences', 'row-actions', 'pagination', 'total-count'], implementation: 'shared-pattern', whyArcoNotEnough: 'The result comparison uses the project VXE table baseline and shared workbench toolbar/column-preference bridge.' },
   ],
   query: {
     totalFields: 52,
-    strategy: 's4-drawer-fallback',
+    strategy: 'page-and-drawer',
     layout: 'semantic-grid-v1',
     visibleFields: ['keyword', 'customerName', 'businessType'],
     visibleFieldLayout: [
@@ -81,6 +82,16 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
       'invoiceStatus', 'exceptionState', 'overdueState', 'currency', 'amountRange', 'grossProfitRange', 'receivableStatus', 'payableStatus',
       'creator', 'updater', 'source', 'tradeTerm', 'transportClause', 'cargoName', 'remarkKeyword',
     ],
+    personalization: {
+      mode: 'page-and-drawer',
+      pageRows: 1,
+      minimumTracks: 24,
+      actionTracks: 9,
+      capacityTracks: 15,
+      requiredPageFields: ['keyword'],
+      ordering: 'page-global-drawer-grouped',
+      persistence: 'local-workspace',
+    },
   },
   table: {
     kind: 'management-list',
@@ -94,6 +105,7 @@ export const QUERY_SCENARIO_SPEC = definePesdpPageSpec({
   detail: { mode: 'none', focus: [], milestones: [] },
   actions: [
     { id: 'query-scenario-apply', scope: 'query', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'query-scenario-apply', successOwner: 'scenario-results', failureOwner: 'scenario-results' },
+    { id: 'query-scenario-query-preferences', scope: 'query', frequency: 'regular', risk: 'low', presentation: 'secondary', contract: 'query-scenario-query-preferences', successOwner: 'query-scenario', failureOwner: 'query-scenario' },
     { id: 'query-scenario-refresh', scope: 'data-utilities', frequency: 'regular', risk: 'low', presentation: 'text', contract: 'query-scenario-refresh', successOwner: 'scenario-results', failureOwner: 'scenario-results' },
     { id: 'query-scenario-column-preferences', scope: 'data-utilities', frequency: 'regular', risk: 'low', presentation: 'text', contract: 'query-scenario-column-preferences', successOwner: 'scenario-results', failureOwner: 'scenario-results' },
     { id: 'query-scenario-status-update', scope: 'row', frequency: 'regular', risk: 'low', presentation: 'row-action', contract: 'query-scenario-status-update', successOwner: 'scenario-results', failureOwner: 'scenario-results' },

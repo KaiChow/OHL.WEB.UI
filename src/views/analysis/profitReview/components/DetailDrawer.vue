@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import BusinessActivityList, { type BusinessActivityItem } from '../../../../components/workbench/BusinessActivityList.vue';
+import BusinessActivityList, { type BusinessActivityItem } from '@/components/workbench/BusinessActivityList.vue';
 import type { ProfitReviewRow } from '../types';
 import { REVIEW_STATUS_META, RISK_LEVEL_META, formatOrderAmount, formatMarginRate } from '../displayMeta';
 

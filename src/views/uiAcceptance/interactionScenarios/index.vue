@@ -6,12 +6,12 @@ import { Message } from '@arco-design/web-vue';
 import type { FormInstance } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import { IconMore, IconPlus, IconRefresh } from '@arco-design/web-vue/es/icon';
-import StandardListFrame from '../../../components/workbench/StandardListFrame.vue';
-import WorkbenchEmptyState from '../../../components/workbench/WorkbenchEmptyState.vue';
-import WorkbenchTableToolbar from '../../../components/workbench/WorkbenchTableToolbar.vue';
-import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '../../../design-system/formLayout';
-import { stableTableRowConfig } from '../../../design-system/tableConfig';
-import { buildDateTimeStamp } from '../../../utils/mock-actions';
+import StandardListFrame from '@/components/workbench/StandardListFrame.vue';
+import WorkbenchEmptyState from '@/components/workbench/WorkbenchEmptyState.vue';
+import WorkbenchTableToolbar from '@/components/workbench/WorkbenchTableToolbar.vue';
+import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '@/design-system/formLayout';
+import { stableTableRowConfig } from '@/design-system/tableConfig';
+import { buildDateTimeStamp } from '@/utils/mock-actions';
 import { INTERACTION_SCENARIO_FEATURE_CONTRACTS } from './featureContracts';
 import type {
   AcceptanceTaskRow,

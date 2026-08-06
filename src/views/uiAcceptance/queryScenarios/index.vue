@@ -4,20 +4,22 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Message } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
-import { IconDown, IconFilter, IconMore, IconRefresh, IconSearch } from '@arco-design/web-vue/es/icon';
-import { compactVerticalFormLabelStyle, denseFormGridGutter } from '../../../design-system/formLayout';
-import { stableTableRowConfig } from '../../../design-system/tableConfig';
-import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
-import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
-import StandardListFrame from '../../../components/workbench/StandardListFrame.vue';
-import WorkbenchColumnSettings from '../../../components/workbench/WorkbenchColumnSettings.vue';
-import WorkbenchEmptyState from '../../../components/workbench/WorkbenchEmptyState.vue';
-import WorkbenchTableToolbar from '../../../components/workbench/WorkbenchTableToolbar.vue';
+import { IconFilter, IconMore, IconRefresh, IconSearch, IconSettings } from '@arco-design/web-vue/es/icon';
+import { compactVerticalFormLabelStyle, denseFormGridGutter } from '@/design-system/formLayout';
+import { stableTableRowConfig } from '@/design-system/tableConfig';
+import QueryFieldCol from '@/components/workbench/QueryFieldCol.vue';
+import QueryFieldGrid from '@/components/workbench/QueryFieldGrid.vue';
+import QueryFieldSettingsDrawer from '@/components/workbench/QueryFieldSettingsDrawer.vue';
+import StandardListFrame from '@/components/workbench/StandardListFrame.vue';
+import WorkbenchColumnSettings from '@/components/workbench/WorkbenchColumnSettings.vue';
+import WorkbenchEmptyState from '@/components/workbench/WorkbenchEmptyState.vue';
+import WorkbenchTableToolbar from '@/components/workbench/WorkbenchTableToolbar.vue';
 import ScenarioFieldControl from './components/ScenarioFieldControl.vue';
 import { QUERY_SCENARIOS, SCENARIO_FIELDS } from './scenarioFields';
 import type { QueryScenarioKey, ScenarioField } from './scenarioFields';
-import { QUERY_GRID_ITEM_SPANS } from '../../../design-system/queryLayout';
-import type { QueryGridItemRole } from '../../../design-system/queryLayout';
+import type { QueryGridItemRole } from '@/design-system/queryLayout';
+import { normalizeQueryFieldPlacement, queryFieldTrackUsage } from '@/design-system/queryFieldPreferences';
+import type { QueryFieldPlacement } from '@/design-system/queryFieldPreferences';
 import { QUERY_SCENARIO_FEATURE_CONTRACTS } from '../featureContracts';
 
 void QUERY_SCENARIO_FEATURE_CONTRACTS;
@@ -42,6 +44,8 @@ const router = useRouter();
 const { t } = useI18n();
 const CURRENT_ACCEPTANCE_OPERATOR = '张操作';
 const COLUMN_SETTING_STORAGE_KEY = 'ohl.ui-acceptance.query.visible-columns.v1';
+const QUERY_FIELD_SETTING_STORAGE_PREFIX = 'ohl.ui-acceptance.query.field-placement.v1';
+const QUERY_PAGE_CAPACITY_TRACKS = 15;
 const OPERATION_COLUMN_WIDTH = 168;
 const STATUS_COLUMN_MIN_WIDTH = 148;
 
@@ -103,11 +107,11 @@ const loadColumnPreferences = (): ColumnPreferences => {
 const initialColumnPreferences = loadColumnPreferences();
 
 const activeScenarioKey = ref<QueryScenarioKey>(props.initialScenario);
-const expanded = ref(false);
 const drawerVisible = ref(false);
+const querySettingsVisible = ref(false);
+const queryFieldPlacement = ref<QueryFieldPlacement>({ pageFields: [], drawerFields: [] });
 const querying = ref(false);
 const refreshing = ref(false);
-const primaryGridTrackCount = ref(24);
 const page = reactive({ current: 1, size: 10 });
 const keywordType = ref('orderNo');
 const wideFilterEditor = ref<HTMLElement>();
@@ -180,48 +184,30 @@ const secondaryFields = computed(() => {
   }
   return remainingFields.value.slice(0, Math.max(0, currentScenario.value.total - visibleFields.value.length));
 });
-const isExpandScenario = computed(() => activeScenarioKey.value === 's2-expand');
-const isDrawerScenario = computed(() => ['s3-drawer', 's3-wide', 's4-drawer'].includes(activeScenarioKey.value));
+const isDrawerScenario = computed(() => 'configurable' in currentScenario.value && currentScenario.value.configurable);
 const isWideDrawer = computed(() => activeScenarioKey.value === 's3-wide' || activeScenarioKey.value === 's4-drawer');
-const actionColumnRole = computed<QueryGridItemRole>(() => {
-  if (isExpandScenario.value) return 'actions-expanded';
-  return isDrawerScenario.value ? 'actions-wide' : 'actions';
-});
-const permanentVisibleFields = computed(() => {
-  if (!isExpandScenario.value && !isDrawerScenario.value) return visibleFields.value;
-  let availableTracks = primaryGridTrackCount.value - QUERY_GRID_ITEM_SPANS[actionColumnRole.value];
-  const fields: ScenarioField[] = [];
-  for (const field of visibleFields.value) {
-    const span = QUERY_GRID_ITEM_SPANS[field.width];
-    if (span > availableTracks) break;
-    fields.push(field);
-    availableTracks -= span;
-  }
-  return fields;
-});
-const responsiveSecondaryFields = computed(() => [
-  ...visibleFields.value.slice(permanentVisibleFields.value.length),
+const actionColumnRole = computed<QueryGridItemRole>(() => isDrawerScenario.value ? 'actions-wide' : 'actions');
+const scenarioFields = computed(() => Array.from(new Set([
+  ...visibleFields.value,
   ...secondaryFields.value,
-]);
-const promotedSecondaryFields = computed(() => {
-  if (!isExpandScenario.value) return [];
-  let availableTracks = primaryGridTrackCount.value
-    - QUERY_GRID_ITEM_SPANS[actionColumnRole.value]
-    - permanentVisibleFields.value.reduce((total, field) => total + QUERY_GRID_ITEM_SPANS[field.width], 0);
-  const promoted: ScenarioField[] = [];
-  for (const field of responsiveSecondaryFields.value) {
-    const span = QUERY_GRID_ITEM_SPANS[field.width];
-    if (span > availableTracks) break;
-    promoted.push(field);
-    availableTracks -= span;
-  }
-  return promoted;
-});
-const collapsibleSecondaryFields = computed(() => responsiveSecondaryFields.value.slice(promotedSecondaryFields.value.length));
-const hiddenActiveCount = computed(() => collapsibleSecondaryFields.value.filter((field) => {
-  const value = queryValues[field.key];
-  return Array.isArray(value) ? value.length > 0 : Boolean(value);
-}).length);
+])));
+const queryPreferenceOptions = computed(() => scenarioFields.value.map((field) => ({
+  field: field.key,
+  label: t(`queryScenario.fields.${field.key}`),
+  width: field.width,
+  requiredPage: field.key === 'keyword',
+  orderLocked: field.key === 'keyword',
+})));
+const defaultQueryFieldPlacement = computed<QueryFieldPlacement>(() => ({
+  pageFields: visibleFields.value.map((field) => field.key),
+  drawerFields: secondaryFields.value.map((field) => field.key),
+}));
+const permanentVisibleFields = computed(() => (isDrawerScenario.value ? queryFieldPlacement.value.pageFields : currentScenario.value.visible)
+  .map((key) => fieldByKey.get(key))
+  .filter((field): field is ScenarioField => Boolean(field)));
+const responsiveSecondaryFields = computed(() => (isDrawerScenario.value ? queryFieldPlacement.value.drawerFields : [])
+  .map((key) => fieldByKey.get(key))
+  .filter((field): field is ScenarioField => Boolean(field)));
 
 const groupFields = (fields: ScenarioField[]) => {
   const groups = new Map<string, ScenarioField[]>();
@@ -324,10 +310,38 @@ const assignRowToMe = (row: ScenarioRow) => {
 
 const cloneValue = (value: string | string[]) => Array.isArray(value) ? [...value] : value;
 
+const syncQueryFieldPlacement = () => {
+  if (!isDrawerScenario.value) {
+    queryFieldPlacement.value = defaultQueryFieldPlacement.value;
+    return;
+  }
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(`${QUERY_FIELD_SETTING_STORAGE_PREFIX}.${activeScenarioKey.value}`) ?? '{}') as Partial<QueryFieldPlacement>;
+    const normalized = normalizeQueryFieldPlacement(stored, queryPreferenceOptions.value, defaultQueryFieldPlacement.value);
+    queryFieldPlacement.value = queryFieldTrackUsage(normalized.pageFields, queryPreferenceOptions.value) <= QUERY_PAGE_CAPACITY_TRACKS
+      ? normalized
+      : normalizeQueryFieldPlacement(defaultQueryFieldPlacement.value, queryPreferenceOptions.value, defaultQueryFieldPlacement.value);
+  } catch {
+    queryFieldPlacement.value = normalizeQueryFieldPlacement(defaultQueryFieldPlacement.value, queryPreferenceOptions.value, defaultQueryFieldPlacement.value);
+  }
+};
+
+const applyQueryFieldPlacement = (placement: QueryFieldPlacement) => {
+  try {
+    const normalized = normalizeQueryFieldPlacement(placement, queryPreferenceOptions.value, defaultQueryFieldPlacement.value);
+    window.localStorage.setItem(`${QUERY_FIELD_SETTING_STORAGE_PREFIX}.${activeScenarioKey.value}`, JSON.stringify(normalized));
+    queryFieldPlacement.value = normalized;
+    Message.success(t('shipment.querySettings.saved'));
+    return true;
+  } catch {
+    Message.error(t('shipment.querySettings.saveError'));
+    return false;
+  }
+};
+
 const resetValues = () => {
   for (const field of SCENARIO_FIELDS) queryValues[field.key] = ['range', 'batch'].includes(field.kind) ? [] : '';
   appliedValues.value = {};
-  expanded.value = false;
   page.current = 1;
 };
 
@@ -342,6 +356,11 @@ const handleSearch = () => {
 const openAdvanced = () => {
   for (const field of responsiveSecondaryFields.value) draftValues[field.key] = cloneValue(queryValues[field.key]);
   drawerVisible.value = true;
+};
+
+const openQuerySettings = () => {
+  drawerVisible.value = false;
+  querySettingsVisible.value = true;
 };
 
 const clearAdvancedDraft = () => {
@@ -366,9 +385,10 @@ const onScenarioChange = (value: string | number | boolean) => {
 watch(() => props.initialScenario, (value) => {
   activeScenarioKey.value = value;
   drawerVisible.value = false;
-  expanded.value = false;
+  querySettingsVisible.value = false;
+  syncQueryFieldPlacement();
   resetValues();
-});
+}, { immediate: true });
 
 onBeforeUnmount(() => {
   window.clearTimeout(searchTimer);
@@ -396,12 +416,9 @@ onBeforeUnmount(() => {
 
     <template #query>
         <a-form :model="queryValues" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
-          <QueryFieldGrid @track-count-change="primaryGridTrackCount = $event">
+          <QueryFieldGrid>
             <QueryFieldCol v-for="field in permanentVisibleFields" :key="field.key" :role="field.width">
               <ScenarioFieldControl v-model="queryValues[field.key]" v-model:keyword-type="keywordType" :field="field" @submit="handleSearch" />
-            </QueryFieldCol>
-            <QueryFieldCol v-for="field in promotedSecondaryFields" :key="field.key" :role="field.width">
-              <ScenarioFieldControl v-model="queryValues[field.key]" :field="field" @submit="handleSearch" />
             </QueryFieldCol>
             <QueryFieldCol :role="actionColumnRole">
               <div class="query-actions">
@@ -409,25 +426,17 @@ onBeforeUnmount(() => {
                   <template #icon><icon-search /></template>{{ t('common.search') }}
                 </a-button>
                 <a-button size="small" type="text" @click="resetValues">{{ t('common.reset') }}</a-button>
-                <a-tooltip v-if="isExpandScenario" :content="expanded ? t('common.collapse') : t('common.expand', { count: collapsibleSecondaryFields.length })">
-                  <a-badge :count="hiddenActiveCount" :offset="[-2, 2]">
-                    <a-button size="small" type="text" class="filter-expand-action" :aria-label="expanded ? t('common.collapse') : t('common.expand', { count: collapsibleSecondaryFields.length })" @click="expanded = !expanded">
-                      <span class="expand-action-label">{{ expanded ? t('common.collapse') : t('common.expand', { count: collapsibleSecondaryFields.length }) }}</span><icon-down />
-                    </a-button>
-                  </a-badge>
-                </a-tooltip>
                 <a-badge v-if="isDrawerScenario" :count="activeAdvancedCount" :offset="[-3, 3]">
                   <a-button size="small" type="text" :aria-label="t('common.moreFilters')" @click="openAdvanced">
                     <template #icon><icon-filter /></template>{{ t('common.filter') }}
                   </a-button>
                 </a-badge>
+                <a-tooltip v-if="isDrawerScenario" :content="t('shipment.querySettings.title')">
+                  <a-button size="small" type="text" :aria-label="t('shipment.querySettings.title')" @click="openQuerySettings">
+                    <template #icon><icon-settings /></template>
+                  </a-button>
+                </a-tooltip>
               </div>
-            </QueryFieldCol>
-          </QueryFieldGrid>
-
-          <QueryFieldGrid v-if="isExpandScenario && expanded" class="expanded-query-grid">
-            <QueryFieldCol v-for="field in collapsibleSecondaryFields" :key="field.key" :role="field.width">
-              <ScenarioFieldControl v-model="queryValues[field.key]" :field="field" @submit="handleSearch" />
             </QueryFieldCol>
           </QueryFieldGrid>
         </a-form>
@@ -528,6 +537,15 @@ onBeforeUnmount(() => {
     </template>
   </StandardListFrame>
 
+    <QueryFieldSettingsDrawer
+      v-model:visible="querySettingsVisible"
+      :options="queryPreferenceOptions"
+      :model-value="queryFieldPlacement"
+      :default-value="defaultQueryFieldPlacement"
+      :capacity-tracks="QUERY_PAGE_CAPACITY_TRACKS"
+      :on-before-apply="applyQueryFieldPlacement"
+    />
+
     <a-drawer
       v-if="!isWideDrawer"
       v-model:visible="drawerVisible"
@@ -606,10 +624,6 @@ onBeforeUnmount(() => {
 .scenario-count {
   color: var(--color-text-3);
   font-size: var(--dense-font-aux);
-}
-
-.expanded-query-grid {
-  margin-top: var(--dense-gap-field-row);
 }
 
 .advanced-section + .advanced-section {

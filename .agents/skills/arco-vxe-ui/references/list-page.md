@@ -10,7 +10,7 @@ Every list `pageSpec.ts` declares exactly one matching pair:
 
 | Archetype / profile | User job | Query and command surface | Table top | Forbidden cargo |
 |---|---|---|---|---|
-| `list-query` / `simple-query` | Find, inspect, print, or occasionally export a record | `S1` inline query by default. No command row unless an actual non-row action exists. | None by default. Use a utility cap only for real pagination, column preference, or refresh ownership. | Work scope, status queues, batch selection, synthetic primary action, and an empty cap. |
+| `list-query` / `simple-query` | Find, inspect, print, or occasionally export a record | Fixed inline query when all conditions fit the typed alignment budget; page-and-drawer placement when secondary conditions exist. No command row unless an actual non-row action exists. | None by default. Use a utility cap only for real pagination, column preference, or refresh ownership. | Work scope, status queues, batch selection, synthetic primary action, and an empty cap. |
 | `list-management` / `management` | Maintain master data: create, edit, activate, import/export | Compact query plus a compact command group only when mutations/output actually exist. One primary create action at most. | Optional utility cap; it owns pagination and table preferences, never business create/import actions. | Operational ownership scope, workflow queues, or batch selection without a real batch action. |
 | `list-workbench` / `operations-workbench` | Repeatedly prioritize, assign, progress, and recover operational records | Query plus only the scope/queues the operator uses to process work; business commands belong to the result-owned table toolbar. | Workbench toolbar required for applicable business commands, refresh, selection context, pagination, density, or columns. | A dashboard title band, decorative KPI strip, duplicated totals, hidden daily queues/actions, or mutation commands mixed into the state selector. |
 
@@ -31,7 +31,7 @@ Non-negotiable visual invariants:
 - GI is the only palette; no page-local control, card, tab, or table skin. Use one primary action per scope, neutral structural surfaces, and semantic status pills.
 - The zone order never changes: query -> scope/queue -> table toolbar -> data. An absent zone disappears; it is never replaced by blank decoration.
 - Spacing, control density, typography, table header, row behavior, icon-only utility rules, focus treatment, and overflow ownership come from the shared Arco/VXE contracts. A page may not create a different list "style" to appear distinctive.
-- Differences between pages are limited to business fields, available actions, statuses, columns, and the declared query scenario. They do not justify another toolbar hierarchy, colored header, bespoke table wrapper, or a second filter layout language.
+- Differences between pages are limited to business fields, available actions, statuses, columns, and the declared query placement mode. They do not justify another toolbar hierarchy, colored header, bespoke table wrapper, or a second filter layout language.
 
 No page-level title/description band is added to operational lists. Query, scope/state, and table toolbar are logical zones, not mandatory cards. Scope and workflow state may share one mutation-free row; business commands stay in the result-owned table toolbar so selection and side effects cannot be mistaken for filters.
 
@@ -74,12 +74,12 @@ This is not a status filter. It is a compact segmented control:
 ## Search Area
 
 - Use an Arco Form/Grid composition. Exact class names in examples are local implementation details unless grep proves a shared definition exists.
-- `list-query` starts with `S1` and a stable one-row query path. A control or advanced drawer requires a demonstrated repeated query need; it is not visual furniture.
-- `list-management` follows the field-count scenario in `filter-layout.md`; use S2/S3 only when the maintenance job really needs those conditions.
-- `list-workbench` follows the same field-count scenario, then keeps its daily scope/queue controls outside the query form because they answer a different question.
+- `list-query` starts with a stable one-row query path. Add page-and-drawer placement only when secondary conditions or differing user roles justify it; the drawer is not visual furniture.
+- `list-management` follows the classification and alignment-capacity decision in `filter-layout.md`; field count alone never changes the DOM structure.
+- `list-workbench` follows the same placement decision, then keeps its daily scope/queue controls outside the query form because they answer a different question.
 - Query button is primary.
 - Reset is always a visible text action. Never reuse the refresh icon for reset; supported desktop layouts reserve enough action width for query, reset, and any advanced entry.
-- Select S1/S2/S3 from `filter-layout.md`. Regular Narrow fields may expand in-page; occasional Investigate fields use an advanced-filter drawer. Do not choose a surface from visual preference alone.
+- Select `none`, `fixed-inline`, `page-and-drawer`, or a contracted saved-query workspace from `filter-layout.md`. Do not choose a surface from field count or visual preference alone.
 
 ### Filter Actions Recipe
 
@@ -123,12 +123,12 @@ Rules:
 - Do not show a separate “selected filters” strip. Current values are visible in controls/tabs.
 - Basic filters should be the 3-6 highest-frequency query fields for the object.
 - Advanced filters can be numerous, but must be grouped by business meaning and hidden behind the drawer.
-- Main list query fields should stay in a flat grid by default. Do not add visible group titles or grouped panels inside the query card unless the query count reaches Tier 3 and the user explicitly needs grouped advanced editing.
+- Page query fields stay in one flat aligned grid. Business grouping belongs in the drawer or saved-query editor, not in visible page-field panels.
 - Do not copy order search fields into finance, warehouse, or customer pages.
 
-## Filter Count Tiers
+## Query Placement
 
-**Authoritative:** field count → Tier → DOM structure is defined in **`filter-layout.md`** (Query Count Decision Matrix + Visible layout structure). Do not duplicate that matrix here.
+**Authoritative:** field classification, semantic widths, minimum-width capacity, and page/drawer behavior are defined in **`filter-layout.md`**. Do not recreate them in page-local rules.
 
 List-page rules that stay in this file:
 
@@ -138,9 +138,9 @@ List-page rules that stay in this file:
 - Put active query state in the controls, transport/status tabs, and selected values; do not add a separate selected-filter strip.
 - Text inputs trigger by Enter or Query button; selects and chips may auto-search when safe.
 - Query and reset actions stay in a stable location in the visible query row.
-- Follow the S1/S2/S3 interaction selection from `filter-layout.md`; do not combine inline expansion and a drawer on the same page.
-- Two visible rows are allowed only for the S1 daily-filter case defined in `filter-layout.md`.
-- 30+/40+ filters use grouped/wide drawer patterns. 50+ filters use a saved query workspace, not a larger drawer.
+- Inline expansion is not a third field location. Use a fixed aligned page surface or the page-and-drawer placement model.
+- Two visible rows require an explicit typed row budget and complete-row alignment evidence; never infer them from query count.
+- High-volume condition catalogs require navigable grouped/wide drawer composition or a fully contracted saved-query workspace, not a larger flat form.
 - Query actions must be internationalization-safe. Do not size them by Chinese labels; use min/max or `clamp()`, allow 1.3-2x text expansion, and give secondary actions tooltip/title/aria labels when text may ellipsize.
 - If translated query actions cannot fit, reserve a wider semantic action span, promote fewer optional fields, or use a horizontal command row. Do not iconify reset/filter or silently clip action meaning.
 - For international freight pages, field examples should use domain identifiers such as order no, business no, HBL, MBL, container no, customer, port, and warehouse no.

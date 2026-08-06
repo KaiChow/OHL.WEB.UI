@@ -10,13 +10,18 @@ import ts from 'typescript';
 import { validateUiSkill } from '../.agents/skills/arco-vxe-ui/scripts/validate-skill.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1');
-const SCAN_DIRS = ['src/views', 'src/components', 'src/layouts'];
+const SCAN_DIRS = ['src/views', 'src/components', 'src/layouts', 'src/router', 'src/design-system'];
 const EXTS = ['.vue', '.ts', '.css'];
 
 // ─── 规则定义 ────────────────────────────────────────────────────────────────
 // { desc, pattern, exclude?, fileFilter? }
 // pattern: RegExp  exclude: RegExp（命中 exclude 则忽略该行）
 const RULES = [
+  {
+    desc: '跨功能目录导入必须使用已配置的 @/ 源码别名，禁止 ../../ 深层相对路径',
+    pattern: /(?:from\s+|import\s*\()\s*['"](?:\.\.\/){2,}/,
+    fileFilter: /\.(vue|ts)$/,
+  },
   // 禁止的组件
   {
     desc: '禁止 <a-table> — 必须用 vxe-table',
@@ -916,7 +921,7 @@ for (const specFile of pageSpecFiles) {
       content: 'duplicate query field declaration',
     });
   }
-  const allowedQueryWidthRoles = new Set(['compact', 'standard', 'wide', 'composite', 'range']);
+  const allowedQueryWidthRoles = new Set(['compact', 'standard', 'wide', 'composite', 'range', 'batch']);
   const invalidQueryLayout = (declaredTotal === 0 && (queryLayout !== 'none' || visibleFieldLayout.length > 0))
     || (declaredTotal > 0 && queryLayout !== 'semantic-grid-v1')
     || visibleFieldLayout.length !== declaredVisible.length
@@ -943,29 +948,75 @@ for (const specFile of pageSpecFiles) {
       });
     }
   }
-  const invalidQueryStrategy = (declaredTotal === 0 && queryStrategy !== 'none')
+  const supportedQueryStrategies = new Set([
+    'none',
+    'fixed-inline',
+    'page-and-drawer',
+    'saved-query-workspace',
+    'saved-query-drawer-fallback',
+    // Routed compatibility only; field count no longer validates or selects these legacy values.
+    's1-inline',
+    's2-expand',
+    's3-drawer',
+    's4-drawer-fallback',
+    's4-workspace',
+  ]);
+  const invalidQueryStrategy = !supportedQueryStrategies.has(queryStrategy)
+    || (declaredTotal === 0 && queryStrategy !== 'none')
     || (declaredTotal > 0 && queryStrategy === 'none')
-    || (queryStrategy === 's1-inline' && (declaredTotal > 8 || declaredAdvanced.length > 0))
-    || (queryStrategy === 's2-expand' && (declaredTotal < 9 || declaredTotal > 20))
-    || (queryStrategy === 's3-drawer' && (declaredTotal <= 8 || declaredTotal >= 50))
-    || (queryStrategy === 's4-drawer-fallback' && declaredTotal < 50)
-    || (queryStrategy === 's4-workspace' && declaredTotal < 50);
+    || (queryStrategy === 'fixed-inline' && declaredAdvanced.length > 0)
+    || (['page-and-drawer', 'saved-query-drawer-fallback'].includes(queryStrategy) && declaredAdvanced.length === 0);
   if (invalidQueryStrategy) {
     violations.push({
-      rule: 'pageSpec 查询策略必须与项目级字段规模边界自洽；边界例外只能在允许区间内选择',
+      rule: 'pageSpec 查询策略必须由字段归属与能力契约决定；字段数量不得直接选择 DOM 结构',
       file: relPath,
       line: 1,
       content: `strategy=${queryStrategy}, total=${declaredTotal}, advanced=${declaredAdvanced.length}`,
     });
   }
-  const invalidSimpleQueryFields = listProfile === 'simple-query' && (
-    (declaredTotal > 0 && queryStrategy !== 's1-inline')
-    || declaredTotal > 8
-    || declaredAdvanced.length > 0
-  );
+  const personalization = getObjectLiteralProperty(query, 'personalization');
+  if (queryStrategy === 'page-and-drawer') {
+    const pageRows = Number(getObjectProperty(personalization, 'pageRows')?.initializer?.text);
+    const minimumTracks = Number(getObjectProperty(personalization, 'minimumTracks')?.initializer?.text);
+    const actionTracks = Number(getObjectProperty(personalization, 'actionTracks')?.initializer?.text);
+    const capacityTracks = Number(getObjectProperty(personalization, 'capacityTracks')?.initializer?.text);
+    const requiredPageFields = getStringArrayProperty(personalization, 'requiredPageFields') ?? [];
+    const widthSpans = { compact: 3, standard: 4, wide: 6, composite: 6, range: 6, batch: 8 };
+    const defaultPageTracks = visibleLayoutRoles.reduce((total, role) => total + (widthSpans[role] ?? 0), 0);
+    const validPersonalization = getStringProperty(personalization, 'mode') === 'page-and-drawer'
+      && [1, 2].includes(pageRows)
+      && Number.isInteger(minimumTracks)
+      && Number.isInteger(actionTracks)
+      && capacityTracks === minimumTracks * pageRows - actionTracks
+      && defaultPageTracks <= capacityTracks
+      && requiredPageFields.length > 0
+      && requiredPageFields.every((field) => declaredVisible.includes(field))
+      && getStringProperty(personalization, 'ordering') === 'page-global-drawer-grouped'
+      && ['local-workspace', 'user-preference-api'].includes(getStringProperty(personalization, 'persistence'));
+    if (!validPersonalization) {
+      violations.push({
+        rule: 'page-and-drawer 必须声明最小宽度对齐容量、必需页面字段、排序与持久化契约，默认页面字段不得超容量',
+        file: relPath,
+        line: 1,
+        content: `rows=${pageRows}, minimum=${minimumTracks}, actions=${actionTracks}, capacity=${capacityTracks}, defaultUsage=${defaultPageTracks}`,
+      });
+    }
+    if (routeView) {
+      const routeSource = readFileSync(routeView, 'utf8');
+      if (!routeSource.includes('QueryFieldSettingsDrawer')) {
+        violations.push({
+          rule: 'page-and-drawer 路由必须提供真实查询项设置能力，不能只在 pageSpec 声明可配置',
+          file: toRelativePath(routeView),
+          line: 1,
+          content: 'missing QueryFieldSettingsDrawer',
+        });
+      }
+    }
+  }
+  const invalidSimpleQueryFields = listProfile === 'simple-query' && !['none', 'fixed-inline', 'page-and-drawer'].includes(queryStrategy);
   if (invalidSimpleQueryFields) {
     violations.push({
-      rule: '轻量查询列表默认只能使用 1-8 个 S1 内联查询项；复杂条件必须升级为管理或运营工作台原型',
+      rule: '轻量查询列表只能使用无查询、固定对齐或页面/抽屉配置；复杂工作区能力必须升级页面原型',
       file: relPath,
       line: 1,
       content: `strategy=${queryStrategy}, total=${declaredTotal}, advanced=${declaredAdvanced.length}`,

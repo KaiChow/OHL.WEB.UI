@@ -1,8 +1,9 @@
-import { definePesdpPageSpec } from '../../../design-system/pesdpPageSpec';
+import { definePesdpPageSpec } from '@/design-system/pesdpPageSpec';
 
 export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   id: 'shipment-export-order-workbench',
   target: 'sellable-saas-grade',
+  presentationTarget: 'daily-ops',
   archetype: 'list-workbench',
   input: { path: 'artifact', artifacts: ['user-provided anchored operations-grid column-settings screenshot'], unresolvedBusinessDecisions: ['production order API, permission, workflow-transition sources, and shared column-template creation'], recommendations: ['preserve local acceptance behavior until production contracts are supplied; implement real local column visibility without inventing saved-template creation'] },
   list: {
@@ -60,24 +61,25 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       ],
     },
     dense: {
-      decisions: ['Keep the identifier locate field as one connected selector plus shared batch-value query using the semantic batch allocation: one value remains directly editable, multi-paste normalizes and de-duplicates values immediately, and review/clear stay directly reachable. Keep business type, customer, and responsible operator as daily locate fields; render search, reset, and advanced-filter entry as one stable action group with a shared inline rhythm; at compact query-container width, reserve that localized three-command slot first and move operator into the same D1 advanced drawer, while release/wide profiles keep all four inline. Edit secondary route, schedule, status/risk, document, and settlement conditions in that drawer using two readable columns and one native scroll owner.'],
+      decisions: ['Keep the identifier locate field as one connected selector plus shared batch-value query using the semantic batch allocation: one value remains directly editable, multi-paste normalizes and de-duplicates values immediately, and review/clear stay directly reachable. Treat every permitted query field as belonging to exactly one user-configurable location: the aligned page row or the D1 filter drawer. Reserve nine of the minimum 24 tracks for localized query commands and cap page fields at fifteen tracks, so user placement stays stable across viewports instead of moving fields responsively. Keep the identifier field required and first; preserve values when fields move; persist only versioned stable field ids and never run a query when saving placement. Edit drawer fields in freight business groups using two readable columns and one native scroll owner.'],
       acceptance: [
         'At 1366, 1024 split, and wide viewports, the query row does not create a separate action band, adjacent query-action boxes keep the same 8px gap, and the table remains the dominant work surface.',
         'At compact table-toolbar width, create and batch remain reachable, optional export text collapses, pagination hides jumper then page-size, and total plus page navigation remain visible on one line.',
         'Vertical query and overlay forms use the shared 4px label-to-control rhythm through the Arco public label-column style.',
         'The advanced-filter grid uses the shared 12px column and 8px row gutter with zero form-item margin, so no page-local spacing layer enlarges the dense form rhythm.',
-        'At 1024, the identifier query keeps the largest field allocation, reset and advanced-filter keep visible labels, operator remains editable in the advanced drawer, and the 12 processing queues move to a deterministic second workflow line where they scroll only inside their own lane.',
+        'At 1024, the identifier query keeps the largest field allocation, reset and advanced-filter keep visible labels, the configured page fields remain on one aligned row, and the 12 processing queues move to a deterministic second workflow line where they scroll only inside their own lane.',
         'The document-number query accepts one direct value or up to 100 pasted values separated by whitespace or common punctuation, preserves first-seen order and case, removes duplicates, exposes the normalized values plus count, and matches any entered value within the selected identifier type.',
         'The advanced filter opens from the right at the shared D1 width, renders two field columns, and keeps the native Drawer body as its only vertical scroll owner.',
+        'Query-field settings exposes ordered page and drawer lists with mouse drag, keyboard reordering, explicit move commands, restore defaults, capacity validation, and failure-preserving persistence; saving placement does not change query values, page, selection, or result data.',
         'Drawer content and footer remain horizontally contained at 1024, 1366, and wide desktop viewports.',
       ],
     },
     premium: {
-      decisions: ['Keep GI and VXE native component styling; derive product quality from field allocation, context-preserving overlays, freight grouping, live result confidence, visible draft state, complete states, and a restrained row-action hierarchy: expose one legal next row action, move supporting work into More, and keep danger in the final confirmed menu group.', 'Use one shared Arco-anchored column-preference panel with one ungrouped scroll-owned checklist, drag handles for movable business-column order, required-column protection, show-all, restore-default, save, and immediate VXE visibility/order application; saved column-template creation remains outside scope until its persistence contract exists.'],
+      decisions: ['Keep GI and VXE native component styling; derive product quality from field allocation, context-preserving overlays, freight grouping, live result confidence, visible draft state, complete states, and a restrained row-action hierarchy: expose one legal next row action, move supporting work into More, and keep danger in the final confirmed menu group.', 'Use one shared Arco-anchored column-preference panel with one ungrouped scroll-owned checklist, drag handles for movable business-column order, required-column protection, show-all, restore-default, save, and immediate VXE visibility/order application; saved column-template creation remains outside scope until its persistence contract exists.', 'Configure query placement through a proportional page-query preview above a searchable full-width drawer catalog; use vertical move icons, stable hover/drag feedback, and no alternate overlay skin.'],
       acceptance: [
         'The advanced drawer exposes route/document, execution/ownership, schedule, and risk groups with local active counts, local reset, and a live matching-order count without a page-local component skin.',
         'The default advanced-filter interaction preserves the list beside a stable right-side drawer and never changes to a top overlay.',
-        'Computed theme tokens, normal/error/empty/permission states, long text, and column settings must be inspected on the real route.',
+        'Computed theme tokens, normal/error/empty/permission states, long text, query-placement search/capacity/drag feedback, and column settings must be inspected on the real route.',
         'The route must not depend on global selectors or theme-variable bridges that rewrite Arco or VXE internals.',
         'Each row exposes one emphasized legal next action followed by neutral More; self-assignment remains reachable in More when status transition owns the direct slot, and irreversible actions are danger-styled only inside the final menu group.',
         'The order-status column must show the longest supported localized status pill in full; the operation column must contain its longest legal localized action set without cell-level horizontal scrolling, and focusing More must not shift the row-action origin.',
@@ -90,20 +92,21 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
     { id: 'app-navigation', role: 'supporting', owns: ['module-navigation', 'route-identity'], implementation: 'arco' },
     { id: 'command', role: 'command', owns: ['query', 'ownership-scope', 'status-queues'], primaryAction: 'export-order-query', implementation: 'shared-pattern', whyArcoNotEnough: 'The routed list pages need one reusable owner for query, workflow, table, and overflow height relationships while Arco continues to own each surface.' },
     { id: 'advanced-query', role: 'supporting', owns: ['right-drawer-grid', 'advanced-query-draft', 'freight-business-grouping', 'group-active-counts', 'group-reset', 'live-result-preview', 'draft-dirty-state', 'cancel-apply-state'], primaryAction: 'export-order-query', implementation: 'arco' },
+    { id: 'query-preferences', role: 'supporting', owns: ['page-and-drawer-placement', 'query-field-order', 'single-row-capacity', 'preference-persistence'], primaryAction: 'export-order-query-preferences', implementation: 'shared-pattern', whyArcoNotEnough: 'Arco owns the drawer and controls; the shared pattern owns cross-list ordering, capacity validation, normalization, and preference persistence.' },
     { id: 'orders', role: 'data', owns: ['create', 'export', 'batch-actions', 'table-data', 'selection', 'batch-result', 'column-settings', 'pagination', 'total-count', 'table-feedback'], primaryAction: 'export-order-create', implementation: 'shared-pattern', whyArcoNotEnough: 'Freight list grids require the shared VXE workbench wrapper and public fixed-column, overflow, loading, and preference configuration.' },
   ],
   query: {
     totalFields: 18,
-    strategy: 's3-drawer',
+    strategy: 'page-and-drawer',
     layout: 'semantic-grid-v1',
-    visibleFields: ['keyword', 'businessType', 'customerName', 'operator'],
+    visibleFields: ['keyword', 'businessType', 'customerName'],
     visibleFieldLayout: [
-      { field: 'keyword', width: 'composite' },
+      { field: 'keyword', width: 'batch' },
       { field: 'businessType', width: 'compact' },
       { field: 'customerName', width: 'standard' },
-      { field: 'operator', width: 'compact' },
     ],
     advancedFields: [
+      'operator',
       'pol',
       'pod',
       'carrier',
@@ -119,6 +122,16 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       'feeStatus',
       'isOverdue',
     ],
+    personalization: {
+      mode: 'page-and-drawer',
+      pageRows: 1,
+      minimumTracks: 24,
+      actionTracks: 9,
+      capacityTracks: 15,
+      requiredPageFields: ['keyword'],
+      ordering: 'page-global-drawer-grouped',
+      persistence: 'local-workspace',
+    },
   },
   table: {
     kind: 'workbench',
@@ -132,6 +145,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
   detail: { mode: 'none', focus: [], milestones: [] },
   actions: [
     { id: 'export-order-query', scope: 'query', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'export-order-query', successOwner: 'orders', failureOwner: 'orders' },
+    { id: 'export-order-query-preferences', scope: 'query', frequency: 'regular', risk: 'low', presentation: 'secondary', contract: 'export-order-query-preferences', successOwner: 'query-preferences', failureOwner: 'query-preferences' },
     { id: 'export-order-create', scope: 'command', frequency: 'daily', risk: 'low', presentation: 'primary', contract: 'export-order-create', successOwner: 'orders', failureOwner: 'orders' },
     { id: 'export-order-batch-action', scope: 'selection', frequency: 'regular', risk: 'medium', presentation: 'dropdown', contract: 'export-order-batch-action', successOwner: 'orders', failureOwner: 'orders' },
     { id: 'export-order-status-transition', scope: 'row', frequency: 'regular', risk: 'medium', presentation: 'row-action', contract: 'export-order-status-transition', successOwner: 'orders', failureOwner: 'orders' },

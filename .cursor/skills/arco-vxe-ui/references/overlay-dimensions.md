@@ -84,7 +84,7 @@ Pass the responsive expression directly to `width`.
 | Tier | Evidence hook / shared class | Width expression | Use |
 |------|------------------------------|------------------|-----|
 | D1 Filter | `data-ui-surface="advanced-filter"` | `min(var(--dense-drawer-w-filter), calc(100vw - var(--dense-drawer-filter-pad)))` | Standard grouped advanced filter |
-| D2 Filter wide | `data-ui-surface="advanced-filter-wide"` | `min(var(--dense-drawer-w-filter-wide), calc(100vw - var(--dense-drawer-filter-pad)))` | 33-49 fields, or an S4 fallback, with anchor rail |
+| D2 Filter wide | `data-ui-surface="advanced-filter-wide"` | `min(var(--dense-drawer-w-filter-wide), calc(100vw - var(--dense-drawer-filter-pad)))` | A navigable multi-group condition catalog or saved-query fallback with an anchor rail; count alone does not select D2 |
 | D3 Detail standard | `detail-drawer detail-drawer--standard` | `min(var(--dense-drawer-w-standard), calc(100vw - var(--dense-drawer-viewport-pad)))` | Read-only detail, few sections, no wide mini-table |
 | D4 Detail complex | `detail-drawer` | `min(var(--dense-drawer-w-complex-max), calc(100vw - var(--dense-drawer-viewport-pad)))` | Tabs, sections, child tables, or editable footer |
 

@@ -15,35 +15,53 @@ import {
   IconFullscreen,
   IconFullscreenExit,
   IconMore,
+  IconSettings,
 } from '@arco-design/web-vue/es/icon';
-import { downloadCsvFile } from '../../../utils/mock-actions';
-import { formatLocalMinute } from '../../../utils/date-time';
-import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '../../../design-system/formLayout';
-import { stableTableRowConfig } from '../../../design-system/tableConfig';
-import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
-import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
-import BatchValueQuery from '../../../components/workbench/BatchValueQuery.vue';
-import StandardListFrame from '../../../components/workbench/StandardListFrame.vue';
-import WorkbenchColumnSettings from '../../../components/workbench/WorkbenchColumnSettings.vue';
-import WorkbenchEmptyState from '../../../components/workbench/WorkbenchEmptyState.vue';
-import WorkbenchTableToolbar from '../../../components/workbench/WorkbenchTableToolbar.vue';
-import WorkflowStateSelector from '../../../components/workbench/WorkflowStateSelector.vue';
-import { shipmentWorkbenchRows } from './mockData';
+import { downloadCsvFile } from '@/utils/mock-actions';
+import { formatLocalMinute } from '@/utils/date-time';
+import { compactVerticalFormLabelStyle, denseFormGridGutter } from '@/design-system/formLayout';
+import { normalizeQueryFieldPlacement, queryFieldTrackUsage } from '@/design-system/queryFieldPreferences';
+import type { QueryFieldPlacement } from '@/design-system/queryFieldPreferences';
+import { stableTableRowConfig } from '@/design-system/tableConfig';
+import QueryFieldCol from '@/components/workbench/QueryFieldCol.vue';
+import QueryFieldGrid from '@/components/workbench/QueryFieldGrid.vue';
+import QueryFieldSettingsDrawer from '@/components/workbench/QueryFieldSettingsDrawer.vue';
+import StandardListFrame from '@/components/workbench/StandardListFrame.vue';
+import WorkbenchColumnSettings from '@/components/workbench/WorkbenchColumnSettings.vue';
+import WorkbenchEmptyState from '@/components/workbench/WorkbenchEmptyState.vue';
+import WorkbenchTableToolbar from '@/components/workbench/WorkbenchTableToolbar.vue';
+import WorkflowStateSelector from '@/components/workbench/WorkflowStateSelector.vue';
+import { shipmentWorkbenchRows } from '@/views/shipment/orderWorkbench/mockData';
+import ShipmentQueryFieldControl from '@/views/shipment/orderWorkbench/ShipmentQueryFieldControl.vue';
+import {
+  clearQueryFields,
+  DEFAULT_QUERY_FIELD_PLACEMENT,
+  isQueryFieldActive,
+  QUERY_FIELD_GROUPS,
+  queryFieldSnapshot,
+  SHIPMENT_QUERY_FIELDS,
+} from '@/views/shipment/orderWorkbench/queryFields';
 import type {
-  ShipmentKeywordType,
+  ShipmentQueryField,
+  ShipmentQueryFieldGroup,
+} from '@/views/shipment/orderWorkbench/queryFields';
+import type {
   ShipmentOrderQuery,
   ShipmentStatusKey,
   ShipmentWorkbenchRow,
   WorkflowStateStat,
-} from './types';
-import type { ShipmentStatusTransition } from '../featureContracts';
-import { getOrderStatusTransitions, resolveShipmentUiScenario } from '../featureContracts';
+} from '@/views/shipment/orderWorkbench/types';
+import type { ShipmentStatusTransition } from '@/views/shipment/featureContracts';
+import { getOrderStatusTransitions, resolveShipmentUiScenario } from '@/views/shipment/featureContracts';
 
 const route = useRoute();
 const { t } = useI18n();
 
 const CURRENT_OPERATOR = '张操作';
 const COLUMN_SETTING_STORAGE_KEY = 'ohl.shipment.export-order.visible-columns.v3';
+const QUERY_FIELD_SETTING_STORAGE_KEY = 'ohl.shipment.export-order.query-fields.v1';
+const QUERY_FIELD_SETTING_VERSION = 1;
+const QUERY_PAGE_CAPACITY_TRACKS = 15;
 const ORDER_STATUS_COLUMN_MIN_WIDTH = 148;
 const OPERATION_COLUMN_WIDTH = 168;
 
@@ -158,14 +176,6 @@ const loadColumnPreferences = (): ColumnPreferences => {
 
 const initialColumnPreferences = loadColumnPreferences();
 
-const KEYWORD_OPTIONS: { key: string; value: ShipmentKeywordType }[] = [
-  { key: 'orderNo', value: 'orderNo' },
-  { key: 'blNo', value: 'blNo' },
-  { key: 'bookingNo', value: 'bookingNo' },
-];
-
-const BUSINESS_TYPE_OPTIONS = ['FCL', 'LCL'];
-
 const WORKFLOW_STATE_OPTIONS: { key: ShipmentStatusKey; tone?: 'danger' | 'warn' }[] = [
   { key: 'all' },
   { key: 'waitBooking' },
@@ -211,6 +221,35 @@ const cloneQuery = (source: ShipmentOrderQuery): ShipmentOrderQuery => ({
   updatedRange: [...source.updatedRange],
 });
 
+const queryFieldPreferenceOptions = SHIPMENT_QUERY_FIELDS.map((definition) => ({
+  field: definition.field,
+  label: definition.labelKey,
+  width: definition.width,
+  requiredPage: definition.requiredPage,
+  orderLocked: definition.orderLocked,
+}));
+
+const loadQueryFieldPlacement = (): QueryFieldPlacement => {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(QUERY_FIELD_SETTING_STORAGE_KEY) ?? '{}') as {
+      version?: number;
+      pageFields?: string[];
+      drawerFields?: string[];
+    };
+    if (stored.version !== QUERY_FIELD_SETTING_VERSION) return normalizeQueryFieldPlacement(
+      DEFAULT_QUERY_FIELD_PLACEMENT,
+      queryFieldPreferenceOptions,
+      DEFAULT_QUERY_FIELD_PLACEMENT,
+    );
+    const normalized = normalizeQueryFieldPlacement(stored, queryFieldPreferenceOptions, DEFAULT_QUERY_FIELD_PLACEMENT);
+    return queryFieldTrackUsage(normalized.pageFields, queryFieldPreferenceOptions) <= QUERY_PAGE_CAPACITY_TRACKS
+      ? normalized
+      : normalizeQueryFieldPlacement(DEFAULT_QUERY_FIELD_PLACEMENT, queryFieldPreferenceOptions, DEFAULT_QUERY_FIELD_PLACEMENT);
+  } catch {
+    return normalizeQueryFieldPlacement(DEFAULT_QUERY_FIELD_PLACEMENT, queryFieldPreferenceOptions, DEFAULT_QUERY_FIELD_PLACEMENT);
+  }
+};
+
 const createWorkbenchRows = () => shipmentWorkbenchRows.map((row) => ({
   ...row,
   riskFlags: [...row.riskFlags],
@@ -218,18 +257,14 @@ const createWorkbenchRows = () => shipmentWorkbenchRows.map((row) => ({
 }));
 
 const query = reactive<ShipmentOrderQuery>(defaultQuery());
-const selectedKeywordLabel = computed(() => {
-  const selected = KEYWORD_OPTIONS.find((option) => option.value === query.keywordType) ?? KEYWORD_OPTIONS[0];
-  return t(`shipment.keywordTypes.${selected.key}`);
-});
 const advancedQuery = reactive<ShipmentOrderQuery>(defaultQuery());
 const uiScenario = computed(() => resolveShipmentUiScenario(route.query.uiState));
 const appliedQuery = ref<ShipmentOrderQuery>(cloneQuery(defaultQuery()));
 const activeWorkflowState = ref<ShipmentStatusKey>('all');
 const activeWorkScope = ref<WorkScope>('all');
 const advancedFilterVisible = ref(false);
-const primaryGridTrackCount = ref(24);
-const showInlineOperator = computed(() => primaryGridTrackCount.value >= 28);
+const queryFieldSettingsVisible = ref(false);
+const queryFieldPlacement = ref<QueryFieldPlacement>(loadQueryFieldPlacement());
 const advancedApplying = ref(false);
 const advancedDatePopupVisible = reactive({ etd: false, closing: false, updated: false });
 const loading = ref(false);
@@ -270,6 +305,26 @@ const page = reactive({ current: 1, size: 50 });
 
 const operatorOptions = Array.from(new Set(shipmentWorkbenchRows.map((row) => row.operator)));
 const carrierOptions = Array.from(new Set(shipmentWorkbenchRows.map((row) => row.carrier)));
+const queryFieldDefinitionByKey = new Map(SHIPMENT_QUERY_FIELDS.map((definition) => [definition.field, definition]));
+const localizedQueryFieldOptions = computed(() => SHIPMENT_QUERY_FIELDS.map((definition) => ({
+  field: definition.field,
+  label: t(definition.labelKey),
+  width: definition.width,
+  requiredPage: definition.requiredPage,
+  orderLocked: definition.orderLocked,
+})));
+const pageQueryFieldDefinitions = computed(() => queryFieldPlacement.value.pageFields
+  .map((field) => queryFieldDefinitionByKey.get(field as ShipmentQueryField))
+  .filter((definition): definition is (typeof SHIPMENT_QUERY_FIELDS)[number] => Boolean(definition)));
+const drawerQueryFields = computed(() => queryFieldPlacement.value.drawerFields as ShipmentQueryField[]);
+const drawerFieldGroups = computed(() => QUERY_FIELD_GROUPS.map((group) => ({
+  group,
+  fields: drawerQueryFields.value
+    .map((field) => queryFieldDefinitionByKey.get(field))
+    .filter((definition): definition is (typeof SHIPMENT_QUERY_FIELDS)[number] => definition?.group === group),
+})).filter((item) => item.fields.length));
+const drawerFieldsForGroup = (group: ShipmentQueryFieldGroup) => drawerFieldGroups.value
+  .find((item) => item.group === group)?.fields ?? [];
 const canOperate = computed(() => uiScenario.value !== 'permission');
 const forcedLoading = computed(() => uiScenario.value === 'loading');
 const tableError = computed(() => loadError.value);
@@ -427,49 +482,14 @@ const hasActiveFilter = computed(() => {
 
 const tableTotal = computed(() => ['empty', 'permission'].includes(uiScenario.value) || tableError.value ? 0 : filteredRows.value.length);
 
-const advancedConditionSnapshot = (source: ShipmentOrderQuery) => ({
-  pol: source.pol.trim(),
-  pod: source.pod.trim(),
-  carrier: source.carrier,
-  vesselVoyage: source.vesselVoyage.trim(),
-  blNo: source.blNo.trim(),
-  bookingNo: source.bookingNo.trim(),
-  orderStatus: source.orderStatus,
-  hasException: source.hasException,
-  etdRange: [...source.etdRange],
-  closingRange: [...source.closingRange],
-  updatedRange: [...source.updatedRange],
-  isOverdue: source.isOverdue,
-  fileStatus: source.fileStatus,
-  feeStatus: source.feeStatus,
-  operator: showInlineOperator.value ? undefined : source.operator,
-});
+const advancedConditionSnapshot = (source: ShipmentOrderQuery) => queryFieldSnapshot(source, drawerQueryFields.value);
 
-const countConditions = (conditions: unknown[]) => conditions.filter(Boolean).length;
-
-const advancedDraftGroupCounts = computed(() => ({
-  routeDocuments: countConditions([
-    advancedQuery.pol.trim(),
-    advancedQuery.pod.trim(),
-    advancedQuery.carrier,
-    advancedQuery.vesselVoyage.trim(),
-    advancedQuery.blNo.trim(),
-    advancedQuery.bookingNo.trim(),
-    !showInlineOperator.value && advancedQuery.operator,
-  ]),
-  schedule: countConditions([
-    advancedQuery.etdRange.length === 2,
-    advancedQuery.closingRange.length === 2,
-    advancedQuery.updatedRange.length === 2,
-  ]),
-  risk: countConditions([
-    advancedQuery.orderStatus,
-    advancedQuery.hasException,
-    advancedQuery.isOverdue,
-    advancedQuery.fileStatus,
-    advancedQuery.feeStatus,
-  ]),
-}));
+const advancedDraftGroupCounts = computed(() => Object.fromEntries(QUERY_FIELD_GROUPS.map((group) => [
+  group,
+  drawerQueryFields.value.filter((field) => (
+    queryFieldDefinitionByKey.get(field)?.group === group && isQueryFieldActive(advancedQuery, field)
+  )).length,
+])) as Record<ShipmentQueryFieldGroup, number>);
 
 const advancedDraftCount = computed(() => Object.values(advancedDraftGroupCounts.value)
   .reduce((total, count) => total + count, 0));
@@ -478,27 +498,8 @@ const advancedDraftDirty = computed(() => (
   !== JSON.stringify(advancedConditionSnapshot(query))
 ));
 
-const advancedActiveCount = computed(() => {
-  let count = 0;
-
-  if (query.pol.trim()) count += 1;
-  if (query.pod.trim()) count += 1;
-  if (query.vesselVoyage.trim()) count += 1;
-  if (query.carrier) count += 1;
-  if (query.blNo.trim()) count += 1;
-  if (query.bookingNo.trim()) count += 1;
-  if (query.orderStatus) count += 1;
-  if (query.hasException) count += 1;
-  if (query.etdRange.length === 2) count += 1;
-  if (query.closingRange.length === 2) count += 1;
-  if (query.fileStatus) count += 1;
-  if (query.feeStatus) count += 1;
-  if (query.updatedRange.length === 2) count += 1;
-  if (query.isOverdue) count += 1;
-  if (!showInlineOperator.value && query.operator) count += 1;
-
-  return count;
-});
+const advancedActiveCount = computed(() => drawerQueryFields.value
+  .filter((field) => isQueryFieldActive(query, field)).length);
 
 const getNextActionLabel = (row: ShipmentWorkbenchRow) => {
   if (row.exceptionStatus === 'open') return t('shipment.nextActions.exception');
@@ -613,6 +614,7 @@ const handleReset = () => {
   activeWorkflowState.value = 'all';
   activeWorkScope.value = 'all';
   advancedFilterVisible.value = false;
+  queryFieldSettingsVisible.value = false;
   page.current = 1;
   clearSelection();
 };
@@ -637,7 +639,33 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleAdvancedPopupE
 const openAdvancedFilters = () => {
   closeAdvancedDatePopups();
   Object.assign(advancedQuery, cloneQuery(query));
+  queryFieldSettingsVisible.value = false;
   advancedFilterVisible.value = true;
+};
+
+const openQueryFieldSettings = () => {
+  advancedFilterVisible.value = false;
+  queryFieldSettingsVisible.value = true;
+};
+
+const applyQueryFieldPlacement = (placement: QueryFieldPlacement) => {
+  const normalized = normalizeQueryFieldPlacement(
+    placement,
+    localizedQueryFieldOptions.value,
+    DEFAULT_QUERY_FIELD_PLACEMENT,
+  );
+  try {
+    window.localStorage.setItem(QUERY_FIELD_SETTING_STORAGE_KEY, JSON.stringify({
+      version: QUERY_FIELD_SETTING_VERSION,
+      ...normalized,
+    }));
+    queryFieldPlacement.value = normalized;
+    Message.success(t('shipment.querySettings.saved'));
+    return true;
+  } catch {
+    Message.error(t('shipment.querySettings.saveError'));
+    return false;
+  }
 };
 
 const cancelAdvancedFilters = () => {
@@ -648,47 +676,17 @@ const cancelAdvancedFilters = () => {
 };
 
 const clearAdvancedFilters = () => {
-  advancedQuery.pol = '';
-  advancedQuery.pod = '';
-  advancedQuery.carrier = undefined;
-  advancedQuery.vesselVoyage = '';
-  advancedQuery.blNo = '';
-  advancedQuery.bookingNo = '';
-  advancedQuery.orderStatus = undefined;
-  advancedQuery.etdRange = [];
-  advancedQuery.closingRange = [];
-  advancedQuery.hasException = '';
-  advancedQuery.fileStatus = undefined;
-  advancedQuery.feeStatus = undefined;
-  advancedQuery.updatedRange = [];
-  advancedQuery.isOverdue = '';
-  if (!showInlineOperator.value) advancedQuery.operator = undefined;
+  clearQueryFields(advancedQuery, drawerQueryFields.value, defaultQuery());
 };
 
-type AdvancedDraftGroup = 'routeDocuments' | 'schedule' | 'risk';
+const clearAdvancedGroup = (group: ShipmentQueryFieldGroup) => clearQueryFields(
+  advancedQuery,
+  drawerQueryFields.value.filter((field) => queryFieldDefinitionByKey.get(field)?.group === group),
+  defaultQuery(),
+);
 
-const clearAdvancedGroup = (group: AdvancedDraftGroup) => {
-  if (group === 'routeDocuments') {
-    advancedQuery.pol = '';
-    advancedQuery.pod = '';
-    advancedQuery.carrier = undefined;
-    advancedQuery.vesselVoyage = '';
-    advancedQuery.blNo = '';
-    advancedQuery.bookingNo = '';
-    if (!showInlineOperator.value) advancedQuery.operator = undefined;
-    return;
-  }
-  if (group === 'schedule') {
-    advancedQuery.etdRange = [];
-    advancedQuery.closingRange = [];
-    advancedQuery.updatedRange = [];
-    return;
-  }
-  advancedQuery.orderStatus = undefined;
-  advancedQuery.hasException = '';
-  advancedQuery.isOverdue = '';
-  advancedQuery.fileStatus = undefined;
-  advancedQuery.feeStatus = undefined;
+const updateAdvancedDatePopup = (field: 'etd' | 'closing' | 'updated', value: boolean) => {
+  advancedDatePopupVisible[field] = value;
 };
 
 const applyAdvancedFilters = async () => {
@@ -992,6 +990,7 @@ watch(uiScenario, () => {
   statusModalVisible.value = false;
   voidModalVisible.value = false;
   advancedFilterVisible.value = false;
+  queryFieldSettingsVisible.value = false;
   pendingRowIds.value = [];
   querying.value = false;
   advancedApplying.value = false;
@@ -1009,53 +1008,19 @@ watch(uiScenario, () => {
   <StandardListFrame page-id="shipment-export-order-workbench" data-pesdp-page="shipment-export-order-workbench">
     <template #query>
           <a-form :model="query" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
-            <QueryFieldGrid @track-count-change="primaryGridTrackCount = $event">
-              <QueryFieldCol role="batch">
-                <a-form-item :label="t('shipment.fields.keyword')">
-                  <BatchValueQuery v-model="query.keyword" :label="selectedKeywordLabel" @submit="handleSearch">
-                    <template #prefix>
-                      <a-select
-                        v-model="query.keywordType"
-                        size="small"
-                        :aria-label="t('shipment.fields.keyword')"
-                        :style="{ width: '116px' }"
-                      >
-                        <a-option v-for="option in KEYWORD_OPTIONS" :key="option.value" :value="option.value">
-                          {{ t(`shipment.keywordTypes.${option.key}`) }}
-                        </a-option>
-                      </a-select>
-                    </template>
-                  </BatchValueQuery>
-                </a-form-item>
-              </QueryFieldCol>
-              <QueryFieldCol role="compact">
-                <a-form-item :label="t('shipment.fields.businessType')">
-                  <a-select v-model="query.businessType" size="small" allow-clear :placeholder="t('shipment.placeholders.businessType')">
-                    <a-option v-for="businessType in BUSINESS_TYPE_OPTIONS" :key="businessType" :value="businessType">
-                      {{ businessType }}
-                    </a-option>
-                  </a-select>
-                </a-form-item>
-              </QueryFieldCol>
-              <QueryFieldCol role="standard">
-                <a-form-item :label="t('shipment.fields.customer')">
-                  <a-input
-                    v-model="query.customerName"
-                    size="small"
-                    allow-clear
-                    :placeholder="t('shipment.placeholders.customer')"
-                    @press-enter="handleSearch"
-                  />
-                </a-form-item>
-              </QueryFieldCol>
-              <QueryFieldCol v-if="showInlineOperator" role="compact">
-                <a-form-item :label="t('shipment.fields.operator')">
-                  <a-select v-model="query.operator" size="small" allow-clear allow-search :placeholder="t('shipment.placeholders.operator')">
-                    <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
-                      {{ operator }}
-                    </a-option>
-                  </a-select>
-                </a-form-item>
+            <QueryFieldGrid>
+              <QueryFieldCol
+                v-for="definition in pageQueryFieldDefinitions"
+                :key="definition.field"
+                :role="definition.width"
+              >
+                <ShipmentQueryFieldControl
+                  :field="definition.field"
+                  :model="query"
+                  :operator-options="operatorOptions"
+                  :carrier-options="carrierOptions"
+                  @submit="handleSearch"
+                />
               </QueryFieldCol>
               <QueryFieldCol role="actions-wide">
                 <div class="query-actions">
@@ -1072,6 +1037,17 @@ watch(uiScenario, () => {
                       </a-button>
                     </a-tooltip>
                   </a-badge>
+                  <a-tooltip :content="t('shipment.querySettings.title')">
+                    <a-button
+                      size="small"
+                      type="text"
+                      :title="t('shipment.querySettings.title')"
+                      :aria-label="t('shipment.querySettings.title')"
+                      @click="openQueryFieldSettings"
+                    >
+                      <template #icon><icon-settings /></template>
+                    </a-button>
+                  </a-tooltip>
                 </div>
               </QueryFieldCol>
             </QueryFieldGrid>
@@ -1339,10 +1315,10 @@ watch(uiScenario, () => {
         </div>
       </template>
       <a-form class="advanced-filter-form" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle" :model="advancedQuery">
-        <section class="advanced-filter-section" aria-labelledby="route-document-filter-title">
+        <section v-if="drawerFieldsForGroup('routeDocuments').length" class="advanced-filter-section" aria-labelledby="route-document-filter-title">
           <div class="advanced-filter-section__head">
             <a-space :size="6">
-              <h3 id="route-document-filter-title" class="advanced-filter-section__title">{{ t(showInlineOperator ? 'shipment.advanced.routeDocs' : 'shipment.advanced.routeDocsOwnership') }}</h3>
+              <h3 id="route-document-filter-title" class="advanced-filter-section__title">{{ t('shipment.advanced.routeDocsOwnership') }}</h3>
               <span v-if="advancedDraftGroupCounts.routeDocuments" class="advanced-filter-section__count">
                 {{ t('shipment.advanced.selected', { count: advancedDraftGroupCounts.routeDocuments }) }}
               </span>
@@ -1356,53 +1332,21 @@ watch(uiScenario, () => {
             >{{ t('shipment.advanced.clearGroup') }}</a-button>
           </div>
           <a-row :gutter="denseFormGridGutter">
-            <a-col v-if="!showInlineOperator" :span="12" :xs="24" :sm="12">
-              <a-form-item field="operator" :label="t('shipment.fields.operator')" :style="denseFormItemStyle">
-                <a-select v-model="advancedQuery.operator" size="small" allow-clear allow-search :placeholder="t('shipment.placeholders.operator')">
-                  <a-option v-for="operator in operatorOptions" :key="operator" :value="operator">
-                    {{ operator }}
-                  </a-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="pol" :label="t('shipment.columns.pol')" :style="denseFormItemStyle">
-                <a-input v-model="advancedQuery.pol" size="small" allow-clear :placeholder="t('shipment.advanced.portPlaceholder')" @press-enter="applyAdvancedFilters" />
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="pod" :label="t('shipment.columns.pod')" :style="denseFormItemStyle">
-                <a-input v-model="advancedQuery.pod" size="small" allow-clear :placeholder="t('shipment.advanced.portPlaceholder')" @press-enter="applyAdvancedFilters" />
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="carrier" :label="t('shipment.columns.carrier')" :style="denseFormItemStyle">
-                <a-select v-model="advancedQuery.carrier" size="small" allow-clear allow-search :placeholder="t('shipment.advanced.carrierPlaceholder')">
-                  <a-option v-for="carrier in carrierOptions" :key="carrier" :value="carrier">
-                    {{ carrier }}
-                  </a-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="vesselVoyage" :label="t('shipment.columns.vesselVoyage')" :style="denseFormItemStyle">
-                <a-input v-model="advancedQuery.vesselVoyage" size="small" allow-clear :placeholder="t('shipment.advanced.vesselPlaceholder')" @press-enter="applyAdvancedFilters" />
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="blNo" :label="t('shipment.columns.blNo')" :style="denseFormItemStyle">
-                <a-input v-model="advancedQuery.blNo" size="small" allow-clear :placeholder="t('shipment.advanced.blPlaceholder')" @press-enter="applyAdvancedFilters" />
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="bookingNo" :label="t('shipment.columns.bookingNo')" :style="denseFormItemStyle">
-                <a-input v-model="advancedQuery.bookingNo" size="small" allow-clear :placeholder="t('shipment.advanced.bookingPlaceholder')" @press-enter="applyAdvancedFilters" />
-              </a-form-item>
+            <a-col v-for="definition in drawerFieldsForGroup('routeDocuments')" :key="definition.field" :span="12" :xs="24" :sm="12">
+              <ShipmentQueryFieldControl
+                :field="definition.field"
+                :model="advancedQuery"
+                :operator-options="operatorOptions"
+                :carrier-options="carrierOptions"
+                dense
+                @submit="applyAdvancedFilters"
+                @date-popup-change="updateAdvancedDatePopup"
+              />
             </a-col>
           </a-row>
         </section>
 
-        <section class="advanced-filter-section" aria-labelledby="schedule-filter-title">
+        <section v-if="drawerFieldsForGroup('schedule').length" class="advanced-filter-section" aria-labelledby="schedule-filter-title">
           <div class="advanced-filter-section__head">
             <a-space :size="6">
               <h3 id="schedule-filter-title" class="advanced-filter-section__title">{{ t('shipment.advanced.schedule') }}</h3>
@@ -1419,40 +1363,21 @@ watch(uiScenario, () => {
             >{{ t('shipment.advanced.clearGroup') }}</a-button>
           </div>
           <a-row :gutter="denseFormGridGutter">
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="etdRange" :label="t('shipment.advanced.sailingDate')" :style="denseFormItemStyle">
-                <a-range-picker
-                  v-model="advancedQuery.etdRange"
-                  v-model:popup-visible="advancedDatePopupVisible.etd"
-                  size="small"
-                  style="width: 100%"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="closingRange" :label="t('shipment.advanced.closingDate')" :style="denseFormItemStyle">
-                <a-range-picker
-                  v-model="advancedQuery.closingRange"
-                  v-model:popup-visible="advancedDatePopupVisible.closing"
-                  size="small"
-                  style="width: 100%"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="updatedRange" :label="t('shipment.columns.updatedAt')" :style="denseFormItemStyle">
-                <a-range-picker
-                  v-model="advancedQuery.updatedRange"
-                  v-model:popup-visible="advancedDatePopupVisible.updated"
-                  size="small"
-                  style="width: 100%"
-                />
-              </a-form-item>
+            <a-col v-for="definition in drawerFieldsForGroup('schedule')" :key="definition.field" :span="12" :xs="24" :sm="12">
+              <ShipmentQueryFieldControl
+                :field="definition.field"
+                :model="advancedQuery"
+                :operator-options="operatorOptions"
+                :carrier-options="carrierOptions"
+                dense
+                @submit="applyAdvancedFilters"
+                @date-popup-change="updateAdvancedDatePopup"
+              />
             </a-col>
           </a-row>
         </section>
 
-        <section class="advanced-filter-section" aria-labelledby="risk-filter-title">
+        <section v-if="drawerFieldsForGroup('risk').length" class="advanced-filter-section" aria-labelledby="risk-filter-title">
           <div class="advanced-filter-section__head">
             <a-space :size="6">
               <h3 id="risk-filter-title" class="advanced-filter-section__title">{{ t('shipment.advanced.risk') }}</h3>
@@ -1469,58 +1394,16 @@ watch(uiScenario, () => {
             >{{ t('shipment.advanced.clearGroup') }}</a-button>
           </div>
           <a-row :gutter="denseFormGridGutter">
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="orderStatus" :label="t('shipment.columns.orderStatus')" :style="denseFormItemStyle">
-                <a-select v-model="advancedQuery.orderStatus" size="small" allow-clear :placeholder="t('shipment.advanced.select')">
-                  <a-option v-for="status in ['waitBooking', 'booking', 'released', 'waitTruck', 'trucking', 'waitCustoms', 'customs', 'sailed', 'completed']" :key="status" :value="status">{{ t(`shipment.statuses.${status}`) }}</a-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="hasException" :label="t('shipment.advanced.hasException')" :style="denseFormItemStyle">
-                <a-radio-group
-                  v-model="advancedQuery.hasException"
-                  type="button"
-                  size="small"
-                  class="advanced-filter-choice"
-                >
-                  <a-radio value="">{{ t('shipment.advanced.all') }}</a-radio>
-                  <a-radio value="yes">{{ t('shipment.advanced.yes') }}</a-radio>
-                  <a-radio value="no">{{ t('shipment.advanced.no') }}</a-radio>
-                </a-radio-group>
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="isOverdue" :label="t('shipment.columns.isOverdue')" :style="denseFormItemStyle">
-                <a-radio-group
-                  v-model="advancedQuery.isOverdue"
-                  type="button"
-                  size="small"
-                  class="advanced-filter-choice"
-                >
-                  <a-radio value="">{{ t('shipment.advanced.all') }}</a-radio>
-                  <a-radio value="yes">{{ t('shipment.advanced.yes') }}</a-radio>
-                  <a-radio value="no">{{ t('shipment.advanced.no') }}</a-radio>
-                </a-radio-group>
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="fileStatus" :label="t('shipment.columns.fileStatus')" :style="denseFormItemStyle">
-                <a-select v-model="advancedQuery.fileStatus" size="small" allow-clear :placeholder="t('shipment.advanced.select')">
-                  <a-option value="missing">{{ t('shipment.advanced.missing') }}</a-option>
-                  <a-option value="pending">{{ t('shipment.fileStatus.pending') }}</a-option>
-                  <a-option value="complete">{{ t('shipment.advanced.complete') }}</a-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-            <a-col :span="12" :xs="24" :sm="12">
-              <a-form-item field="feeStatus" :label="t('shipment.columns.feeStatus')" :style="denseFormItemStyle">
-                <a-select v-model="advancedQuery.feeStatus" size="small" allow-clear :placeholder="t('shipment.advanced.select')">
-                  <a-option value="none">{{ t('shipment.feeStatus.none') }}</a-option>
-                  <a-option value="pending">{{ t('shipment.feeStatus.pending') }}</a-option>
-                  <a-option value="confirmed">{{ t('shipment.feeStatus.confirmed') }}</a-option>
-                </a-select>
-              </a-form-item>
+            <a-col v-for="definition in drawerFieldsForGroup('risk')" :key="definition.field" :span="12" :xs="24" :sm="12">
+              <ShipmentQueryFieldControl
+                :field="definition.field"
+                :model="advancedQuery"
+                :operator-options="operatorOptions"
+                :carrier-options="carrierOptions"
+                dense
+                @submit="applyAdvancedFilters"
+                @date-popup-change="updateAdvancedDatePopup"
+              />
             </a-col>
           </a-row>
         </section>
@@ -1542,6 +1425,15 @@ watch(uiScenario, () => {
         </div>
       </template>
     </a-drawer>
+
+    <QueryFieldSettingsDrawer
+      v-model:visible="queryFieldSettingsVisible"
+      :options="localizedQueryFieldOptions"
+      :model-value="queryFieldPlacement"
+      :default-value="DEFAULT_QUERY_FIELD_PLACEMENT"
+      :capacity-tracks="QUERY_PAGE_CAPACITY_TRACKS"
+      :on-before-apply="applyQueryFieldPlacement"
+    />
 
     <a-modal
       v-model:visible="batchAssignVisible"
@@ -1757,16 +1649,6 @@ watch(uiScenario, () => {
   font-size: var(--dense-font-title);
   font-weight: var(--dense-weight-title);
   line-height: 18px;
-}
-
-.advanced-filter-choice {
-  display: flex;
-  width: 100%;
-}
-
-.advanced-filter-choice :deep(.arco-radio-button) {
-  flex: 1;
-  text-align: center;
 }
 
 .next-action-value {

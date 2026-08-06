@@ -1,4 +1,4 @@
-import { defineFeatureContracts } from '../../../design-system/featureContract';
+import { defineFeatureContracts } from '@/design-system/featureContract';
 
 export const DETAIL_MODULE_FEATURE_CONTRACTS = defineFeatureContracts([
   { id: 'detail-module-navigate', actorRoles: ['ui.acceptance.viewer'], visibleWhen: '宽屏复杂详情包含多个业务模块', enabledWhen: '目标模块存在于当前详情画布', request: '在当前详情滚动容器内定位到所选业务模块', successResult: '滚动到目标模块并同步当前模块指示', errorResult: '保留当前滚动位置且不改变编辑数据', refreshScope: '详情模块索引与当前滚动位置' },

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { getQueryGridTrackCount } from '../../design-system/queryLayout';
+import { getQueryGridTrackCount } from '@/design-system/queryLayout';
 
 const emit = defineEmits<{
   (event: 'track-count-change', value: number): void;

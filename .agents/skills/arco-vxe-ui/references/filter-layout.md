@@ -4,14 +4,14 @@
 
 ## Authority And Boundary
 
-This file owns query-field priority, scenario selection, query-state behavior, advanced-filter composition, and acceptance evidence.
+This file owns query-field priority, placement selection, alignment capacity, query-state behavior, advanced-filter composition, and acceptance evidence.
 
 It does not define a second component framework:
 
 - Start with Arco Form, Grid, Input Group, Space, Badge, Drawer, and their props.
 - A class name shown in an example is a local semantic hook, not a reusable API. Reuse requires a real shared Vue component or composable found by `rg`.
 - Page CSS may arrange local grid, flex, stable width, and overflow relationships. It must not reskin Arco inputs, drawers, buttons, or popup chrome.
-- Field count selects a candidate scenario; frequency, task continuity, and adjustment cost decide the final surface.
+- Field count is a complexity signal only. Frequency, task continuity, and the typed alignment budget decide placement; count never selects a DOM pattern by itself.
 
 The command-surface height and first-viewport table budget are owned by `existing-project-modernization.md`. Control dimensions and typography are owned by `form-field.md`.
 
@@ -21,9 +21,9 @@ Classify every available condition before choosing a layout.
 
 | Layer | User job | Default surface |
 |------|----------|-----------------|
-| Locate | Find a known record or very small result set | Always-visible query row |
-| Narrow | Repeatedly reduce the current work queue | Visible row when used daily; page expansion when used regularly |
-| Investigate | Diagnose occasional attributes, ranges, flags, or audit conditions | Advanced-filter drawer |
+| Locate | Find a known record or very small result set | Required page field unless the page has no query surface |
+| Narrow | Repeatedly reduce the current work queue | User-configurable page or drawer field |
+| Investigate | Diagnose occasional attributes, ranges, flags, or audit conditions | Drawer by default; movable only when the page contract permits it |
 
 The default row answers: "What does the target operator enter first to find the object now?" Do not promote a field merely because it exists in the API.
 
@@ -52,94 +52,75 @@ A full-width bordered query surface with a left-pinned capped grid and an unowne
 
 ### Shared Track Model
 
-Use one shared responsive track model so wider containers gain tracks instead of wider controls. A logical track stays roughly `40-56px` across supported desktop profiles at 100% zoom: `compact` spans 3, `standard` 4, `wide` / `composite` / `range` 6, and `batch` 8 tracks. The normal action slot spans 5 tracks, the wide three-command slot 9, and the expanded slot 10 when a localized dynamic label such as `Expand (+N)` must remain visible.
+Use one shared responsive track model so wider containers gain tracks instead of wider controls. A logical track stays roughly `40-56px` across supported desktop profiles at 100% zoom: `compact` spans 3, `standard` 4, `wide` / `composite` / `range` 6, and `batch` 8 tracks. The normal action slot spans 5 tracks, the wide three-command slot 9, and the expanded action slot 10 only when a proven localized command set needs it.
 
 - Derive track count from the **query container's inner width**, not the browser width. Keep enough tracks for the supported 1024px desktop and add tracks as the container grows through 1440px and 1920px evidence.
 - Controls fill their semantic item, but the shared grid bounds the effective track size. Do not make a customer Select 400px wide merely because the monitor is wide.
-- Place query actions immediately after the last permanent visible field, separated by one shared column gutter. Stability means a deterministic position after the field sequence, not flush-right alignment across the query surface. Reserve the action slot first; at a compact profile, demote the lowest-priority Narrow field into the existing expand/drawer surface before allowing actions to wrap, clip, shrink, or iconify.
+- Place query actions immediately after the last configured page field, separated by one shared column gutter. Stability means a deterministic position after the saved field sequence, not flush-right alignment across the query surface. Reserve the action slot first; reject an over-capacity preference before allowing actions to wrap, clip, shrink, iconify, or moving a field without user intent.
 - At the same container width, the same ordered roles and action set produce the same widths, wrapping, and action alignment across routes.
 - A business difference changes the semantic role or field priority in `pageSpec.ts`; it never introduces page-local spans.
 - Only a connected control's internal selector may use a stable bounded width based on its longest legal option.
 - Advanced drawers keep their documented two-column/one-column composition; list-row tracks do not leak into the drawer.
 
 Start with Arco Grid when its 24 columns satisfy all supported widths. When a fixed 24-column grid would either stretch fields or require a narrow left-pinned `max-width` on wide desktop, the shared `QueryFieldGrid` may use CSS Grid for layout only. Record the reusable gap as: `Arco's fixed 24-column model cannot preserve bounded semantic field widths while adding wide-desktop capacity.` Arco continues to own Form, controls, validation, focus, and component chrome.
-Reference algorithm: derive a shared track count from container inner width and the profile's target track; map fields to `3/4/6/8` spans; append the `5/9/10`-track action item after the permanent field cluster and reserve that capacity before promoting optional fields; then verify wrapping and DOM/focus order. Implement it once in the shared component, not in pages.
+Reference algorithm: derive the minimum supported track count from the query container; reserve the localized `5/9/10`-track action item; map page fields to `3/4/6/8` spans; validate their sum against `minimumTracks * pageRows - actionTracks`; then verify wrapping and DOM/focus order at every larger profile. Implement normalization and capacity validation once in a shared component/composable, not in pages.
 
 ### Space-Use Decision
 
 After placing bounded fields, inspect unused space in this order:
 
 1. Keep all proven Locate and daily Narrow fields directly reachable.
-2. Use added wide-container tracks to reduce avoidable wrapping or expose another proven regular Narrow field without exceeding the command-height budget.
+2. Use added wide-container tracks to reduce avoidable wrapping; do not promote a drawer field merely because a wider monitor has space.
 3. Keep Investigate fields in the advanced surface even when space exists.
 4. Accept only the normal tail of the final field row; do not stretch the last field or invent decoration.
 
 Measure `grid width / query-surface inner width` at wide desktop. Below `80%` fails when the surface is full-width, left-aligned, and the remainder has no documented owner. This is a project composition gate, not a universal screen-filling target; field occupancy inside the grid may remain lower because semantic widths and field count still govern it.
 
-## Scenario Decision
+## Placement Decision
 
-Every list page selects one primary query scenario. Do not combine a full flat query wall with an advanced drawer.
+Every list page selects one query placement mode after classifying fields and calculating its minimum-width alignment budget.
 
-| Total query fields | Scenario | Default visible | Secondary surface | Selection rule |
-|--------------------|----------|-----------------|-------------------|----------------|
-| `0` | **S0** | none | none | Do not render an empty filter bar. The list starts with its actual command or data surface. |
-| `1-3` | **S1 compact** | all | none | Known-record lookup; keep the query action attached to the fields and do not create an extra command row. |
-| `4-8` | **S1** | all daily Locate/Narrow fields | none | One row preferred. A second aligned row is allowed only when every field is daily and table data stays in the first viewport. |
-| `9-16` | **S2** | 1-2 rows, usually 6-12 fields | inline expand/collapse | Secondary fields are still Narrow and users scan-adjust them in the same session. |
-| `17-20` | **S2** or **S3** | 1-2 core rows | expand or drawer | S2 only for a specialist workbench when all hidden fields are regular Narrow conditions. |
-| `21-32` | **S3** | one core row, usually 3-8 fields | grouped advanced-filter drawer | Hidden conditions span several concepts or contain Investigate fields. |
-| `33-49` | **S3 wide** | core row | wide drawer with group anchors | Occasional conditions remain composable in one query session. |
-| `50+` | **S4** | core Locate fields | saved-query workspace, or grouped D2 fallback | Prefer named, permission-aware saved queries. Until that product capability exists, use one grouped wide drawer with an anchor rail instead of an inline field wall. |
+| Mode | Use when | Page surface | Secondary surface |
+|------|----------|--------------|-------------------|
+| `none` | No user-entered conditions exist | none | none |
+| `fixed-inline` | Every condition is Locate/daily Narrow and the full semantic width fits the declared aligned row budget | all fields in stable order | none |
+| `page-and-drawer` | Any permitted field is secondary, roles need different daily fields, or all fields do not fit the aligned budget | required defaults plus the user's saved ordered page fields | every remaining field in a grouped drawer |
+| `saved-query-workspace` | Condition volume and repeatable combinations justify named views and a real persistence/permission contract | core Locate fields | saved queries; grouped D2 drawer is the complete fallback |
 
-Boundary overrides:
+Field count may prompt a complexity review, but it cannot promote/demote fields or select a mode. A four-field page can need a drawer; a ten-field specialist page can remain fixed-inline if all roles fit the explicitly verified two-row budget.
 
-1. A `9-16` field page may use S3 when Investigate fields dominate and opening them is uncommon.
-2. A `17-20` field specialist page may use S2 only when the table still owns the first viewport and expanded fields are used several times per week.
-3. A page moves to S3 when hidden conditions require four or more visible rows, contain nine or more Investigate fields, or make the query actions move while editing.
+## Placement Contracts
 
-## Scenario Contracts
+### No Query Surface
 
-### S0: No Query Surface
+- Render no empty query card, divider, placeholder controls, or disabled query button.
+- When the route or parent object pre-scopes data, show that scope once as context instead of inventing a control.
 
-- Render no empty query card, divider, placeholder controls, or disabled `查询` button.
-- The first visible surface is the actual command surface when it has real actions; otherwise it is the table and its meaningful table utilities.
-- When the data is intentionally pre-scoped by the route or parent object, show that scope once as page/table context instead of inventing a filter control.
+### Fixed Inline
 
-### S1: Full Inline
+- Compose fields with Arco Form/Grid and keep query actions adjacent to the final field.
+- Declare `pageRows`, `minimumTracks`, `actionTracks`, and derived `capacityTracks` in `pageSpec.ts`; one row is the default.
+- Two rows require proven daily use, stable complete-row alignment, and first-viewport table evidence. Do not infer a second row from field count.
+- If a later field no longer fits, graduate to `page-and-drawer`; do not silently hide, truncate, or wrap it.
 
-- Compose fields with Arco Form/Grid and keep query actions adjacent to the final visible field in the stable field sequence.
-- Use one primary `查询` action and one text `重置` action.
-- One row is preferred; two aligned rows are allowed when all fields are daily and the table remains visible in the first viewport.
-- Do not add expand, drawer, or hidden active count chrome when there is no hidden state.
+### Page And Drawer
 
-### S2: Inline Expand
+- Every permitted field belongs to exactly one location: ordered `pageFields` or ordered `drawerFields`. This is placement, not visibility.
+- Keep at least one Locate field required on the page. Preserve its stable position when order has workflow meaning.
+- User placement is invariant across language and viewport. Responsive behavior changes track count/control width only; it never moves fields between locations.
+- The settings trigger stays with query/reset/filter actions and opens an Arco Drawer. The drawer provides page and drawer lists, mouse drag within/across lists, keyboard reordering, an explicit non-drag move command, restore default, cancel, capacity feedback, and one primary save.
+- Reject over-capacity drafts in the settings surface and keep them editable. Do not auto-drop the last field or save a layout that wraps.
+- Persist versioned stable field IDs, never translated labels. Normalize unknown/duplicate/unauthorized IDs, restore required fields, and put newly introduced fields in the drawer. Invalid or over-capacity persisted state falls back to the typed default.
+- Moving or saving fields preserves every query value and does not run a query, reset pagination, clear selection, or change applied results. Query reset clears values without resetting placement; restore default changes placement without clearing values.
+- The filter entry shows the applied count for fields currently owned by the drawer. Open the drawer with a draft copied from query state; cancel/close discards draft edits, group clear affects only current drawer fields, and apply resets page 1 and runs the query.
+- Render drawer fields in business groups and honor saved order within each group. Empty groups disappear. The native Drawer body remains the one vertical scroll owner.
+- When the drawer contains portaled Select or Date popups, set Drawer `esc-to-close="false"`: Escape belongs to the active popup, while drawer close and cancel remain explicit.
 
-- Keep permanent and conditional fields inside one query surface and one shared track model.
-- Expansion adds conditional fields after the permanent query path; it does not move the query/reset action anchor or change permanent-field order.
-- A wider container may promote proven regular Narrow fields into the permanent row; keep their order stable and make `+N` count only the fields still hidden at that profile.
-- The trigger states `展开 (+N)` and `收起`, where `N` is the hidden field count.
-- When collapsed fields contain values, show an active count on the trigger.
-- Remember expansion state locally when useful; do not persist query values across sessions.
-- Expanded query content must not become a four-row default wall.
+### Saved Query Workspace
 
-### S3: Advanced Filter Drawer
-
-- Keep Locate and daily Narrow fields visible. Move occasional Narrow and Investigate fields into the drawer.
-- The entry remains beside query/reset and shows the applied hidden-condition count.
-- Open the drawer with a draft copied from applied query state.
-- `取消` discards draft edits and preserves the current list.
-- `清空更多筛选` clears only advanced draft fields unless the label explicitly says `清空全部条件`.
-- `应用筛选` commits the draft, closes the drawer, resets pagination to page 1, and runs the query.
-- Closing with the drawer close affordance follows cancel semantics; do not partially apply hidden fields.
-- When the drawer contains portaled Select or Date popups, set Drawer `esc-to-close="false"`: Escape belongs to the active popup, while drawer close and cancel remain explicit. An orphan popup after the drawer closes is a release blocker.
-
-### S4: Saved Query Workspace
-
-- `50+` conditions should graduate to named saved queries or views with an explicit current-view owner.
-- The core Locate fields remain directly reachable. Saved-query selection, edit, duplicate, permission, default, apply, reset, and failure behavior need real product/API contracts before implementation.
-- A saved view may combine conditions; it must never silently overwrite unsaved draft edits. Ask the user to apply, discard, or save the draft before switching views.
-- Do not claim a saved-query workspace from static frontend fixtures. If persistence, sharing, or permissions are not implemented, use `s4-drawer-fallback`: core fields inline plus a grouped D2 drawer with an anchor rail and one scroll owner.
-- The fallback is transitional but complete: it must support draft/apply/cancel/reset, group navigation, applied-condition count, and containment verification. It must not become a fullscreen drawer or an inline 50-field wall.
+- High condition volume should graduate only when named-query selection, edit, duplicate, permission, default, apply, reset, and failure behavior have real product/API contracts.
+- A saved view never silently overwrites unsaved draft edits. Ask the user to apply, discard, or save before switching.
+- Without that contract, use the complete page-and-drawer model with a grouped D2 drawer and anchor rail; do not build a static fake workspace or a flat field wall.
 
 ## Query Interaction Invariants
 
@@ -234,7 +215,7 @@ The section class names below are local hooks. They are not a mandatory shared D
 </a-drawer>
 ```
 
-## Wide Drawer: 33-49 Fields, Or S4 Fallback
+## Wide Drawer And Saved-Query Fallback
 
 - Use D2 width from `overlay-dimensions.md`.
 - Add a group-anchor rail when there are seven or more groups or when scrolling cannot keep the current group obvious.
@@ -242,7 +223,7 @@ The section class names below are local hooks. They are not a mandatory shared D
 - The rail stays fixed while the editor is the one vertical scroll owner.
 - Provide `清空本组` only when group-level reset is implemented and distinguish it from `清空全部`.
 - Do not make a wide filter drawer fullscreen.
-- For `50+` fields, this drawer is allowed only as the documented `s4-drawer-fallback` when saved-query product contracts are absent. Record that absence in `pageSpec`; do not label the surface as a saved-query workspace.
+- Use this drawer only when D1 grouping cannot keep the permitted field catalog navigable or when saved-query product contracts are absent. Record the missing contract in `pageSpec`; do not label the fallback as a saved-query workspace.
 
 ## Connected Identifier Search
 
@@ -265,9 +246,11 @@ The section class names below are local hooks. They are not a mandatory shared D
 
 ## Verification Gate
 
-Verify the selected scenario against real content at `1024x768`, `1366x768`, `1440x900`, and `1920x1080`:
+Verify the selected placement mode against real content at `1024x768`, `1366x768`, `1440x900`, and `1920x1080`:
 
-- [ ] The gap from the final permanent field to query actions equals the shared column gutter, and action order stays stable when S2 expands or S3 opens/closes.
+- [ ] The gap from the final configured page field to query actions equals the shared column gutter, and action order stays stable when either drawer opens or closes.
+- [ ] Page-field track usage stays within the typed minimum-width capacity; over-capacity drafts cannot be saved and invalid persisted state recovers to defaults.
+- [ ] Moving, saving, resetting, refreshing, changing language, and changing viewport preserve the placement/value boundaries defined above.
 - [ ] At `1920x1080`, record query-surface width, grid width, ratio, row count, and action rectangle; a full-width left-pinned grid with less than `80%` coverage has a documented owner or fails.
 - [ ] Wide layout adds track capacity without scaling type or making ordinary controls visibly oversized.
 - [ ] Permanent field order and keyboard order stay coherent when conditional fields appear, disappear, or wrap.
@@ -290,11 +273,11 @@ Verify the selected scenario against real content at `1024x768`, `1366x768`, `14
 - A page-local second Drawer skin that overrides Arco header, body, footer, colors, radius, or shadow.
 - Nested full-height scroll wrappers in a standard advanced-filter drawer.
 - A footer child whose `width: 100%` plus padding increases intrinsic width.
-- Three or four default-visible query rows used to avoid choosing S2/S3.
+- Ragged extra query rows created because field count, translation, or viewport silently changed placement.
 - A flat ungrouped drawer for dozens of unrelated conditions.
 - A D1 advanced drawer that meets the grouping threshold but still looks like one uninterrupted default form.
 - Yes/no/all conditions hidden in Select without an option-count, search, or label-length reason.
-- `50+` conditions in one drawer or in a page wall above the table.
+- A high-volume condition catalog in one uninterrupted drawer or in a page wall above the table.
 - Exclusive group tabs that prevent users from combining conditions across concepts.
 
 ## Related References

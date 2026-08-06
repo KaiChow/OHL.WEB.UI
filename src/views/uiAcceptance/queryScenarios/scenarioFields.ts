@@ -1,4 +1,4 @@
-import type { PesdpQueryFieldWidthRole } from '../../../design-system/pesdpPageSpec';
+import type { PesdpQueryFieldWidthRole } from '@/design-system/pesdpPageSpec';
 
 export type QueryScenarioKey =
   | 's0'
@@ -74,16 +74,15 @@ export const SCENARIO_FIELDS: ScenarioField[] = [
 
 const compactVisible = ['keyword', 'businessType'];
 const inlineVisible = ['customerName', 'businessType', 'owner', 'orderStatus', 'branch', 'source'];
-const expandVisible = ['customerName', 'businessType', 'owner', 'orderStatus', 'branch'];
-const coreVisible = ['keyword', 'customerName', 'businessType', 'owner'];
-const expandSecondary = ['batchValues', 'mblNo', 'bookingNo', 'source', 'pol', 'pod', 'carrier'];
+const configurableVisible = ['keyword', 'customerName', 'businessType'];
+const configurableSecondary = ['owner', 'orderStatus', 'updatedRange', 'batchValues', 'mblNo', 'bookingNo', 'pol', 'pod', 'carrier'];
 
 export const QUERY_SCENARIOS = [
   { key: 's0', routeName: 'QueryScenarioS0', labelKey: 'queryScenario.scenarios.s0', total: 0, visible: [] },
   { key: 's1-compact', routeName: 'QueryScenarioS1Compact', labelKey: 'queryScenario.scenarios.s1Compact', total: 2, visible: compactVisible },
   { key: 's1-inline', routeName: 'QueryScenarioS1Inline', labelKey: 'queryScenario.scenarios.s1Inline', total: 6, visible: inlineVisible },
-  { key: 's2-expand', routeName: 'QueryScenarioS2Expand', labelKey: 'queryScenario.scenarios.s2Expand', total: 12, visible: expandVisible, secondary: expandSecondary },
-  { key: 's3-drawer', routeName: 'QueryScenarioS3Drawer', labelKey: 'queryScenario.scenarios.s3Drawer', total: 24, visible: coreVisible },
-  { key: 's3-wide', routeName: 'QueryScenarioS3Wide', labelKey: 'queryScenario.scenarios.s3Wide', total: 40, visible: coreVisible },
-  { key: 's4-drawer', routeName: 'QueryScenarioS4Drawer', labelKey: 'queryScenario.scenarios.s4Drawer', total: 52, visible: ['keyword', 'customerName', 'businessType'] },
+  { key: 's2-expand', routeName: 'QueryScenarioS2Expand', labelKey: 'queryScenario.scenarios.s2Expand', total: 12, visible: configurableVisible, secondary: configurableSecondary, configurable: true },
+  { key: 's3-drawer', routeName: 'QueryScenarioS3Drawer', labelKey: 'queryScenario.scenarios.s3Drawer', total: 24, visible: configurableVisible, configurable: true },
+  { key: 's3-wide', routeName: 'QueryScenarioS3Wide', labelKey: 'queryScenario.scenarios.s3Wide', total: 40, visible: configurableVisible, configurable: true },
+  { key: 's4-drawer', routeName: 'QueryScenarioS4Drawer', labelKey: 'queryScenario.scenarios.s4Drawer', total: 52, visible: configurableVisible, configurable: true },
 ] as const;

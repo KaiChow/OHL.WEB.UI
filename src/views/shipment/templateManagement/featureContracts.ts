@@ -1,4 +1,4 @@
-import { defineFeatureContracts } from '../../../design-system/featureContract';
+import { defineFeatureContracts } from '@/design-system/featureContract';
 
 export const TEMPLATE_MANAGEMENT_FEATURE_CONTRACTS = defineFeatureContracts([
   { id: 'template-query', actorRoles: ['template.viewer', 'template.editor'], visibleWhen: '模板列表可见', enabledWhen: '本地查询未执行中', request: '按已应用条件过滤本地模板数据', successResult: '更新表格结果和分页', errorResult: '保留查询条件与当前结果', refreshScope: '本地列表与分页' },
