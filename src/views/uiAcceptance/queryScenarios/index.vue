@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { IconDown, IconFilter, IconSearch } from '@arco-design/web-vue/es/icon';
+import { Message } from '@arco-design/web-vue';
+import type { VxeTableInstance } from 'vxe-table';
+import { IconDown, IconFilter, IconMore, IconRefresh, IconSearch } from '@arco-design/web-vue/es/icon';
 import { compactVerticalFormLabelStyle, denseFormGridGutter } from '../../../design-system/formLayout';
 import { stableTableRowConfig } from '../../../design-system/tableConfig';
 import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
 import StandardListFrame from '../../../components/workbench/StandardListFrame.vue';
+import WorkbenchColumnSettings from '../../../components/workbench/WorkbenchColumnSettings.vue';
 import WorkbenchEmptyState from '../../../components/workbench/WorkbenchEmptyState.vue';
 import WorkbenchTableToolbar from '../../../components/workbench/WorkbenchTableToolbar.vue';
 import ScenarioFieldControl from './components/ScenarioFieldControl.vue';
@@ -37,24 +40,100 @@ interface ScenarioRow {
 
 const router = useRouter();
 const { t } = useI18n();
+const CURRENT_ACCEPTANCE_OPERATOR = '张操作';
+const COLUMN_SETTING_STORAGE_KEY = 'ohl.ui-acceptance.query.visible-columns.v1';
+const OPERATION_COLUMN_WIDTH = 168;
+const STATUS_COLUMN_MIN_WIDTH = 148;
+
+type ScenarioColumnField = 'orderNo' | 'orderStatus' | 'customerName' | 'businessType' | 'owner' | 'updatedAt';
+
+const COLUMN_SETTING_OPTIONS: Array<{ field: ScenarioColumnField; required?: boolean }> = [
+  { field: 'orderNo', required: true },
+  { field: 'orderStatus', required: true },
+  { field: 'customerName' },
+  { field: 'businessType' },
+  { field: 'owner' },
+  { field: 'updatedAt' },
+];
+const COLUMN_LABEL_KEYS: Record<ScenarioColumnField, string> = {
+  orderNo: 'orderNo',
+  orderStatus: 'status',
+  customerName: 'customer',
+  businessType: 'businessType',
+  owner: 'owner',
+  updatedAt: 'updatedAt',
+};
+const DEFAULT_VISIBLE_COLUMN_FIELDS: ScenarioColumnField[] = COLUMN_SETTING_OPTIONS.map((option) => option.field);
+const DEFAULT_COLUMN_ORDER_FIELDS: ScenarioColumnField[] = COLUMN_SETTING_OPTIONS.map((option) => option.field);
+const REQUIRED_COLUMN_FIELDS = COLUMN_SETTING_OPTIONS.filter((option) => option.required).map((option) => option.field);
+
+interface ColumnPreferences {
+  visibleFields: ScenarioColumnField[];
+  orderedFields: ScenarioColumnField[];
+}
+
+const normalizeColumnOrder = (fields: string[]): ScenarioColumnField[] => {
+  const available = new Set(DEFAULT_COLUMN_ORDER_FIELDS);
+  const normalized = Array.from(new Set(fields.filter((field): field is ScenarioColumnField => available.has(field as ScenarioColumnField))));
+  DEFAULT_COLUMN_ORDER_FIELDS.forEach((field) => {
+    if (!normalized.includes(field)) normalized.push(field);
+  });
+  return normalized;
+};
+
+const loadColumnPreferences = (): ColumnPreferences => {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) ?? '[]') as string[] | Partial<ColumnPreferences>;
+    const storedVisible = Array.isArray(stored) ? stored : stored.visibleFields ?? [];
+    const storedOrder = Array.isArray(stored) ? DEFAULT_COLUMN_ORDER_FIELDS : stored.orderedFields ?? DEFAULT_COLUMN_ORDER_FIELDS;
+    const available = new Set(DEFAULT_VISIBLE_COLUMN_FIELDS);
+    const normalized = Array.from(new Set([
+      ...REQUIRED_COLUMN_FIELDS,
+      ...storedVisible.filter((field): field is ScenarioColumnField => available.has(field as ScenarioColumnField)),
+    ]));
+    return {
+      visibleFields: normalized.length >= 4 ? normalized : [...DEFAULT_VISIBLE_COLUMN_FIELDS],
+      orderedFields: normalizeColumnOrder(storedOrder),
+    };
+  } catch {
+    return { visibleFields: [...DEFAULT_VISIBLE_COLUMN_FIELDS], orderedFields: [...DEFAULT_COLUMN_ORDER_FIELDS] };
+  }
+};
+
+const initialColumnPreferences = loadColumnPreferences();
+
 const activeScenarioKey = ref<QueryScenarioKey>(props.initialScenario);
 const expanded = ref(false);
 const drawerVisible = ref(false);
 const querying = ref(false);
+const refreshing = ref(false);
 const primaryGridTrackCount = ref(24);
-const page = reactive({ current: 1, size: 50 });
+const page = reactive({ current: 1, size: 10 });
 const keywordType = ref('orderNo');
 const wideFilterEditor = ref<HTMLElement>();
+const tableRef = ref<VxeTableInstance>();
+const visibleColumnFields = ref<ScenarioColumnField[]>(initialColumnPreferences.visibleFields);
+const orderedColumnFields = ref<ScenarioColumnField[]>(initialColumnPreferences.orderedFields);
 const queryValues = reactive<Record<string, string | string[]>>({});
 const draftValues = reactive<Record<string, string | string[]>>({});
 const appliedValues = ref<Record<string, string | string[]>>({});
+let searchTimer: number | undefined;
+let refreshTimer: number | undefined;
 
 for (const field of SCENARIO_FIELDS) {
   queryValues[field.key] = ['range', 'batch'].includes(field.kind) ? [] : '';
   draftValues[field.key] = ['range', 'batch'].includes(field.kind) ? [] : '';
 }
 
-const rows: ScenarioRow[] = [
+const columnSettingOptions = computed(() => COLUMN_SETTING_OPTIONS.map((option) => ({
+  field: option.field,
+  label: t(`queryScenario.columns.${COLUMN_LABEL_KEYS[option.field]}`),
+  required: option.required,
+  orderLocked: option.field === 'orderNo',
+})));
+const isColumnVisible = (field: ScenarioColumnField) => visibleColumnFields.value.includes(field);
+
+const BASE_ROWS: ScenarioRow[] = [
   { id: '1', orderNo: 'SEO2026080001', orderStatus: '订舱中', statusKey: 'booking', statusTone: 'op', customerName: '深圳华贸进出口有限公司', businessType: 'FCL', owner: '张操作', updatedAt: '2026-08-03 09:30' },
   { id: '2', orderNo: 'SEO2026080002', orderStatus: '已放舱', statusKey: 'released', statusTone: 'rel', customerName: '宁波远洋贸易集团', businessType: 'FCL', owner: '李操作', updatedAt: '2026-08-03 09:12' },
   { id: '3', orderNo: 'SEO2026080003', orderStatus: '报关中', statusKey: 'customs', statusTone: 'op', customerName: '广州宏达电子科技', businessType: 'LCL', owner: '王操作', updatedAt: '2026-08-03 08:48' },
@@ -64,6 +143,26 @@ const rows: ScenarioRow[] = [
   { id: '7', orderNo: 'SEO2026080007', orderStatus: '异常', statusKey: 'exception', statusTone: 'risk', customerName: '天津港联国际', businessType: 'LCL', owner: '王操作', updatedAt: '2026-08-02 14:05' },
   { id: '8', orderNo: 'SEO2026080008', orderStatus: '已完成', statusKey: 'completed', statusTone: 'rel', customerName: '东莞精密制造', businessType: 'FCL', owner: '赵操作', updatedAt: '2026-08-02 11:32' },
 ];
+
+const rows = reactive<ScenarioRow[]>(Array.from({ length: 24 }, (_, index) => {
+  const base = BASE_ROWS[index % BASE_ROWS.length];
+  return {
+    ...base,
+    id: String(index + 1),
+    orderNo: `SEO202608${String(index + 1).padStart(4, '0')}`,
+  };
+}));
+
+const NEXT_STATUS: Record<string, { key: string; tone: string }> = {
+  booking: { key: 'released', tone: 'rel' },
+  released: { key: 'customs', tone: 'op' },
+  pendingCustoms: { key: 'customs', tone: 'op' },
+  trucking: { key: 'customs', tone: 'op' },
+  customs: { key: 'sailed', tone: 'rel' },
+  exception: { key: 'customs', tone: 'op' },
+  sailed: { key: 'completed', tone: 'rel' },
+  completed: { key: 'booking', tone: 'op' },
+};
 
 const groupMessageKeys: Record<string, string> = {
   '识别条件': 'identity', '航线与运输': 'route', '时间计划': 'schedule', '执行与归属': 'ownership',
@@ -158,6 +257,71 @@ const onPageSizeChange = (size: number) => {
   page.current = 1;
 };
 
+const syncTableColumnPreferences = async (visibleFields: ScenarioColumnField[], orderedFields: ScenarioColumnField[]) => {
+  const table = tableRef.value;
+  if (!table) return false;
+
+  const tableColumns = table.getTableColumn().fullColumn;
+  const structuralLeft = tableColumns.filter((column) => !column.field && column.fixed === 'left');
+  const structuralRight = tableColumns.filter((column) => !column.field && column.fixed === 'right');
+  const structuralCenter = tableColumns.filter((column) => !column.field && !column.fixed);
+  const orderedBusinessColumns = orderedFields
+    .map((field) => table.getColumnByField(field))
+    .filter((column): column is NonNullable<typeof column> => Boolean(column));
+  await table.reloadColumn([...structuralLeft, ...orderedBusinessColumns, ...structuralCenter, ...structuralRight]);
+  await Promise.all(COLUMN_SETTING_OPTIONS.map((option) => (
+    visibleFields.includes(option.field)
+      ? table.showColumn(option.field)
+      : table.hideColumn(option.field)
+  )));
+  await table.refreshColumn();
+  return true;
+};
+
+const applyColumnSettings = async ({ visibleFields, orderedFields }: { visibleFields: string[]; orderedFields: string[] }) => {
+  const available = new Set(DEFAULT_VISIBLE_COLUMN_FIELDS);
+  const requested = visibleFields.filter((field): field is ScenarioColumnField => available.has(field as ScenarioColumnField));
+  const nextFields = Array.from(new Set([...REQUIRED_COLUMN_FIELDS, ...requested]));
+  const nextOrder = normalizeColumnOrder(orderedFields);
+  if (nextFields.length < 4 || !tableRef.value) return false;
+
+  visibleColumnFields.value = nextFields;
+  orderedColumnFields.value = nextOrder;
+  window.localStorage.setItem(COLUMN_SETTING_STORAGE_KEY, JSON.stringify({ visibleFields: nextFields, orderedFields: nextOrder }));
+  await nextTick();
+  await syncTableColumnPreferences(nextFields, nextOrder);
+  Message.success(t('queryScenario.messages.columnsApplied'));
+  return true;
+};
+
+onMounted(async () => {
+  await nextTick();
+  await syncTableColumnPreferences(visibleColumnFields.value, orderedColumnFields.value);
+});
+
+const handleRefresh = () => {
+  if (refreshing.value || querying.value) return;
+  refreshing.value = true;
+  window.clearTimeout(refreshTimer);
+  refreshTimer = window.setTimeout(() => {
+    refreshing.value = false;
+    Message.success(t('queryScenario.messages.refreshed'));
+  }, 320);
+};
+
+const updateRowStatus = (row: ScenarioRow) => {
+  const next = NEXT_STATUS[row.statusKey] ?? NEXT_STATUS.booking;
+  row.statusKey = next.key;
+  row.statusTone = next.tone;
+  row.orderStatus = t(`queryScenario.statuses.${next.key}`);
+  Message.success(t('queryScenario.messages.statusUpdated', { orderNo: row.orderNo, status: row.orderStatus }));
+};
+
+const assignRowToMe = (row: ScenarioRow) => {
+  row.owner = CURRENT_ACCEPTANCE_OPERATOR;
+  Message.success(t('queryScenario.messages.assigned', { orderNo: row.orderNo, owner: row.owner }));
+};
+
 const cloneValue = (value: string | string[]) => Array.isArray(value) ? [...value] : value;
 
 const resetValues = () => {
@@ -171,7 +335,8 @@ const handleSearch = () => {
   querying.value = true;
   appliedValues.value = Object.fromEntries(Object.entries(queryValues).map(([key, value]) => [key, cloneValue(value)]));
   page.current = 1;
-  window.setTimeout(() => { querying.value = false; }, 160);
+  window.clearTimeout(searchTimer);
+  searchTimer = window.setTimeout(() => { querying.value = false; }, 160);
 };
 
 const openAdvanced = () => {
@@ -203,6 +368,11 @@ watch(() => props.initialScenario, (value) => {
   drawerVisible.value = false;
   expanded.value = false;
   resetValues();
+});
+
+onBeforeUnmount(() => {
+  window.clearTimeout(searchTimer);
+  window.clearTimeout(refreshTimer);
 });
 
 </script>
@@ -268,22 +438,81 @@ watch(() => props.initialScenario, (value) => {
         :current="page.current"
         :page-size="page.size"
         :total="filteredRows.length"
+        :page-size-options="[10, 20, 50]"
         @change="onPageChange"
         @page-size-change="onPageSizeChange"
-      />
+      >
+        <template #utilities>
+          <a-tooltip :content="t('common.refresh')">
+            <a-button
+              size="small"
+              type="text"
+              class="table-cap-tool"
+              :title="t('common.refresh')"
+              :aria-label="t('common.refresh')"
+              :loading="refreshing"
+              :disabled="querying"
+              @click="handleRefresh"
+            >
+              <template #icon><icon-refresh /></template>
+            </a-button>
+          </a-tooltip>
+          <WorkbenchColumnSettings
+            :model-value="visibleColumnFields"
+            :order-value="orderedColumnFields"
+            :default-value="DEFAULT_VISIBLE_COLUMN_FIELDS"
+            :options="columnSettingOptions"
+            :minimum="4"
+            :disabled="querying || refreshing"
+            :on-before-apply="applyColumnSettings"
+          />
+        </template>
+      </WorkbenchTableToolbar>
     </template>
 
     <template #table>
-        <vxe-table :data="pagedRows" height="100%" auto-resize fit show-overflow="title" :row-config="stableTableRowConfig" :seq-config="{ startIndex: (page.current - 1) * page.size }">
+        <vxe-table
+          ref="tableRef"
+          id="ui-acceptance-query-results"
+          :data="pagedRows"
+          :loading="querying || refreshing"
+          height="100%"
+          auto-resize
+          fit
+          show-overflow="title"
+          :column-config="{ resizable: true }"
+          :custom-config="{ storage: true }"
+          :row-config="stableTableRowConfig"
+          :seq-config="{ startIndex: (page.current - 1) * page.size }"
+        >
           <vxe-column type="seq" :title="t('common.sequence')" width="52" fixed="left" align="center" />
-          <vxe-column field="orderNo" :title="t('queryScenario.columns.orderNo')" min-width="160" fixed="left" class-name="mono" />
-          <vxe-column field="orderStatus" :title="t('queryScenario.columns.status')" min-width="112">
+          <vxe-column field="orderNo" :title="t('queryScenario.columns.orderNo')" min-width="160" fixed="left" class-name="mono" :visible="isColumnVisible('orderNo')" />
+          <vxe-column field="orderStatus" :title="t('queryScenario.columns.status')" :min-width="STATUS_COLUMN_MIN_WIDTH" :visible="isColumnVisible('orderStatus')">
             <template #default="{ row }"><span class="s-pill" :data-s="row.statusTone">{{ t(`queryScenario.statuses.${row.statusKey}`) }}</span></template>
           </vxe-column>
-          <vxe-column field="customerName" :title="t('queryScenario.columns.customer')" min-width="200" />
-          <vxe-column field="businessType" :title="t('queryScenario.columns.businessType')" min-width="96" />
-          <vxe-column field="owner" :title="t('queryScenario.columns.owner')" min-width="104" />
-          <vxe-column field="updatedAt" :title="t('queryScenario.columns.updatedAt')" min-width="148" class-name="mono" />
+          <vxe-column field="customerName" :title="t('queryScenario.columns.customer')" min-width="200" :visible="isColumnVisible('customerName')" />
+          <vxe-column field="businessType" :title="t('queryScenario.columns.businessType')" min-width="96" :visible="isColumnVisible('businessType')" />
+          <vxe-column field="owner" :title="t('queryScenario.columns.owner')" min-width="104" :visible="isColumnVisible('owner')" />
+          <vxe-column field="updatedAt" :title="t('queryScenario.columns.updatedAt')" min-width="148" class-name="mono" :visible="isColumnVisible('updatedAt')" />
+          <vxe-column :title="t('common.operations')" :width="OPERATION_COLUMN_WIDTH" fixed="right" align="left" header-align="center">
+            <template #default="{ row }">
+              <a-space class="row-actions" :size="2">
+                <a-button size="mini" type="text" class="row-action-btn" @click="updateRowStatus(row)">
+                  {{ t('queryScenario.actions.updateStatus') }}
+                </a-button>
+                <a-dropdown trigger="click" position="br">
+                  <a-tooltip :content="t('common.moreActions')">
+                    <a-button size="mini" type="text" class="row-action-btn row-action-btn--more" :aria-label="t('common.moreActions')">
+                      <template #icon><icon-more /></template>
+                    </a-button>
+                  </a-tooltip>
+                  <template #content>
+                    <a-doption @click="assignRowToMe(row)">{{ t('queryScenario.actions.assignMe') }}</a-doption>
+                  </template>
+                </a-dropdown>
+              </a-space>
+            </template>
+          </vxe-column>
           <template #empty>
             <WorkbenchEmptyState
               kind="empty"

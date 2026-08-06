@@ -36,7 +36,7 @@ export type ShipmentKeywordType = 'orderNo' | 'blNo' | 'bookingNo';
 
 export interface ShipmentOrderQuery {
   keywordType: ShipmentKeywordType;
-  keyword: string;
+  keyword: string[];
   customerName: string;
   pol: string;
   pod: string;

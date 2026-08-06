@@ -20,13 +20,14 @@ export const appMenus: AppMenuItem[] = [
     key: 'ui-acceptance',
     title: 'UI验收', titleKey: 'menu.uiAcceptance',
     children: [
+      { key: 'ui-acceptance-list-design-guide', title: '设计说明', titleKey: 'menu.uiAcceptanceDesignGuide', routeName: 'UiAcceptanceListDesignGuide' },
       { key: 'query-scenario-s1-compact', title: '2项紧凑查询', titleKey: 'menu.queryS1Compact', routeName: 'QueryScenarioS1Compact' },
       { key: 'query-scenario-s1-inline', title: '6项内联查询', titleKey: 'menu.queryS1Inline', routeName: 'QueryScenarioS1Inline' },
       { key: 'query-scenario-s2-expand', title: '12项展开查询', titleKey: 'menu.queryS2Expand', routeName: 'QueryScenarioS2Expand' },
       { key: 'query-scenario-s3-drawer', title: '24项抽屉查询', titleKey: 'menu.queryS3Drawer', routeName: 'QueryScenarioS3Drawer' },
       { key: 'query-scenario-s3-wide', title: '40项宽抽屉查询', titleKey: 'menu.queryS3Wide', routeName: 'QueryScenarioS3Wide' },
       { key: 'query-scenario-s4-drawer', title: '52项分组抽屉', titleKey: 'menu.queryS4Drawer', routeName: 'QueryScenarioS4Drawer' },
-         { key: 'detail-module-complex', title: '复杂详情模块', titleKey: 'menu.detailModuleComplex', routeName: 'DetailModuleComplex' },
+      { key: 'detail-module-complex', title: '复杂详情模块', titleKey: 'menu.detailModuleComplex', routeName: 'DetailModuleComplex' },
     ],
   },
   {

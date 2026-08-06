@@ -1,6 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
 
 export const uiAcceptanceRoutes: RouteRecordRaw[] = [
+  { path: 'ui-acceptance/design-guide/list-pages', name: 'UiAcceptanceListDesignGuide', component: () => import('@/views/uiAcceptance/listDesignGuide/index.vue'), meta: { menuKey: 'ui-acceptance-list-design-guide', title: '列表设计说明', titleKey: 'routes.uiAcceptanceDesignGuide' } },
   { path: 'ui-acceptance/detail-modules/complex', name: 'DetailModuleComplex', component: () => import('../../views/uiAcceptance/detailModules/index.vue'), meta: { menuKey: 'detail-module-complex', title: '复杂详情模块', titleKey: 'routes.detailModuleComplex' } },
   { path: 'ui-acceptance/interactions/form-overlays', name: 'InteractionFormOverlays', component: () => import('../../views/uiAcceptance/interactionScenarios/index.vue'), props: { initialScenario: 'form-overlays' }, meta: { menuKey: 'interaction-form-overlays', title: '表单与弹窗', titleKey: 'routes.interactionFormOverlays' } },
   { path: 'ui-acceptance/interactions/action-hierarchy', name: 'InteractionActionHierarchy', component: () => import('../../views/uiAcceptance/interactionScenarios/index.vue'), props: { initialScenario: 'action-hierarchy' }, meta: { menuKey: 'interaction-action-hierarchy', title: '按钮与操作', titleKey: 'routes.interactionActionHierarchy' } },

@@ -86,8 +86,8 @@ const handlePaste = (event: ClipboardEvent) => {
   emit('update:modelValue', parsed.valid);
   if (tokenCount > 1) {
     Message.info(parsed.duplicateCount
-      ? t('queryScenario.batch.pasteAcceptedWithDuplicates', { count: parsed.valid.length, duplicate: parsed.duplicateCount })
-      : t('queryScenario.batch.pasteAccepted', { count: parsed.valid.length }));
+      ? t('common.batchQuery.pasteAcceptedWithDuplicates', { count: parsed.valid.length, duplicate: parsed.duplicateCount })
+      : t('common.batchQuery.pasteAccepted', { count: parsed.valid.length }));
   }
 };
 
@@ -133,11 +133,12 @@ const applyDraft = () => {
 
 <template>
   <a-input-group class="batch-query-control">
+    <slot name="prefix" />
     <a-input
       :model-value="displayValue"
       size="small"
       :readonly="modelValue.length > 1"
-      :placeholder="t('queryScenario.batch.placeholder')"
+      :placeholder="t('common.batchQuery.placeholder')"
       :aria-label="label"
       @input="handleDirectInput"
       @paste="handlePaste"
@@ -145,10 +146,10 @@ const applyDraft = () => {
       @press-enter="commitDirectValue(true)"
     >
     </a-input>
-    <a-tooltip v-if="modelValue.length" :content="t('queryScenario.batch.clearValues', { field: label })">
+    <a-tooltip v-if="modelValue.length" :content="t('common.batchQuery.clearValues', { field: label })">
       <a-button
         size="small"
-        :aria-label="t('queryScenario.batch.clearValues', { field: label })"
+        :aria-label="t('common.batchQuery.clearValues', { field: label })"
         @click="clearValue"
       ><icon-close-circle /></a-button>
     </a-tooltip>
@@ -159,44 +160,44 @@ const applyDraft = () => {
       :content-style="{ width: 'min(360px, calc(100vw - 32px))' }"
       @popup-visible-change="handleVisibleChange"
     >
-      <a-tooltip :content="t('queryScenario.batch.open', { field: label })">
+      <a-tooltip :content="t('common.batchQuery.open', { field: label })">
         <a-badge :count="modelValue.length > 1 ? modelValue.length : 0" :max-count="99" :offset="[-2, 2]">
           <a-button
             size="small"
             :aria-label="modelValue.length > 1
-              ? t('queryScenario.batch.openWithCount', { field: label, count: modelValue.length })
-              : t('queryScenario.batch.open', { field: label })"
+              ? t('common.batchQuery.openWithCount', { field: label, count: modelValue.length })
+              : t('common.batchQuery.open', { field: label })"
           ><icon-edit /></a-button>
         </a-badge>
       </a-tooltip>
-      <template #title>{{ t('queryScenario.batch.title', { field: label }) }}</template>
+      <template #title>{{ t('common.batchQuery.title', { field: label }) }}</template>
       <template #content>
         <div class="batch-query-editor">
           <a-textarea
             v-model="draftText"
             class="batch-query-editor__input"
             :auto-size="{ minRows: 5, maxRows: 8 }"
-            :placeholder="t('queryScenario.batch.editorPlaceholder')"
+            :placeholder="t('common.batchQuery.editorPlaceholder')"
           />
           <div class="batch-query-editor__stats" aria-live="polite">
-            {{ t('queryScenario.batch.stats', {
+            {{ t('common.batchQuery.stats', {
               valid: parsedDraft.valid.length,
               duplicate: parsedDraft.duplicateCount,
               invalid: parsedDraft.invalid.length,
             }) }}
           </div>
           <div v-if="parsedDraft.invalid.length" class="batch-query-editor__error">
-            {{ t('queryScenario.batch.invalid', { values: parsedDraft.invalid.slice(0, 3).join(', ') }) }}
+            {{ t('common.batchQuery.invalid', { values: parsedDraft.invalid.slice(0, 3).join(', ') }) }}
           </div>
           <div v-else-if="overLimit" class="batch-query-editor__error">
-            {{ t('queryScenario.batch.overLimit', { max: MAX_IDENTIFIERS }) }}
+            {{ t('common.batchQuery.overLimit', { max: MAX_IDENTIFIERS }) }}
           </div>
           <div class="batch-query-editor__footer">
             <a-button size="small" type="text" @click="draftText = ''">{{ t('common.clear') }}</a-button>
             <div class="batch-query-editor__commands">
               <a-button size="small" @click="popupVisible = false">{{ t('common.cancel') }}</a-button>
               <a-button size="small" type="primary" :disabled="!canApply" @click="applyDraft">
-                {{ t('queryScenario.batch.useValues') }}
+                {{ t('common.batchQuery.useValues') }}
               </a-button>
             </div>
           </div>

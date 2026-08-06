@@ -15,7 +15,6 @@ import {
   IconFullscreen,
   IconFullscreenExit,
   IconMore,
-  IconSettings,
 } from '@arco-design/web-vue/es/icon';
 import { downloadCsvFile } from '../../../utils/mock-actions';
 import { formatLocalMinute } from '../../../utils/date-time';
@@ -23,7 +22,9 @@ import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle 
 import { stableTableRowConfig } from '../../../design-system/tableConfig';
 import QueryFieldCol from '../../../components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '../../../components/workbench/QueryFieldGrid.vue';
+import BatchValueQuery from '../../../components/workbench/BatchValueQuery.vue';
 import StandardListFrame from '../../../components/workbench/StandardListFrame.vue';
+import WorkbenchColumnSettings from '../../../components/workbench/WorkbenchColumnSettings.vue';
 import WorkbenchEmptyState from '../../../components/workbench/WorkbenchEmptyState.vue';
 import WorkbenchTableToolbar from '../../../components/workbench/WorkbenchTableToolbar.vue';
 import WorkflowStateSelector from '../../../components/workbench/WorkflowStateSelector.vue';
@@ -44,7 +45,7 @@ const { t } = useI18n();
 const CURRENT_OPERATOR = '张操作';
 const COLUMN_SETTING_STORAGE_KEY = 'ohl.shipment.export-order.visible-columns.v3';
 const ORDER_STATUS_COLUMN_MIN_WIDTH = 148;
-const OPERATION_COLUMN_WIDTH = 270;
+const OPERATION_COLUMN_WIDTH = 168;
 
 type WorkScope = 'all' | 'mine' | 'others';
 
@@ -100,9 +101,14 @@ const COLUMN_SETTING_GROUPS: ColumnSettingGroup[] = [
 ];
 
 const COLUMN_SETTING_OPTIONS = COLUMN_SETTING_GROUPS.flatMap((group) => group.options);
-const COLUMN_GROUP_I18N_KEYS: Record<string, string> = { '核心信息': 'core', '运输节点': 'transport', '单证信息': 'documents', '执行跟进': 'execution' };
-const getColumnGroupLabel = (label: string) => t(`shipment.settings.${COLUMN_GROUP_I18N_KEYS[label]}`);
+const localizedColumnSettingOptions = computed(() => COLUMN_SETTING_OPTIONS.map((option) => ({
+  field: option.field,
+  label: t(`shipment.columns.${option.field}`),
+  required: option.required,
+  orderLocked: option.field === 'orderNo' || option.field === 'orderStatus',
+})));
 const REQUIRED_COLUMN_FIELDS = COLUMN_SETTING_OPTIONS.filter((option) => option.required).map((option) => option.field);
+const DEFAULT_COLUMN_ORDER_FIELDS = COLUMN_SETTING_OPTIONS.map((option) => option.field);
 // PRD 4.7 默认 18 列全集受 check-spec「默认可见业务列 8-12」上限约束（风险标记列固定可见占 1 席），
 // 因此默认集取 PRD 点名的 7 个字段 + 订单号/订单状态/客户/操作人员，其余字段经列设置开启。
 const DEFAULT_VISIBLE_COLUMN_FIELDS: ColumnSettingField[] = [
@@ -119,17 +125,38 @@ const DEFAULT_VISIBLE_COLUMN_FIELDS: ColumnSettingField[] = [
   'containerSummary',
 ];
 
-const loadVisibleColumnFields = (): ColumnSettingField[] => {
+interface ColumnPreferences {
+  visibleFields: ColumnSettingField[];
+  orderedFields: ColumnSettingField[];
+}
+
+const normalizeColumnOrder = (fields: string[]): ColumnSettingField[] => {
+  const availableFields = new Set(DEFAULT_COLUMN_ORDER_FIELDS);
+  const normalized = Array.from(new Set(fields.filter((field): field is ColumnSettingField => availableFields.has(field as ColumnSettingField))));
+  DEFAULT_COLUMN_ORDER_FIELDS.forEach((field) => {
+    if (!normalized.includes(field)) normalized.push(field);
+  });
+  return normalized;
+};
+
+const loadColumnPreferences = (): ColumnPreferences => {
   try {
-    const stored = JSON.parse(window.localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) ?? '[]') as string[];
+    const stored = JSON.parse(window.localStorage.getItem(COLUMN_SETTING_STORAGE_KEY) ?? '[]') as string[] | Partial<ColumnPreferences>;
+    const storedVisible = Array.isArray(stored) ? stored : stored.visibleFields ?? [];
+    const storedOrder = Array.isArray(stored) ? DEFAULT_COLUMN_ORDER_FIELDS : stored.orderedFields ?? DEFAULT_COLUMN_ORDER_FIELDS;
     const availableFields = new Set(COLUMN_SETTING_OPTIONS.map((option) => option.field));
-    const validFields = stored.filter((field): field is ColumnSettingField => availableFields.has(field as ColumnSettingField));
+    const validFields = storedVisible.filter((field): field is ColumnSettingField => availableFields.has(field as ColumnSettingField));
     const normalized = Array.from(new Set([...REQUIRED_COLUMN_FIELDS, ...validFields]));
-    return normalized.length >= 8 ? normalized : [...DEFAULT_VISIBLE_COLUMN_FIELDS];
+    return {
+      visibleFields: normalized.length >= 8 ? normalized : [...DEFAULT_VISIBLE_COLUMN_FIELDS],
+      orderedFields: normalizeColumnOrder(storedOrder),
+    };
   } catch {
-    return [...DEFAULT_VISIBLE_COLUMN_FIELDS];
+    return { visibleFields: [...DEFAULT_VISIBLE_COLUMN_FIELDS], orderedFields: [...DEFAULT_COLUMN_ORDER_FIELDS] };
   }
 };
+
+const initialColumnPreferences = loadColumnPreferences();
 
 const KEYWORD_OPTIONS: { key: string; value: ShipmentKeywordType }[] = [
   { key: 'orderNo', value: 'orderNo' },
@@ -156,7 +183,7 @@ const WORKFLOW_STATE_OPTIONS: { key: ShipmentStatusKey; tone?: 'danger' | 'warn'
 
 const defaultQuery = (): ShipmentOrderQuery => ({
   keywordType: 'orderNo',
-  keyword: '',
+  keyword: [],
   customerName: '',
   pol: '',
   pod: '',
@@ -178,6 +205,7 @@ const defaultQuery = (): ShipmentOrderQuery => ({
 
 const cloneQuery = (source: ShipmentOrderQuery): ShipmentOrderQuery => ({
   ...source,
+  keyword: [...source.keyword],
   etdRange: [...source.etdRange],
   closingRange: [...source.closingRange],
   updatedRange: [...source.updatedRange],
@@ -190,6 +218,10 @@ const createWorkbenchRows = () => shipmentWorkbenchRows.map((row) => ({
 }));
 
 const query = reactive<ShipmentOrderQuery>(defaultQuery());
+const selectedKeywordLabel = computed(() => {
+  const selected = KEYWORD_OPTIONS.find((option) => option.value === query.keywordType) ?? KEYWORD_OPTIONS[0];
+  return t(`shipment.keywordTypes.${selected.key}`);
+});
 const advancedQuery = reactive<ShipmentOrderQuery>(defaultQuery());
 const uiScenario = computed(() => resolveShipmentUiScenario(route.query.uiState));
 const appliedQuery = ref<ShipmentOrderQuery>(cloneQuery(defaultQuery()));
@@ -217,9 +249,8 @@ const batchAssignForm = reactive({ operator: CURRENT_OPERATOR });
 const batchAssignError = ref('');
 const pendingRowIds = ref<string[]>([]);
 const tableRef = ref<VxeTableInstance>();
-const columnSettingsVisible = ref(false);
-const visibleColumnFields = ref<ColumnSettingField[]>(loadVisibleColumnFields());
-const columnSettingDraft = ref<ColumnSettingField[]>([...visibleColumnFields.value]);
+const visibleColumnFields = ref<ColumnSettingField[]>(initialColumnPreferences.visibleFields);
+const orderedColumnFields = ref<ColumnSettingField[]>(initialColumnPreferences.orderedFields);
 const selectedRows = ref<ShipmentWorkbenchRow[]>([]);
 const allRows = ref<ShipmentWorkbenchRow[]>(createWorkbenchRows());
 const statusModalVisible = ref(false);
@@ -260,18 +291,14 @@ const matchText = (value: string, keyword: string) =>
   !keyword.trim() || value.toLowerCase().includes(keyword.trim().toLowerCase());
 
 const matchKeyword = (row: ShipmentWorkbenchRow, q: ShipmentOrderQuery) => {
-  if (!q.keyword.trim()) return true;
-  const keyword = q.keyword.trim();
+  if (!q.keyword.length) return true;
+  const documentValue = q.keywordType === 'blNo'
+    ? row.blNo
+    : q.keywordType === 'bookingNo'
+      ? row.bookingNo
+      : row.orderNo;
 
-  switch (q.keywordType) {
-    case 'blNo':
-      return matchText(row.blNo, keyword);
-    case 'bookingNo':
-      return matchText(row.bookingNo, keyword);
-    case 'orderNo':
-    default:
-      return [row.orderNo, row.blNo, row.bookingNo].some((value) => matchText(value, keyword));
-  }
+  return q.keyword.some((keyword) => matchText(documentValue, keyword));
 };
 
 const matchRange = (value: string, range: string[], dateOnly = false) => {
@@ -375,7 +402,7 @@ const selectedCount = computed(() => selectedRows.value.length);
 const hasActiveFilter = computed(() => {
   const q = appliedQuery.value;
   return Boolean(
-    q.keyword.trim()
+    q.keyword.length
     || q.customerName.trim()
     || q.pol.trim()
     || q.pod.trim()
@@ -713,17 +740,32 @@ const onPageSizeChange = (nextSize: number) => {
   clearSelection();
 };
 
-const openColumnSettings = () => {
-  columnSettingDraft.value = [...visibleColumnFields.value];
-  columnSettingsVisible.value = true;
+const syncTableColumnPreferences = async (visibleFields: ColumnSettingField[], orderedFields: ColumnSettingField[]) => {
+  const table = tableRef.value;
+  if (!table) return false;
+
+  const tableColumns = table.getTableColumn().fullColumn;
+  const structuralLeft = tableColumns.filter((column) => !column.field && column.fixed === 'left');
+  const structuralRight = tableColumns.filter((column) => !column.field && column.fixed === 'right');
+  const structuralCenter = tableColumns.filter((column) => !column.field && !column.fixed);
+  const orderedBusinessColumns = orderedFields
+    .map((field) => table.getColumnByField(field))
+    .filter((column): column is NonNullable<typeof column> => Boolean(column));
+  await table.reloadColumn([...structuralLeft, ...orderedBusinessColumns, ...structuralCenter, ...structuralRight]);
+  await Promise.all(COLUMN_SETTING_OPTIONS.map((option) => (
+    visibleFields.includes(option.field)
+      ? table.showColumn(option.field)
+      : table.hideColumn(option.field)
+  )));
+  await table.refreshColumn();
+  return true;
 };
 
-const resetColumnSettingDraft = () => {
-  columnSettingDraft.value = [...DEFAULT_VISIBLE_COLUMN_FIELDS];
-};
-
-const applyColumnSettings = async () => {
-  const nextFields = Array.from(new Set([...REQUIRED_COLUMN_FIELDS, ...columnSettingDraft.value]));
+const applyColumnSettings = async ({ visibleFields, orderedFields }: { visibleFields: string[]; orderedFields: string[] }) => {
+  const availableFields = new Set(COLUMN_SETTING_OPTIONS.map((option) => option.field));
+  const requestedFields = visibleFields.filter((field): field is ColumnSettingField => availableFields.has(field as ColumnSettingField));
+  const nextFields = Array.from(new Set([...REQUIRED_COLUMN_FIELDS, ...requestedFields]));
+  const nextOrder = normalizeColumnOrder(orderedFields);
   if (nextFields.length < 8) {
     Message.warning(t('shipment.messages.minColumns'));
     return false;
@@ -734,17 +776,18 @@ const applyColumnSettings = async () => {
   }
 
   visibleColumnFields.value = nextFields;
-  window.localStorage.setItem(COLUMN_SETTING_STORAGE_KEY, JSON.stringify(nextFields));
+  orderedColumnFields.value = nextOrder;
+  window.localStorage.setItem(COLUMN_SETTING_STORAGE_KEY, JSON.stringify({ visibleFields: nextFields, orderedFields: nextOrder }));
   await nextTick();
-  await Promise.all(COLUMN_SETTING_OPTIONS.map((option) => (
-    nextFields.includes(option.field)
-      ? tableRef.value?.showColumn(option.field)
-      : tableRef.value?.hideColumn(option.field)
-  )));
-  await tableRef.value.refreshColumn();
+  await syncTableColumnPreferences(nextFields, nextOrder);
   Message.success(t('shipment.messages.columnsApplied'));
   return true;
 };
+
+onMounted(async () => {
+  await nextTick();
+  await syncTableColumnPreferences(visibleColumnFields.value, orderedColumnFields.value);
+});
 
 const handleCreateOrder = async () => {
   if (creating.value) return;
@@ -967,26 +1010,22 @@ watch(uiScenario, () => {
     <template #query>
           <a-form :model="query" layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
             <QueryFieldGrid @track-count-change="primaryGridTrackCount = $event">
-              <QueryFieldCol role="composite">
+              <QueryFieldCol role="batch">
                 <a-form-item :label="t('shipment.fields.keyword')">
-                  <a-input-group>
-                    <a-select
-                      v-model="query.keywordType"
-                      size="small"
-                      :style="{ width: '104px' }"
-                    >
-                      <a-option v-for="option in KEYWORD_OPTIONS" :key="option.value" :value="option.value">
-                        {{ t(`shipment.keywordTypes.${option.key}`) }}
-                      </a-option>
-                    </a-select>
-                    <a-input
-                      v-model="query.keyword"
-                      size="small"
-                      allow-clear
-                      :placeholder="t('shipment.placeholders.keyword')"
-                      @press-enter="handleSearch"
-                    />
-                  </a-input-group>
+                  <BatchValueQuery v-model="query.keyword" :label="selectedKeywordLabel" @submit="handleSearch">
+                    <template #prefix>
+                      <a-select
+                        v-model="query.keywordType"
+                        size="small"
+                        :aria-label="t('shipment.fields.keyword')"
+                        :style="{ width: '116px' }"
+                      >
+                        <a-option v-for="option in KEYWORD_OPTIONS" :key="option.value" :value="option.value">
+                          {{ t(`shipment.keywordTypes.${option.key}`) }}
+                        </a-option>
+                      </a-select>
+                    </template>
+                  </BatchValueQuery>
                 </a-form-item>
               </QueryFieldCol>
               <QueryFieldCol role="compact">
@@ -1111,11 +1150,14 @@ watch(uiScenario, () => {
                   <template #icon><icon-refresh /></template>
                 </a-button>
               </a-tooltip>
-              <a-tooltip :content="t('shipment.actions.columns')">
-                <a-button size="small" type="text" class="table-cap-tool" :title="t('shipment.actions.columns')" :aria-label="t('shipment.actions.columns')" @click="openColumnSettings">
-                  <template #icon><icon-settings /></template>
-                </a-button>
-              </a-tooltip>
+              <WorkbenchColumnSettings
+                :model-value="visibleColumnFields"
+                :order-value="orderedColumnFields"
+                :default-value="DEFAULT_VISIBLE_COLUMN_FIELDS"
+                :options="localizedColumnSettingOptions"
+                :minimum="8"
+                :on-before-apply="applyColumnSettings"
+              />
             </template>
           </WorkbenchTableToolbar>
     </template>
@@ -1221,9 +1263,10 @@ watch(uiScenario, () => {
                     @click="openStatusModal(row)"
                   >{{ t('shipment.actions.updateStatus') }}</a-button>
                   <a-button
+                    v-else
                     size="mini"
                     type="text"
-                    class="row-action-btn row-action-btn--secondary"
+                    class="row-action-btn"
                     :disabled="isRowPending(row)"
                     @click="handleAssignOperator(row)"
                   >{{ t('shipment.actions.assignMe') }}</a-button>
@@ -1241,6 +1284,7 @@ watch(uiScenario, () => {
                       </a-button>
                     </a-tooltip>
                     <template #content>
+                      <a-doption v-if="canTransitionOrder(row)" @click="handleAssignOperator(row)">{{ t('shipment.actions.assignMe') }}</a-doption>
                       <a-doption @click="handleGenerateRowFee(row)">{{ t('shipment.actions.generateFee') }}</a-doption>
                       <a-doption @click="handleRowNotify(row)">{{ t('shipment.actions.notify') }}</a-doption>
                       <a-divider :margin="4" />
@@ -1500,38 +1544,6 @@ watch(uiScenario, () => {
     </a-drawer>
 
     <a-modal
-      v-model:visible="columnSettingsVisible"
-      :title="t('shipment.settings.title')"
-      class="column-settings-modal"
-      :width="560"
-      :mask-closable="false"
-      :ok-text="t('shipment.settings.apply')"
-      :ok-button-props="{ size: 'small' }"
-      :cancel-button-props="{ size: 'small' }"
-      :on-before-ok="applyColumnSettings"
-    >
-      <div class="column-settings-summary">
-        <span>{{ t('shipment.settings.selected', { count: columnSettingDraft.length }) }}</span>
-        <a-button size="small" type="text" @click="resetColumnSettingDraft">{{ t('shipment.settings.restore') }}</a-button>
-      </div>
-      <a-checkbox-group v-model="columnSettingDraft" class="column-settings-groups">
-        <section v-for="group in COLUMN_SETTING_GROUPS" :key="group.label" class="column-settings-group">
-          <div class="column-settings-group__title">{{ getColumnGroupLabel(group.label) }}</div>
-          <div class="column-settings-grid">
-            <a-checkbox
-              v-for="option in group.options"
-              :key="option.field"
-              :value="option.field"
-              :disabled="option.required"
-            >
-              {{ t(`shipment.columns.${option.field}`) }}
-            </a-checkbox>
-          </div>
-        </section>
-      </a-checkbox-group>
-    </a-modal>
-
-    <a-modal
       v-model:visible="batchAssignVisible"
       :title="t('shipment.modal.batchAssignTitle')"
       :width="480"
@@ -1668,54 +1680,6 @@ watch(uiScenario, () => {
 }
 
 .workflow-filter-bar__scope :deep(.arco-radio-group-button) {
-  white-space: nowrap;
-}
-
-.column-settings-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 32px;
-  padding-bottom: 8px;
-  color: var(--color-text-3);
-  font-size: var(--dense-font-aux);
-  border-bottom: 1px solid var(--color-border-1);
-}
-
-.column-settings-groups {
-  display: block;
-}
-
-.column-settings-group {
-  padding: 12px 0;
-}
-
-.column-settings-group + .column-settings-group {
-  border-top: 1px solid var(--color-border-1);
-}
-
-.column-settings-group__title {
-  margin-bottom: 8px;
-  color: var(--color-text-1);
-  font-size: var(--dense-font-nav);
-  font-weight: var(--dense-weight-title);
-  line-height: 18px;
-}
-
-.column-settings-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px 12px;
-}
-
-.column-settings-grid :deep(.arco-checkbox) {
-  min-width: 0;
-  margin-right: 0;
-}
-
-.column-settings-grid :deep(.arco-checkbox-label) {
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 

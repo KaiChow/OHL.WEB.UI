@@ -322,7 +322,10 @@ const routedViewFiles = new Set();
 for (const routerFile of routerFiles) {
   const source = readFileSync(routerFile, 'utf8');
   for (const match of source.matchAll(/component\s*:\s*\(\)\s*=>\s*import\((['"])([^'"]+\.vue)\1\)/g)) {
-    const routeView = resolve(dirname(routerFile), match[2]);
+    const importPath = match[2];
+    const routeView = importPath.startsWith('@/')
+      ? resolve(ROOT, 'src', importPath.slice(2))
+      : resolve(dirname(routerFile), importPath);
     if (toRelativePath(routeView).startsWith('src/views/')) routedViewFiles.add(routeView);
   }
 }
@@ -971,7 +974,7 @@ for (const specFile of pageSpecFiles) {
 
   const table = getObjectLiteralProperty(spec, 'table');
   const tableKind = getStringProperty(table, 'kind');
-  if (routeView) {
+  if (list && routeView) {
     const routeSource = readFileSync(routeView, 'utf8');
     const sequenceColumn = /<vxe-column(?=[^>]*\btype=["']seq["'])(?=[^>]*(?:\btitle=["']序号["']|:title=["'][^>]*common\.sequence))(?=[^>]*\bwidth=["']52["'])(?=[^>]*\balign=["']center["'])[^>]*>/.test(routeSource);
     if (!sequenceColumn) {
