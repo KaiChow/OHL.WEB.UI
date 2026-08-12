@@ -236,6 +236,8 @@ onBeforeUnmount(destroySortables);
                 :aria-label="t('shipment.querySettings.drag', { field: option.label })"
                 @keydown.alt.left.prevent="moveWithin(option.field, 'pageFields', -1)"
                 @keydown.alt.right.prevent="moveWithin(option.field, 'pageFields', 1)"
+                @keydown.alt.up.prevent="moveWithin(option.field, 'pageFields', -1)"
+                @keydown.alt.down.prevent="moveWithin(option.field, 'pageFields', 1)"
               >
                 <template #icon><icon-drag-dot-vertical /></template>
               </a-button>
@@ -297,6 +299,8 @@ onBeforeUnmount(destroySortables);
                 :aria-label="t('shipment.querySettings.drag', { field: option.label })"
                 @keydown.alt.up.prevent="moveWithin(option.field, 'drawerFields', -1)"
                 @keydown.alt.down.prevent="moveWithin(option.field, 'drawerFields', 1)"
+                @keydown.alt.left.prevent="moveWithin(option.field, 'drawerFields', -1)"
+                @keydown.alt.right.prevent="moveWithin(option.field, 'drawerFields', 1)"
               >
                 <template #icon><icon-drag-dot-vertical /></template>
               </a-button>

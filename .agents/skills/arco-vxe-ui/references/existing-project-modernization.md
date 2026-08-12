@@ -122,7 +122,7 @@ No real-route before/after evidence means the modernization result is unverified
 
 ## Architecture Boundary Contract
 
-For a large existing Vue repository, modernization must preserve business behavior while making ownership explicit. Engineering layers (data, state, router, testing, tooling) are owned by `project-architecture.md`; the typed contract is `src/design-system/systemArchitecture.ts`, checked by `scripts/check-spec.js`.
+For a large existing Vue repository, modernization must preserve business behavior while making ownership explicit. Engineering layers (data, state, router, testing, tooling) stay outside this skill's scope; the typed contract is `src/design-system/systemArchitecture.ts`, checked by `scripts/check-spec.js`.
 
 For the OHL.Web baseline, keep these ownership boundaries:
 | Boundary | Owner | Must not absorb |

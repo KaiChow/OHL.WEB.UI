@@ -122,19 +122,19 @@ No real-route before/after evidence means the modernization result is unverified
 
 ## Architecture Boundary Contract
 
-For a large existing Vue repository, modernization must preserve business behavior while making ownership explicit. The repository architecture contract is recorded in `src/design-system/systemArchitecture.ts` and is checked by `scripts/check-spec.js`.
+For a large existing Vue repository, modernization must preserve business behavior while making ownership explicit. Engineering layers (data, state, router, testing, tooling) stay outside this skill's scope; the typed contract is `src/design-system/systemArchitecture.ts`, checked by `scripts/check-spec.js`.
 
 For the OHL.Web baseline, keep these ownership boundaries:
 | Boundary | Owner | Must not absorb |
 | --- | --- | --- |
 | `src/views` | Route composition, page-local state, pageSpec, feature-contract wiring | Shared UI primitives, scattered API wrappers, global theme rules |
 | `src/components` | Typed reusable UI structure and interaction states | Business labels, hidden permissions, default requests |
-| `src/api` | Endpoint functions, DTO mapping, transport normalization | Rendering, route navigation, page-local state |
-| `src/store` / `src/composables` | Cross-route state or reusable behavior | Temporary component drafts and unbounded global state |
-| `src/locale` | Global and domain copy | Hard-coded user-facing product text |
+| `src/api` (target) | Endpoint functions, DTO mapping, transport normalization | Rendering, route navigation, page-local state |
+| `src/store` / `src/composables` (target) | Cross-route state or reusable behavior | Temporary component drafts and unbounded global state |
+| `src/i18n` | Global and domain copy | Hard-coded user-facing product text |
 | `src/design-system` / `src/styles` | Semantic contracts, tokens, dimensions, VXE theme | Single-route business fields and page-private skins |
 
-The allowed dependency direction is `router -> views -> shared components/composables`, `views -> api/store/locale`, `components -> design-system/styles/Arco/VXE public APIs`, and `feature contracts -> action visibility/enablement/request/result/failure/refresh`.
+The allowed dependency direction is `router -> views -> shared components/composables`, `views -> api/store/i18n`, `components -> design-system/styles/Arco/VXE public APIs`, and `feature contracts -> action visibility/enablement/request/result/failure/refresh`.
 Pages may compose these layers, but they must not cross-wire their internal responsibilities. Cross-feature imports use the configured `@/` alias; relative imports are limited to adjacent files in one feature directory.
 ## Progressive Migration Contract
 Do not move or rewrite the OHL.Web repository in one operation. Use the following migration records in order:

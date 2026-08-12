@@ -243,7 +243,7 @@ Rules:
 - Do not override `.arco-modal-*`, `.arco-select-*`, dropdown, tooltip, or popconfirm internals globally.
 - F6 10px is for units, sequence text, and compact counters only — not status pills, buttons, or dropdown options.
 
-Arco `size` prop: see `component-size.md`. Business UI uses `size="small"` only.
+Arco `size` prop: see `form-field.md` Size Contract. Business UI uses `size="small"` only.
 
 ## Implementation Checklist
 

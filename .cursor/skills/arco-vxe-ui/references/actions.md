@@ -8,7 +8,7 @@ Arco `a-button` has **5 types** and **4 statuses**. Status can combine with any 
 <a-button type="primary" status="danger">...</a-button>
 ```
 
-All operational pages inherit `size="small"` from the application ConfigProvider unless a documented hero/empty-state exception exists. Full mapping: `references/component-size.md`.
+All operational pages inherit `size="small"` from the application ConfigProvider unless a documented hero/empty-state exception exists. Full mapping: `references/form-field.md` Size Contract.
 
 **Do not override form controls to `size="medium"` or `size="large"`** in `src/views`; table-row controls remain the explicit `size="mini"` exception.
 

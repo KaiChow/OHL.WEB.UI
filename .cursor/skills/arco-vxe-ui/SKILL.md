@@ -43,7 +43,7 @@ The final back-office UI/UX standard is routed through these existing authoritie
 | Page layout and page types | `domain-routing.md`, the selected page authority, `module-patterns.md` |
 | System architecture and modernization | `existing-project-modernization.md`, `src/design-system/systemArchitecture.ts`, `feature-delivery-contract.md` |
 | Query, table, form, and button | `filter-layout.md`, `table.md`, form authorities, `actions.md` |
-| Shared components | `arco-first.md`, `component-size.md`, `icons.md`, overlay/upload authorities |
+| Shared components | `arco-first.md`, `form-field.md`, `icons.md`, overlay/upload authorities |
 | State and exception feedback | `page-spec-contract.md`, `feedback.md`, `feature-delivery-contract.md` |
 | Permission | `permissions.md` plus the applicable feature contract |
 | Internationalization | `domain-language.md`, `typography.md`, `responsive.md` |

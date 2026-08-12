@@ -59,7 +59,7 @@ export function validateUiSkill() {
     [references.get('domain-language.md') || '', '## Internationalization Contract', 'domain-language.md: missing internationalization contract'],
     [references.get('product-grade-evaluation.md') || '', '## Six Blocking Gates', 'product-grade-evaluation.md: missing commercial release gates'],
     [references.get('product-grade-evaluation.md') || '', '200% zoom', 'product-grade-evaluation.md: missing accessible rendered gate'],
-    [references.get('component-size.md') || '', '24×24px minimum target', 'component-size.md: missing row-action target authority'],
+    [references.get('form-field.md') || '', '24×24px minimum target', 'form-field.md: missing row-action target authority'],
     [references.get('typography.md') || '', '| | Status pill | F5 Aux | 11px', 'typography.md: missing readable status-pill authority'],
     [skill, 'Global CSS must not target `.arco-*`, `.vxe-*`, framework data attributes, or declare `--vxe-*` variables.', 'SKILL.md: missing framework-style ownership boundary'],
     [skill, 'business efficiency, information clarity, operational safety, system consistency, visual quality, then decoration', 'SKILL.md: missing product decision priority'],

@@ -71,6 +71,7 @@ withDefaults(defineProps<{
 }
 
 .standard-list-frame__query {
+  container-type: inline-size;
   padding: 10px 12px 8px;
 }
 
@@ -85,6 +86,22 @@ withDefaults(defineProps<{
   gap: var(--dense-gap-inline);
   padding-bottom: 1px;
   white-space: nowrap;
+}
+
+@container (max-width: 760px) {
+  .standard-list-frame__query :deep(.query-actions) {
+    gap: 2px;
+  }
+
+  .standard-list-frame__query :deep(.query-actions .arco-btn) {
+    width: 28px;
+    min-width: 28px;
+    padding: 0;
+  }
+
+  .standard-list-frame__query :deep(.query-actions__label) {
+    display: none;
+  }
 }
 
 .standard-list-frame__workflow {

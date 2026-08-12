@@ -321,12 +321,12 @@ const localizedQueryFieldOptions = computed(() => SHIPMENT_QUERY_FIELDS.map((def
 const pageQueryFieldDefinitions = computed(() => queryFieldPlacement.value.pageFields
   .map((field) => queryFieldDefinitionByKey.get(field as ShipmentQueryField))
   .filter((definition): definition is (typeof SHIPMENT_QUERY_FIELDS)[number] => Boolean(definition)));
-const allQueryFields = computed(() => [
-  ...SHIPMENT_QUERY_FIELDS.map((definition) => definition.field),
-] as ShipmentQueryField[]);
+const drawerQueryFields = computed(() => queryFieldPlacement.value.drawerFields
+  .map((field) => queryFieldDefinitionByKey.get(field as ShipmentQueryField)?.field)
+  .filter((field): field is ShipmentQueryField => Boolean(field)));
 const drawerFieldGroups = computed(() => QUERY_FIELD_GROUPS.map((group) => ({
   group,
-  fields: allQueryFields.value
+  fields: drawerQueryFields.value
     .map((field) => queryFieldDefinitionByKey.get(field))
     .filter((definition): definition is (typeof SHIPMENT_QUERY_FIELDS)[number] => definition?.group === group),
 })).filter((item) => item.fields.length));
@@ -489,11 +489,11 @@ const hasActiveFilter = computed(() => {
 
 const tableTotal = computed(() => ['empty', 'permission'].includes(uiScenario.value) || tableError.value ? 0 : filteredRows.value.length);
 
-const advancedConditionSnapshot = (source: ShipmentOrderQuery) => queryFieldSnapshot(source, allQueryFields.value);
+const advancedConditionSnapshot = (source: ShipmentOrderQuery) => queryFieldSnapshot(source, drawerQueryFields.value);
 
 const advancedDraftGroupCounts = computed(() => Object.fromEntries(QUERY_FIELD_GROUPS.map((group) => [
   group,
-  allQueryFields.value.filter((field) => (
+  drawerQueryFields.value.filter((field) => (
     queryFieldDefinitionByKey.get(field)?.group === group && isQueryFieldActive(advancedQuery, field)
   )).length,
 ])) as Record<ShipmentQueryFieldGroup, number>);
@@ -505,7 +505,7 @@ const advancedDraftDirty = computed(() => (
   !== JSON.stringify(advancedConditionSnapshot(query))
 ));
 
-const advancedActiveCount = computed(() => allQueryFields.value
+const advancedActiveCount = computed(() => drawerQueryFields.value
   .filter((field) => isQueryFieldActive(query, field)).length);
 
 const getNextActionLabel = (row: ShipmentWorkbenchRow) => {
@@ -687,12 +687,12 @@ const cancelAdvancedFilters = () => {
 };
 
 const clearAdvancedFilters = () => {
-  clearQueryFields(advancedQuery, allQueryFields.value, defaultQuery());
+  clearQueryFields(advancedQuery, drawerQueryFields.value, defaultQuery());
 };
 
 const clearAdvancedGroup = (group: ShipmentQueryFieldGroup) => clearQueryFields(
   advancedQuery,
-  allQueryFields.value.filter((field) => queryFieldDefinitionByKey.get(field)?.group === group),
+  drawerQueryFields.value.filter((field) => queryFieldDefinitionByKey.get(field)?.group === group),
   defaultQuery(),
 );
 
@@ -1081,16 +1081,23 @@ watch(uiScenario, () => {
               </QueryFieldCol>
               <QueryFieldCol role="actions">
                 <div class="query-actions">
-                  <a-button size="small" type="primary" :loading="querying" @click="handleSearch">
-                    <template #icon><icon-search /></template>
-                    {{ t('common.search') }}
-                  </a-button>
-                  <a-button size="small" type="text" :disabled="querying" @click="handleReset">{{ t('common.reset') }}</a-button>
+                  <a-tooltip :content="t('common.search')">
+                    <a-button size="small" type="primary" :loading="querying" :aria-label="t('common.search')" @click="handleSearch">
+                      <template #icon><icon-search /></template>
+                      <span class="query-actions__label">{{ t('common.search') }}</span>
+                    </a-button>
+                  </a-tooltip>
+                  <a-tooltip :content="t('common.reset')">
+                    <a-button size="small" type="text" :disabled="querying" :aria-label="t('common.reset')" @click="handleReset">
+                      <template #icon><icon-refresh /></template>
+                      <span class="query-actions__label">{{ t('common.reset') }}</span>
+                    </a-button>
+                  </a-tooltip>
                   <a-badge :count="advancedActiveCount" :offset="[-4, 4]">
                     <a-tooltip :content="t('shipment.actions.advanced')">
                       <a-button size="small" type="text" :title="t('shipment.actions.advanced')" :aria-label="t('shipment.actions.advanced')" @click="openAdvancedFilters">
                         <template #icon><icon-filter /></template>
-                        {{ t('common.filter') }}
+                        <span class="query-actions__label">{{ t('common.filter') }}</span>
                       </a-button>
                     </a-tooltip>
                   </a-badge>

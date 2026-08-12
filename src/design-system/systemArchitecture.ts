@@ -55,7 +55,7 @@ export function defineSystemArchitectureSpec<const T extends SystemArchitectureS
  * Architecture baseline for the existing OHL.Web repository.
  * It records ownership and migration boundaries; it does not replace business APIs or route contracts.
  * A directory declared `current` must exist in the repository; `target` entries document the approved
- * direction and must never appear in import paths or verification claims (see project-architecture.md).
+ * direction and must never appear in import paths or verification claims.
  */
 export const OHL_WEB_ARCHITECTURE_SPEC = defineSystemArchitectureSpec({
   id: 'ohl-web-modernization',
