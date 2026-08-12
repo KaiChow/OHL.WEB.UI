@@ -45,4 +45,11 @@ export const appMenus: AppMenuItem[] = [
       { key: 'notification-list', title: '通知列表', titleKey: 'menu.notificationList', routeName: 'NotificationList' },
     ],
   },
+  {
+    key: 'ui-acceptance',
+    title: 'UI 验收', titleKey: 'menu.uiAcceptance',
+    children: [
+      { key: 'ui-acceptance-export-order-list', title: '海运出口订单列表', titleKey: 'menu.exportOrderListAcceptance', routeName: 'UiAcceptanceExportOrderList' },
+    ],
+  },
 ];
