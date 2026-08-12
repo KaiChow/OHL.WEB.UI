@@ -234,8 +234,8 @@ These are starting floors; adjust per module but keep the `min-width` vs `width`
 
 ## Cell Patterns
 
-- Main links: `link-text link-text--strong mono`; the primary object identifier should be stronger than secondary links.
-- Normal links: `link-text mono`.
+- Main links: `link-text link-text--strong`; the primary object identifier should be stronger than secondary links.
+- Normal links: `link-text` with `.tabular` only when numeric alignment is required.
 - Status: `.s-pill[data-s]`.
 - Status pills do not use a leading dot by default. Use `.s-pill--dot` only for timeline/legend-like contexts, not normal table cells.
 - Risk attributes may use an icon inside `.s-pill` when the icon has an unambiguous meaning, but must not combine icon and leading dot.
@@ -400,7 +400,7 @@ Applies to **main-list operation columns** unless noted. Menu order / danger sty
 
 Decision rules:
 
-- Decide direct exposure from proven frequency, reversibility, recognition cost, permission/state legality, and available table space; never from a button-count formula.
+- Decide legal actions from proven frequency, reversibility, recognition cost, permission/state legality, and available table space. Then apply the product visibility contract: 1–3 legal actions are direct; 4+ renders the first two eligible direct actions plus one More entry.
 - Mutually exclusive actions such as 草稿→编辑 / 已发布→查看 occupy the same semantic position.
 - If the primary identifier already opens detail, do not repeat a low-value 查看 action in the operation column.
 - A low-frequency action does not become direct merely because room remains. When direct actions wrap, crowd each other, or make the operation column compete with decision data, move the lower-priority action to `···`.
@@ -418,9 +418,8 @@ Alignment and sizing rules:
 
 ### Implementation contract
 
-- Direct actions: `a-button size="mini" type="text" class="row-action-btn"` carrying a business verb — text needs no tooltip. Add the shared `row-action-btn--secondary` semantic class to supporting actions; do not invent page-local colors.
-- Wrap in an Arco `a-space` carrying the semantic `row-actions` hook. It owns horizontal rhythm only; the VXE operation cell owns start alignment. Do not add border/background/capsule chrome or page-local centering CSS.
-- More trigger: icon-only `row-action-btn row-action-btn--more` (`icon-more` + `aria-label="更多操作"` + Tooltip) with the native Arco Dropdown popup; it is the only icon-only button allowed in the column.
+- Use the shared `WorkbenchRowActions` component. It renders Arco `a-button size="mini" type="text"` icon-only direct actions with Tooltip and business `aria-label`, keeps a stable `row-actions` rhythm, and partitions 1–3 vs 4+ actions consistently.
+- More is the third visible entry whenever overflow exists; its native Arco Dropdown contains text-first options. Dangerous or explicitly overflow-only actions never consume a direct slot.
 - No permanent borders on buttons.
 - Danger in `···`: a compact Arco Divider then `a-doption.danger-opt`; set Divider spacing through its public `margin` prop so the options remain a continuous menu instead of inheriting page-section spacing. Its click stores the target and opens a separate business Modal or `Modal.confirm` after the dropdown closes. Never nest `a-popconfirm` in Dropdown and never expose flat `status="danger"` on list rows.
 - Keep VXE native focus/selection behavior; do not suppress it with global or page-local internal selectors.
@@ -466,7 +465,7 @@ Editable detail subtables may expose a delete icon directly (`status="danger"` +
 - Loose buttons outside `row-actions`.
 - Centering a variable-width action group so the first visible action shifts horizontally between rows.
 - Styling every direct action and More trigger as equally blue, which erases the next-action hierarchy and creates a noisy command strip.
-- Icon-only action buttons in operation columns — use text verbs; `···` is the only icon trigger.
+- Reimplementing row-action partitioning inside a page; use `WorkbenchRowActions` so 4 actions cannot accidentally become four visible buttons.
 
 ## Detail And Nested Tables
 
@@ -512,7 +511,7 @@ Rules:
 - Do not mix permanent input controls with read-only rows in the same visual state.
 - Do not use hover alone to reveal editability for required business work; hover may reveal edit icon only.
 - A row can be in exactly one of these states: `view`, `editing`, `new`, `saving`, `error`, `locked`.
-- Use display formatting first: code mono, amount right aligned, date compact, status as `.s-pill`, empty as `—`.
+- Use display formatting first: identifiers inherit the global stack, amount right aligned, date compact, status as `.s-pill`, empty as `—`.
 - Editable cells must keep the same column width and row height as display cells as much as possible; entering edit mode must not shift the table.
 
 ### Large Data Editing

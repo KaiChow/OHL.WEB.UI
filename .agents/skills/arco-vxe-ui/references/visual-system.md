@@ -186,7 +186,7 @@ Table borders, vertical grid lines, zebra stripes, density, and skin ownership a
 - Primary identifiers and business codes use `primary-6/7` links and medium/title weight.
 - Core business values such as primary identity, party/context, location, quantity, amount, and due date use `color-text-1`; dates and passive metadata may use `color-text-2`; empty values use `color-text-4`.
 - Status pills must be readable at scan distance; use semantic token level 7 for text when level 6 is too weak.
-- Row actions should be visible as actions but not compete with data: text/icon buttons with primary hover, no always-heavy button frames.
+- Row actions should be visible as actions but not compete with data: shared icon-only buttons with Tooltip/aria labels, stable three-entry partitioning, and no always-heavy button frames.
 - Table header stays calm and neutral. Primary belongs to sortable/focused/selected states, links, and row hover accents, not normal header fill.
 - Do not make every code/link the same strength when one identifier is the primary object.
 

@@ -6,8 +6,10 @@ import { Message } from '@arco-design/web-vue';
 import type { FormInstance } from '@arco-design/web-vue';
 import {
   IconCopy,
-  IconDown,
-  IconMore,
+  IconDelete,
+  IconEdit,
+  IconExport,
+  IconFilter,
   IconPlus,
   IconRefresh,
   IconSearch,
@@ -18,7 +20,10 @@ import QueryFieldGrid from '@/components/workbench/QueryFieldGrid.vue';
 import QueryFieldCol from '@/components/workbench/QueryFieldCol.vue';
 import WorkbenchTableToolbar from '@/components/workbench/WorkbenchTableToolbar.vue';
 import WorkbenchEmptyState from '@/components/workbench/WorkbenchEmptyState.vue';
+import WorkbenchRowActions from '@/components/workbench/WorkbenchRowActions.vue';
 import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle } from '@/design-system/formLayout';
+import { ROW_ACTION_COLUMN_WIDTH } from '@/design-system/rowActions';
+import type { WorkbenchRowAction } from '@/design-system/rowActions';
 import { stableTableRowConfig } from '@/design-system/tableConfig';
 import { buildDateTimeStamp, buildTimestampSuffix, downloadCsvFile } from '@/utils/mock-actions';
 import { createTemplateMockRows } from './mockData';
@@ -59,7 +64,9 @@ const blankDraft = (templateType: TemplateType): TemplateDraft => ({
 const rows = ref(createTemplateMockRows());
 const query = reactive(blankQuery());
 const appliedQuery = ref(blankQuery());
-const expanded = ref(false);
+const advancedFilterVisible = ref(false);
+const advancedApplying = ref(false);
+const advancedDraft = reactive(blankQuery());
 const querying = ref(false);
 const activeType = ref<TemplateType>('master');
 const page = reactive({ current: 1, size: 50 });
@@ -110,7 +117,7 @@ const uiScenario = computed(() => route.query.scenario === 'permission' ? 'permi
 const renderedRows = computed(() => uiScenario.value === 'normal' ? pagedRows.value : []);
 
 const hasActiveQuery = computed(() => Object.entries(appliedQuery.value).some(([, value]) => Array.isArray(value) ? value.length > 0 : Boolean(value)));
-const advancedActiveCount = computed(() => [query.creator, query.peer, query.createdRange, query.updatedRange]
+const advancedActiveCount = computed(() => Object.values(appliedQuery.value)
   .filter((value) => Array.isArray(value) ? value.length > 0 : Boolean(value)).length);
 
 const isColumnVisible = (field: string) => visibleColumns.value.includes(field);
@@ -133,7 +140,29 @@ const handleReset = () => {
   const empty = blankQuery();
   assignQuery(query, empty);
   appliedQuery.value = empty;
+  advancedFilterVisible.value = false;
   page.current = 1;
+};
+
+const openAdvancedFilters = () => {
+  assignQuery(advancedDraft, query);
+  advancedFilterVisible.value = true;
+};
+
+const clearAdvancedFilters = () => {
+  assignQuery(advancedDraft, blankQuery());
+};
+
+const applyAdvancedFilters = async () => {
+  if (advancedApplying.value) return;
+  advancedApplying.value = true;
+  try {
+    assignQuery(query, advancedDraft);
+    advancedFilterVisible.value = false;
+    await handleSearch();
+  } finally {
+    advancedApplying.value = false;
+  }
 };
 
 const handleRefresh = async () => {
@@ -257,6 +286,13 @@ const openDelete = (row: TemplateRecord) => {
   deleteVisible.value = true;
 };
 
+const getRowActions = (row: TemplateRecord): WorkbenchRowAction[] => [
+  { key: 'edit', label: t('common.edit'), icon: IconEdit, onClick: () => openEdit(row) },
+  { key: 'copy', label: t('templateManagement.actions.copy'), icon: IconCopy, onClick: () => copyTemplate(row) },
+  { key: 'export', label: t('common.export'), icon: IconExport, onClick: () => exportTemplate(row) },
+  { key: 'delete', label: t('templateManagement.actions.delete'), icon: IconDelete, danger: true, onClick: () => openDelete(row) },
+];
+
 const confirmDelete = async () => {
   if (!deleteTarget.value) return false;
   deleting.value = true;
@@ -343,37 +379,92 @@ watch(activeType, () => {
               </a-button>
               <a-button size="small" type="text" @click="handleReset">{{ t('common.reset') }}</a-button>
               <a-badge :count="advancedActiveCount" :offset="[-2, 2]">
-                <a-button size="small" type="text" :aria-expanded="expanded" @click="expanded = !expanded">
-                  {{ expanded ? t('common.collapse') : t('common.expand', { count: 4 }) }}<icon-down class="expand-icon" :class="{ 'expand-icon--open': expanded }" />
+                <a-button size="small" type="text" :aria-label="t('common.moreFilters')" @click="openAdvancedFilters">
+                  <template #icon><icon-filter /></template>{{ t('common.filter') }}
                 </a-button>
               </a-badge>
             </div>
           </QueryFieldCol>
         </QueryFieldGrid>
-
-        <QueryFieldGrid v-if="expanded" class="expanded-query-grid">
-          <QueryFieldCol role="standard">
-            <a-form-item :label="t('templateManagement.fields.creator')">
-              <a-input v-model="query.creator" allow-clear :placeholder="t('templateManagement.placeholders.creator')" @press-enter="handleSearch" />
-            </a-form-item>
-          </QueryFieldCol>
-          <QueryFieldCol role="standard">
-            <a-form-item :label="t('templateManagement.fields.peer')">
-              <a-input v-model="query.peer" allow-clear :placeholder="t('templateManagement.placeholders.peer')" @press-enter="handleSearch" />
-            </a-form-item>
-          </QueryFieldCol>
-          <QueryFieldCol role="range">
-            <a-form-item :label="t('templateManagement.fields.createdRange')">
-              <a-range-picker v-model="query.createdRange" value-format="YYYY-MM-DD" allow-clear />
-            </a-form-item>
-          </QueryFieldCol>
-          <QueryFieldCol role="range">
-            <a-form-item :label="t('templateManagement.fields.updatedRange')">
-              <a-range-picker v-model="query.updatedRange" value-format="YYYY-MM-DD" allow-clear />
-            </a-form-item>
-          </QueryFieldCol>
-        </QueryFieldGrid>
       </a-form>
+
+      <a-drawer
+        v-model:visible="advancedFilterVisible"
+        data-ui-surface="advanced-filter"
+        width="min(var(--dense-drawer-w-filter), calc(100vw - var(--dense-drawer-filter-pad)))"
+        :mask-closable="false"
+        :closable="!advancedApplying"
+      >
+        <template #title>
+          <span>{{ t('common.moreFilters') }}</span>
+          <span class="advanced-filter-title__hint">{{ t('templateManagement.allFields') }}</span>
+        </template>
+        <a-form layout="vertical" size="small" :label-col-style="compactVerticalFormLabelStyle">
+          <a-row :gutter="denseFormGridGutter">
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item :label="t('templateManagement.fields.templateName')" :style="denseFormItemStyle">
+                <a-input v-model="advancedDraft.templateName" allow-clear :placeholder="t('templateManagement.placeholders.templateName')" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item :label="t('templateManagement.fields.pol')" :style="denseFormItemStyle">
+                <a-input v-model="advancedDraft.pol" allow-clear :placeholder="t('templateManagement.placeholders.pol')" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item :label="t('templateManagement.fields.pod')" :style="denseFormItemStyle">
+                <a-input v-model="advancedDraft.pod" allow-clear :placeholder="t('templateManagement.placeholders.pod')" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item :label="t('templateManagement.fields.carrier')" :style="denseFormItemStyle">
+                <a-select v-model="advancedDraft.carrier" allow-clear allow-search :placeholder="t('templateManagement.placeholders.carrier')">
+                  <a-option value="MAERSK">MAERSK</a-option>
+                  <a-option value="COSCO">COSCO</a-option>
+                  <a-option value="CMA CGM">CMA CGM</a-option>
+                  <a-option value="ONE">ONE</a-option>
+                  <a-option value="EVERGREEN">EVERGREEN</a-option>
+                  <a-option value="HAPAG-LLOYD">HAPAG-LLOYD</a-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item :label="t('templateManagement.fields.contractNo')" :style="denseFormItemStyle">
+                <a-input v-model="advancedDraft.contractNo" allow-clear :placeholder="t('templateManagement.placeholders.contractNo')" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item :label="t('templateManagement.fields.creator')" :style="denseFormItemStyle">
+                <a-input v-model="advancedDraft.creator" allow-clear :placeholder="t('templateManagement.placeholders.creator')" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item :label="t('templateManagement.fields.peer')" :style="denseFormItemStyle">
+                <a-input v-model="advancedDraft.peer" allow-clear :placeholder="t('templateManagement.placeholders.peer')" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item :label="t('templateManagement.fields.createdRange')" :style="denseFormItemStyle">
+                <a-range-picker v-model="advancedDraft.createdRange" value-format="YYYY-MM-DD" allow-clear />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" :xs="24" :sm="12">
+              <a-form-item :label="t('templateManagement.fields.updatedRange')" :style="denseFormItemStyle">
+                <a-range-picker v-model="advancedDraft.updatedRange" value-format="YYYY-MM-DD" allow-clear />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
+        <template #footer>
+          <div class="advanced-filter-footer">
+            <a-button size="small" type="text" @click="clearAdvancedFilters">{{ t('common.clear') }}</a-button>
+            <a-space :size="8">
+              <a-button size="small" :disabled="advancedApplying" @click="advancedFilterVisible = false">{{ t('common.cancel') }}</a-button>
+              <a-button size="small" type="primary" :loading="advancedApplying" @click="applyAdvancedFilters">{{ t('common.apply') }}</a-button>
+            </a-space>
+          </div>
+        </template>
+      </a-drawer>
     </template>
 
     <template #toolbar>
@@ -418,13 +509,13 @@ watch(activeType, () => {
           </template>
         </vxe-column>
         <vxe-column v-if="isColumnVisible('carrier')" field="carrier" :title="t('templateManagement.columns.carrier')" min-width="100" />
-        <vxe-column v-if="isColumnVisible('contractNo')" field="contractNo" :title="t('templateManagement.columns.contractNo')" min-width="130" class-name="mono" />
+        <vxe-column v-if="isColumnVisible('contractNo')" field="contractNo" :title="t('templateManagement.columns.contractNo')" min-width="130" class-name="tabular" />
         <vxe-column v-if="isColumnVisible('pol')" field="pol" :title="t('templateManagement.columns.pol')" min-width="112" />
         <vxe-column v-if="isColumnVisible('pod')" field="pod" :title="t('templateManagement.columns.pod')" min-width="120" />
         <vxe-column v-if="isColumnVisible('peer')" field="peer" :title="t('templateManagement.columns.peer')" min-width="96" />
         <vxe-column v-if="isColumnVisible('creator')" field="creator" :title="t('templateManagement.columns.creator')" min-width="88" />
-        <vxe-column v-if="isColumnVisible('createdAt')" field="createdAt" :title="t('templateManagement.columns.createdAt')" min-width="140" class-name="mono" />
-        <vxe-column v-if="isColumnVisible('updatedAt')" field="updatedAt" :title="t('templateManagement.columns.updatedAt')" min-width="140" class-name="mono" />
+        <vxe-column v-if="isColumnVisible('createdAt')" field="createdAt" :title="t('templateManagement.columns.createdAt')" min-width="140" class-name="tabular" />
+        <vxe-column v-if="isColumnVisible('updatedAt')" field="updatedAt" :title="t('templateManagement.columns.updatedAt')" min-width="140" class-name="tabular" />
         <vxe-column v-if="isColumnVisible('viewers')" field="viewers" :title="t('templateManagement.columns.viewers')" min-width="150">
           <template #default="{ row }">{{ row.viewers.join(', ') || '-' }}</template>
         </vxe-column>
@@ -434,22 +525,9 @@ watch(activeType, () => {
         <vxe-column v-if="isColumnVisible('isSwitchBill')" field="isSwitchBill" :title="t('templateManagement.columns.isSwitchBill')" min-width="88" align="center">
           <template #default="{ row }"><span class="s-pill" :data-s="row.isSwitchBill ? 'wait' : 'draft'">{{ row.isSwitchBill ? t('templateManagement.yes') : t('templateManagement.no') }}</span></template>
         </vxe-column>
-        <vxe-column :title="t('common.operations')" width="156" fixed="right" align="left">
+        <vxe-column :title="t('common.operations')" :width="ROW_ACTION_COLUMN_WIDTH" fixed="right" align="left">
           <template #default="{ row }">
-            <a-space class="row-actions" :size="2">
-              <a-button size="mini" type="text" class="row-action-btn" @click="openEdit(row)">{{ t('common.edit') }}</a-button>
-              <a-button size="mini" type="text" class="row-action-btn row-action-btn--secondary" @click="copyTemplate(row)">{{ t('templateManagement.actions.copy') }}</a-button>
-              <a-dropdown trigger="click" position="br">
-                <a-tooltip :content="t('common.moreActions')">
-                  <a-button size="mini" type="text" class="row-action-btn row-action-btn--more" :aria-label="t('common.moreActions')"><icon-more /></a-button>
-                </a-tooltip>
-                <template #content>
-                  <a-doption @click="exportTemplate(row)">{{ t('common.export') }}</a-doption>
-                  <a-divider :margin="4" />
-                  <a-doption class="danger-opt" @click="openDelete(row)">{{ t('templateManagement.actions.delete') }}</a-doption>
-                </template>
-              </a-dropdown>
-            </a-space>
+            <WorkbenchRowActions :actions="getRowActions(row)" :more-label="t('common.moreActions')" />
           </template>
         </vxe-column>
         <template #empty>
@@ -599,19 +677,6 @@ watch(activeType, () => {
   min-height: 28px;
 }
 
-.expanded-query-grid {
-  margin-top: 10px;
-}
-
-.expand-icon {
-  margin-left: 4px;
-  transition: transform 160ms ease;
-}
-
-.expand-icon--open {
-  transform: rotate(180deg);
-}
-
 .identity-link {
   max-width: 100%;
   padding-inline: 0;
@@ -622,24 +687,6 @@ watch(activeType, () => {
   text-overflow: ellipsis;
 }
 
-.row-actions {
-  white-space: nowrap;
-}
-
-.row-action-btn {
-  padding-inline: 5px;
-}
-
-.row-action-btn--secondary {
-  color: var(--color-text-2);
-}
-
-.row-action-btn--more {
-  width: 24px;
-  padding-inline: 0;
-  color: var(--color-text-3);
-}
-
 .column-settings-summary {
   display: flex;
   align-items: center;
@@ -647,6 +694,13 @@ watch(activeType, () => {
   margin-bottom: 12px;
   color: var(--color-text-3);
   font-size: var(--dense-font-aux);
+}
+
+.advanced-filter-title__hint {
+  margin-left: 8px;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  font-weight: 400;
 }
 
 .column-settings-grid {

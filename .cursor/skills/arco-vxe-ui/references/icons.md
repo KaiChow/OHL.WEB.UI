@@ -200,7 +200,7 @@ Rules:
 | Toolbar primary create | icon + text | Arco | `icon-plus` etc. |
 | Toolbar utilities | icon-only + tooltip | Arco | compact utility |
 | Toolbar business workflow | text-only by default | none | text |
-| Row actions | 文字按钮（业务动词）；仅 `···` icon + tooltip | Arco | `more` |
+| Row actions | Arco icon-only + Tooltip；最多 3 个可见入口，4+ 为 2 个直出 + More | Arco | `edit`, `user-add`, `more` |
 | Detail/module title | semantic icon + text | IconPark | left icon |
 | Status pill | text-only | none | no icon by default |
 | Dropdown options | text-only | none | no icons by default |

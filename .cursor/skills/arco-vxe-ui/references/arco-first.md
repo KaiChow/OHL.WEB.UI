@@ -91,7 +91,7 @@ These are **structural slots**, not replacements for Arco controls inside them.
 |-------|---------|
 | Base | `html/body/#app` reset, min-width |
 | Tokens | `:root` density/dimension tokens; `body` theme-dependent aliases because GI variables are body-scoped |
-| Freight semantics | `.s-pill[data-s]`, `.link-text`, `.mono` |
+| Freight semantics | `.s-pill[data-s]`, `.link-text`, `.tabular` when numeric alignment is required |
 | Shared non-framework semantics | Accessibility helpers or business-role utilities that do not target Arco/VXE internals |
 
 Layout archetypes use Arco structure plus small scoped shell CSS. Reused layout behavior moves to shared Vue components.

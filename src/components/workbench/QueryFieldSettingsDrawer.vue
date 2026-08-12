@@ -11,8 +11,10 @@ import {
 } from '@arco-design/web-vue/es/icon';
 import {
   normalizeQueryFieldPlacement,
-  queryFieldTrackUsage,
+  queryFieldRows,
+  queryFieldUnitUsage,
 } from '@/design-system/queryFieldPreferences';
+import { QUERY_GRID_ITEM_SPANS } from '@/design-system/queryLayout';
 import type {
   QueryFieldPlacement,
   QueryFieldPreferenceOption,
@@ -22,7 +24,10 @@ const props = defineProps<{
   options: QueryFieldPreferenceOption[];
   modelValue: QueryFieldPlacement;
   defaultValue: QueryFieldPlacement;
-  capacityTracks: number;
+  capacityUnits: number;
+  minimumUnits: number;
+  actionUnits: 2 | 3;
+  maxRows: 2;
   onBeforeApply: (value: QueryFieldPlacement) => boolean | Promise<boolean>;
 }>();
 
@@ -47,8 +52,9 @@ const matchesSearch = (option: QueryFieldPreferenceOption) => !normalizedSearchK
   || option.label.toLocaleLowerCase().includes(normalizedSearchKeyword.value);
 const visibleDrawerOptions = computed(() => drawerOptions.value.filter(matchesSearch));
 const isSearching = computed(() => Boolean(normalizedSearchKeyword.value));
-const usedTracks = computed(() => queryFieldTrackUsage(draft.value.pageFields, props.options));
-const overCapacity = computed(() => usedTracks.value > props.capacityTracks);
+const usedUnits = computed(() => queryFieldUnitUsage(draft.value.pageFields, props.options));
+const usedRows = computed(() => queryFieldRows(draft.value.pageFields, props.options, props.minimumUnits, props.actionUnits));
+const overCapacity = computed(() => usedUnits.value > props.capacityUnits || usedRows.value > props.maxRows);
 const appliedPlacement = computed(() => normalizeQueryFieldPlacement(
   props.modelValue,
   props.options,
@@ -58,12 +64,12 @@ const hasChanges = computed(() => (
   draft.value.pageFields.join('\u0000') !== appliedPlacement.value.pageFields.join('\u0000')
   || draft.value.drawerFields.join('\u0000') !== appliedPlacement.value.drawerFields.join('\u0000')
 ));
-const capacityPercent = computed(() => Math.min(usedTracks.value / props.capacityTracks, 1));
+const capacityPercent = computed(() => Math.min(usedUnits.value / props.capacityUnits, 1));
 const wideCatalog = computed(() => props.options.length >= 24);
 const drawerWidth = computed(() => wideCatalog.value
   ? 'min(var(--dense-drawer-w-filter-wide), calc(100vw - var(--dense-drawer-filter-pad)))'
   : 'min(var(--dense-drawer-w-standard), calc(100vw - var(--dense-drawer-filter-pad)))');
-const optionTracks = (option: QueryFieldPreferenceOption) => queryFieldTrackUsage([option.field], props.options);
+const optionTracks = (option: QueryFieldPreferenceOption) => QUERY_GRID_ITEM_SPANS[option.width];
 
 const syncDraft = (value = props.modelValue) => {
   draft.value = normalizeQueryFieldPlacement(value, props.options, props.defaultValue);
@@ -173,20 +179,28 @@ onBeforeUnmount(destroySortables);
     :mask-closable="false"
     :closable="!applying"
   >
-    <template #title>{{ t('shipment.querySettings.title') }}</template>
+    <template #title>
+      <div class="query-field-settings__title">
+        <span>{{ t('shipment.querySettings.title') }}</span>
+        <span class="query-field-settings__title-note">{{ t('shipment.querySettings.description') }}</span>
+      </div>
+    </template>
 
     <div class="query-field-settings__workspace">
       <section class="query-field-settings__section query-field-settings__section--page" aria-labelledby="query-page-fields-title">
         <div class="query-field-settings__section-head">
           <div class="query-field-settings__section-title">
-            <h3 id="query-page-fields-title">{{ t('shipment.querySettings.page') }}</h3>
-            <span>{{ t('shipment.querySettings.pageCount', { count: pageOptions.length }) }}</span>
+            <div class="query-field-settings__heading-line">
+              <h3 id="query-page-fields-title">{{ t('shipment.querySettings.page') }}</h3>
+              <span class="query-field-settings__count">{{ t('shipment.querySettings.pageCount', { count: pageOptions.length }) }}</span>
+            </div>
+            <span class="query-field-settings__section-note">{{ t('shipment.querySettings.pageHint') }}</span>
           </div>
-          <div class="query-field-settings__capacity">
+          <div class="query-field-settings__capacity" :class="{ 'query-field-settings__capacity--error': overCapacity }">
             <div class="query-field-settings__capacity-label">
               <span>{{ t('shipment.querySettings.capacityLabel') }}</span>
-              <strong class="tabular">{{ usedTracks }}/{{ capacityTracks }}</strong>
-              <a-tooltip :content="t('shipment.querySettings.capacity', { used: usedTracks, capacity: capacityTracks })">
+              <strong class="tabular">{{ usedUnits }}/{{ capacityUnits }}</strong>
+              <a-tooltip :content="t('shipment.querySettings.capacity', { used: usedUnits, capacity: capacityUnits, rows: usedRows })">
                 <icon-question-circle class="query-field-settings__help" />
               </a-tooltip>
             </div>
@@ -200,18 +214,19 @@ onBeforeUnmount(destroySortables);
         </div>
 
         <a-alert v-if="overCapacity" type="error" class="query-field-settings__error">
-          {{ t('shipment.querySettings.capacityError', { used: usedTracks, capacity: capacityTracks }) }}
+          {{ t('shipment.querySettings.capacityError', { used: usedUnits, capacity: capacityUnits, rows: usedRows }) }}
         </a-alert>
 
         <div ref="pageListRef" class="query-field-settings__page-preview" :class="{ 'query-field-settings__page-preview--error': overCapacity }">
           <div
-            v-for="option in pageOptions"
+            v-for="(option, index) in pageOptions"
             :key="option.field"
             class="query-field-settings__item query-field-settings__page-item"
             :class="{ 'query-field-settings__item--locked': option.orderLocked }"
             :data-query-field="option.field"
             :style="{ gridColumn: `span ${optionTracks(option)}` }"
           >
+            <span class="query-field-settings__index tabular">{{ String(index + 1).padStart(2, '0') }}</span>
             <a-tooltip :content="isSearching ? t('shipment.querySettings.clearSearchToSort') : t('shipment.querySettings.drag', { field: option.label })">
               <a-button
                 class="query-field-settings__drag"
@@ -250,8 +265,11 @@ onBeforeUnmount(destroySortables);
       <section class="query-field-settings__section query-field-settings__section--drawer" aria-labelledby="query-drawer-fields-title">
         <div class="query-field-settings__section-head">
           <div class="query-field-settings__section-title">
-            <h3 id="query-drawer-fields-title">{{ t('shipment.querySettings.drawer') }}</h3>
-            <span>{{ t('shipment.querySettings.drawerCount', { count: drawerOptions.length }) }}</span>
+            <div class="query-field-settings__heading-line">
+              <h3 id="query-drawer-fields-title">{{ t('shipment.querySettings.drawer') }}</h3>
+              <span class="query-field-settings__count">{{ t('shipment.querySettings.drawerCount', { count: drawerOptions.length }) }}</span>
+            </div>
+            <span class="query-field-settings__section-note">{{ t('shipment.querySettings.drawerHint') }}</span>
           </div>
           <a-input-search
             v-model="searchKeyword"
@@ -264,11 +282,12 @@ onBeforeUnmount(destroySortables);
         </div>
         <div ref="drawerListRef" class="query-field-settings__catalog">
           <div
-            v-for="option in visibleDrawerOptions"
+            v-for="(option, index) in visibleDrawerOptions"
             :key="option.field"
             class="query-field-settings__item query-field-settings__catalog-item"
             :data-query-field="option.field"
           >
+            <span class="query-field-settings__index tabular">{{ String(index + 1).padStart(2, '0') }}</span>
             <a-tooltip :content="isSearching ? t('shipment.querySettings.clearSearchToSort') : t('shipment.querySettings.drag', { field: option.label })">
               <a-button
                 class="query-field-settings__drag"
@@ -319,7 +338,8 @@ onBeforeUnmount(destroySortables);
 <style scoped>
 .query-field-settings__workspace {
   display: grid;
-  gap: var(--dense-gap-module);
+  gap: 20px;
+  padding-top: 2px;
 }
 
 .query-field-settings__section {
@@ -337,31 +357,83 @@ onBeforeUnmount(destroySortables);
 
 .query-field-settings__section-head {
   justify-content: space-between;
-  min-height: var(--dense-bar-h);
-  margin-bottom: var(--dense-gap-zone);
+  align-items: flex-end;
+  gap: 16px;
+  min-height: 42px;
+  margin-bottom: 10px;
 }
 
 .query-field-settings__section-title {
-  gap: var(--dense-gap-inline);
+  display: grid;
+  gap: 3px;
+}
+
+.query-field-settings__heading-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .query-field-settings__section-title h3 {
   margin: 0;
   color: var(--color-text-1);
-  font-size: var(--dense-font-title);
+  font-size: 14px;
+  font-weight: var(--dense-weight-title);
+  line-height: 20px;
+}
+
+.query-field-settings__count {
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: var(--color-fill-2);
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  line-height: 18px;
+}
+
+.query-field-settings__section-note {
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  line-height: 16px;
+}
+
+.query-field-settings__title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.query-field-settings__title > span:first-child {
+  color: var(--color-text-1);
+  font-size: var(--dense-font-overlay);
   font-weight: var(--dense-weight-title);
 }
 
-.query-field-settings__section-title span {
+.query-field-settings__title-note {
+  overflow: hidden;
   color: var(--color-text-3);
   font-size: var(--dense-font-aux);
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .query-field-settings__capacity {
   display: grid;
-  grid-template-columns: auto 132px;
+  grid-template-columns: auto 116px;
   align-items: center;
-  gap: var(--dense-gap-inline);
+  gap: 10px;
+  min-width: 224px;
+  padding: 7px 10px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 6px;
+  background: var(--color-fill-1);
+}
+
+.query-field-settings__capacity--error {
+  border-color: var(--dense-danger-3);
+  background: var(--dense-danger-1);
 }
 
 .query-field-settings__capacity-label {
@@ -373,6 +445,10 @@ onBeforeUnmount(destroySortables);
 .query-field-settings__capacity-label strong {
   color: var(--color-text-1);
   font-weight: var(--dense-weight-title);
+}
+
+.query-field-settings__capacity--error .query-field-settings__capacity-label strong {
+  color: var(--dense-danger-6);
 }
 
 .query-field-settings__help {
@@ -391,11 +467,11 @@ onBeforeUnmount(destroySortables);
 .query-field-settings__page-preview {
   display: grid;
   grid-template-columns: repeat(15, minmax(0, 1fr));
-  gap: var(--dense-gap-inline);
-  min-height: 54px;
-  padding: var(--dense-gap-inline);
+  gap: 8px;
+  min-height: 82px;
+  padding: 10px;
   border: 1px solid var(--color-border-1);
-  border-radius: var(--dense-radius);
+  border-radius: 8px;
   background: var(--color-fill-1);
 }
 
@@ -406,23 +482,27 @@ onBeforeUnmount(destroySortables);
 .query-field-settings__catalog {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  min-height: 104px;
+  grid-auto-rows: 42px;
+  min-height: clamp(300px, calc(100vh - 430px), 520px);
   overflow: hidden;
   border: 1px solid var(--color-border-1);
-  border-radius: var(--dense-radius);
+  border-radius: 8px;
+  background: var(--color-fill-1);
 }
 
 .query-field-settings__item {
   min-width: 0;
-  min-height: var(--dense-row-h);
+  min-height: 40px;
 }
 
 .query-field-settings__page-item {
-  padding-inline: var(--dense-gap-label);
+  gap: 2px;
+  padding: 4px 7px 4px 5px;
   overflow: hidden;
   border: 1px solid var(--dense-primary-3);
-  border-radius: var(--dense-radius);
+  border-radius: 6px;
   background: var(--dense-primary-1);
+  box-shadow: 0 1px 1px rgb(29 78 216 / 5%);
 }
 
 .query-field-settings__page-item .query-field-settings__label {
@@ -431,19 +511,24 @@ onBeforeUnmount(destroySortables);
 
 .query-field-settings__page-item .query-field-settings__drag,
 .query-field-settings__page-item .query-field-settings__move {
-  width: 20px;
-  min-width: 20px;
-  height: 20px;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
   padding: 0;
 }
 
 .query-field-settings__catalog-item {
-  padding-inline: var(--dense-gap-inline);
+  gap: 4px;
+  padding-inline: 10px;
   border-bottom: 1px solid var(--color-border-1);
 }
 
 .query-field-settings__catalog-item:nth-child(odd) {
   border-right: 1px solid var(--color-border-1);
+}
+
+.query-field-settings__catalog-item:nth-last-child(-n + 2) {
+  border-bottom: 0;
 }
 
 .query-field-settings__catalog-item:hover,
@@ -475,6 +560,18 @@ onBeforeUnmount(destroySortables);
   color: var(--color-text-1);
   font-size: var(--dense-font-data);
   font-weight: var(--dense-weight-control);
+}
+
+.query-field-settings__index {
+  flex: 0 0 22px;
+  color: var(--color-text-3);
+  font-size: var(--dense-font-micro);
+  text-align: center;
+}
+
+.query-field-settings__page-item .query-field-settings__index {
+  color: var(--dense-primary-6);
+  font-weight: var(--dense-weight-title);
 }
 
 .query-field-settings__move-wrap {

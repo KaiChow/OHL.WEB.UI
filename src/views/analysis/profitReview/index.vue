@@ -5,19 +5,24 @@ import { useI18n } from 'vue-i18n';
 import { Message } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
+  IconCloseCircle,
+  IconDelete,
+  IconEdit,
   IconSearch,
   IconRefresh,
   IconDownload,
-  IconMore,
 } from '@arco-design/web-vue/es/icon';
 import { downloadCsvFile, buildTimestampSuffix } from '@/utils/mock-actions';
 import { formatLocalMinute } from '@/utils/date-time';
 import { compactVerticalFormLabelStyle } from '@/design-system/formLayout';
+import { ROW_ACTION_COLUMN_WIDTH } from '@/design-system/rowActions';
+import type { WorkbenchRowAction } from '@/design-system/rowActions';
 import { stableTableRowConfig } from '@/design-system/tableConfig';
 import QueryFieldCol from '@/components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '@/components/workbench/QueryFieldGrid.vue';
 import StandardListFrame from '@/components/workbench/StandardListFrame.vue';
 import WorkbenchEmptyState from '@/components/workbench/WorkbenchEmptyState.vue';
+import WorkbenchRowActions from '@/components/workbench/WorkbenchRowActions.vue';
 import WorkbenchTableToolbar from '@/components/workbench/WorkbenchTableToolbar.vue';
 import WorkflowStateSelector from '@/components/workbench/WorkflowStateSelector.vue';
 import DetailDrawer from './components/DetailDrawer.vue';
@@ -358,6 +363,20 @@ const confirmDelete = async () => {
   return true;
 };
 
+const getRowActions = (row: ProfitReviewRow): WorkbenchRowAction[] => {
+  if (!canOperate.value) return [];
+  const actions: WorkbenchRowAction[] = [
+    { key: 'edit', label: t('common.edit'), icon: IconEdit, onClick: () => openEdit(row) },
+  ];
+  if (['pending', 'reviewing'].includes(row.reviewStatus)) {
+    actions.push({ key: 'reject', label: t('profit.actions.reject'), icon: IconCloseCircle, onClick: () => openRejectConfirm(row) });
+  }
+  if (['pending', 'rejected'].includes(row.reviewStatus)) {
+    actions.push({ key: 'delete', label: t('profit.actions.deleteRecord'), icon: IconDelete, danger: true, onClick: () => openDeleteConfirm(row) });
+  }
+  return actions;
+};
+
 const handleExport = async () => {
   if (exporting.value) return;
   const rows = filteredRows.value;
@@ -550,7 +569,7 @@ watch(uiScenario, () => {
 
             <vxe-column field="orderNo" :title="t('profit.columns.orderNo')" min-width="150" fixed="left">
               <template #default="{ row }">
-                <span class="link-text--strong mono" @click="openDetail(row)">{{ row.orderNo }}</span>
+                <span class="link-text--strong tabular" @click="openDetail(row)">{{ row.orderNo }}</span>
               </template>
             </vxe-column>
 
@@ -587,43 +606,11 @@ watch(uiScenario, () => {
               </template>
             </vxe-column>
 
-            <vxe-column field="updatedAt" :title="t('profit.columns.updatedAt')" min-width="140" class-name="mono" />
+            <vxe-column field="updatedAt" :title="t('profit.columns.updatedAt')" min-width="140" class-name="tabular" />
 
-            <vxe-column :title="t('common.operations')" width="132" fixed="right" align="left" header-align="center">
+            <vxe-column :title="t('common.operations')" :width="ROW_ACTION_COLUMN_WIDTH" fixed="right" align="left" header-align="center">
               <template #default="{ row }">
-                <a-space class="row-actions" :size="2">
-                  <a-button
-                    v-if="canOperate"
-                    size="mini"
-                    type="text"
-                    class="row-action-btn"
-                    @click="openEdit(row)"
-                  >{{ t('common.edit') }}</a-button>
-                  <a-dropdown
-                    v-if="canOperate && ['pending', 'reviewing', 'rejected'].includes(row.reviewStatus)"
-                    trigger="click"
-                    position="br"
-                  >
-                    <a-tooltip :content="t('common.moreActions')">
-                      <a-button
-                        size="mini"
-                        type="text"
-                        class="row-action-btn row-action-btn--more"
-                        :aria-label="t('common.moreActions')"
-                      >
-                        <icon-more />
-                      </a-button>
-                    </a-tooltip>
-                    <template #content>
-                      <a-doption v-if="['pending', 'reviewing'].includes(row.reviewStatus)" @click="openRejectConfirm(row)">{{ t('profit.actions.reject') }}</a-doption>
-                      <a-divider
-                        v-if="['pending', 'reviewing'].includes(row.reviewStatus) && ['pending', 'rejected'].includes(row.reviewStatus)"
-                        :margin="4"
-                      />
-                      <a-doption v-if="['pending', 'rejected'].includes(row.reviewStatus)" class="danger-opt" @click="openDeleteConfirm(row)">{{ t('profit.actions.deleteRecord') }}</a-doption>
-                    </template>
-                  </a-dropdown>
-                </a-space>
+                <WorkbenchRowActions :actions="getRowActions(row)" :more-label="t('common.moreActions')" />
               </template>
             </vxe-column>
 
@@ -674,7 +661,7 @@ watch(uiScenario, () => {
       :on-before-ok="confirmBatchSubmit"
     >
       <p class="modal-confirm-copy">{{ t('profit.modal.batchCopy', { count: submittableRows.length }) }}</p>
-      <p class="modal-order-list mono">{{ submittableRows.map((row) => row.orderNo).join('、') }}</p>
+      <p class="modal-order-list tabular">{{ submittableRows.map((row) => row.orderNo).join('、') }}</p>
       <a-alert v-if="batchError" type="error">{{ batchError }}</a-alert>
     </a-modal>
 

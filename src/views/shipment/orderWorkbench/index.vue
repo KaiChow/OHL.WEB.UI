@@ -12,23 +12,29 @@ import {
   IconDownload,
   IconDown,
   IconEdit,
+  IconNotification,
+  IconPlusCircle,
+  IconStop,
+  IconUserAdd,
   IconFullscreen,
   IconFullscreenExit,
-  IconMore,
   IconSettings,
 } from '@arco-design/web-vue/es/icon';
 import { downloadCsvFile } from '@/utils/mock-actions';
 import { formatLocalMinute } from '@/utils/date-time';
 import { compactVerticalFormLabelStyle, denseFormGridGutter } from '@/design-system/formLayout';
-import { normalizeQueryFieldPlacement, queryFieldTrackUsage } from '@/design-system/queryFieldPreferences';
+import { normalizeQueryFieldPlacement, queryFieldFitsWithinRows, queryFieldUnitUsage } from '@/design-system/queryFieldPreferences';
 import type { QueryFieldPlacement } from '@/design-system/queryFieldPreferences';
 import { stableTableRowConfig } from '@/design-system/tableConfig';
+import { ROW_ACTION_COLUMN_WIDTH } from '@/design-system/rowActions';
+import type { WorkbenchRowAction } from '@/design-system/rowActions';
 import QueryFieldCol from '@/components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '@/components/workbench/QueryFieldGrid.vue';
 import QueryFieldSettingsDrawer from '@/components/workbench/QueryFieldSettingsDrawer.vue';
 import StandardListFrame from '@/components/workbench/StandardListFrame.vue';
 import WorkbenchColumnSettings from '@/components/workbench/WorkbenchColumnSettings.vue';
 import WorkbenchEmptyState from '@/components/workbench/WorkbenchEmptyState.vue';
+import WorkbenchRowActions from '@/components/workbench/WorkbenchRowActions.vue';
 import WorkbenchTableToolbar from '@/components/workbench/WorkbenchTableToolbar.vue';
 import WorkflowStateSelector from '@/components/workbench/WorkflowStateSelector.vue';
 import { shipmentWorkbenchRows } from '@/views/shipment/orderWorkbench/mockData';
@@ -61,9 +67,8 @@ const CURRENT_OPERATOR = '张操作';
 const COLUMN_SETTING_STORAGE_KEY = 'ohl.shipment.export-order.visible-columns.v3';
 const QUERY_FIELD_SETTING_STORAGE_KEY = 'ohl.shipment.export-order.query-fields.v1';
 const QUERY_FIELD_SETTING_VERSION = 1;
-const QUERY_PAGE_CAPACITY_TRACKS = 15;
+const QUERY_PAGE_CAPACITY_UNITS = 10;
 const ORDER_STATUS_COLUMN_MIN_WIDTH = 148;
-const OPERATION_COLUMN_WIDTH = 168;
 
 type WorkScope = 'all' | 'mine' | 'others';
 
@@ -242,7 +247,7 @@ const loadQueryFieldPlacement = (): QueryFieldPlacement => {
       DEFAULT_QUERY_FIELD_PLACEMENT,
     );
     const normalized = normalizeQueryFieldPlacement(stored, queryFieldPreferenceOptions, DEFAULT_QUERY_FIELD_PLACEMENT);
-    return queryFieldTrackUsage(normalized.pageFields, queryFieldPreferenceOptions) <= QUERY_PAGE_CAPACITY_TRACKS
+    return queryFieldFitsWithinRows(normalized.pageFields, queryFieldPreferenceOptions, 6, 2, 2)
       ? normalized
       : normalizeQueryFieldPlacement(DEFAULT_QUERY_FIELD_PLACEMENT, queryFieldPreferenceOptions, DEFAULT_QUERY_FIELD_PLACEMENT);
   } catch {
@@ -316,10 +321,12 @@ const localizedQueryFieldOptions = computed(() => SHIPMENT_QUERY_FIELDS.map((def
 const pageQueryFieldDefinitions = computed(() => queryFieldPlacement.value.pageFields
   .map((field) => queryFieldDefinitionByKey.get(field as ShipmentQueryField))
   .filter((definition): definition is (typeof SHIPMENT_QUERY_FIELDS)[number] => Boolean(definition)));
-const drawerQueryFields = computed(() => queryFieldPlacement.value.drawerFields as ShipmentQueryField[]);
+const allQueryFields = computed(() => [
+  ...SHIPMENT_QUERY_FIELDS.map((definition) => definition.field),
+] as ShipmentQueryField[]);
 const drawerFieldGroups = computed(() => QUERY_FIELD_GROUPS.map((group) => ({
   group,
-  fields: drawerQueryFields.value
+  fields: allQueryFields.value
     .map((field) => queryFieldDefinitionByKey.get(field))
     .filter((definition): definition is (typeof SHIPMENT_QUERY_FIELDS)[number] => definition?.group === group),
 })).filter((item) => item.fields.length));
@@ -482,11 +489,11 @@ const hasActiveFilter = computed(() => {
 
 const tableTotal = computed(() => ['empty', 'permission'].includes(uiScenario.value) || tableError.value ? 0 : filteredRows.value.length);
 
-const advancedConditionSnapshot = (source: ShipmentOrderQuery) => queryFieldSnapshot(source, drawerQueryFields.value);
+const advancedConditionSnapshot = (source: ShipmentOrderQuery) => queryFieldSnapshot(source, allQueryFields.value);
 
 const advancedDraftGroupCounts = computed(() => Object.fromEntries(QUERY_FIELD_GROUPS.map((group) => [
   group,
-  drawerQueryFields.value.filter((field) => (
+  allQueryFields.value.filter((field) => (
     queryFieldDefinitionByKey.get(field)?.group === group && isQueryFieldActive(advancedQuery, field)
   )).length,
 ])) as Record<ShipmentQueryFieldGroup, number>);
@@ -498,7 +505,7 @@ const advancedDraftDirty = computed(() => (
   !== JSON.stringify(advancedConditionSnapshot(query))
 ));
 
-const advancedActiveCount = computed(() => drawerQueryFields.value
+const advancedActiveCount = computed(() => allQueryFields.value
   .filter((field) => isQueryFieldActive(query, field)).length);
 
 const getNextActionLabel = (row: ShipmentWorkbenchRow) => {
@@ -654,6 +661,10 @@ const applyQueryFieldPlacement = (placement: QueryFieldPlacement) => {
     localizedQueryFieldOptions.value,
     DEFAULT_QUERY_FIELD_PLACEMENT,
   );
+  if (!queryFieldFitsWithinRows(normalized.pageFields, localizedQueryFieldOptions.value, 6, 2, 2)) {
+    Message.error(t('shipment.querySettings.capacityError', { used: queryFieldUnitUsage(normalized.pageFields, localizedQueryFieldOptions.value), capacity: QUERY_PAGE_CAPACITY_UNITS, rows: 2 }));
+    return false;
+  }
   try {
     window.localStorage.setItem(QUERY_FIELD_SETTING_STORAGE_KEY, JSON.stringify({
       version: QUERY_FIELD_SETTING_VERSION,
@@ -676,12 +687,12 @@ const cancelAdvancedFilters = () => {
 };
 
 const clearAdvancedFilters = () => {
-  clearQueryFields(advancedQuery, drawerQueryFields.value, defaultQuery());
+  clearQueryFields(advancedQuery, allQueryFields.value, defaultQuery());
 };
 
 const clearAdvancedGroup = (group: ShipmentQueryFieldGroup) => clearQueryFields(
   advancedQuery,
-  drawerQueryFields.value.filter((field) => queryFieldDefinitionByKey.get(field)?.group === group),
+  allQueryFields.value.filter((field) => queryFieldDefinitionByKey.get(field)?.group === group),
   defaultQuery(),
 );
 
@@ -905,6 +916,52 @@ const handleRowNotify = (row: ShipmentWorkbenchRow) => runRowMutation(
   t('shipment.messages.notifyFail', { orderNo: row.orderNo }),
 );
 
+const getRowActions = (row: ShipmentWorkbenchRow): WorkbenchRowAction[] => {
+  const pending = isRowPending(row);
+  const actions: WorkbenchRowAction[] = [];
+  if (canTransitionOrder(row)) {
+    actions.push({
+      key: 'update-status',
+      label: t('shipment.actions.updateStatus'),
+      icon: IconEdit,
+      disabled: pending,
+      loading: pending,
+      onClick: () => openStatusModal(row),
+    });
+  }
+  actions.push({
+    key: 'assign-me',
+    label: t('shipment.actions.assignMe'),
+    icon: IconUserAdd,
+    disabled: pending,
+    loading: pending && !canTransitionOrder(row),
+    onClick: () => handleAssignOperator(row),
+  });
+  actions.push({
+    key: 'generate-fee',
+    label: t('shipment.actions.generateFee'),
+    icon: IconPlusCircle,
+    disabled: pending,
+    onClick: () => handleGenerateRowFee(row),
+  });
+  actions.push({
+    key: 'notify',
+    label: t('shipment.actions.notify'),
+    icon: IconNotification,
+    disabled: pending,
+    onClick: () => handleRowNotify(row),
+  });
+  actions.push({
+    key: 'void-order',
+    label: t('shipment.actions.voidOrder'),
+    icon: IconStop,
+    disabled: pending,
+    danger: true,
+    onClick: () => openVoidModal(row),
+  });
+  return actions;
+};
+
 const runBatchAction = async (label: string, mutate: (row: ShipmentWorkbenchRow) => void) => {
   if (!selectedCount.value) {
     Message.warning(t('shipment.messages.selectOrders'));
@@ -1022,7 +1079,7 @@ watch(uiScenario, () => {
                   @submit="handleSearch"
                 />
               </QueryFieldCol>
-              <QueryFieldCol role="actions-wide">
+              <QueryFieldCol role="actions">
                 <div class="query-actions">
                   <a-button size="small" type="primary" :loading="querying" @click="handleSearch">
                     <template #icon><icon-search /></template>
@@ -1173,7 +1230,7 @@ watch(uiScenario, () => {
 
             <vxe-column field="orderNo" :title="t('shipment.columns.orderNo')" min-width="168" fixed="left" :visible="isColumnVisible('orderNo')">
               <template #default="{ row }">
-                <span class="mono">{{ row.orderNo }}</span>
+                <span class="tabular">{{ row.orderNo }}</span>
               </template>
             </vxe-column>
 
@@ -1191,9 +1248,9 @@ watch(uiScenario, () => {
 
             <vxe-column field="operator" :title="t('shipment.columns.operator')" min-width="104" :visible="isColumnVisible('operator')" />
             <vxe-column field="customerName" :title="t('shipment.columns.customerName')" min-width="190" :visible="isColumnVisible('customerName')" />
-            <vxe-column field="pol" :title="t('shipment.columns.pol')" min-width="96" class-name="mono" :visible="isColumnVisible('pol')" />
-            <vxe-column field="pod" :title="t('shipment.columns.pod')" min-width="96" class-name="mono" :visible="isColumnVisible('pod')" />
-            <vxe-column field="etd" title="ETD" min-width="104" class-name="mono" :visible="isColumnVisible('etd')" />
+            <vxe-column field="pol" :title="t('shipment.columns.pol')" min-width="96" class-name="tabular" :visible="isColumnVisible('pol')" />
+            <vxe-column field="pod" :title="t('shipment.columns.pod')" min-width="96" class-name="tabular" :visible="isColumnVisible('pod')" />
+            <vxe-column field="etd" title="ETD" min-width="104" class-name="tabular" :visible="isColumnVisible('etd')" />
 
             <vxe-column field="fileStatus" :title="t('shipment.columns.fileStatus')" min-width="104" :visible="isColumnVisible('fileStatus')">
               <template #default="{ row }">
@@ -1213,61 +1270,23 @@ watch(uiScenario, () => {
               </template>
             </vxe-column>
 
-            <vxe-column field="updatedAt" :title="t('shipment.columns.updatedAt')" min-width="140" class-name="mono" :visible="isColumnVisible('updatedAt')" />
+            <vxe-column field="updatedAt" :title="t('shipment.columns.updatedAt')" min-width="140" class-name="tabular" :visible="isColumnVisible('updatedAt')" />
 
             <vxe-column field="businessType" :title="t('shipment.columns.businessType')" min-width="96" :visible="isColumnVisible('businessType')" />
             <vxe-column field="carrier" :title="t('shipment.columns.carrier')" min-width="120" :visible="isColumnVisible('carrier')" />
             <vxe-column field="vesselVoyage" :title="t('shipment.columns.vesselVoyage')" min-width="190" :visible="isColumnVisible('vesselVoyage')" />
-            <vxe-column field="eta" title="ETA" min-width="104" class-name="mono" :visible="isColumnVisible('eta')" />
-            <vxe-column field="closingTime" :title="t('shipment.columns.closingTime')" min-width="140" class-name="mono" :visible="isColumnVisible('closingTime')" />
-            <vxe-column field="bookingNo" :title="t('shipment.columns.bookingNo')" min-width="150" class-name="mono" :visible="isColumnVisible('bookingNo')" />
-            <vxe-column field="blNo" :title="t('shipment.columns.blNo')" min-width="160" class-name="mono" :visible="isColumnVisible('blNo')" />
+            <vxe-column field="eta" title="ETA" min-width="104" class-name="tabular" :visible="isColumnVisible('eta')" />
+            <vxe-column field="closingTime" :title="t('shipment.columns.closingTime')" min-width="140" class-name="tabular" :visible="isColumnVisible('closingTime')" />
+            <vxe-column field="bookingNo" :title="t('shipment.columns.bookingNo')" min-width="150" class-name="tabular" :visible="isColumnVisible('bookingNo')" />
+            <vxe-column field="blNo" :title="t('shipment.columns.blNo')" min-width="160" class-name="tabular" :visible="isColumnVisible('blNo')" />
             <vxe-column field="containerSummary" :title="t('shipment.columns.containerSummary')" min-width="110" :visible="isColumnVisible('containerSummary')" />
             <vxe-column field="isOverdue" :title="t('shipment.columns.isOverdue')" min-width="90" :visible="isColumnVisible('isOverdue')">
               <template #default="{ row }">{{ row.isOverdue ? t('shipment.overdue.yes') : t('shipment.overdue.no') }}</template>
             </vxe-column>
 
-            <vxe-column :title="t('common.operations')" :width="OPERATION_COLUMN_WIDTH" fixed="right" align="left" header-align="center">
+            <vxe-column :title="t('common.operations')" :width="ROW_ACTION_COLUMN_WIDTH" fixed="right" align="left" header-align="center">
               <template #default="{ row }">
-                <a-space class="row-actions" :size="2">
-                  <a-button
-                    v-if="canTransitionOrder(row)"
-                    size="mini"
-                    type="text"
-                    class="row-action-btn"
-                    :disabled="isRowPending(row)"
-                    @click="openStatusModal(row)"
-                  >{{ t('shipment.actions.updateStatus') }}</a-button>
-                  <a-button
-                    v-else
-                    size="mini"
-                    type="text"
-                    class="row-action-btn"
-                    :disabled="isRowPending(row)"
-                    @click="handleAssignOperator(row)"
-                  >{{ t('shipment.actions.assignMe') }}</a-button>
-                  <a-dropdown trigger="click" position="br">
-                    <a-tooltip :content="t('common.moreActions')">
-                      <a-button
-                        size="mini"
-                        type="text"
-                        class="row-action-btn row-action-btn--more"
-                        :aria-label="t('common.moreActions')"
-                        :disabled="isRowPending(row)"
-                        :loading="isRowPending(row)"
-                      >
-                        <icon-more />
-                      </a-button>
-                    </a-tooltip>
-                    <template #content>
-                      <a-doption v-if="canTransitionOrder(row)" @click="handleAssignOperator(row)">{{ t('shipment.actions.assignMe') }}</a-doption>
-                      <a-doption @click="handleGenerateRowFee(row)">{{ t('shipment.actions.generateFee') }}</a-doption>
-                      <a-doption @click="handleRowNotify(row)">{{ t('shipment.actions.notify') }}</a-doption>
-                      <a-divider :margin="4" />
-                      <a-doption class="danger-opt" @click="openVoidModal(row)">{{ t('shipment.actions.voidOrder') }}</a-doption>
-                    </template>
-                  </a-dropdown>
-                </a-space>
+                <WorkbenchRowActions :actions="getRowActions(row)" :more-label="t('common.moreActions')" />
               </template>
             </vxe-column>
             <template #empty>
@@ -1310,6 +1329,7 @@ watch(uiScenario, () => {
       <template #title>
         <div class="advanced-filter-title">
           <span>{{ t('shipment.advanced.title') }}</span>
+          <span class="advanced-filter-title__hint">{{ t('shipment.advanced.allFields') }}</span>
           <span v-if="advancedDraftCount" class="advanced-filter-title__count">{{ t('shipment.advanced.selected', { count: advancedDraftCount }) }}</span>
           <a-badge v-if="advancedDraftDirty" class="advanced-filter-title__dirty" status="processing" :text="t('shipment.advanced.pending')" />
         </div>
@@ -1431,7 +1451,10 @@ watch(uiScenario, () => {
       :options="localizedQueryFieldOptions"
       :model-value="queryFieldPlacement"
       :default-value="DEFAULT_QUERY_FIELD_PLACEMENT"
-      :capacity-tracks="QUERY_PAGE_CAPACITY_TRACKS"
+      :capacity-units="QUERY_PAGE_CAPACITY_UNITS"
+      :minimum-units="6"
+      :action-units="2"
+      :max-rows="2"
       :on-before-apply="applyQueryFieldPlacement"
     />
 
@@ -1614,6 +1637,13 @@ watch(uiScenario, () => {
 
 .advanced-filter-title__count,
 .advanced-filter-section__count {
+  color: var(--color-text-3);
+  font-size: var(--dense-font-aux);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.advanced-filter-title__hint {
   color: var(--color-text-3);
   font-size: var(--dense-font-aux);
   font-weight: 400;

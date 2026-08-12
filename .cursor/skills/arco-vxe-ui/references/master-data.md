@@ -63,7 +63,7 @@ Small dictionaries (&lt;200 rows, no hierarchy): skip tree — use **Archetype A
 
 | Column | Rule |
 |--------|------|
-| 编码 | `min-width` 120–160, mono optional |
+| 编码 | `min-width` 120–160；继承全局字体，数字对齐时可使用 `.tabular` |
 | 名称 | `min-width` 160+, primary identity |
 | 启用状态 | `s-pill` `acc`/`draft` — 启用/停用 |
 | 归属组织 | when multi-tenant |

@@ -119,3 +119,30 @@ remaining_blockers:
 ```
 
 No real-route before/after evidence means the modernization result is unverified.
+
+## Architecture Boundary Contract
+
+For a large existing Vue repository, modernization must preserve business behavior while making ownership explicit. Engineering layers (data, state, router, testing, tooling) are owned by `project-architecture.md`; the typed contract is `src/design-system/systemArchitecture.ts`, checked by `scripts/check-spec.js`.
+
+For the OHL.Web baseline, keep these ownership boundaries:
+| Boundary | Owner | Must not absorb |
+| --- | --- | --- |
+| `src/views` | Route composition, page-local state, pageSpec, feature-contract wiring | Shared UI primitives, scattered API wrappers, global theme rules |
+| `src/components` | Typed reusable UI structure and interaction states | Business labels, hidden permissions, default requests |
+| `src/api` (target) | Endpoint functions, DTO mapping, transport normalization | Rendering, route navigation, page-local state |
+| `src/store` / `src/composables` (target) | Cross-route state or reusable behavior | Temporary component drafts and unbounded global state |
+| `src/i18n` | Global and domain copy | Hard-coded user-facing product text |
+| `src/design-system` / `src/styles` | Semantic contracts, tokens, dimensions, VXE theme | Single-route business fields and page-private skins |
+
+The allowed dependency direction is `router -> views -> shared components/composables`, `views -> api/store/i18n`, `components -> design-system/styles/Arco/VXE public APIs`, and `feature contracts -> action visibility/enablement/request/result/failure/refresh`.
+Pages may compose these layers, but they must not cross-wire their internal responsibilities. Cross-feature imports use the configured `@/` alias; relative imports are limited to adjacent files in one feature directory.
+## Progressive Migration Contract
+Do not move or rewrite the OHL.Web repository in one operation. Use the following migration records in order:
+
+1. **Inventory** — route, business object, user job, API, store, permission, locale, legacy component, state, and rollback boundary.
+2. **Contract** — typed `pageSpec.ts`, feature contracts, field/action ownership, and adverse-state matrix for one pilot route.
+3. **Capability** — shared query, toolbar, table, overlay, feedback, or adapter capability with a real consumer.
+4. **Pilot** — one high-frequency route passes static, build, interaction, localization, viewport, and 200% evidence.
+5. **Rollout** — migrate route by route and domain by domain; remove legacy code only after all consumers and fallback paths are verified.
+
+The migration must preserve API paths and payloads, response interpretation, permission semantics, store contracts, locale keys, and business vocabulary unless a separate feature contract records the intentional change. Every stage has a rollback boundary; a green build alone is not migration approval.

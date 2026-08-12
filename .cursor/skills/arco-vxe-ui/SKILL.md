@@ -41,6 +41,7 @@ The final back-office UI/UX standard is routed through these existing authoritie
 | --- | --- |
 | Design principles | this file, `arco-first.md`, `theme-contract.md`, `visual-system.md` |
 | Page layout and page types | `domain-routing.md`, the selected page authority, `module-patterns.md` |
+| System architecture and modernization | `existing-project-modernization.md`, `src/design-system/systemArchitecture.ts`, `feature-delivery-contract.md` |
 | Query, table, form, and button | `filter-layout.md`, `table.md`, form authorities, `actions.md` |
 | Shared components | `arco-first.md`, `component-size.md`, `icons.md`, overlay/upload authorities |
 | State and exception feedback | `page-spec-contract.md`, `feedback.md`, `feature-delivery-contract.md` |
@@ -93,14 +94,14 @@ Any failed applicable item blocks `sellable-saas-grade`; a target in `pageSpec.t
 - Status: `.s-pill[data-s]`; never color the whole row by status or rely on color alone.
 - Arco form and business controls inherit the app-wide `small` default; Arco controls rendered inside `vxe-table` rows must explicitly use `size="mini"` (the mini row content box is 24px — `small` clips); one `type="primary"` per action scope.
 - Use the configured `@/` source alias for imports that cross a feature/component boundary. Relative imports are limited to files in the same colocated feature directory; never traverse shared project structure with `../../` or deeper paths.
-- Row actions are text buttons carrying business verbs (no icon-only guessing). Expose only proven frequent, low-risk actions that remain readable on one line without competing with business data; move the rest and all list danger actions to the `···` More menu with danger confirmation. When one clear next action exists it may keep primary emphasis; supporting actions and `···` stay neutral at rest, so the column never becomes an all-blue command strip. The `···` trigger is the only icon-only button in the column. Main-list row actions are start-aligned in a stable order; conditional actions must not recenter the remaining controls.
+- Main-list row actions use Arco icon-only buttons with a Tooltip and business `aria-label`; the operation surface has at most three visible entries. For one to three legal actions, show them directly. For four or more actions, show the first two eligible direct icons and a third `More` entry, with the rest in the native dropdown. Dangerous or explicitly overflow-only actions always stay in `More`, so the visible surface remains stable. Direct actions are start-aligned in a stable order; dropdown options are text-first, danger is the final separated group, and destructive actions require confirmation.
 - Business object and user job decide fields; never transplant fields across unrelated modules.
 - Do not implement a business action until its smallest complete feature contract exists.
 - Do not claim UI quality from source inspection alone.
 
 ## Reference Implementation
 
-`--dense-*` tokens, `.s-pill[data-s]`, typed `pageSpec.ts` and feature-contract infrastructure, and `scripts/check-spec.js` are this repository's reference implementation of the contract. The rules are the contract; the symbols are replaceable. A project adopting this skill must provide equivalent infrastructure: a semantic token layer, VXE public configuration for the applicable table role, typed page-spec and feature-contract helpers, and a static checker that gates routed pages.
+`--dense-*` tokens, `.s-pill[data-s]`, typed `pageSpec.ts`, `systemArchitecture.ts`, feature-contract infrastructure, and `scripts/check-spec.js` are this repository's reference implementation of the contract. The rules are the contract; the symbols are replaceable. A project adopting this skill must provide equivalent infrastructure: a semantic token layer, VXE public configuration for the applicable table role, typed page/spec and architecture contracts, feature-contract helpers, explicit directory ownership, and a static checker that gates routed pages and migration boundaries.
 
 ## Verification
 

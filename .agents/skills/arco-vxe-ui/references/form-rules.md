@@ -232,7 +232,7 @@ formRef.value?.clearValidate()
 
 - 展示态优先用 Arco `a-descriptions class="detail-display"`；字段按业务分区，不使用 disabled/readonly input 假装文本。
 - 用户显式进入编辑后，可改字段才切换为 `a-input` / `a-select` / `a-date-picker` 等真实控件，统一 `size="small"`。
-- 系统主键/审计字段（订单号、创建时间）在编辑态仍用纯文本 `<span class="mono">`，不得伪装成输入框。
+- 系统主键/审计字段（订单号、创建时间）在编辑态仍用纯文本，不得伪装成输入框；仅在需要数字列对齐时使用 `.tabular`。
 - 保存失败保留输入和编辑态；取消恢复快照；离开/切换对象处理未保存修改。
 - 吸底编辑栏只在编辑态出现，保留一个 primary 保存和 secondary 取消；状态推进、行编辑和对象编辑互斥。
 

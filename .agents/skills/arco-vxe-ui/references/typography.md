@@ -29,26 +29,14 @@ F6 Micro            10px / 500   Badge, pill, seq
 ```
 
 ## Font Family
-Use a system-first font stack. Do not introduce web fonts unless the product explicitly ships them.
+Use the product's single global font stack. Do not introduce web fonts, page-local font families, or per-component font overrides.
 
 Declaration owners and stack:
 
-The UI stack has exactly two declaration owners: the base rule in `global.css` and the mirrored `@vxe-font-family` token in `src/styles/vxe-theme/`. Pages, shared components, and scoped CSS never declare `font-family`; the only exception is the mono stack on machine-compared identifier values.
+The UI stack has exactly two declaration owners: the base rule in `global.css` and the mirrored `@vxe-font-family` token in `src/styles/vxe-theme/`. Pages, shared components, and scoped CSS never declare `font-family`. Identifiers use the same product stack; numeric alignment uses `font-variant-numeric` only.
 
 ```css
-font-family:
-  system-ui,
-  -apple-system,
-  "Segoe UI",
-  Roboto,
-  "Inter",
-  "PingFang SC",
-  "Hiragino Sans GB",
-  "HarmonyOS Sans SC",
-  "Source Han Sans SC",
-  "Noto Sans CJK SC",
-  "Microsoft YaHei",
-  sans-serif;
+font-family: Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Noto Sans", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, "Open Sans", "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 ```
 
 Ordering rules:
@@ -58,17 +46,7 @@ Ordering rules:
 - A CJK family must always precede the generic `sans-serif`; without one, Chinese text can fall back to legacy bitmap-class rendering (for example SimSun), which fails the clarity requirement at dense sizes.
 - Do not reorder to prefer a Latin family over CJK rendering, do not append project families, and do not set per-module fonts to fix look; report readability problems against this stack instead.
 
-Use a mono stack only for opaque identifiers, codes, and machine-oriented values whose characters must be compared exactly:
-
-```css
-font-family:
-  "SF Mono",
-  "Cascadia Mono",
-  "JetBrains Mono",
-  Consolas,
-  "Liberation Mono",
-  monospace;
-```
+Do not create a separate identifier stack. Preserve the global stack and use `.tabular` only when numeric columns need aligned glyph widths.
 
 ## Size Scale (F0–F6)
 
@@ -98,7 +76,7 @@ Exceptions:
 - The Display tier (`--dense-font-display`, max **20px/600**) exists only on routes declaring `presentationTarget: 'demo'`: one hero identity or first-run empty state per route, never inside table, form, filter, or list rows, and never to rescue weak hierarchy on a `daily-ops` page.
 - In a dense `dds-hero` key-facts row, all fact values use F1 12px. Stronger lead facts use weight/placement, not a larger size inside the same row.
 - Brand/logo shell may use larger text; never copy shell typography into business modules.
-- Icons use `--dense-icon-action` (14px graphic), not text tokens.
+- Icons use `--dense-icon-action` (16px graphic), not text tokens.
 
 ## Weight Rules
 
@@ -132,14 +110,14 @@ Design for 1.3–2× text expansion compared with Chinese.
 
 | Value | Rule |
 |-------|------|
-| Order/document/container/tracking/reference IDs, hashes, API keys, checksums, IP/MAC, raw logs/code | `.mono`: family + tabular glyphs only; original case, zero letter spacing, full value in Tooltip/title, copy affordance when frequent; apply only to the token/editor value |
-| Amount, percentage, qty, weight, volume, phone | UI sans + `font-variant-numeric: tabular-nums`; right align numeric table values; never `.mono` |
-| Dates/times | UI sans + tabular numbers; one display format per page; never `.mono` |
+| Order/document/container/tracking/reference IDs, hashes, API keys, checksums, IP/MAC, raw logs/code | Global product stack; preserve original case, zero letter spacing, full value in Tooltip/title, copy affordance when frequent |
+| Amount, percentage, qty, weight, volume, phone | Global stack + `font-variant-numeric: tabular-nums`; right align numeric table values |
+| Dates/times | Global stack + tabular numbers; one display format per page |
 | Long customer/company names | Normal sans; ellipsis with title |
 
 ## Detail Header Typography
 
-- Mono only for technical identifiers and document numbers.
+- Technical identifiers and document numbers inherit the global product stack.
 - Hero fact labels: F5 / `color-text-3`.
 - Hero fact values: F1 12px / `color-text-1`.
 - All key-fact values in one `dds-hero` row share the same size.
@@ -220,7 +198,7 @@ Use this table as the fast lookup for implementation and review.
 | Modal / drawer / Tooltip | overlay chrome/content | GI native | framework-owned |
 | `s-pill` | auxiliary status | `--dense-font-aux` | 11px |
 | badge / seq micro text | micro | `--dense-font-micro` | 10px |
-| Icon-only action icon | icon graphic | `--dense-icon-action` | 14px graphic |
+| Icon-only action icon | icon graphic | `--dense-icon-action` | 16px graphic |
 
 Decision shortcut:
 
@@ -265,7 +243,7 @@ Rules:
 - Do not override `.arco-modal-*`, `.arco-select-*`, dropdown, tooltip, or popconfirm internals globally.
 - F6 10px is for units, sequence text, and compact counters only — not status pills, buttons, or dropdown options.
 
-Arco `size` prop: see `component-size.md`. Business UI uses `size="small"` only.
+Arco `size` prop: see `form-field.md` Size Contract. Business UI uses `size="small"` only.
 
 ## Implementation Checklist
 

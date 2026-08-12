@@ -57,7 +57,7 @@ const reviewActivities = computed<BusinessActivityItem[]>(() => (props.row?.time
     <template #title>{{ t('profit.detail.title') }}</template>
     <div v-if="row && statusMeta && riskMeta" class="detail-body" data-detail-object="order-profit-review">
       <div class="detail-head">
-        <span class="detail-head__identity mono">{{ row.orderNo }}</span>
+        <span class="detail-head__identity tabular">{{ row.orderNo }}</span>
         <span class="s-pill" :data-s="statusMeta.tone">{{ t(`profit.status.${row.reviewStatus}`) }}</span>
         <span class="s-pill" :data-s="riskMeta.tone">{{ t('profit.detail.riskPrefix') }} {{ t(`profit.risk.${row.riskLevel}`) }}</span>
       </div>

@@ -74,7 +74,7 @@ This is not a status filter. It is a compact segmented control:
 ## Search Area
 
 - Use an Arco Form/Grid composition. Exact class names in examples are local implementation details unless grep proves a shared definition exists.
-- `list-query` starts with a stable one-row query path. Add page-and-drawer placement only when secondary conditions or differing user roles justify it; the drawer is not visual furniture.
+- `list-query` starts with a stable aligned query path capped at two rows. Add page-and-drawer placement when secondary conditions or differing user roles justify it; the drawer is not visual furniture.
 - `list-management` follows the classification and alignment-capacity decision in `filter-layout.md`; field count alone never changes the DOM structure.
 - `list-workbench` follows the same placement decision, then keeps its daily scope/queue controls outside the query form because they answer a different question.
 - Query button is primary.
@@ -120,6 +120,8 @@ Rules:
 - Reset uses `type="text"` with a visible label at every supported desktop width; the refresh icon belongs only to result refresh.
 - More filters uses `type="text"` plus filter icon and opens the advanced filter drawer.
 - Advanced filters are grouped by business meaning inside the drawer, not random field order.
+- More filters is the complete query catalog, including fields currently visible on the page; page/drawer placement settings only control the compact page surface and its order.
+- Page controls and More filters share one query-value model: open copies the current draft, Apply commits the complete draft, Cancel discards drawer edits, and Reset clears the same full catalog.
 - Do not show a separate “selected filters” strip. Current values are visible in controls/tabs.
 - Basic filters should be the 3-6 highest-frequency query fields for the object.
 - Advanced filters can be numerous, but must be grouped by business meaning and hidden behind the drawer.
@@ -139,7 +141,7 @@ List-page rules that stay in this file:
 - Text inputs trigger by Enter or Query button; selects and chips may auto-search when safe.
 - Query and reset actions stay in a stable location in the visible query row.
 - Inline expansion is not a third field location. Use a fixed aligned page surface or the page-and-drawer placement model.
-- Two visible rows require an explicit typed row budget and complete-row alignment evidence; never infer them from query count.
+- The visible query surface has a hard maximum of two rows. Declare the typed unit/action budget, append actions after the final page field, and reject any placement that would create a third row.
 - High-volume condition catalogs require navigable grouped/wide drawer composition or a fully contracted saved-query workspace, not a larger flat form.
 - Query actions must be internationalization-safe. Do not size them by Chinese labels; use min/max or `clamp()`, allow 1.3-2x text expansion, and give secondary actions tooltip/title/aria labels when text may ellipsize.
 - If translated query actions cannot fit, reserve a wider semantic action span, promote fewer optional fields, or use a horizontal command row. Do not iconify reset/filter or silently clip action meaning.

@@ -61,13 +61,13 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       ],
     },
     dense: {
-      decisions: ['Keep the identifier locate field as one connected selector plus shared batch-value query using the semantic batch allocation: one value remains directly editable, multi-paste normalizes and de-duplicates values immediately, and review/clear stay directly reachable. Treat every permitted query field as belonging to exactly one user-configurable location: the aligned page row or the D1 filter drawer. Reserve nine of the minimum 24 tracks for localized query commands and cap page fields at fifteen tracks, so user placement stays stable across viewports instead of moving fields responsively. Keep the identifier field required and first; preserve values when fields move; persist only versioned stable field ids and never run a query when saving placement. Edit drawer fields in freight business groups using two readable columns and one native scroll owner.'],
+      decisions: ['Keep the identifier locate field as one connected selector plus shared batch-value query using the semantic batch allocation: one value remains directly editable, multi-paste normalizes and de-duplicates values immediately, and review/clear stay directly reachable. Treat every permitted query field as belonging to exactly one user-configurable location: the aligned page surface or the D1 filter drawer. Use one logical-unit grid with six minimum units, reserve two units for the localized query command group, and reject any placement that would exceed two rows. Keep the identifier field required and first; preserve values when fields move; persist only versioned stable field ids and never run a query when saving placement. Edit drawer fields in freight business groups using two readable columns and one native scroll owner.'],
       acceptance: [
         'At 1366, 1024 split, and wide viewports, the query row does not create a separate action band, adjacent query-action boxes keep the same 8px gap, and the table remains the dominant work surface.',
         'At compact table-toolbar width, create and batch remain reachable, optional export text collapses, pagination hides jumper then page-size, and total plus page navigation remain visible on one line.',
         'Vertical query and overlay forms use the shared 4px label-to-control rhythm through the Arco public label-column style.',
         'The advanced-filter grid uses the shared 12px column and 8px row gutter with zero form-item margin, so no page-local spacing layer enlarges the dense form rhythm.',
-        'At 1024, the identifier query keeps the largest field allocation, reset and advanced-filter keep visible labels, the configured page fields remain on one aligned row, and the 12 processing queues move to a deterministic second workflow line where they scroll only inside their own lane.',
+        'At 1024, the identifier query keeps the largest field allocation, reset and advanced-filter keep visible labels, the configured page fields and action group remain aligned within two rows, and the 12 processing queues move to a deterministic second workflow line where they scroll only inside their own lane.',
         'The document-number query accepts one direct value or up to 100 pasted values separated by whitespace or common punctuation, preserves first-seen order and case, removes duplicates, exposes the normalized values plus count, and matches any entered value within the selected identifier type.',
         'The advanced filter opens from the right at the shared D1 width, renders two field columns, and keeps the native Drawer body as its only vertical scroll owner.',
         'Query-field settings exposes ordered page and drawer lists with mouse drag, keyboard reordering, explicit move commands, restore defaults, capacity validation, and failure-preserving persistence; saving placement does not change query values, page, selection, or result data.',
@@ -105,6 +105,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
       { field: 'businessType', width: 'compact' },
       { field: 'customerName', width: 'standard' },
     ],
+    layoutContract: { maxRows: 2, minimumUnits: 6, actionUnits: 2, capacityUnits: 10 },
     advancedFields: [
       'operator',
       'pol',
@@ -124,10 +125,10 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
     ],
     personalization: {
       mode: 'page-and-drawer',
-      pageRows: 1,
-      minimumTracks: 24,
-      actionTracks: 9,
-      capacityTracks: 15,
+      pageRows: 2,
+      minimumUnits: 6,
+      actionUnits: 2,
+      capacityUnits: 10,
       requiredPageFields: ['keyword'],
       ordering: 'page-global-drawer-grouped',
       persistence: 'local-workspace',
@@ -141,6 +142,7 @@ export const EXPORT_ORDER_WORKBENCH_SPEC = definePesdpPageSpec({
     supportingColumns: ['updatedAt'],
     fixed: ['checkbox', 'sequence', 'orderNo', 'operations'],
     densityReason: 'The global mini density keeps the repeated operational list compact and consistent across workbenches.',
+    rowActions: { presentation: 'icon-tooltip', maxVisibleEntries: 3, directEntriesWithOverflow: 2, dangerPlacement: 'overflow-only' },
   },
   detail: { mode: 'none', focus: [], milestones: [] },
   actions: [

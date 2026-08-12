@@ -1,4 +1,4 @@
-import { QUERY_GRID_ITEM_SPANS } from '@/design-system/queryLayout';
+import { QUERY_GRID_UNIT_SPANS } from '@/design-system/queryLayout';
 import type { PesdpQueryFieldWidthRole } from '@/design-system/pesdpPageSpec';
 
 export interface QueryFieldPreferenceOption {
@@ -31,9 +31,9 @@ export const normalizeQueryFieldPlacement = (
     if (!pageSet.has(option.field) && !drawerFields.includes(option.field)) drawerFields.push(option.field);
   });
 
-  const usedTracks = queryFieldTrackUsage(pageFields, options);
-  const defaultTracks = queryFieldTrackUsage(defaults.pageFields, options);
-  if (!pageFields.length || usedTracks <= 0 || defaultTracks <= 0) {
+  const usedUnits = queryFieldUnitUsage(pageFields, options);
+  const defaultUnits = queryFieldUnitUsage(defaults.pageFields, options);
+  if (!pageFields.length || usedUnits <= 0 || defaultUnits <= 0) {
     return {
       pageFields: [...defaults.pageFields],
       drawerFields: [...defaults.drawerFields],
@@ -43,10 +43,39 @@ export const normalizeQueryFieldPlacement = (
   return { pageFields, drawerFields };
 };
 
-export const queryFieldTrackUsage = (fields: string[], options: QueryFieldPreferenceOption[]) => {
+export const queryFieldUnitUsage = (fields: string[], options: QueryFieldPreferenceOption[]) => {
   const optionByField = new Map(options.map((option) => [option.field, option]));
   return fields.reduce((total, field) => {
     const option = optionByField.get(field);
-    return total + (option ? QUERY_GRID_ITEM_SPANS[option.width] : 0);
+    return total + (option ? QUERY_GRID_UNIT_SPANS[option.width] : 0);
   }, 0);
 };
+
+export const queryFieldRows = (
+  fields: string[],
+  options: QueryFieldPreferenceOption[],
+  gridUnits: number,
+  actionUnits: number,
+) => {
+  const optionByField = new Map(options.map((option) => [option.field, option]));
+  const spans = fields.map((field) => optionByField.get(field)).filter(Boolean)
+    .map((option) => QUERY_GRID_UNIT_SPANS[option!.width]);
+  let rows = 1;
+  let used = 0;
+  spans.concat(actionUnits).forEach((span) => {
+    if (used > 0 && used + span > gridUnits) {
+      rows += 1;
+      used = 0;
+    }
+    used += span;
+  });
+  return rows;
+};
+
+export const queryFieldFitsWithinRows = (
+  fields: string[],
+  options: QueryFieldPreferenceOption[],
+  gridUnits: number,
+  actionUnits: number,
+  maxRows: number,
+) => queryFieldRows(fields, options, gridUnits, actionUnits) <= maxRows;

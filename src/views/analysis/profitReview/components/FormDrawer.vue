@@ -63,7 +63,7 @@ const handleCancel = () => {
     <template #title>{{ t('profit.form.title') }}</template>
     <div v-if="row && statusMeta" class="edit-body">
       <div class="edit-context">
-        <span class="edit-context__identity mono">{{ row.orderNo }}</span>
+        <span class="edit-context__identity tabular">{{ row.orderNo }}</span>
         <span class="s-pill" :data-s="statusMeta.tone">{{ t(`profit.status.${row.reviewStatus}`) }}</span>
         <span class="edit-context__meta">{{ row.customer }}</span>
       </div>

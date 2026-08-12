@@ -52,7 +52,7 @@ A full-width bordered query surface with a left-pinned capped grid and an unowne
 
 ### Shared Track Model
 
-Use one shared responsive track model so wider containers gain tracks instead of wider controls. A logical track stays roughly `40-56px` across supported desktop profiles at 100% zoom: `compact` spans 3, `standard` 4, `wide` / `composite` / `range` 6, and `batch` 8 tracks. The normal action slot spans 5 tracks, the wide three-command slot 9, and the expanded action slot 10 only when a proven localized command set needs it.
+Use one shared responsive track model so wider containers gain physical tracks instead of wider controls. A logical unit is the product-facing sizing contract: `compact` and `standard` use 1 unit; `wide`, `composite`, `range`, and `batch` use 2 units. The normal action slot uses 2 units and the wide three-command slot uses 3 units. Physical CSS tracks are an implementation detail derived from the query container.
 
 - Derive track count from the **query container's inner width**, not the browser width. Keep enough tracks for the supported 1024px desktop and add tracks as the container grows through 1440px and 1920px evidence.
 - Controls fill their semantic item, but the shared grid bounds the effective track size. Do not make a customer Select 400px wide merely because the monitor is wide.
@@ -63,7 +63,7 @@ Use one shared responsive track model so wider containers gain tracks instead of
 - Advanced drawers keep their documented two-column/one-column composition; list-row tracks do not leak into the drawer.
 
 Start with Arco Grid when its 24 columns satisfy all supported widths. When a fixed 24-column grid would either stretch fields or require a narrow left-pinned `max-width` on wide desktop, the shared `QueryFieldGrid` may use CSS Grid for layout only. Record the reusable gap as: `Arco's fixed 24-column model cannot preserve bounded semantic field widths while adding wide-desktop capacity.` Arco continues to own Form, controls, validation, focus, and component chrome.
-Reference algorithm: derive the minimum supported track count from the query container; reserve the localized `5/9/10`-track action item; map page fields to `3/4/6/8` spans; validate their sum against `minimumTracks * pageRows - actionTracks`; then verify wrapping and DOM/focus order at every larger profile. Implement normalization and capacity validation once in a shared component/composable, not in pages.
+Reference algorithm: derive the physical track count from the query container and convert it to logical units; map fields to the shared 1/2-unit roles; reserve a localized 2/3-unit action item; append actions after the final page field; then validate greedy row packing against `maxRows: 2`. Implement normalization and capacity validation once in a shared component/composable, not in pages.
 
 ### Space-Use Decision
 
@@ -99,21 +99,22 @@ Field count may prompt a complexity review, but it cannot promote/demote fields 
 ### Fixed Inline
 
 - Compose fields with Arco Form/Grid and keep query actions adjacent to the final field.
-- Declare `pageRows`, `minimumTracks`, `actionTracks`, and derived `capacityTracks` in `pageSpec.ts`; one row is the default.
-- Two rows require proven daily use, stable complete-row alignment, and first-viewport table evidence. Do not infer a second row from field count.
-- If a later field no longer fits, graduate to `page-and-drawer`; do not silently hide, truncate, or wrap it.
+- Declare the typed query layout contract in `pageSpec.ts`: `maxRows: 2`, `minimumUnits: 6`, `actionUnits: 2 | 3`, and derived `capacityUnits`.
+- The visible query surface has a hard two-row ceiling. Pack fields in order using logical units: ordinary controls use one unit; batch/composite identifiers and ranges use two; append the action group as the final grid item.
+- Reserve the action group's units before validating a placement. If the final action item would create a third row, reject the draft and move lower-frequency fields to the drawer; do not silently hide, truncate, stretch, or wrap it.
 
 ### Page And Drawer
 
 - Every permitted field belongs to exactly one location: ordered `pageFields` or ordered `drawerFields`. This is placement, not visibility.
+- Placement preferences control the compact page surface and its order; they do not define the query catalog. More filters is the complete editor for every permitted field, including fields currently placed on the page.
 - Keep at least one Locate field required on the page. Preserve its stable position when order has workflow meaning.
-- User placement is invariant across language and viewport. Responsive behavior changes track count/control width only; it never moves fields between locations.
+- User placement is invariant across language and viewport. Responsive behavior changes physical track count/control width only; it never changes logical field units or moves fields between locations.
 - The settings trigger stays with query/reset/filter actions and opens an Arco Drawer. The drawer provides page and drawer lists, mouse drag within/across lists, keyboard reordering, an explicit non-drag move command, restore default, cancel, capacity feedback, and one primary save.
-- Reject over-capacity drafts in the settings surface and keep them editable. Do not auto-drop the last field or save a layout that wraps.
+- Reject drafts that exceed either the logical capacity or the two-row limit in the settings surface and keep them editable. Do not auto-drop the last field or save a layout that wraps.
 - Persist versioned stable field IDs, never translated labels. Normalize unknown/duplicate/unauthorized IDs, restore required fields, and put newly introduced fields in the drawer. Invalid or over-capacity persisted state falls back to the typed default.
 - Moving or saving fields preserves every query value and does not run a query, reset pagination, clear selection, or change applied results. Query reset clears values without resetting placement; restore default changes placement without clearing values.
-- The filter entry shows the applied count for fields currently owned by the drawer. Open the drawer with a draft copied from query state; cancel/close discards draft edits, group clear affects only current drawer fields, and apply resets page 1 and runs the query.
-- Render drawer fields in business groups and honor saved order within each group. Empty groups disappear. The native Drawer body remains the one vertical scroll owner.
+- The filter entry shows the active count across the complete query catalog. Open the drawer with a draft copied from the current page query state; cancel/close discards draft edits, clear affects the complete catalog or its current business group, and apply commits all values, resets page 1, and runs the query.
+- Render the complete query catalog in business groups. Placement order may shape the compact page, but it must not remove page fields from More filters. Empty groups disappear. The native Drawer body remains the one vertical scroll owner.
 - When the drawer contains portaled Select or Date popups, set Drawer `esc-to-close="false"`: Escape belongs to the active popup, while drawer close and cancel remain explicit.
 
 ### Saved Query Workspace
@@ -255,6 +256,8 @@ Verify the selected placement mode against real content at `1024x768`, `1366x768
 - [ ] Wide layout adds track capacity without scaling type or making ordinary controls visibly oversized.
 - [ ] Permanent field order and keyboard order stay coherent when conditional fields appear, disappear, or wrap.
 - [ ] The advanced entry shows the number of applied hidden conditions.
+- [ ] More filters renders every permitted query field, including fields currently visible on the page; the placement settings drawer does not change this catalog.
+- [ ] Opening More filters copies all current page values, Apply commits all draft values, and Cancel leaves the applied/page values unchanged.
 - [ ] A non-empty advanced group shows its local count; clearing that group preserves conditions in every other group.
 - [ ] Direct three-state conditions have a visible selected value in default, edited, and reopened states.
 - [ ] `待应用` appears only while draft and applied states differ, and disappears after cancel or successful apply.

@@ -9,7 +9,7 @@
 
 ## 原则
 
-1. 页面、Drawer 与 Modal 表单统一 `size="small"`；`vxe-table` 行内控件显式 `size="mini"`（见 `component-size.md`）
+1. 页面、Drawer 与 Modal 表单统一 `size="small"`（由 App.vue `<a-config-provider size="small">` 继承，显式声明仅作可选文档）；`vxe-table` 行内控件显式 `size="mini"`，因为 mini 行内容盒 24px，`small` 28px 会裁切
 2. 先使用 Arco 原生控件、props、插槽与表单布局；垂直表单通过共享 `label-col-style` 公共配置使用 `--dense-gap-label`，不以全局 CSS 修正框架内部字号或皮肤
 3. 控件外观由 GI 负责；`filter-field` / `detail-form` / `detail-drawer` 等布局 class 只管理排列、间距和宽度
 4. 布局 class（`filter-field`、`detail-form-grid`）只管 **排列与栅格**，不管控件皮肤
@@ -25,6 +25,20 @@
 | `--dense-font-field` | 12px / 500 | 字段名 label |
 | `--dense-font-control` | 12px | 输入值 / placeholder |
 | `--dense-gap-label` | 4px | 字段名 → 控件 |
+
+## Size Contract（全局尺寸契约）
+
+项目使用 **一种业务密度**，不是一个字面 size prop：表单与普通控件继承 `small`；VXE 行内控件用 `mini` 以适配行内容盒。两个 surface 强制同一 prop 只会裁切表格控件或让页面控件过小。
+
+| Arco `size` | 使用范围 |
+|-------------|----------|
+| **`small`** | **唯一默认** — 表格之外的全部业务 UI |
+| `medium` / `large` | **禁止** 出现在 `src/views/**` 业务区（Arco 默认 medium 的 14px 文字破坏 typography 契约；large 仅营销/落地页） |
+| `mini` | **仅限 `vxe-table` 行内**（行操作按钮、可编辑单元格控件） |
+
+其他 surface 尺寸归属：table row action 为 24×24px minimum target，直出为业务动词文字按钮，`···` 为唯一 icon 触发器（见 `actions.md`）；VXE 行高与密度由全局 `size` 与 `table.md` 管理；Modal/Drawer 标题保持 GI 原生。
+
+禁止：per-module 控件高度 CSS（如 `.detail-form .arco-input { height: … }`）；VXE 行内出现 `size="small"` 或更大的 Arco 控件；低于 24×24px 的行操作 target。验证：`node scripts/check-spec.js` 与 `rg 'size="medium"|size="large"' src/views`。
 
 ## 组件默认态（Default）
 
@@ -106,7 +120,7 @@ import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle 
 - Arco 写法 / 校验：`form-rules.md`
 - 表单栅格布局：`detail-form.md`
 - 筛选区布局（不含控件皮肤）：`filter-layout.md`
-- `size="small"` 枚举：`component-size.md`
+- `size="small"` / `mini` 全局尺寸契约：见上文 Size Contract
 
 ## Release Gate
 

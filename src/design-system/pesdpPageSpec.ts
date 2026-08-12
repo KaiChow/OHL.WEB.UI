@@ -204,12 +204,18 @@ interface PesdpPageSpecBase {
     visibleFields: readonly string[];
     visibleFieldLayout: readonly PesdpQueryFieldLayout[];
     advancedFields: readonly string[];
+    layoutContract?: {
+      maxRows: 2;
+      minimumUnits: number;
+      actionUnits: 2 | 3;
+      capacityUnits: number;
+    };
     personalization?: {
       mode: 'page-and-drawer';
-      pageRows: 1 | 2;
-      minimumTracks: number;
-      actionTracks: number;
-      capacityTracks: number;
+      pageRows: 2;
+      minimumUnits: 6;
+      actionUnits: 2 | 3;
+      capacityUnits: number;
       requiredPageFields: readonly string[];
       ordering: 'page-global-drawer-grouped';
       persistence: 'local-workspace' | 'user-preference-api';
@@ -224,6 +230,12 @@ interface PesdpPageSpecBase {
     compositeColumns?: readonly string[];
     fixed?: readonly string[];
     densityReason?: string;
+    rowActions?: {
+      presentation: 'icon-tooltip';
+      maxVisibleEntries: 3;
+      directEntriesWithOverflow: 2;
+      dangerPlacement: 'overflow-only';
+    };
   };
   detail: PesdpDetailSpec;
   actions: readonly [PesdpActionSpec, ...PesdpActionSpec[]];

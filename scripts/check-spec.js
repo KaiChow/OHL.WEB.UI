@@ -171,6 +171,37 @@ const files = SCAN_DIRS.flatMap(collectFiles);
 const violations = [];
 const toRelativePath = (file) => relative(ROOT, file).replace(/\\/g, '/');
 
+const architectureContractPath = join(ROOT, 'src/design-system/systemArchitecture.ts');
+if (!existsSync(architectureContractPath)) {
+  violations.push({
+    rule: '项目必须提供 typed systemArchitecture.ts，声明运行时、目录、模块边界、复用、样式和迁移阶段',
+    file: 'src/design-system/systemArchitecture.ts',
+    line: 1,
+    content: 'missing system architecture contract',
+  });
+} else {
+  const architectureSource = readFileSync(architectureContractPath, 'utf8');
+  const requiredArchitectureMarkers = [
+    'defineSystemArchitectureSpec',
+    'baseline:',
+    'layers:',
+    'directories:',
+    'boundaries:',
+    'reuse:',
+    'styles:',
+    'migrationStages:',
+  ];
+  const missingArchitectureMarkers = requiredArchitectureMarkers.filter((marker) => !architectureSource.includes(marker));
+  if (missingArchitectureMarkers.length) {
+    violations.push({
+      rule: 'systemArchitecture.ts 必须完整声明 baseline/layers/directories/boundaries/reuse/styles/migrationStages',
+      file: 'src/design-system/systemArchitecture.ts',
+      line: 1,
+      content: `missing: ${missingArchitectureMarkers.join(', ')}`,
+    });
+  }
+}
+
 function getObjectProperty(objectNode, name) {
   return objectNode?.properties.find((property) => ts.isPropertyAssignment(property)
     && ((ts.isIdentifier(property.name) && property.name.text === name)
@@ -185,6 +216,11 @@ function getObjectLiteralProperty(objectNode, name) {
 function getStringProperty(objectNode, name) {
   const property = getObjectProperty(objectNode, name);
   return property && ts.isStringLiteralLike(property.initializer) ? property.initializer.text : undefined;
+}
+
+function getNumericProperty(objectNode, name) {
+  const property = getObjectProperty(objectNode, name);
+  return property && ts.isNumericLiteral(property.initializer) ? Number(property.initializer.text) : undefined;
 }
 
 function getStringArrayProperty(objectNode, name) {
@@ -239,6 +275,20 @@ for (const file of files) {
         content: line.trim().slice(0, 120),
       });
     }
+  }
+}
+
+for (const file of files.filter((file) => file.replace(/\\/g, '/').includes('/src/'))) {
+  const source = readFileSync(file, 'utf8');
+  if (/\bmono\b/.test(source)) {
+    const lines = source.split('\n');
+    const lineIndex = lines.findIndex((line) => /\bmono\b/.test(line));
+    violations.push({
+      rule: '业务源码禁止使用 mono 字体变体；统一继承全局产品字体，数字对齐仅使用 tabular-nums',
+      file: toRelativePath(file),
+      line: lineIndex + 1,
+      content: lines[lineIndex].trim().slice(0, 140),
+    });
   }
 }
 
@@ -901,6 +951,7 @@ for (const specFile of pageSpecFiles) {
   const declaredAdvanced = getStringArrayProperty(query, 'advancedFields') ?? [];
   const queryStrategy = getStringProperty(query, 'strategy');
   const queryLayout = getStringProperty(query, 'layout');
+  const layoutContract = getObjectLiteralProperty(query, 'layoutContract');
   const visibleFieldLayout = getObjectArrayProperty(query, 'visibleFieldLayout') ?? [];
   const visibleLayoutFields = visibleFieldLayout.map((entry) => getStringProperty(entry, 'field'));
   const visibleLayoutRoles = visibleFieldLayout.map((entry) => getStringProperty(entry, 'width'));
@@ -974,21 +1025,38 @@ for (const specFile of pageSpecFiles) {
       content: `strategy=${queryStrategy}, total=${declaredTotal}, advanced=${declaredAdvanced.length}`,
     });
   }
+  if (declaredTotal > 0) {
+    const maxRows = getNumericProperty(layoutContract, 'maxRows');
+    const minimumUnits = getNumericProperty(layoutContract, 'minimumUnits');
+    const actionUnits = getNumericProperty(layoutContract, 'actionUnits');
+    const capacityUnits = getNumericProperty(layoutContract, 'capacityUnits');
+    if (maxRows !== 2
+      || minimumUnits !== 6
+      || ![2, 3].includes(actionUnits)
+      || capacityUnits !== minimumUnits * maxRows - actionUnits) {
+      violations.push({
+        rule: '所有有查询项的 pageSpec 必须声明统一查询布局契约：最多两行、最小六份基础网格、操作区 2/3 份及可计算容量',
+        file: relPath,
+        line: 1,
+        content: `rows=${maxRows}, minimumUnits=${minimumUnits}, actionUnits=${actionUnits}, capacityUnits=${capacityUnits}`,
+      });
+    }
+  }
   const personalization = getObjectLiteralProperty(query, 'personalization');
   if (queryStrategy === 'page-and-drawer') {
     const pageRows = Number(getObjectProperty(personalization, 'pageRows')?.initializer?.text);
-    const minimumTracks = Number(getObjectProperty(personalization, 'minimumTracks')?.initializer?.text);
-    const actionTracks = Number(getObjectProperty(personalization, 'actionTracks')?.initializer?.text);
-    const capacityTracks = Number(getObjectProperty(personalization, 'capacityTracks')?.initializer?.text);
+    const minimumUnits = Number(getObjectProperty(personalization, 'minimumUnits')?.initializer?.text);
+    const actionUnits = Number(getObjectProperty(personalization, 'actionUnits')?.initializer?.text);
+    const capacityUnits = Number(getObjectProperty(personalization, 'capacityUnits')?.initializer?.text);
     const requiredPageFields = getStringArrayProperty(personalization, 'requiredPageFields') ?? [];
-    const widthSpans = { compact: 3, standard: 4, wide: 6, composite: 6, range: 6, batch: 8 };
-    const defaultPageTracks = visibleLayoutRoles.reduce((total, role) => total + (widthSpans[role] ?? 0), 0);
+    const widthSpans = { compact: 1, standard: 1, wide: 2, composite: 2, range: 2, batch: 2 };
+    const defaultPageUnits = visibleLayoutRoles.reduce((total, role) => total + (widthSpans[role] ?? 0), 0);
     const validPersonalization = getStringProperty(personalization, 'mode') === 'page-and-drawer'
-      && [1, 2].includes(pageRows)
-      && Number.isInteger(minimumTracks)
-      && Number.isInteger(actionTracks)
-      && capacityTracks === minimumTracks * pageRows - actionTracks
-      && defaultPageTracks <= capacityTracks
+      && pageRows === 2
+      && minimumUnits === 6
+      && [2, 3].includes(actionUnits)
+      && capacityUnits === minimumUnits * pageRows - actionUnits
+      && defaultPageUnits <= capacityUnits
       && requiredPageFields.length > 0
       && requiredPageFields.every((field) => declaredVisible.includes(field))
       && getStringProperty(personalization, 'ordering') === 'page-global-drawer-grouped'
@@ -998,7 +1066,7 @@ for (const specFile of pageSpecFiles) {
         rule: 'page-and-drawer 必须声明最小宽度对齐容量、必需页面字段、排序与持久化契约，默认页面字段不得超容量',
         file: relPath,
         line: 1,
-        content: `rows=${pageRows}, minimum=${minimumTracks}, actions=${actionTracks}, capacity=${capacityTracks}, defaultUsage=${defaultPageTracks}`,
+        content: `rows=${pageRows}, minimum=${minimumUnits}, actions=${actionUnits}, capacity=${capacityUnits}, defaultUsage=${defaultPageUnits}`,
       });
     }
     if (routeView) {
@@ -1057,6 +1125,26 @@ for (const specFile of pageSpecFiles) {
       line: 1,
       content: 'missing vxe-table for declared list page',
     });
+  }
+  if (['query-list', 'management-list', 'workbench'].includes(tableKind)) {
+    const rowActions = getObjectLiteralProperty(table, 'rowActions');
+    const rowActionContract = {
+      presentation: getStringProperty(rowActions, 'presentation'),
+      maxVisibleEntries: getNumericProperty(rowActions, 'maxVisibleEntries'),
+      directEntriesWithOverflow: getNumericProperty(rowActions, 'directEntriesWithOverflow'),
+      dangerPlacement: getStringProperty(rowActions, 'dangerPlacement'),
+    };
+    if (rowActionContract.presentation !== 'icon-tooltip'
+      || rowActionContract.maxVisibleEntries !== 3
+      || rowActionContract.directEntriesWithOverflow !== 2
+      || rowActionContract.dangerPlacement !== 'overflow-only') {
+      violations.push({
+        rule: '主列表 pageSpec 必须声明统一行操作契约：icon-tooltip、最多 3 个可见入口、4+ 时 2 个直出、危险动作仅 More',
+        file: relPath,
+        line: 1,
+        content: JSON.stringify(rowActionContract),
+      });
+    }
   }
 
   const surfacesProperty = getObjectProperty(spec, 'surfaces');
@@ -1269,7 +1357,8 @@ for (const file of files) {
   const isWorkbenchList = /<vxe-table\b[\s\S]*?\bshow-overflow=(['"])title\1/.test(content);
   for (const match of content.matchAll(opColumnPattern)) {
     const block = match[0];
-    if (!block.includes('class="row-actions"')) {
+    const usesSharedRowActions = block.includes('<WorkbenchRowActions');
+    if (!block.includes('class="row-actions"') && !usesSharedRowActions) {
       violations.push({
         rule: 'VXE 操作列必须使用 row-actions dock 承载行级按钮',
         file: relPath,
@@ -1279,6 +1368,15 @@ for (const file of files) {
       continue;
     }
     if (!isWorkbenchList) continue;
+    if (isWorkbenchList && !usesSharedRowActions) {
+      violations.push({
+        rule: '列表主表操作列必须使用共享 WorkbenchRowActions，统一 icon + Tooltip 与 2+More 分配规则',
+        file: relPath,
+        line: getLineNumber(content, match.index),
+        content: block.split('\n').slice(0, 6).join(' ').trim().slice(0, 140),
+      });
+    }
+    if (usesSharedRowActions) continue;
     const columnTag = block.match(/^<vxe-column\b[^>]*>/)?.[0] || '';
     if (!/\balign="left"/.test(columnTag)) {
       violations.push({

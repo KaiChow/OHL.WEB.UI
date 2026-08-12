@@ -59,13 +59,13 @@ export const TEMPLATE_MANAGEMENT_PAGE_SPEC = definePesdpPageSpec({
     },
   },
   surfaces: [
-    { id: 'template-query', role: 'command', owns: ['visible-query', 'expanded-query', 'query-actions'], primaryAction: 'template-query', implementation: 'shared-pattern', whyArcoNotEnough: 'The shared semantic grid keeps bounded field widths across shell breakpoints.' },
+    { id: 'template-query', role: 'command', owns: ['visible-query', 'advanced-query-drawer', 'query-actions'], primaryAction: 'template-query', implementation: 'shared-pattern', whyArcoNotEnough: 'The shared semantic grid and advanced drawer keep bounded field widths across shell breakpoints without creating a third inline query row.' },
     { id: 'template-results', role: 'data', owns: ['table-data', 'pagination', 'column-settings'], primaryAction: 'template-create', implementation: 'shared-pattern', whyArcoNotEnough: 'The project VXE baseline owns dense table behavior.' },
     { id: 'template-editor', role: 'supporting', owns: ['create-form', 'edit-form'], primaryAction: 'template-save', implementation: 'arco' },
   ],
   query: {
     totalFields: 9,
-    strategy: 's2-expand',
+    strategy: 's3-drawer',
     layout: 'semantic-grid-v1',
     visibleFields: ['templateName', 'pol', 'pod', 'carrier', 'contractNo'],
     visibleFieldLayout: [
@@ -76,6 +76,7 @@ export const TEMPLATE_MANAGEMENT_PAGE_SPEC = definePesdpPageSpec({
       { field: 'contractNo', width: 'standard' },
     ],
     advancedFields: ['creator', 'peer', 'createdRange', 'updatedRange'],
+    layoutContract: { maxRows: 2, minimumUnits: 6, actionUnits: 3, capacityUnits: 9 },
   },
   table: {
     kind: 'management-list',
@@ -85,6 +86,7 @@ export const TEMPLATE_MANAGEMENT_PAGE_SPEC = definePesdpPageSpec({
     supportingColumns: ['peer', 'creator', 'createdAt', 'updatedAt', 'viewers'],
     fixed: ['templateName', 'operations'],
     densityReason: 'Template operators compare many similar records and need maximum scan throughput without losing row identity.',
+    rowActions: { presentation: 'icon-tooltip', maxVisibleEntries: 3, directEntriesWithOverflow: 2, dangerPlacement: 'overflow-only' },
   },
   detail: { mode: 'none', focus: [], milestones: [] },
   actions: [

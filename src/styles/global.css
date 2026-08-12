@@ -6,7 +6,8 @@ body,
   height: 100%;
   margin: 0;
   min-width: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, "PingFang SC", "Hiragino Sans GB", "HarmonyOS Sans SC", "Source Han Sans SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  overflow: hidden;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Noto Sans", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, "Open Sans", "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
   font-size: 13px;
   -webkit-font-smoothing: antialiased;
 }
@@ -77,7 +78,7 @@ body,
   /* 别名：全页表单/详情页头 F0 */
   --dense-font-filter-label: var(--dense-font-field);
   /* 别名：与 F4 相同，禁止再分档 */
-  --dense-icon-action: 14px;
+  --dense-icon-action: 16px;
   /* 仅 icon-only 按钮图形，非正文字号 */
 
   /* 浮层宽度（Modal / Drawer — 见 overlay-dimensions.md） */
@@ -118,7 +119,7 @@ body,
   /* 表单列 / 栅格 col-gap */
   --dense-gap-inline: 8px;
   /* 按钮组、统计项、head 内元素 */
-  --dense-gap-label: 4px;
+  --dense-gap-label: 0;
   /* 字段 label → 控件 */
   --dense-pad-section-y: 10px;
   /* 分区 body 上下 */
@@ -349,12 +350,6 @@ body {
 
 .danger-opt:hover {
   color: var(--dense-danger-7);
-}
-
-.mono {
-  font-family: "SF Mono", "Cascadia Mono", "JetBrains Mono", Consolas, "Liberation Mono", monospace;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0;
 }
 
 .tabular {

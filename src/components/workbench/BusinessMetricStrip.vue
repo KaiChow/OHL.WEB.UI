@@ -4,7 +4,6 @@ export interface BusinessMetricItem {
   label: string;
   value: string;
   tone?: 'normal' | 'warning' | 'danger';
-  mono?: boolean;
 }
 
 defineProps<{ items: readonly BusinessMetricItem[] }>();
@@ -14,7 +13,7 @@ defineProps<{ items: readonly BusinessMetricItem[] }>();
   <div class="business-metric-strip">
     <div v-for="item in items" :key="item.id" class="business-metric-strip__item" :data-tone="item.tone || 'normal'">
       <span class="business-metric-strip__label">{{ item.label }}</span>
-      <span class="business-metric-strip__value" :class="{ mono: item.mono }">{{ item.value }}</span>
+      <span class="business-metric-strip__value">{{ item.value }}</span>
     </div>
   </div>
 </template>

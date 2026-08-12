@@ -4,7 +4,7 @@
  * =====================================================
  */
 
-@vxe-font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, "PingFang SC", "Hiragino Sans GB", "HarmonyOS Sans SC", "Source Han Sans SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+@vxe-font-family: Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Noto Sans", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, "Open Sans", "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 
 @vxe-font-size-xs: 12px;
 
@@ -19,18 +19,3 @@
 @vxe-font-weight-medium: 500;
 
 @vxe-font-weight-bold: 600;
-
-/**
- * 业务语义字体（系统栈，不引入 webfont）
- * - id：单号等宽，便于扫读比对
- * - money / number：UI 字体 + tabular-nums 对齐
- * - number：沿用 UI 字体 + tabular-nums（见 business/type）
- * - log：日志等宽偏技术感
- */
-
-@vxe-id-font: "SF Mono", "Cascadia Mono", "JetBrains Mono", Consolas, "Liberation Mono", monospace;
-
-/* 保留别名：历史引用；普通数字改走 UI + tabular，不再强制等宽 */
-@vxe-number-font: @vxe-font-family;
-
-@vxe-log-font: Consolas, "Cascadia Mono", "SF Mono", Menlo, monospace;

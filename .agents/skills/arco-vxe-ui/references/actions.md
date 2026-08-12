@@ -8,7 +8,7 @@ Arco `a-button` has **5 types** and **4 statuses**. Status can combine with any 
 <a-button type="primary" status="danger">...</a-button>
 ```
 
-All operational pages inherit `size="small"` from the application ConfigProvider unless a documented hero/empty-state exception exists. Full mapping: `references/component-size.md`.
+All operational pages inherit `size="small"` from the application ConfigProvider unless a documented hero/empty-state exception exists. Full mapping: `references/form-field.md` Size Contract.
 
 **Do not override form controls to `size="medium"` or `size="large"`** in `src/views`; table-row controls remain the explicit `size="mini"` exception.
 
@@ -147,11 +147,11 @@ text      → 重置、刷新、列设置、复制、清除；行内业务动词
 | 详情页头 | — | — | 复制/归档/更多 | — | 关闭 |
 | 详情模块头 | — | 模块主操作（添加） | — | — | 复制、清除 |
 | 子表/子面板头 | — | 添加明细、添加行 | — | 空状态「添加」 | — |
-| 表格行内 | 行编辑保存 ×1 | — | 行编辑取消 | — | 主列表业务动词文字按钮；仅 `···` 为 icon-only |
+| 表格行内 | 行编辑保存 ×1 | — | 行编辑取消 | — | 主列表使用共享 icon + Tooltip 行操作；仅 More 入口打开文字下拉 |
 | 详情吸底 | 保存 ×1 | — | 提交审核、发布、输出 | — | 废弃 danger |
 | 弹窗 footer | 确定 ×1 | — | 取消 | — | 删除 danger（左侧） |
 
-**同一作用域内**：primary ≤ 1。生产作业台的高频可逆动作保持直接可见并按业务命令与工具分组；低频、危险或导致换行/挤压的动作进入 dropdown 或确认流。主表操作列不按按钮数量套公式，而按频率、风险、可识别性和可用空间决定直出。
+**同一作用域内**：primary ≤ 1。主表先按频率、风险、可识别性和权限判断合法动作，再按稳定的三入口规则呈现：1–3 个合法动作全部直出；4 个及以上只直出前两个合格动作，第三个入口固定为 More，其余进入下拉。危险或显式要求收纳的动作始终进入 More。
 
 ---
 
@@ -346,33 +346,22 @@ Footer 布局与完整示例见 `modal.md`；本节只约束按钮层级。
 
 | 场景 | 直出 | 危险操作 |
 |------|------|----------|
-| **列表主表** | 高频、低风险、单行可读且不挤压业务数据的业务动词 | 永远在 `···` 内 + `danger-opt`，点击后打开独立确认 Modal |
+| **列表主表** | 高频、低风险动作的 Arco icon-only button + Tooltip；最多两个直出动作（有 More 时） | 永远在 More 内 + `danger-opt`，点击后打开独立确认 Modal |
 | **详情可编辑子表** | 与行编辑任务直接相关且保持紧凑可辨识的动作 | 允许明确的 danger icon + `a-popconfirm`（行编辑场景） |
 
 ```vue
-<!-- 列表：经频率与空间验证后直出的业务动词 + More（含危险项） -->
-<a-space class="row-actions" :size="2">
-  <a-button size="mini" type="text" class="row-action-btn" @click="openStatusModal(row)">修改状态</a-button>
-  <a-button size="mini" type="text" class="row-action-btn row-action-btn--secondary" @click="handleAssign(row)">分配给我</a-button>
-  <a-dropdown trigger="click">
-    <a-button size="mini" type="text" class="row-action-btn row-action-btn--more" aria-label="更多操作"><icon-more /></a-button>
-    <template #content>
-      <a-doption @click="handleFee(row)">生成费用</a-doption>
-      <a-divider :margin="4" />
-      <a-doption class="danger-opt" @click="openVoidConfirm(row)">作废订单</a-doption>
-    </template>
-  </a-dropdown>
-</a-space>
+<!-- 列表：共享组件负责 1–3 直出、4+ 两个直出 + More，以及危险动作收纳。 -->
+<WorkbenchRowActions :actions="getRowActions(row)" :more-label="t('common.moreActions')" />
 ```
 
-- 直出用**文字按钮**（业务动词，无学习成本）；`···` 是操作列唯一允许的 icon-only 触发器（配 `aria-label="更多操作"` + Tooltip）
-- 当存在明确的当前下一动作时，它保留 Arco 主色强调；辅助直出动作使用共享 `row-action-btn--secondary` 中性色，`row-action-btn--more` 同样中性。没有明确主次时宁可全部中性，禁止把所有可点击项染成同一种蓝色。
-- 行内控件必须 `size="mini"`（mini 行内容盒 24px，small 28px 会裁切）
-- 操作列内按钮使用 Arco `a-space.row-actions` 承载；更多使用 `row-action-btn--more`
+- 直出使用 Arco icon-only button，必须由 Tooltip 和业务化 `aria-label` 提供可发现性；图标只表达明确的系统动作，菜单选项保持文字优先。
+- 1–3 个合法动作全部直出；4 个及以上只直出前两个，第三个可见入口固定为 More；危险动作始终进入 More。
+- 行内控件必须 `size="mini"`；共享行操作使用 16px 图标与 28×28px 命中区，保持 mini 行密度而不牺牲可发现性。
+- 操作列统一使用共享 `WorkbenchRowActions`，其内部使用 Arco `a-space.row-actions` 和原生 Dropdown。
 - 主列表操作单元格统一左对齐，动作顺序固定为 A → B → `···`；条件动作缺失时禁止重新居中剩余按钮
 - `row-actions` 只负责水平节奏，不画常驻边框/背景/阴影，也不写页面局部居中 CSS
 - 列表主表禁止直出 `status="danger"`；禁止 `outline` 铺满操作列
-- 操作列按最长合法多语言操作组合确定一个稳定宽度；规范不规定像素值
+- 操作列按共享组件的可见入口和最长合法本地化内容确定一个稳定宽度；禁止按单一语言或单个词临时量列宽。
 
 ---
 
@@ -488,12 +477,12 @@ Danger rules:
 可见性与收纳
 □ 高频、低风险、可逆动作直接可见；低频动作进入 dropdown；危险动作隔离到末组
 □ 高密度主表只直出有频率证据、低风险、单行可读且不挤压业务数据的动作；其余进入 More
-□ 核心业务流程使用紧凑业务动词文字按钮；操作列只有 `···` More 触发器允许 icon-only
+□ 主表行操作统一使用 Arco icon + Tooltip + 业务 `aria-label`；1–3 个直出，4 个及以上为两个直出 + More
 □ 窄工作区先把熟悉工具图标化，再收纳低频动作；不得隐藏 Primary 或造成控件重叠/换行
 
 内容与可访问性
 □ icon-only = Arco icon + Tooltip + 业务化 aria-label；不能只靠 title 或颜色
-□ icon 14–16px；常规点击热区 ≥ 28×28px，高密度表格最低 ≥ 24×24px
+□ icon 16px；常规点击热区 ≥ 28×28px，高密度表格的共享行操作也保持 ≥ 28×28px
 □ Dropdown 选项默认文字；危险项使用 danger 语义、位于末组并与普通项分隔
 □ 文案必须包含对象或结果，禁止“处理/确定/操作”等脱离上下文的泛化动词
 

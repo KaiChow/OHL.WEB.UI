@@ -35,9 +35,10 @@ export const PROFIT_REVIEW_SPEC = definePesdpPageSpec({
       { field: 'owner', width: 'compact' },
       { field: 'updatedRange', width: 'range' },
     ],
+    layoutContract: { maxRows: 2, minimumUnits: 6, actionUnits: 2, capacityUnits: 10 },
     advancedFields: [],
   },
-  table: { kind: 'workbench', rowBanding: 'striped', identityColumns: ['sequence', 'orderNo', 'reviewStatus'], decisionColumns: ['riskLevel', 'grossMarginRate', 'owner'], supportingColumns: ['updatedAt'], fixed: ['checkbox', 'sequence', 'orderNo', 'operations'], densityReason: 'Profit review is a repeated operator queue with scan-first rows and continuous row references.' },
+  table: { kind: 'workbench', rowBanding: 'striped', identityColumns: ['sequence', 'orderNo', 'reviewStatus'], decisionColumns: ['riskLevel', 'grossMarginRate', 'owner'], supportingColumns: ['updatedAt'], fixed: ['checkbox', 'sequence', 'orderNo', 'operations'], densityReason: 'Profit review is a repeated operator queue with scan-first rows and continuous row references.', rowActions: { presentation: 'icon-tooltip', maxVisibleEntries: 3, directEntriesWithOverflow: 2, dangerPlacement: 'overflow-only' } },
   detail: {
     mode: 'display-first',
     focus: ['riskItems', 'reviewNote', 'timeline'],
