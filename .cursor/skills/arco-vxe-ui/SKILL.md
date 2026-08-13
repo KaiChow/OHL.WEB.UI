@@ -36,7 +36,9 @@ If business object, user job, legal action, API behavior, or permission source c
 
 ## Evidence Artifact Ownership
 
-Store committed viewport and state screenshots under `docs/ui-acceptance/<route-or-feature>/`. Use `output/playwright/` for temporary local captures. Acceptance artifacts must never be written to the repository root; screenshots are evidence records, not runtime assets.
+Store committed viewport and state screenshots under `docs/ui-acceptance/<route-or-feature>/`. Every routed page must own a `docs/ui-acceptance/<route path basename>/` directory holding at least one real captured evidence file (png/jpg/webp/md); `scripts/check-spec.js` enforces this coverage and rejects route basename collisions. Feature-level evidence directories may complement routed-page coverage but never replace it. Use `output/playwright/` for temporary local captures. Acceptance artifacts must never be written to the repository root; screenshots are evidence records, not runtime assets.
+
+Evidence lifecycle: a routed page keeps one canonical baseline set with stable filenames (viewport/state), overwritten on every acceptance — evidence records current truth, not an archive. Iteration evidence (dated files, before/after comparisons) is transient and must be deleted at delivery once the route baseline is refreshed; git history is the audit trail, not the directory. The static gate checks presence, never volume, so cleanup cannot break it while the baseline set exists.
 
 ## Specification Coverage
 
@@ -95,6 +97,7 @@ Any failed applicable item blocks `sellable-saas-grade`; a target in `pageSpec.t
 - GI is the only Arco baseline/palette; no theme adapter or page-local component skin.
 - vxe-table appearance is owned by `src/styles/vxe-theme/` (business tokens injected into official `--vxe-*` variables) plus the global workbench `border`/`stripe` defaults in `main.ts`; that directory is the only place allowed to declare `--vxe-*` variables or touch `.vxe-*` selectors. Typed table roles may choose row banding through the public `stripe` prop. Global CSS must not target `.arco-*`, `.vxe-*`, framework data attributes, or declare `--vxe-*` variables.
 - Use `vxe-table`, never `a-table`.
+- Modal/footer button labels come from the `actions.md` Label Lexicon (`取消`/`确定`/`提交`/`关闭` by scenario, confirm dialogs use `确认`+verb); query text inputs submit on Enter; business text inputs declare contract-backed `max-length`.
 - Main-list and child-table roles are declared by the page specification and VXE public configuration, never a prescribed CSS class name. Borders, row height, and colors come from the global theme; density uses `size`, and stable row banding uses typed `rowBanding` plus VXE's public `stripe` prop. The global default size is `mini`; pages must not set `border="none"`, dynamic banding from current row count, row heights, or table appearance CSS.
 - Status: `.s-pill[data-s]`; never color the whole row by status or rely on color alone.
 - Arco form and business controls inherit the app-wide `small` default; Arco controls rendered inside `vxe-table` rows must explicitly use `size="mini"` (the mini row content box is 24px — `small` clips); one `type="primary"` per action scope.
@@ -112,7 +115,7 @@ Any failed applicable item blocks `sellable-saas-grade`; a target in `pageSpec.t
 
 For skill changes: run `npm run validate-ui-skill`, then `npm run sync-ui-skill`.
 
-For UI code: run `node scripts/check-spec.js` and `npm run build`. The checker discovers routed `src/views` pages, colocated `pageSpec.ts` files, and project feature contracts; a new business route must enter the same gate without script path edits. When visual or interaction quality is in scope, inspect the real route at `1024x768`, `1366x768`, one wide desktop viewport at least 1440px wide, and 200% zoom; add deterministic state scenarios required by the page spec. Commercial claims must pass all gates in `product-grade-evaluation.md` with recorded evidence.
+For UI code: run `node scripts/check-spec.js` and `npm run build`. The checker discovers routed `src/views` pages, colocated `pageSpec.ts` files, project feature contracts, and per-route `docs/ui-acceptance/<route basename>/` evidence coverage; a new business route must enter the same gate without script path edits, and it fails until real-route evidence is committed. When visual or interaction quality is in scope, inspect the real route at `1024x768`, `1366x768`, one wide desktop viewport at least 1440px wide, and 200% zoom; add deterministic state scenarios required by the page spec. Commercial claims must pass all gates in `product-grade-evaluation.md` with recorded evidence.
 
 Follow `.cursor/rules/adversarial-review.mdc` before delivery. Report only evidence actually produced and list remaining blockers or unverified states.
 

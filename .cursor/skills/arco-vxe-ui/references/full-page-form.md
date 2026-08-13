@@ -38,11 +38,14 @@ Prefer **drawer** when user must keep list context. Use **full page** when creat
   <footer class="xf-footer">
     <a-row justify="space-between" align="center">
       <a-col><a-button size="small" type="text" status="danger" @click="handleAbandon">废弃</a-button></a-col>
-      <a-col><a-space :size="8"><a-button size="small" @click="handleCancel">取消</a-button><a-button size="small" type="outline" @click="saveDraft">存草稿</a-button><a-button size="small" type="primary" :loading="submitting" @click="handleSubmit">提交</a-button></a-space></a-col>
+      <a-col><a-space :size="8"><a-button size="small" @click="handleCancel">取消</a-button><a-button size="small" type="outline" @click="saveDraft">保存草稿</a-button><a-button size="small" type="primary" :loading="submitting" @click="handleSubmit">提交</a-button></a-space></a-col>
     </a-row>
   </footer>
 </div>
 ```
+
+页脚按钮文案遵循 `actions.md` 的 Label Lexicon：整页表单固定 `取消` + `保存草稿` + `提交`（流程节点用业务动词），禁止换成弹窗的 `确定`。
+
 
 `xf-wrap`, `xf-head`, `xf-body`, `xf-footer` are page-scoped shell hooks. Promote repeated shell behavior to a shared Vue component, not `global.css`.
 
@@ -58,7 +61,7 @@ Prefer **drawer** when user must keep list context. Use **full page** when creat
 | Button | Type | Notes |
 |--------|------|-------|
 | 取消 | default button | back / close |
-| 存草稿 | outline | reversible |
+| 保存草稿 | outline | reversible |
 | 提交 | **primary** — one only | `:loading="submitting"` |
 | 废弃 | `text` + `danger`, separated left | confirm |
 

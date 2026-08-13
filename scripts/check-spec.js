@@ -374,14 +374,18 @@ const packageJson = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))
 const mainTs = readFileSync(join(ROOT, 'src/main.ts'), 'utf8');
 const routerFiles = collectFiles('src/router').filter((file) => file.endsWith('.ts'));
 const routedViewFiles = new Set();
+const routedPages = [];
 for (const routerFile of routerFiles) {
   const source = readFileSync(routerFile, 'utf8');
-  for (const match of source.matchAll(/component\s*:\s*\(\)\s*=>\s*import\((['"])([^'"]+\.vue)\1\)/g)) {
-    const importPath = match[2];
+  for (const match of source.matchAll(/path\s*:\s*['"]([^'"]+)['"][\s\S]*?component\s*:\s*\(\)\s*=>\s*import\((['"])([^'"]+\.vue)\2\)/g)) {
+    const routePath = match[1];
+    const importPath = match[3];
     const routeView = importPath.startsWith('@/')
       ? resolve(ROOT, 'src', importPath.slice(2))
       : resolve(dirname(routerFile), importPath);
-    if (toRelativePath(routeView).startsWith('src/views/')) routedViewFiles.add(routeView);
+    if (!toRelativePath(routeView).startsWith('src/views/')) continue;
+    routedViewFiles.add(routeView);
+    routedPages.push({ routePath, viewFile: routeView });
   }
 }
 
@@ -511,6 +515,39 @@ for (const routeView of routedViewFiles) {
     file: toRelativePath(routeView),
     line: 1,
     content: `missing ${toRelativePath(specFile)}`,
+  });
+}
+
+// 验收证据覆盖门：每个路由页面必须在 docs/ui-acceptance/<路由 basename>/ 提交真实路由截图证据。
+const ACCEPTANCE_EVIDENCE_EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.md'];
+const acceptanceSlugOwners = new Map();
+for (const { routePath, viewFile } of routedPages) {
+  const slug = routePath.split('/').filter(Boolean).pop();
+  if (!slug) continue;
+  if (acceptanceSlugOwners.has(slug)) {
+    violations.push({
+      rule: '路由 path basename 必须唯一，否则 docs/ui-acceptance 验收证据目录无法唯一映射',
+      file: toRelativePath(viewFile),
+      line: 1,
+      content: `${slug} 同时被 ${acceptanceSlugOwners.get(slug)} 与 ${routePath} 使用`,
+    });
+    continue;
+  }
+  acceptanceSlugOwners.set(slug, routePath);
+  const evidenceDir = join(ROOT, 'docs/ui-acceptance', slug);
+  const hasEvidence = existsSync(evidenceDir)
+    && readdirSync(evidenceDir).some((name) => {
+      const full = join(evidenceDir, name);
+      return statSync(full).isFile()
+        && ACCEPTANCE_EVIDENCE_EXTS.includes(extname(name).toLowerCase())
+        && statSync(full).size > 0;
+    });
+  if (hasEvidence) continue;
+  violations.push({
+    rule: '每个业务路由必须在 docs/ui-acceptance/<路由 basename>/ 提交真实路由验收截图证据（至少 1 个 png/jpg/webp/md 文件）',
+    file: toRelativePath(viewFile),
+    line: 1,
+    content: `missing docs/ui-acceptance/${slug}/ evidence for route ${routePath}`,
   });
 }
 
@@ -1691,6 +1728,23 @@ if (existsSync(globalCssFile)) {
       file: toRelativePath(globalCssFile),
       line: i + 1,
       content: trimmed.slice(0, 140),
+    });
+  }
+}
+
+// 查询组件的文本输入必须支持 Enter 触发查询（a-textarea 多值编辑器除外）。
+for (const file of files) {
+  if (!file.endsWith('.vue') || !/query/i.test(file)) continue;
+  const content = readFileSync(file, 'utf8');
+  const relPath = toRelativePath(file);
+  for (const match of content.matchAll(/<a-input(?![\w-])((?:"[^"]*"|'[^']*'|[^>"'])*)>/g)) {
+    const tag = match[0];
+    if (/@(?:keydown\.enter|press-enter)|:on-press-enter/.test(tag)) continue;
+    violations.push({
+      rule: '查询文本输入必须绑定 Enter 触发查询（@press-enter / @keydown.enter）',
+      file: relPath,
+      line: content.slice(0, match.index).split('\n').length,
+      content: tag.replace(/\s+/g, ' ').slice(0, 140),
     });
   }
 }

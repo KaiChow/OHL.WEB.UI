@@ -48,7 +48,7 @@ Custom interactive overlays may be at most two layers deep. A Drawer may open on
 
 ## Modal Footer Buttons
 
-Use the `actions.md` section 4.7 recipe. Do not add extra buttons beyond cancel / confirm / delete.
+Use the `actions.md` 5.7 recipe and its Label Lexicon. Do not add extra buttons beyond cancel / confirm / delete, and do not substitute `提交`/`确认`/`关闭` for the lexicon labels in a form modal footer.
 
 ```vue
 <template #footer>

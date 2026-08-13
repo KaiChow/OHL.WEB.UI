@@ -139,7 +139,7 @@ List-page rules that stay in this file:
 - Do not use a modal dialog for frequent advanced search; it interrupts scan-and-adjust work.
 - Do not show 50 fields as a flat form wall.
 - Put active query state in the controls, transport/status tabs, and selected values; do not add a separate selected-filter strip.
-- Text inputs trigger by Enter or Query button; selects and chips may auto-search when safe.
+- Text inputs trigger by Enter or Query button; selects and chips may auto-search when safe. Shared query field controls own the Enter binding, and check-spec rejects a query text input without it.
 - Query and reset actions stay in a stable location in the visible query row.
 - Inline expansion is not a third field location. Use a fixed aligned page surface or the page-and-drawer placement model.
 - The visible query surface has a hard maximum of two rows. Declare the typed unit/action budget, append actions after the final page field, and reject any placement that would create a third row.

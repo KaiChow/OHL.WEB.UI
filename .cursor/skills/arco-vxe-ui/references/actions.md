@@ -196,6 +196,23 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 ---
 
+### Label Lexicon（按钮文案词汇表）
+
+Button labels come from this table only; no surface invents synonyms. `modal.md` and `full-page-form.md` reference this lexicon instead of redefining labels.
+
+| 场景 | 放弃/退出 | 主操作 | 规则 |
+|------|-----------|--------|------|
+| 新建/编辑弹窗、浮层编辑器 | `取消` | `确定`（保存类可用业务动词，如 `保存`、`使用这些值`） | footer 禁止 `提交`/`确认`/`关闭` |
+| 整页表单、详情吸底 | `取消` | `提交`（流程节点用业务动词，如 `提交审核`；草稿用 `保存草稿`） | 禁止把弹窗的 `确定` 搬到整页表单 |
+| `Modal.confirm` 确认框 | `取消` | `确认` + 动作动词（`确认废弃`、`确认删除`、`确认提交`） | okText 禁止裸 `确定`/`确认` |
+| 只读查看弹窗/抽屉 | — | `关闭` 唯一入口或无 footer | 禁止 `取消` |
+| 危险动作本体 | — | 动作动词本身（`删除`、`废弃`） | `确认` 只出现在确认框内 |
+
+- `取消`/`确定`/`提交`/`关闭` 四个词分工唯一；同一场景禁止混用、替换或并列。
+- 业务动作使用业务动词（`同步数据`、`分配给我`），不从这张表造词；词表变更只能改本节，禁止页面就地发明同义词。
+
+---
+
 ## 5. Scene Recipes
 
 ### 5.1 列表页筛选

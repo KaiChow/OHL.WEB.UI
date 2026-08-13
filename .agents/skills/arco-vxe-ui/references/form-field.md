@@ -83,6 +83,14 @@
 
 Do not create page-local variants such as “drawer select uses 13px” or “toolbar button uses 12px”. The surface may change; framework ownership does not.
 
+## 输入长度契约（Maxlength）
+
+- 业务文本输入（`a-input` / `a-textarea`，含查询区）必须按业务字段契约声明 `:max-length`；不允许无限制输入把脏数据留到提交或后端报错时才暴露。
+- 长度来源顺序：后端模型/API 字段定义 → pageSpec/功能契约 → 既有业务单据事实。三者都无法证明时禁止编造数字，按 pageSpec `unresolvedBusinessDecisions` 上报缺口。
+- 默认使用截断式限制；单号/编号等批量粘贴场景改用 `{ length, errorOnly: true }` + 校验提示，禁止静默吞掉用户粘贴的内容。
+- `show-word-limit` 只用于备注/长文本；单行紧凑查询与表单输入不挂字数计数器（密度噪音）。
+- `max-length` 不代替业务校验：格式、范围、必填仍走 `form-rules.md` 的 rules。
+
 ## 禁止
 
 ```
@@ -127,5 +135,6 @@ import { compactVerticalFormLabelStyle, denseFormGridGutter, denseFormItemStyle 
 - [ ] Business form controls inherit app-wide `small`; controls inside VXE rows explicitly use `mini`; GI owns chrome, typography, hover, focus, disabled, and error states.
 - [ ] Every vertical Arco Form uses the shared public label-column style; every dense vertical grid uses the shared 12px/8px gutter and zero form-item margin; a normal single-line field measures 60px internally with a 4px label gap and 8px net gap to the next row, never page-local values.
 - [ ] Labels remain visible, associated with controls, and do not rely on placeholder text.
+- [ ] Business text inputs declare contract-backed `max-length`; pasted over-limit content gets an explicit error instead of silent truncation.
 - [ ] Pickers/selects fill their form-item through public props/layout, not internal-selector overrides.
 - [ ] Long labels, 1.3-2x translated copy, validation messages, disabled/read-only values, keyboard focus, and 200% zoom remain usable.
