@@ -122,6 +122,7 @@ Field count may prompt a complexity review, but it cannot promote/demote fields 
 - High condition volume should graduate only when named-query selection, edit, duplicate, permission, default, apply, reset, and failure behavior have real product/API contracts.
 - A saved view never silently overwrites unsaved draft edits. Ask the user to apply, discard, or save before switching.
 - Without that contract, use the complete page-and-drawer model with a grouped D2 drawer and anchor rail; do not build a static fake workspace or a flat field wall.
+- Saved-query selection, save, and manage commands belong to the query command group beside Query/Reset/More filters. The workflow row is reserved for ownership scope and status queues; do not place saved-query controls there or make them visually compete with workflow state.
 
 ## Query Interaction Invariants
 

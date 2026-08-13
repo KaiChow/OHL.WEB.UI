@@ -51,9 +51,9 @@ export const UA_EXPORT_ORDER_LIST_SPEC = definePesdpPageSpec({
       ],
       acceptance: [
         'Rendered columns expose order identity, main-flow status, exception/risk, route, ETD, and closing time without generic task wording.',
-        'Ownership scope and the twelve processing queues share one mutation-free workflow row below query; risk queues (fee-unconfirmed, file-missing, exception) are visually distinguishable from normal queues.',
+        'Ownership scope and the twelve processing queues share one mutation-free workflow row below query; saved-query commands stay with query actions, and risk queues (fee-unconfirmed, file-missing, exception) are visually distinguishable from normal queues.',
         'Queue switches change one query dimension, reset pagination and selection, and update queue counts and rows from the same result contract.',
-        'Queue counts carry today-new and overdue numbers because operators use them to prioritize work; totals otherwise live only in pagination.',
+        'Queue tabs show one concise label and count; risk details such as overdue state remain on the order row and in explicit filters.',
       ],
     },
     efficient: {
@@ -85,7 +85,10 @@ export const UA_EXPORT_ORDER_LIST_SPEC = definePesdpPageSpec({
         'Keep the global mini table density; more than twelve business columns ship with a default visible set of eight to twelve plus user column preferences persisted locally.',
       ],
       acceptance: [
-        'At 1366, 1280, 1024 split, and wide viewports the query surface stays within two rows, the twelve queues overflow only inside their own lane, and the first table header plus first data row remain visible.',
+        'At 1366, 1280, 1024 split, and wide viewports the query surface keeps the primary field/action baseline aligned until the supported split threshold, stays within two rows, the twelve queues overflow only inside their own lane, and the first table header plus first data row remain visible.',
+        'The workbench toolbar command group and table surface share one horizontal start edge; no unowned leading notch appears beside the import/export actions.',
+        'The workflow row transitions flush into the result toolbar, and toolbar controls have equal optical breathing room above and below before the table header.',
+        'The workflow row has one shared bottom boundary; the state selector keeps its active ink without rendering a duplicate full-width navigation baseline.',
         'The advanced filter opens from the right at the shared D1 width, renders freight business groups with local counts and group reset, and keeps the native Drawer body as its only vertical scroll owner.',
         'The quick-view drawer keeps the list beside it visible, preserves query/page/selection context on close, and never becomes a top overlay.',
         'Long customer, vessel, port, and BL values truncate with hover access to the full value without breaking row height or layout.',

@@ -19,6 +19,7 @@ import {
   IconFullscreen,
   IconFullscreenExit,
   IconSettings,
+  IconUndo,
 } from '@arco-design/web-vue/es/icon';
 import { downloadCsvFile } from '@/utils/mock-actions';
 import { formatLocalMinute } from '@/utils/date-time';
@@ -1089,7 +1090,7 @@ watch(uiScenario, () => {
                   </a-tooltip>
                   <a-tooltip :content="t('common.reset')">
                     <a-button size="small" type="text" :disabled="querying" :aria-label="t('common.reset')" @click="handleReset">
-                      <template #icon><icon-refresh /></template>
+                      <template #icon><icon-undo /></template>
                       <span class="query-actions__label">{{ t('common.reset') }}</span>
                     </a-button>
                   </a-tooltip>

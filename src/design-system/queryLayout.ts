@@ -34,7 +34,10 @@ export const QUERY_GRID_ITEM_SPANS: Record<QueryGridItemRole, number> = {
 
 export const getQueryGridTrackCount = (containerWidth: number) => {
   if (containerWidth >= 1600) return 40;
-  if (containerWidth >= 1040) return 32;
+  // The standard workbench query path is 7 logical units (batch + 3 standard fields + actions).
+  // Keep 32 physical tracks until the actual query surface is genuinely narrow; using the
+  // viewport threshold here made a roughly 1000px content area wrap its primary action early.
+  if (containerWidth >= 960) return 32;
   return QUERY_GRID_MIN_TRACKS;
 };
 

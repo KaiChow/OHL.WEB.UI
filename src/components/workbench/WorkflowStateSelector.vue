@@ -55,7 +55,7 @@ const handleChange = (value: WorkflowStateKey) => {
         <template #title>
           <span class="workflow-state-selector__option">
             {{ option.label }}
-            <span
+            <a-badge
               v-if="option.count !== undefined"
               class="workflow-state-selector__count"
               :class="{
@@ -63,9 +63,10 @@ const handleChange = (value: WorkflowStateKey) => {
                 'workflow-state-selector__count--danger': option.tone === 'danger',
                 'workflow-state-selector__count--active': option.key === props.modelValue,
               }"
+              :count="option.count"
+              :max-count="9999"
             >
-              {{ option.count }}
-            </span>
+            </a-badge>
           </span>
         </template>
       </a-tab-pane>
@@ -94,6 +95,13 @@ const handleChange = (value: WorkflowStateKey) => {
   min-width: 0;
 }
 
+/* The standard workbench frame owns the workflow row boundary. Keep Arco's
+   active ink, but remove its full-width navigation baseline so the head does
+   not render two competing bottom borders. */
+.workflow-state-selector__control :deep(.arco-tabs-nav::before) {
+  display: none;
+}
+
 .workflow-state-selector__option {
   display: inline-flex;
   align-items: center;
@@ -101,28 +109,39 @@ const handleChange = (value: WorkflowStateKey) => {
 }
 
 .workflow-state-selector__count {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.workflow-state-selector__count :deep(.arco-badge-number) {
+  position: static;
+  display: inline-block;
   min-width: 18px;
+  height: 16px;
   padding: 0 5px;
+  border: 0;
   border-radius: 10px;
   background: var(--color-fill-3);
+  box-shadow: none;
   color: var(--color-text-2);
   font-size: var(--dense-font-micro);
   font-weight: var(--dense-weight-nav-active);
   line-height: 16px;
   text-align: center;
+  transform: none;
 }
 
-.workflow-state-selector__count--warn {
+.workflow-state-selector__count--warn :deep(.arco-badge-number) {
   background: var(--dense-warning-1);
   color: var(--dense-warning-7);
 }
 
-.workflow-state-selector__count--danger {
+.workflow-state-selector__count--danger :deep(.arco-badge-number) {
   background: var(--dense-danger-1);
   color: var(--dense-danger-7);
 }
 
-.workflow-state-selector__count--active {
+.workflow-state-selector__count--active :deep(.arco-badge-number) {
   background: var(--dense-primary-1);
   color: var(--dense-primary-7);
 }

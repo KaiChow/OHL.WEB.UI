@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n';
 import { Message, Modal } from '@arco-design/web-vue';
 import type { VxeTableInstance } from 'vxe-table';
 import {
-  IconBookmark,
   IconCopy,
   IconDown,
   IconDownload,
@@ -17,10 +16,10 @@ import {
   IconNotification,
   IconPlusCircle,
   IconRefresh,
-  IconSave,
   IconSearch,
   IconSettings,
   IconStop,
+  IconUndo,
   IconUpload,
   IconUserAdd,
 } from '@arco-design/web-vue/es/icon';
@@ -35,6 +34,7 @@ import type { WorkbenchRowAction } from '@/design-system/rowActions';
 import QueryFieldCol from '@/components/workbench/QueryFieldCol.vue';
 import QueryFieldGrid from '@/components/workbench/QueryFieldGrid.vue';
 import QueryFieldSettingsDrawer from '@/components/workbench/QueryFieldSettingsDrawer.vue';
+import SavedQueryMenu from '@/components/workbench/SavedQueryMenu.vue';
 import StandardListFrame from '@/components/workbench/StandardListFrame.vue';
 import WorkbenchColumnSettings from '@/components/workbench/WorkbenchColumnSettings.vue';
 import WorkbenchEmptyState from '@/components/workbench/WorkbenchEmptyState.vue';
@@ -376,9 +376,12 @@ const importing = ref(false);
 const schemes = ref<ExportQueryScheme[]>(loadSchemes());
 const activeSchemeId = ref('');
 const schemeSaveVisible = ref(false);
-const schemeSaveName = ref('');
+const schemeSaveForm = reactive({ name: '' });
 const schemeSaveError = ref('');
 const schemeManagerVisible = ref(false);
+const schemeSwitchVisible = ref(false);
+const pendingSchemeId = ref('');
+const schemeSaveSource = ref<'applied' | 'draft'>('applied');
 const copySeq = ref(1);
 
 const page = reactive({ current: 1, size: 20 });
@@ -517,15 +520,11 @@ const workflowStateOptions = computed<ExportQueueStat[]>(() =>
     const rows = state.key === 'all'
       ? queryBaseRows.value
       : queryBaseRows.value.filter((row) => row.queueKeys.includes(state.key));
-    const todayNew = rows.filter((row) => row.todayNew).length;
-    const overdue = rows.filter((row) => row.isOverdue).length;
     const name = t(`exportOrderList.queues.${state.key}`);
     return {
       key: state.key,
-      label: todayNew || overdue ? `${name} ${t('exportOrderList.queueBadge', { today: todayNew, overdue })}` : name,
+      label: name,
       count: rows.length,
-      todayNew,
-      overdue,
       tone: state.tone,
     };
   }),
@@ -537,6 +536,8 @@ const hasActiveFilter = computed(() => {
   const isDefaultConditions = JSON.stringify(appliedQuery.value) === JSON.stringify(defaultQuery());
   return !isDefaultConditions || activeWorkScope.value !== 'all' || activeQueue.value !== 'all';
 });
+
+const queryDraftDirty = computed(() => JSON.stringify(query) !== JSON.stringify(appliedQuery.value));
 
 const tableTotal = computed(() => ['empty', 'permission'].includes(uiScenario.value) || tableError.value ? 0 : filteredRows.value.length);
 
@@ -686,6 +687,17 @@ const handleReset = () => {
   clearSelection();
 };
 
+const applyScheme = (schemeId: string) => {
+  const scheme = schemes.value.find((item) => item.id === schemeId);
+  if (!scheme) return;
+  activeSchemeId.value = scheme.id;
+  Object.assign(query, cloneQuery(scheme.conditions));
+  void handleSearch().then(() => {
+    activeSchemeId.value = scheme.id;
+    Message.success(t('exportOrderList.schemes.applied', { name: scheme.name }));
+  });
+};
+
 const closeAdvancedDatePopups = () => {
   advancedDatePopupVisible.etd = false;
   advancedDatePopupVisible.closing = false;
@@ -793,30 +805,41 @@ const persistSchemes = () => {
   }));
 };
 
-const onSchemeChange = (value: string | number | Record<string, unknown> | undefined) => {
-  const schemeId = typeof value === 'string' ? value : '';
-  if (!schemeId) {
-    activeSchemeId.value = '';
+const onSchemeChange = (schemeId: string) => {
+  if (!schemeId || schemeId === activeSchemeId.value) return;
+  if (queryDraftDirty.value) {
+    pendingSchemeId.value = schemeId;
+    schemeSwitchVisible.value = true;
     return;
   }
-  const scheme = schemes.value.find((item) => item.id === schemeId);
-  if (!scheme) return;
-  activeSchemeId.value = scheme.id;
-  Object.assign(query, cloneQuery(scheme.conditions));
-  void handleSearch().then(() => {
-    activeSchemeId.value = scheme.id;
-    Message.success(t('exportOrderList.schemes.applied', { name: scheme.name }));
-  });
+  applyScheme(schemeId);
 };
 
-const openSchemeSave = () => {
-  schemeSaveName.value = '';
+const cancelSchemeSwitch = () => {
+  pendingSchemeId.value = '';
+  schemeSwitchVisible.value = false;
+};
+
+const discardDraftAndApplyScheme = () => {
+  const schemeId = pendingSchemeId.value;
+  cancelSchemeSwitch();
+  if (schemeId) applyScheme(schemeId);
+};
+
+const saveDraftAndApplyScheme = () => {
+  schemeSwitchVisible.value = false;
+  openSchemeSave('draft');
+};
+
+const openSchemeSave = (source: 'applied' | 'draft' = 'applied') => {
+  schemeSaveSource.value = source;
+  schemeSaveForm.name = '';
   schemeSaveError.value = '';
   schemeSaveVisible.value = true;
 };
 
 const confirmSchemeSave = () => {
-  const name = schemeSaveName.value.trim();
+  const name = schemeSaveForm.name.trim();
   schemeSaveError.value = name ? '' : t('exportOrderList.schemes.nameRequired');
   if (!schemeSaveError.value && schemes.value.some((scheme) => scheme.name === name)) {
     schemeSaveError.value = t('exportOrderList.schemes.duplicate');
@@ -826,10 +849,15 @@ const confirmSchemeSave = () => {
     id: `scheme-${Date.now()}`,
     name,
     isDefault: schemes.value.length === 0,
-    conditions: cloneQuery(appliedQuery.value),
+    conditions: cloneQuery(schemeSaveSource.value === 'draft' ? query : appliedQuery.value),
   }];
   persistSchemes();
   Message.success(t('exportOrderList.schemes.saved', { name }));
+  if (schemeSaveSource.value === 'draft' && pendingSchemeId.value) {
+    const targetId = pendingSchemeId.value;
+    pendingSchemeId.value = '';
+    applyScheme(targetId);
+  }
   return true;
 };
 
@@ -1545,7 +1573,7 @@ const formGridGutter = denseFormGridGutter;
               </a-tooltip>
               <a-tooltip :content="t('common.reset')">
                 <a-button size="small" type="text" :disabled="querying" :aria-label="t('common.reset')" @click="handleReset">
-                  <template #icon><icon-refresh /></template>
+                  <template #icon><icon-undo /></template>
                   <span class="query-actions__label">{{ t('common.reset') }}</span>
                 </a-button>
               </a-tooltip>
@@ -1557,6 +1585,18 @@ const formGridGutter = denseFormGridGutter;
                   </a-button>
                 </a-tooltip>
               </a-badge>
+              <SavedQueryMenu
+                :items="schemes"
+                :label="t('exportOrderList.schemes.label')"
+                :save-label="t('exportOrderList.actions.saveScheme')"
+                :manage-label="t('exportOrderList.actions.manageSchemes')"
+                :empty-label="t('exportOrderList.schemes.emptyShort')"
+                :default-label="t('exportOrderList.schemes.defaultTag')"
+                :disabled="querying"
+                @select="onSchemeChange"
+                @save="openSchemeSave(queryDraftDirty ? 'draft' : 'applied')"
+                @manage="schemeManagerVisible = true"
+              />
               <a-tooltip :content="t('shipment.querySettings.title')">
                 <a-button
                   size="small"
@@ -1586,34 +1626,6 @@ const formGridGutter = denseFormGridGutter;
           <a-radio value="all">{{ t('exportOrderList.scope.all') }}</a-radio>
         </a-radio-group>
       </div>
-
-      <a-divider direction="vertical" class="workflow-filter-bar__divider" />
-
-      <div class="workflow-filter-bar__schemes">
-        <a-select
-          v-model="activeSchemeId"
-          size="small"
-          allow-clear
-          class="workflow-filter-bar__scheme-select"
-          :placeholder="t('exportOrderList.schemes.placeholder')"
-          :aria-label="t('exportOrderList.schemes.label')"
-          @change="onSchemeChange"
-        >
-          <a-option v-for="scheme in schemes" :key="scheme.id" :value="scheme.id">{{ scheme.name }}</a-option>
-        </a-select>
-        <a-tooltip :content="t('exportOrderList.actions.saveScheme')">
-          <a-button size="small" type="text" :aria-label="t('exportOrderList.actions.saveScheme')" @click="openSchemeSave">
-            <template #icon><icon-save /></template>
-          </a-button>
-        </a-tooltip>
-        <a-tooltip :content="t('exportOrderList.actions.manageSchemes')">
-          <a-button size="small" type="text" :aria-label="t('exportOrderList.actions.manageSchemes')" @click="schemeManagerVisible = true">
-            <template #icon><icon-bookmark /></template>
-          </a-button>
-        </a-tooltip>
-      </div>
-
-      <a-divider direction="vertical" class="workflow-filter-bar__divider" />
 
       <WorkflowStateSelector
         class="workflow-filter-bar__state"
@@ -1948,6 +1960,21 @@ const formGridGutter = denseFormGridGutter;
   />
 
   <a-modal
+    v-model:visible="schemeSwitchVisible"
+    :title="t('exportOrderList.schemes.switchTitle')"
+    :width="440"
+    :mask-closable="false"
+    :footer="false"
+  >
+    <p class="modal-confirm-copy">{{ t('exportOrderList.schemes.switchCopy') }}</p>
+    <div class="scheme-switch-actions">
+      <a-button size="small" @click="cancelSchemeSwitch">{{ t('common.cancel') }}</a-button>
+      <a-button size="small" @click="discardDraftAndApplyScheme">{{ t('exportOrderList.schemes.discardAndApply') }}</a-button>
+      <a-button size="small" type="primary" @click="saveDraftAndApplyScheme">{{ t('exportOrderList.schemes.saveAndApply') }}</a-button>
+    </div>
+  </a-modal>
+
+  <a-modal
     v-model:visible="schemeSaveVisible"
     :title="t('exportOrderList.schemes.saveTitle')"
     :width="420"
@@ -1956,7 +1983,7 @@ const formGridGutter = denseFormGridGutter;
     :cancel-button-props="{ size: 'small' }"
     :on-before-ok="confirmSchemeSave"
   >
-    <a-form layout="vertical" size="small" :label-col-style="labelStyle" class="detail-form">
+    <a-form :model="schemeSaveForm" layout="vertical" size="small" :label-col-style="labelStyle" class="detail-form">
       <a-form-item
         :label="t('exportOrderList.schemes.nameLabel')"
         required
@@ -1964,7 +1991,7 @@ const formGridGutter = denseFormGridGutter;
         :help="schemeSaveError"
       >
         <a-input
-          v-model="schemeSaveName"
+          v-model="schemeSaveForm.name"
           size="small"
           allow-clear
           :placeholder="t('exportOrderList.schemes.namePlaceholder')"
@@ -2027,18 +2054,6 @@ const formGridGutter = denseFormGridGutter;
   flex: 0 0 auto;
   align-items: center;
   gap: 8px;
-}
-
-.workflow-filter-bar__schemes {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 2px;
-  min-width: 0;
-}
-
-.workflow-filter-bar__scheme-select {
-  width: 168px;
 }
 
 .workflow-filter-bar__divider {
@@ -2151,6 +2166,12 @@ const formGridGutter = denseFormGridGutter;
   line-height: 20px;
 }
 
+.scheme-switch-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .upload-field {
   display: flex;
   align-items: center;
@@ -2186,10 +2207,6 @@ const formGridGutter = denseFormGridGutter;
 @media (max-width: 1199px) {
   .workflow-filter-bar__scope {
     gap: 4px;
-  }
-
-  .workflow-filter-bar__scheme-select {
-    width: 136px;
   }
 
   .selection-context {

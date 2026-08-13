@@ -77,8 +77,9 @@ This is not a status filter. It is a compact segmented control:
 - `list-query` starts with a stable aligned query path capped at two rows. Add page-and-drawer placement when secondary conditions or differing user roles justify it; the drawer is not visual furniture.
 - `list-management` follows the classification and alignment-capacity decision in `filter-layout.md`; field count alone never changes the DOM structure.
 - `list-workbench` follows the same placement decision, then keeps its daily scope/queue controls outside the query form because they answer a different question.
+- Saved-query selection and management remain with the query command group; the workflow row owns only scope and workflow-state selectors.
 - Query button is primary.
-- Reset is always a visible text action. Never reuse the refresh icon for reset; supported desktop layouts reserve enough action width for query, reset, and any advanced entry.
+- Reset is always a visible text action. It may include Arco `icon-undo` or `icon-rotate-left` when the interaction restores default conditions; never reuse `icon-refresh` for reset. Supported desktop layouts reserve enough action width for query, reset, and any advanced entry.
 - Select `none`, `fixed-inline`, `page-and-drawer`, or a contracted saved-query workspace from `filter-layout.md`. Do not choose a surface from field count or visual preference alone.
 
 ### Filter Actions Recipe
@@ -117,7 +118,7 @@ Rules:
 
 - All three controls use the same Arco `size` and align to the same baseline; do not hand-set a second control skin.
 - Query uses `type="primary"` plus search icon.
-- Reset uses `type="text"` with a visible label at every supported desktop width; the refresh icon belongs only to result refresh.
+- Reset uses `type="text"` with a visible label at every supported desktop width; `icon-undo` / `icon-rotate-left` are valid supporting metaphors, while `icon-refresh` belongs only to result refresh.
 - More filters uses `type="text"` plus filter icon and opens the advanced filter drawer.
 - Advanced filters are grouped by business meaning inside the drawer, not random field order.
 - More filters is the complete query catalog, including fields currently visible on the page; page/drawer placement settings only control the compact page surface and its order.
@@ -213,6 +214,9 @@ Never place row-specific workflow verbs in the table toolbar; they belong in the
 - Total count is shown by the pagination component (`show-total`) when needed.
 - Do not repeat the same total as a separate left-side `共 N 条` summary when pagination already shows it.
 - Business commands and selection context live left; available refresh/column/density tools form one right icon group, then one divider and a rightmost `a-pagination size="mini"`. Density requires an explicit page contract; never split tools around pagination or override its internals.
+- The workbench toolbar command start and table surface share one horizontal frame edge. Any inset must be owned by the shared frame and applied consistently; an unowned leading blank notch between the frame and the first command is a layout defect. Pages must not add local offsets to compensate.
+- When the workflow surface and result toolbar are consecutive zones in the standard workbench frame, they remain flush as one head transition. The toolbar's control height must have an equal optical inset above and below; an extra inter-card gap that makes the command group sit lower than the table header is a layout defect.
+- A workflow state selector inside the framed command surface keeps Arco's active ink only; its full navigation baseline must not compete with the shared frame's bottom boundary. Do not render two parallel bottom borders for one workflow row.
 - Do not render an empty `table-card-cap` between the toolbar and table header. If it only contains one or two utility icons and no pagination/context, it creates a dead horizontal band and should be removed.
 - The left side of a query/management utility cap stays empty unless it adds non-duplicated context. The left side of a workbench toolbar owns applicable business commands and selected-row feedback.
 - Do not use table cap for page titles, instructions, KPI summaries, or duplicated status counts.
@@ -260,7 +264,7 @@ For a simple query/management list, keep a low-frequency status inside the query
 - Requests expose loading without hiding the selected state. Ignore stale responses when users switch rapidly; failures preserve the previous usable result and identify retry ownership.
 - Every state has an explicit selected default and a state-specific empty result. Reset restores the documented default, not an implicit first option.
 - Active state, focus, keyboard traversal, and overflow use native Arco behavior. Pages do not override internal Tab/Radio selectors or implement scrolling through DOM-class hacks.
-- Count badges use neutral tokens by default. Warning/danger tokens are reserved for attention or risk semantics; selection remains the dominant state when active.
+- Count badges use the Arco `a-badge` component when a count badge is needed. Use neutral tokens by default; warning/danger tokens are reserved for attention or risk semantics, and selection remains the dominant state when active. Do not hand-draw an equivalent count badge when the component can own the structure.
 - A visible group label is conditional, not mandatory. Omit it when option text and row/divider structure already make the group self-explanatory; keep the control's business-specific accessible name. Show it when labels are ambiguous, adjacent selectors could be confused, or the group question is necessary context. A Divider never replaces an accessible name.
 - One list has at most one visible page-mode control, one ownership-scope control, and one workflow-state control. Do not duplicate the same dimension in visible query fields and the workflow row.
 - At the `1366x768` release gate, the workflow path stays compact and unwrapped. At `1024x768`, labels may reduce and state choices overflow only inside their native region before the layout adds a dedicated row; see `responsive.md`.

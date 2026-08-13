@@ -33,7 +33,7 @@ withDefaults(defineProps<{
         class="standard-list-frame__data"
         size="small"
         :bordered="false"
-        :header-style="{ minHeight: '40px', padding: '0 12px', borderBottom: 'none' }"
+        :header-style="{ minHeight: '40px', padding: '0', borderBottom: 'none' }"
         :body-style="{ minHeight: 0, padding: 0, display: 'flex', flexDirection: 'column', flex: 1 }"
       >
         <template v-if="$slots.toolbar" #title>
@@ -61,13 +61,14 @@ withDefaults(defineProps<{
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: var(--dense-gap-zone);
+  gap: 0;
   min-height: 0;
 }
 
 .standard-list-frame__page-mode {
   flex: 0 0 auto;
   min-width: 0;
+  margin-bottom: var(--dense-gap-zone);
 }
 
 .standard-list-frame__query {

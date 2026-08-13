@@ -139,8 +139,6 @@ export interface ExportQueueStat {
   key: ExportQueueKey;
   label: string;
   count: number;
-  todayNew: number;
-  overdue: number;
   tone?: 'warn' | 'danger';
 }
 

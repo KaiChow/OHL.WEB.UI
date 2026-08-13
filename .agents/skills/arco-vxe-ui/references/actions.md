@@ -183,7 +183,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 
 | Scope | Default content form | Examples |
 |-------|----------------------|----------|
-| Filter | 查询用搜索 icon + text；重置固定 text-only；高级筛选用 filter icon + text | `查询`, `重置`, `筛选` |
+| Filter | 查询用搜索 icon + text；重置保留 text，可配 `icon-undo` / `icon-rotate-left` 表达恢复条件；高级筛选用 filter icon + text | `查询`, `重置`, `筛选` |
 | Toolbar primary create | Icon + text | `+ 新建工单` |
 | Toolbar direct business action | Text-only or icon + text if universal | `打印工单`, `导出` |
 | Toolbar utility | Icon-only + tooltip | refresh, column settings |
@@ -206,7 +206,7 @@ Button content is decided by action scope and recognition cost, not by decoratio
 ```
 
 - 查询 = `primary`
-- 重置 = `text`（禁止 `outline`），始终保留文字且不使用 refresh icon；重置会清空条件，不能与“刷新当前结果”共用图形语义
+- 重置 = `text`（禁止 `outline`），始终保留文字；可使用 `icon-undo` / `icon-rotate-left` 强化“恢复默认条件”的识别，不得使用 `icon-refresh`。刷新当前结果仍只使用 `icon-refresh`，两者不可共用图形语义。
 
 ### 5.2 列表页工具栏
 
@@ -242,6 +242,8 @@ Key rules:
 - A frequent, permission-visible batch command keeps a stable toolbar position and is disabled with a concise reason until an eligible selection exists. Contextual appearance is reserved for rare selection-only commands inside a dedicated selection surface; it must not shift stable neighboring commands.
 - Refresh, column settings, density, and pagination stay beside the table. Do not create an otherwise empty cap band for one icon.
 - Selected count and Clear appear once beside the batch commands while selection exists. Batch trigger labels remain action-only and never repeat the selected count. Pagination owns the result total count.
+- The shared workbench toolbar aligns its command group to the same horizontal frame edge as the table. Do not leave an unexplained leading gap or add page-local padding/offsets; any inset must be owned and applied by the shared frame.
+- In the standard workbench head, the workflow-to-toolbar transition is flush and the toolbar control group is optically centered with equal top and bottom breathing room. Do not introduce a page-local inter-card gap that shifts commands downward.
 - The final danger group follows an Arco Divider and requires confirmation.
 
 ```vue
