@@ -21,6 +21,7 @@ The executable UI contract is `.agents/skills/arco-vxe-ui/SKILL.md`. Keep this f
 - Use Arco icons for common actions; use IconPark only for business/menu/empty/module semantics.
 - Complete feature contracts before implementing clicks, requests, permissions, mutations, or state transitions.
 - For screenshot/prototype input, complete artifact intake and prototype translation before coding.
+- Store UI acceptance screenshots under `docs/ui-acceptance/<route-or-feature>/`; use `output/playwright/` for temporary local captures. Never write acceptance artifacts to the repository root.
 - Do not add documentation to compensate for missing shared UI capability or rendered verification.
 
 All detailed routing and numeric rules live in the skill references.

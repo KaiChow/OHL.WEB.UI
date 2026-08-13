@@ -3,6 +3,7 @@ dist
 *.tsbuildinfo
 .DS_Store
 *.local
+/*.png
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

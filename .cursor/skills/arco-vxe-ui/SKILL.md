@@ -29,6 +29,10 @@ Use the smallest path that covers the task:
 6. Screenshot, Figma, or prototype: complete `references/prototype-to-ui-contract.md` before steps 2-5; translate it into a professional proposal instead of copying it, and surface unresolved business decisions with a recommended default.
 7. Financing, sales, demo, productization, `高级感`, `质感`, or `设计感`: read `references/visual-system.md` Design Sense Gate (six items scored 0/1/2 with screenshot evidence) and declare `presentationTarget` in the page spec; for commercial release claims also apply `references/product-grade-evaluation.md` as a blocking gate.
 8. Any detail, create/edit, master-detail, or complex business workspace: read `references/module-patterns.md`; its typed module manifest is required even when the page has no visual artifact.
+
+## Evidence Artifact Ownership
+
+Store committed viewport and state screenshots under `docs/ui-acceptance/<route-or-feature>/`. Use `output/playwright/` for temporary local captures. Acceptance artifacts must never be written to the repository root; screenshots are evidence records, not runtime assets.
 9. Read helpers such as `filter-layout.md`, `table.md`, `actions.md`, `feedback.md`, `icons.md`, `typography.md`, and `overlay-dimensions.md` only when that surface is present.
 
 If business object, user job, legal action, API behavior, or permission source cannot be proven from the repository or user input, do not invent it. Preserve the boundary visibly and report the missing contract.
