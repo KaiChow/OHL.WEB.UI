@@ -2,18 +2,10 @@ import type { AppMenuItem } from '../types/navigation';
 
 export const appMenus: AppMenuItem[] = [
   {
-    key: 'analysis',
-    title: '经营分析', titleKey: 'menu.analysis',
-    children: [
-      { key: 'profit-review-workbench', title: '订单利润核查', titleKey: 'menu.profitReview', routeName: 'ProfitReviewWorkbench' },
-    ],
-  },
-  {
     key: 'shipment',
     title: '海运业务', titleKey: 'menu.shipment',
     children: [
       { key: 'shipment-order-workbench', title: '出口订单', titleKey: 'menu.exportOrders', routeName: 'ShipmentOrderWorkbench' },
-      { key: 'shipment-template-management', title: '提单模板管理', titleKey: 'menu.templateManagement', routeName: 'ShipmentTemplateManagement' },
     ],
   },
   {
