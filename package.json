@@ -10,7 +10,11 @@
     "check-spec": "node scripts/check-spec.js",
     "validate-ui-skill": "node .agents/skills/arco-vxe-ui/scripts/validate-skill.mjs",
     "sync-ui-skill": "node scripts/sync-ui-skill.mjs",
-    "verify": "node scripts/check-spec.js && npm run build"
+    "verify": "node scripts/check-spec.js && npm run build",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,vue,js,mjs,cjs}": "eslint --fix"
   },
   "dependencies": {
     "@arco-design/web-vue": "^2.57.0",
@@ -25,9 +29,16 @@
     "xe-utils": "^3.7.8"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/sortablejs": "^1.15.9",
+    "eslint": "^10.8.1",
+    "eslint-plugin-vue": "^10.10.0",
+    "globals": "^17.11.0",
+    "husky": "^9.1.7",
     "less": "^4.6.6",
+    "lint-staged": "^16.4.0",
     "typescript": "^5.8.3",
+    "typescript-eslint": "^8.67.0",
     "vite": "^6.3.5",
     "vue-tsc": "^2.2.10"
   }
